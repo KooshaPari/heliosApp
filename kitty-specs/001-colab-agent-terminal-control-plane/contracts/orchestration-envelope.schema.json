@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://helios.local/schemas/orchestration-envelope.schema.json",
+  "title": "Helios Local Bus Envelope (Feature Parity Overlay)",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "ts"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "type": {
+      "type": "string",
+      "enum": ["command", "response", "event"]
+    },
+    "ts": { "type": "string", "format": "date-time" },
+    "workspace_id": { "type": "string", "minLength": 1 },
+    "lane_id": { "type": ["string", "null"] },
+    "session_id": { "type": ["string", "null"] },
+    "terminal_id": { "type": ["string", "null"] },
+    "actor": {
+      "type": "object",
+      "properties": {
+        "kind": { "type": "string" },
+        "id": { "type": "string" }
+      },
+      "required": ["kind", "id"],
+      "additionalProperties": false
+    },
+    "method": {
+      "type": ["string", "null"],
+      "enum": [
+        "workspace.create",
+        "workspace.open",
+        "project.clone",
+        "project.init",
+        "session.create",
+        "session.attach",
+        "session.terminate",
+        "terminal.spawn",
+        "terminal.resize",
+        "terminal.input",
+        "renderer.switch",
+        "renderer.capabilities",
+        "agent.run",
+        "agent.cancel",
+        "approval.request.resolve",
+        "share.upterm.start",
+        "share.upterm.stop",
+        "share.tmate.start",
+        "share.tmate.stop",
+        "zmx.checkpoint",
+        "zmx.restore",
+        "lane.create",
+        "lane.attach",
+        "lane.cleanup",
+        null
+      ]
+    },
+    "topic": {
+      "type": ["string", "null"],
+      "enum": [
+        "workspace.opened",
+        "project.ready",
+        "session.created",
+        "session.attached",
+        "session.terminated",
+        "terminal.spawned",
+        "terminal.output",
+        "terminal.state.changed",
+        "renderer.switch.started",
+        "renderer.switch.succeeded",
+        "renderer.switch.failed",
+        "agent.run.started",
+        "agent.run.progress",
+        "agent.run.completed",
+        "agent.run.failed",
+        "approval.requested",
+        "approval.resolved",
+        "share.session.started",
+        "share.session.stopped",
+        "lane.created",
+        "lane.cleaned",
+        "audit.recorded",
+        "lane.attached",
+        "harness.status.changed",
+        null
+      ]
+    },
+    "payload": { "type": "object" },
+    "status": {
+      "type": ["string", "null"],
+      "enum": ["ok", "error", null]
+    },
+    "result": { "type": ["object", "null"] },
+    "error": {
+      "type": ["object", "null"],
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "retryable": { "type": "boolean" },
+        "details": { "type": ["object", "null"] }
+      },
+      "required": ["code", "message", "retryable"],
+      "additionalProperties": true
+    },
+    "correlation_id": { "type": ["string", "null"] },
+    "envelope_id": { "type": ["string", "null"] },
+    "timestamp": { "type": ["string", "null"], "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "command" } }, "required": ["type"] },
+      "then": { "required": ["method", "payload"] }
+    },
+    {
+      "if": { "properties": { "type": { "const": "event" } }, "required": ["type"] },
+      "then": { "required": ["topic", "payload"] }
+    }
+  ],
+  "additionalProperties": false
+}

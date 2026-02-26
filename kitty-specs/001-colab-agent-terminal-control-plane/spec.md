@@ -64,12 +64,14 @@ As an advanced user, I can run local and external agent operations through consi
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST let users initialize and open workspaces and persist workspace/project metadata across restarts.
+- **FR-001a**: For slice-1, the system MUST let users initialize/open workspaces and restore active workspace context after runtime restart via `codex_session_id` reattach flow.
+- **FR-001b**: For slice-2, the system MUST persist workspace/project metadata durably on local storage across full host restarts.
 - **FR-002**: The system MUST provide lane lifecycle actions (create, list, attach, cleanup) with explicit lifecycle status.
 - **FR-003**: The system MUST provide session lifecycle actions (ensure/open/terminate) linked to lane identity.
 - **FR-004**: The system MUST maintain a terminal registry that maps each terminal to workspace, lane, and session.
-- **FR-005**: The system MUST support checkpoint and restore operations for terminal/session continuity.
-- **FR-006**: The system MUST execute crash-restart recovery that restores recoverable lane/session state automatically.
+- **FR-005a**: For slice-1, the system MUST support transient checkpoint snapshots sufficient for active terminal/session continuity during runtime restarts.
+- **FR-005b**: For slice-2, the system MUST support durable checkpoint persistence and restore for terminal/session continuity.
+- **FR-006**: The system MUST execute crash-restart recovery orchestration that restores recoverable lane/session state from available checkpoints and reconciliation rules.
 - **FR-007**: The system MUST expose two rendering modes selectable by user settings.
 - **FR-008**: The system MUST perform rendering-mode switch as a transaction with automatic rollback on failure.
 - **FR-009**: The system MUST provide an internal command/response/event bus with envelope validation and correlation IDs.
@@ -80,14 +82,17 @@ As an advanced user, I can run local and external agent operations through consi
 - **FR-014**: The system MUST provide auditable operation records for lane/session/agent lifecycle actions.
 - **FR-015**: The system MUST clearly separate MVP scope from deferred post-MVP capabilities in product behavior and planning artifacts.
 - **FR-016**: The system MUST keep core workflows fully usable without requiring an embedded code editor.
+- **FR-017**: The system MUST maintain parity with formal localbus protocol assets in `specs/protocol/v1/` for method/topic coverage, with any intentional extensions explicitly documented.
+- **FR-018**: The system MUST expose lifecycle surfaces for renderer switch/capabilities, agent run/cancel, approval resolution, share-session controls (`upterm`/`tmate`), and checkpoint/restore semantics in phased implementation artifacts.
 
 ### Non-Functional Requirements
 
-- **NFR-001**: Primary terminal interactions (input echo, context switch feedback) MUST feel immediate during normal operation.
-- **NFR-002**: Recovery operations MUST complete fast enough to preserve active-user flow without manual reconstruction.
+- **NFR-001**: Primary terminal interactions (input echo, context-switch feedback) MUST satisfy `p50 <= 60ms` and `p95 <= 150ms` under baseline load profile.
+- **NFR-002**: Recovery operations for recoverable sessions MUST satisfy `p95 <= 5s` under baseline restart profile.
 - **NFR-003**: The interface MUST remain understandable under multi-lane concurrent usage with clear state visibility.
 - **NFR-004**: Failures in optional or external orchestration boundaries MUST degrade gracefully without taking down local runtime control.
-- **NFR-005**: Lifecycle event and audit records MUST be retained with enough fidelity to reconstruct key operator actions for incident review.
+- **NFR-005a**: Lifecycle event and audit records MUST be retained for at least 30 days by default (configurable) with enough fidelity to reconstruct key operator actions for incident review.
+- **NFR-005b**: Audit export bundles MUST include complete correlated timeline fields for selected workspace/lane/session scopes with required redactions applied.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -110,9 +115,11 @@ As an advanced user, I can run local and external agent operations through consi
 - **SC-003**: Users can switch active lane context and continue work in under 5 seconds for common workflows.
 - **SC-004**: In validation runs, users complete a full editorless workflow (open workspace → run terminal work → recover state) with at least 90% first-attempt completion.
 - **SC-005**: In protocol-boundary failure drills, 100% of injected external failures are surfaced with normalized errors while local runtime control remains operational.
+- **SC-006**: Protocol parity validation shows 100% coverage of formal `methods.json` and `topics.json` entries in feature contracts or explicitly documented deferred mappings.
 
 ## Assumptions
 
 - Existing planning docs under `docs/sessions/20260226-helios-market-research/` are the authoritative source for MVP candidate scope.
 - Collaboration overlays and personal feature packs are explicitly deferred to post-MVP.
+- Slice-1 scope uses in-memory continuity and `codex_session_id` reattach; slice-2 adds durable local persistence and durable checkpoint restore.
 - Target branch remains `main` for planning artifacts unless changed later by user direction.

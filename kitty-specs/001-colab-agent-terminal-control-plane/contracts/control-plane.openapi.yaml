@@ -1,0 +1,195 @@
+openapi: 3.1.0
+info:
+  title: Helios Control Plane API (Slice 1)
+  version: 0.1.0
+  description: >-
+    Local-first API for lane/session/terminal lifecycle on the canonical Codex CLI
+    plus cliproxyapi++ harness path with explicit fallback semantics.
+    Formal protocol parity is tracked against specs/protocol/v1 methods/topics.
+  x-formal-protocol-parity:
+    source_methods: specs/protocol/v1/methods.json
+    source_topics: specs/protocol/v1/topics.json
+    implemented_in_slice_1:
+      - lane.create
+      - lane.attach
+      - lane.cleanup
+      - session.create
+      - session.attach
+      - terminal.spawn
+      - terminal.input
+      - terminal.resize
+      - workspace.open
+      - workspace.create
+    deferred_or_phase_gated:
+      - project.clone
+      - project.init
+      - renderer.switch
+      - renderer.capabilities
+      - agent.run
+      - agent.cancel
+      - approval.request.resolve
+      - share.upterm.start
+      - share.upterm.stop
+      - share.tmate.start
+      - share.tmate.stop
+      - zmx.checkpoint
+      - zmx.restore
+    extension_methods:
+      - harness.status.get
+servers:
+  - url: http://127.0.0.1:8787
+paths:
+  /v1/workspaces/{workspace_id}/lanes:
+    post:
+      operationId: createLane
+      summary: Create lane
+      parameters:
+        - in: path
+          name: workspace_id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LaneCreateRequest'
+      responses:
+        '201':
+          description: Lane created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LaneResponse'
+  /v1/workspaces/{workspace_id}/lanes/{lane_id}/sessions:
+    post:
+      operationId: ensureSession
+      summary: Ensure session for lane
+      parameters:
+        - in: path
+          name: workspace_id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: lane_id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionEnsureRequest'
+      responses:
+        '200':
+          description: Session ensured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+  /v1/workspaces/{workspace_id}/lanes/{lane_id}/terminals:
+    post:
+      operationId: spawnTerminal
+      summary: Spawn terminal in lane session
+      parameters:
+        - in: path
+          name: workspace_id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: lane_id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TerminalSpawnRequest'
+      responses:
+        '201':
+          description: Terminal spawned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TerminalResponse'
+  /v1/harness/cliproxy/status:
+    get:
+      operationId: getHarnessStatus
+      summary: Get cliproxyapi++ harness status and fallback route
+      responses:
+        '200':
+          description: Harness status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HarnessStatusResponse'
+components:
+  schemas:
+    LaneCreateRequest:
+      type: object
+      required: [project_context_id, display_name]
+      properties:
+        project_context_id: { type: string }
+        display_name: { type: string }
+    LaneResponse:
+      type: object
+      required: [lane_id, workspace_id, status]
+      properties:
+        lane_id: { type: string }
+        workspace_id: { type: string }
+        status:
+          type: string
+          enum: [new, provisioning, ready, running, blocked, error, closed]
+    SessionEnsureRequest:
+      type: object
+      required: [provider]
+      properties:
+        provider:
+          type: string
+          enum: [codex]
+        preferred_transport:
+          type: string
+          enum: [cliproxy_harness, native_openai]
+    SessionResponse:
+      type: object
+      required: [session_id, lane_id, codex_session_id, transport, status]
+      properties:
+        session_id: { type: string }
+        lane_id: { type: string }
+        codex_session_id: { type: string }
+        transport:
+          type: string
+          enum: [cliproxy_harness, native_openai]
+        status:
+          type: string
+          enum: [detached, attaching, attached, terminated]
+    TerminalSpawnRequest:
+      type: object
+      required: [session_id]
+      properties:
+        session_id: { type: string }
+        title: { type: string }
+    TerminalResponse:
+      type: object
+      required: [terminal_id, lane_id, session_id, state]
+      properties:
+        terminal_id: { type: string }
+        lane_id: { type: string }
+        session_id: { type: string }
+        state:
+          type: string
+          enum: [idle, spawning, active, throttled, closed]
+    HarnessStatusResponse:
+      type: object
+      required: [status, fallback_transport]
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unavailable]
+        fallback_transport:
+          type: string
+          enum: [native_openai]
+        degrade_reason:
+          type: string
+          nullable: true
