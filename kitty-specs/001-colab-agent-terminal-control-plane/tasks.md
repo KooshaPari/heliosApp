@@ -195,11 +195,73 @@
 
 ---
 
+## Work Package WP07: Protocol Boundary Delegation and Traceability Gates (Priority: P3)
+
+**Goal**: Implement explicit FR-010 protocol boundaries for local/tool/A2A delegation and enforce measurable quality gates for coverage and requirement traceability.
+**Independent Test**: Delegation mode selection is deterministic across local/tool/A2A boundaries, and CI fails when coverage drops below 85% or requirement traces are missing.
+**Prompt**: `/kitty-specs/001-colab-agent-terminal-control-plane/tasks/WP07-protocol-boundary-delegation-and-traceability-gates.md`
+**Estimated Prompt Size**: ~360 lines
+
+### Included Subtasks
+- [ ] T031 Define FR-010 boundary contract mapping (`local_execution`, `tool_invocation`, `a2a_delegation`) in `specs/protocol/v1/methods.json`, `specs/protocol/v1/topics.json`, and `kitty-specs/001-colab-agent-terminal-control-plane/spec.md`
+- [ ] T032 Implement protocol boundary adapter and dispatch selection in `apps/runtime/src/protocol/boundary_adapter.ts` and integrate with `apps/runtime/src/integrations/exec.ts`
+- [ ] T033 [P] Add unit/integration tests for local/tool/A2A delegation routing and boundary error normalization in `apps/runtime/tests/unit/protocol/` and `apps/runtime/tests/integration/protocol/`
+- [ ] T034 Implement coverage gate (`>=85% lines`) in `apps/runtime/package.json`, `apps/runtime/vitest.config.ts`, and repo CI workflow configs
+- [ ] T035 Implement requirement-traceability gate (`FR/NFR -> test artifact`) using `kitty-specs/001-colab-agent-terminal-control-plane/` trace matrix checks and validation scripts under `apps/runtime/tests/`
+- [ ] T036 [P] Add gate validation tests/fixtures proving coverage and traceability gates fail closed when thresholds or mappings are missing
+
+### Implementation Notes
+- Boundary adapter must remain explicit: no implicit fallback between local/tool/A2A paths.
+- Traceability gate should consume stable requirement IDs and reject orphan tests or orphan requirements.
+
+### Parallel Opportunities
+- T033 and T036 can proceed in parallel once T032 and T035 interfaces are stable.
+
+### Dependencies
+- Depends on WP06.
+
+### Risks & Mitigations
+- Risk: delegation boundary ambiguity causes accidental path switching.
+- Mitigation: enforce adapter-level discriminated union and explicit refusal responses on unknown boundary type.
+
+---
+
+## Work Package WP08: Durability Follow-On Placeholder and Retention Compliance (Priority: P3)
+
+**Goal**: Add slice-2 durability follow-on placeholders and enforce retention/export compliance coverage for lifecycle audit data.
+**Independent Test**: Slice-2 durability placeholders are tracked with explicit checkpoint contracts, and retention/export tests verify completeness and policy enforcement.
+**Prompt**: `/kitty-specs/001-colab-agent-terminal-control-plane/tasks/WP08-durability-follow-on-placeholder-and-retention-compliance.md`
+**Estimated Prompt Size**: ~350 lines
+
+### Included Subtasks
+- [ ] T037 Define slice-2 durability placeholder contract (persistent lane/session/checkpoint store) in `kitty-specs/001-colab-agent-terminal-control-plane/plan.md` and `kitty-specs/001-colab-agent-terminal-control-plane/data-model.md`
+- [ ] T038 Add checkpoint persistence interface stubs and TODO markers for slice-2 handoff in `apps/runtime/src/sessions/` and `apps/runtime/src/audit/`
+- [ ] T039 Implement retention policy configuration model and enforcement hooks for audit/session artifacts in `apps/runtime/src/audit/` and `apps/runtime/src/config/`
+- [ ] T040 [P] Add retention policy compliance tests for TTL expiry, legal hold exception, and deletion audit proofs in `apps/runtime/tests/integration/recovery/` and `apps/runtime/tests/unit/audit/`
+- [ ] T041 [P] Add export completeness tests to verify policy-compliant lifecycle export contains required fields/correlation IDs and redacts restricted data
+- [ ] T042 Update `quickstart.md` and ops guidance with slice-2 durability placeholder boundaries, retention policy defaults, and compliance verification commands
+
+### Implementation Notes
+- Slice-2 durability artifacts in this work package are placeholders only; avoid hidden persistence enablement in slice-1 runtime paths.
+- Retention policy behavior must be auditable and deterministic across replay/export workflows.
+
+### Parallel Opportunities
+- T040 and T041 can run in parallel after T039 policy model interfaces are stable.
+
+### Dependencies
+- Depends on WP05 and WP07.
+
+### Risks & Mitigations
+- Risk: retention enforcement diverges from export behavior.
+- Mitigation: lock both behaviors behind shared policy evaluators and completeness assertions.
+
+---
+
 ## Dependency & Execution Summary
 
-- **Sequence**: WP01 → WP02 → WP03 → (WP04 and WP05 in parallel) → WP06.
-- **Parallelization**: WP04 and WP05 can run concurrently after WP03.
-- **MVP Scope**: WP01 + WP02 + WP03 (core control-plane lifecycle and terminal flow).
+- **Sequence**: WP01 → WP02 → WP03 → (WP04 and WP05 in parallel) → WP06 → WP07 → WP08.
+- **Parallelization**: WP04 and WP05 can run concurrently after WP03; within WP07 and WP08, designated `[P]` tasks can execute in parallel after interface-lock milestones.
+- **MVP Scope**: WP01 + WP02 + WP03 (core control-plane lifecycle and terminal flow), with WP07/WP08 extending post-MVP compliance hardening and slice-2 readiness scaffolding.
 
 ---
 
@@ -237,3 +299,15 @@
 | T028 | Strict quality gate enforcement | WP06 | P3 | No |
 | T029 | Quickstart and ops validation | WP06 | P3 | Yes |
 | T030 | MVP boundary checklist | WP06 | P3 | Yes |
+| T031 | Define FR-010 boundary contract mapping | WP07 | P3 | No |
+| T032 | Implement protocol boundary adapter dispatch | WP07 | P3 | No |
+| T033 | Delegation routing + boundary error tests | WP07 | P3 | Yes |
+| T034 | Enforce coverage threshold gate (>=85%) | WP07 | P3 | No |
+| T035 | Enforce requirement-traceability gate | WP07 | P3 | No |
+| T036 | Gate fail-closed validation fixtures/tests | WP07 | P3 | Yes |
+| T037 | Define slice-2 durability placeholder contract | WP08 | P3 | No |
+| T038 | Add checkpoint persistence interface stubs | WP08 | P3 | No |
+| T039 | Implement retention policy model/enforcement hooks | WP08 | P3 | No |
+| T040 | Retention policy compliance tests | WP08 | P3 | Yes |
+| T041 | Export completeness compliance tests | WP08 | P3 | Yes |
+| T042 | Document durability/retention ops verification | WP08 | P3 | No |
