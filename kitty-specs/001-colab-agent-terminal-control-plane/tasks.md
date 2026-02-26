@@ -177,7 +177,7 @@
 - [x] T027 Add local soak/perf harness for multi-session tab scenarios and publish thresholds
 - [x] T028 Enforce strict lint/type/security/static analysis gates in repo tooling
 - [x] T029 Validate and refine `quickstart.md`, `plan.md`, and ops notes with final scenario commands
-- [ ] T030 Produce MVP boundary checklist with explicit deferred items (post-MVP durability expansion)
+- [x] T030 Produce MVP boundary checklist with explicit deferred items (post-MVP durability expansion)
 
 ### Implementation Notes
 - Keep strictness at max without ignores/skips.
