@@ -913,6 +913,29 @@ class CommandBusImpl implements LocalBus {
     };
   }
 
+  private protocolErrorResponse(
+    command: CommandEnvelope,
+    code: ErrorCode,
+    details?: Record<string, unknown>
+  ): LocalBusEnvelope {
+    const error = createProtocolError(code, { details });
+    return this.errorResponse(command, error.code, error.message, error.details ?? undefined, error.retryable);
+  }
+
+  private resolveContext(command: CommandEnvelope): {
+    workspace_id?: string;
+    lane_id?: string;
+    session_id?: string;
+    terminal_id?: string;
+  } {
+    return {
+      workspace_id: command.workspace_id ?? this.readString(command.payload.workspace_id),
+      lane_id: command.lane_id ?? this.readString(command.payload.lane_id),
+      session_id: command.session_id ?? this.readString(command.payload.session_id),
+      terminal_id: command.terminal_id ?? this.readString(command.payload.terminal_id)
+    };
+  }
+
   private readString(value: unknown): string | undefined {
     return typeof value === "string" && value.length > 0 ? value : undefined;
   }
