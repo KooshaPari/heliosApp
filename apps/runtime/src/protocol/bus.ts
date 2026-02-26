@@ -9,6 +9,11 @@ import { TerminalOutputBuffer } from "../sessions/terminal_buffer";
 import type { TerminalContext, TerminalLifecycleState } from "../sessions/terminal_registry";
 import { TerminalRegistry } from "../sessions/terminal_registry";
 import {
+  RuntimeMetrics,
+  type RuntimeMetricSample,
+  type RuntimeMetricsReport
+} from "../diagnostics/metrics";
+import {
   type CommandEnvelope,
   isCommandEnvelope,
   isEventEnvelope,
@@ -49,6 +54,8 @@ type LifecycleTopic =
   | "session.attach.started"
   | "session.attached"
   | "session.attach.failed"
+  | "session.restore.started"
+  | "session.restore.completed"
   | "terminal.spawn.started"
   | "terminal.spawned"
   | "terminal.spawn.failed";
@@ -86,6 +93,8 @@ const TOPIC_LIFECYCLE: Record<LifecycleTopic, LifecycleName> = {
   "session.attach.started": "session.attach",
   "session.attached": "session.attach",
   "session.attach.failed": "session.attach",
+  "session.restore.started": "session.attach",
+  "session.restore.completed": "session.attach",
   "terminal.spawn.started": "terminal.spawn",
   "terminal.spawned": "terminal.spawn",
   "terminal.spawn.failed": "terminal.spawn"
@@ -94,6 +103,7 @@ const TOPIC_LIFECYCLE: Record<LifecycleTopic, LifecycleName> = {
 const START_TOPICS = new Set<LifecycleTopic>([
   "lane.create.started",
   "session.attach.started",
+  "session.restore.started",
   "terminal.spawn.started"
 ]);
 
@@ -102,6 +112,7 @@ const END_TOPICS = new Set<LifecycleTopic>([
   "lane.create.failed",
   "session.attached",
   "session.attach.failed",
+  "session.restore.completed",
   "terminal.spawned",
   "terminal.spawn.failed"
 ]);
@@ -138,6 +149,7 @@ export class InMemoryLocalBus implements LocalBus {
   private readonly lifecycleProgressByCorrelation = new Map<string, LifecycleProgress>();
   private readonly terminalRegistry = new TerminalRegistry();
   private readonly terminalBuffer: TerminalOutputBuffer;
+  private readonly metrics = new RuntimeMetrics();
   private terminalCounter = 0;
 
   constructor(options: InMemoryLocalBusOptions = {}) {
@@ -163,6 +175,10 @@ export class InMemoryLocalBus implements LocalBus {
     return this.terminalBuffer.get(terminalId);
   }
 
+  getMetricsReport(): RuntimeMetricsReport {
+    return this.metrics.getReport();
+  }
+
   async getAuditRecords(): Promise<AuditRecord[]> {
     if (this.auditSink instanceof InMemoryAuditSink) {
       return this.auditSink.getRecords();
@@ -183,6 +199,7 @@ export class InMemoryLocalBus implements LocalBus {
         timestamp: envelope.timestamp ?? envelope.ts
       };
       this.eventLog.push(stampedEnvelope);
+      await this.captureBacklogDepthMetric(stampedEnvelope);
 
       await this.auditSink.append({
         recorded_at: new Date().toISOString(),
@@ -206,35 +223,11 @@ export class InMemoryLocalBus implements LocalBus {
   }
 
   async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
-    let envelope: LocalBusEnvelope;
-    try {
-      envelope = validateEnvelope(command);
-    } catch (error) {
-      if (
-        error instanceof ProtocolValidationError &&
-        error.code === "MISSING_CORRELATION_ID" &&
-        command.type === "command"
-      ) {
-        return this.errorResponse(
-          command,
-          "MISSING_CORRELATION_ID",
-          "correlation_id is required"
-        );
-      }
-      throw error;
-    }
+    const envelope = validateEnvelope(command);
     if (!isCommandEnvelope(envelope)) {
       throw new ProtocolValidationError(
         "INVALID_ENVELOPE_TYPE",
         "Bus request accepts command envelopes only"
-      );
-    }
-
-    if (!envelope.correlation_id && isHandledMethod(envelope.method)) {
-      return this.errorResponse(
-        envelope,
-        "MISSING_CORRELATION_ID",
-        "correlation_id is required"
       );
     }
 
@@ -334,11 +327,45 @@ export class InMemoryLocalBus implements LocalBus {
     const forcedError = command.payload.force_error === true;
     const resultId =
       (command.payload.id as string | undefined) ?? `${spec.resultKey}_${Date.now()}`;
+    const lifecycleCommand =
+      method === "lane.create" && !command.lane_id
+        ? { ...command, lane_id: resultId }
+        : command;
+    const restoreLifecycleCommand =
+      command.correlation_id === undefined
+        ? null
+        : ({ ...command, correlation_id: `${command.correlation_id}:restore` } as CommandEnvelope);
+    const laneCreateMetric = method === "lane.create" ? "lane_create_latency_ms" : null;
+    const sessionRestoreMetric =
+      method === "session.attach" && command.payload.restore === true
+        ? "session_restore_latency_ms"
+        : null;
 
-    await this.emitTransitionEvent(command, spec.requested, spec.startedTopic);
+    if (laneCreateMetric) {
+      this.metrics.startTimer(laneCreateMetric, command.id);
+    }
+    if (sessionRestoreMetric) {
+      this.metrics.startTimer(sessionRestoreMetric, command.id);
+      if (restoreLifecycleCommand) {
+        await this.emitTransitionEvent(
+          restoreLifecycleCommand,
+          "session.restore.started",
+          "session.restore.started"
+        );
+      }
+    }
+
+    await this.emitTransitionEvent(lifecycleCommand, spec.requested, spec.startedTopic);
 
     if (forcedError) {
-      await this.emitTransitionEvent(command, spec.failed, spec.failedTopic);
+      await this.emitTransitionEvent(lifecycleCommand, spec.failed, spec.failedTopic);
+      await this.recordLatencyMetrics(command, laneCreateMetric, sessionRestoreMetric, {
+        status: "error",
+        method,
+        workspace_id: command.workspace_id ?? "unknown",
+        lane_id: command.lane_id ?? "unknown",
+        session_id: command.session_id ?? "unknown"
+      });
       return this.errorResponse(
         command,
         `${method.toUpperCase().replace(".", "_")}_FAILED`,
@@ -348,7 +375,21 @@ export class InMemoryLocalBus implements LocalBus {
       );
     }
 
-    await this.emitTransitionEvent(command, spec.succeeded, spec.successTopic);
+    await this.emitTransitionEvent(lifecycleCommand, spec.succeeded, spec.successTopic);
+    if (sessionRestoreMetric && restoreLifecycleCommand) {
+      await this.emitTransitionEvent(
+        restoreLifecycleCommand,
+        "session.restore.completed",
+        "session.restore.completed"
+      );
+    }
+    await this.recordLatencyMetrics(command, laneCreateMetric, sessionRestoreMetric, {
+      status: "ok",
+      method,
+      workspace_id: command.workspace_id ?? "unknown",
+      lane_id: command.lane_id ?? "unknown",
+      session_id: command.session_id ?? "unknown"
+    });
     return this.okResponse(command, {
       [spec.resultKey]: resultId,
       state: this.state
@@ -496,6 +537,7 @@ export class InMemoryLocalBus implements LocalBus {
       ts: new Date().toISOString()
     };
     const bufferResult = this.terminalBuffer.push(terminalId, outputEntry);
+    const backlogDepth = this.terminalBuffer.get(terminalId).entries.length;
 
     await this.publish({
       id: `${command.id}:terminal.output:${outputSeq}`,
@@ -511,6 +553,7 @@ export class InMemoryLocalBus implements LocalBus {
         terminal_id: terminalId,
         seq: outputSeq,
         chunk: inputData,
+        backlog_depth: backlogDepth,
         overflowed: bufferResult.overflowed,
         dropped_bytes: bufferResult.droppedBytes
       }
@@ -527,7 +570,65 @@ export class InMemoryLocalBus implements LocalBus {
     return this.okResponse(command, {
       terminal_id: terminalId,
       accepted_bytes: new TextEncoder().encode(inputData).byteLength,
-      output_seq: outputSeq
+      output_seq: outputSeq,
+      backlog_depth: backlogDepth
+    });
+  }
+
+  private async captureBacklogDepthMetric(event: LocalBusEnvelope): Promise<void> {
+    if (event.type !== "event" || event.topic !== "terminal.output") {
+      return;
+    }
+    const depth = event.payload.backlog_depth;
+    if (typeof depth !== "number" || Number.isNaN(depth)) {
+      return;
+    }
+
+    const sample = this.metrics.record("terminal_output_backlog_depth", depth, "count", {
+      workspace_id: event.workspace_id ?? "unknown",
+      session_id: event.session_id ?? "unknown",
+      terminal_id: event.terminal_id ?? "unknown"
+    });
+    await this.appendMetricEvent(event, sample);
+  }
+
+  private async recordLatencyMetrics(
+    command: CommandEnvelope,
+    laneCreateMetric: "lane_create_latency_ms" | null,
+    sessionRestoreMetric: "session_restore_latency_ms" | null,
+    tags: Record<string, string>
+  ): Promise<void> {
+    if (laneCreateMetric) {
+      const sample = this.metrics.endTimer(laneCreateMetric, command.id, tags);
+      if (sample) {
+        await this.appendMetricEvent(command, sample);
+      }
+    }
+    if (sessionRestoreMetric) {
+      const sample = this.metrics.endTimer(sessionRestoreMetric, command.id, tags);
+      if (sample) {
+        await this.appendMetricEvent(command, sample);
+      }
+    }
+  }
+
+  private async appendMetricEvent(source: LocalBusEnvelope, sample: RuntimeMetricSample): Promise<void> {
+    await this.publish({
+      id: `${source.id}:metric:${sample.metric}:${this.sequence + 1}`,
+      type: "event",
+      ts: sample.ts,
+      workspace_id: source.workspace_id,
+      lane_id: source.lane_id,
+      session_id: source.session_id,
+      terminal_id: source.terminal_id,
+      correlation_id: source.correlation_id,
+      topic: "diagnostics.metric",
+      payload: {
+        metric: sample.metric,
+        value: sample.value,
+        unit: sample.unit,
+        tags: sample.tags ?? {}
+      }
     });
   }
 
