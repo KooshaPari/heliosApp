@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Terminal Registry and Streaming Data Plane
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP02
 base_branch: 001-colab-agent-terminal-control-plane-WP02
@@ -126,3 +126,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-26T13:19:35Z – system – lane=planned – Prompt created.
+- 2026-02-26T16:53:08Z – unknown – shell_pid=94640 – lane=for_review – Ready for review (forced lane move): terminal registry/streaming data plane implemented in worktree commit 3c15ddf.
