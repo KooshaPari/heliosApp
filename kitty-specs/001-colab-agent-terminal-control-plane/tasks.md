@@ -113,7 +113,7 @@
 **Estimated Prompt Size**: ~420 lines
 
 ### Included Subtasks
-- [ ] T016 Build shared active-context store in `apps/desktop/src/` for workspace/lane/session/tab state
+- [x] T016 Build shared active-context store in `apps/desktop/src/` for workspace/lane/session/tab state
 - [ ] T017 Implement tab surfaces for terminal/agent/session/chat/project bound to shared context
 - [ ] T018 Wire UI actions to runtime APIs for lane create, session ensure, and terminal spawn
 - [ ] T019 Implement renderer mode transaction + rollback UX in `apps/desktop/src/settings.ts`
