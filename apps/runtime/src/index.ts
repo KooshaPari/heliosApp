@@ -174,33 +174,17 @@ export function createRuntime(options: RuntimeOptions = {}) {
         });
 
         const sessionCorrelationId = `session.attach:${ensured.session.session_id}:${Date.now()}`;
-        await bus.publish({
-          id: `session:${ensured.session.session_id}:attach-started:${Date.now()}`,
-          type: "event",
+        await bus.request({
+          id: `session:${ensured.session.session_id}:attach:${Date.now()}`,
+          type: "command",
           ts: new Date().toISOString(),
           workspace_id: workspaceId,
           lane_id: laneId,
           session_id: ensured.session.session_id,
           correlation_id: sessionCorrelationId,
-          topic: "session.attach.started",
+          method: "session.attach",
           payload: {
-            lane_id: laneId,
-            codex_session_id: ensured.session.codex_session_id,
-            transport: ensured.session.transport,
-            diagnostics: route.diagnostics
-          }
-        });
-
-        await bus.publish({
-          id: `session:${ensured.session.session_id}:attach-succeeded:${Date.now()}`,
-          type: "event",
-          ts: new Date().toISOString(),
-          workspace_id: workspaceId,
-          lane_id: laneId,
-          session_id: ensured.session.session_id,
-          correlation_id: sessionCorrelationId,
-          topic: "session.attached",
-          payload: {
+            id: ensured.session.session_id,
             lane_id: laneId,
             codex_session_id: ensured.session.codex_session_id,
             transport: ensured.session.transport,
@@ -249,6 +233,14 @@ export function createRuntime(options: RuntimeOptions = {}) {
         const laneId = segments[4];
         const sessionId = asString(body, "session_id") as string;
         const title = asString(body, "title", false);
+        const lane = laneService.getRequired(laneId);
+
+        if (lane.workspace_id !== workspaceId) {
+          return json(409, { error: `lane ${laneId} does not belong to workspace ${workspaceId}` });
+        }
+        if (lane.status === "closed") {
+          return json(409, { error: "lane_closed", details: { lane_id: laneId } });
+        }
 
         const session = sessionRegistry.get(sessionId);
         if (!session) {
@@ -264,39 +256,30 @@ export function createRuntime(options: RuntimeOptions = {}) {
         const terminalId = `term_${crypto.randomUUID()}`;
         const correlationId = `terminal.spawn:${terminalId}:${Date.now()}`;
 
-        await bus.publish({
-          id: `terminal:${terminalId}:spawn-started:${Date.now()}`,
-          type: "event",
-          ts: new Date().toISOString(),
-          workspace_id: workspaceId,
-          lane_id: laneId,
-          session_id: sessionId,
-          correlation_id: correlationId,
-          topic: "terminal.spawn.started",
-          payload: {
-            lane_id: laneId,
-            session_id: sessionId,
-            title: title ?? null
-          }
-        });
-
-        await bus.publish({
-          id: `terminal:${terminalId}:spawned:${Date.now()}`,
-          type: "event",
+        const response = await bus.request({
+          id: `terminal:${terminalId}:spawn:${Date.now()}`,
+          type: "command",
           ts: new Date().toISOString(),
           workspace_id: workspaceId,
           lane_id: laneId,
           session_id: sessionId,
           terminal_id: terminalId,
           correlation_id: correlationId,
-          topic: "terminal.spawned",
+          method: "terminal.spawn",
           payload: {
+            id: terminalId,
             lane_id: laneId,
             session_id: sessionId,
-            terminal_id: terminalId,
-            state: "active"
+            title: title ?? null
           }
         });
+
+        if (response.status !== "ok") {
+          return json(409, {
+            error: "terminal_spawn_failed",
+            details: response.error ?? { lane_id: laneId, session_id: sessionId }
+          });
+        }
 
         return json(201, {
           terminal_id: terminalId,
