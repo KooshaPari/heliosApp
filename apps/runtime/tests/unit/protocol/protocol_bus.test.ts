@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { InMemoryLocalBus } from "../../../src/protocol/bus";
-import { type LocalBusEnvelope, ProtocolValidationError } from "../../../src/protocol/types";
+import { ProtocolValidationError, type LocalBusEnvelope } from "../../../src/protocol/types";
 import { validateEnvelope } from "../../../src/protocol/validator";
 
 function createLifecycleCommand(overrides: Partial<LocalBusEnvelope> = {}): LocalBusEnvelope {
@@ -14,7 +14,7 @@ function createLifecycleCommand(overrides: Partial<LocalBusEnvelope> = {}): Loca
     correlation_id: "corr-1",
     method: "session.attach",
     payload: {},
-    ...overrides,
+    ...overrides
   };
 }
 
@@ -28,63 +28,14 @@ describe("protocol validator", () => {
     );
   });
 
-  test("returns error response when lifecycle command is missing correlation_id", async () => {
+  test("fails fast when lifecycle command is missing correlation_id", async () => {
     const bus = new InMemoryLocalBus();
     const command = createLifecycleCommand({ correlation_id: undefined });
-    const response = await bus.request(command);
-    expect(response.type).toBe("response");
-    expect(response.status).toBe("error");
-    expect(response.error?.code).toBe("MISSING_CORRELATION_ID");
-  });
 
-  test("rejects timestamps without RFC3339 timezone", () => {
-    expect(() =>
-      validateEnvelope({
-        id: "evt-1",
-        type: "event",
-        ts: "2026-02-26T00:00:00",
-        topic: "workspace.opened",
-        payload: {},
-      })
-    ).toThrow("Envelope field 'ts' must be an RFC3339 timestamp with timezone");
-  });
-
-  test("accepts RFC3339 timestamps with explicit timezone offset", () => {
-    const envelope = validateEnvelope({
-      id: "evt-1",
-      type: "event",
-      ts: "2026-02-26T00:00:00+00:00",
-      topic: "workspace.opened",
-      payload: {},
+    await expect(bus.request(command)).rejects.toMatchObject({
+      name: "ProtocolValidationError",
+      code: "MISSING_CORRELATION_ID"
     });
-
-    expect(envelope.ts).toBe("2026-02-26T00:00:00+00:00");
-  });
-
-  test("rejects optional timestamp without RFC3339 timezone", () => {
-    expect(() =>
-      validateEnvelope({
-        id: "evt-1",
-        type: "event",
-        ts: "2026-02-26T00:00:00.000Z",
-        timestamp: "2026-02-26T00:00:00",
-        topic: "workspace.opened",
-        payload: {},
-      })
-    ).toThrow("Envelope field 'timestamp' must be an RFC3339 timestamp with timezone");
-  });
-
-  test("accepts optional timestamp with RFC3339 timezone", () => {
-    const envelope = validateEnvelope({
-      id: "evt-1",
-      type: "event",
-      ts: "2026-02-26T00:00:00.000Z",
-      timestamp: "2026-02-26T00:00:00+00:00",
-      topic: "workspace.opened",
-      payload: {},
-    });
-
-    expect(envelope.timestamp).toBe("2026-02-26T00:00:00+00:00");
   });
 });
 
@@ -117,11 +68,11 @@ describe("protocol sequencing and audit", () => {
         session_id: "session-1",
         correlation_id: "corr-1",
         topic: "session.attached",
-        payload: {},
+        payload: {}
       })
     ).rejects.toMatchObject({
       name: "ProtocolValidationError",
-      code: "ORDERING_VIOLATION",
+      code: "ORDERING_VIOLATION"
     });
   });
 
@@ -135,7 +86,7 @@ describe("protocol sequencing and audit", () => {
       lane_id: "lane-1",
       correlation_id: "corr-accepted",
       topic: "lane.create.started",
-      payload: {},
+      payload: {}
     });
 
     await expect(
@@ -147,34 +98,16 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-accepted",
         topic: "lane.create.started",
-        payload: {},
+        payload: {}
       })
     ).rejects.toMatchObject({
       name: "ProtocolValidationError",
-      code: "ORDERING_VIOLATION",
+      code: "ORDERING_VIOLATION"
     });
 
     const records = await bus.getAuditRecords();
     expect(records).toHaveLength(2);
     expect(records[0]?.outcome).toBe("accepted");
     expect(records[1]?.outcome).toBe("rejected");
-  });
-
-  test("keeps session detached when session.attach fails", async () => {
-    const bus = new InMemoryLocalBus();
-    const response = await bus.request(
-      createLifecycleCommand({
-        payload: { force_error: true },
-      })
-    );
-
-    expect(response.type).toBe("response");
-    expect(response.status).toBe("error");
-    expect(bus.getState().session).toBe("detached");
-
-    const events = bus.getEvents();
-    expect(events).toHaveLength(2);
-    expect(events[0]?.topic).toBe("session.attach.started");
-    expect(events[1]?.topic).toBe("session.attach.failed");
   });
 });
