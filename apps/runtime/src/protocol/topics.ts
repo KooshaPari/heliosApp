@@ -5,6 +5,8 @@ export const TOPICS = [
   "session.attach.started",
   "session.attached",
   "session.attach.failed",
+  "session.restore.started",
+  "session.restore.completed",
   "session.terminated",
   "terminal.spawn.started",
   "terminal.spawned",
@@ -28,7 +30,8 @@ export const TOPICS = [
   "lane.attached",
   "lane.cleaned",
   "harness.status.changed",
-  "audit.recorded"
+  "audit.recorded",
+  "diagnostics.metric"
 ] as const;
 
 export type ProtocolTopic = (typeof TOPICS)[number];

@@ -193,6 +193,14 @@
 - Risk: perf regressions masked by small local test runs.
 - Mitigation: enforce repeated soak profiles and track trend metrics.
 
+### WP06 Release Readiness Checklist
+- [x] Runtime metrics emitted for lane create, session restore, and terminal backlog depth
+- [x] Multi-session soak scenario and threshold baseline documented
+- [x] Strict lint/type/static/security gate commands defined and executable
+- [x] Quickstart validated command paths updated for scenarios A/B/C
+- [x] MVP vs post-MVP scope boundaries explicitly documented in quickstart/plan
+
+
 ---
 
 ## Work Package WP07: Protocol Boundary Delegation and Traceability Gates (Priority: P3)

@@ -64,6 +64,14 @@ function splitPath(pathname: string): string[] {
   return pathname.split("/").filter(Boolean);
 }
 
+function requiredSegment(segments: string[], index: number, name: string): string {
+  const value = segments[index];
+  if (!value) {
+    throw new Error(`missing_path_${name}`);
+  }
+  return value;
+}
+
 export function createRuntime(options: RuntimeOptions = {}) {
   const bus = new InMemoryLocalBus({
     auditSink: options.auditSink,
@@ -87,7 +95,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
         segments[3] === "lanes"
       ) {
         const body = await parseBody(request);
-        const workspaceId = segments[2];
+        const workspaceId = requiredSegment(segments, 2, "workspace_id");
         const projectContextId = asString(body, "project_context_id") as string;
         const displayName = asString(body, "display_name") as string;
         const lane = await laneService.create({
@@ -110,7 +118,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
         segments[1] === "workspaces" &&
         segments[3] === "lanes"
       ) {
-        const workspaceId = segments[2];
+        const workspaceId = requiredSegment(segments, 2, "workspace_id");
         const lanes = laneService.list(workspaceId).map((lane) => ({
           lane_id: lane.lane_id,
           workspace_id: lane.workspace_id,
@@ -128,8 +136,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
         segments[3] === "lanes" &&
         segments[5] === "attach"
       ) {
-        const workspaceId = segments[2];
-        const laneId = segments[4];
+        const workspaceId = requiredSegment(segments, 2, "workspace_id");
+        const laneId = requiredSegment(segments, 4, "lane_id");
         const lane = await laneService.attach(workspaceId, laneId);
         return json(200, {
           lane_id: lane.lane_id,
@@ -146,8 +154,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
         segments[3] === "lanes" &&
         segments[5] === "cleanup"
       ) {
-        const workspaceId = segments[2];
-        const laneId = segments[4];
+        const workspaceId = requiredSegment(segments, 2, "workspace_id");
+        const laneId = requiredSegment(segments, 4, "lane_id");
         const lane = await laneService.cleanup(workspaceId, laneId);
         return json(200, {
           lane_id: lane.lane_id,
@@ -165,8 +173,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
         segments[5] === "sessions"
       ) {
         const body = await parseBody(request);
-        const workspaceId = segments[2];
-        const laneId = segments[4];
+        const workspaceId = requiredSegment(segments, 2, "workspace_id");
+        const laneId = requiredSegment(segments, 4, "lane_id");
 
         const provider = asString(body, "provider") as string;
         if (provider !== "codex") {
@@ -241,8 +249,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
         segments[5] === "terminals"
       ) {
         const body = await parseBody(request);
-        const workspaceId = segments[2];
-        const laneId = segments[4];
+        const workspaceId = requiredSegment(segments, 2, "workspace_id");
+        const laneId = requiredSegment(segments, 4, "lane_id");
         const sessionId = asString(body, "session_id") as string;
         const title = asString(body, "title", false);
         await laneService.attach(workspaceId, laneId);
@@ -313,6 +321,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
     getState: () => bus.getState(),
     getEvents: () => bus.getEvents(),
     getAuditRecords: () => bus.getAuditRecords(),
+    getMetricsReport: () => bus.getMetricsReport(),
     getTerminal: (terminalId: string) => bus.getTerminal(terminalId),
     getTerminalBuffer: (terminalId: string) => bus.getTerminalBuffer(terminalId),
     spawnTerminal: (input: {

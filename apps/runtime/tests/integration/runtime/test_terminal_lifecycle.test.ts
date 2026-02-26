@@ -5,19 +5,20 @@ import { createRuntime } from "../../../src";
 describe("terminal lifecycle and streaming data plane", () => {
   test("rejects lifecycle commands without correlation_id", async () => {
     const runtime = createRuntime();
-    const response = await runtime.bus.request({
-      id: "cmd-missing-correlation",
-      type: "command",
-      ts: new Date().toISOString(),
-      method: "terminal.spawn",
-      workspace_id: "ws-1",
-      lane_id: "lane-1",
-      session_id: "sess-1",
-      payload: { session_id: "sess-1" }
+    await expect(
+      runtime.bus.request({
+        id: "cmd-missing-correlation",
+        type: "command",
+        ts: new Date().toISOString(),
+        method: "terminal.spawn",
+        workspace_id: "ws-1",
+        lane_id: "lane-1",
+        session_id: "sess-1",
+        payload: { session_id: "sess-1" }
+      })
+    ).rejects.toMatchObject({
+      code: "MISSING_CORRELATION_ID"
     });
-
-    expect(response.status).toBe("error");
-    expect(response.error?.code).toBe("MISSING_CORRELATION_ID");
   });
 
   test("spawns terminals, preserves correlation, and blocks cross-lane access", async () => {
