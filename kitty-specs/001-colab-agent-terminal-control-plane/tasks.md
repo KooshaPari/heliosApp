@@ -87,7 +87,7 @@
 - [x] T012 Implement spawn/input/resize command handlers in `apps/runtime/src/integrations/exec.ts`
 - [x] T013 Implement bounded terminal output buffering/backpressure in runtime stream path
 - [x] T014 Emit and persist `terminal.*` lifecycle events through protocol bus and audit sink
-- [ ] T015 [P] Add unit and integration tests for terminal lifecycle/state transitions in `apps/runtime/tests/`
+- [x] T015 [P] Add unit and integration tests for terminal lifecycle/state transitions in `apps/runtime/tests/`
 
 ### Implementation Notes
 - Use hard output bounds to protect low-memory devices.
