@@ -97,6 +97,7 @@ export class EditorlessControlPlane {
   }): Promise<{ ok: boolean; sessionId: string | null; error: string | null }> {
     this.store.dispatch({ type: "operation.start", operation: "session" });
     const result = await this.runtimeClient.ensureSession(input);
+    this.store.dispatch({ type: "diagnostics.set", diagnostics: result.diagnostics });
 
     if (!(result.ok && result.id)) {
       this.store.dispatch({

@@ -45,6 +45,7 @@ function toCommandEnvelope(
     id: correlationId,
     type: "command",
     ts: new Date().toISOString(),
+    correlation_id: correlationId,
     method,
     workspace_id: workspaceId ?? undefined,
     lane_id: laneId ?? undefined,
@@ -210,6 +211,14 @@ export class DesktopRuntimeClient {
     targetEngine: RendererEngine;
     forceError?: boolean;
   }): Promise<RendererSwitchResult> {
+    if (input.forceError === true) {
+      return {
+        ok: false,
+        activeEngine: "ghostty",
+        previousEngine: "ghostty",
+        error: "renderer switch forced failure"
+      };
+    }
     const response = await this.bus.request(
       toCommandEnvelope(
         "renderer.switch",

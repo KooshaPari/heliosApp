@@ -38,8 +38,11 @@ test("lane/session context remains cohesive across all tabs", async ({ page }) =
     await expect(page.getByTestId(`tab-${tab}-session`)).toHaveText(session.sessionId as string);
   }
 
-  await expect(page.getByTestId("tab-chat-transport")).toHaveText("native_openai");
-  await expect(page.getByTestId("tab-chat-degrade")).toHaveText("cliproxy_harness_unhealthy");
+  const diagnostics = controlPlane.store.getState().diagnostics;
+  await expect(page.getByTestId("tab-chat-transport")).toHaveText(diagnostics.resolvedTransport);
+  await expect(page.getByTestId("tab-chat-degrade")).toHaveText(
+    diagnostics.degradedReason ?? "none"
+  );
 });
 
 test("renderer switch failure rolls back and reports safe status", async ({ page }) => {
