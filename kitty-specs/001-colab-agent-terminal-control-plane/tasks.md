@@ -176,7 +176,7 @@
 - [x] T026 Implement runtime metrics for lane create latency, session restore latency, and terminal backlog depth
 - [x] T027 Add local soak/perf harness for multi-session tab scenarios and publish thresholds
 - [x] T028 Enforce strict lint/type/security/static analysis gates in repo tooling
-- [ ] T029 Validate and refine `quickstart.md`, `plan.md`, and ops notes with final scenario commands
+- [x] T029 Validate and refine `quickstart.md`, `plan.md`, and ops notes with final scenario commands
 - [ ] T030 Produce MVP boundary checklist with explicit deferred items (post-MVP durability expansion)
 
 ### Implementation Notes
