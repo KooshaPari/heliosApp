@@ -1,7 +1,7 @@
 ---
 work_package_id: WP06
 title: Hardening, Performance Gates, and Release Readiness
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP04
 base_branch: 001-colab-agent-terminal-control-plane-WP05
@@ -129,3 +129,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-26T13:19:35Z – system – lane=planned – Prompt created.
+- 2026-02-26T16:53:10Z – unknown – shell_pid=65388 – lane=for_review – Ready for review (forced lane move): hardening/perf gates/release readiness implemented in worktree commit 03dcbaa.
