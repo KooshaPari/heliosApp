@@ -86,7 +86,7 @@
 - [x] T011 Implement terminal registry mapping (`terminal_id` ↔ `workspace_id/lane_id/session_id`) in `apps/runtime/src/sessions/`
 - [x] T012 Implement spawn/input/resize command handlers in `apps/runtime/src/integrations/exec.ts`
 - [x] T013 Implement bounded terminal output buffering/backpressure in runtime stream path
-- [ ] T014 Emit and persist `terminal.*` lifecycle events through protocol bus and audit sink
+- [x] T014 Emit and persist `terminal.*` lifecycle events through protocol bus and audit sink
 - [ ] T015 [P] Add unit and integration tests for terminal lifecycle/state transitions in `apps/runtime/tests/`
 
 ### Implementation Notes
