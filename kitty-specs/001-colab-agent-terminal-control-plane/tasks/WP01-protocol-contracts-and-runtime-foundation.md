@@ -1,26 +1,29 @@
 ---
-work_package_id: "WP01"
-subtasks:
-  - "T001"
-  - "T002"
-  - "T003"
-  - "T004"
-  - "T005"
-title: "Protocol Contracts and Runtime Foundation"
-phase: "Phase 1 - Foundation"
-lane: "planned"
+work_package_id: WP01
+title: Protocol Contracts and Runtime Foundation
+lane: "doing"
 dependencies: []
-assignee: ""
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+base_branch: main
+base_commit: f1d0bc01693c809a121c904e94a68cf81422b4a2
+created_at: '2026-02-26T16:35:07.704643+00:00'
+subtasks:
+- T001
+- T002
+- T003
+- T004
+- T005
+phase: Phase 1 - Foundation
+assignee: ''
+agent: ''
+shell_pid: "94640"
+review_status: ''
+reviewed_by: ''
 history:
-  - timestamp: "2026-02-26T13:19:35Z"
-    lane: "planned"
-    agent: "system"
-    shell_pid: ""
-    action: "Prompt generated via /spec-kitty.tasks"
+- timestamp: '2026-02-26T13:19:35Z'
+  lane: planned
+  agent: system
+  shell_pid: ''
+  action: Prompt generated via /spec-kitty.tasks
 ---
 
 # Work Package Prompt: WP01 - Protocol Contracts and Runtime Foundation
