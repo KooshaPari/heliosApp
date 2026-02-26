@@ -212,4 +212,60 @@ describe("session routing lifecycle", () => {
     expect(events.some((event) => event.topic === "terminal.spawn.started")).toBeTrue();
     expect(events.some((event) => event.topic === "terminal.spawned")).toBeTrue();
   });
+
+  it("updates runtime state when HTTP lifecycle endpoints drive session and terminal transitions", async () => {
+    const runtime = createRuntime({
+      harnessProbe: {
+        async check() {
+          return { ok: true };
+        }
+      }
+    });
+
+    const laneId = await createLane(runtime);
+    const sessionResponse = await ensureSession(runtime, laneId);
+    expect(sessionResponse.status).toBe(200);
+    const sessionBody = (await sessionResponse.json()) as { session_id: string };
+
+    const terminalResponse = await runtime.fetch(
+      jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/terminals`, {
+        session_id: sessionBody.session_id
+      })
+    );
+    expect(terminalResponse.status).toBe(201);
+
+    const runtimeState = runtime.getState();
+    expect(runtimeState.session).toBe("attached");
+    expect(runtimeState.terminal).toBe("active");
+  });
+
+  it("rejects terminal spawn when lane is closed", async () => {
+    const runtime = createRuntime({
+      harnessProbe: {
+        async check() {
+          return { ok: true };
+        }
+      }
+    });
+
+    const laneId = await createLane(runtime);
+    const sessionResponse = await ensureSession(runtime, laneId);
+    expect(sessionResponse.status).toBe(200);
+    const sessionBody = (await sessionResponse.json()) as { session_id: string };
+
+    const cleanupResponse = await runtime.fetch(
+      jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/cleanup`, {})
+    );
+    expect(cleanupResponse.status).toBe(200);
+
+    const terminalResponse = await runtime.fetch(
+      jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/terminals`, {
+        session_id: sessionBody.session_id,
+        title: "Closed Lane Terminal"
+      })
+    );
+    expect(terminalResponse.status).toBe(409);
+    const body = (await terminalResponse.json()) as { error: string };
+    expect(body.error).toBe("lane_closed");
+  });
 });
