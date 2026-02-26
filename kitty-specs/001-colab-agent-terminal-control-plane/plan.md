@@ -18,7 +18,7 @@ Deliver a tight first vertical slice for a terminal-first control plane: one can
   - Durable local persistence for workspace/project metadata.
   - Durable checkpoint persistence and restore across full host restarts.
   - Expanded boundary adapter depth beyond slice-1 canonical path.
-  - Full formal localbus surface completion for deferred protocol capabilities.
+  - Full formal localbus runtime implementation completion beyond parity mapping/check gates delivered in slice-1 planning tasks.
 
 ## Technical Context
 

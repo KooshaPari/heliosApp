@@ -89,8 +89,8 @@ As an advanced user, I can run local and external agent operations through consi
 
 - **NFR-001**: Primary terminal interactions (input echo, context-switch feedback) MUST satisfy `p50 <= 60ms` and `p95 <= 150ms` under baseline load profile.
 - **NFR-002**: Recovery operations for recoverable sessions MUST satisfy `p95 <= 5s` under baseline restart profile.
-- **NFR-003**: The interface MUST remain understandable under multi-lane concurrent usage with clear state visibility.
-- **NFR-004**: Failures in optional or external orchestration boundaries MUST degrade gracefully without taking down local runtime control.
+- **NFR-003**: In multi-lane workflows (`>=8` active lanes), users MUST identify active workspace/lane/session correctly in `>=95%` of validation tasks and complete lane-context switch actions in `<=5s p95`.
+- **NFR-004**: On external boundary failures (tool/A2A/harness), local runtime control MUST remain available, degraded routing MUST engage within `<=2s p95`, and failure scope MUST be isolated to affected lane/session without process-wide crash.
 - **NFR-005a**: Lifecycle event and audit records MUST be retained for at least 30 days by default (configurable) with enough fidelity to reconstruct key operator actions for incident review.
 - **NFR-005b**: Audit export bundles MUST include complete correlated timeline fields for selected workspace/lane/session scopes with required redactions applied.
 
