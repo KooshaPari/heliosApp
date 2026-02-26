@@ -53,7 +53,7 @@
 **Estimated Prompt Size**: ~390 lines
 
 ### Included Subtasks
-- [ ] T006 Implement lane lifecycle state machine (`create/list/attach/cleanup`) in `apps/runtime/src/sessions/state_machine.ts`
+- [x] T006 Implement lane lifecycle state machine (`create/list/attach/cleanup`) in `apps/runtime/src/sessions/state_machine.ts`
 - [ ] T007 Implement in-memory session registry keyed by `codex_session_id` in `apps/runtime/src/sessions/`
 - [ ] T008 Implement `cliproxyapi++` health monitor + route selector in `apps/runtime/src/integrations/exec.ts`
 - [ ] T009 Expose lane/session/harness status endpoints per `contracts/control-plane.openapi.yaml` in runtime API surface
