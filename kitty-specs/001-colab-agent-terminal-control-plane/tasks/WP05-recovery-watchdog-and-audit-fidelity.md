@@ -1,27 +1,30 @@
 ---
-work_package_id: "WP05"
-subtasks:
-  - "T021"
-  - "T022"
-  - "T023"
-  - "T024"
-  - "T025"
-title: "Recovery, Watchdog, and Audit Fidelity"
-phase: "Phase 3 - User Story 1 hardening"
-lane: "planned"
+work_package_id: WP05
+title: Recovery, Watchdog, and Audit Fidelity
+lane: "doing"
 dependencies:
-  - "WP03"
-assignee: ""
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+- WP03
+base_branch: 001-colab-agent-terminal-control-plane-WP03
+base_commit: f1d0bc01693c809a121c904e94a68cf81422b4a2
+created_at: '2026-02-26T16:35:11.536188+00:00'
+subtasks:
+- T021
+- T022
+- T023
+- T024
+- T025
+phase: Phase 3 - User Story 1 hardening
+assignee: ''
+agent: ''
+shell_pid: "94640"
+review_status: ''
+reviewed_by: ''
 history:
-  - timestamp: "2026-02-26T13:19:35Z"
-    lane: "planned"
-    agent: "system"
-    shell_pid: ""
-    action: "Prompt generated via /spec-kitty.tasks"
+- timestamp: '2026-02-26T13:19:35Z'
+  lane: planned
+  agent: system
+  shell_pid: ''
+  action: Prompt generated via /spec-kitty.tasks
 ---
 
 # Work Package Prompt: WP05 - Recovery, Watchdog, and Audit Fidelity
