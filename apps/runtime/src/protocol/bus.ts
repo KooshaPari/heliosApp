@@ -6,6 +6,12 @@ import {
   type RuntimeState
 } from "../sessions/state_machine";
 import {
+  RuntimeMetrics,
+  type RuntimeMetricSample,
+  type RuntimeMetricsReport
+} from "../diagnostics/metrics";
+import {
+  type CommandEnvelope,
   isCommandEnvelope,
   isEventEnvelope,
   ProtocolValidationError,
@@ -38,6 +44,8 @@ type LifecycleTopic =
   | "session.attach.started"
   | "session.attached"
   | "session.attach.failed"
+  | "session.restore.started"
+  | "session.restore.completed"
   | "terminal.spawn.started"
   | "terminal.spawned"
   | "terminal.spawn.failed";
@@ -84,6 +92,8 @@ const TOPIC_LIFECYCLE: Record<LifecycleTopic, LifecycleName> = {
   "session.attach.started": "session.attach",
   "session.attached": "session.attach",
   "session.attach.failed": "session.attach",
+  "session.restore.started": "session.attach",
+  "session.restore.completed": "session.attach",
   "terminal.spawn.started": "terminal.spawn",
   "terminal.spawned": "terminal.spawn",
   "terminal.spawn.failed": "terminal.spawn"
@@ -92,6 +102,7 @@ const TOPIC_LIFECYCLE: Record<LifecycleTopic, LifecycleName> = {
 const START_TOPICS = new Set<LifecycleTopic>([
   "lane.create.started",
   "session.attach.started",
+  "session.restore.started",
   "terminal.spawn.started"
 ]);
 
@@ -100,6 +111,7 @@ const END_TOPICS = new Set<LifecycleTopic>([
   "lane.create.failed",
   "session.attached",
   "session.attach.failed",
+  "session.restore.completed",
   "terminal.spawned",
   "terminal.spawn.failed"
 ]);
@@ -122,6 +134,10 @@ export class InMemoryLocalBus implements LocalBus {
   private readonly eventLog: LocalBusEnvelope[] = [];
   private readonly auditSink: AuditSink;
   private readonly lifecycleProgressByCorrelation = new Map<string, LifecycleProgress>();
+  private readonly terminalRegistry = new TerminalRegistry();
+  private readonly terminalBuffer: TerminalOutputBuffer;
+  private readonly metrics = new RuntimeMetrics();
+  private terminalCounter = 0;
 
   constructor(options: InMemoryLocalBusOptions = {}) {
     this.auditSink = options.auditSink ?? new InMemoryAuditSink();
@@ -133,6 +149,18 @@ export class InMemoryLocalBus implements LocalBus {
 
   getEvents(): LocalBusEnvelope[] {
     return [...this.eventLog];
+  }
+
+  getTerminal(terminalId: string): TerminalContext | undefined {
+    return this.terminalRegistry.get(terminalId);
+  }
+
+  getTerminalBuffer(terminalId: string) {
+    return this.terminalBuffer.get(terminalId);
+  }
+
+  getMetricsReport(): RuntimeMetricsReport {
+    return this.metrics.getReport();
   }
 
   async getAuditRecords(): Promise<AuditRecord[]> {
@@ -150,6 +178,7 @@ export class InMemoryLocalBus implements LocalBus {
       this.sequence += 1;
       const stampedEnvelope: LocalBusEnvelope = { ...envelope, sequence: this.sequence };
       this.eventLog.push(stampedEnvelope);
+      await this.captureBacklogDepthMetric(stampedEnvelope);
 
       await this.auditSink.append({
         recorded_at: new Date().toISOString(),
@@ -181,7 +210,26 @@ export class InMemoryLocalBus implements LocalBus {
       );
     }
 
-    if (isHandledMethod(envelope.method)) {
+    if (envelope.method === "terminal.spawn") {
+      return this.handleTerminalSpawn(envelope);
+    }
+    if (envelope.method === "terminal.input") {
+      return this.handleTerminalInput(envelope);
+    }
+    if (envelope.method === "terminal.resize") {
+      return this.handleTerminalResize(envelope);
+    }
+    if (envelope.method === "renderer.capabilities") {
+      return this.okResponse(envelope, {
+        active_engine: this.rendererEngine,
+        available_engines: ["ghostty", "rio"],
+        hot_swap_supported: true
+      });
+    }
+    if (envelope.method === "renderer.switch") {
+      return this.handleRendererSwitch(envelope);
+    }
+    if (envelope.method === "lane.create" || envelope.method === "session.attach") {
       return this.handleLifecycleCommand(envelope, envelope.method);
     }
 
@@ -258,36 +306,367 @@ export class InMemoryLocalBus implements LocalBus {
     const forcedError = command.payload.force_error === true;
     const resultId =
       (command.payload.id as string | undefined) ?? `${spec.resultKey}_${Date.now()}`;
+    const lifecycleCommand =
+      method === "lane.create" && !command.lane_id
+        ? { ...command, lane_id: resultId }
+        : command;
+    const restoreLifecycleCommand =
+      command.correlation_id === undefined
+        ? null
+        : ({ ...command, correlation_id: `${command.correlation_id}:restore` } as CommandEnvelope);
+    const laneCreateMetric = method === "lane.create" ? "lane_create_latency_ms" : null;
+    const sessionRestoreMetric =
+      method === "session.attach" && command.payload.restore === true
+        ? "session_restore_latency_ms"
+        : null;
 
-    await this.emitTransitionEvent(command, spec.requested, spec.startedTopic);
-
-    if (forcedError) {
-      await this.emitTransitionEvent(command, spec.failed, spec.failedTopic);
-      return {
-        id: command.id,
-        type: "response",
-        ts: new Date().toISOString(),
-        workspace_id: command.workspace_id,
-        lane_id: command.lane_id,
-        session_id: command.session_id,
-        terminal_id: command.terminal_id,
-        correlation_id: command.correlation_id,
-        method,
-        status: "error",
-        result: null,
-        error: {
-          code: `${method.toUpperCase().replace(".", "_")}_FAILED`,
-          message: `${method} failed`,
-          retryable: true,
-          details: { method }
-        }
-      };
+    if (laneCreateMetric) {
+      this.metrics.startTimer(laneCreateMetric, command.id);
+    }
+    if (sessionRestoreMetric) {
+      this.metrics.startTimer(sessionRestoreMetric, command.id);
+      if (restoreLifecycleCommand) {
+        await this.emitTransitionEvent(
+          restoreLifecycleCommand,
+          "session.restore.started",
+          "session.restore.started"
+        );
+      }
     }
 
-    await this.emitTransitionEvent(command, spec.succeeded, spec.successTopic);
-    return {
-      id: command.id,
-      type: "response",
+    await this.emitTransitionEvent(lifecycleCommand, spec.requested, spec.startedTopic);
+
+    if (forcedError) {
+      await this.emitTransitionEvent(lifecycleCommand, spec.failed, spec.failedTopic);
+      await this.recordLatencyMetrics(command, laneCreateMetric, sessionRestoreMetric, {
+        status: "error",
+        method,
+        workspace_id: command.workspace_id ?? "unknown",
+        lane_id: command.lane_id ?? "unknown",
+        session_id: command.session_id ?? "unknown"
+      });
+      return this.errorResponse(
+        command,
+        `${method.toUpperCase().replace(".", "_")}_FAILED`,
+        `${method} failed`,
+        { method },
+        true
+      );
+    }
+
+    await this.emitTransitionEvent(lifecycleCommand, spec.succeeded, spec.successTopic);
+    if (sessionRestoreMetric && restoreLifecycleCommand) {
+      await this.emitTransitionEvent(
+        restoreLifecycleCommand,
+        "session.restore.completed",
+        "session.restore.completed"
+      );
+    }
+    await this.recordLatencyMetrics(command, laneCreateMetric, sessionRestoreMetric, {
+      status: "ok",
+      method,
+      workspace_id: command.workspace_id ?? "unknown",
+      lane_id: command.lane_id ?? "unknown",
+      session_id: command.session_id ?? "unknown"
+    });
+    return this.okResponse(command, {
+      [spec.resultKey]: resultId,
+      state: this.state
+    });
+  }
+
+  private async handleTerminalSpawn(command: CommandEnvelope): Promise<LocalBusEnvelope> {
+    const workspaceId = command.workspace_id;
+    const laneId = command.lane_id;
+    const sessionId = this.readString(command.payload.session_id) ?? command.session_id;
+
+    if (!workspaceId || !laneId || !sessionId || !command.correlation_id) {
+      return this.errorResponse(
+        command,
+        "INVALID_TERMINAL_CONTEXT",
+        "workspace_id, lane_id, and session_id are required"
+      );
+    }
+
+    this.terminalCounter += 1;
+    const terminalId =
+      this.readString(command.payload.terminal_id) ?? `${sessionId}:terminal:${this.terminalCounter}`;
+    const title = this.readString(command.payload.title) ?? "Terminal";
+    const existingTerminal = this.terminalRegistry.get(terminalId);
+    if (existingTerminal) {
+      this.terminalBuffer.clear(terminalId);
+    }
+
+    this.terminalRegistry.spawn({
+      terminal_id: terminalId,
+      workspace_id: workspaceId,
+      lane_id: laneId,
+      session_id: sessionId,
+      title
+    });
+
+    await this.emitTransitionEvent(command, "terminal.spawn.requested", "terminal.spawn.started");
+    await this.emitTerminalStateChanged(command, terminalId, "spawning", {
+      runtime_event: "terminal.spawn.requested"
+    });
+
+    this.state = transition(this.state, "terminal.spawn.succeeded");
+    await this.emitTerminalStateChanged(command, terminalId, "active", {
+      runtime_event: "terminal.spawn.succeeded"
+    });
+
+    await this.publish({
+      id: `${command.id}:terminal.spawned`,
+      type: "event",
+      ts: new Date().toISOString(),
+      workspace_id: workspaceId,
+      lane_id: laneId,
+      session_id: sessionId,
+      terminal_id: terminalId,
+      correlation_id: command.correlation_id,
+      topic: "terminal.spawned",
+      payload: {
+        terminal_id: terminalId,
+        lane_id: laneId,
+        session_id: sessionId,
+        workspace_id: workspaceId,
+        state: "active",
+        title
+      }
+    });
+
+    return this.okResponse(command, {
+      terminal_id: terminalId,
+      lane_id: laneId,
+      session_id: sessionId,
+      state: "active"
+    });
+  }
+
+  private handleRendererSwitch(command: CommandEnvelope): LocalBusEnvelope {
+    const forcedError = command.payload.force_error === true;
+    if (forcedError) {
+      return this.errorResponse(
+        command,
+        "RENDERER_SWITCH_FAILED",
+        "renderer.switch failed",
+        { method: "renderer.switch" },
+        true
+      );
+    }
+
+    const targetEngine = this.readString(command.payload.target_engine);
+    if (targetEngine !== "ghostty" && targetEngine !== "rio") {
+      return this.errorResponse(
+        command,
+        "INVALID_RENDERER_ENGINE",
+        "target_engine must be one of: ghostty, rio"
+      );
+    }
+
+    const previousEngine = this.rendererEngine;
+    this.rendererEngine = targetEngine;
+    return this.okResponse(command, {
+      active_engine: this.rendererEngine,
+      previous_engine: previousEngine
+    });
+  }
+
+  private async handleTerminalInput(command: CommandEnvelope): Promise<LocalBusEnvelope> {
+    const terminalId = command.terminal_id ?? this.readString(command.payload.terminal_id);
+    const workspaceId = command.workspace_id;
+    const laneId = command.lane_id;
+    const sessionId = command.session_id ?? this.readString(command.payload.session_id);
+
+    if (!terminalId || !workspaceId || !laneId || !sessionId) {
+      return this.errorResponse(
+        command,
+        "INVALID_TERMINAL_CONTEXT",
+        "terminal_id, workspace_id, lane_id, and session_id are required"
+      );
+    }
+
+    if (
+      !this.terminalRegistry.isOwnedBy(terminalId, {
+        workspace_id: workspaceId,
+        lane_id: laneId,
+        session_id: sessionId
+      })
+    ) {
+      return this.errorResponse(
+        command,
+        "TERMINAL_CONTEXT_MISMATCH",
+        "terminal does not belong to the provided workspace/lane/session context"
+      );
+    }
+
+    const inputData = this.readNonEmptyString(command.payload.data);
+    if (!inputData) {
+      return this.errorResponse(
+        command,
+        "INVALID_TERMINAL_INPUT",
+        "payload.data must be a non-empty string"
+      );
+    }
+
+    const outputSeq = this.terminalRegistry.incrementOutputSeq(terminalId);
+    const outputEntry = {
+      seq: outputSeq,
+      chunk: inputData,
+      ts: new Date().toISOString()
+    };
+    const bufferResult = this.terminalBuffer.push(terminalId, outputEntry);
+    const backlogDepth = this.terminalBuffer.get(terminalId).entries.length;
+
+    await this.publish({
+      id: `${command.id}:terminal.output:${outputSeq}`,
+      type: "event",
+      ts: new Date().toISOString(),
+      workspace_id: workspaceId,
+      lane_id: laneId,
+      session_id: sessionId,
+      terminal_id: terminalId,
+      correlation_id: command.correlation_id,
+      topic: "terminal.output",
+      payload: {
+        terminal_id: terminalId,
+        seq: outputSeq,
+        chunk: inputData,
+        backlog_depth: backlogDepth,
+        overflowed: bufferResult.overflowed,
+        dropped_bytes: bufferResult.droppedBytes
+      }
+    });
+
+    if (bufferResult.overflowed) {
+      this.state = transition(this.state, "terminal.throttled");
+      await this.emitTerminalStateChanged(command, terminalId, "throttled", {
+        runtime_event: "terminal.throttled",
+        dropped_bytes: bufferResult.droppedBytes
+      });
+    }
+
+    return this.okResponse(command, {
+      terminal_id: terminalId,
+      accepted_bytes: new TextEncoder().encode(inputData).byteLength,
+      output_seq: outputSeq,
+      backlog_depth: backlogDepth
+    });
+  }
+
+  private async captureBacklogDepthMetric(event: LocalBusEnvelope): Promise<void> {
+    if (event.type !== "event" || event.topic !== "terminal.output") {
+      return;
+    }
+    const depth = event.payload.backlog_depth;
+    if (typeof depth !== "number" || Number.isNaN(depth)) {
+      return;
+    }
+
+    const sample = this.metrics.record("terminal_output_backlog_depth", depth, "count", {
+      workspace_id: event.workspace_id ?? "unknown",
+      session_id: event.session_id ?? "unknown",
+      terminal_id: event.terminal_id ?? "unknown"
+    });
+    await this.appendMetricEvent(event, sample);
+  }
+
+  private async recordLatencyMetrics(
+    command: CommandEnvelope,
+    laneCreateMetric: "lane_create_latency_ms" | null,
+    sessionRestoreMetric: "session_restore_latency_ms" | null,
+    tags: Record<string, string>
+  ): Promise<void> {
+    if (laneCreateMetric) {
+      const sample = this.metrics.endTimer(laneCreateMetric, command.id, tags);
+      if (sample) {
+        await this.appendMetricEvent(command, sample);
+      }
+    }
+    if (sessionRestoreMetric) {
+      const sample = this.metrics.endTimer(sessionRestoreMetric, command.id, tags);
+      if (sample) {
+        await this.appendMetricEvent(command, sample);
+      }
+    }
+  }
+
+  private async appendMetricEvent(source: LocalBusEnvelope, sample: RuntimeMetricSample): Promise<void> {
+    await this.publish({
+      id: `${source.id}:metric:${sample.metric}:${this.sequence + 1}`,
+      type: "event",
+      ts: sample.ts,
+      workspace_id: source.workspace_id,
+      lane_id: source.lane_id,
+      session_id: source.session_id,
+      terminal_id: source.terminal_id,
+      correlation_id: source.correlation_id,
+      topic: "diagnostics.metric",
+      payload: {
+        metric: sample.metric,
+        value: sample.value,
+        unit: sample.unit,
+        tags: sample.tags ?? {}
+      }
+    });
+  }
+
+  private async handleTerminalResize(command: CommandEnvelope): Promise<LocalBusEnvelope> {
+    const terminalId = command.terminal_id ?? this.readString(command.payload.terminal_id);
+    const workspaceId = command.workspace_id;
+    const laneId = command.lane_id;
+    const sessionId = command.session_id ?? this.readString(command.payload.session_id);
+    const cols = this.readNumber(command.payload.cols);
+    const rows = this.readNumber(command.payload.rows);
+
+    if (!terminalId || !workspaceId || !laneId || !sessionId || !cols || !rows || cols < 1 || rows < 1) {
+      return this.errorResponse(
+        command,
+        "INVALID_TERMINAL_RESIZE",
+        "terminal_id, workspace_id, lane_id, session_id, cols, and rows are required"
+      );
+    }
+
+    if (
+      !this.terminalRegistry.isOwnedBy(terminalId, {
+        workspace_id: workspaceId,
+        lane_id: laneId,
+        session_id: sessionId
+      })
+    ) {
+      return this.errorResponse(
+        command,
+        "TERMINAL_CONTEXT_MISMATCH",
+        "terminal does not belong to the provided workspace/lane/session context"
+      );
+    }
+
+    this.state = transition(this.state, "terminal.spawn.succeeded");
+    await this.emitTerminalStateChanged(command, terminalId, "active", {
+      reason: "resize",
+      cols,
+      rows,
+      runtime_event: "terminal.spawn.succeeded"
+    });
+
+    return this.okResponse(command, {
+      terminal_id: terminalId,
+      cols,
+      rows,
+      state: "active"
+    });
+  }
+
+  private async emitTerminalStateChanged(
+    command: CommandEnvelope,
+    terminalId: string,
+    state: TerminalLifecycleState,
+    payload: Record<string, unknown>
+  ): Promise<void> {
+    const terminal = this.terminalRegistry.setState(terminalId, state);
+    await this.publish({
+      id: `${command.id}:terminal.state.changed:${state}:${this.sequence + 1}`,
+      type: "event",
       ts: new Date().toISOString(),
       workspace_id: command.workspace_id,
       lane_id: command.lane_id,
