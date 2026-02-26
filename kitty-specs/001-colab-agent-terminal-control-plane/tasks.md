@@ -147,7 +147,7 @@
 - [x] T022 Implement orphan lane/session watchdog and remediation suggestions in runtime services
 - [x] T023 Implement immutable lifecycle audit records with correlation filtering and export hooks
 - [x] T024 Normalize protocol-boundary failure payloads to stable error codes/messages
-- [ ] T025 [P] Add recovery/chaos tests and failure-drill scenarios in `apps/runtime/tests/integration/recovery/`
+- [x] T025 [P] Add recovery/chaos tests and failure-drill scenarios in `apps/runtime/tests/integration/recovery/`
 
 ### Implementation Notes
 - Maintain deterministic ordering for lifecycle-critical events during recovery.
