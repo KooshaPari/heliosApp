@@ -257,11 +257,41 @@
 
 ---
 
+## Work Package WP09: Formal Protocol Surface Completion (Priority: P3)
+
+**Goal**: Ensure complete parity between formal protocol assets (`specs/protocol/v1/`) and feature contracts/runtime task coverage for methods/topics outside the initial slice-1 core path.
+**Independent Test**: A parity checker reports zero unmapped formal methods/topics and all deferred entries are explicitly linked to implementable tasks.
+**Prompt**: `/kitty-specs/001-colab-agent-terminal-control-plane/tasks/WP09-formal-protocol-surface-completion.md`
+**Estimated Prompt Size**: ~330 lines
+
+### Included Subtasks
+- [ ] T043 Build a method/topic parity matrix artifact mapping every formal method/topic to contract sections, runtime adapter paths, and WP task IDs
+- [ ] T044 Add explicit contract coverage for workspace/project/renderer/agent/approval/share/zmx method families in `kitty-specs/001-colab-agent-terminal-control-plane/contracts/control-plane.openapi.yaml` and protocol docs
+- [ ] T045 Add event coverage mapping for `workspace.opened`, `project.ready`, renderer switch events, `agent.run.*`, and approval/share events in feature contract docs and runtime event plans
+- [ ] T046 [P] Add automated parity check script/test that fails when formal method/topic entries are unmapped or removed without explicit extension/defer annotation
+- [ ] T047 [P] Update `research.md`, `plan.md`, and `quickstart.md` with parity verification commands and extension/defer policy examples
+
+### Implementation Notes
+- Treat `specs/protocol/v1/*` as canonical baseline and document Helios-specific extensions (`harness.status.changed`, `lane.attached`) explicitly.
+- No silent contract drift is allowed.
+
+### Parallel Opportunities
+- T046 and T047 can run in parallel after T043 matrix format is agreed.
+
+### Dependencies
+- Depends on WP08.
+
+### Risks & Mitigations
+- Risk: parity matrix gets stale as contracts evolve.
+- Mitigation: parity check script becomes required gate in CI/local validation.
+
+---
+
 ## Dependency & Execution Summary
 
-- **Sequence**: WP01 → WP02 → WP03 → (WP04 and WP05 in parallel) → WP06 → WP07 → WP08.
-- **Parallelization**: WP04 and WP05 can run concurrently after WP03; within WP07 and WP08, designated `[P]` tasks can execute in parallel after interface-lock milestones.
-- **MVP Scope**: WP01 + WP02 + WP03 (core control-plane lifecycle and terminal flow), with WP07/WP08 extending post-MVP compliance hardening and slice-2 readiness scaffolding.
+- **Sequence**: WP01 → WP02 → WP03 → (WP04 and WP05 in parallel) → WP06 → WP07 → WP08 → WP09.
+- **Parallelization**: WP04 and WP05 can run concurrently after WP03; within WP07/WP08/WP09, designated `[P]` tasks can execute in parallel after interface-lock milestones.
+- **MVP Scope**: WP01 + WP02 + WP03 (core control-plane lifecycle and terminal flow), with WP07/WP08/WP09 extending post-MVP compliance hardening, slice-2 readiness scaffolding, and formal protocol parity completion.
 
 ---
 
@@ -311,3 +341,8 @@
 | T040 | Retention policy compliance tests | WP08 | P3 | Yes |
 | T041 | Export completeness compliance tests | WP08 | P3 | Yes |
 | T042 | Document durability/retention ops verification | WP08 | P3 | No |
+| T043 | Build formal method/topic parity matrix | WP09 | P3 | No |
+| T044 | Add formal method-family contract coverage | WP09 | P3 | No |
+| T045 | Add formal event-family coverage mapping | WP09 | P3 | No |
+| T046 | Automated parity checker gate | WP09 | P3 | Yes |
+| T047 | Publish parity verification guidance | WP09 | P3 | Yes |
