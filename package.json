@@ -1,0 +1,8 @@
+{
+  "name": "heliosapp",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:runtime": "bun test apps/runtime/tests/integration/sessions"
+  }
+}
