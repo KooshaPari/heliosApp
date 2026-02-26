@@ -37,6 +37,30 @@ describe("protocol validator", () => {
       code: "MISSING_CORRELATION_ID"
     });
   });
+
+  test("rejects timestamps without RFC3339 timezone", () => {
+    expect(() =>
+      validateEnvelope({
+        id: "evt-1",
+        type: "event",
+        ts: "2026-02-26T00:00:00",
+        topic: "workspace.opened",
+        payload: {}
+      })
+    ).toThrow("Envelope field 'ts' must be an RFC3339 timestamp with timezone");
+  });
+
+  test("accepts RFC3339 timestamps with explicit timezone offset", () => {
+    const envelope = validateEnvelope({
+      id: "evt-1",
+      type: "event",
+      ts: "2026-02-26T00:00:00+00:00",
+      topic: "workspace.opened",
+      payload: {}
+    });
+
+    expect(envelope.ts).toBe("2026-02-26T00:00:00+00:00");
+  });
 });
 
 describe("protocol sequencing and audit", () => {
@@ -109,5 +133,23 @@ describe("protocol sequencing and audit", () => {
     expect(records).toHaveLength(2);
     expect(records[0]?.outcome).toBe("accepted");
     expect(records[1]?.outcome).toBe("rejected");
+  });
+
+  test("keeps session detached when session.attach fails", async () => {
+    const bus = new InMemoryLocalBus();
+    const response = await bus.request(
+      createLifecycleCommand({
+        payload: { force_error: true }
+      })
+    );
+
+    expect(response.type).toBe("response");
+    expect(response.status).toBe("error");
+    expect(bus.getState().session).toBe("detached");
+
+    const events = bus.getEvents();
+    expect(events).toHaveLength(2);
+    expect(events[0]?.topic).toBe("session.attach.started");
+    expect(events[1]?.topic).toBe("session.attach.failed");
   });
 });

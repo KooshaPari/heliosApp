@@ -14,7 +14,11 @@
       "type": "string",
       "enum": ["command", "response", "event"]
     },
-    "ts": { "type": "string", "format": "date-time" },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
     "workspace_id": { "type": "string", "minLength": 1 },
     "lane_id": { "type": ["string", "null"] },
     "session_id": { "type": ["string", "null"] },
@@ -113,7 +117,11 @@
     },
     "correlation_id": { "type": ["string", "null"] },
     "envelope_id": { "type": ["string", "null"] },
-    "timestamp": { "type": ["string", "null"], "format": "date-time" }
+    "timestamp": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?(?:Z|[+-]\\d{2}:\\d{2})$"
+    }
   },
   "allOf": [
     {
@@ -121,8 +129,102 @@
       "then": { "required": ["method", "payload"] }
     },
     {
+      "if": { "properties": { "type": { "const": "response" } }, "required": ["type"] },
+      "then": { "required": ["status"] }
+    },
+    {
       "if": { "properties": { "type": { "const": "event" } }, "required": ["type"] },
       "then": { "required": ["topic", "payload"] }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "command" }, "method": { "const": "lane.create" } },
+        "required": ["type", "method"]
+      },
+      "then": { "required": ["workspace_id", "correlation_id"] }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "command" }, "method": { "const": "session.attach" } },
+        "required": ["type", "method"]
+      },
+      "then": {
+        "required": ["workspace_id", "lane_id", "session_id", "correlation_id"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "command" }, "method": { "const": "terminal.spawn" } },
+        "required": ["type", "method"]
+      },
+      "then": {
+        "required": ["workspace_id", "lane_id", "session_id", "correlation_id"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "event" }, "topic": { "const": "lane.create.started" } },
+        "required": ["type", "topic"]
+      },
+      "then": { "required": ["workspace_id", "lane_id", "correlation_id"] }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "event" }, "topic": { "const": "lane.created" } },
+        "required": ["type", "topic"]
+      },
+      "then": { "required": ["workspace_id", "lane_id", "correlation_id"] }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "event" }, "topic": { "const": "lane.create.failed" } },
+        "required": ["type", "topic"]
+      },
+      "then": { "required": ["workspace_id", "lane_id", "correlation_id"] }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "event" }, "topic": { "const": "session.attach.started" } },
+        "required": ["type", "topic"]
+      },
+      "then": { "required": ["workspace_id", "lane_id", "session_id", "correlation_id"] }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "event" }, "topic": { "const": "session.attached" } },
+        "required": ["type", "topic"]
+      },
+      "then": { "required": ["workspace_id", "lane_id", "session_id", "correlation_id"] }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "event" }, "topic": { "const": "session.attach.failed" } },
+        "required": ["type", "topic"]
+      },
+      "then": { "required": ["workspace_id", "lane_id", "session_id", "correlation_id"] }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "event" }, "topic": { "const": "terminal.spawn.started" } },
+        "required": ["type", "topic"]
+      },
+      "then": { "required": ["workspace_id", "lane_id", "session_id", "correlation_id"] }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "event" }, "topic": { "const": "terminal.spawned" } },
+        "required": ["type", "topic"]
+      },
+      "then": {
+        "required": ["workspace_id", "lane_id", "session_id", "terminal_id", "correlation_id"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "event" }, "topic": { "const": "terminal.spawn.failed" } },
+        "required": ["type", "topic"]
+      },
+      "then": { "required": ["workspace_id", "lane_id", "session_id", "correlation_id"] }
     }
   ],
   "additionalProperties": false

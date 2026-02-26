@@ -60,7 +60,7 @@ const METHOD_SPECS: Record<HandledMethod, MethodTransitionSpec> = {
   "session.attach": {
     requested: "session.attach.requested",
     succeeded: "session.attach.succeeded",
-    failed: "session.terminated",
+    failed: "session.attach.failed",
     startedTopic: "session.attach.started",
     successTopic: "session.attached",
     failedTopic: "session.attach.failed",

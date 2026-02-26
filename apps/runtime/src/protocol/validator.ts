@@ -5,7 +5,8 @@ import { ProtocolValidationError } from "./types";
 
 const METHOD_SET = new Set<string>(METHODS);
 const TOPIC_SET = new Set<string>(TOPICS);
-const ISO_8601_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
+const RFC3339_PATTERN =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 
 const CORRELATION_REQUIRED_METHODS = new Set<string>([
   "lane.create",
@@ -68,10 +69,10 @@ function assertStringField(envelope: Record<string, unknown>, field: string): st
 }
 
 function assertIsoTimestamp(value: string, field: string): void {
-  if (!ISO_8601_PATTERN.test(value) || Number.isNaN(Date.parse(value))) {
+  if (!RFC3339_PATTERN.test(value) || Number.isNaN(Date.parse(value))) {
     throw new ProtocolValidationError(
       "INVALID_TIMESTAMP",
-      `Envelope field '${field}' must be an ISO timestamp`,
+      `Envelope field '${field}' must be an RFC3339 timestamp with timezone`,
       {
         field,
         value

@@ -20,6 +20,7 @@ export type RuntimeEvent =
   | "lane.cleanup.completed"
   | "session.attach.requested"
   | "session.attach.succeeded"
+  | "session.attach.failed"
   | "session.restore.started"
   | "session.restore.completed"
   | "session.terminated"
@@ -59,6 +60,8 @@ export function transition(state: RuntimeState, event: RuntimeEvent): RuntimeSta
       return { ...state, session: "attaching" };
     case "session.attach.succeeded":
       return { ...state, session: "attached" };
+    case "session.attach.failed":
+      return { ...state, session: "detached" };
     case "session.restore.started":
       return { ...state, session: "restoring" };
     case "session.restore.completed":
