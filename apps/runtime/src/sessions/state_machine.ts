@@ -1,13 +1,4 @@
-export type LaneState =
-  | "new"
-  | "provisioning"
-  | "ready"
-  | "running"
-  | "blocked"
-  | "shared"
-  | "failed"
-  | "cleaning"
-  | "closed";
+export type LaneState = "new" | "provisioning" | "ready" | "running" | "blocked" | "shared" | "failed" | "cleaning" | "closed";
 export type SessionState = "detached" | "attaching" | "attached" | "restoring" | "terminated";
 export type TerminalState = "idle" | "spawning" | "active" | "throttled" | "errored" | "stopped";
 
@@ -41,7 +32,7 @@ export type RuntimeEvent =
 export const INITIAL_RUNTIME_STATE: RuntimeState = {
   lane: "new",
   session: "detached",
-  terminal: "idle",
+  terminal: "idle"
 };
 
 export function transition(state: RuntimeState, event: RuntimeEvent): RuntimeState {

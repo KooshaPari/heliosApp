@@ -2,9 +2,13 @@ export const TOPICS = [
   "workspace.opened",
   "project.ready",
   "session.created",
+  "session.attach.started",
   "session.attached",
+  "session.attach.failed",
   "session.terminated",
+  "terminal.spawn.started",
   "terminal.spawned",
+  "terminal.spawn.failed",
   "terminal.output",
   "terminal.state.changed",
   "renderer.switch.started",
@@ -18,7 +22,13 @@ export const TOPICS = [
   "approval.resolved",
   "share.session.started",
   "share.session.stopped",
+  "lane.create.started",
   "lane.created",
+  "lane.create.failed",
+  "lane.attached",
   "lane.cleaned",
-  "audit.recorded",
+  "harness.status.changed",
+  "audit.recorded"
 ] as const;
+
+export type ProtocolTopic = (typeof TOPICS)[number];

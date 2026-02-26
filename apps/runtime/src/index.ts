@@ -1,10 +1,16 @@
+import type { AuditSink } from "./audit/sink";
 import { InMemoryLocalBus } from "./protocol/bus";
 
-export function createRuntime() {
-  const bus = new InMemoryLocalBus();
+type RuntimeOptions = {
+  auditSink?: AuditSink;
+};
+
+export function createRuntime(options: RuntimeOptions = {}) {
+  const bus = new InMemoryLocalBus({ auditSink: options.auditSink });
   return {
     bus,
     getState: () => bus.getState(),
     getEvents: () => bus.getEvents(),
+    getAuditRecords: () => bus.getAuditRecords()
   };
 }

@@ -67,8 +67,6 @@
         "session.attach.started",
         "session.attached",
         "session.attach.failed",
-        "session.restore.started",
-        "session.restore.completed",
         "session.terminated",
         "terminal.spawn.started",
         "terminal.spawned",
@@ -89,11 +87,10 @@
         "lane.create.started",
         "lane.created",
         "lane.create.failed",
-        "lane.cleaned",
         "lane.attached",
+        "lane.cleaned",
         "harness.status.changed",
         "audit.recorded",
-        "diagnostics.metric",
         null
       ]
     },
