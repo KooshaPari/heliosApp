@@ -865,6 +865,65 @@ class CommandBusImpl implements LocalBus {
   getActiveCorrelationId(): string | undefined {
     return this.activeCorrelationId;
   }
+
+  private okResponse(
+    command: CommandEnvelope,
+    result: Record<string, unknown>
+  ): LocalBusEnvelope {
+    return {
+      id: command.id,
+      type: "response",
+      ts: new Date().toISOString(),
+      workspace_id: command.workspace_id,
+      lane_id: command.lane_id,
+      session_id: command.session_id,
+      terminal_id: command.terminal_id,
+      correlation_id: command.correlation_id,
+      method: command.method,
+      status: "ok",
+      result
+    };
+  }
+
+  private errorResponse(
+    command: CommandEnvelope,
+    code: string,
+    message: string,
+    details?: Record<string, unknown>,
+    retryable = false
+  ): LocalBusEnvelope {
+    return {
+      id: command.id,
+      type: "response",
+      ts: new Date().toISOString(),
+      workspace_id: command.workspace_id,
+      lane_id: command.lane_id,
+      session_id: command.session_id,
+      terminal_id: command.terminal_id,
+      correlation_id: command.correlation_id,
+      method: command.method,
+      status: "error",
+      result: null,
+      error: {
+        code,
+        message,
+        retryable,
+        details: details ?? null
+      }
+    };
+  }
+
+  private readString(value: unknown): string | undefined {
+    return typeof value === "string" && value.length > 0 ? value : undefined;
+  }
+
+  private readNonEmptyString(value: unknown): string | undefined {
+    return typeof value === "string" && value.length > 0 ? value : undefined;
+  }
+
+  private readNumber(value: unknown): number | undefined {
+    return typeof value === "number" ? value : undefined;
+  }
 }
 
 export function createBus(options?: CommandBusOptions): LocalBus {
