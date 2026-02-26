@@ -3,7 +3,7 @@ import {
   ActiveContextStore,
   INITIAL_ACTIVE_CONTEXT_STATE,
   selectActiveContext,
-  selectRendererSwitchStatus,
+  selectRendererSwitchStatus
 } from "../../src/context_store";
 
 describe("ActiveContextStore", () => {
@@ -21,7 +21,7 @@ describe("ActiveContextStore", () => {
       laneId: "lane_1",
       sessionId: "session_1",
       terminalId: null,
-      activeTab: "project",
+      activeTab: "project"
     });
   });
 
@@ -30,12 +30,12 @@ describe("ActiveContextStore", () => {
     store.dispatch({
       type: "renderer.switch.started",
       previousEngine: "ghostty",
-      targetEngine: "rio",
+      targetEngine: "rio"
     });
     store.dispatch({
       type: "renderer.switch.rolled_back",
       engine: "ghostty",
-      message: "renderer rollback to ghostty applied",
+      message: "renderer rollback to ghostty applied"
     });
 
     const status = selectRendererSwitchStatus(store.getState());
@@ -43,3 +43,4 @@ describe("ActiveContextStore", () => {
     expect(status.targetEngine).toBe("ghostty");
   });
 });
+

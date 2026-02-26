@@ -11,12 +11,12 @@ describe("renderer switch transaction", () => {
     const laneResult = await controlPlane.createLane({ workspaceId: "ws_renderer" });
     const sessionResult = await controlPlane.ensureSession({
       workspaceId: "ws_renderer",
-      laneId: laneResult.laneId as string,
+      laneId: laneResult.laneId as string
     });
     await controlPlane.spawnTerminal({
       workspaceId: "ws_renderer",
       laneId: laneResult.laneId as string,
-      sessionId: sessionResult.sessionId as string,
+      sessionId: sessionResult.sessionId as string
     });
 
     const beforeSwitch = controlPlane.getActiveContext();
@@ -30,3 +30,4 @@ describe("renderer switch transaction", () => {
     expect(controlPlane.store.getState().rendererSwitch.lastStatus).toBe("rolled_back");
   });
 });
+

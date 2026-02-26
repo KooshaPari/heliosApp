@@ -1,32 +1,13 @@
-/**
- * @helios/desktop — Desktop shell entry point for heliosApp.
- *
- * Creates the ElectroBun window and initializes the terminal surface.
- * Cross-workspace import from @helios/runtime validates path alias resolution.
- */
-
-import { type HealthCheckResult, healthCheck } from "@helios/runtime";
 import { InMemoryLocalBus } from "../../runtime/src/protocol/bus";
+import { DEFAULT_SETTINGS, switchRendererWithRollback, type DesktopSettings, type RendererEngine } from "./settings";
 import {
   ActiveContextStore,
-  type ActiveTab,
   INITIAL_ACTIVE_CONTEXT_STATE,
   selectActiveContext,
+  type ActiveTab
 } from "./context_store";
 import { DesktopRuntimeClient } from "./runtime_client";
-import {
-  DEFAULT_SETTINGS,
-  type DesktopSettings,
-  type RendererEngine,
-  switchRendererWithRollback,
-} from "./settings";
-import { type TabSurface, buildAllTabSurfaces } from "./tabs";
-
-function main(): void {
-  const _health: HealthCheckResult = healthCheck();
-}
-
-main();
+import { buildAllTabSurfaces, type TabSurface } from "./tabs";
 
 export type BootDesktopInput = {
   bus?: InMemoryLocalBus;
@@ -81,11 +62,11 @@ export class EditorlessControlPlane {
     const result = await this.runtimeClient.createLane(input);
     this.store.dispatch({ type: "diagnostics.set", diagnostics: result.diagnostics });
 
-    if (!(result.ok && result.id)) {
+    if (!result.ok || !result.id) {
       this.store.dispatch({
         type: "operation.failure",
         operation: "lane",
-        error: result.error ?? "lane create failed",
+        error: result.error ?? "lane create failed"
       });
       return { ok: false, laneId: null, error: result.error ?? "lane create failed" };
     }
@@ -106,11 +87,11 @@ export class EditorlessControlPlane {
     this.store.dispatch({ type: "operation.start", operation: "session" });
     const result = await this.runtimeClient.ensureSession(input);
 
-    if (!(result.ok && result.id)) {
+    if (!result.ok || !result.id) {
       this.store.dispatch({
         type: "operation.failure",
         operation: "session",
-        error: result.error ?? "session attach failed",
+        error: result.error ?? "session attach failed"
       });
       return { ok: false, sessionId: null, error: result.error ?? "session attach failed" };
     }
@@ -131,11 +112,11 @@ export class EditorlessControlPlane {
   }): Promise<{ ok: boolean; terminalId: string | null; error: string | null }> {
     this.store.dispatch({ type: "operation.start", operation: "terminal" });
     const result = await this.runtimeClient.spawnTerminal(input);
-    if (!(result.ok && result.id)) {
+    if (!result.ok || !result.id) {
       this.store.dispatch({
         type: "operation.failure",
         operation: "terminal",
-        error: result.error ?? "terminal spawn failed",
+        error: result.error ?? "terminal spawn failed"
       });
       return { ok: false, terminalId: null, error: result.error ?? "terminal spawn failed" };
     }
@@ -148,32 +129,24 @@ export class EditorlessControlPlane {
     return { ok: true, terminalId: result.id, error: null };
   }
 
-  async switchRenderer(
-    targetEngine: RendererEngine,
-    options?: {
-      forceError?: boolean;
-      forceRollbackError?: boolean;
-    }
-  ): Promise<{
-    committed: boolean;
-    rolledBack: boolean;
-    message: string;
-    activeEngine: RendererEngine;
-  }> {
+  async switchRenderer(targetEngine: RendererEngine, options?: {
+    forceError?: boolean;
+    forceRollbackError?: boolean;
+  }): Promise<{ committed: boolean; rolledBack: boolean; message: string; activeEngine: RendererEngine }> {
     const outcome = await switchRendererWithRollback({
       settings: this.settings,
       targetEngine,
       runtimeClient: this.runtimeClient,
       contextStore: this.store,
-      forceError: options?.forceError ?? false,
-      forceRollbackError: options?.forceRollbackError ?? false,
+      forceError: options?.forceError,
+      forceRollbackError: options?.forceRollbackError
     });
     this.settings = outcome.settings;
     return {
       committed: outcome.committed,
       rolledBack: outcome.rolledBack,
       message: outcome.message,
-      activeEngine: this.settings.rendererEngine,
+      activeEngine: this.settings.rendererEngine
     };
   }
 }
@@ -192,7 +165,7 @@ export function renderTabSnapshot(surface: TabSurface): string {
     `<p data-testid="tab-${surface.tab}-session">${surface.context.sessionId ?? "none"}</p>`,
     `<p data-testid="tab-${surface.tab}-transport">${surface.diagnostics.resolvedTransport}</p>`,
     `<p data-testid="tab-${surface.tab}-degrade">${surface.diagnostics.degradedReason ?? "none"}</p>`,
-    "</section>",
+    "</section>"
   ].join("");
 }
 
@@ -208,6 +181,7 @@ export function renderControlPlaneSnapshot(controlPlane: EditorlessControlPlane)
     renderTabSnapshot(tabs.session),
     renderTabSnapshot(tabs.chat),
     renderTabSnapshot(tabs.project),
-    "</main>",
+    "</main>"
   ].join("");
 }
+
