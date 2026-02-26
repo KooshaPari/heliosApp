@@ -57,7 +57,7 @@
 - [x] T007 Implement in-memory session registry keyed by `codex_session_id` in `apps/runtime/src/sessions/`
 - [x] T008 Implement `cliproxyapi++` health monitor + route selector in `apps/runtime/src/integrations/exec.ts`
 - [x] T009 Expose lane/session/harness status endpoints per `contracts/control-plane.openapi.yaml` in runtime API surface
-- [ ] T010 [P] Add integration tests for harness healthy and degraded scenarios in `apps/runtime/tests/integration/sessions/`
+- [x] T010 [P] Add integration tests for harness healthy and degraded scenarios in `apps/runtime/tests/integration/sessions/`
 
 ### Implementation Notes
 - Primary transport must attempt `cliproxy_harness` first.
