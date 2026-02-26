@@ -1,27 +1,30 @@
 ---
-work_package_id: "WP03"
-subtasks:
-  - "T011"
-  - "T012"
-  - "T013"
-  - "T014"
-  - "T015"
-title: "Terminal Registry and Streaming Data Plane"
-phase: "Phase 2 - MVP Core Lifecycle"
-lane: "planned"
+work_package_id: WP03
+title: Terminal Registry and Streaming Data Plane
+lane: "doing"
 dependencies:
-  - "WP02"
-assignee: ""
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+- WP02
+base_branch: 001-colab-agent-terminal-control-plane-WP02
+base_commit: f1d0bc01693c809a121c904e94a68cf81422b4a2
+created_at: '2026-02-26T16:35:09.673044+00:00'
+subtasks:
+- T011
+- T012
+- T013
+- T014
+- T015
+phase: Phase 2 - MVP Core Lifecycle
+assignee: ''
+agent: ''
+shell_pid: "94640"
+review_status: ''
+reviewed_by: ''
 history:
-  - timestamp: "2026-02-26T13:19:35Z"
-    lane: "planned"
-    agent: "system"
-    shell_pid: ""
-    action: "Prompt generated via /spec-kitty.tasks"
+- timestamp: '2026-02-26T13:19:35Z'
+  lane: planned
+  agent: system
+  shell_pid: ''
+  action: Prompt generated via /spec-kitty.tasks
 ---
 
 # Work Package Prompt: WP03 - Terminal Registry and Streaming Data Plane
