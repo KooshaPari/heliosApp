@@ -111,6 +111,9 @@ export function reduceActiveContextState(
       return {
         ...state,
         workspaceId: action.workspaceId,
+        laneId: null,
+        sessionId: null,
+        terminalId: null,
         trace: appendTrace(state.trace, action.type, { workspaceId: action.workspaceId })
       };
     case "lane.set":
