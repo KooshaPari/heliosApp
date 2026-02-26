@@ -180,3 +180,123 @@ export async function execCommand(command: string, args: string[]): Promise<Exec
     stderr: new TextDecoder().decode(stderrBuf)
   };
 }
+
+type TerminalCommandContext = {
+  command_id: string;
+  correlation_id: string;
+  workspace_id: string;
+  lane_id: string;
+  session_id: string;
+  terminal_id?: string;
+};
+
+type SpawnTerminalInput = TerminalCommandContext & {
+  title?: string;
+};
+
+type InputTerminalInput = TerminalCommandContext & {
+  terminal_id: string;
+  data: string;
+};
+
+type ResizeTerminalInput = TerminalCommandContext & {
+  terminal_id: string;
+  cols: number;
+  rows: number;
+};
+
+function nowIsoString() {
+  return new Date().toISOString();
+}
+
+function assertString(value: unknown, field: string): asserts value is string {
+  if (typeof value !== "string" || value.length === 0) {
+    throw new Error(`invalid ${field}`);
+  }
+}
+
+function assertNonEmptyString(value: unknown, field: string): asserts value is string {
+  if (typeof value !== "string" || value.length === 0) {
+    throw new Error(`invalid ${field}`);
+  }
+}
+
+export function buildSpawnTerminalCommand(input: SpawnTerminalInput) {
+  assertString(input.command_id, "command_id");
+  assertString(input.correlation_id, "correlation_id");
+  assertString(input.workspace_id, "workspace_id");
+  assertString(input.lane_id, "lane_id");
+  assertString(input.session_id, "session_id");
+
+  return {
+    id: input.command_id,
+    correlation_id: input.correlation_id,
+    type: "command" as const,
+    ts: nowIsoString(),
+    method: "terminal.spawn",
+    workspace_id: input.workspace_id,
+    lane_id: input.lane_id,
+    session_id: input.session_id,
+    payload: {
+      session_id: input.session_id,
+      title: input.title
+    }
+  };
+}
+
+export function buildInputTerminalCommand(input: InputTerminalInput) {
+  assertString(input.command_id, "command_id");
+  assertString(input.correlation_id, "correlation_id");
+  assertString(input.workspace_id, "workspace_id");
+  assertString(input.lane_id, "lane_id");
+  assertString(input.session_id, "session_id");
+  assertString(input.terminal_id, "terminal_id");
+  assertNonEmptyString(input.data, "data");
+
+  return {
+    id: input.command_id,
+    correlation_id: input.correlation_id,
+    type: "command" as const,
+    ts: nowIsoString(),
+    method: "terminal.input",
+    workspace_id: input.workspace_id,
+    lane_id: input.lane_id,
+    session_id: input.session_id,
+    terminal_id: input.terminal_id,
+    payload: {
+      terminal_id: input.terminal_id,
+      session_id: input.session_id,
+      data: input.data
+    }
+  };
+}
+
+export function buildResizeTerminalCommand(input: ResizeTerminalInput) {
+  assertString(input.command_id, "command_id");
+  assertString(input.correlation_id, "correlation_id");
+  assertString(input.workspace_id, "workspace_id");
+  assertString(input.lane_id, "lane_id");
+  assertString(input.session_id, "session_id");
+  assertString(input.terminal_id, "terminal_id");
+  if (input.cols < 1 || input.rows < 1) {
+    throw new Error("invalid terminal dimensions");
+  }
+
+  return {
+    id: input.command_id,
+    correlation_id: input.correlation_id,
+    type: "command" as const,
+    ts: nowIsoString(),
+    method: "terminal.resize",
+    workspace_id: input.workspace_id,
+    lane_id: input.lane_id,
+    session_id: input.session_id,
+    terminal_id: input.terminal_id,
+    payload: {
+      terminal_id: input.terminal_id,
+      session_id: input.session_id,
+      cols: input.cols,
+      rows: input.rows
+    }
+  };
+}

@@ -5,7 +5,11 @@ import {
   type RuntimeEvent,
   type RuntimeState
 } from "../sessions/state_machine";
+import { TerminalOutputBuffer } from "../sessions/terminal_buffer";
+import type { TerminalContext, TerminalLifecycleState } from "../sessions/terminal_registry";
+import { TerminalRegistry } from "../sessions/terminal_registry";
 import {
+  type CommandEnvelope,
   isCommandEnvelope,
   isEventEnvelope,
   ProtocolValidationError,
@@ -18,7 +22,12 @@ export interface LocalBus {
   request(command: LocalBusEnvelope): Promise<LocalBusEnvelope>;
 }
 
-type HandledMethod = "lane.create" | "session.attach" | "terminal.spawn";
+type HandledMethod =
+  | "lane.create"
+  | "session.attach"
+  | "terminal.spawn"
+  | "terminal.input"
+  | "terminal.resize";
 
 type MethodTransitionSpec = {
   requested: RuntimeEvent;
@@ -27,7 +36,7 @@ type MethodTransitionSpec = {
   startedTopic: LifecycleTopic;
   successTopic: LifecycleTopic;
   failedTopic: LifecycleTopic;
-  resultKey: "lane_id" | "session_id" | "terminal_id";
+  resultKey: "lane_id" | "session_id";
 };
 
 type LifecycleName = "lane.create" | "session.attach" | "terminal.spawn";
@@ -47,7 +56,7 @@ type LifecycleProgress = {
   state: "started";
 };
 
-const METHOD_SPECS: Record<HandledMethod, MethodTransitionSpec> = {
+const METHOD_SPECS: Record<"lane.create" | "session.attach", MethodTransitionSpec> = {
   "lane.create": {
     requested: "lane.create.requested",
     succeeded: "lane.create.succeeded",
@@ -65,15 +74,6 @@ const METHOD_SPECS: Record<HandledMethod, MethodTransitionSpec> = {
     successTopic: "session.attached",
     failedTopic: "session.attach.failed",
     resultKey: "session_id"
-  },
-  "terminal.spawn": {
-    requested: "terminal.spawn.requested",
-    succeeded: "terminal.spawn.succeeded",
-    failed: "terminal.error",
-    startedTopic: "terminal.spawn.started",
-    successTopic: "terminal.spawned",
-    failedTopic: "terminal.spawn.failed",
-    resultKey: "terminal_id"
   }
 };
 
@@ -104,8 +104,16 @@ const END_TOPICS = new Set<LifecycleTopic>([
   "terminal.spawn.failed"
 ]);
 
+const DEFAULT_TERMINAL_BUFFER_CAP_BYTES = 64 * 1024;
+
 function isHandledMethod(method: string): method is HandledMethod {
-  return method in METHOD_SPECS;
+  return (
+    method === "lane.create" ||
+    method === "session.attach" ||
+    method === "terminal.spawn" ||
+    method === "terminal.input" ||
+    method === "terminal.resize"
+  );
 }
 
 function isLifecycleTopic(topic: string): topic is LifecycleTopic {
@@ -113,6 +121,7 @@ function isLifecycleTopic(topic: string): topic is LifecycleTopic {
 }
 
 type InMemoryLocalBusOptions = {
+  terminalBufferCapBytes?: number;
   auditSink?: AuditSink;
 };
 
@@ -122,9 +131,15 @@ export class InMemoryLocalBus implements LocalBus {
   private readonly eventLog: LocalBusEnvelope[] = [];
   private readonly auditSink: AuditSink;
   private readonly lifecycleProgressByCorrelation = new Map<string, LifecycleProgress>();
+  private readonly terminalRegistry = new TerminalRegistry();
+  private readonly terminalBuffer: TerminalOutputBuffer;
+  private terminalCounter = 0;
 
   constructor(options: InMemoryLocalBusOptions = {}) {
     this.auditSink = options.auditSink ?? new InMemoryAuditSink();
+    this.terminalBuffer = new TerminalOutputBuffer(
+      options.terminalBufferCapBytes ?? DEFAULT_TERMINAL_BUFFER_CAP_BYTES
+    );
   }
 
   getState(): RuntimeState {
@@ -133,6 +148,14 @@ export class InMemoryLocalBus implements LocalBus {
 
   getEvents(): LocalBusEnvelope[] {
     return [...this.eventLog];
+  }
+
+  getTerminal(terminalId: string): TerminalContext | undefined {
+    return this.terminalRegistry.get(terminalId);
+  }
+
+  getTerminalBuffer(terminalId: string) {
+    return this.terminalBuffer.get(terminalId);
   }
 
   async getAuditRecords(): Promise<AuditRecord[]> {
@@ -148,7 +171,12 @@ export class InMemoryLocalBus implements LocalBus {
       this.assertDeterministicOrdering(envelope);
 
       this.sequence += 1;
-      const stampedEnvelope: LocalBusEnvelope = { ...envelope, sequence: this.sequence };
+      const stampedEnvelope: LocalBusEnvelope = {
+        ...envelope,
+        sequence: this.sequence,
+        envelope_id: envelope.envelope_id ?? envelope.id,
+        timestamp: envelope.timestamp ?? envelope.ts
+      };
       this.eventLog.push(stampedEnvelope);
 
       await this.auditSink.append({
@@ -173,7 +201,23 @@ export class InMemoryLocalBus implements LocalBus {
   }
 
   async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
-    const envelope = validateEnvelope(command);
+    let envelope: LocalBusEnvelope;
+    try {
+      envelope = validateEnvelope(command);
+    } catch (error) {
+      if (
+        error instanceof ProtocolValidationError &&
+        error.code === "MISSING_CORRELATION_ID" &&
+        command.type === "command"
+      ) {
+        return this.errorResponse(
+          command,
+          "MISSING_CORRELATION_ID",
+          "correlation_id is required"
+        );
+      }
+      throw error;
+    }
     if (!isCommandEnvelope(envelope)) {
       throw new ProtocolValidationError(
         "INVALID_ENVELOPE_TYPE",
@@ -181,7 +225,24 @@ export class InMemoryLocalBus implements LocalBus {
       );
     }
 
-    if (isHandledMethod(envelope.method)) {
+    if (!envelope.correlation_id && isHandledMethod(envelope.method)) {
+      return this.errorResponse(
+        envelope,
+        "MISSING_CORRELATION_ID",
+        "correlation_id is required"
+      );
+    }
+
+    if (envelope.method === "terminal.spawn") {
+      return this.handleTerminalSpawn(envelope);
+    }
+    if (envelope.method === "terminal.input") {
+      return this.handleTerminalInput(envelope);
+    }
+    if (envelope.method === "terminal.resize") {
+      return this.handleTerminalResize(envelope);
+    }
+    if (envelope.method === "lane.create" || envelope.method === "session.attach") {
       return this.handleLifecycleCommand(envelope, envelope.method);
     }
 
@@ -251,8 +312,8 @@ export class InMemoryLocalBus implements LocalBus {
   }
 
   private async handleLifecycleCommand(
-    command: LocalBusEnvelope,
-    method: HandledMethod
+    command: CommandEnvelope,
+    method: "lane.create" | "session.attach"
   ): Promise<LocalBusEnvelope> {
     const spec = METHOD_SPECS[method];
     const forcedError = command.payload.force_error === true;
@@ -263,48 +324,239 @@ export class InMemoryLocalBus implements LocalBus {
 
     if (forcedError) {
       await this.emitTransitionEvent(command, spec.failed, spec.failedTopic);
-      return {
-        id: command.id,
-        type: "response",
-        ts: new Date().toISOString(),
-        workspace_id: command.workspace_id,
-        lane_id: command.lane_id,
-        session_id: command.session_id,
-        terminal_id: command.terminal_id,
-        correlation_id: command.correlation_id,
-        method,
-        status: "error",
-        result: null,
-        error: {
-          code: `${method.toUpperCase().replace(".", "_")}_FAILED`,
-          message: `${method} failed`,
-          retryable: true,
-          details: { method }
-        }
-      };
+      return this.errorResponse(
+        command,
+        `${method.toUpperCase().replace(".", "_")}_FAILED`,
+        `${method} failed`,
+        { method },
+        true
+      );
     }
 
     await this.emitTransitionEvent(command, spec.succeeded, spec.successTopic);
-    return {
-      id: command.id,
-      type: "response",
+    return this.okResponse(command, {
+      [spec.resultKey]: resultId,
+      state: this.state
+    });
+  }
+
+  private async handleTerminalSpawn(command: CommandEnvelope): Promise<LocalBusEnvelope> {
+    const workspaceId = command.workspace_id;
+    const laneId = command.lane_id;
+    const sessionId = this.readString(command.payload.session_id) ?? command.session_id;
+
+    if (!workspaceId || !laneId || !sessionId || !command.correlation_id) {
+      return this.errorResponse(
+        command,
+        "INVALID_TERMINAL_CONTEXT",
+        "workspace_id, lane_id, and session_id are required"
+      );
+    }
+
+    this.terminalCounter += 1;
+    const terminalId =
+      this.readString(command.payload.terminal_id) ?? `${sessionId}:terminal:${this.terminalCounter}`;
+    const title = this.readString(command.payload.title) ?? "Terminal";
+
+    this.terminalRegistry.spawn({
+      terminal_id: terminalId,
+      workspace_id: workspaceId,
+      lane_id: laneId,
+      session_id: sessionId,
+      title
+    });
+
+    await this.emitTransitionEvent(command, "terminal.spawn.requested", "terminal.spawn.started");
+    await this.emitTerminalStateChanged(command, terminalId, "spawning", {
+      runtime_event: "terminal.spawn.requested"
+    });
+
+    this.state = transition(this.state, "terminal.spawn.succeeded");
+    await this.emitTerminalStateChanged(command, terminalId, "active", {
+      runtime_event: "terminal.spawn.succeeded"
+    });
+
+    await this.publish({
+      id: `${command.id}:terminal.spawned`,
+      type: "event",
+      ts: new Date().toISOString(),
+      workspace_id: workspaceId,
+      lane_id: laneId,
+      session_id: sessionId,
+      terminal_id: terminalId,
+      correlation_id: command.correlation_id,
+      topic: "terminal.spawned",
+      payload: {
+        terminal_id: terminalId,
+        lane_id: laneId,
+        session_id: sessionId,
+        workspace_id: workspaceId,
+        state: "active",
+        title
+      }
+    });
+
+    return this.okResponse(command, {
+      terminal_id: terminalId,
+      lane_id: laneId,
+      session_id: sessionId,
+      state: "active"
+    });
+  }
+
+  private async handleTerminalInput(command: CommandEnvelope): Promise<LocalBusEnvelope> {
+    const terminalId = command.terminal_id ?? this.readString(command.payload.terminal_id);
+    const workspaceId = command.workspace_id;
+    const laneId = command.lane_id;
+    const sessionId = command.session_id ?? this.readString(command.payload.session_id);
+
+    if (!terminalId || !workspaceId || !laneId || !sessionId) {
+      return this.errorResponse(
+        command,
+        "INVALID_TERMINAL_CONTEXT",
+        "terminal_id, workspace_id, lane_id, and session_id are required"
+      );
+    }
+
+    if (
+      !this.terminalRegistry.isOwnedBy(terminalId, {
+        workspace_id: workspaceId,
+        lane_id: laneId,
+        session_id: sessionId
+      })
+    ) {
+      return this.errorResponse(
+        command,
+        "TERMINAL_CONTEXT_MISMATCH",
+        "terminal does not belong to the provided workspace/lane/session context"
+      );
+    }
+
+    const inputData = this.readNonEmptyString(command.payload.data);
+    if (!inputData) {
+      return this.errorResponse(
+        command,
+        "INVALID_TERMINAL_INPUT",
+        "payload.data must be a non-empty string"
+      );
+    }
+
+    const outputSeq = this.terminalRegistry.incrementOutputSeq(terminalId);
+    const outputEntry = {
+      seq: outputSeq,
+      chunk: inputData,
+      ts: new Date().toISOString()
+    };
+    const bufferResult = this.terminalBuffer.push(terminalId, outputEntry);
+
+    await this.publish({
+      id: `${command.id}:terminal.output:${outputSeq}`,
+      type: "event",
+      ts: new Date().toISOString(),
+      workspace_id: workspaceId,
+      lane_id: laneId,
+      session_id: sessionId,
+      terminal_id: terminalId,
+      correlation_id: command.correlation_id,
+      topic: "terminal.output",
+      payload: {
+        terminal_id: terminalId,
+        seq: outputSeq,
+        chunk: inputData,
+        overflowed: bufferResult.overflowed,
+        dropped_bytes: bufferResult.droppedBytes
+      }
+    });
+
+    if (bufferResult.overflowed) {
+      this.state = transition(this.state, "terminal.throttled");
+      await this.emitTerminalStateChanged(command, terminalId, "throttled", {
+        runtime_event: "terminal.throttled",
+        dropped_bytes: bufferResult.droppedBytes
+      });
+    }
+
+    return this.okResponse(command, {
+      terminal_id: terminalId,
+      accepted_bytes: new TextEncoder().encode(inputData).byteLength,
+      output_seq: outputSeq
+    });
+  }
+
+  private async handleTerminalResize(command: CommandEnvelope): Promise<LocalBusEnvelope> {
+    const terminalId = command.terminal_id ?? this.readString(command.payload.terminal_id);
+    const workspaceId = command.workspace_id;
+    const laneId = command.lane_id;
+    const sessionId = command.session_id ?? this.readString(command.payload.session_id);
+    const cols = this.readNumber(command.payload.cols);
+    const rows = this.readNumber(command.payload.rows);
+
+    if (!terminalId || !workspaceId || !laneId || !sessionId || !cols || !rows || cols < 1 || rows < 1) {
+      return this.errorResponse(
+        command,
+        "INVALID_TERMINAL_RESIZE",
+        "terminal_id, workspace_id, lane_id, session_id, cols, and rows are required"
+      );
+    }
+
+    if (
+      !this.terminalRegistry.isOwnedBy(terminalId, {
+        workspace_id: workspaceId,
+        lane_id: laneId,
+        session_id: sessionId
+      })
+    ) {
+      return this.errorResponse(
+        command,
+        "TERMINAL_CONTEXT_MISMATCH",
+        "terminal does not belong to the provided workspace/lane/session context"
+      );
+    }
+
+    this.state = transition(this.state, "terminal.spawn.succeeded");
+    await this.emitTerminalStateChanged(command, terminalId, "active", {
+      reason: "resize",
+      cols,
+      rows,
+      runtime_event: "terminal.spawn.succeeded"
+    });
+
+    return this.okResponse(command, {
+      terminal_id: terminalId,
+      cols,
+      rows,
+      state: "active"
+    });
+  }
+
+  private async emitTerminalStateChanged(
+    command: CommandEnvelope,
+    terminalId: string,
+    state: TerminalLifecycleState,
+    payload: Record<string, unknown>
+  ): Promise<void> {
+    const terminal = this.terminalRegistry.setState(terminalId, state);
+    await this.publish({
+      id: `${command.id}:terminal.state.changed:${state}:${this.sequence + 1}`,
+      type: "event",
       ts: new Date().toISOString(),
       workspace_id: command.workspace_id,
       lane_id: command.lane_id,
-      session_id: command.session_id,
-      terminal_id: command.terminal_id,
+      session_id: command.session_id ?? this.readString(command.payload.session_id),
+      terminal_id: terminalId,
       correlation_id: command.correlation_id,
-      method,
-      status: "ok",
-      result: {
-        [spec.resultKey]: resultId,
-        state: this.state
+      topic: "terminal.state.changed",
+      payload: {
+        ...payload,
+        state,
+        terminal: terminal ?? null,
+        runtime_state: this.state
       }
-    };
+    });
   }
 
   private async emitTransitionEvent(
-    command: LocalBusEnvelope,
+    command: CommandEnvelope,
     runtimeEvent: RuntimeEvent,
     topic: LifecycleTopic
   ): Promise<void> {
@@ -324,5 +576,64 @@ export class InMemoryLocalBus implements LocalBus {
         state: this.state
       }
     });
+  }
+
+  private okResponse(
+    command: CommandEnvelope,
+    result: Record<string, unknown>
+  ): LocalBusEnvelope {
+    return {
+      id: command.id,
+      type: "response",
+      ts: new Date().toISOString(),
+      workspace_id: command.workspace_id,
+      lane_id: command.lane_id,
+      session_id: command.session_id,
+      terminal_id: command.terminal_id,
+      correlation_id: command.correlation_id,
+      method: command.method,
+      status: "ok",
+      result
+    };
+  }
+
+  private errorResponse(
+    command: CommandEnvelope,
+    code: string,
+    message: string,
+    details?: Record<string, unknown>,
+    retryable = false
+  ): LocalBusEnvelope {
+    return {
+      id: command.id,
+      type: "response",
+      ts: new Date().toISOString(),
+      workspace_id: command.workspace_id,
+      lane_id: command.lane_id,
+      session_id: command.session_id,
+      terminal_id: command.terminal_id,
+      correlation_id: command.correlation_id,
+      method: command.method,
+      status: "error",
+      result: null,
+      error: {
+        code,
+        message,
+        retryable,
+        details: details ?? null
+      }
+    };
+  }
+
+  private readString(value: unknown): string | undefined {
+    return typeof value === "string" && value.length > 0 ? value : undefined;
+  }
+
+  private readNonEmptyString(value: unknown): string | undefined {
+    return typeof value === "string" && value.length > 0 ? value : undefined;
+  }
+
+  private readNumber(value: unknown): number | undefined {
+    return typeof value === "number" ? value : undefined;
   }
 }
