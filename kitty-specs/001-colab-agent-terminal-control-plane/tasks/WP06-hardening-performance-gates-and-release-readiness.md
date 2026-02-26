@@ -1,9 +1,12 @@
 ---
 work_package_id: WP06
 title: Hardening, Performance Gates, and Release Readiness
-lane: planned
+lane: "doing"
 dependencies:
 - WP04
+base_branch: 001-colab-agent-terminal-control-plane-WP05
+base_commit: f1d0bc01693c809a121c904e94a68cf81422b4a2
+created_at: '2026-02-26T16:35:12.454108+00:00'
 subtasks:
 - T026
 - T027
@@ -13,7 +16,7 @@ subtasks:
 phase: Phase 4 - Hardening and release
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "65388"
 review_status: ''
 reviewed_by: ''
 history:
