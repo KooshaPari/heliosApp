@@ -24,7 +24,7 @@
 
 ### Included Subtasks
 - [x] T001 Align `specs/protocol/v1/methods.json` and `specs/protocol/v1/topics.json` with slice-1 lane/session/terminal/harness flows
-- [ ] T002 Implement strict envelope validator + typed protocol helpers in `apps/runtime/src/protocol/types.ts` and `apps/runtime/src/protocol/bus.ts`
+- [x] T002 Implement strict envelope validator + typed protocol helpers in `apps/runtime/src/protocol/types.ts` and `apps/runtime/src/protocol/bus.ts`
 - [ ] T003 Add deterministic sequence and correlation guardrails in `apps/runtime/src/protocol/bus.ts`
 - [ ] T004 [P] Add runtime audit event sink scaffold in `apps/runtime/src/index.ts` and new `apps/runtime/src/audit/` module
 - [ ] T005 [P] Add Vitest unit tests for envelope validation and event ordering in `apps/runtime/tests/unit/protocol/`
