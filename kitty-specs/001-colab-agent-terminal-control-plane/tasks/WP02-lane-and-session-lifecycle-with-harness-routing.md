@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Lane and Session Lifecycle with Harness Routing
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP01
 base_branch: 001-colab-agent-terminal-control-plane-WP01
@@ -126,3 +126,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-26T13:19:35Z – system – lane=planned – Prompt created.
+- 2026-02-26T16:53:08Z – unknown – shell_pid=94640 – lane=for_review – Ready for review (forced lane move): lane/session lifecycle + harness routing implemented in worktree commit d2eeca5; dependency rebase conflict pending.
