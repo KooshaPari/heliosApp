@@ -116,7 +116,7 @@
 - [x] T016 Build shared active-context store in `apps/desktop/src/` for workspace/lane/session/tab state
 - [x] T017 Implement tab surfaces for terminal/agent/session/chat/project bound to shared context
 - [x] T018 Wire UI actions to runtime APIs for lane create, session ensure, and terminal spawn
-- [ ] T019 Implement renderer mode transaction + rollback UX in `apps/desktop/src/settings.ts`
+- [x] T019 Implement renderer mode transaction + rollback UX in `apps/desktop/src/settings.ts`
 - [ ] T020 [P] Add Playwright flows for tab sync, lane switching, and renderer switch safety
 
 ### Implementation Notes
