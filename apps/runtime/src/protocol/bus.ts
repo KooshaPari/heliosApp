@@ -54,8 +54,10 @@ type MethodTransitionSpec = {
 type LifecycleName = "lane.create" | "session.attach" | "terminal.spawn";
 type LifecycleTopic =
   | "lane.attach.started"
+  | "lane.attached"
   | "lane.attach.failed"
   | "lane.cleanup.started"
+  | "lane.cleaned"
   | "lane.cleanup.failed"
   | "lane.create.started"
   | "lane.created"
@@ -128,8 +130,10 @@ const METHOD_SPECS: Record<
 
 const TOPIC_LIFECYCLE: Record<LifecycleTopic, LifecycleName> = {
   "lane.attach.started": "lane.create",
+  "lane.attached": "lane.create",
   "lane.attach.failed": "lane.create",
   "lane.cleanup.started": "lane.create",
+  "lane.cleaned": "lane.create",
   "lane.cleanup.failed": "lane.create",
   "lane.create.started": "lane.create",
   "lane.created": "lane.create",
@@ -155,6 +159,8 @@ const START_TOPICS = new Set<LifecycleTopic>([
 ]);
 
 const END_TOPICS = new Set<LifecycleTopic>([
+  "lane.attached",
+  "lane.cleaned",
   "lane.attach.failed",
   "lane.cleanup.failed",
   "lane.created",
@@ -483,11 +489,18 @@ export class InMemoryLocalBus implements LocalBus {
     const context = this.resolveContext(command);
     const laneId = context.lane_id;
     const sessionId = context.session_id;
-    const resultId =
-      (command.payload.id as string | undefined) ?? `${spec.resultKey}_${Date.now()}`;
-    const effectiveLaneId = laneId ?? (method.startsWith("lane.") ? String(resultId) : undefined);
+    const fallbackResultId = `${spec.resultKey}_${Date.now()}`;
+    const payloadResultId = this.readString(command.payload.id);
+    const effectiveLaneId =
+      laneId ?? (method.startsWith("lane.") ? payloadResultId ?? fallbackResultId : undefined);
     const effectiveSessionId =
-      sessionId ?? (method.startsWith("session.") ? String(resultId) : undefined);
+      sessionId ?? (method.startsWith("session.") ? payloadResultId ?? fallbackResultId : undefined);
+    const effectiveResultId =
+      spec.resultKey === "lane_id"
+        ? effectiveLaneId ?? payloadResultId ?? fallbackResultId
+        : spec.resultKey === "session_id"
+          ? effectiveSessionId ?? payloadResultId ?? fallbackResultId
+          : payloadResultId ?? fallbackResultId;
     const tracked = this.recoveryRegistry.snapshot();
 
     await this.emitTransitionEvent(command, spec.requested, spec.startedTopic, {
@@ -568,7 +581,7 @@ export class InMemoryLocalBus implements LocalBus {
       session_id: effectiveSessionId
     });
     return this.okResponse(command, {
-      [spec.resultKey]: resultId,
+      [spec.resultKey]: effectiveResultId,
       state: this.state
     });
   }
