@@ -56,7 +56,7 @@
 - [x] T006 Implement lane lifecycle state machine (`create/list/attach/cleanup`) in `apps/runtime/src/sessions/state_machine.ts`
 - [x] T007 Implement in-memory session registry keyed by `codex_session_id` in `apps/runtime/src/sessions/`
 - [x] T008 Implement `cliproxyapi++` health monitor + route selector in `apps/runtime/src/integrations/exec.ts`
-- [ ] T009 Expose lane/session/harness status endpoints per `contracts/control-plane.openapi.yaml` in runtime API surface
+- [x] T009 Expose lane/session/harness status endpoints per `contracts/control-plane.openapi.yaml` in runtime API surface
 - [ ] T010 [P] Add integration tests for harness healthy and degraded scenarios in `apps/runtime/tests/integration/sessions/`
 
 ### Implementation Notes
