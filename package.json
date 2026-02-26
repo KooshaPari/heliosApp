@@ -4,5 +4,8 @@
   "type": "module",
   "scripts": {
     "test:runtime": "bun test apps/runtime/tests/integration/sessions"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
   }
 }
