@@ -239,6 +239,7 @@ export function buildSpawnTerminalCommand(input: SpawnTerminalInput) {
     session_id: input.session_id,
     payload: {
       session_id: input.session_id,
+      terminal_id: input.terminal_id,
       title: input.title
     }
   };

@@ -91,7 +91,8 @@ describe("terminal lifecycle and streaming data plane", () => {
     ]);
     expect(spawnOneEvents.every((event) => event.correlation_id === "corr-spawn-1")).toBe(true);
 
-    const sequences = events.map((event) => Number(event.payload?.sequence ?? 0));
+    const sequences = events.map((event) => Number(event.sequence ?? 0));
+    expect(sequences.every((sequence) => sequence > 0)).toBe(true);
     const sorted = [...sequences].sort((a, b) => a - b);
     expect(sequences).toEqual(sorted);
 
@@ -204,6 +205,69 @@ describe("terminal lifecycle and streaming data plane", () => {
 
     expect(recoveryEvent).toBeDefined();
     expect(recoveryEvent?.payload?.runtime_state).toEqual(runtime.getState());
+  });
+
+  test("clears stale buffered output when reusing terminal_id", async () => {
+    const runtime = createRuntime({ terminalBufferCapBytes: 1024 });
+
+    const firstSpawn = await runtime.bus.request({
+      id: "cmd-spawn-reuse-1",
+      type: "command",
+      ts: new Date().toISOString(),
+      method: "terminal.spawn",
+      correlation_id: "corr-spawn-reuse-1",
+      workspace_id: "ws-1",
+      lane_id: "lane-1",
+      session_id: "sess-reuse",
+      payload: {
+        session_id: "sess-reuse",
+        terminal_id: "term-reused"
+      }
+    });
+    expect(firstSpawn.status).toBe("ok");
+
+    const firstInput = await runtime.inputTerminal({
+      command_id: "cmd-input-reuse-1",
+      correlation_id: "corr-input-reuse-1",
+      workspace_id: "ws-1",
+      lane_id: "lane-1",
+      session_id: "sess-reuse",
+      terminal_id: "term-reused",
+      data: "first"
+    });
+    expect(firstInput.status).toBe("ok");
+    expect(firstInput.result?.output_seq).toBe(1);
+    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry) => entry.seq)).toEqual([1]);
+
+    const secondSpawn = await runtime.bus.request({
+      id: "cmd-spawn-reuse-2",
+      type: "command",
+      ts: new Date().toISOString(),
+      method: "terminal.spawn",
+      correlation_id: "corr-spawn-reuse-2",
+      workspace_id: "ws-1",
+      lane_id: "lane-1",
+      session_id: "sess-reuse",
+      payload: {
+        session_id: "sess-reuse",
+        terminal_id: "term-reused"
+      }
+    });
+    expect(secondSpawn.status).toBe("ok");
+    expect(runtime.getTerminalBuffer("term-reused").entries).toHaveLength(0);
+
+    const secondInput = await runtime.inputTerminal({
+      command_id: "cmd-input-reuse-2",
+      correlation_id: "corr-input-reuse-2",
+      workspace_id: "ws-1",
+      lane_id: "lane-1",
+      session_id: "sess-reuse",
+      terminal_id: "term-reused",
+      data: "second"
+    });
+    expect(secondInput.status).toBe("ok");
+    expect(secondInput.result?.output_seq).toBe(1);
+    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry) => entry.seq)).toEqual([1]);
   });
 
   test("rejects terminal input when payload.data is missing", async () => {
