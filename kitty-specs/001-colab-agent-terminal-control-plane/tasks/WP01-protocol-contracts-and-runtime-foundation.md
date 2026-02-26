@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Protocol Contracts and Runtime Foundation
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: f1d0bc01693c809a121c904e94a68cf81422b4a2
@@ -134,3 +134,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-26T13:19:35Z – system – lane=planned – Prompt created.
+- 2026-02-26T16:52:45Z – unknown – shell_pid=94640 – lane=for_review – Ready for review: protocol contracts/runtime foundation implemented in worktree commit efb2ad9
