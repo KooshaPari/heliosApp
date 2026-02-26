@@ -1,27 +1,30 @@
 ---
-work_package_id: "WP02"
-subtasks:
-  - "T006"
-  - "T007"
-  - "T008"
-  - "T009"
-  - "T010"
-title: "Lane and Session Lifecycle with Harness Routing"
-phase: "Phase 2 - MVP Core Lifecycle"
-lane: "planned"
+work_package_id: WP02
+title: Lane and Session Lifecycle with Harness Routing
+lane: "doing"
 dependencies:
-  - "WP01"
-assignee: ""
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+- WP01
+base_branch: 001-colab-agent-terminal-control-plane-WP01
+base_commit: f1d0bc01693c809a121c904e94a68cf81422b4a2
+created_at: '2026-02-26T16:35:08.731270+00:00'
+subtasks:
+- T006
+- T007
+- T008
+- T009
+- T010
+phase: Phase 2 - MVP Core Lifecycle
+assignee: ''
+agent: ''
+shell_pid: "94640"
+review_status: ''
+reviewed_by: ''
 history:
-  - timestamp: "2026-02-26T13:19:35Z"
-    lane: "planned"
-    agent: "system"
-    shell_pid: ""
-    action: "Prompt generated via /spec-kitty.tasks"
+- timestamp: '2026-02-26T13:19:35Z'
+  lane: planned
+  agent: system
+  shell_pid: ''
+  action: Prompt generated via /spec-kitty.tasks
 ---
 
 # Work Package Prompt: WP02 - Lane and Session Lifecycle with Harness Routing
