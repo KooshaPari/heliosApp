@@ -143,7 +143,7 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T021 Implement restart recovery bootstrap using in-memory rebuild + `codex_session_id` reattach semantics
+- [x] T021 Implement restart recovery bootstrap using in-memory rebuild + `codex_session_id` reattach semantics
 - [ ] T022 Implement orphan lane/session watchdog and remediation suggestions in runtime services
 - [ ] T023 Implement immutable lifecycle audit records with correlation filtering and export hooks
 - [ ] T024 Normalize protocol-boundary failure payloads to stable error codes/messages
