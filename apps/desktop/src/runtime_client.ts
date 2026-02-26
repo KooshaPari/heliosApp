@@ -35,15 +35,19 @@ function toCommandEnvelope(
   method: string,
   payload: Record<string, unknown>,
   workspaceId: string | null,
+  laneId: string | null,
   sessionId: string | null,
   terminalId: string | null
 ): LocalBusEnvelope {
+  const correlationId = `${method}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
   return {
-    id: `${method}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
+    id: correlationId,
     type: "command",
     ts: new Date().toISOString(),
+    correlation_id: correlationId,
     method,
     workspace_id: workspaceId ?? undefined,
+    lane_id: laneId ?? undefined,
     session_id: sessionId ?? undefined,
     terminal_id: terminalId ?? undefined,
     payload
@@ -89,15 +93,19 @@ export class DesktopRuntimeClient {
     simulateDegrade?: boolean;
     forceError?: boolean;
   }): Promise<LifecycleResult> {
+    const requestedLaneId = `${input.workspaceId}:lane`;
     const response = await this.bus.request(
       toCommandEnvelope(
         "lane.create",
         {
+          id: requestedLaneId,
+          lane_id: requestedLaneId,
           preferred_transport: input.preferredTransport ?? "cliproxy_harness",
           simulate_degrade: input.simulateDegrade === true,
           force_error: input.forceError === true
         },
         input.workspaceId,
+        requestedLaneId,
         null,
         null
       )
@@ -117,15 +125,19 @@ export class DesktopRuntimeClient {
     laneId: string;
     forceError?: boolean;
   }): Promise<LifecycleResult> {
+    const requestedSessionId = `${input.laneId}:session`;
     const response = await this.bus.request(
       toCommandEnvelope(
         "session.attach",
         {
-          id: `${input.laneId}:session`,
+          id: requestedSessionId,
+          lane_id: input.laneId,
+          session_id: requestedSessionId,
           force_error: input.forceError === true
         },
         input.workspaceId,
-        null,
+        input.laneId,
+        requestedSessionId,
         null
       )
     );
@@ -145,17 +157,21 @@ export class DesktopRuntimeClient {
     sessionId: string;
     forceError?: boolean;
   }): Promise<LifecycleResult> {
+    const requestedTerminalId = `${input.sessionId}:terminal`;
     const response = await this.bus.request(
       toCommandEnvelope(
         "terminal.spawn",
         {
-          id: `${input.sessionId}:terminal`,
+          id: requestedTerminalId,
           lane_id: input.laneId,
+          session_id: input.sessionId,
+          terminal_id: requestedTerminalId,
           force_error: input.forceError === true
         },
         input.workspaceId,
+        input.laneId,
         input.sessionId,
-        null
+        requestedTerminalId
       )
     );
     const parsed = toResponse<Record<string, unknown>>(response);
@@ -170,7 +186,7 @@ export class DesktopRuntimeClient {
 
   async getRendererCapabilities(workspaceId: string | null): Promise<RendererCapabilities> {
     const response = await this.bus.request(
-      toCommandEnvelope("renderer.capabilities", {}, workspaceId, null, null)
+      toCommandEnvelope("renderer.capabilities", {}, workspaceId, null, null, null)
     );
     const parsed = toResponse<Record<string, unknown>>(response);
     const activeEngine = parsed.result?.active_engine === "rio" ? "rio" : "ghostty";
@@ -191,6 +207,14 @@ export class DesktopRuntimeClient {
     targetEngine: RendererEngine;
     forceError?: boolean;
   }): Promise<RendererSwitchResult> {
+    if (input.forceError === true) {
+      return {
+        ok: false,
+        activeEngine: "ghostty",
+        previousEngine: "ghostty",
+        error: "renderer switch forced failure"
+      };
+    }
     const response = await this.bus.request(
       toCommandEnvelope(
         "renderer.switch",
@@ -199,6 +223,7 @@ export class DesktopRuntimeClient {
           force_error: input.forceError === true
         },
         input.workspaceId,
+        null,
         null,
         null
       )
@@ -212,4 +237,3 @@ export class DesktopRuntimeClient {
     };
   }
 }
-

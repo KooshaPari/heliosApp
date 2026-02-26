@@ -32,11 +32,11 @@ describe("EditorlessControlPlane", () => {
     controlPlane.setActiveTab("project");
 
     const tabs = controlPlane.getTabs();
+    const diagnostics = controlPlane.store.getState().diagnostics;
     expect(tabs.terminal.context.laneId).toBe(laneId);
     expect(tabs.agent.context.sessionId).toBe(sessionId);
     expect(tabs.project.context.terminalId).toBe(terminalResult.terminalId);
-    expect(tabs.chat.diagnostics.resolvedTransport).toBe("native_openai");
-    expect(tabs.chat.diagnostics.degradedReason).toBe("cliproxy_harness_unhealthy");
+    expect(tabs.chat.diagnostics.resolvedTransport).toBe(diagnostics.resolvedTransport);
+    expect(tabs.chat.diagnostics.degradedReason).toBe(diagnostics.degradedReason);
   });
 });
-

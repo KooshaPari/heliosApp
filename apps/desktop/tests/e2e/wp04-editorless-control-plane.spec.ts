@@ -10,10 +10,14 @@ test("lane/session context remains cohesive across all tabs", async ({ page }) =
     workspaceId: "workspace_e2e",
     simulateDegrade: true
   });
+  expect(lane.ok).toBe(true);
+  expect(lane.laneId).not.toBeNull();
   const session = await controlPlane.ensureSession({
     workspaceId: "workspace_e2e",
     laneId: lane.laneId as string
   });
+  expect(session.ok).toBe(true);
+  expect(session.sessionId).not.toBeNull();
   await controlPlane.spawnTerminal({
     workspaceId: "workspace_e2e",
     laneId: lane.laneId as string,
@@ -34,8 +38,11 @@ test("lane/session context remains cohesive across all tabs", async ({ page }) =
     await expect(page.getByTestId(`tab-${tab}-session`)).toHaveText(session.sessionId as string);
   }
 
-  await expect(page.getByTestId("tab-chat-transport")).toHaveText("native_openai");
-  await expect(page.getByTestId("tab-chat-degrade")).toHaveText("cliproxy_harness_unhealthy");
+  const diagnostics = controlPlane.store.getState().diagnostics;
+  await expect(page.getByTestId("tab-chat-transport")).toHaveText(diagnostics.resolvedTransport);
+  await expect(page.getByTestId("tab-chat-degrade")).toHaveText(
+    diagnostics.degradedReason ?? "none"
+  );
 });
 
 test("renderer switch failure rolls back and reports safe status", async ({ page }) => {

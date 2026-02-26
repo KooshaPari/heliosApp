@@ -96,10 +96,14 @@ export async function switchRendererWithRollback(
     message: `renderer switch failed; rollback failed (${rollbackResult.error ?? "unknown"})`
   });
 
+  const observed = await input.runtimeClient.getRendererCapabilities(snapshot.workspaceId);
+
   return {
-    settings: { ...input.settings, rendererEngine: previousEngine },
+    settings: { ...input.settings, rendererEngine: observed.activeEngine },
     committed: false,
     rolledBack: false,
-    message: `renderer switch and rollback failed (${rollbackResult.error ?? "unknown"})`
+    message:
+      `renderer switch and rollback failed (${rollbackResult.error ?? "unknown"}); ` +
+      `runtime engine is ${observed.activeEngine}`
   };
 }
