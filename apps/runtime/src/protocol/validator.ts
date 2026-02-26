@@ -11,7 +11,9 @@ const RFC3339_PATTERN =
 const CORRELATION_REQUIRED_METHODS = new Set<string>([
   "lane.create",
   "session.attach",
-  "terminal.spawn"
+  "terminal.spawn",
+  "terminal.input",
+  "terminal.resize"
 ]);
 
 const CORRELATION_REQUIRED_TOPICS = new Set<string>([
@@ -23,16 +25,20 @@ const CORRELATION_REQUIRED_TOPICS = new Set<string>([
   "session.attach.failed",
   "terminal.spawn.started",
   "terminal.spawned",
-  "terminal.spawn.failed"
+  "terminal.spawn.failed",
+  "terminal.output",
+  "terminal.state.changed"
 ]);
 
 const METHOD_CONTEXT_REQUIREMENTS: Record<
   string,
-  Array<"workspace_id" | "lane_id" | "session_id">
+  Array<"workspace_id" | "lane_id" | "session_id" | "terminal_id">
 > = {
   "lane.create": ["workspace_id"],
   "session.attach": ["workspace_id", "lane_id", "session_id"],
-  "terminal.spawn": ["workspace_id", "lane_id", "session_id"]
+  "terminal.spawn": ["workspace_id", "lane_id", "session_id"],
+  "terminal.input": ["workspace_id", "lane_id", "session_id", "terminal_id"],
+  "terminal.resize": ["workspace_id", "lane_id", "session_id", "terminal_id"]
 };
 
 const TOPIC_CONTEXT_REQUIREMENTS: Record<
@@ -47,7 +53,9 @@ const TOPIC_CONTEXT_REQUIREMENTS: Record<
   "session.attach.failed": ["workspace_id", "lane_id", "session_id"],
   "terminal.spawn.started": ["workspace_id", "lane_id", "session_id"],
   "terminal.spawned": ["workspace_id", "lane_id", "session_id", "terminal_id"],
-  "terminal.spawn.failed": ["workspace_id", "lane_id", "session_id"]
+  "terminal.spawn.failed": ["workspace_id", "lane_id", "session_id"],
+  "terminal.output": ["workspace_id", "lane_id", "session_id", "terminal_id"],
+  "terminal.state.changed": ["workspace_id", "lane_id", "session_id", "terminal_id"]
 };
 
 function assertRecord(value: unknown): asserts value is Record<string, unknown> {
