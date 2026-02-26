@@ -1,4 +1,11 @@
-import { InMemoryAuditSink, type AuditRecord, type AuditSink } from "../audit/sink";
+import {
+  InMemoryAuditSink,
+  type AuditBundle,
+  type AuditFilter,
+  type AuditRecord,
+  type AuditSink
+} from "../audit/sink";
+import { createProtocolError, ERROR_CODES, type ErrorCode } from "./errors";
 import {
   INITIAL_RUNTIME_STATE,
   transition,
@@ -8,6 +15,8 @@ import {
 import { TerminalOutputBuffer } from "../sessions/terminal_buffer";
 import type { TerminalContext, TerminalLifecycleState } from "../sessions/terminal_registry";
 import { TerminalRegistry } from "../sessions/terminal_registry";
+import { RecoveryRegistry } from "../sessions/registry";
+import type { RecoveryBootstrapResult, RecoveryMetadata, WatchdogScanResult } from "../sessions/types";
 import {
   type CommandEnvelope,
   isCommandEnvelope,
@@ -23,8 +32,11 @@ export interface LocalBus {
 }
 
 type HandledMethod =
+  | "lane.attach"
+  | "lane.cleanup"
   | "lane.create"
   | "session.attach"
+  | "session.terminate"
   | "terminal.spawn"
   | "terminal.input"
   | "terminal.resize";
@@ -36,17 +48,24 @@ type MethodTransitionSpec = {
   startedTopic: LifecycleTopic;
   successTopic: LifecycleTopic;
   failedTopic: LifecycleTopic;
-  resultKey: "lane_id" | "session_id";
+  resultKey: "lane_id" | "session_id" | "terminal_id";
 };
 
 type LifecycleName = "lane.create" | "session.attach" | "terminal.spawn";
 type LifecycleTopic =
+  | "lane.attach.started"
+  | "lane.attach.failed"
+  | "lane.cleanup.started"
+  | "lane.cleanup.failed"
   | "lane.create.started"
   | "lane.created"
   | "lane.create.failed"
   | "session.attach.started"
   | "session.attached"
   | "session.attach.failed"
+  | "session.terminate.started"
+  | "session.terminate.failed"
+  | "session.terminated"
   | "terminal.spawn.started"
   | "terminal.spawned"
   | "terminal.spawn.failed";
@@ -56,7 +75,28 @@ type LifecycleProgress = {
   state: "started";
 };
 
-const METHOD_SPECS: Record<"lane.create" | "session.attach", MethodTransitionSpec> = {
+const METHOD_SPECS: Record<
+  "lane.attach" | "lane.cleanup" | "lane.create" | "session.attach" | "session.terminate",
+  MethodTransitionSpec
+> = {
+  "lane.attach": {
+    requested: "lane.run.started",
+    succeeded: "lane.run.started",
+    failed: "lane.blocked",
+    startedTopic: "lane.attach.started",
+    successTopic: "lane.attached",
+    failedTopic: "lane.attach.failed",
+    resultKey: "lane_id"
+  },
+  "lane.cleanup": {
+    requested: "lane.cleanup.started",
+    succeeded: "lane.cleanup.completed",
+    failed: "lane.blocked",
+    startedTopic: "lane.cleanup.started",
+    successTopic: "lane.cleaned",
+    failedTopic: "lane.cleanup.failed",
+    resultKey: "lane_id"
+  },
   "lane.create": {
     requested: "lane.create.requested",
     succeeded: "lane.create.succeeded",
@@ -74,32 +114,55 @@ const METHOD_SPECS: Record<"lane.create" | "session.attach", MethodTransitionSpe
     successTopic: "session.attached",
     failedTopic: "session.attach.failed",
     resultKey: "session_id"
+  },
+  "session.terminate": {
+    requested: "session.terminated",
+    succeeded: "session.terminated",
+    failed: "lane.blocked",
+    startedTopic: "session.terminate.started",
+    successTopic: "session.terminated",
+    failedTopic: "session.terminate.failed",
+    resultKey: "session_id"
   }
 };
 
 const TOPIC_LIFECYCLE: Record<LifecycleTopic, LifecycleName> = {
+  "lane.attach.started": "lane.create",
+  "lane.attach.failed": "lane.create",
+  "lane.cleanup.started": "lane.create",
+  "lane.cleanup.failed": "lane.create",
   "lane.create.started": "lane.create",
   "lane.created": "lane.create",
   "lane.create.failed": "lane.create",
   "session.attach.started": "session.attach",
   "session.attached": "session.attach",
   "session.attach.failed": "session.attach",
+  "session.terminate.started": "session.attach",
+  "session.terminate.failed": "session.attach",
+  "session.terminated": "session.attach",
   "terminal.spawn.started": "terminal.spawn",
   "terminal.spawned": "terminal.spawn",
   "terminal.spawn.failed": "terminal.spawn"
 };
 
 const START_TOPICS = new Set<LifecycleTopic>([
+  "lane.attach.started",
+  "lane.cleanup.started",
   "lane.create.started",
   "session.attach.started",
+  "session.terminate.started",
   "terminal.spawn.started"
 ]);
 
 const END_TOPICS = new Set<LifecycleTopic>([
+  "lane.attach.failed",
+  "lane.cleanup.failed",
   "lane.created",
   "lane.create.failed",
   "session.attached",
   "session.attach.failed",
+  "session.terminated",
+  "session.terminate.failed",
   "terminal.spawned",
   "terminal.spawn.failed"
 ]);
@@ -108,8 +171,11 @@ const DEFAULT_TERMINAL_BUFFER_CAP_BYTES = 64 * 1024;
 
 function isHandledMethod(method: string): method is HandledMethod {
   return (
+    method === "lane.attach" ||
+    method === "lane.cleanup" ||
     method === "lane.create" ||
     method === "session.attach" ||
+    method === "session.terminate" ||
     method === "terminal.spawn" ||
     method === "terminal.input" ||
     method === "terminal.resize"
@@ -130,6 +196,7 @@ export class InMemoryLocalBus implements LocalBus {
   private sequence = 0;
   private readonly eventLog: LocalBusEnvelope[] = [];
   private readonly auditSink: AuditSink;
+  private readonly recoveryRegistry = new RecoveryRegistry();
   private readonly lifecycleProgressByCorrelation = new Map<string, LifecycleProgress>();
   private readonly terminalRegistry = new TerminalRegistry();
   private readonly terminalBuffer: TerminalOutputBuffer;
@@ -158,11 +225,94 @@ export class InMemoryLocalBus implements LocalBus {
     return this.terminalBuffer.get(terminalId);
   }
 
-  async getAuditRecords(): Promise<AuditRecord[]> {
+  async getAuditRecords(filter: AuditFilter = {}): Promise<AuditRecord[]> {
     if (this.auditSink instanceof InMemoryAuditSink) {
-      return this.auditSink.getRecords();
+      if (Object.keys(filter).length === 0) {
+        return this.auditSink.getRecords();
+      }
+      return this.auditSink.query(filter);
     }
     return [];
+  }
+
+  exportAuditBundle(filter: AuditFilter = {}): AuditBundle {
+    if (this.auditSink instanceof InMemoryAuditSink) {
+      return this.auditSink.exportBundle(filter);
+    }
+    return {
+      generated_at: new Date().toISOString(),
+      filters: { ...filter },
+      count: 0,
+      records: []
+    };
+  }
+
+  exportRecoveryMetadata(): RecoveryMetadata {
+    return this.recoveryRegistry.snapshot();
+  }
+
+  bootstrapRecovery(metadata: RecoveryMetadata): RecoveryBootstrapResult {
+    const ts = new Date().toISOString();
+    if (this.auditSink instanceof InMemoryAuditSink) {
+      void this.auditSink.appendSystem({
+        action: "runtime.recovery.bootstrap.started",
+        status: "ok",
+        ts
+      });
+    }
+
+    this.emitSystemTransitionEvent("session.restore.started", "session.restore.started", {
+      metadata_entries: metadata.sessions.length + metadata.lanes.length + metadata.terminals.length
+    });
+
+    const result = this.recoveryRegistry.bootstrap(metadata);
+    const hasUnrecoverable = result.issues.some((issue) => issue.state === "unrecoverable");
+
+    this.emitSystemTransitionEvent("session.restore.completed", "session.restore.completed", result);
+    if (this.auditSink instanceof InMemoryAuditSink) {
+      void this.auditSink.appendSystem({
+        action: "runtime.recovery.bootstrap.completed",
+        status: hasUnrecoverable ? "error" : "ok",
+        ts: new Date().toISOString(),
+        payload: {
+          recovered_session_ids: result.recovered_session_ids,
+          issues: result.issues
+        },
+        error_code: hasUnrecoverable ? ERROR_CODES.RECOVERY_NOT_POSSIBLE : undefined
+      });
+    }
+
+    return result;
+  }
+
+  scanForOrphans(nowIso: string = new Date().toISOString()): WatchdogScanResult {
+    const result = this.recoveryRegistry.scanForOrphans(nowIso);
+    const hasUnrecoverable = result.issues.some((issue) => issue.state === "unrecoverable");
+    if (this.auditSink instanceof InMemoryAuditSink) {
+      void this.auditSink.appendSystem({
+        action: "watchdog.scan.completed",
+        status: hasUnrecoverable ? "error" : "ok",
+        ts: nowIso,
+        correlation_id: "runtime-watchdog-scan",
+        payload: {
+          issue_count: result.issues.length,
+          issues: result.issues
+        },
+        error_code: hasUnrecoverable ? ERROR_CODES.RECOVERY_NOT_POSSIBLE : undefined
+      });
+    }
+    this.eventLog.push({
+      id: `watchdog:${nowIso}`,
+      type: "event",
+      ts: nowIso,
+      correlation_id: "runtime-watchdog-scan",
+      topic: "audit.recorded",
+      payload: {
+        event: "watchdog.scan.completed",
+        issue_count: result.issues.length
+      }
+    });
+    return result;
   }
 
   async publish(event: LocalBusEnvelope): Promise<void> {
@@ -216,6 +366,14 @@ export class InMemoryLocalBus implements LocalBus {
           "correlation_id is required"
         );
       }
+      if (error instanceof ProtocolValidationError && error.code === "INVALID_METHOD") {
+        if (!isCommandEnvelope(command)) {
+          throw error;
+        }
+        return this.protocolErrorResponse(command, ERROR_CODES.METHOD_NOT_SUPPORTED, {
+          method: command.method
+        });
+      }
       throw error;
     }
     if (!isCommandEnvelope(envelope)) {
@@ -224,6 +382,14 @@ export class InMemoryLocalBus implements LocalBus {
         "Bus request accepts command envelopes only"
       );
     }
+
+    await this.auditSink.append({
+      recorded_at: new Date().toISOString(),
+      sequence: null,
+      outcome: "accepted",
+      reason: null,
+      envelope
+    });
 
     if (!envelope.correlation_id && isHandledMethod(envelope.method)) {
       return this.errorResponse(
@@ -242,23 +408,19 @@ export class InMemoryLocalBus implements LocalBus {
     if (envelope.method === "terminal.resize") {
       return this.handleTerminalResize(envelope);
     }
-    if (envelope.method === "lane.create" || envelope.method === "session.attach") {
+    if (
+      envelope.method === "lane.attach" ||
+      envelope.method === "lane.cleanup" ||
+      envelope.method === "lane.create" ||
+      envelope.method === "session.attach" ||
+      envelope.method === "session.terminate"
+    ) {
       return this.handleLifecycleCommand(envelope, envelope.method);
     }
 
-    return {
-      id: envelope.id,
-      type: "response",
-      ts: new Date().toISOString(),
-      workspace_id: envelope.workspace_id,
-      lane_id: envelope.lane_id,
-      session_id: envelope.session_id,
-      terminal_id: envelope.terminal_id,
-      correlation_id: envelope.correlation_id,
-      method: envelope.method,
-      status: "ok",
-      result: {}
-    };
+    return this.protocolErrorResponse(envelope, ERROR_CODES.METHOD_NOT_SUPPORTED, {
+      method: envelope.method
+    });
   }
 
   private assertDeterministicOrdering(envelope: LocalBusEnvelope): void {
@@ -313,27 +475,98 @@ export class InMemoryLocalBus implements LocalBus {
 
   private async handleLifecycleCommand(
     command: CommandEnvelope,
-    method: "lane.create" | "session.attach"
+    method: "lane.attach" | "lane.cleanup" | "lane.create" | "session.attach" | "session.terminate"
   ): Promise<LocalBusEnvelope> {
     const spec = METHOD_SPECS[method];
-    const forcedError = command.payload.force_error === true;
+    const forcedError =
+      command.payload.force_error === true || command.payload.boundary_failure === "harness";
+    const context = this.resolveContext(command);
+    const laneId = context.lane_id;
+    const sessionId = context.session_id;
     const resultId =
       (command.payload.id as string | undefined) ?? `${spec.resultKey}_${Date.now()}`;
+    const effectiveLaneId = laneId ?? (method.startsWith("lane.") ? String(resultId) : undefined);
+    const effectiveSessionId =
+      sessionId ?? (method.startsWith("session.") ? String(resultId) : undefined);
+    const tracked = this.recoveryRegistry.snapshot();
 
-    await this.emitTransitionEvent(command, spec.requested, spec.startedTopic);
+    await this.emitTransitionEvent(command, spec.requested, spec.startedTopic, {
+      lane_id: effectiveLaneId,
+      session_id: effectiveSessionId
+    });
 
-    if (forcedError) {
-      await this.emitTransitionEvent(command, spec.failed, spec.failedTopic);
-      return this.errorResponse(
-        command,
-        `${method.toUpperCase().replace(".", "_")}_FAILED`,
-        `${method} failed`,
-        { method },
-        true
-      );
+    if (
+      method === "lane.attach" &&
+      laneId &&
+      tracked.lanes.length > 0 &&
+      !this.recoveryRegistry.hasLane(laneId)
+    ) {
+      await this.emitTransitionEvent(command, spec.failed, spec.failedTopic, {
+        lane_id: effectiveLaneId,
+        session_id: effectiveSessionId
+      });
+      return this.protocolErrorResponse(command, ERROR_CODES.LANE_NOT_FOUND, { method });
+    }
+    if (
+      method === "lane.cleanup" &&
+      laneId &&
+      tracked.lanes.length > 0 &&
+      !this.recoveryRegistry.hasLane(laneId)
+    ) {
+      await this.emitTransitionEvent(command, spec.failed, spec.failedTopic, {
+        lane_id: effectiveLaneId,
+        session_id: effectiveSessionId
+      });
+      return this.protocolErrorResponse(command, ERROR_CODES.LANE_NOT_FOUND, { method });
+    }
+    if (
+      method === "session.attach" &&
+      laneId &&
+      tracked.lanes.length > 0 &&
+      !this.recoveryRegistry.hasLane(laneId)
+    ) {
+      await this.emitTransitionEvent(command, spec.failed, spec.failedTopic, {
+        lane_id: effectiveLaneId,
+        session_id: effectiveSessionId
+      });
+      return this.protocolErrorResponse(command, ERROR_CODES.LANE_NOT_FOUND, { method });
+    }
+    if (
+      method === "session.terminate" &&
+      sessionId &&
+      tracked.sessions.length > 0 &&
+      !this.recoveryRegistry.hasSession(sessionId)
+    ) {
+      await this.emitTransitionEvent(command, spec.failed, spec.failedTopic, {
+        lane_id: effectiveLaneId,
+        session_id: effectiveSessionId
+      });
+      return this.protocolErrorResponse(command, ERROR_CODES.SESSION_NOT_FOUND, { method });
     }
 
-    await this.emitTransitionEvent(command, spec.succeeded, spec.successTopic);
+    if (forcedError) {
+      await this.emitTransitionEvent(command, spec.failed, spec.failedTopic, {
+        lane_id: effectiveLaneId,
+        session_id: effectiveSessionId
+      });
+      if (command.payload.boundary_failure === "harness") {
+        return this.protocolErrorResponse(command, ERROR_CODES.HARNESS_UNAVAILABLE, { method });
+      }
+      return this.protocolErrorResponse(command, ERROR_CODES.VALIDATION_FAILED, { method });
+    }
+
+    this.recoveryRegistry.apply(method, {
+      codex_session_id: this.readString(command.payload.codex_session_id),
+      lane_id: effectiveLaneId,
+      session_id: effectiveSessionId,
+      terminal_id: context.terminal_id,
+      workspace_id: context.workspace_id
+    });
+
+    await this.emitTransitionEvent(command, spec.succeeded, spec.successTopic, {
+      lane_id: effectiveLaneId,
+      session_id: effectiveSessionId
+    });
     return this.okResponse(command, {
       [spec.resultKey]: resultId,
       state: this.state
@@ -341,9 +574,10 @@ export class InMemoryLocalBus implements LocalBus {
   }
 
   private async handleTerminalSpawn(command: CommandEnvelope): Promise<LocalBusEnvelope> {
-    const workspaceId = command.workspace_id;
-    const laneId = command.lane_id;
-    const sessionId = this.readString(command.payload.session_id) ?? command.session_id;
+    const context = this.resolveContext(command);
+    const workspaceId = context.workspace_id;
+    const laneId = context.lane_id;
+    const sessionId = context.session_id;
 
     if (!workspaceId || !laneId || !sessionId || !command.correlation_id) {
       return this.errorResponse(
@@ -351,6 +585,12 @@ export class InMemoryLocalBus implements LocalBus {
         "INVALID_TERMINAL_CONTEXT",
         "workspace_id, lane_id, and session_id are required"
       );
+    }
+
+    const hasRecoverySessions = this.recoveryRegistry.snapshot().sessions.length > 0;
+    if (hasRecoverySessions && sessionId && !this.recoveryRegistry.hasSession(sessionId)) {
+      await this.emitTransitionEvent(command, "terminal.error", "terminal.spawn.failed");
+      return this.protocolErrorResponse(command, ERROR_CODES.SESSION_NOT_FOUND, { method: command.method });
     }
 
     this.terminalCounter += 1;
@@ -398,6 +638,13 @@ export class InMemoryLocalBus implements LocalBus {
         state: "active",
         title
       }
+    });
+
+    this.recoveryRegistry.apply("terminal.spawn", {
+      lane_id: laneId,
+      session_id: sessionId,
+      terminal_id: terminalId,
+      workspace_id: workspaceId
     });
 
     return this.okResponse(command, {
@@ -562,20 +809,50 @@ export class InMemoryLocalBus implements LocalBus {
   private async emitTransitionEvent(
     command: CommandEnvelope,
     runtimeEvent: RuntimeEvent,
-    topic: LifecycleTopic
+    topic: LifecycleTopic,
+    contextOverride: {
+      workspace_id?: string;
+      lane_id?: string;
+      session_id?: string;
+      terminal_id?: string;
+    } = {}
   ): Promise<void> {
+    const context = { ...this.resolveContext(command), ...contextOverride };
     this.state = transition(this.state, runtimeEvent);
     await this.publish({
       id: `${command.id}:${runtimeEvent}`,
       type: "event",
       ts: new Date().toISOString(),
-      workspace_id: command.workspace_id,
-      lane_id: command.lane_id,
-      session_id: command.session_id,
-      terminal_id: command.terminal_id,
+      workspace_id: context.workspace_id,
+      lane_id: context.lane_id,
+      session_id: context.session_id,
+      terminal_id: context.terminal_id,
       correlation_id: command.correlation_id,
       topic,
       payload: {
+        lane_id: context.lane_id,
+        session_id: context.session_id,
+        terminal_id: context.terminal_id,
+        runtime_event: runtimeEvent,
+        state: this.state
+      }
+    });
+  }
+
+  private emitSystemTransitionEvent(
+    runtimeEvent: RuntimeEvent,
+    topic: "session.restore.started" | "session.restore.completed",
+    payload: Record<string, unknown>
+  ): void {
+    this.state = transition(this.state, runtimeEvent);
+    this.eventLog.push({
+      id: `system:${runtimeEvent}:${Date.now()}`,
+      type: "event",
+      ts: new Date().toISOString(),
+      correlation_id: "runtime-recovery-bootstrap",
+      topic,
+      payload: {
+        ...payload,
         runtime_event: runtimeEvent,
         state: this.state
       }
@@ -626,6 +903,29 @@ export class InMemoryLocalBus implements LocalBus {
         retryable,
         details: details ?? null
       }
+    };
+  }
+
+  private protocolErrorResponse(
+    command: CommandEnvelope,
+    code: ErrorCode,
+    details?: Record<string, unknown>
+  ): LocalBusEnvelope {
+    const error = createProtocolError(code, { details });
+    return this.errorResponse(command, error.code, error.message, error.details ?? undefined, error.retryable);
+  }
+
+  private resolveContext(command: CommandEnvelope): {
+    workspace_id?: string;
+    lane_id?: string;
+    session_id?: string;
+    terminal_id?: string;
+  } {
+    return {
+      workspace_id: command.workspace_id ?? this.readString(command.payload.workspace_id),
+      lane_id: command.lane_id ?? this.readString(command.payload.lane_id),
+      session_id: command.session_id ?? this.readString(command.payload.session_id),
+      terminal_id: command.terminal_id ?? this.readString(command.payload.terminal_id)
     };
   }
 

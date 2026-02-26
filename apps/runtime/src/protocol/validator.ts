@@ -9,20 +9,30 @@ const RFC3339_PATTERN =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 
 const CORRELATION_REQUIRED_METHODS = new Set<string>([
+  "lane.attach",
+  "lane.cleanup",
   "lane.create",
   "session.attach",
+  "session.terminate",
   "terminal.spawn",
   "terminal.input",
   "terminal.resize"
 ]);
 
 const CORRELATION_REQUIRED_TOPICS = new Set<string>([
+  "lane.attach.started",
+  "lane.attach.failed",
+  "lane.cleanup.started",
+  "lane.cleanup.failed",
   "lane.create.started",
   "lane.created",
   "lane.create.failed",
   "session.attach.started",
   "session.attached",
   "session.attach.failed",
+  "session.terminate.started",
+  "session.terminate.failed",
+  "session.terminated",
   "terminal.spawn.started",
   "terminal.spawned",
   "terminal.spawn.failed",
@@ -35,7 +45,10 @@ const METHOD_CONTEXT_REQUIREMENTS: Record<
   Array<"workspace_id" | "lane_id" | "session_id" | "terminal_id">
 > = {
   "lane.create": ["workspace_id"],
+  "lane.attach": ["workspace_id", "lane_id"],
+  "lane.cleanup": ["workspace_id", "lane_id"],
   "session.attach": ["workspace_id", "lane_id", "session_id"],
+  "session.terminate": ["workspace_id", "lane_id", "session_id"],
   "terminal.spawn": ["workspace_id", "lane_id", "session_id"],
   "terminal.input": ["workspace_id", "lane_id", "session_id", "terminal_id"],
   "terminal.resize": ["workspace_id", "lane_id", "session_id", "terminal_id"]
@@ -45,12 +58,19 @@ const TOPIC_CONTEXT_REQUIREMENTS: Record<
   string,
   Array<"workspace_id" | "lane_id" | "session_id" | "terminal_id">
 > = {
+  "lane.attach.started": ["workspace_id", "lane_id"],
+  "lane.attach.failed": ["workspace_id", "lane_id"],
+  "lane.cleanup.started": ["workspace_id", "lane_id"],
+  "lane.cleanup.failed": ["workspace_id", "lane_id"],
   "lane.create.started": ["workspace_id", "lane_id"],
   "lane.created": ["workspace_id", "lane_id"],
   "lane.create.failed": ["workspace_id", "lane_id"],
   "session.attach.started": ["workspace_id", "lane_id", "session_id"],
   "session.attached": ["workspace_id", "lane_id", "session_id"],
   "session.attach.failed": ["workspace_id", "lane_id", "session_id"],
+  "session.terminate.started": ["workspace_id", "lane_id", "session_id"],
+  "session.terminate.failed": ["workspace_id", "lane_id", "session_id"],
+  "session.terminated": ["workspace_id", "lane_id", "session_id"],
   "terminal.spawn.started": ["workspace_id", "lane_id", "session_id"],
   "terminal.spawned": ["workspace_id", "lane_id", "session_id", "terminal_id"],
   "terminal.spawn.failed": ["workspace_id", "lane_id", "session_id"],
