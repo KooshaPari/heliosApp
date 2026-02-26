@@ -9,14 +9,14 @@ describe("EditorlessControlPlane", () => {
 
     const laneResult = await controlPlane.createLane({
       workspaceId: "workspace_alpha",
-      simulateDegrade: true,
+      simulateDegrade: true
     });
     expect(laneResult.ok).toBe(true);
 
     const laneId = laneResult.laneId as string;
     const sessionResult = await controlPlane.ensureSession({
       workspaceId: "workspace_alpha",
-      laneId,
+      laneId
     });
     expect(sessionResult.ok).toBe(true);
 
@@ -24,7 +24,7 @@ describe("EditorlessControlPlane", () => {
     const terminalResult = await controlPlane.spawnTerminal({
       workspaceId: "workspace_alpha",
       laneId,
-      sessionId,
+      sessionId
     });
     expect(terminalResult.ok).toBe(true);
 
@@ -39,3 +39,4 @@ describe("EditorlessControlPlane", () => {
     expect(tabs.chat.diagnostics.degradedReason).toBe("cliproxy_harness_unhealthy");
   });
 });
+

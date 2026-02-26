@@ -8,16 +8,16 @@ test("lane/session context remains cohesive across all tabs", async ({ page }) =
 
   const lane = await controlPlane.createLane({
     workspaceId: "workspace_e2e",
-    simulateDegrade: true,
+    simulateDegrade: true
   });
   const session = await controlPlane.ensureSession({
     workspaceId: "workspace_e2e",
-    laneId: lane.laneId as string,
+    laneId: lane.laneId as string
   });
   await controlPlane.spawnTerminal({
     workspaceId: "workspace_e2e",
     laneId: lane.laneId as string,
-    sessionId: session.sessionId as string,
+    sessionId: session.sessionId as string
   });
 
   controlPlane.setActiveTab("terminal");
