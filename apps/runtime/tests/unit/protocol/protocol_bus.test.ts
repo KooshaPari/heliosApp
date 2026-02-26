@@ -28,14 +28,13 @@ describe("protocol validator", () => {
     );
   });
 
-  test("fails fast when lifecycle command is missing correlation_id", async () => {
+  test("returns error response when lifecycle command is missing correlation_id", async () => {
     const bus = new InMemoryLocalBus();
     const command = createLifecycleCommand({ correlation_id: undefined });
-
-    await expect(bus.request(command)).rejects.toMatchObject({
-      name: "ProtocolValidationError",
-      code: "MISSING_CORRELATION_ID"
-    });
+    const response = await bus.request(command);
+    expect(response.type).toBe("response");
+    expect(response.status).toBe("error");
+    expect(response.error?.code).toBe("MISSING_CORRELATION_ID");
   });
 
   test("rejects timestamps without RFC3339 timezone", () => {

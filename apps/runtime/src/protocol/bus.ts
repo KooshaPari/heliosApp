@@ -357,6 +357,10 @@ export class InMemoryLocalBus implements LocalBus {
     const terminalId =
       this.readString(command.payload.terminal_id) ?? `${sessionId}:terminal:${this.terminalCounter}`;
     const title = this.readString(command.payload.title) ?? "Terminal";
+    const existingTerminal = this.terminalRegistry.get(terminalId);
+    if (existingTerminal) {
+      this.terminalBuffer.clear(terminalId);
+    }
 
     this.terminalRegistry.spawn({
       terminal_id: terminalId,
