@@ -61,6 +61,32 @@ describe("protocol validator", () => {
 
     expect(envelope.ts).toBe("2026-02-26T00:00:00+00:00");
   });
+
+  test("rejects optional timestamp without RFC3339 timezone", () => {
+    expect(() =>
+      validateEnvelope({
+        id: "evt-1",
+        type: "event",
+        ts: "2026-02-26T00:00:00.000Z",
+        timestamp: "2026-02-26T00:00:00",
+        topic: "workspace.opened",
+        payload: {}
+      })
+    ).toThrow("Envelope field 'timestamp' must be an RFC3339 timestamp with timezone");
+  });
+
+  test("accepts optional timestamp with RFC3339 timezone", () => {
+    const envelope = validateEnvelope({
+      id: "evt-1",
+      type: "event",
+      ts: "2026-02-26T00:00:00.000Z",
+      timestamp: "2026-02-26T00:00:00+00:00",
+      topic: "workspace.opened",
+      payload: {}
+    });
+
+    expect(envelope.timestamp).toBe("2026-02-26T00:00:00+00:00");
+  });
 });
 
 describe("protocol sequencing and audit", () => {
