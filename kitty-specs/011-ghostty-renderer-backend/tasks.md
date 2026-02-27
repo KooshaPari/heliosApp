@@ -24,11 +24,11 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T001 Implement ghostty adapter class implementing RendererAdapter interface in `apps/runtime/src/renderer/ghostty/backend.ts`
-- [ ] T002 Implement ghostty process lifecycle (start/stop/crash detection) in `apps/runtime/src/renderer/ghostty/process.ts`
-- [ ] T003 Implement ElectroBun window surface binding in `apps/runtime/src/renderer/ghostty/surface.ts`
-- [ ] T004 Implement ghostty capability matrix reporting in `apps/runtime/src/renderer/ghostty/capabilities.ts`
-- [ ] T005 [P] Implement backend registration and export in `apps/runtime/src/renderer/ghostty/index.ts`
+- [x] T001 Implement ghostty adapter class implementing RendererAdapter interface in `apps/runtime/src/renderer/ghostty/backend.ts`
+- [x] T002 Implement ghostty process lifecycle (start/stop/crash detection) in `apps/runtime/src/renderer/ghostty/process.ts`
+- [x] T003 Implement ElectroBun window surface binding in `apps/runtime/src/renderer/ghostty/surface.ts`
+- [x] T004 Implement ghostty capability matrix reporting in `apps/runtime/src/renderer/ghostty/capabilities.ts`
+- [x] T005 [P] Implement backend registration and export in `apps/runtime/src/renderer/ghostty/index.ts`
 
 ### Implementation Notes
 - Ghostty managed as a separate process (not in-process library) for portability.
