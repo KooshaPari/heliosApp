@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Stream Binding, Capability Matrix, and Tests
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP01
 base_branch: 010-renderer-adapter-interface-WP01
@@ -216,3 +216,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-02-27T12:14:54Z – claude-wp02-010 – shell_pid=65314 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:19:59Z – claude-wp02-010 – shell_pid=65314 – lane=for_review – Ready for review: stream binding, switch buffering, and full test suite
