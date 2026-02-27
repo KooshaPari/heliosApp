@@ -24,12 +24,12 @@
 **Estimated Prompt Size**: ~350 lines
 
 ### Included Subtasks
-- [ ] T001 Define envelope TypeScript interfaces and discriminated unions in `apps/runtime/src/protocol/types.ts`
-- [ ] T002 Define error taxonomy types and constructors in `apps/runtime/src/protocol/errors.ts`
-- [ ] T003 Implement envelope creation helpers with ID generation and timestamp in `apps/runtime/src/protocol/envelope.ts`
-- [ ] T004 Implement strict envelope validation (schema check, required fields, payload size limit) in `apps/runtime/src/protocol/envelope.ts`
-- [ ] T005 [P] Create JSON schema assets in `specs/protocol/v1/envelope.schema.json`
-- [ ] T006 [P] Add Vitest unit tests for envelope creation, validation, and error taxonomy in `apps/runtime/tests/unit/protocol/`
+- [x] T001 Define envelope TypeScript interfaces and discriminated unions in `apps/runtime/src/protocol/types.ts`
+- [x] T002 Define error taxonomy types and constructors in `apps/runtime/src/protocol/errors.ts`
+- [x] T003 Implement envelope creation helpers with ID generation and timestamp in `apps/runtime/src/protocol/envelope.ts`
+- [x] T004 Implement strict envelope validation (schema check, required fields, payload size limit) in `apps/runtime/src/protocol/envelope.ts`
+- [x] T005 [P] Create JSON schema assets in `specs/protocol/v1/envelope.schema.json`
+- [x] T006 [P] Add Vitest unit tests for envelope creation, validation, and error taxonomy in `apps/runtime/tests/unit/protocol/`
 
 ### Implementation Notes
 - Envelope interfaces must use discriminated unions to separate command, response, and event envelope shapes.
