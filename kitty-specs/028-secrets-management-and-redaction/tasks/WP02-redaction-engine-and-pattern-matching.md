@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Redaction Engine and Pattern Matching
-lane: "planned"
+lane: "for_review"
 dependencies:
 - WP01
 base_branch: main
@@ -276,3 +276,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-02-27T11:31:25Z – unknown – lane=for_review – Ready for review: MethodRegistry, TopicRegistry, LocalBus facade with command dispatch, event fan-out, re-entrant safety, subscriber isolation. 25 new tests, all passing.
