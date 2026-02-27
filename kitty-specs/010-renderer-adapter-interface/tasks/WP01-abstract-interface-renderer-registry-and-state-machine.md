@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Abstract Interface, Renderer Registry, and State Machine
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: 98f3236ffa670bb7161f21b79271c6ae261e7d57
@@ -273,3 +273,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-02-27T11:58:04Z – claude-wp01-010 – shell_pid=51331 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:13:19Z – claude-wp01-010 – shell_pid=51331 – lane=for_review – Ready for review
