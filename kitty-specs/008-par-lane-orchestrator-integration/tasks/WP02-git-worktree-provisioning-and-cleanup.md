@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Git Worktree Provisioning and Cleanup
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP01
 base_branch: 008-par-lane-orchestrator-integration-WP01
@@ -210,3 +210,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-02-27T12:14:49Z – claude-wp02-008 – shell_pid=64845 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:18:29Z – claude-wp02-008 – shell_pid=64845 – lane=for_review – Ready for review
