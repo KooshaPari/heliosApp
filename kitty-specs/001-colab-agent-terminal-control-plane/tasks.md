@@ -239,7 +239,7 @@
 - [x] T039 Implement retention policy configuration model and enforcement hooks for audit/session artifacts in `apps/runtime/src/audit/` and `apps/runtime/src/config/`
 - [x] T040 [P] Add retention policy compliance tests for TTL expiry, legal hold exception, and deletion audit proofs in `apps/runtime/tests/integration/recovery/` and `apps/runtime/tests/unit/audit/`
 - [x] T041 [P] Add export completeness tests to verify policy-compliant lifecycle export contains required fields/correlation IDs and redacts restricted data
-- [ ] T042 Update `quickstart.md` and ops guidance with slice-2 durability placeholder boundaries, retention policy defaults, and compliance verification commands
+- [x] T042 Update `quickstart.md` and ops guidance with slice-2 durability placeholder boundaries, retention policy defaults, and compliance verification commands
 
 ### Implementation Notes
 - Slice-2 durability artifacts in this work package are placeholders only; avoid hidden persistence enablement in slice-1 runtime paths.
