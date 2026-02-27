@@ -24,13 +24,13 @@
 **Estimated Prompt Size**: ~420 lines
 
 ### Included Subtasks
-- [ ] T001 Define settings types, schema definition format, and reload policy in `apps/runtime/src/config/types.ts`
-- [ ] T002 Implement settings schema with defaults and validation rules in `apps/runtime/src/config/schema.ts`
-- [ ] T003 Implement JSON persistence store with in-memory cache and file watch in `apps/runtime/src/config/store.ts`
-- [ ] T004 Implement settings read/write API with validation and change detection in `apps/runtime/src/config/settings.ts`
-- [ ] T005 Implement hot-reload propagation via bus events and restart-required indicator in `apps/runtime/src/config/settings.ts`
-- [ ] T006 [P] Implement unknown key preservation for forward compatibility in `apps/runtime/src/config/store.ts`
-- [ ] T007 [P] Add Vitest unit tests for schema, validation, persistence, and hot-reload in `apps/runtime/tests/unit/config/`
+- [x] T001 Define settings types, schema definition format, and reload policy in `apps/runtime/src/config/types.ts`
+- [x] T002 Implement settings schema with defaults and validation rules in `apps/runtime/src/config/schema.ts`
+- [x] T003 Implement JSON persistence store with in-memory cache and file watch in `apps/runtime/src/config/store.ts`
+- [x] T004 Implement settings read/write API with validation and change detection in `apps/runtime/src/config/settings.ts`
+- [x] T005 Implement hot-reload propagation via bus events and restart-required indicator in `apps/runtime/src/config/settings.ts`
+- [x] T006 [P] Implement unknown key preservation for forward compatibility in `apps/runtime/src/config/store.ts`
+- [x] T007 [P] Add Vitest unit tests for schema, validation, persistence, and hot-reload in `apps/runtime/tests/unit/config/`
 
 ### Implementation Notes
 - Settings schema defines: key, type, default, validation rule, reload policy (hot/restart).
