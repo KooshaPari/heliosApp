@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Violation Events, Bus Integration, and Tests
-lane: "doing"
+lane: "for_review"
 dependencies: [WP02]
 base_branch: 006-performance-baseline-and-instrumentation-WP02
 base_commit: 4c3c1e5e6e3a6398e086fc573e8dd58f023becc7
@@ -210,3 +210,4 @@ Constraints:
 
 - 2026-02-27 – system – lane=planned – Prompt generated.
 - 2026-02-27T11:57:54Z – claude-wp03-006 – shell_pid=50383 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:01:32Z – claude-wp03-006 – shell_pid=50383 – lane=for_review – Ready for review
