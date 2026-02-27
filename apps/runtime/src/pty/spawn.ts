@@ -5,9 +5,9 @@
  * @module
  */
 
-import type { PtyDimensions, PtyRecord } from "./registry.js";
-import type { PtyRegistry } from "./registry.js";
 import { PtyLifecycle } from "./state_machine.js";
+import type { PtyRecord, PtyDimensions } from "./registry.js";
+import { PtyRegistry } from "./registry.js";
 
 /** Options for spawning a new PTY. */
 export interface SpawnOptions {
@@ -53,7 +53,10 @@ function generatePtyId(): string {
  * @returns The spawn result including the PTY record and latency.
  * @throws If the shell binary is not found or spawn fails.
  */
-export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Promise<SpawnResult> {
+export async function spawnPty(
+  options: SpawnOptions,
+  registry: PtyRegistry,
+): Promise<SpawnResult> {
   const startTime = performance.now();
   const ptyId = generatePtyId();
   const lifecycle = new PtyLifecycle(ptyId);
@@ -68,11 +71,11 @@ export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Pr
   lifecycle.apply("spawn_requested");
 
   try {
-    const proc = (Bun as any).spawn([shell], {
+    const proc = Bun.spawn([shell], {
       cwd,
       env: {
         ...env,
-        TERM: env.TERM ?? "xterm-256color",
+        TERM: env["TERM"] ?? "xterm-256color",
         COLUMNS: String(cols),
         LINES: String(rows),
       },
@@ -81,7 +84,7 @@ export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Pr
       stderr: "pipe",
     });
 
-    const pid = (proc as any).pid;
+    const pid = proc.pid;
 
     if (pid <= 0) {
       lifecycle.apply("spawn_failed");
