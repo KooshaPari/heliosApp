@@ -32,7 +32,6 @@ describe("EditorlessControlPlane", () => {
     controlPlane.setActiveTab("project");
 
     const tabs = controlPlane.getTabs();
-    const diagnostics = controlPlane.store.getState().diagnostics;
     expect(tabs.terminal.context.laneId).toBe(laneId);
     expect(tabs.agent.context.sessionId).toBe(sessionId);
     expect(tabs.project.context.terminalId).toBe(terminalResult.terminalId);
