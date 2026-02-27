@@ -14,7 +14,7 @@ subtasks:
 - T005
 phase: Phase 1 - Lane Infrastructure
 assignee: ''
-agent: ''
+agent: "claude-wp01-008"
 shell_pid: "50717"
 review_status: ''
 reviewed_by: ''
@@ -212,3 +212,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-02-27T11:57:58Z – claude-wp01-008 – shell_pid=50717 – lane=doing – Assigned agent via workflow command
