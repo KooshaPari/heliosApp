@@ -32,3 +32,17 @@
 2. Build data model and quickstart scenarios around canonical Codex CLI + `cliproxyapi++` path.
 3. Generate tasks with explicit follow-up work for durable checkpoint/restore after slice-1.
 4. Keep parity-check gate active to detect method/topic drift as contracts evolve.
+
+## WP09 Formal Parity Policy
+
+- Canonical formal surface remains `specs/protocol/v1/methods.json` and `specs/protocol/v1/topics.json`.
+- Feature coverage trace is required in `contracts/protocol-parity-matrix.json` for every formal method/topic.
+- Defer decisions are valid only with `status: deferred` and `task_ids` containing one or more `Txxx` entries.
+- Extension decisions are valid only when explicitly marked `status: extension` and represented in contract/runtime assets.
+
+Verification commands:
+
+```bash
+node tools/gates/protocol-parity.mjs
+bun test apps/runtime/tests/unit/protocol/protocol_parity_gate.test.ts
+```
