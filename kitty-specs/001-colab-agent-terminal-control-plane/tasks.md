@@ -208,7 +208,7 @@
 - [x] T033 [P] Add unit/integration tests for local/tool/A2A delegation routing and boundary error normalization in `apps/runtime/tests/unit/protocol/` and `apps/runtime/tests/integration/protocol/`
 - [x] T034 Implement coverage gate (`>=85% lines`) in `apps/runtime/package.json`, `apps/runtime/vitest.config.ts`, and repo CI workflow configs
 - [x] T035 Implement requirement-traceability gate (`FR/NFR -> test artifact`) using `kitty-specs/001-colab-agent-terminal-control-plane/` trace matrix checks and validation scripts under `apps/runtime/tests/`
-- [ ] T036 [P] Add gate validation tests/fixtures proving coverage and traceability gates fail closed when thresholds or mappings are missing
+- [x] T036 [P] Add gate validation tests/fixtures proving coverage and traceability gates fail closed when thresholds or mappings are missing
 
 ### Implementation Notes
 - Boundary adapter must remain explicit: no implicit fallback between local/tool/A2A paths.
