@@ -1,10 +1,11 @@
 ---
 work_package_id: WP01
 title: Encrypted Credential Store and Lifecycle
-lane: "planned"
+lane: "doing"
 dependencies: []
 base_branch: main
-created_at: '2026-02-27T00:00:00+00:00'
+base_commit: 052223c7b89f74b50477c7d7de87deeb43505ccf
+created_at: '2026-02-27T10:27:28.911589+00:00'
 subtasks:
 - T001
 - T002
@@ -14,7 +15,7 @@ subtasks:
 phase: Phase 0 - Foundation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "17896"
 review_status: ''
 reviewed_by: ''
 history:
