@@ -130,3 +130,4 @@ Implementation command:
 
 - 2026-02-26T13:19:35Z – system – lane=planned – Prompt created.
 - 2026-02-26T16:53:10Z – unknown – shell_pid=65388 – lane=for_review – Ready for review (forced lane move): hardening/perf gates/release readiness implemented in worktree commit 03dcbaa.
+- 2026-02-27T07:48:13Z – unknown – shell_pid=65388 – lane=for_review – Restacked, quality gate passing; ready for review.
