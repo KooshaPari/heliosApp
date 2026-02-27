@@ -1,8 +1,11 @@
 ---
 work_package_id: WP01
 title: Zellij CLI Adapter and Session Lifecycle
-lane: "planned"
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 04dfbaad4ac7293e3868738d9ff6f9931df3349a
+created_at: '2026-02-27T11:58:00.609535+00:00'
 subtasks:
 - T001
 - T002
@@ -12,7 +15,7 @@ subtasks:
 phase: Phase 1 - Zellij Foundation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "51017"
 review_status: ''
 reviewed_by: ''
 history:
