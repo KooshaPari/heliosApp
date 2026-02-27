@@ -27,7 +27,10 @@ export type PtyEventTopic =
   | "pty.signal.delivered"
   | "pty.terminating"
   | "pty.force_killed"
-  | "pty.idle_timeout";
+  | "pty.idle_timeout"
+  | "pty.backpressure.on"
+  | "pty.backpressure.off"
+  | "pty.buffer.overflow";
 
 /** A bus envelope for PTY events. */
 export interface PtyBusEvent {
