@@ -24,11 +24,11 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T001 Implement AES-256-GCM encryption module with OS keychain master key integration in `apps/runtime/src/secrets/encryption.ts`
-- [ ] T002 Implement per-provider+workspace credential store with scoped access in `apps/runtime/src/secrets/credential-store.ts`
-- [ ] T003 Implement credential lifecycle operations (create, rotate, revoke) with audit event emission
-- [ ] T004 [P] Implement cross-provider credential isolation enforcement and access denial
-- [ ] T005 [P] Add unit tests for encryption, credential store, lifecycle operations, and cross-provider isolation
+- [x] T001 Implement AES-256-GCM encryption module with OS keychain master key integration in `apps/runtime/src/secrets/encryption.ts`
+- [x] T002 Implement per-provider+workspace credential store with scoped access in `apps/runtime/src/secrets/credential-store.ts`
+- [x] T003 Implement credential lifecycle operations (create, rotate, revoke) with audit event emission
+- [x] T004 [P] Implement cross-provider credential isolation enforcement and access denial
+- [x] T005 [P] Add unit tests for encryption, credential store, lifecycle operations, and cross-provider isolation
 
 ### Implementation Notes
 - Master key derived from OS keychain; no hardcoded keys.
@@ -55,7 +55,7 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T006 Implement redaction engine as synchronous filter on audit sink path in `apps/runtime/src/secrets/redaction-engine.ts`
+- [x] T006 Implement redaction engine as synchronous filter on audit sink path in `apps/runtime/src/secrets/redaction-engine.ts`
 - [ ] T007 Implement default redaction rules for AWS, GCP, GitHub, OpenAI key patterns in `apps/runtime/src/secrets/redaction-rules.ts`
 - [x] T008 Implement configurable and operator-tunable redaction rule management
 - [x] T009 Implement redaction audit trail proving redaction was applied to each artifact in `apps/runtime/src/secrets/audit-trail.ts`
