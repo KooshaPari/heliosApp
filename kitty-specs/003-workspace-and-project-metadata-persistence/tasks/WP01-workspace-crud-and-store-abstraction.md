@@ -1,12 +1,16 @@
 ---
 work_package_id: WP01
-title: "Workspace CRUD and Store Abstraction"
-lane: "planned"
+title: Workspace CRUD and Store Abstraction
+lane: "doing"
 dependencies: []
-subtasks: ["T001", "T002", "T003", "T004", "T005"]
-phase: "Phase 1 - Foundation"
-assignee: ""
-agent: ""
+base_branch: main
+base_commit: 138c026f17f300bb7a61f1c5868941eb28c42236
+created_at: '2026-02-27T11:28:37.124825+00:00'
+subtasks: [T001, T002, T003, T004, T005]
+phase: Phase 1 - Foundation
+assignee: ''
+agent: ''
+shell_pid: "28454"
 ---
 
 # Work Package Prompt: WP01 - Workspace CRUD and Store Abstraction
