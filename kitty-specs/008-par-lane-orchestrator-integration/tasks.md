@@ -88,11 +88,11 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T011 Implement par task binding (spawn par task, associate with lane) in `apps/runtime/src/lanes/par.ts`
-- [ ] T012 Implement par task termination during lane cleanup in `apps/runtime/src/lanes/par.ts`
-- [ ] T013 Implement command execution within lane worktree context via par
-- [ ] T014 [P] Implement stale par task detection and force-kill escalation
-- [ ] T015 [P] Wire comprehensive lane lifecycle events for all state transitions
+- [x] T011 Implement par task binding (spawn par task, associate with lane) in `apps/runtime/src/lanes/par.ts`
+- [x] T012 Implement par task termination during lane cleanup in `apps/runtime/src/lanes/par.ts`
+- [x] T013 Implement command execution within lane worktree context via par
+- [x] T014 [P] Implement stale par task detection and force-kill escalation
+- [x] T015 [P] Wire comprehensive lane lifecycle events for all state transitions
 
 ### Implementation Notes
 - Par is invoked via `Bun.spawn` calling the par CLI.
