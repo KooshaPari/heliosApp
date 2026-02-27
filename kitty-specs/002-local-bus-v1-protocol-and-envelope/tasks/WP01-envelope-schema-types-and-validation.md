@@ -9,7 +9,7 @@ created_at: '2026-02-27T11:19:15.585730+00:00'
 subtasks: [T001, T002, T003, T004, T005, T006]
 phase: Phase 1 - Foundation
 assignee: ''
-agent: ''
+agent: "wp01-bus-agent"
 shell_pid: "22522"
 ---
 
@@ -203,3 +203,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27 – system – lane=planned – Prompt generated.
+- 2026-02-27T11:19:15Z – wp01-bus-agent – shell_pid=22522 – lane=doing – Assigned agent via workflow command
