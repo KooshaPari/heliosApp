@@ -1,12 +1,16 @@
 ---
 work_package_id: WP01
-title: "ULID Library, Prefix Format, and Validation"
-lane: "planned"
+title: ULID Library, Prefix Format, and Validation
+lane: "doing"
 dependencies: []
-subtasks: ["T001", "T002", "T003", "T004", "T005", "T006"]
-phase: "Phase 1 - Foundation"
-assignee: ""
-agent: ""
+base_branch: main
+base_commit: 3f963b6074171f7e751e0c490e95696090a68f54
+created_at: '2026-02-27T11:28:32.828578+00:00'
+subtasks: [T001, T002, T003, T004, T005, T006]
+phase: Phase 1 - Foundation
+assignee: ''
+agent: ''
+shell_pid: "28267"
 ---
 
 # Work Package Prompt: WP01 - ULID Library, Prefix Format, and Validation
