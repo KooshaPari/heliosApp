@@ -253,6 +253,13 @@ export function createRuntime(options: RuntimeOptions = {}) {
         const laneId = requiredSegment(segments, 4, "lane_id");
         const sessionId = asString(body, "session_id") as string;
         const title = asString(body, "title", false);
+        const lane = laneService.getRequired(laneId);
+        if (lane.workspace_id !== workspaceId) {
+          return json(409, { error: `lane ${laneId} does not belong to workspace ${workspaceId}` });
+        }
+        if (lane.status === "closed") {
+          return json(409, { error: "lane_closed", details: { lane_id: laneId } });
+        }
         await laneService.attach(workspaceId, laneId);
 
         const session = sessionRegistry.get(sessionId);

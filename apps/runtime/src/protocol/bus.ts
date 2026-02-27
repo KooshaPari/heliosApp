@@ -223,7 +223,24 @@ export class InMemoryLocalBus implements LocalBus {
   }
 
   async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
-    const envelope = validateEnvelope(command);
+    let envelope: LocalBusEnvelope;
+    try {
+      envelope = validateEnvelope(command);
+    } catch (error) {
+      if (
+        error instanceof ProtocolValidationError &&
+        error.code === "MISSING_CORRELATION_ID" &&
+        command.type === "command"
+      ) {
+        return this.errorResponse(
+          command as CommandEnvelope,
+          "MISSING_CORRELATION_ID",
+          "correlation_id is required"
+        );
+      }
+      throw error;
+    }
+
     if (!isCommandEnvelope(envelope)) {
       throw new ProtocolValidationError(
         "INVALID_ENVELOPE_TYPE",
