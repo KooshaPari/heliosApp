@@ -109,7 +109,8 @@ Implementation command:
 
 ## Test Strategy
 
-- Run full Vitest and Playwright flows plus strict static/security checks.
+- Run enforced WP06 runtime gates: `bun run lint`, `bun run typecheck`, `bun run static`,
+  `bun run test`, `bun run security`, `bun run quality`.
 - Run soak profile and capture metrics snapshots.
 - Re-run fallback and recovery scenarios after hardening.
 
@@ -118,7 +119,8 @@ Implementation command:
 - Risk: hardening exposes latent failures late.
 - Mitigation: stage checks early and keep per-WP gate runs incremental.
 - Risk: soak harness introduces flaky thresholds.
-- Mitigation: define stable baseline windows and failure bands.
+- Mitigation: keep strict thresholds, but allow a narrow near-threshold retry band for session-restore
+  host jitter before failing closed.
 
 ## Review Guidance
 
