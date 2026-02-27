@@ -1,12 +1,16 @@
 ---
 work_package_id: WP02
-title: "Feature Flag System and Tests"
-lane: "planned"
-dependencies: ["WP01"]
-subtasks: ["T008", "T009", "T010", "T011", "T012"]
-phase: "Phase 2 - Feature Gating"
-assignee: ""
-agent: ""
+title: Feature Flag System and Tests
+lane: "doing"
+dependencies: [WP01]
+base_branch: 004-app-settings-and-feature-flags-WP01
+base_commit: ac383a1d731ebcb407add85b7c275e8ab117073c
+created_at: '2026-02-27T11:50:49.277334+00:00'
+subtasks: [T008, T009, T010, T011, T012]
+phase: Phase 2 - Feature Gating
+assignee: ''
+agent: ''
+shell_pid: "38381"
 ---
 
 # Work Package Prompt: WP02 - Feature Flag System and Tests
