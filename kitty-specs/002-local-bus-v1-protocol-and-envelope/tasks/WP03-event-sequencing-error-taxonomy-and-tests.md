@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Event Sequencing, Error Taxonomy Integration, and Tests
-lane: "doing"
+lane: "for_review"
 dependencies: [WP02]
 base_branch: 002-local-bus-v1-protocol-and-envelope-WP02
 base_commit: 8377f7da306441de443674fe9f2fddbadd8b502f
@@ -198,3 +198,4 @@ Constraints:
 
 - 2026-02-27 – system – lane=planned – Prompt generated.
 - 2026-02-27T11:50:39Z – wp03-bus-agent – shell_pid=37905 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:31:34Z – wp03-bus-agent – shell_pid=37905 – lane=for_review – Completed
