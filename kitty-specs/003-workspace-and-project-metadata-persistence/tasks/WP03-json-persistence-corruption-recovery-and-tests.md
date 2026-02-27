@@ -9,7 +9,7 @@ created_at: '2026-02-27T11:50:54.968690+00:00'
 subtasks: [T011, T012, T013, T014, T015, T016]
 phase: Phase 3 - Durability
 assignee: ''
-agent: ''
+agent: "wp03-ws-agent"
 shell_pid: "38782"
 ---
 
@@ -210,3 +210,4 @@ Constraints:
 ## Activity Log
 
 - 2026-02-27 – system – lane=planned – Prompt generated.
+- 2026-02-27T11:50:55Z – wp03-ws-agent – shell_pid=38782 – lane=doing – Assigned agent via workflow command
