@@ -1,12 +1,16 @@
 ---
 work_package_id: WP03
-title: "Violation Events, Bus Integration, and Tests"
-lane: "planned"
-dependencies: ["WP02"]
-subtasks: ["T013", "T014", "T015", "T016", "T017", "T018"]
-phase: "Phase 3 - Alerting"
-assignee: ""
-agent: ""
+title: Violation Events, Bus Integration, and Tests
+lane: "doing"
+dependencies: [WP02]
+base_branch: 006-performance-baseline-and-instrumentation-WP02
+base_commit: 4c3c1e5e6e3a6398e086fc573e8dd58f023becc7
+created_at: '2026-02-27T11:57:54.453547+00:00'
+subtasks: [T013, T014, T015, T016, T017, T018]
+phase: Phase 3 - Alerting
+assignee: ''
+agent: ''
+shell_pid: "50383"
 ---
 
 # Work Package Prompt: WP03 - Violation Events, Bus Integration, and Tests
