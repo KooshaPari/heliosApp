@@ -8,8 +8,11 @@
   },
   "scripts": {
     "dev": "bun --filter '*' dev",
-    "build": "bun --filter '*' build",
-    "typecheck": "tsc --build"
+    "build": "bun run build:runtime && bun run build:desktop",
+    "build:runtime": "bun --filter '@helios/runtime' build",
+    "build:desktop": "bun --filter '@helios/desktop' build",
+    "typecheck": "tsc --build",
+    "test": "bun --filter '*' test"
   },
   "devDependencies": {
     "typescript": "^5.7.0"
