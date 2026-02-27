@@ -5,6 +5,7 @@
  * with re-entrant safety, subscriber isolation, and structured error handling.
  */
 
+import { AsyncLocalStorage } from 'node:async_hooks';
 import type {
   CommandEnvelope,
   ResponseEnvelope,
@@ -24,6 +25,17 @@ import { MethodRegistry } from './methods.js';
 import type { MethodHandler } from './methods.js';
 import { TopicRegistry } from './topics.js';
 import type { TopicSubscriber } from './topics.js';
+
+// ---------------------------------------------------------------------------
+// Correlation context (AsyncLocalStorage for proper async isolation)
+// ---------------------------------------------------------------------------
+
+const correlationStorage = new AsyncLocalStorage<string>();
+
+/** Get the active correlation_id from the current async context. */
+export function getActiveCorrelationId(): string | undefined {
+  return correlationStorage.getStore();
+}
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -46,9 +58,6 @@ export class LocalBus {
   private readonly maxDepth: number;
   private depth = 0;
   private destroyed = false;
-
-  /** Current correlation_id during dispatch (for event propagation). */
-  private activeCorrelationId: string | undefined;
 
   constructor(options?: BusOptions) {
     this.maxDepth = options?.maxDepth ?? DEFAULT_MAX_DEPTH;
@@ -113,12 +122,13 @@ export class LocalBus {
       return createResponse(command, null, methodNotFound(command.method));
     }
 
-    // Step 5: execute handler with re-entrant tracking
-    const previousCorrelation = this.activeCorrelationId;
-    this.activeCorrelationId = command.correlation_id;
+    // Step 5: execute handler with re-entrant tracking and correlation context
     this.depth++;
     try {
-      const result: unknown = await handler(command);
+      const result: unknown = await correlationStorage.run(
+        command.correlation_id,
+        async () => handler(command),
+      );
 
       // Verify handler returned a valid response envelope
       if (!isValidResponse(result)) {
@@ -134,7 +144,6 @@ export class LocalBus {
       return createResponse(command, null, handlerError(command.method, err));
     } finally {
       this.depth--;
-      this.activeCorrelationId = previousCorrelation;
     }
   }
 
@@ -170,7 +179,14 @@ export class LocalBus {
       return;
     }
 
-    const event: EventEnvelope = validated;
+    let event: EventEnvelope = validated;
+
+    // Inherit correlation_id from active context if not explicitly set
+    const activeCorr = getActiveCorrelationId();
+    if (activeCorr !== undefined && event.correlation_id.startsWith('cor_')) {
+      // Auto-generated correlation — inherit from command context
+      event = { ...event, correlation_id: activeCorr };
+    }
 
     // Assign sequence number
     const seq = this.topics.nextSequence(event.topic);
@@ -199,7 +215,7 @@ export class LocalBus {
 
   /** Get the active correlation_id (for events created within handlers). */
   getActiveCorrelationId(): string | undefined {
-    return this.activeCorrelationId;
+    return getActiveCorrelationId();
   }
 
   // -------------------------------------------------------------------------
@@ -212,7 +228,6 @@ export class LocalBus {
     this.methods.clear();
     this.topics.clear();
     this.depth = 0;
-    this.activeCorrelationId = undefined;
   }
 
   // -------------------------------------------------------------------------

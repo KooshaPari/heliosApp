@@ -82,12 +82,24 @@ export class TopicRegistry {
     return [...this.subs.keys()];
   }
 
-  /** Get the next sequence number for a topic. */
+  /** Get the next sequence number for a topic (monotonically increasing). */
   nextSequence(topic: string): number {
     const current = this.sequenceCounters.get(topic) ?? 0;
-    const next = current + 1;
+    let next = current + 1;
+    // Handle overflow at Number.MAX_SAFE_INTEGER — reset to 1 with warning.
+    if (current >= Number.MAX_SAFE_INTEGER) {
+      console.warn(
+        `[topics] Sequence counter overflow for topic "${topic}" — resetting to 1`,
+      );
+      next = 1;
+    }
     this.sequenceCounters.set(topic, next);
     return next;
+  }
+
+  /** Get the current sequence number for a topic (for testing/observability). */
+  getSequence(topic: string): number {
+    return this.sequenceCounters.get(topic) ?? 0;
   }
 
   /** Remove all subscriptions. */
