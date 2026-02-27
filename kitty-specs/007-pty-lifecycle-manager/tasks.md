@@ -24,11 +24,11 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T001 Implement PTY state machine with validated transitions in `apps/runtime/src/pty/state_machine.ts`
-- [ ] T002 Implement in-memory process registry keyed by PTY ID in `apps/runtime/src/pty/registry.ts`
-- [ ] T003 Implement PTY spawn via Bun.spawn with environment, dimensions, and shell configuration in `apps/runtime/src/pty/spawn.ts`
-- [ ] T004 Wire public API surface in `apps/runtime/src/pty/index.ts` exposing spawn, query, and lifecycle operations
-- [ ] T005 [P] Implement orphaned PTY detection and reconciliation on startup in `apps/runtime/src/pty/registry.ts`
+- [x] T001 Implement PTY state machine with validated transitions in `apps/runtime/src/pty/state_machine.ts`
+- [x] T002 Implement in-memory process registry keyed by PTY ID in `apps/runtime/src/pty/registry.ts`
+- [x] T003 Implement PTY spawn via Bun.spawn with environment, dimensions, and shell configuration in `apps/runtime/src/pty/spawn.ts`
+- [x] T004 Wire public API surface in `apps/runtime/src/pty/index.ts` exposing spawn, query, and lifecycle operations
+- [x] T005 [P] Implement orphaned PTY detection and reconciliation on startup in `apps/runtime/src/pty/registry.ts`
 
 ### Implementation Notes
 - State machine must enforce strict transition validation; invalid transitions must throw with diagnostic context.
