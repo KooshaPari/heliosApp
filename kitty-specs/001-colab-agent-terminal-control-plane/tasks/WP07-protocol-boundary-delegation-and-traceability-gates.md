@@ -1,28 +1,31 @@
 ---
-work_package_id: "WP07"
-subtasks:
-  - "T031"
-  - "T032"
-  - "T033"
-  - "T034"
-  - "T035"
-  - "T036"
-title: "Protocol Boundary Delegation and Traceability Gates"
-phase: "Phase 4 - Boundary completeness"
-lane: "planned"
+work_package_id: WP07
+title: Protocol Boundary Delegation and Traceability Gates
+lane: "doing"
 dependencies:
-  - "WP06"
-assignee: ""
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+- WP06
+base_branch: 001-colab-agent-terminal-control-plane-WP06
+base_commit: 9f5060adc6e1931099c808f5354bc46c179e4488
+created_at: '2026-02-27T07:52:58.629967+00:00'
+subtasks:
+- T031
+- T032
+- T033
+- T034
+- T035
+- T036
+phase: Phase 4 - Boundary completeness
+assignee: ''
+agent: ''
+shell_pid: "25766"
+review_status: ''
+reviewed_by: ''
 history:
-  - timestamp: "2026-02-26T13:19:35Z"
-    lane: "planned"
-    agent: "system"
-    shell_pid: ""
-    action: "Prompt generated via /spec-kitty.tasks"
+- timestamp: '2026-02-26T13:19:35Z'
+  lane: planned
+  agent: system
+  shell_pid: ''
+  action: Prompt generated via /spec-kitty.tasks
 ---
 
 # Work Package Prompt: WP07 - Protocol Boundary Delegation and Traceability Gates
