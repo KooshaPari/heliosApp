@@ -14,7 +14,7 @@ subtasks:
 - T005
 phase: Phase 1 - Core PTY Infrastructure
 assignee: ''
-agent: ''
+agent: "claude-wp01-007"
 shell_pid: "50539"
 review_status: ''
 reviewed_by: ''
@@ -218,3 +218,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-02-27T11:57:55Z – claude-wp01-007 – shell_pid=50539 – lane=doing – Assigned agent via workflow command
