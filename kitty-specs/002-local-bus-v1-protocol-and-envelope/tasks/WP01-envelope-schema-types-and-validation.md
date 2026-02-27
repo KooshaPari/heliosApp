@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Envelope Schema, Types, and Validation
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: d89dc4f54d56d98a0ded78813aeffc0ed68d1dd0
@@ -204,3 +204,4 @@ Implementation command:
 
 - 2026-02-27 – system – lane=planned – Prompt generated.
 - 2026-02-27T11:19:15Z – wp01-bus-agent – shell_pid=22522 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T11:24:07Z – wp01-bus-agent – shell_pid=22522 – lane=for_review – Ready for review: Envelope schema types, error taxonomy, creation helpers, strict validation, JSON schema, and 54 unit tests
