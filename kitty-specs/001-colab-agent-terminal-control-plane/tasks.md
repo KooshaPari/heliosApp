@@ -238,7 +238,7 @@
 - [x] T038 Add checkpoint persistence interface stubs and TODO markers for slice-2 handoff in `apps/runtime/src/sessions/` and `apps/runtime/src/audit/`
 - [x] T039 Implement retention policy configuration model and enforcement hooks for audit/session artifacts in `apps/runtime/src/audit/` and `apps/runtime/src/config/`
 - [x] T040 [P] Add retention policy compliance tests for TTL expiry, legal hold exception, and deletion audit proofs in `apps/runtime/tests/integration/recovery/` and `apps/runtime/tests/unit/audit/`
-- [ ] T041 [P] Add export completeness tests to verify policy-compliant lifecycle export contains required fields/correlation IDs and redacts restricted data
+- [x] T041 [P] Add export completeness tests to verify policy-compliant lifecycle export contains required fields/correlation IDs and redacts restricted data
 - [ ] T042 Update `quickstart.md` and ops guidance with slice-2 durability placeholder boundaries, retention policy defaults, and compliance verification commands
 
 ### Implementation Notes
