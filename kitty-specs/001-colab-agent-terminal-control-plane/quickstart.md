@@ -1,26 +1,23 @@
-# Quickstart: Colab Agent Terminal Control Plane (Slice 1)
+# 001 Colab Agent Terminal Control Plane - Quickstart
 
-## Goal
+## WP08 Compliance Checks
 
-Validate the first end-to-end vertical slice for `codex` CLI orchestration with `cliproxyapi++` harness and native fallback, with strict hardening gates from WP06.
+Run targeted WP08 suites:
 
-## Prerequisites
+```bash
+bun test apps/runtime/tests/unit/audit
+bun test apps/runtime/tests/unit/sessions/test_checkpoint_store.test.ts
+bun test apps/runtime/tests/integration/recovery
+```
 
-1. Bun installed and available in PATH (`bun --version` tested on 1.2.9).
-2. TypeScript compiler available (`tsc --version` tested on 5.9.3).
-3. Security scanners available:
-   - `semgrep --version` (tested on 1.151.0)
-   - `gitleaks version` (tested on 8.30.0)
-4. Repository root: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp`.
+## Slice-2 Placeholder Verification
 
-## Scenario A: Canonical Harness Path
+- Checkpoint interface exists and is non-operational in slice-1:
+  - `apps/runtime/src/sessions/checkpoint_store.ts`
+- Audit durability interface exists and is non-operational in slice-1:
+  - `apps/runtime/src/audit/durable_store.ts`
 
-1. Validate lifecycle commands and runtime metrics emission:
-   - `bun test apps/runtime/tests/unit/protocol/runtime_metrics.test.ts`
-2. Confirm lane create lifecycle is healthy:
-   - Expected metrics include `lane_create_latency_ms`.
-3. Confirm session attach with restore path is healthy:
-   - Expected metrics include `session_restore_latency_ms`.
+## Retention/Export Verification
 
 Expected result:
 - Session transport path remains usable for canonical flow.
