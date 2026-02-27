@@ -95,7 +95,7 @@
 - [ ] T013 Implement recovery from last known good snapshot in `apps/runtime/src/workspace/snapshot.ts`
 - [ ] T014 Implement concurrent operation serialization (write lock) in `apps/runtime/src/workspace/store.ts`
 - [ ] T015 [P] Add integration tests for persistence round-trip, corruption recovery, and concurrency in `apps/runtime/tests/integration/workspace/`
-- [ ] T016 [P] Add performance tests for CRUD operations (<100ms) and restore (<500ms) in `apps/runtime/tests/bench/workspace/`
+- [x] T016 [P] Add performance tests for CRUD operations (<100ms) and restore (<500ms) in `apps/runtime/tests/bench/workspace/`
 
 ### Implementation Notes
 - JSON files stored in well-known app data directory (platform-specific).
