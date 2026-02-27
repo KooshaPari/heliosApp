@@ -1,4 +1,23 @@
-export { type ReloadPolicy, type SettingType, type SettingDefinition, type SettingsSchema, type SettingChangeEvent, type SettingsStore } from "./config/types.js";
-export { SETTINGS_SCHEMA, getDefault, getAllDefaults, validateValue } from "./config/schema.js";
-export { JsonSettingsStore } from "./config/store.js";
-export { SettingsManager } from "./config/settings.js";
+// Runtime entry point — re-exports diagnostics instrumentation
+export {
+  type MetricType,
+  type MetricDefinition,
+  type Sample,
+  type PercentileBucket,
+  type SLODefinition,
+  type SLOViolationEvent,
+} from "./diagnostics/types.js";
+
+export {
+  type MonotonicClock,
+  monotonicNow,
+  markStart,
+  markEnd,
+  getMarkOverflowCount,
+  createInstrumentationHooks,
+} from "./diagnostics/hooks.js";
+
+export {
+  RingBuffer,
+  MetricsRegistry,
+} from "./diagnostics/metrics.js";
