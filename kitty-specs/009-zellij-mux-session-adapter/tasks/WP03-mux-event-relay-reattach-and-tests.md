@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Mux Event Relay, Reattach, and Tests
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP01
 - WP02
@@ -232,3 +232,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-02-27T12:44:16Z – claude-wp03-009-direct – shell_pid=66570 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:49:10Z – claude-wp03-009-direct – shell_pid=66570 – lane=for_review – Complete
