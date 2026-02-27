@@ -48,6 +48,16 @@ export {
   SwitchSameRendererError,
 } from "./switch.js";
 
+export type {
+  StreamBinding,
+  BufferOverflowEvent,
+  StreamBindingEventBus,
+} from "./stream_binding.js";
+export {
+  StreamBindingManager,
+  SwitchBuffer,
+} from "./stream_binding.js";
+
 // ---------------------------------------------------------------------------
 // Lifecycle event types
 // ---------------------------------------------------------------------------
