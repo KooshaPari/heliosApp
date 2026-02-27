@@ -1,9 +1,12 @@
 ---
 work_package_id: WP02
 title: Crash Fallback to Ghostty and Tests
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
+base_branch: 012-rio-renderer-backend-WP01
+base_commit: f0b3edf963dcc5a7cd7ef5625d23c00fbf09aa6f
+created_at: '2026-02-27T12:23:52.563205+00:00'
 subtasks:
 - T007
 - T008
@@ -14,7 +17,7 @@ subtasks:
 phase: Phase 2 - Fallback and Validation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "76982"
 review_status: ''
 reviewed_by: ''
 history:
