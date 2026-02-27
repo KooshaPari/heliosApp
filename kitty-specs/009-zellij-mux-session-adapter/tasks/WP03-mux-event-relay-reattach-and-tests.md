@@ -1,10 +1,13 @@
 ---
 work_package_id: WP03
 title: Mux Event Relay, Reattach, and Tests
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
 - WP02
+base_branch: 009-zellij-mux-session-adapter-WP02
+base_commit: c5a162aa67c59701df3b1258d059cff79a3e884b
+created_at: '2026-02-27T12:44:15.880873+00:00'
 subtasks:
 - T011
 - T012
@@ -15,7 +18,7 @@ subtasks:
 phase: Phase 3 - Event Integration and Validation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "66570"
 review_status: ''
 reviewed_by: ''
 history:
