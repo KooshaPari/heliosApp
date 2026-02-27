@@ -1,7 +1,7 @@
 ---
 work_package_id: WP04
 title: Worktree Pooling, Reconciliation, and Tests
-lane: "planned"
+lane: "for_review"
 dependencies:
 - WP01
 - WP02
@@ -200,3 +200,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-02-27T12:41:50Z – unknown – lane=for_review – Completed
