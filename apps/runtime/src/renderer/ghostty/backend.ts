@@ -15,6 +15,10 @@ import type { RendererCapabilities } from "../capabilities.js";
 import { GhosttyProcess } from "./process.js";
 import { GhosttySurface } from "./surface.js";
 import { detectCapabilities, getCachedCapabilities } from "./capabilities.js";
+import { GhosttyMetrics } from "./metrics.js";
+import type { MetricsSnapshot, MetricsPublisher } from "./metrics.js";
+import { GhosttyInputRelay } from "./input.js";
+import type { PtyWriter, GhosttyInputEvent } from "./input.js";
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -57,6 +61,18 @@ export class GhosttyBackend implements RendererAdapter {
   private readonly _streamAbortControllers = new Map<string, AbortController>();
   private _crashHandler: ((error: Error) => void) | undefined;
 
+  // -- WP02: Render loop monitoring (T006) --
+  private readonly _metrics = new GhosttyMetrics();
+  private _inputRelay: GhosttyInputRelay | undefined;
+  private _renderLoopTimer: ReturnType<typeof setInterval> | undefined;
+  private _lastFrameTimestamp = 0;
+  private _fpsWindowStart = 0;
+  private _fpsWindowFrames = 0;
+  private _degradedStart = 0;
+  private _stallCheckTimer: ReturnType<typeof setInterval> | undefined;
+  private _targetFps = 60;
+  private _fpsEventHandler: ((event: string, payload: unknown) => void) | undefined;
+
   constructor(version = "0.0.0") {
     this.version = version;
 
@@ -65,6 +81,97 @@ export class GhosttyBackend implements RendererAdapter {
       this._state = "errored";
       this._crashHandler?.(error);
     });
+  }
+
+  // -------------------------------------------------------------------------
+  // WP02 public API: Metrics (T008/T009)
+  // -------------------------------------------------------------------------
+
+  /** Access the metrics collector for this backend. */
+  getMetrics(): GhosttyMetrics {
+    return this._metrics;
+  }
+
+  /**
+   * Enable metrics collection and optional publishing.
+   */
+  enableMetrics(publisher?: MetricsPublisher | undefined): void {
+    if (publisher !== undefined) {
+      this._metrics.setPublisher(publisher);
+    }
+    this._metrics.enable();
+  }
+
+  /**
+   * Disable metrics collection and publishing.
+   */
+  disableMetrics(): void {
+    this._metrics.disable();
+  }
+
+  /**
+   * Get a snapshot of current metrics.
+   */
+  getMetricsSnapshot(): MetricsSnapshot {
+    return this._metrics.getSnapshot();
+  }
+
+  // -------------------------------------------------------------------------
+  // WP02 public API: Input relay (T007)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Set up an input relay backed by the given PTY writer.
+   */
+  setupInputRelay(ptyWriter: PtyWriter): GhosttyInputRelay {
+    this._inputRelay = new GhosttyInputRelay(ptyWriter, this._metrics);
+    return this._inputRelay;
+  }
+
+  /**
+   * Get the current input relay, if set up.
+   */
+  getInputRelay(): GhosttyInputRelay | undefined {
+    return this._inputRelay;
+  }
+
+  // -------------------------------------------------------------------------
+  // WP02 public API: Render loop (T006)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Record a frame from the ghostty render loop.
+   * Call this whenever ghostty completes a frame (via IPC signal, shared
+   * memory fence, or output parsing).
+   */
+  recordFrame(timestamp: number = Date.now()): void {
+    this._lastFrameTimestamp = timestamp;
+    this._fpsWindowFrames++;
+    this._metrics.recordFrame(timestamp);
+
+    // Rolling 1-second FPS window
+    const elapsed = timestamp - this._fpsWindowStart;
+    if (elapsed >= 1_000) {
+      const currentFps = (this._fpsWindowFrames / elapsed) * 1_000;
+      this._checkFpsDegradation(currentFps, timestamp);
+      this._fpsWindowStart = timestamp;
+      this._fpsWindowFrames = 0;
+    }
+  }
+
+  /**
+   * Set the target FPS (default 60). Used for degradation detection.
+   */
+  setTargetFps(fps: number): void {
+    this._targetFps = fps;
+  }
+
+  /**
+   * Register an event handler for render-loop events
+   * (e.g., `renderer.ghostty.fps_degraded`).
+   */
+  onRenderEvent(handler: (event: string, payload: unknown) => void): void {
+    this._fpsEventHandler = handler;
   }
 
   // -------------------------------------------------------------------------
@@ -83,6 +190,9 @@ export class GhosttyBackend implements RendererAdapter {
       // Detect capabilities (GPU, etc.) during init
       await detectCapabilities(true);
       this._state = "running";
+
+      // Start render loop monitoring (T006)
+      this._startRenderLoopMonitoring();
     } catch (error) {
       this._state = "errored";
       throw error;
@@ -108,6 +218,17 @@ export class GhosttyBackend implements RendererAdapter {
     }
 
     this._state = "stopping";
+
+    // Stop render loop monitoring
+    this._stopRenderLoopMonitoring();
+
+    // Disable metrics
+    this._metrics.disable();
+    this._metrics.reset();
+
+    // Tear down input relay
+    this._inputRelay?.teardownAll();
+    this._inputRelay = undefined;
 
     // Unbind all streams
     for (const ptyId of [...this._streams.keys()]) {
@@ -206,7 +327,69 @@ export class GhosttyBackend implements RendererAdapter {
   }
 
   // -------------------------------------------------------------------------
-  // Internal
+  // Internal: render loop monitoring (T006)
+  // -------------------------------------------------------------------------
+
+  private _startRenderLoopMonitoring(): void {
+    this._fpsWindowStart = Date.now();
+    this._fpsWindowFrames = 0;
+    this._lastFrameTimestamp = Date.now();
+    this._degradedStart = 0;
+
+    // Stall check every 500ms
+    this._stallCheckTimer = setInterval(() => {
+      this._checkRenderStall();
+    }, 500);
+  }
+
+  private _stopRenderLoopMonitoring(): void {
+    if (this._stallCheckTimer !== undefined) {
+      clearInterval(this._stallCheckTimer);
+      this._stallCheckTimer = undefined;
+    }
+    if (this._renderLoopTimer !== undefined) {
+      clearInterval(this._renderLoopTimer);
+      this._renderLoopTimer = undefined;
+    }
+  }
+
+  private _checkFpsDegradation(currentFps: number, timestamp: number): void {
+    const threshold = this._targetFps - 5; // < 55 FPS
+    if (currentFps < threshold) {
+      if (this._degradedStart === 0) {
+        this._degradedStart = timestamp;
+      } else if (timestamp - this._degradedStart > 2_000) {
+        // Sustained degradation for > 2 seconds
+        this._fpsEventHandler?.("renderer.ghostty.fps_degraded", {
+          currentFps: Math.round(currentFps * 100) / 100,
+          targetFps: this._targetFps,
+          degradedForMs: timestamp - this._degradedStart,
+          timestamp,
+        });
+      }
+    } else {
+      this._degradedStart = 0;
+    }
+  }
+
+  private _checkRenderStall(): void {
+    if (this._state !== "running") return;
+    if (this._lastFrameTimestamp === 0) return;
+
+    const elapsed = Date.now() - this._lastFrameTimestamp;
+    if (elapsed > 500) {
+      // Check if the process is alive
+      if (this._process.isRunning()) {
+        console.warn(
+          `[ghostty] Render stall detected: no frames for ${elapsed}ms, but process is alive.`,
+        );
+      }
+      // If process is dead, crash detection in WP01 T002 handles it.
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Internal: stream pump
   // -------------------------------------------------------------------------
 
   /**
