@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Lane State Machine and Lifecycle Commands
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: e1ccdaeb4820757da27aa6af279f8f39ba6dcf4b
@@ -213,3 +213,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-02-27T11:57:58Z – claude-wp01-008 – shell_pid=50717 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:04:13Z – claude-wp01-008 – shell_pid=50717 – lane=for_review – Ready for review
