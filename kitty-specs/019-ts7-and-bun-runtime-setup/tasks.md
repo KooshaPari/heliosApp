@@ -24,13 +24,13 @@
 **Estimated Prompt Size**: ~300 lines
 
 ### Included Subtasks
-- [ ] T001 Create root `package.json` with Bun workspace declarations for `apps/desktop` and `apps/runtime`, minimum Bun version, and TypeScript 7 dependency
-- [ ] T002 Create `bunfig.toml` with workspace resolution config, minimum Bun version enforcement, and registry settings
-- [ ] T003 Create `tsconfig.base.json` with TS7 strict mode, noImplicitAny, strictNullChecks, and shared compiler options
-- [ ] T004 [P] Create `apps/desktop/package.json`, `apps/desktop/tsconfig.json` extending base, and `apps/desktop/src/index.ts` scaffold with ElectroBun entry point
-- [ ] T005 [P] Create `apps/runtime/package.json`, `apps/runtime/tsconfig.json` extending base, and `apps/runtime/src/index.ts` scaffold
-- [ ] T006 Configure path aliases in tsconfig files and verify resolution works for cross-workspace imports
-- [ ] T007 Validate: `bun install` completes cleanly, workspace linking works, and `bun run typecheck` passes with zero errors
+- [x] T001 Create root `package.json` with Bun workspace declarations for `apps/desktop` and `apps/runtime`, minimum Bun version, and TypeScript 7 dependency
+- [x] T002 Create `bunfig.toml` with workspace resolution config, minimum Bun version enforcement, and registry settings
+- [x] T003 Create `tsconfig.base.json` with TS7 strict mode, noImplicitAny, strictNullChecks, and shared compiler options
+- [x] T004 [P] Create `apps/desktop/package.json`, `apps/desktop/tsconfig.json` extending base, and `apps/desktop/src/index.ts` scaffold with ElectroBun entry point
+- [x] T005 [P] Create `apps/runtime/package.json`, `apps/runtime/tsconfig.json` extending base, and `apps/runtime/src/index.ts` scaffold
+- [x] T006 Configure path aliases in tsconfig files and verify resolution works for cross-workspace imports
+- [x] T007 Validate: `bun install` completes cleanly, workspace linking works, and `bun run typecheck` passes with zero errors
 
 ### Implementation Notes
 - Keep root `package.json` workspace paths explicit (`apps/*`).
