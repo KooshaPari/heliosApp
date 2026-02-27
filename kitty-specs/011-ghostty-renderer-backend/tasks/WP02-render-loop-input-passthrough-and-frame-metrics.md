@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Render Loop, Input Passthrough, and Frame Metrics
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP01
 base_branch: 011-ghostty-renderer-backend-WP01
@@ -190,3 +190,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-02-27T12:23:16Z – claude-wp02-011 – shell_pid=75511 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:31:35Z – claude-wp02-011 – shell_pid=75511 – lane=for_review – Completed
