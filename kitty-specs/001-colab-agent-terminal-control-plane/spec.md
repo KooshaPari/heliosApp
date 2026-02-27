@@ -1,125 +1,117 @@
-# Feature Specification: Colab Agent Terminal Control Plane
+# Feature Specification: Terminal-First Desktop Shell
 
-**Feature Branch**: `001-colab-agent-terminal-control-plane`  
-**Created**: 2026-02-26  
-**Status**: Draft  
-**Input**: User description: "all of the above, initial prompt; Planning Co(Lab) fork focused on effectively being a hyper optimal Antigravity + Warp Terminal + Codex App + our personal needed features that will be added AFTER the mvp. core focus is tight IDE experience just without the editor and really good agent\\session\\chat\\project mgmt tabs etc"
+**Feature Branch**: `001-colab-agent-terminal-control-plane`
+**Created**: 2026-02-26
+**Updated**: 2026-02-27
+**Status**: Draft
+
+## Overview
+
+Master specification for the heliosApp desktop shell. Scope: fork co(lab), strip the embedded editor and browser chrome, establish ElectroBun as the desktop shell with a terminal-first layout, command palette scaffolding, window management, and app lifecycle. This spec owns the shell — not the bus (002), not the renderer (010-013), not the mux or sessions (008-009).
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Run Multi-Lane Terminal Work Reliably (Priority: P1)
+### User Story 1 — Launch and Reach Interactive Shell (Priority: P0)
 
-As an operator managing parallel project work, I can create, attach, and recover multiple work lanes with persistent terminal sessions so work continues through restarts and failures.
+As an operator, I can launch heliosApp and reach an interactive terminal pane within 2 seconds so I can begin work immediately.
 
-**Why this priority**: Reliable lane and terminal continuity is the core value proposition and baseline for daily use.
+**Why this priority**: First-launch experience defines whether the product feels "insanely snappy."
 
-**Independent Test**: Can be fully tested by creating multiple lanes and sessions, forcing restarts, and verifying the same work context is recoverable without manual reconstruction.
+**Independent Test**: Cold-start the app on reference hardware, measure wall-clock time from process spawn to first keystroke accepted in the terminal pane.
 
 **Acceptance Scenarios**:
 
-1. **Given** a user with an active workspace, **When** they create a new lane and start a terminal session, **Then** the lane and session are available for reattach later.
-2. **Given** a terminal session with active commands, **When** the runtime restarts, **Then** the session state is restored and mapped to the same lane and workspace.
-3. **Given** orphaned lane/session artifacts, **When** watchdog checks run, **Then** the user receives actionable remediation guidance and optional safe cleanup.
+1. **Given** a fresh install, **When** the user launches heliosApp, **Then** an interactive terminal pane is focused and accepting input within 2 seconds.
+2. **Given** a previous session existed, **When** the user relaunches, **Then** the shell frame restores window geometry and workspace binding before terminal panes re-attach.
+3. **Given** a critical subsystem fails during boot (e.g., renderer unavailable), **Then** the shell displays a degraded-mode banner and remains operable for diagnostics.
 
 ---
 
-### User Story 2 - Use a Tight Editorless IDE Surface (Priority: P2)
+### User Story 2 — Terminal-First Layout and Navigation (Priority: P0)
 
-As an agent-centric developer, I can manage terminal, agent, session, chat, and project context from a low-friction interface without needing an in-app code editor.
+As an operator, I can navigate between terminal panes, tabs, and management views without touching an embedded editor because the shell is built around terminals, not around a code editor.
 
-**Why this priority**: This defines the product interaction model and enables fast execution with minimal interface overhead.
+**Why this priority**: The product thesis is an editorless IDE — the layout must prove this works.
 
-**Independent Test**: Can be tested by completing a full lane lifecycle (create, run, switch context, recover) using only the control-plane interface and terminal surfaces.
+**Independent Test**: Complete a multi-pane workflow (split, navigate, close, reorder) using only keyboard shortcuts and command palette.
 
 **Acceptance Scenarios**:
 
-1. **Given** an active workspace, **When** the user opens terminal, agent, session, chat, and project tabs, **Then** each tab reflects the same underlying lane context.
-2. **Given** two available rendering modes, **When** the user changes rendering mode in settings, **Then** the runtime switches or safely restarts while preserving active session context.
+1. **Given** an active workspace, **When** the user opens terminal, agent, session, chat, and project tabs, **Then** each tab renders correctly and reflects current workspace context.
+2. **Given** multiple panes, **When** the user uses keyboard shortcuts to split/navigate/close, **Then** focus moves predictably and layout state is preserved.
+3. **Given** a command palette invocation, **When** the user types a partial command, **Then** matching actions are surfaced with sub-100ms filter latency.
 
 ---
 
-### User Story 3 - Orchestrate Agent Work Across Protocol Boundaries (Priority: P3)
+### User Story 3 — Window Lifecycle and Multi-Window (Priority: P1)
 
-As an advanced user, I can run local and external agent operations through consistent orchestration boundaries with traceable request/response behavior.
+As an operator, I can open multiple windows, each bound to a workspace, and close/reopen them without losing state.
 
-**Why this priority**: Protocol interoperability enables extensibility and long-term platform utility beyond local terminal control.
-
-**Independent Test**: Can be tested by issuing an orchestration request, confirming correlation continuity, and validating completion/error events across protocol boundaries.
+**Why this priority**: Multi-window is table-stakes for desktop IDE usage.
 
 **Acceptance Scenarios**:
 
-1. **Given** a valid orchestration request, **When** it is routed through protocol boundaries, **Then** request correlation is preserved from submission to completion.
-2. **Given** an external protocol failure, **When** the failure is returned, **Then** the local runtime remains responsive and surfaces normalized error feedback.
+1. **Given** an open window, **When** the user closes it, **Then** window geometry and workspace binding are persisted.
+2. **Given** two windows bound to different workspaces, **When** one crashes, **Then** the other remains fully operational.
+3. **Given** the last window is closed, **When** the user relaunches, **Then** the previous window set is offered for restore.
 
 ---
 
 ### Edge Cases
 
-- What happens when a rendering-mode switch cannot be completed in-place? The system must fall back to a safe restart path and preserve session continuity.
-- How does the system handle partial recovery after a crash? The system must restore all recoverable lanes/sessions and clearly flag unrecoverable artifacts for user action.
-- What happens when lane/session metadata and runtime state diverge? The system must detect drift, prevent unsafe actions, and prompt reconciliation.
-- How does the system handle concurrent actions on the same lane/session from multiple tabs? The system must serialize conflicting actions and provide deterministic outcomes.
+- Shell must handle renderer process crash without losing window chrome or workspace binding.
+- Command palette must remain functional even when terminal panes are unresponsive.
+- Layout must degrade gracefully when screen resolution is below minimum supported (1280x720).
+- Window close during an active checkpoint operation must block until checkpoint completes or times out.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001a**: For slice-1, the system MUST let users initialize/open workspaces and restore active workspace context after runtime restart via `codex_session_id` reattach flow.
-- **FR-001b**: For slice-2, the system MUST persist workspace/project metadata durably on local storage across full host restarts.
-- **FR-002**: The system MUST provide lane lifecycle actions (create, list, attach, cleanup) with explicit lifecycle status.
-- **FR-003**: The system MUST provide session lifecycle actions (ensure/open/terminate) linked to lane identity.
-- **FR-004**: The system MUST maintain a terminal registry that maps each terminal to workspace, lane, and session.
-- **FR-005a**: For slice-1, the system MUST support transient checkpoint snapshots sufficient for active terminal/session continuity during runtime restarts.
-- **FR-005b**: For slice-2, the system MUST support durable checkpoint persistence and restore for terminal/session continuity.
-- **FR-006**: The system MUST execute crash-restart recovery orchestration that restores recoverable lane/session state from available checkpoints and reconciliation rules.
-- **FR-007**: The system MUST expose two rendering modes selectable by user settings.
-- **FR-008**: The system MUST perform rendering-mode switch as a transaction with automatic rollback on failure.
-- **FR-009**: The system MUST provide an internal command/response/event bus with envelope validation and correlation IDs.
-- **FR-010**: The system MUST expose protocol boundaries for local control, tool interoperability, and agent-to-agent delegation.
-- **FR-011**: The system MUST provide unified tabs for terminal, agent, session, chat, and project management views bound to active context.
-- **FR-012**: The system MUST detect orphaned lane/session artifacts and surface actionable remediation paths.
-- **FR-013**: The system MUST preserve deterministic event ordering for lifecycle-critical state transitions.
-- **FR-014**: The system MUST provide auditable operation records for lane/session/agent lifecycle actions.
-- **FR-015**: The system MUST clearly separate MVP scope from deferred post-MVP capabilities in product behavior and planning artifacts.
-- **FR-016**: The system MUST keep core workflows fully usable without requiring an embedded code editor.
-- **FR-017**: The system MUST maintain parity with formal localbus protocol assets in `specs/protocol/v1/` for method/topic coverage, with any intentional extensions explicitly documented.
-- **FR-018**: The system MUST expose lifecycle surfaces for renderer switch/capabilities, agent run/cancel, approval resolution, share-session controls (`upterm`/`tmate`), and checkpoint/restore semantics in phased implementation artifacts.
+- **FR-001**: The system MUST fork co(lab) and strip embedded editor, browser, and non-terminal UI surfaces to produce a terminal-first shell.
+- **FR-002**: The system MUST bootstrap an ElectroBun desktop shell that reaches interactive state within 2 seconds on reference hardware.
+- **FR-003**: The system MUST provide a terminal-first default layout with split panes, tab bar, and sidebar for workspace/project navigation.
+- **FR-004**: The system MUST provide a command palette accessible via global keyboard shortcut that supports fuzzy search over registered actions.
+- **FR-005**: The system MUST manage window lifecycle: create, close, minimize, maximize, restore geometry, and persist window state across restarts.
+- **FR-006**: The system MUST support multiple windows, each independently bound to a workspace context.
+- **FR-007**: The system MUST provide tab management for terminal, agent, session, chat, and project views within each window.
+- **FR-008**: The system MUST expose a shell-level extension point for subsystems (renderer, mux, bus) to register capabilities and UI surfaces.
+- **FR-009**: The system MUST implement graceful shutdown that signals all subsystems and waits for in-flight operations before exit.
+- **FR-010**: The system MUST display a degraded-mode banner when a critical subsystem is unavailable, keeping the shell operable for diagnostics.
 
 ### Non-Functional Requirements
 
-- **NFR-001**: Primary terminal interactions (input echo, context-switch feedback) MUST satisfy `p50 <= 60ms` and `p95 <= 150ms` under baseline load profile.
-- **NFR-002**: Recovery operations for recoverable sessions MUST satisfy `p95 <= 5s` under baseline restart profile.
-- **NFR-003**: In multi-lane workflows (`>=8` active lanes), users MUST identify active workspace/lane/session correctly in `>=95%` of validation tasks and complete lane-context switch actions in `<=5s p95`.
-- **NFR-004**: On external boundary failures (tool/A2A/harness), local runtime control MUST remain available, degraded routing MUST engage within `<=2s p95`, and failure scope MUST be isolated to affected lane/session without process-wide crash.
-- **NFR-005a**: Lifecycle event and audit records MUST be retained for at least 30 days by default (configurable) with enough fidelity to reconstruct key operator actions for incident review.
-- **NFR-005b**: Audit export bundles MUST include complete correlated timeline fields for selected workspace/lane/session scopes with required redactions applied.
+- **NFR-001**: Startup to interactive terminal MUST be < 2 seconds (p95) on reference hardware (8 GB RAM, 4-core CPU).
+- **NFR-002**: Command palette filter latency MUST be < 100ms (p95) for up to 500 registered actions.
+- **NFR-003**: Steady-state memory for the shell frame (excluding renderer and terminal buffers) MUST be < 80 MB. This is the shell component budget within the 500 MB system-wide steady-state target defined in the constitution. Other components (renderer, terminal buffers, runtime daemon) have separate budgets.
+- **NFR-004**: Window close-to-reopen restore MUST preserve geometry within 1px tolerance.
+- **NFR-005**: Shell frame rendering MUST maintain 60 FPS on active UI surfaces.
 
-### Key Entities *(include if feature involves data)*
+### Dependencies
 
-- **Workspace**: Top-level operating boundary containing projects, lanes, and shared runtime settings.
-- **Project Context**: Metadata that binds repository or task context to workspace views and active lanes.
-- **Lane**: Isolated execution track for a unit of work, including lifecycle state and associated sessions.
-- **Session**: Multiplexed terminal context attached to a lane with persistence and recovery semantics.
-- **Terminal Instance**: Concrete interactive terminal endpoint mapped to workspace/lane/session identifiers.
-- **Renderer Mode**: User-selectable rendering pathway with capability state and switch transaction metadata.
-- **Orchestration Envelope**: Structured command/response/event unit containing correlation and outcome fields.
-- **Protocol Boundary**: Named integration surface for local control, tool invocation, and agent federation actions.
-- **Lifecycle Audit Event**: Immutable record of significant lane/session/agent operations for traceability.
+- **Spec 002** (Local Bus): Shell dispatches commands and subscribes to events via the bus protocol.
+- **Spec 007** (Zellij Mux Integration): Terminal pane layout delegates to zellij for multiplexing.
+- **Spec 010** (Ghostty Renderer): Terminal rendering is handled by renderer subsystem, not the shell.
+
+## Key Entities
+
+- **Shell Frame**: Top-level ElectroBun window host managing chrome, layout containers, and subsystem lifecycle.
+- **Window**: OS-level window instance bound to exactly one workspace, owning layout state and tab set.
+- **Layout**: Arrangement of panes and tabs within a window, serializable for persistence and restore.
+- **Command Palette**: Fuzzy-search action dispatcher registered by shell and subsystems.
+- **Tab**: Named view container (terminal, agent, session, chat, project) within a window.
 
 ## Success Criteria *(mandatory)*
 
-### Measurable Outcomes
-
-- **SC-001**: At least 95% of lane create/attach operations complete successfully on first attempt in normal conditions.
-- **SC-002**: At least 95% of recoverable sessions are restored after controlled restart tests without manual operator repair.
-- **SC-003**: Users can switch active lane context and continue work in under 5 seconds for common workflows.
-- **SC-004**: In validation runs, users complete a full editorless workflow (open workspace → run terminal work → recover state) with at least 90% first-attempt completion.
-- **SC-005**: In protocol-boundary failure drills, 100% of injected external failures are surfaced with normalized errors while local runtime control remains operational.
-- **SC-006**: Protocol parity validation shows 100% coverage of formal `methods.json` and `topics.json` entries in feature contracts or explicitly documented deferred mappings.
+- **SC-001**: Cold start reaches interactive terminal in < 2s on reference hardware in 95% of test runs.
+- **SC-002**: Users complete a full editorless workflow (open workspace, split panes, navigate tabs, close/reopen window) with 90%+ first-attempt success rate in usability testing.
+- **SC-003**: Shell survives renderer process crash without losing window state in 100% of chaos test injections.
+- **SC-004**: Command palette returns filtered results in < 100ms for 500 registered actions in 95% of measurements.
+- **SC-005**: Multi-window isolation verified: crash in window A produces zero observable effect on window B.
 
 ## Assumptions
 
-- Existing planning docs under `docs/sessions/20260226-helios-market-research/` are the authoritative source for MVP candidate scope.
-- Collaboration overlays and personal feature packs are explicitly deferred to post-MVP.
-- Slice-1 scope uses in-memory continuity and `codex_session_id` reattach; slice-2 adds durable local persistence and durable checkpoint restore.
-- Target branch remains `main` for planning artifacts unless changed later by user direction.
+- co(lab) fork is the starting point; strip-and-rebuild is preferred over rewrite per constitution ("fork before build").
+- Renderer, mux, and protocol bus are separate subsystems with their own specs; this spec owns only the shell host.
+- Reference hardware: 8 GB RAM, 4-core CPU, macOS or Linux.
+- Post-MVP: plugin system, collaboration overlays, personal feature packs.

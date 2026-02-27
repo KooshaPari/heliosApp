@@ -15,6 +15,42 @@
 
 ---
 
+## Work Package WP00: Co(Lab) Fork and ElectroBun Bootstrap (Priority: P0 — prerequisite to all other WPs)
+
+**Phase**: Phase 0 - Foundation
+**Goal**: Fork co(lab) from Blackboard/ElectroBun, strip editor/browser panes, bootstrap terminal-first shell with one real renderer (ghostty) rendering actual PTY output.
+**Independent Test**: ElectroBun fork builds cleanly, ghostty renders real PTY output, zellij sessions are controllable, par lanes execute in isolated worktrees, end-to-end latency is measured.
+**Prompt**: `/kitty-specs/001-colab-agent-terminal-control-plane/tasks/WP00-colab-fork-and-electrobun-bootstrap.md`
+**Estimated Prompt Size**: ~350 lines
+
+### Included Subtasks
+- [ ] T000a Fork co(lab) repo, establish baseline build with ElectroBun, capture initial perf metrics
+- [ ] T000b Surface reduction — remove editor/browser-first panes, establish terminal-first layout placeholders
+- [ ] T000c Integrate ghostty renderer — spawn real PTY, pipe output through ghostty, render to ElectroBun window
+- [ ] T000d Integrate zellij as mux backend — create/attach zellij sessions from the control plane
+- [ ] T000e [P] Integrate par for lane-based execution — map lanes to git worktree-backed par tasks
+- [ ] T000f [P] Wire zmx checkpoint/restore for session durability basics
+- [ ] T000g Verify end-to-end: keystroke → PTY → ghostty render → screen with measured latency
+- [ ] T000h [P] Add baseline integration tests for fork bootstrap
+
+### Implementation Notes — Keep / Rewrite / Delete Matrix
+- **KEEP**: Desktop shell bootstrap, workspace/project primitives, command palette scaffolding
+- **REWRITE**: Main-stage layout (terminal-first), runtime boundary (local bus contract), task orchestration (par lanes), session runtime (zellij + zmx), renderer subsystem (dual adapter)
+- **DELETE**: Browser/editor-first panes, heavy DOM/editor models, synchronous indexing, non-essential starter flows
+
+### Parallel Opportunities
+- T000e and T000f can proceed after T000d zellij basics are functional.
+- T000h can proceed in parallel once core integrations are in place.
+
+### Dependencies
+- None.
+
+### Risks & Mitigations
+- Risk: ElectroBun build breaks after aggressive surface reduction.
+- Mitigation: incremental removal with build verification after each deletion pass.
+
+---
+
 ## Work Package WP01: Protocol Contracts and Runtime Foundation (Priority: P0)
 
 **Goal**: Establish deterministic control-plane protocol primitives, validators, and audit/event scaffolding.
@@ -37,7 +73,7 @@
 - T004 and T005 can proceed after T002 baseline type contracts are stable.
 
 ### Dependencies
-- None.
+- Depends on WP00.
 
 ### Risks & Mitigations
 - Risk: schema drift between `specs/protocol/v1/` and runtime types.
@@ -289,9 +325,9 @@
 
 ## Dependency & Execution Summary
 
-- **Sequence**: WP01 → WP02 → WP03 → (WP04 and WP05 in parallel) → WP06 → WP07 → WP08 → WP09.
-- **Parallelization**: WP04 and WP05 can run concurrently after WP03; within WP07/WP08/WP09, designated `[P]` tasks can execute in parallel after interface-lock milestones.
-- **MVP Scope**: WP01 + WP02 + WP03 (core control-plane lifecycle and terminal flow), with WP07/WP08/WP09 extending post-MVP compliance hardening, slice-2 readiness scaffolding, and formal protocol parity completion.
+- **Sequence**: WP00 → WP01 → WP02 → WP03 → (WP04 and WP05 in parallel) → WP06 → WP07 → WP08 → WP09.
+- **Parallelization**: WP04 and WP05 can run concurrently after WP03; within WP00, T000e/T000f can proceed after T000d; within WP07/WP08/WP09, designated `[P]` tasks can execute in parallel after interface-lock milestones.
+- **MVP Scope**: WP00 (fork bootstrap) + WP01 + WP02 + WP03 (core control-plane lifecycle and terminal flow), with WP07/WP08/WP09 extending post-MVP compliance hardening, slice-2 readiness scaffolding, and formal protocol parity completion.
 
 ---
 
@@ -299,6 +335,14 @@
 
 | Subtask ID | Summary | Work Package | Priority | Parallel? |
 |------------|---------|--------------|----------|-----------|
+| T000a | Fork co(lab) repo, baseline build + perf metrics | WP00 | P0 | No |
+| T000b | Surface reduction — remove editor/browser panes | WP00 | P0 | No |
+| T000c | Integrate ghostty renderer with real PTY | WP00 | P0 | No |
+| T000d | Integrate zellij as mux backend | WP00 | P0 | No |
+| T000e | Integrate par for lane-based execution | WP00 | P0 | Yes |
+| T000f | Wire zmx checkpoint/restore basics | WP00 | P0 | Yes |
+| T000g | End-to-end keystroke-to-render verification | WP00 | P0 | No |
+| T000h | Baseline integration tests for fork bootstrap | WP00 | P0 | Yes |
 | T001 | Align protocol methods/topics | WP01 | P0 | No |
 | T002 | Implement envelope validator/types | WP01 | P0 | No |
 | T003 | Add deterministic sequence guardrails | WP01 | P0 | No |
