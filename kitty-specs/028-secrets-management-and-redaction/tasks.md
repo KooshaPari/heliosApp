@@ -89,8 +89,8 @@
 - [x] T011 Implement protected path detection and warning emission for sensitive file access in `apps/runtime/src/secrets/protected-paths.ts`
 - [x] T012 Implement configurable protected path list with operator-added custom patterns
 - [x] T013 Integrate credential access and redaction audit trails with spec 024 audit subsystem
-- [ ] T014 [P] Add CI redaction verification tests that block merge on unredacted secrets (FR-028-011)
-- [ ] T015 [P] Add integration tests for protected path warnings, cross-provider isolation, audit completeness, and redaction verification
+- [x] T014 [P] Add CI redaction verification tests that block merge on unredacted secrets (FR-028-011)
+- [x] T015 [P] Add integration tests for protected path warnings, cross-provider isolation, audit completeness, and redaction verification
 
 ### Implementation Notes
 - Protected path detection monitors terminal command input, not filesystem events.
