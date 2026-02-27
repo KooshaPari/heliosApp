@@ -1,12 +1,12 @@
 ---
 work_package_id: WP02
 title: Build, Dev, and Typecheck Scripts with Path Aliases and Tests
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00.000000+00:00'
+base_branch: 019-ts7-and-bun-runtime-setup-WP01
+base_commit: 76a235c583c88d28f17942d53484e7e2d6882d48
+created_at: '2026-02-27T11:19:14.050454+00:00'
 subtasks:
 - T008
 - T009
@@ -16,10 +16,10 @@ subtasks:
 - T013
 phase: Phase 0 - Foundation
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: ''
+shell_pid: "22412"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
