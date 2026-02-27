@@ -1,8 +1,11 @@
 ---
 work_package_id: WP01
 title: Lane State Machine and Lifecycle Commands
-lane: "planned"
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: e1ccdaeb4820757da27aa6af279f8f39ba6dcf4b
+created_at: '2026-02-27T11:57:57.830922+00:00'
 subtasks:
 - T001
 - T002
@@ -12,7 +15,7 @@ subtasks:
 phase: Phase 1 - Lane Infrastructure
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "50717"
 review_status: ''
 reviewed_by: ''
 history:
