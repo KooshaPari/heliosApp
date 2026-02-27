@@ -90,11 +90,11 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T011 Implement JSON file persistence backend for the store abstraction in `apps/runtime/src/workspace/store.ts`
-- [ ] T012 Implement snapshot creation and corruption detection in `apps/runtime/src/workspace/snapshot.ts`
-- [ ] T013 Implement recovery from last known good snapshot in `apps/runtime/src/workspace/snapshot.ts`
-- [ ] T014 Implement concurrent operation serialization (write lock) in `apps/runtime/src/workspace/store.ts`
-- [ ] T015 [P] Add integration tests for persistence round-trip, corruption recovery, and concurrency in `apps/runtime/tests/integration/workspace/`
+- [x] T011 Implement JSON file persistence backend for the store abstraction in `apps/runtime/src/workspace/store.ts`
+- [x] T012 Implement snapshot creation and corruption detection in `apps/runtime/src/workspace/snapshot.ts`
+- [x] T013 Implement recovery from last known good snapshot in `apps/runtime/src/workspace/snapshot.ts`
+- [x] T014 Implement concurrent operation serialization (write lock) in `apps/runtime/src/workspace/store.ts`
+- [x] T015 [P] Add integration tests for persistence round-trip, corruption recovery, and concurrency in `apps/runtime/tests/integration/workspace/`
 - [x] T016 [P] Add performance tests for CRUD operations (<100ms) and restore (<500ms) in `apps/runtime/tests/bench/workspace/`
 
 ### Implementation Notes
