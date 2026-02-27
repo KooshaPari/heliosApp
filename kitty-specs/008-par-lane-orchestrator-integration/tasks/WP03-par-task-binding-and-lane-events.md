@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Par Task Binding and Lane Events
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP01
 - WP02
@@ -212,3 +212,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-02-27T12:32:57Z – claude-wp03-008 – shell_pid=83881 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:37:20Z – claude-wp03-008 – shell_pid=83881 – lane=for_review – Ready for review: par task binding, execution, stale detection, lifecycle events
