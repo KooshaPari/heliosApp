@@ -45,6 +45,8 @@ describe("LaneManager", () => {
 
   test("attach rejects on closed lane", async () => {
     const lane = await mgr.create("ws-1", "main");
+    // Move to ready so cleanup can proceed (create leaves lane in provisioning)
+    mgr.getRegistry().update(lane.laneId, { state: "ready" });
     await mgr.cleanup(lane.laneId);
     try {
       await mgr.attach(lane.laneId, "agent-1");
@@ -61,12 +63,14 @@ describe("LaneManager", () => {
 
   test("cleanup is idempotent", async () => {
     const lane = await mgr.create("ws-1", "main");
+    mgr.getRegistry().update(lane.laneId, { state: "ready" });
     await mgr.cleanup(lane.laneId);
     await mgr.cleanup(lane.laneId); // should not throw
   });
 
   test("cleanup emits lane.closed event", async () => {
     const lane = await mgr.create("ws-1", "main");
+    mgr.getRegistry().update(lane.laneId, { state: "ready" });
     await mgr.cleanup(lane.laneId);
     const events = bus.getEvents();
     const closed = events.find((e) => e.topic === "lane.closed");
