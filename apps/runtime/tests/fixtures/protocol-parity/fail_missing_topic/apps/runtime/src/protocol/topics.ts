@@ -31,7 +31,7 @@ export const TOPICS = [
   "lane.cleaned",
   "harness.status.changed",
   "audit.recorded",
-  "diagnostics.metric",
+  "diagnostics.metric"
 ] as const;
 
 export type ProtocolTopic = (typeof TOPICS)[number];

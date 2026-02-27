@@ -31,22 +31,7 @@ export const TOPICS = [
   "lane.cleaned",
   "harness.status.changed",
   "audit.recorded",
-  "diagnostics.metric",
-  "orphan.detection.cycle_completed",
-  "orphan.detection.resource_found",
-  "recovery.stage.changed",
-  "recovery.crash.detected",
-  "recovery.safemode.entered",
-  "recovery.safemode.exited",
-  "recovery.orphans.cleaned",
-  "recovery.session.restored",
-  "recovery.session.failed",
-  "secrets.credential.created",
-  "secrets.credential.accessed",
-  "secrets.credential.rotated",
-  "secrets.credential.revoked",
-  "secrets.redaction.applied",
-  "secrets.protected_path.accessed",
+  "diagnostics.metric"
 ] as const;
 
 export type ProtocolTopic = (typeof TOPICS)[number];
