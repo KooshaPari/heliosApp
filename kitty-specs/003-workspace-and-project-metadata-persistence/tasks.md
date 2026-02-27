@@ -57,11 +57,11 @@
 **Estimated Prompt Size**: ~350 lines
 
 ### Included Subtasks
-- [ ] T006 Implement project binding entity and types in `apps/runtime/src/workspace/project.ts`
-- [ ] T007 Implement root path validation and stale detection in `apps/runtime/src/workspace/project.ts`
-- [ ] T008 Implement git clone delegation for URL-based project binding in `apps/runtime/src/workspace/project.ts`
-- [ ] T009 Wire bus event emission for workspace lifecycle transitions in `apps/runtime/src/workspace/workspace.ts`
-- [ ] T010 [P] Add Vitest unit tests for project binding and stale detection in `apps/runtime/tests/unit/workspace/`
+- [x] T006 Implement project binding entity and types in `apps/runtime/src/workspace/project.ts`
+- [x] T007 Implement root path validation and stale detection in `apps/runtime/src/workspace/project.ts`
+- [x] T008 Implement git clone delegation for URL-based project binding in `apps/runtime/src/workspace/project.ts`
+- [x] T009 Wire bus event emission for workspace lifecycle transitions in `apps/runtime/src/workspace/workspace.ts`
+- [x] T010 [P] Add Vitest unit tests for project binding and stale detection in `apps/runtime/tests/unit/workspace/`
 
 ### Implementation Notes
 - Root paths must be absolute; relative paths rejected.
