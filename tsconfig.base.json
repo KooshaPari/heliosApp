@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    /* Strict type-checking — all flags enabled, no relaxations */
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
@@ -8,8 +7,6 @@
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noPropertyAccessFromIndexSignature": true,
-
-    /* Module system — ESNext for Bun native ESM */
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -17,14 +14,10 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-
-    /* Emit */
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "skipLibCheck": false,
-
-    /* Bun types */
     "types": ["bun-types"]
   }
 }
