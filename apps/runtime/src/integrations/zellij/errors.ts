@@ -63,3 +63,48 @@ export class DuplicateBindingError extends Error {
     this.name = "DuplicateBindingError";
   }
 }
+
+export class PaneTooSmallError extends Error {
+  public readonly requestedCols: number;
+  public readonly requestedRows: number;
+  public readonly minCols: number;
+  public readonly minRows: number;
+
+  constructor(
+    requestedCols: number,
+    requestedRows: number,
+    minCols: number,
+    minRows: number,
+  ) {
+    super(
+      `Pane dimensions ${requestedCols}x${requestedRows} violate minimum ` +
+        `${minCols}x${minRows}`
+    );
+    this.name = "PaneTooSmallError";
+    this.requestedCols = requestedCols;
+    this.requestedRows = requestedRows;
+    this.minCols = minCols;
+    this.minRows = minRows;
+  }
+}
+
+export class PaneNotFoundError extends Error {
+  constructor(sessionName: string, paneId: number) {
+    super(`Pane ${paneId} not found in session ${sessionName}`);
+    this.name = "PaneNotFoundError";
+  }
+}
+
+export class TabNotFoundError extends Error {
+  constructor(sessionName: string, tabId: number) {
+    super(`Tab ${tabId} not found in session ${sessionName}`);
+    this.name = "TabNotFoundError";
+  }
+}
+
+export class PtyBindingError extends Error {
+  constructor(paneId: number, reason: string) {
+    super(`PTY binding failed for pane ${paneId}: ${reason}`);
+    this.name = "PtyBindingError";
+  }
+}
