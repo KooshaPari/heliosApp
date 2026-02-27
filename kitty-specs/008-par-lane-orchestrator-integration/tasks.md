@@ -24,11 +24,11 @@
 **Estimated Prompt Size**: ~420 lines
 
 ### Included Subtasks
-- [ ] T001 Implement lane state machine with validated transitions in `apps/runtime/src/lanes/state_machine.ts`
-- [ ] T002 Implement in-memory lane registry with secondary indexes in `apps/runtime/src/lanes/registry.ts`
-- [ ] T003 Implement lane lifecycle commands (create, list, attach, detach, cleanup) in `apps/runtime/src/lanes/index.ts`
-- [ ] T004 [P] Wire lane lifecycle event publishing to local bus
-- [ ] T005 [P] Implement lane sharing (multi-agent concurrent access) in `apps/runtime/src/lanes/sharing.ts`
+- [x] T001 Implement lane state machine with validated transitions in `apps/runtime/src/lanes/state_machine.ts`
+- [x] T002 Implement in-memory lane registry with secondary indexes in `apps/runtime/src/lanes/registry.ts`
+- [x] T003 Implement lane lifecycle commands (create, list, attach, detach, cleanup) in `apps/runtime/src/lanes/index.ts`
+- [x] T004 [P] Wire lane lifecycle event publishing to local bus
+- [x] T005 [P] Implement lane sharing (multi-agent concurrent access) in `apps/runtime/src/lanes/sharing.ts`
 
 ### Implementation Notes
 - State transitions must be serialized per lane to prevent race conditions (NFR-008-004).
