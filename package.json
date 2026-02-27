@@ -1,15 +1,17 @@
 {
   "name": "helios-app",
+  "version": "0.0.1",
   "private": true,
+  "workspaces": ["apps/desktop", "apps/runtime"],
+  "engines": {
+    "bun": ">=1.2.0"
+  },
   "scripts": {
-    "typecheck": "tsc --build",
-    "test": "bun test apps/runtime/src/renderer/__tests__/ apps/runtime/tests/",
-    "test:unit": "bun test apps/runtime/tests/unit/",
-    "test:integration": "bun test apps/runtime/tests/integration/",
-    "test:benchmark": "bun test apps/runtime/tests/benchmark/"
+    "dev": "bun --filter '*' dev",
+    "build": "bun --filter '*' build",
+    "typecheck": "tsc --build"
   },
   "devDependencies": {
-    "bun-types": "latest",
-    "typescript": "^5.8.0"
+    "typescript": "^5.7.0"
   }
 }
