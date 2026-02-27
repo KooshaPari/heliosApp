@@ -1,9 +1,12 @@
 ---
 work_package_id: WP08
 title: Durability Follow-On Placeholder and Retention Compliance
-lane: planned
+lane: "doing"
 dependencies:
 - WP05
+base_branch: 001-colab-agent-terminal-control-plane-WP07
+base_commit: 9f5060adc6e1931099c808f5354bc46c179e4488
+created_at: '2026-02-27T07:52:59.521476+00:00'
 subtasks:
 - T037
 - T038
@@ -14,7 +17,7 @@ subtasks:
 phase: Phase 4 - Durability and compliance
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "25766"
 review_status: ''
 reviewed_by: ''
 history:
