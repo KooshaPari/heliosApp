@@ -27,7 +27,9 @@ type HandledMethod =
   | "session.attach"
   | "terminal.spawn"
   | "terminal.input"
-  | "terminal.resize";
+  | "terminal.resize"
+  | "renderer.capabilities"
+  | "renderer.switch";
 
 type MethodTransitionSpec = {
   requested: RuntimeEvent;
@@ -112,7 +114,9 @@ function isHandledMethod(method: string): method is HandledMethod {
     method === "session.attach" ||
     method === "terminal.spawn" ||
     method === "terminal.input" ||
-    method === "terminal.resize"
+    method === "terminal.resize" ||
+    method === "renderer.capabilities" ||
+    method === "renderer.switch"
   );
 }
 
@@ -127,6 +131,7 @@ type InMemoryLocalBusOptions = {
 
 export class InMemoryLocalBus implements LocalBus {
   private state: RuntimeState = INITIAL_RUNTIME_STATE;
+  private rendererEngine: "ghostty" | "rio" = "ghostty";
   private sequence = 0;
   private readonly eventLog: LocalBusEnvelope[] = [];
   private readonly auditSink: AuditSink;
@@ -241,6 +246,16 @@ export class InMemoryLocalBus implements LocalBus {
     }
     if (envelope.method === "terminal.resize") {
       return this.handleTerminalResize(envelope);
+    }
+    if (envelope.method === "renderer.capabilities") {
+      return this.okResponse(envelope, {
+        active_engine: this.rendererEngine,
+        available_engines: ["ghostty", "rio"],
+        hot_swap_supported: true
+      });
+    }
+    if (envelope.method === "renderer.switch") {
+      return this.handleRendererSwitch(envelope);
     }
     if (envelope.method === "lane.create" || envelope.method === "session.attach") {
       return this.handleLifecycleCommand(envelope, envelope.method);
@@ -405,6 +420,35 @@ export class InMemoryLocalBus implements LocalBus {
       lane_id: laneId,
       session_id: sessionId,
       state: "active"
+    });
+  }
+
+  private handleRendererSwitch(command: CommandEnvelope): LocalBusEnvelope {
+    const forcedError = command.payload.force_error === true;
+    if (forcedError) {
+      return this.errorResponse(
+        command,
+        "RENDERER_SWITCH_FAILED",
+        "renderer.switch failed",
+        { method: "renderer.switch" },
+        true
+      );
+    }
+
+    const targetEngine = this.readString(command.payload.target_engine);
+    if (targetEngine !== "ghostty" && targetEngine !== "rio") {
+      return this.errorResponse(
+        command,
+        "INVALID_RENDERER_ENGINE",
+        "target_engine must be one of: ghostty, rio"
+      );
+    }
+
+    const previousEngine = this.rendererEngine;
+    this.rendererEngine = targetEngine;
+    return this.okResponse(command, {
+      active_engine: this.rendererEngine,
+      previous_engine: previousEngine
     });
   }
 
