@@ -246,7 +246,7 @@ describe('validateEnvelope', () => {
     setMaxPayloadSize(saved);
     expect(r.valid).toBe(false);
     if (!r.valid) {
-      expect(r.error.message).toContain('maximum size');
+      expect(r.error.code).toBe('BACKPRESSURE');
     }
   });
 

@@ -11,7 +11,7 @@ import type {
   EventEnvelope,
   Envelope,
 } from './types.js';
-import { validationError } from './errors.js';
+import { validationError, backpressureError } from './errors.js';
 import type { BusError } from './errors.js';
 
 // ---------------------------------------------------------------------------
@@ -197,17 +197,53 @@ export function validateEnvelope(input: unknown): ValidationResult {
 
   // --- Payload size check ---
   if ('payload' in envelope && envelope['payload'] !== undefined && envelope['payload'] !== null) {
-    try {
-      const serialised = JSON.stringify(envelope['payload']);
-      if (serialised !== undefined && serialised.length > MAX_PAYLOAD_SIZE) {
-        return fail(
-          `Payload exceeds maximum size of ${MAX_PAYLOAD_SIZE} bytes`,
-          { size: serialised.length, limit: MAX_PAYLOAD_SIZE },
-        );
+    const payload = envelope['payload'];
+    const topicOrMethod =
+      typeof envelope['topic'] === 'string'
+        ? envelope['topic']
+        : typeof envelope['method'] === 'string'
+          ? envelope['method']
+          : 'unknown';
+
+    // Fast-path: Buffer/ArrayBuffer — check byteLength directly.
+    if (payload instanceof ArrayBuffer) {
+      if (payload.byteLength > MAX_PAYLOAD_SIZE) {
+        return {
+          valid: false,
+          error: backpressureError(topicOrMethod),
+        };
       }
-    } catch {
-      // Circular reference or other serialisation error
-      return fail('Payload cannot be serialised (possible circular reference)');
+    } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(payload)) {
+      if (payload.byteLength > MAX_PAYLOAD_SIZE) {
+        return {
+          valid: false,
+          error: backpressureError(topicOrMethod),
+        };
+      }
+    } else if (typeof payload === 'string') {
+      // Fast-path: strings — check length directly (no serialization needed).
+      if (payload.length > MAX_PAYLOAD_SIZE) {
+        return {
+          valid: false,
+          error: backpressureError(topicOrMethod),
+        };
+      }
+    } else if (typeof payload === 'number' || typeof payload === 'boolean') {
+      // Primitives are always small — skip size check.
+    } else {
+      // Object payloads — serialize to check size.
+      try {
+        const serialised = JSON.stringify(payload);
+        if (serialised !== undefined && serialised.length > MAX_PAYLOAD_SIZE) {
+          return {
+            valid: false,
+            error: backpressureError(topicOrMethod),
+          };
+        }
+      } catch {
+        // Circular reference or other serialisation error
+        return fail('Payload cannot be serialised (possible circular reference)');
+      }
     }
   }
 
