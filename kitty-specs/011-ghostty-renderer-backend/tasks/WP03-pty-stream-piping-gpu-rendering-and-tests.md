@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: PTY Stream Piping, GPU Rendering, and Tests
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP01
 - WP02
@@ -213,3 +213,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-02-27T12:32:36Z – claude-wp03-011 – shell_pid=82846 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:40:38Z – claude-wp03-011 – shell_pid=82846 – lane=for_review – Ready for review: PTY stream piping with backpressure, GPU rendering surface with fallback/monitoring, unit/integration/benchmark tests all passing (236/236)
