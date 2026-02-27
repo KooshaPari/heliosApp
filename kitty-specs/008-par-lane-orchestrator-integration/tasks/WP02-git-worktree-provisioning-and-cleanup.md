@@ -1,9 +1,12 @@
 ---
 work_package_id: WP02
 title: Git Worktree Provisioning and Cleanup
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
+base_branch: 008-par-lane-orchestrator-integration-WP01
+base_commit: 1d0b8b91af3e44d3e5ff2f42ccf80d747e8e079e
+created_at: '2026-02-27T12:14:48.875991+00:00'
 subtasks:
 - T006
 - T007
@@ -13,7 +16,7 @@ subtasks:
 phase: Phase 2 - Worktree Management
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "64845"
 review_status: ''
 reviewed_by: ''
 history:
