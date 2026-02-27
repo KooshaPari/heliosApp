@@ -103,6 +103,10 @@ describe("protocol asset parity", () => {
     );
     expect(topicRequired).toEqual(
       new Map<string, string[]>([
+        ["lane.attach.started", ["correlation_id", "lane_id", "workspace_id"]],
+        ["lane.attach.failed", ["correlation_id", "lane_id", "workspace_id"]],
+        ["lane.cleanup.started", ["correlation_id", "lane_id", "workspace_id"]],
+        ["lane.cleanup.failed", ["correlation_id", "lane_id", "workspace_id"]],
         ["lane.create.started", ["correlation_id", "lane_id", "workspace_id"]],
         ["lane.created", ["correlation_id", "lane_id", "workspace_id"]],
         ["lane.create.failed", ["correlation_id", "lane_id", "workspace_id"]],
@@ -113,6 +117,14 @@ describe("protocol asset parity", () => {
         ["session.attached", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
         [
           "session.attach.failed",
+          ["correlation_id", "lane_id", "session_id", "workspace_id"]
+        ],
+        [
+          "session.terminate.started",
+          ["correlation_id", "lane_id", "session_id", "workspace_id"]
+        ],
+        [
+          "session.terminate.failed",
           ["correlation_id", "lane_id", "session_id", "workspace_id"]
         ],
         [
