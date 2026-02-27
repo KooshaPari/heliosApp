@@ -57,11 +57,11 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T007 Implement PTY stream binding/unbinding to active renderer in `apps/runtime/src/renderer/stream_binding.ts`
-- [ ] T008 Implement output buffering during renderer switch to prevent data loss
-- [ ] T009 [P] Add Vitest unit tests for state machine, registry, switch/rollback, and capability query in `apps/runtime/tests/unit/renderer/`
-- [ ] T010 [P] Add integration tests with mock ghostty and mock rio backends in `apps/runtime/tests/integration/renderer/`
-- [ ] T011 [P] Add renderer switch rollback stress test (failure injection)
+- [x] T007 Implement PTY stream binding/unbinding to active renderer in `apps/runtime/src/renderer/stream_binding.ts`
+- [x] T008 Implement output buffering during renderer switch to prevent data loss
+- [x] T009 [P] Add Vitest unit tests for state machine, registry, switch/rollback, and capability query in `apps/runtime/tests/unit/renderer/`
+- [x] T010 [P] Add integration tests with mock ghostty and mock rio backends in `apps/runtime/tests/integration/renderer/`
+- [x] T011 [P] Add renderer switch rollback stress test (failure injection)
 
 ### Implementation Notes
 - Stream binding must handle rebind during switch atomically.
