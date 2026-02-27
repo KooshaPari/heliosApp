@@ -235,7 +235,7 @@
 
 ### Included Subtasks
 - [x] T037 Define slice-2 durability placeholder contract (persistent lane/session/checkpoint store) in `kitty-specs/001-colab-agent-terminal-control-plane/plan.md` and `kitty-specs/001-colab-agent-terminal-control-plane/data-model.md`
-- [ ] T038 Add checkpoint persistence interface stubs and TODO markers for slice-2 handoff in `apps/runtime/src/sessions/` and `apps/runtime/src/audit/`
+- [x] T038 Add checkpoint persistence interface stubs and TODO markers for slice-2 handoff in `apps/runtime/src/sessions/` and `apps/runtime/src/audit/`
 - [ ] T039 Implement retention policy configuration model and enforcement hooks for audit/session artifacts in `apps/runtime/src/audit/` and `apps/runtime/src/config/`
 - [ ] T040 [P] Add retention policy compliance tests for TTL expiry, legal hold exception, and deletion audit proofs in `apps/runtime/tests/integration/recovery/` and `apps/runtime/tests/unit/audit/`
 - [ ] T041 [P] Add export completeness tests to verify policy-compliant lifecycle export contains required fields/correlation IDs and redacts restricted data
