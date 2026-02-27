@@ -93,12 +93,12 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T013 Implement SLO violation detection and rate-limited event emission in `apps/runtime/src/diagnostics/slo.ts`
-- [ ] T014 Wire violation events to bus (`perf.slo_violation` topic) in `apps/runtime/src/diagnostics/slo.ts`
-- [ ] T015 Implement periodic SLO check loop (configurable interval) in `apps/runtime/src/diagnostics/slo.ts`
-- [ ] T016 [P] Add integration tests for violation detection, rate limiting, and bus emission in `apps/runtime/tests/integration/diagnostics/`
-- [ ] T017 [P] Add overhead microbenchmarks (<0.1ms per measurement) in `apps/runtime/tests/bench/diagnostics/`
-- [ ] T018 [P] Add memory overhead test (<10 MB total for all metric buffers) in `apps/runtime/tests/bench/diagnostics/`
+- [x] T013 Implement SLO violation detection and rate-limited event emission in `apps/runtime/src/diagnostics/slo.ts`
+- [x] T014 Wire violation events to bus (`perf.slo_violation` topic) in `apps/runtime/src/diagnostics/slo.ts`
+- [x] T015 Implement periodic SLO check loop (configurable interval) in `apps/runtime/src/diagnostics/slo.ts`
+- [x] T016 [P] Add integration tests for violation detection, rate limiting, and bus emission in `apps/runtime/tests/integration/diagnostics/`
+- [x] T017 [P] Add overhead microbenchmarks (<0.1ms per measurement) in `apps/runtime/tests/bench/diagnostics/`
+- [x] T018 [P] Add memory overhead test (<10 MB total for all metric buffers) in `apps/runtime/tests/bench/diagnostics/`
 
 ### Implementation Notes
 - Rate limit: 1 violation event per metric per 10-second window.
