@@ -1,10 +1,13 @@
 ---
 work_package_id: WP03
 title: PTY Stream Piping, GPU Rendering, and Tests
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
 - WP02
+base_branch: 011-ghostty-renderer-backend-WP02
+base_commit: 5e933ba625248b3c2ae0757ddb24f04ab89844db
+created_at: '2026-02-27T12:32:36.636034+00:00'
 subtasks:
 - T010
 - T011
@@ -14,7 +17,7 @@ subtasks:
 phase: Phase 3 - Integration and Validation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "82846"
 review_status: ''
 reviewed_by: ''
 history:
