@@ -57,9 +57,9 @@
 ### Included Subtasks
 - [ ] T006 Implement redaction engine as synchronous filter on audit sink path in `apps/runtime/src/secrets/redaction-engine.ts`
 - [ ] T007 Implement default redaction rules for AWS, GCP, GitHub, OpenAI key patterns in `apps/runtime/src/secrets/redaction-rules.ts`
-- [ ] T008 Implement configurable and operator-tunable redaction rule management
-- [ ] T009 Implement redaction audit trail proving redaction was applied to each artifact in `apps/runtime/src/secrets/audit-trail.ts`
-- [ ] T010 [P] Add unit tests for redaction engine, default patterns, custom rules, and audit trail generation
+- [x] T008 Implement configurable and operator-tunable redaction rule management
+- [x] T009 Implement redaction audit trail proving redaction was applied to each artifact in `apps/runtime/src/secrets/audit-trail.ts`
+- [x] T010 [P] Add unit tests for redaction engine, default patterns, custom rules, and audit trail generation
 
 ### Implementation Notes
 - Redaction is synchronous; must not add > 5ms latency to audit sink path.
@@ -86,9 +86,9 @@
 **Estimated Prompt Size**: ~420 lines
 
 ### Included Subtasks
-- [ ] T011 Implement protected path detection and warning emission for sensitive file access in `apps/runtime/src/secrets/protected-paths.ts`
-- [ ] T012 Implement configurable protected path list with operator-added custom patterns
-- [ ] T013 Integrate credential access and redaction audit trails with spec 024 audit subsystem
+- [x] T011 Implement protected path detection and warning emission for sensitive file access in `apps/runtime/src/secrets/protected-paths.ts`
+- [x] T012 Implement configurable protected path list with operator-added custom patterns
+- [x] T013 Integrate credential access and redaction audit trails with spec 024 audit subsystem
 - [ ] T014 [P] Add CI redaction verification tests that block merge on unredacted secrets (FR-028-011)
 - [ ] T015 [P] Add integration tests for protected path warnings, cross-provider isolation, audit completeness, and redaction verification
 
