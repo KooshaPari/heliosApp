@@ -1,9 +1,12 @@
 ---
 work_package_id: WP02
 title: Render Loop, Input Passthrough, and Frame Metrics
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
+base_branch: 011-ghostty-renderer-backend-WP01
+base_commit: 5213fc27d2c16ea6bca5872ce7d6aee23f119e37
+created_at: '2026-02-27T12:23:16.290173+00:00'
 subtasks:
 - T006
 - T007
@@ -12,7 +15,7 @@ subtasks:
 phase: Phase 2 - Rendering Pipeline
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "75511"
 review_status: ''
 reviewed_by: ''
 history:
