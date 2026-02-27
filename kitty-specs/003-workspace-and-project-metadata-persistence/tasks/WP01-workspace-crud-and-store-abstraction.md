@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Workspace CRUD and Store Abstraction
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: 138c026f17f300bb7a61f1c5868941eb28c42236
@@ -189,3 +189,4 @@ Constraints:
 
 - 2026-02-27 – system – lane=planned – Prompt generated.
 - 2026-02-27T11:28:37Z – wp01-ws-agent – shell_pid=28454 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T11:31:48Z – wp01-ws-agent – shell_pid=28454 – lane=for_review – Ready for review: Workspace CRUD lifecycle with types, state machine, in-memory store, service layer, and 32 passing unit tests
