@@ -14,7 +14,7 @@ subtasks:
 - T005
 phase: Phase 1 - Zellij Foundation
 assignee: ''
-agent: ''
+agent: "claude-wp01-009"
 shell_pid: "51017"
 review_status: ''
 reviewed_by: ''
@@ -205,3 +205,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-02-27T11:58:00Z – claude-wp01-009 – shell_pid=51017 – lane=doing – Assigned agent via workflow command
