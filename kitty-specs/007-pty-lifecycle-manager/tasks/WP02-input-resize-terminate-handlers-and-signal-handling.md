@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Input, Resize, Terminate Handlers and Signal Handling
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP01
 base_branch: 007-pty-lifecycle-manager-WP01
@@ -227,3 +227,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-02-27T12:32:12Z – claude-wp02-007 – shell_pid=81904 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:38:43Z – claude-wp02-007 – shell_pid=81904 – lane=for_review – Ready for review: PTY input/resize/terminate handlers, signal audit, bus events, idle timeout
