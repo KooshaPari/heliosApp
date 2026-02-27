@@ -1,9 +1,12 @@
 ---
 work_package_id: WP02
 title: Input, Resize, Terminate Handlers and Signal Handling
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
+base_branch: 007-pty-lifecycle-manager-WP01
+base_commit: c387c28ded3abd4e4eb250b44bb2d71e2657335e
+created_at: '2026-02-27T12:32:12.283964+00:00'
 subtasks:
 - T006
 - T007
@@ -14,7 +17,7 @@ subtasks:
 phase: Phase 2 - PTY Operations
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "81904"
 review_status: ''
 reviewed_by: ''
 history:
