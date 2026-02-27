@@ -1,0 +1,20 @@
+{
+  "name": "helios-app",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": ["apps/desktop", "apps/runtime"],
+  "engines": {
+    "bun": ">=1.2.0"
+  },
+  "scripts": {
+    "dev": "bun --filter '*' dev",
+    "build": "bun run build:runtime && bun run build:desktop",
+    "build:runtime": "bun --filter '@helios/runtime' build",
+    "build:desktop": "bun --filter '@helios/desktop' build",
+    "typecheck": "tsc --build",
+    "test": "bun --filter '*' test"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}

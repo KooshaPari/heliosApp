@@ -14,3 +14,13 @@
 .kittify/.dashboard
 !.gemini/
 !.gemini/config.yaml
+*.tsbuildinfo
+node_modules/
+dist/
+# tsc --build emit artifacts in test dirs
+apps/*/tests/**/*.js
+apps/*/tests/**/*.js.map
+apps/*/tests/**/*.d.ts
+apps/*/tests/**/*.d.ts.map
+# Excluded via sparse-checkout
+kitty-specs/
