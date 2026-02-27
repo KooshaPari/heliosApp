@@ -95,9 +95,9 @@
 - [ ] T013 Implement per-topic monotonic sequence number assignment in `apps/runtime/src/protocol/topics.ts`
 - [ ] T014 Implement correlation ID propagation from originating command through all downstream events in `apps/runtime/src/protocol/bus.ts`
 - [ ] T015 Implement payload size enforcement and backpressure error in `apps/runtime/src/protocol/envelope.ts`
-- [ ] T016 [P] Add integration tests for 10k concurrent publishes verifying zero sequence inversions in `apps/runtime/tests/integration/protocol/`
-- [ ] T017 [P] Add latency microbenchmarks for dispatch (<1ms) and fan-out (<5ms for 50 subs) in `apps/runtime/tests/bench/protocol/`
-- [ ] T018 [P] Validate JSON schema parity with runtime types and add regression test in `apps/runtime/tests/unit/protocol/`
+- [x] T016 [P] Add integration tests for 10k concurrent publishes verifying zero sequence inversions in `apps/runtime/tests/integration/protocol/`
+- [x] T017 [P] Add latency microbenchmarks for dispatch (<1ms) and fan-out (<5ms for 50 subs) in `apps/runtime/tests/bench/protocol/`
+- [x] T018 [P] Validate JSON schema parity with runtime types and add regression test in `apps/runtime/tests/unit/protocol/`
 
 ### Implementation Notes
 - Sequence numbers are per-topic counters, not global.
