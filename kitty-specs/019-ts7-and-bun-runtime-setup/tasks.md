@@ -57,12 +57,12 @@
 **Estimated Prompt Size**: ~320 lines
 
 ### Included Subtasks
-- [ ] T008 Implement `bun dev` script with hot-reload support across workspace packages and ElectroBun desktop shell launch
-- [ ] T009 Implement `bun run build` script producing a production-optimized ElectroBun desktop artifact
-- [ ] T010 Implement `bun run typecheck` as a standalone strict-mode type-checking gate across all workspace packages
-- [ ] T011 [P] Add path alias resolution validation tests — confirm aliases resolve in build output, dev server, and runtime contexts
-- [ ] T012 [P] Add build infrastructure tests: verify dev server starts, build produces artifact, typecheck catches deliberate errors, circular dependency detection works
-- [ ] T013 Validate NFR compliance: `bun install` < 30s, dev server cold start < 5s, typecheck < 15s on reference hardware
+- [x] T008 Implement `bun dev` script with hot-reload support across workspace packages and ElectroBun desktop shell launch
+- [x] T009 Implement `bun run build` script producing a production-optimized ElectroBun desktop artifact
+- [x] T010 Implement `bun run typecheck` as a standalone strict-mode type-checking gate across all workspace packages
+- [x] T011 [P] Add path alias resolution validation tests — confirm aliases resolve in build output, dev server, and runtime contexts
+- [x] T012 [P] Add build infrastructure tests: verify dev server starts, build produces artifact, typecheck catches deliberate errors, circular dependency detection works
+- [x] T013 Validate NFR compliance: `bun install` < 30s, dev server cold start < 5s, typecheck < 15s on reference hardware
 
 ### Implementation Notes
 - `bun run typecheck` must be a discrete gate that can run independently of build.
