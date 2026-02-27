@@ -15,7 +15,7 @@ subtasks:
 - T006
 phase: Phase 1 - Interface Definition
 assignee: ''
-agent: ''
+agent: "claude-wp01-010"
 shell_pid: "51331"
 review_status: ''
 reviewed_by: ''
@@ -272,3 +272,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-02-27T11:58:04Z – claude-wp01-010 – shell_pid=51331 – lane=doing – Assigned agent via workflow command
