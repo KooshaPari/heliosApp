@@ -203,7 +203,7 @@
 **Estimated Prompt Size**: ~360 lines
 
 ### Included Subtasks
-- [ ] T031 Define FR-010 boundary contract mapping (`local_execution`, `tool_invocation`, `a2a_delegation`) in `specs/protocol/v1/methods.json`, `specs/protocol/v1/topics.json`, and `kitty-specs/001-colab-agent-terminal-control-plane/spec.md`
+- [x] T031 Define FR-010 boundary contract mapping (`local_execution`, `tool_invocation`, `a2a_delegation`) in `specs/protocol/v1/methods.json`, `specs/protocol/v1/topics.json`, and `kitty-specs/001-colab-agent-terminal-control-plane/spec.md`
 - [ ] T032 Implement protocol boundary adapter and dispatch selection in `apps/runtime/src/protocol/boundary_adapter.ts` and integrate with `apps/runtime/src/integrations/exec.ts`
 - [ ] T033 [P] Add unit/integration tests for local/tool/A2A delegation routing and boundary error normalization in `apps/runtime/tests/unit/protocol/` and `apps/runtime/tests/integration/protocol/`
 - [ ] T034 Implement coverage gate (`>=85% lines`) in `apps/runtime/package.json`, `apps/runtime/vitest.config.ts`, and repo CI workflow configs
@@ -265,11 +265,11 @@
 **Estimated Prompt Size**: ~330 lines
 
 ### Included Subtasks
-- [ ] T043 Build a method/topic parity matrix artifact mapping every formal method/topic to contract sections, runtime adapter paths, and WP task IDs
-- [ ] T044 Add explicit contract coverage for workspace/project/renderer/agent/approval/share/zmx method families in `kitty-specs/001-colab-agent-terminal-control-plane/contracts/control-plane.openapi.yaml` and protocol docs
-- [ ] T045 Add event coverage mapping for `workspace.opened`, `project.ready`, renderer switch events, `agent.run.*`, and approval/share events in feature contract docs and runtime event plans
-- [ ] T046 [P] Add automated parity check script/test that fails when formal method/topic entries are unmapped or removed without explicit extension/defer annotation
-- [ ] T047 [P] Update `research.md`, `plan.md`, and `quickstart.md` with parity verification commands and extension/defer policy examples
+- [x] T043 Build a method/topic parity matrix artifact mapping every formal method/topic to contract sections, runtime adapter paths, and WP task IDs
+- [x] T044 Add explicit contract coverage for workspace/project/renderer/agent/approval/share/zmx method families in `kitty-specs/001-colab-agent-terminal-control-plane/contracts/control-plane.openapi.yaml` and protocol docs
+- [x] T045 Add event coverage mapping for `workspace.opened`, `project.ready`, renderer switch events, `agent.run.*`, and approval/share events in feature contract docs and runtime event plans
+- [x] T046 [P] Add automated parity check script/test that fails when formal method/topic entries are unmapped or removed without explicit extension/defer annotation
+- [x] T047 [P] Update `research.md`, `plan.md`, and `quickstart.md` with parity verification commands and extension/defer policy examples
 
 ### Implementation Notes
 - Treat `specs/protocol/v1/*` as canonical baseline and document Helios-specific extensions (`harness.status.changed`, `lane.attached`) explicitly.
