@@ -1,12 +1,16 @@
 ---
 work_package_id: WP02
-title: "Method and Topic Registries with Dispatch"
-lane: "planned"
-dependencies: ["WP01"]
-subtasks: ["T007", "T008", "T009", "T010", "T011", "T012"]
-phase: "Phase 2 - Core Routing"
-assignee: ""
-agent: ""
+title: Method and Topic Registries with Dispatch
+lane: "doing"
+dependencies: [WP01]
+base_branch: 002-local-bus-v1-protocol-and-envelope-WP01
+base_commit: 653850b86743c01cdbaf2042aab76e6988c1c24b
+created_at: '2026-02-27T11:28:31.579393+00:00'
+subtasks: [T007, T008, T009, T010, T011, T012]
+phase: Phase 2 - Core Routing
+assignee: ''
+agent: ''
+shell_pid: "28146"
 ---
 
 # Work Package Prompt: WP02 - Method and Topic Registries with Dispatch
