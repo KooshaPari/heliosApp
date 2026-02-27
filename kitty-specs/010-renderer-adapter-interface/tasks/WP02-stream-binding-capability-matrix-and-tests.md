@@ -1,9 +1,12 @@
 ---
 work_package_id: WP02
 title: Stream Binding, Capability Matrix, and Tests
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
+base_branch: 010-renderer-adapter-interface-WP01
+base_commit: a10ba7e1c9250e6cca5d8b90d257fd0f793b17d8
+created_at: '2026-02-27T12:14:54.187231+00:00'
 subtasks:
 - T007
 - T008
@@ -13,7 +16,7 @@ subtasks:
 phase: Phase 2 - Integration and Validation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "65314"
 review_status: ''
 reviewed_by: ''
 history:
