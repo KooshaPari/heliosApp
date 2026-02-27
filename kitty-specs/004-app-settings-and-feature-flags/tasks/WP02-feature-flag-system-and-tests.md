@@ -9,7 +9,7 @@ created_at: '2026-02-27T11:50:49.277334+00:00'
 subtasks: [T008, T009, T010, T011, T012]
 phase: Phase 2 - Feature Gating
 assignee: ''
-agent: ''
+agent: "wp02-flags-agent"
 shell_pid: "38381"
 ---
 
@@ -178,3 +178,4 @@ Constraints:
 ## Activity Log
 
 - 2026-02-27 – system – lane=planned – Prompt generated.
+- 2026-02-27T11:50:49Z – wp02-flags-agent – shell_pid=38381 – lane=doing – Assigned agent via workflow command
