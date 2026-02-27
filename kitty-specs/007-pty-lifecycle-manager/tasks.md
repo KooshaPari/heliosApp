@@ -56,12 +56,12 @@
 **Estimated Prompt Size**: ~420 lines
 
 ### Included Subtasks
-- [ ] T006 Implement write-input handler delivering bytes to PTY fd in `apps/runtime/src/pty/spawn.ts` or new `apps/runtime/src/pty/io.ts`
-- [ ] T007 Implement resize handler sending SIGWINCH and updating PTY dimensions in `apps/runtime/src/pty/signals.ts`
-- [ ] T008 Implement terminate handler with configurable SIGTERM-to-SIGKILL escalation timer in `apps/runtime/src/pty/signals.ts`
-- [ ] T009 Implement signal delivery audit records (signal envelope) for all signal operations
-- [ ] T010 [P] Wire lifecycle event publishing (spawned, state-changed, output, error, stopped) to local bus in `apps/runtime/src/pty/index.ts`
-- [ ] T011 [P] Implement idle timeout detection transitioning PTY to `throttled` state
+- [x] T006 Implement write-input handler delivering bytes to PTY fd in `apps/runtime/src/pty/spawn.ts` or new `apps/runtime/src/pty/io.ts`
+- [x] T007 Implement resize handler sending SIGWINCH and updating PTY dimensions in `apps/runtime/src/pty/signals.ts`
+- [x] T008 Implement terminate handler with configurable SIGTERM-to-SIGKILL escalation timer in `apps/runtime/src/pty/signals.ts`
+- [x] T009 Implement signal delivery audit records (signal envelope) for all signal operations
+- [x] T010 [P] Wire lifecycle event publishing (spawned, state-changed, output, error, stopped) to local bus in `apps/runtime/src/pty/index.ts`
+- [x] T011 [P] Implement idle timeout detection transitioning PTY to `throttled` state
 
 ### Implementation Notes
 - Input handler must be zero-copy where possible and never reorder bytes.
