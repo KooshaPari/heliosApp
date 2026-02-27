@@ -58,12 +58,12 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T007 Implement rolling percentile computation over ring buffer in `apps/runtime/src/diagnostics/percentiles.ts`
-- [ ] T008 Define SLO thresholds from constitution in `apps/runtime/src/diagnostics/slo.ts`
-- [ ] T009 Implement memory sampler (interval-based) in `apps/runtime/src/diagnostics/samplers.ts`
-- [ ] T010 Implement frame timing sampler with FPS flagging in `apps/runtime/src/diagnostics/samplers.ts`
-- [ ] T011 Implement metrics query API in `apps/runtime/src/diagnostics/query.ts`
-- [ ] T012 [P] Add Vitest unit tests for percentiles, SLO definitions, samplers, and query API in `apps/runtime/tests/unit/diagnostics/`
+- [x] T007 Implement rolling percentile computation over ring buffer in `apps/runtime/src/diagnostics/percentiles.ts`
+- [x] T008 Define SLO thresholds from constitution in `apps/runtime/src/diagnostics/slo.ts`
+- [x] T009 Implement memory sampler (interval-based) in `apps/runtime/src/diagnostics/samplers.ts`
+- [x] T010 Implement frame timing sampler with FPS flagging in `apps/runtime/src/diagnostics/samplers.ts`
+- [x] T011 Implement metrics query API in `apps/runtime/src/diagnostics/query.ts`
+- [x] T012 [P] Add Vitest unit tests for percentiles, SLO definitions, samplers, and query API in `apps/runtime/tests/unit/diagnostics/`
 
 ### Implementation Notes
 - Rolling percentiles: compute over the full ring buffer (sliding window = buffer capacity).
