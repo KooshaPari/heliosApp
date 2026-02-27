@@ -1,12 +1,16 @@
 ---
 work_package_id: WP01
-title: "Envelope Schema, Types, and Validation"
-lane: "planned"
+title: Envelope Schema, Types, and Validation
+lane: "doing"
 dependencies: []
-subtasks: ["T001", "T002", "T003", "T004", "T005", "T006"]
-phase: "Phase 1 - Foundation"
-assignee: ""
-agent: ""
+base_branch: main
+base_commit: d89dc4f54d56d98a0ded78813aeffc0ed68d1dd0
+created_at: '2026-02-27T11:19:15.585730+00:00'
+subtasks: [T001, T002, T003, T004, T005, T006]
+phase: Phase 1 - Foundation
+assignee: ''
+agent: ''
+shell_pid: "22522"
 ---
 
 # Work Package Prompt: WP01 - Envelope Schema, Types, and Validation
