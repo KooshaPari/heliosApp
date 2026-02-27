@@ -1,12 +1,16 @@
 ---
 work_package_id: WP01
-title: "Instrumentation Hooks and Timer API"
-lane: "planned"
+title: Instrumentation Hooks and Timer API
+lane: "doing"
 dependencies: []
-subtasks: ["T001", "T002", "T003", "T004", "T005", "T006"]
-phase: "Phase 1 - Foundation"
-assignee: ""
-agent: ""
+base_branch: main
+base_commit: 39f25bd2dd6b41645c93a63f333558a581a3f652
+created_at: '2026-02-27T11:50:52.771440+00:00'
+subtasks: [T001, T002, T003, T004, T005, T006]
+phase: Phase 1 - Foundation
+assignee: ''
+agent: ''
+shell_pid: "38561"
 ---
 
 # Work Package Prompt: WP01 - Instrumentation Hooks and Timer API
