@@ -24,12 +24,12 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T001 Implement self-contained ULID generation with monotonic ordering in `packages/ids/src/ulid.ts`
-- [ ] T002 Define prefix registry mapping entity types to prefixes in `packages/ids/src/prefixes.ts`
-- [ ] T003 Implement `generateId(entityType)` public API in `packages/ids/src/index.ts`
-- [ ] T004 Implement `validateId(raw)` with format, prefix, and ULID integrity checks in `packages/ids/src/validate.ts`
-- [ ] T005 Implement `parseId(raw)` extracting entity type and timestamp in `packages/ids/src/parse.ts`
-- [ ] T006 [P] Add Vitest unit tests for generation, validation, and parsing in `packages/ids/tests/`
+- [x] T001 Implement self-contained ULID generation with monotonic ordering in `packages/ids/src/ulid.ts`
+- [x] T002 Define prefix registry mapping entity types to prefixes in `packages/ids/src/prefixes.ts`
+- [x] T003 Implement `generateId(entityType)` public API in `packages/ids/src/index.ts`
+- [x] T004 Implement `validateId(raw)` with format, prefix, and ULID integrity checks in `packages/ids/src/validate.ts`
+- [x] T005 Implement `parseId(raw)` extracting entity type and timestamp in `packages/ids/src/parse.ts`
+- [x] T006 [P] Add Vitest unit tests for generation, validation, and parsing in `packages/ids/tests/`
 
 ### Implementation Notes
 - ULID: 10-char timestamp (ms since Unix epoch in Crockford base32) + 16-char random. Total 26 chars.
