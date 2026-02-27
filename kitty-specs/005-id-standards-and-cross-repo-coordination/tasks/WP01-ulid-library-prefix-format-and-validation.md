@@ -9,7 +9,7 @@ created_at: '2026-02-27T11:28:32.828578+00:00'
 subtasks: [T001, T002, T003, T004, T005, T006]
 phase: Phase 1 - Foundation
 assignee: ''
-agent: ''
+agent: "wp01-ids-agent"
 shell_pid: "28267"
 ---
 
@@ -227,3 +227,4 @@ Constraints:
 ## Activity Log
 
 - 2026-02-27 – system – lane=planned – Prompt generated.
+- 2026-02-27T11:28:32Z – wp01-ids-agent – shell_pid=28267 – lane=doing – Assigned agent via workflow command
