@@ -56,7 +56,7 @@
 
 ### Included Subtasks
 - [x] T006 Implement redaction engine as synchronous filter on audit sink path in `apps/runtime/src/secrets/redaction-engine.ts`
-- [ ] T007 Implement default redaction rules for AWS, GCP, GitHub, OpenAI key patterns in `apps/runtime/src/secrets/redaction-rules.ts`
+- [x] T007 Implement default redaction rules for AWS, GCP, GitHub, OpenAI key patterns in `apps/runtime/src/secrets/redaction-rules.ts`
 - [x] T008 Implement configurable and operator-tunable redaction rule management
 - [x] T009 Implement redaction audit trail proving redaction was applied to each artifact in `apps/runtime/src/secrets/audit-trail.ts`
 - [x] T010 [P] Add unit tests for redaction engine, default patterns, custom rules, and audit trail generation
