@@ -16,7 +16,7 @@ subtasks:
 - T013
 phase: Phase 0 - Foundation
 assignee: ''
-agent: ''
+agent: "wp02-agent"
 shell_pid: "22412"
 review_status: ''
 reviewed_by: ''
@@ -213,3 +213,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z – system – lane=planned – Prompt created.
+- 2026-02-27T11:19:14Z – wp02-agent – shell_pid=22412 – lane=doing – Assigned agent via workflow command
