@@ -1,27 +1,30 @@
 ---
-work_package_id: "WP09"
-subtasks:
-  - "T043"
-  - "T044"
-  - "T045"
-  - "T046"
-  - "T047"
-title: "Formal Protocol Surface Completion"
-phase: "Phase 4 - Formal parity"
-lane: "planned"
+work_package_id: WP09
+title: Formal Protocol Surface Completion
+lane: "doing"
 dependencies:
-  - "WP08"
-assignee: ""
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+- WP08
+base_branch: 001-colab-agent-terminal-control-plane-WP08
+base_commit: 9f5060adc6e1931099c808f5354bc46c179e4488
+created_at: '2026-02-27T07:53:00.480052+00:00'
+subtasks:
+- T043
+- T044
+- T045
+- T046
+- T047
+phase: Phase 4 - Formal parity
+assignee: ''
+agent: ''
+shell_pid: "65388"
+review_status: ''
+reviewed_by: ''
 history:
-  - timestamp: "2026-02-26T13:19:35Z"
-    lane: "planned"
-    agent: "system"
-    shell_pid: ""
-    action: "Prompt generated via /spec-kitty.tasks"
+- timestamp: '2026-02-26T13:19:35Z'
+  lane: planned
+  agent: system
+  shell_pid: ''
+  action: Prompt generated via /spec-kitty.tasks
 ---
 
 # Work Package Prompt: WP09 - Formal Protocol Surface Completion
