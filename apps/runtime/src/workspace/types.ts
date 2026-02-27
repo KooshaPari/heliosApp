@@ -1,7 +1,7 @@
 // T001 — Workspace and store types
 
 /** Valid workspace lifecycle states */
-export type WorkspaceState = "active" | "closed" | "deleted";
+export type WorkspaceState = 'active' | 'closed' | 'deleted';
 
 /** A project bound to a workspace */
 export interface ProjectBinding {
@@ -9,7 +9,7 @@ export interface ProjectBinding {
   workspaceId: string;
   rootPath: string;
   gitUrl?: string | undefined;
-  status: "active" | "stale";
+  status: 'active' | 'stale';
   boundAt: number;
 }
 
