@@ -1,10 +1,13 @@
 ---
 work_package_id: WP03
 title: Bounded Output Buffering, Backpressure, and Tests
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
 - WP02
+base_branch: 007-pty-lifecycle-manager-WP02
+base_commit: 2af67727606fac0498496c5405d9175df21d131d
+created_at: '2026-02-27T12:44:08.376210+00:00'
 subtasks:
 - T012
 - T013
@@ -15,7 +18,7 @@ subtasks:
 phase: Phase 3 - Stream Safety and Validation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "64558"
 review_status: ''
 reviewed_by: ''
 history:
