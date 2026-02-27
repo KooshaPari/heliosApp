@@ -26,7 +26,7 @@ export async function detectGpu(): Promise<GpuInfo> {
   try {
     if (process.platform === "darwin") {
       // macOS always has Metal on supported hardware
-      const proc = (Bun as any).spawn(["system_profiler", "SPDisplaysDataType"], {
+      const proc = Bun.spawn(["system_profiler", "SPDisplaysDataType"], {
         stdout: "pipe",
         stderr: "ignore",
       });
@@ -36,7 +36,7 @@ export async function detectGpu(): Promise<GpuInfo> {
     }
 
     // Linux: probe for OpenGL
-    const proc = (Bun as any).spawn(["glxinfo"], { stdout: "pipe", stderr: "ignore" });
+    const proc = Bun.spawn(["glxinfo"], { stdout: "pipe", stderr: "ignore" });
     const text = await new Response(proc.stdout).text();
     const versionMatch = text.match(/OpenGL version string:\s*(.+)/);
     return {
@@ -62,7 +62,9 @@ let cachedCapabilities: RendererCapabilities | undefined;
  *
  * @param forceRefresh - If true, discard the cache and re-detect.
  */
-export async function detectCapabilities(forceRefresh = false): Promise<RendererCapabilities> {
+export async function detectCapabilities(
+  forceRefresh = false,
+): Promise<RendererCapabilities> {
   if (cachedCapabilities !== undefined && !forceRefresh) {
     return cachedCapabilities;
   }
