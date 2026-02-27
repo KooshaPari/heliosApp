@@ -9,7 +9,7 @@ created_at: '2026-02-27T11:50:39.812822+00:00'
 subtasks: [T013, T014, T015, T016, T017, T018]
 phase: Phase 3 - Hardening
 assignee: ''
-agent: ''
+agent: "wp03-bus-agent"
 shell_pid: "37905"
 ---
 
@@ -197,3 +197,4 @@ Constraints:
 ## Activity Log
 
 - 2026-02-27 – system – lane=planned – Prompt generated.
+- 2026-02-27T11:50:39Z – wp03-bus-agent – shell_pid=37905 – lane=doing – Assigned agent via workflow command
