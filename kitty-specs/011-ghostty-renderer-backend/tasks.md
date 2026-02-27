@@ -87,11 +87,11 @@
 **Estimated Prompt Size**: ~390 lines
 
 ### Included Subtasks
-- [ ] T010 Implement PTY output stream piping to ghostty render input
-- [ ] T011 Implement GPU rendering surface integration with ElectroBun window
-- [ ] T012 [P] Add Vitest unit tests for adapter, process lifecycle, metrics, and capabilities in `apps/runtime/tests/unit/renderer/ghostty/`
-- [ ] T013 [P] Add integration tests for ghostty lifecycle and rendering in `apps/runtime/tests/integration/renderer/ghostty/`
-- [ ] T014 [P] Add SLO benchmark tests: 60 FPS, input-to-echo < 60ms p95, memory < 10 MB per terminal
+- [x] T010 Implement PTY output stream piping to ghostty render input
+- [x] T011 Implement GPU rendering surface integration with ElectroBun window
+- [x] T012 [P] Add Vitest unit tests for adapter, process lifecycle, metrics, and capabilities in `apps/runtime/tests/unit/renderer/ghostty/`
+- [x] T013 [P] Add integration tests for ghostty lifecycle and rendering in `apps/runtime/tests/integration/renderer/ghostty/`
+- [x] T014 [P] Add SLO benchmark tests: 60 FPS, input-to-echo < 60ms p95, memory < 10 MB per terminal
 
 ### Implementation Notes
 - PTY stream piping: adapter receives ReadableStream from spec 007, feeds to ghostty process stdin or IPC channel.
