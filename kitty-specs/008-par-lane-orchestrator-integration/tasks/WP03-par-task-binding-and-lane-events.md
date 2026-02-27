@@ -1,10 +1,13 @@
 ---
 work_package_id: WP03
 title: Par Task Binding and Lane Events
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
 - WP02
+base_branch: 008-par-lane-orchestrator-integration-WP02
+base_commit: 08b43d310314e753b278097a855b9037d117634c
+created_at: '2026-02-27T12:32:57.666763+00:00'
 subtasks:
 - T011
 - T012
@@ -14,7 +17,7 @@ subtasks:
 phase: Phase 3 - Execution Isolation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "83881"
 review_status: ''
 reviewed_by: ''
 history:
