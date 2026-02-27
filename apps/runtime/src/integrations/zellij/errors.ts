@@ -15,7 +15,8 @@ export class ZellijNotFoundError extends Error {
 export class ZellijVersionError extends Error {
   constructor(actual: string, required: string) {
     super(
-      `zellij version ${actual} is below the minimum required ${required}. Please upgrade: https://zellij.dev/documentation/installation`
+      `zellij version ${actual} is below the minimum required ${required}. ` +
+        "Please upgrade: https://zellij.dev/documentation/installation"
     );
     this.name = "ZellijVersionError";
   }
@@ -35,7 +36,9 @@ export class ZellijCliError extends Error {
 
 export class ZellijTimeoutError extends Error {
   constructor(command: string, timeoutMs: number) {
-    super(`zellij command timed out after ${timeoutMs}ms: ${command}`);
+    super(
+      `zellij command timed out after ${timeoutMs}ms: ${command}`
+    );
     this.name = "ZellijTimeoutError";
   }
 }
@@ -58,44 +61,5 @@ export class DuplicateBindingError extends Error {
   constructor(key: string, existing: string) {
     super(`Binding conflict: ${key} already bound to ${existing}`);
     this.name = "DuplicateBindingError";
-  }
-}
-
-export class PaneTooSmallError extends Error {
-  public readonly requestedCols: number;
-  public readonly requestedRows: number;
-  public readonly minCols: number;
-  public readonly minRows: number;
-
-  constructor(requestedCols: number, requestedRows: number, minCols: number, minRows: number) {
-    super(
-      `Pane dimensions ${requestedCols}x${requestedRows} violate minimum ` + `${minCols}x${minRows}`
-    );
-    this.name = "PaneTooSmallError";
-    this.requestedCols = requestedCols;
-    this.requestedRows = requestedRows;
-    this.minCols = minCols;
-    this.minRows = minRows;
-  }
-}
-
-export class PaneNotFoundError extends Error {
-  constructor(sessionName: string, paneId: number) {
-    super(`Pane ${paneId} not found in session ${sessionName}`);
-    this.name = "PaneNotFoundError";
-  }
-}
-
-export class TabNotFoundError extends Error {
-  constructor(sessionName: string, tabId: number) {
-    super(`Tab ${tabId} not found in session ${sessionName}`);
-    this.name = "TabNotFoundError";
-  }
-}
-
-export class PtyBindingError extends Error {
-  constructor(paneId: number, reason: string) {
-    super(`PTY binding failed for pane ${paneId}: ${reason}`);
-    this.name = "PtyBindingError";
   }
 }
