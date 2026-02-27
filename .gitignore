@@ -19,3 +19,5 @@
 *.tsbuildinfo
 dist/
 node_modules/
+# Excluded via sparse-checkout
+kitty-specs/
