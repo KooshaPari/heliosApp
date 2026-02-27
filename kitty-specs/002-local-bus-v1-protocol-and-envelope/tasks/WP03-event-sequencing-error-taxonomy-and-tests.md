@@ -1,12 +1,16 @@
 ---
 work_package_id: WP03
-title: "Event Sequencing, Error Taxonomy Integration, and Tests"
-lane: "planned"
-dependencies: ["WP02"]
-subtasks: ["T013", "T014", "T015", "T016", "T017", "T018"]
-phase: "Phase 3 - Hardening"
-assignee: ""
-agent: ""
+title: Event Sequencing, Error Taxonomy Integration, and Tests
+lane: "doing"
+dependencies: [WP02]
+base_branch: 002-local-bus-v1-protocol-and-envelope-WP02
+base_commit: 8377f7da306441de443674fe9f2fddbadd8b502f
+created_at: '2026-02-27T11:50:39.812822+00:00'
+subtasks: [T013, T014, T015, T016, T017, T018]
+phase: Phase 3 - Hardening
+assignee: ''
+agent: ''
+shell_pid: "37905"
 ---
 
 # Work Package Prompt: WP03 - Event Sequencing, Error Taxonomy Integration, and Tests
