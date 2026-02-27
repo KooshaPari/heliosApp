@@ -24,12 +24,12 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T001 Define metric, sample, and buffer types in `apps/runtime/src/diagnostics/types.ts`
-- [ ] T002 Implement monotonic clock wrapper in `apps/runtime/src/diagnostics/hooks.ts`
-- [ ] T003 Implement `markStart`/`markEnd` API with zero-allocation hot path in `apps/runtime/src/diagnostics/hooks.ts`
-- [ ] T004 Implement bounded ring buffer for sample storage in `apps/runtime/src/diagnostics/metrics.ts`
-- [ ] T005 Implement metric registration and sample recording in `apps/runtime/src/diagnostics/metrics.ts`
-- [ ] T006 [P] Add Vitest unit tests for hooks, ring buffer, and metric registration in `apps/runtime/tests/unit/diagnostics/`
+- [x] T001 Define metric, sample, and buffer types in `apps/runtime/src/diagnostics/types.ts`
+- [x] T002 Implement monotonic clock wrapper in `apps/runtime/src/diagnostics/hooks.ts`
+- [x] T003 Implement `markStart`/`markEnd` API with zero-allocation hot path in `apps/runtime/src/diagnostics/hooks.ts`
+- [x] T004 Implement bounded ring buffer for sample storage in `apps/runtime/src/diagnostics/metrics.ts`
+- [x] T005 Implement metric registration and sample recording in `apps/runtime/src/diagnostics/metrics.ts`
+- [x] T006 [P] Add Vitest unit tests for hooks, ring buffer, and metric registration in `apps/runtime/tests/unit/diagnostics/`
 
 ### Implementation Notes
 - Monotonic clock: `performance.now()` or equivalent — never `Date.now()`.
