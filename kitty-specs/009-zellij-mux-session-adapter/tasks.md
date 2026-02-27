@@ -24,11 +24,11 @@
 **Estimated Prompt Size**: ~420 lines
 
 ### Included Subtasks
-- [ ] T001 Implement zellij CLI wrapper with version detection and availability check in `apps/runtime/src/integrations/zellij/cli.ts`
-- [ ] T002 Implement session create operation in `apps/runtime/src/integrations/zellij/session.ts`
-- [ ] T003 Implement session reattach operation using zellij native persistence
-- [ ] T004 Implement session terminate operation with graceful cleanup
-- [ ] T005 Implement session-to-lane binding registry in `apps/runtime/src/integrations/zellij/registry.ts`
+- [x] T001 Implement zellij CLI wrapper with version detection and availability check in `apps/runtime/src/integrations/zellij/cli.ts`
+- [x] T002 Implement session create operation in `apps/runtime/src/integrations/zellij/session.ts`
+- [x] T003 Implement session reattach operation using zellij native persistence
+- [x] T004 Implement session terminate operation with graceful cleanup
+- [x] T005 Implement session-to-lane binding registry in `apps/runtime/src/integrations/zellij/registry.ts`
 
 ### Implementation Notes
 - All zellij operations use CLI shelling via `Bun.spawn`.
