@@ -14,3 +14,41 @@
 .kittify/.dashboard
 !.gemini/
 !.gemini/config.yaml
+
+# Dependencies
+node_modules/
+bun.lockb
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Worktrees (managed by spec-kitty)
+.worktrees/
+
+# Archive
+.archive/
+
+# Logs
+*.log
+npm-debug.log*
