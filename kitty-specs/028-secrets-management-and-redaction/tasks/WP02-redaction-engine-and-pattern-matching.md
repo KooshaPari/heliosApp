@@ -279,3 +279,4 @@ Implementation command:
 - 2026-02-27T11:31:25Z – unknown – lane=for_review – Ready for review: MethodRegistry, TopicRegistry, LocalBus facade with command dispatch, event fan-out, re-entrant safety, subscriber isolation. 25 new tests, all passing.
 - 2026-02-27T11:53:15Z – unknown – lane=for_review – Ready for review: cross-repo package.json/tsconfig, 10M collision test, microbenchmarks, format compliance tests. All 74 tests pass, all SLOs met.
 - 2026-02-27T11:53:39Z – unknown – lane=for_review – Ready for review: feature flag system with zero-allocation reads, restart-pending semantics, typed renderer_engine accessor, 16 unit tests, 4 microbenchmarks all passing
+- 2026-02-27T12:27:41Z – unknown – lane=for_review – Ready for review: render loop monitoring, input passthrough, frame metrics with full test coverage (32 new tests, all passing)
