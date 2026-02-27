@@ -57,6 +57,14 @@ export {
 
 export { IdleMonitor, type IdleMonitorConfig } from "./idle_monitor.js";
 
+export {
+  RingBuffer,
+  type RingWriteResult,
+  OutputBuffer,
+  type OutputBufferConfig,
+  type BufferStats,
+} from "./buffers.js";
+
 // Local imports for use in PtyManager class body.
 import { PtyRegistry as _PtyRegistry } from "./registry.js";
 import { PtyLifecycle as _PtyLifecycle } from "./state_machine.js";
@@ -74,6 +82,7 @@ import {
 } from "./signals.js";
 import { writeInput as _writeInput, type ProcessMap as _ProcessMap } from "./io.js";
 import { IdleMonitor as _IdleMonitor, type IdleMonitorConfig as _IdleMonitorConfig } from "./idle_monitor.js";
+import { OutputBuffer as _OutputBuffer, type OutputBufferConfig as _OutputBufferConfig, type BufferStats as _BufferStats } from "./buffers.js";
 
 /**
  * High-level facade for PTY operations.
@@ -100,6 +109,12 @@ export class PtyManager {
   /** Idle monitor instance. */
   public readonly idleMonitor: _IdleMonitor;
 
+  /** Output buffers keyed by ptyId. */
+  private readonly outputBuffers = new Map<string, _OutputBuffer>();
+
+  /** Default output buffer configuration. */
+  private readonly bufferConfig: _OutputBufferConfig | undefined;
+
   /**
    * @param maxCapacity - Maximum number of concurrent PTYs (default 300).
    * @param bus - Bus publisher for lifecycle events (default: NoOpBusPublisher).
@@ -109,7 +124,9 @@ export class PtyManager {
     maxCapacity = 300,
     bus?: _BusPublisher,
     idleConfig?: _IdleMonitorConfig,
+    bufferConfig?: _OutputBufferConfig,
   ) {
+    this.bufferConfig = bufferConfig;
     this.registry = new _PtyRegistry(maxCapacity);
     this.bus = bus ?? new _NoOpBusPublisher();
     this.idleMonitor = new _IdleMonitor(
@@ -162,6 +179,10 @@ export class PtyManager {
 
     // Initialize idle monitor tracking.
     this.idleMonitor.recordOutput(record.ptyId);
+
+    // Create output buffer for this PTY.
+    const outputBuffer = new _OutputBuffer(this.bus, correlation, this.bufferConfig);
+    this.outputBuffers.set(record.ptyId, outputBuffer);
 
     return record;
   }
@@ -274,6 +295,7 @@ export class PtyManager {
     // Clean up internal maps.
     this.lifecycles.delete(ptyId);
     this.processes.delete(ptyId);
+    this.outputBuffers.delete(ptyId);
     this.idleMonitor.remove(ptyId);
   }
 
@@ -296,6 +318,26 @@ export class PtyManager {
    */
   stopIdleMonitor(): void {
     this.idleMonitor.stop();
+  }
+
+  /**
+   * Get the output buffer for a PTY.
+   *
+   * @param ptyId - The PTY ID.
+   * @returns The output buffer, or `undefined` if not found.
+   */
+  getOutputBuffer(ptyId: string): _OutputBuffer | undefined {
+    return this.outputBuffers.get(ptyId);
+  }
+
+  /**
+   * Get buffer statistics for a PTY.
+   *
+   * @param ptyId - The PTY ID.
+   * @returns Buffer stats, or `undefined` if the PTY has no buffer.
+   */
+  getBufferStats(ptyId: string): _BufferStats | undefined {
+    return this.outputBuffers.get(ptyId)?.getStats();
   }
 
   /**
