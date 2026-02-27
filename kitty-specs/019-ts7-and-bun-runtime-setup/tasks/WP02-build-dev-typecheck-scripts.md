@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Build, Dev, and Typecheck Scripts with Path Aliases and Tests
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP01
 base_branch: 019-ts7-and-bun-runtime-setup-WP01
@@ -214,3 +214,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z – system – lane=planned – Prompt created.
 - 2026-02-27T11:19:14Z – wp02-agent – shell_pid=22412 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T11:22:39Z – wp02-agent – shell_pid=22412 – lane=for_review – Ready for review: build/dev/typecheck scripts, path aliases, alias resolution tests, build infra tests. All 17 tests pass, typecheck clean, build produces minified artifacts with sourcemaps.
