@@ -58,12 +58,12 @@
 **Estimated Prompt Size**: ~420 lines
 
 ### Included Subtasks
-- [ ] T007 Implement crash fallback: rio crash triggers automatic switch to ghostty with session preservation
-- [ ] T008 Implement feature flag toggle handling (disable while rio is active: switch to ghostty first)
-- [ ] T009 [P] Add Vitest unit tests for rio adapter, feature flag, and fallback logic in `apps/runtime/tests/unit/renderer/rio/`
-- [ ] T010 [P] Add integration tests for rio lifecycle and fallback in `apps/runtime/tests/integration/renderer/rio/`
-- [ ] T011 [P] Add feature flag enforcement tests (zero runtime cost when disabled)
-- [ ] T012 [P] Add SLO benchmark tests for rio (same targets as ghostty)
+- [x] T007 Implement crash fallback: rio crash triggers automatic switch to ghostty with session preservation
+- [x] T008 Implement feature flag toggle handling (disable while rio is active: switch to ghostty first)
+- [x] T009 [P] Add Vitest unit tests for rio adapter, feature flag, and fallback logic in `apps/runtime/tests/unit/renderer/rio/`
+- [x] T010 [P] Add integration tests for rio lifecycle and fallback in `apps/runtime/tests/integration/renderer/rio/`
+- [x] T011 [P] Add feature flag enforcement tests (zero runtime cost when disabled)
+- [x] T012 [P] Add SLO benchmark tests for rio (same targets as ghostty)
 
 ### Implementation Notes
 - Fallback uses the renderer switch transaction from spec 010 (switch from rio to ghostty).
