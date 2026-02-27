@@ -56,11 +56,11 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T006 Implement git worktree provisioning (create worktree from workspace repo) in `apps/runtime/src/lanes/worktree.ts`
-- [ ] T007 Implement git worktree cleanup (remove worktree, prune) in `apps/runtime/src/lanes/worktree.ts`
-- [ ] T008 Implement graceful PTY termination before worktree removal (via spec 007) in `apps/runtime/src/lanes/index.ts`
-- [ ] T009 [P] Implement orphaned worktree detection and reconciliation on startup
-- [ ] T010 [P] Handle partial provisioning failures with automatic cleanup
+- [x] T006 Implement git worktree provisioning (create worktree from workspace repo) in `apps/runtime/src/lanes/worktree.ts`
+- [x] T007 Implement git worktree cleanup (remove worktree, prune) in `apps/runtime/src/lanes/worktree.ts`
+- [x] T008 Implement graceful PTY termination before worktree removal (via spec 007) in `apps/runtime/src/lanes/index.ts`
+- [x] T009 [P] Implement orphaned worktree detection and reconciliation on startup
+- [x] T010 [P] Handle partial provisioning failures with automatic cleanup
 
 ### Implementation Notes
 - Worktree paths: `<workspace-root>/.helios-worktrees/<lane-id>/`.
