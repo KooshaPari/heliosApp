@@ -1,8 +1,11 @@
 ---
 work_package_id: WP01
 title: Rio Adapter Implementing 010 Interface with Feature Flag
-lane: "planned"
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: afcb42bace7a44aa362e8bdd93b292ea1a1d3bc3
+created_at: '2026-02-27T12:14:56.757334+00:00'
 subtasks:
 - T001
 - T002
@@ -13,7 +16,7 @@ subtasks:
 phase: Phase 1 - Rio Foundation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "65607"
 review_status: ''
 reviewed_by: ''
 history:
