@@ -21,6 +21,7 @@ export {
 export { GhosttyProcess, GhosttyBinaryNotFoundError, GhosttyProcessError } from "./process.js";
 export type { GhosttyOptions } from "./process.js";
 export { GhosttySurface, SurfaceBindingError } from "./surface.js";
+export type { GpuRenderingMode, GpuSurfaceStatus, SurfaceEventHandler } from "./surface.js";
 export {
   detectCapabilities,
   getCachedCapabilities,
