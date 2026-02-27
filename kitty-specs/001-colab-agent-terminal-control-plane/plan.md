@@ -25,7 +25,7 @@ Deliver a tight first vertical slice for a terminal-first control plane: one can
 **Language/Version**: TypeScript (TS-native track, Bun runtime), Python 3.14+/PyPy 3.11 for supporting tooling where needed  
 **Primary Dependencies**: Bun, runtime protocol bus in `apps/runtime/src/protocol/`, Codex CLI integration, `cliproxyapi++` harness bridge  
 **Storage**: In-memory for this vertical slice (Codex session IDs used for continuity); durable persistence deferred to later increment  
-**Testing**: Vitest + Playwright, strict lint/type checks, static analysis, security checks, regression and chaos drills  
+**Testing**: Bun test gates, strict lint/type checks, static analysis, security checks, and soak/regression drills  
 **Target Platform**: Local device-first desktop runtime (no required cloud dependency)  
 **Project Type**: Desktop + local runtime control plane  
 **Performance Goals**: Fast lane/session switches and responsive multi-tab control under high local session concurrency  
@@ -37,7 +37,8 @@ Deliver a tight first vertical slice for a terminal-first control plane: one can
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - **Language/runtime alignment**: PASS. TS + Bun-centered implementation aligns with constitution.
-- **Testing posture**: PASS. Plan enforces Vitest + Playwright and full-pyramid quality gates.
+- **Testing posture**: PASS. Plan enforces the WP06 runtime command gates (`lint`, `typecheck`, `static`,
+  `test`, `security`, `quality`) and soak validation.
 - **Coverage + traceability posture**: Planned for WP07; not enforced by WP06 command gates.
 - **Performance/local-first constraints**: PASS. Device-first, low-overhead, dockerless assumptions retained.
 - **Architecture discipline**: PASS. Vertical slice keeps explicit extension seams (provider and session boundaries) without overbuilding adapter matrix.

@@ -22,6 +22,8 @@ Workload profile:
 
 Notes:
 - Spike samples above `64` are expected in low frequency; gate validity is determined by `p95`, not `max`.
+- Session restore latency keeps a strict `35ms` target. If first-run `p95` is within `+3ms` jitter band,
+  rerun once and require strict `p95 <= 35ms` on the retry to avoid host-noise flakes.
 
 ## Failure Criteria
 
