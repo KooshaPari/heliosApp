@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Protocol Contracts and Runtime Foundation
-lane: "for_review"
+lane: "doing"
 dependencies: []
 base_branch: main
 base_commit: f1d0bc01693c809a121c904e94a68cf81422b4a2
@@ -14,8 +14,8 @@ subtasks:
 - T005
 phase: Phase 1 - Foundation
 assignee: ''
-agent: ''
-shell_pid: "94640"
+agent: "codex"
+shell_pid: "65388"
 review_status: ''
 reviewed_by: ''
 history:
@@ -136,3 +136,4 @@ Implementation command:
 - 2026-02-26T13:19:35Z – system – lane=planned – Prompt created.
 - 2026-02-26T16:52:45Z – unknown – shell_pid=94640 – lane=for_review – Ready for review: protocol contracts/runtime foundation implemented in worktree commit efb2ad9
 - 2026-02-27T07:48:10Z – unknown – shell_pid=94640 – lane=for_review – Restacked and fully smoke-validated; ready for review.
+- 2026-02-27T08:56:21Z – codex – shell_pid=65388 – lane=doing – Started review via workflow command
