@@ -863,7 +863,7 @@ class CommandBusImpl implements LocalBus {
   }
 
   getActiveCorrelationId(): string | undefined {
-    return this.activeCorrelationId;
+    return getActiveCorrelationId();
   }
 
   private okResponse(
