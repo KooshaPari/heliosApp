@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Crash Fallback to Ghostty and Tests
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP01
 base_branch: 012-rio-renderer-backend-WP01
@@ -234,3 +234,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-02-27T12:23:52Z – claude-wp02-012 – shell_pid=76982 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:29:50Z – claude-wp02-012 – shell_pid=76982 – lane=for_review – Ready for review: crash fallback, feature flag toggle, unit/integration/zero-cost/benchmark tests
