@@ -17,7 +17,7 @@ subtasks:
 - T017
 phase: Phase 3 - Stream Safety and Validation
 assignee: ''
-agent: ''
+agent: "claude-wp03-007-direct"
 shell_pid: "64558"
 review_status: ''
 reviewed_by: ''
@@ -238,3 +238,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-02-27T12:44:08Z – claude-wp03-007-direct – shell_pid=64558 – lane=doing – Assigned agent via workflow command
