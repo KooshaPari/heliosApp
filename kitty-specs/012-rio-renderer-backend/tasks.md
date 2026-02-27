@@ -24,12 +24,12 @@
 **Estimated Prompt Size**: ~480 lines
 
 ### Included Subtasks
-- [ ] T001 Implement feature flag gate for rio (off by default, zero runtime cost when disabled) in `apps/runtime/src/renderer/rio/index.ts`
-- [ ] T002 Implement rio adapter class implementing RendererAdapter interface in `apps/runtime/src/renderer/rio/backend.ts`
-- [ ] T003 Implement rio process lifecycle (start/stop/crash detection) in `apps/runtime/src/renderer/rio/process.ts`
-- [ ] T004 Implement rio surface binding and PTY stream piping in `apps/runtime/src/renderer/rio/surface.ts`
-- [ ] T005 Implement rio capability matrix and frame metrics (same schema as ghostty) in `apps/runtime/src/renderer/rio/capabilities.ts` and `apps/runtime/src/renderer/rio/metrics.ts`
-- [ ] T006 [P] Implement input passthrough from rio to PTY write path in `apps/runtime/src/renderer/rio/input.ts`
+- [x] T001 Implement feature flag gate for rio (off by default, zero runtime cost when disabled) in `apps/runtime/src/renderer/rio/index.ts`
+- [x] T002 Implement rio adapter class implementing RendererAdapter interface in `apps/runtime/src/renderer/rio/backend.ts`
+- [x] T003 Implement rio process lifecycle (start/stop/crash detection) in `apps/runtime/src/renderer/rio/process.ts`
+- [x] T004 Implement rio surface binding and PTY stream piping in `apps/runtime/src/renderer/rio/surface.ts`
+- [x] T005 Implement rio capability matrix and frame metrics (same schema as ghostty) in `apps/runtime/src/renderer/rio/capabilities.ts` and `apps/runtime/src/renderer/rio/metrics.ts`
+- [x] T006 [P] Implement input passthrough from rio to PTY write path in `apps/runtime/src/renderer/rio/input.ts`
 
 ### Implementation Notes
 - Feature flag: check configuration (spec 004) at registration time; skip entirely if disabled.
