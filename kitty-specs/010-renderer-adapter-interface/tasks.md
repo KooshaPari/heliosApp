@@ -24,12 +24,12 @@
 **Estimated Prompt Size**: ~450 lines
 
 ### Included Subtasks
-- [ ] T001 Define abstract renderer adapter interface with lifecycle operations in `apps/runtime/src/renderer/adapter.ts`
-- [ ] T002 Implement renderer state machine in `apps/runtime/src/renderer/state_machine.ts`
-- [ ] T003 Implement renderer registry (register, lookup, list, enforce single-active) in `apps/runtime/src/renderer/registry.ts`
-- [ ] T004 Implement transactional renderer switch with rollback in `apps/runtime/src/renderer/switch.ts`
-- [ ] T005 [P] Define capability matrix types and query interface in `apps/runtime/src/renderer/capabilities.ts`
-- [ ] T006 [P] Wire renderer lifecycle event publishing to local bus
+- [x] T001 Define abstract renderer adapter interface with lifecycle operations in `apps/runtime/src/renderer/adapter.ts`
+- [x] T002 Implement renderer state machine in `apps/runtime/src/renderer/state_machine.ts`
+- [x] T003 Implement renderer registry (register, lookup, list, enforce single-active) in `apps/runtime/src/renderer/registry.ts`
+- [x] T004 Implement transactional renderer switch with rollback in `apps/runtime/src/renderer/switch.ts`
+- [x] T005 [P] Define capability matrix types and query interface in `apps/runtime/src/renderer/capabilities.ts`
+- [x] T006 [P] Wire renderer lifecycle event publishing to local bus
 
 ### Implementation Notes
 - Interface must be open for extension: new backends register without modifying core.
