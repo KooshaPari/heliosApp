@@ -1,7 +1,7 @@
 ---
 work_package_id: WP07
 title: Protocol Boundary Delegation and Traceability Gates
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP06
 base_branch: 001-colab-agent-terminal-control-plane-WP06
@@ -124,3 +124,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-26T13:19:35Z – system – lane=planned – Prompt created.
+- 2026-02-27T08:00:41Z – unknown – shell_pid=25766 – lane=for_review – Implemented with boundary adapter + coverage/traceability gates; ready for review.
