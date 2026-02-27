@@ -24,11 +24,11 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T001 Define workspace and store types in `apps/runtime/src/workspace/types.ts`
-- [ ] T002 Implement workspace entity with state machine in `apps/runtime/src/workspace/workspace.ts`
-- [ ] T003 Implement store abstraction interface and in-memory implementation in `apps/runtime/src/workspace/store.ts`
-- [ ] T004 Implement workspace CRUD operations (create, open, close, delete) with validation in `apps/runtime/src/workspace/workspace.ts`
-- [ ] T005 [P] Add Vitest unit tests for workspace CRUD lifecycle in `apps/runtime/tests/unit/workspace/`
+- [x] T001 Define workspace and store types in `apps/runtime/src/workspace/types.ts`
+- [x] T002 Implement workspace entity with state machine in `apps/runtime/src/workspace/workspace.ts`
+- [x] T003 Implement store abstraction interface and in-memory implementation in `apps/runtime/src/workspace/store.ts`
+- [x] T004 Implement workspace CRUD operations (create, open, close, delete) with validation in `apps/runtime/src/workspace/workspace.ts`
+- [x] T005 [P] Add Vitest unit tests for workspace CRUD lifecycle in `apps/runtime/tests/unit/workspace/`
 
 ### Implementation Notes
 - Workspace state transitions: `created -> active -> closed -> deleted` (with guards).
