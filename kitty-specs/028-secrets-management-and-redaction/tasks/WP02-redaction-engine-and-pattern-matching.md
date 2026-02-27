@@ -277,3 +277,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-02-27T11:31:25Z – unknown – lane=for_review – Ready for review: MethodRegistry, TopicRegistry, LocalBus facade with command dispatch, event fan-out, re-entrant safety, subscriber isolation. 25 new tests, all passing.
+- 2026-02-27T11:53:15Z – unknown – lane=for_review – Ready for review: cross-repo package.json/tsconfig, 10M collision test, microbenchmarks, format compliance tests. All 74 tests pass, all SLOs met.
