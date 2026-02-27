@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Ghostty Process Lifecycle and Embedding
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: 147b15897658867166faa3fd1352c2891545faa8
@@ -14,7 +14,7 @@ subtasks:
 - T005
 phase: Phase 1 - Ghostty Foundation
 assignee: ''
-agent: ''
+agent: "claude-wp01-011"
 shell_pid: "65285"
 review_status: ''
 reviewed_by: ''
@@ -231,3 +231,5 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-02-27T12:14:54Z – claude-wp01-011 – shell_pid=65285 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:21:24Z – claude-wp01-011 – shell_pid=65285 – lane=for_review – Ready for review
