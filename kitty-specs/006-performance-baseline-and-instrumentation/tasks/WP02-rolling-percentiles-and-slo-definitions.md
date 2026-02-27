@@ -1,12 +1,16 @@
 ---
 work_package_id: WP02
-title: "Rolling Percentiles and SLO Definitions"
-lane: "planned"
-dependencies: ["WP01"]
-subtasks: ["T007", "T008", "T009", "T010", "T011", "T012"]
-phase: "Phase 2 - Statistics"
-assignee: ""
-agent: ""
+title: Rolling Percentiles and SLO Definitions
+lane: "doing"
+dependencies: [WP01]
+base_branch: 006-performance-baseline-and-instrumentation-WP01
+base_commit: 4c3c1e5e6e3a6398e086fc573e8dd58f023becc7
+created_at: '2026-02-27T11:57:52.976552+00:00'
+subtasks: [T007, T008, T009, T010, T011, T012]
+phase: Phase 2 - Statistics
+assignee: ''
+agent: ''
+shell_pid: "50273"
 ---
 
 # Work Package Prompt: WP02 - Rolling Percentiles and SLO Definitions
