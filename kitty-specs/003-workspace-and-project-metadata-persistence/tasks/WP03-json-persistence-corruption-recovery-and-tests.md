@@ -1,12 +1,16 @@
 ---
 work_package_id: WP03
-title: "JSON Persistence, Corruption Recovery, and Tests"
-lane: "planned"
-dependencies: ["WP02"]
-subtasks: ["T011", "T012", "T013", "T014", "T015", "T016"]
-phase: "Phase 3 - Durability"
-assignee: ""
-agent: ""
+title: JSON Persistence, Corruption Recovery, and Tests
+lane: "doing"
+dependencies: [WP02]
+base_branch: 003-workspace-and-project-metadata-persistence-WP02
+base_commit: d1377eb047dd343dba4bde28d2d7d708398bf1e8
+created_at: '2026-02-27T11:50:54.968690+00:00'
+subtasks: [T011, T012, T013, T014, T015, T016]
+phase: Phase 3 - Durability
+assignee: ''
+agent: ''
+shell_pid: "38782"
 ---
 
 # Work Package Prompt: WP03 - JSON Persistence, Corruption Recovery, and Tests
