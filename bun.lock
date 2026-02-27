@@ -4,7 +4,8 @@
     "": {
       "name": "helios-app",
       "devDependencies": {
-        "typescript": "^5.7.0",
+        "bun-types": "latest",
+        "typescript": "^5.8.0",
       },
     },
     "apps/desktop": {

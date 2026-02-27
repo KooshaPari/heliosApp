@@ -2,16 +2,14 @@
   "name": "helios-app",
   "version": "0.0.1",
   "private": true,
-  "workspaces": ["apps/desktop", "apps/runtime"],
-  "engines": {
-    "bun": ">=1.2.0"
-  },
+  "type": "module",
   "scripts": {
-    "dev": "bun --filter '*' dev",
-    "build": "bun --filter '*' build",
-    "typecheck": "tsc --build"
+    "typecheck": "tsc -b",
+    "test": "bun test"
   },
   "devDependencies": {
-    "typescript": "^5.7.0"
-  }
+    "bun-types": "latest",
+    "typescript": "^5.8.0"
+  },
+  "workspaces": ["apps/*"]
 }
