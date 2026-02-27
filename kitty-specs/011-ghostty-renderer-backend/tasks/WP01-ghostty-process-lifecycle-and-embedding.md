@@ -1,8 +1,11 @@
 ---
 work_package_id: WP01
 title: Ghostty Process Lifecycle and Embedding
-lane: "planned"
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 147b15897658867166faa3fd1352c2891545faa8
+created_at: '2026-02-27T12:14:53.817183+00:00'
 subtasks:
 - T001
 - T002
@@ -12,7 +15,7 @@ subtasks:
 phase: Phase 1 - Ghostty Foundation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "65285"
 review_status: ''
 reviewed_by: ''
 history:

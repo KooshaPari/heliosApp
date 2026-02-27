@@ -1,9 +1,12 @@
 ---
 work_package_id: WP02
 title: Pane and Tab Topology with Session-to-Lane Binding
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
+base_branch: 009-zellij-mux-session-adapter-WP01
+base_commit: 4d8ac5d66b5a36f669c4f5567e254490c07ba200
+created_at: '2026-02-27T12:14:53.698725+00:00'
 subtasks:
 - T006
 - T007
@@ -13,7 +16,7 @@ subtasks:
 phase: Phase 2 - Topology Management
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "65254"
 review_status: ''
 reviewed_by: ''
 history:
