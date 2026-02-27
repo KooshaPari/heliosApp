@@ -1,8 +1,11 @@
 ---
 work_package_id: WP01
 title: Abstract Interface, Renderer Registry, and State Machine
-lane: "planned"
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 98f3236ffa670bb7161f21b79271c6ae261e7d57
+created_at: '2026-02-27T11:58:04.015668+00:00'
 subtasks:
 - T001
 - T002
@@ -13,7 +16,7 @@ subtasks:
 phase: Phase 1 - Interface Definition
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "51331"
 review_status: ''
 reviewed_by: ''
 history:
