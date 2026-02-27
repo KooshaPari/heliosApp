@@ -16,7 +16,7 @@ subtasks:
 - T011
 phase: Phase 2 - PTY Operations
 assignee: ''
-agent: ''
+agent: "claude-wp02-007"
 shell_pid: "81904"
 review_status: ''
 reviewed_by: ''
@@ -226,3 +226,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-02-27T12:32:12Z – claude-wp02-007 – shell_pid=81904 – lane=doing – Assigned agent via workflow command
