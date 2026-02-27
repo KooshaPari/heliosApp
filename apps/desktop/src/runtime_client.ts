@@ -207,14 +207,6 @@ export class DesktopRuntimeClient {
     targetEngine: RendererEngine;
     forceError?: boolean;
   }): Promise<RendererSwitchResult> {
-    if (input.forceError === true) {
-      return {
-        ok: false,
-        activeEngine: "ghostty",
-        previousEngine: "ghostty",
-        error: "renderer switch forced failure"
-      };
-    }
     const response = await this.bus.request(
       toCommandEnvelope(
         "renderer.switch",
