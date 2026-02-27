@@ -16,7 +16,7 @@ subtasks:
 - T015
 phase: Phase 3 - Execution Isolation
 assignee: ''
-agent: ''
+agent: "claude-wp03-008"
 shell_pid: "83881"
 review_status: ''
 reviewed_by: ''
@@ -211,3 +211,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-02-27T12:32:57Z – claude-wp03-008 – shell_pid=83881 – lane=doing – Assigned agent via workflow command
