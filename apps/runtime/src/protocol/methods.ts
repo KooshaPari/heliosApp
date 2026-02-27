@@ -22,7 +22,10 @@ export const METHODS = [
   "zmx.restore",
   "lane.create",
   "lane.attach",
-  "lane.cleanup"
+  "lane.cleanup",
+  "boundary.local.dispatch",
+  "boundary.tool.dispatch",
+  "boundary.a2a.dispatch"
 ] as const;
 
 export type ProtocolMethod = (typeof METHODS)[number];

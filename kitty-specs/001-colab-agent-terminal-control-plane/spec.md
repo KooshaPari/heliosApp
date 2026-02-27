@@ -85,6 +85,14 @@ As an advanced user, I can run local and external agent operations through consi
 - **FR-017**: The system MUST maintain parity with formal localbus protocol assets in `specs/protocol/v1/` for method/topic coverage, with any intentional extensions explicitly documented.
 - **FR-018**: The system MUST expose lifecycle surfaces for renderer switch/capabilities, agent run/cancel, approval resolution, share-session controls (`upterm`/`tmate`), and checkpoint/restore semantics in phased implementation artifacts.
 
+#### FR-010 Boundary Contract Mapping
+
+| Boundary | Canonical Commands | Canonical Events | Runtime Adapter |
+|----------|--------------------|------------------|-----------------|
+| local control | `boundary.local.dispatch`, `lane.create`, `session.attach`, `terminal.spawn` | `boundary.local.dispatched`, lifecycle topics | `local_bus` |
+| tool interoperability | `boundary.tool.dispatch`, `approval.request.resolve`, `share.upterm.start`, `zmx.checkpoint` | `boundary.tool.dispatched`, `boundary.dispatch.failed` | `tool_bridge` |
+| agent-to-agent delegation | `boundary.a2a.dispatch`, `agent.run`, `agent.cancel` | `boundary.a2a.delegated`, `boundary.dispatch.failed` | `a2a_bridge` |
+
 ### Non-Functional Requirements
 
 - **NFR-001**: Primary terminal interactions (input echo, context-switch feedback) MUST satisfy `p50 <= 60ms` and `p95 <= 150ms` under baseline load profile.
