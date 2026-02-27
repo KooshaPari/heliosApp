@@ -9,7 +9,7 @@ created_at: '2026-02-27T11:28:31.579393+00:00'
 subtasks: [T007, T008, T009, T010, T011, T012]
 phase: Phase 2 - Core Routing
 assignee: ''
-agent: ''
+agent: "wp02-bus-agent"
 shell_pid: "28146"
 ---
 
@@ -213,3 +213,4 @@ Constraints:
 ## Activity Log
 
 - 2026-02-27 – system – lane=planned – Prompt generated.
+- 2026-02-27T11:28:31Z – wp02-bus-agent – shell_pid=28146 – lane=doing – Assigned agent via workflow command
