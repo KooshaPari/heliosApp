@@ -1,5 +1,5 @@
 /**
- * Renderer registry.
+ * Renderer registry (minimal version for rio adapter registration).
  */
 
 import type { RendererAdapter } from "./adapter.js";
@@ -64,7 +64,9 @@ export class RendererRegistry {
   }
 
   getActive(): RendererAdapter | undefined {
-    return this._activeId !== undefined ? this._adapters.get(this._activeId) : undefined;
+    return this._activeId !== undefined
+      ? this._adapters.get(this._activeId)
+      : undefined;
   }
 
   setActive(id: string): void {
@@ -84,14 +86,5 @@ export class RendererRegistry {
       throw new RendererNotFoundError(id);
     }
     return meta.capabilities;
-  }
-
-  refreshCapabilities(id: string): void {
-    const adapter = this._adapters.get(id);
-    const meta = this._meta.get(id);
-    if (adapter === undefined || meta === undefined) {
-      throw new RendererNotFoundError(id);
-    }
-    meta.capabilities = adapter.queryCapabilities();
   }
 }

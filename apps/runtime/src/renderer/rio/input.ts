@@ -48,6 +48,7 @@ export class RioInputRelay {
 
     const targetPty = ptyId || this._focusedPtyId;
     if (!targetPty) {
+      console.warn("Rio input relay: no focused PTY, discarding input");
       return;
     }
 
@@ -67,9 +68,7 @@ export class RioInputRelay {
    * Get the average input-to-PTY-write latency in ms.
    */
   getAverageLatencyMs(): number {
-    if (this._latencySamples.length === 0) {
-      return 0;
-    }
+    if (this._latencySamples.length === 0) return 0;
     const sum = this._latencySamples.reduce((a, b) => a + b, 0);
     return sum / this._latencySamples.length;
   }

@@ -2,7 +2,7 @@
  * Abstract renderer adapter interface.
  *
  * All renderer backends (ghostty, rio, etc.) must implement this contract.
- * This file contains only interface and type definitions -- no concrete
+ * This file contains only interface and type definitions — no concrete
  * implementation.
  */
 
@@ -12,25 +12,14 @@ import type { RendererCapabilities } from "./capabilities.js";
 // Supporting types
 // ---------------------------------------------------------------------------
 
-/**
- * Configuration supplied to a renderer adapter at initialisation time.
- */
 export interface RendererConfig {
-  /** Whether the adapter should attempt GPU-accelerated rendering. */
   gpuAcceleration: boolean;
-  /** Requested colour depth in bits (8, 16, or 24). */
   colorDepth: number;
-  /** Maximum terminal dimensions the adapter needs to support. */
   maxDimensions: { cols: number; rows: number };
 }
 
-/**
- * Describes the surface (window region) a renderer should draw into.
- */
 export interface RenderSurface {
-  /** Unique identifier of the host window. */
   windowId: string;
-  /** Pixel-space bounding box of the rendering area. */
   bounds: { x: number; y: number; width: number; height: number };
 }
 
@@ -38,9 +27,6 @@ export interface RenderSurface {
 // Renderer state
 // ---------------------------------------------------------------------------
 
-/**
- * Possible lifecycle states of a renderer adapter.
- */
 export type RendererState =
   | "uninitialized"
   | "initializing"
@@ -54,9 +40,6 @@ export type RendererState =
 // Abstract adapter interface
 // ---------------------------------------------------------------------------
 
-/**
- * Contract that every renderer backend must implement.
- */
 export interface RendererAdapter {
   readonly id: string;
   readonly version: string;
