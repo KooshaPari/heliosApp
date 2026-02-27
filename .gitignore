@@ -14,3 +14,6 @@
 .kittify/.dashboard
 !.gemini/
 !.gemini/config.yaml
+*.tsbuildinfo
+node_modules/
+dist/
