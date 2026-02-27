@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: PTY Spawn, State Machine, and Process Registry
-lane: "doing"
+lane: "planned"
 dependencies: []
 base_branch: main
 base_commit: 0a7bfe603151db516d67ea89532b4a063237c24a
@@ -219,3 +219,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-02-27T11:57:55Z – claude-wp01-007 – shell_pid=50539 – lane=doing – Assigned agent via workflow command
+- 2026-02-27T12:13:53Z – claude-wp01-007 – shell_pid=50539 – lane=planned – Agent failed, relaunching
