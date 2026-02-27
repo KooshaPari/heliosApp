@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: PTY Spawn, State Machine, and Process Registry
-lane: "for_review"
+lane: "planned"
 dependencies: []
 base_branch: main
 base_commit: 8962fd29e26f3c0b9a4abb968e70c309e7d8e327
@@ -16,8 +16,8 @@ phase: Phase 1 - Core PTY Infrastructure
 assignee: ''
 agent: claude-wp01-007
 shell_pid: "65144"
-review_status: ''
-reviewed_by: ''
+review_status: "has_feedback"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -221,3 +221,4 @@ Implementation command:
 - 2026-02-27T11:57:55Z – claude-wp01-007 – shell_pid=50539 – lane=doing – Assigned agent via workflow command
 - 2026-02-27T12:13:53Z – claude-wp01-007 – shell_pid=50539 – lane=planned – Agent failed, relaunching
 - 2026-02-27T12:20:19Z – claude-wp01-007 – shell_pid=65144 – lane=for_review – Ready for review: all 5 subtasks implemented with 32 passing tests
+- 2026-02-27T12:22:11Z – claude-wp01-007 – shell_pid=65144 – lane=planned – Moved to planned
