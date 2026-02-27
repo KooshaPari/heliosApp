@@ -120,11 +120,11 @@
 **Estimated Prompt Size**: ~370 lines
 
 ### Included Subtasks
-- [ ] T016 Implement full orphaned lane reconciliation on startup (worktrees without records, records without worktrees) in `apps/runtime/src/lanes/registry.ts`
-- [ ] T017 [P] Add Vitest unit tests for lane state machine, registry, and worktree ops in `apps/runtime/tests/unit/lanes/`
-- [ ] T018 [P] Add integration tests for full lane create-run-cleanup lifecycle with real git repos in `apps/runtime/tests/integration/lanes/`
-- [ ] T019 [P] Add integration test for orphan reconciliation scenario
-- [ ] T020 [P] Add stress test for concurrent lane operations (50 lanes) validating NFR-008-003
+- [x] T016 Implement full orphaned lane reconciliation on startup (worktrees without records, records without worktrees) in `apps/runtime/src/lanes/registry.ts`
+- [x] T017 [P] Add Vitest unit tests for lane state machine, registry, and worktree ops in `apps/runtime/tests/unit/lanes/`
+- [x] T018 [P] Add integration tests for full lane create-run-cleanup lifecycle with real git repos in `apps/runtime/tests/integration/lanes/`
+- [x] T019 [P] Add integration test for orphan reconciliation scenario
+- [x] T020 [P] Add stress test for concurrent lane operations (50 lanes) validating NFR-008-003
 
 ### Implementation Notes
 - Reconciliation must complete within 30 seconds (SC-008-004).
