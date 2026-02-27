@@ -1,12 +1,16 @@
 ---
 work_package_id: WP01
-title: "Settings Schema, Persistence, and Hot-Reload"
-lane: "planned"
+title: Settings Schema, Persistence, and Hot-Reload
+lane: "doing"
 dependencies: []
-subtasks: ["T001", "T002", "T003", "T004", "T005", "T006", "T007"]
-phase: "Phase 1 - Foundation"
-assignee: ""
-agent: ""
+base_branch: main
+base_commit: f95ec2c9561fb25c9f97b087363c68474f24f89f
+created_at: '2026-02-27T11:28:40.281844+00:00'
+subtasks: [T001, T002, T003, T004, T005, T006, T007]
+phase: Phase 1 - Foundation
+assignee: ''
+agent: ''
+shell_pid: "28634"
 ---
 
 # Work Package Prompt: WP01 - Settings Schema, Persistence, and Hot-Reload
