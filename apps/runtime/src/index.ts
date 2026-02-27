@@ -1,23 +1,4 @@
-// Runtime entry point — re-exports diagnostics instrumentation
-export {
-  type MetricType,
-  type MetricDefinition,
-  type Sample,
-  type PercentileBucket,
-  type SLODefinition,
-  type SLOViolationEvent,
-} from "./diagnostics/types.js";
-
-export {
-  type MonotonicClock,
-  monotonicNow,
-  markStart,
-  markEnd,
-  getMarkOverflowCount,
-  createInstrumentationHooks,
-} from "./diagnostics/hooks.js";
-
-export {
-  RingBuffer,
-  MetricsRegistry,
-} from "./diagnostics/metrics.js";
+export { LaneManager } from "./lanes/index.js";
+export { InMemoryLocalBus } from "./protocol/bus.js";
+export type { LocalBus } from "./protocol/bus.js";
+export type { LocalBusEnvelope } from "./protocol/types.js";
