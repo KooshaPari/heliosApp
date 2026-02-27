@@ -16,7 +16,7 @@ subtasks:
 - T012
 phase: Phase 2 - Fallback and Validation
 assignee: ''
-agent: ''
+agent: "claude-wp02-012"
 shell_pid: "76982"
 review_status: ''
 reviewed_by: ''
@@ -233,3 +233,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-02-27T12:23:52Z – claude-wp02-012 – shell_pid=76982 – lane=doing – Assigned agent via workflow command
