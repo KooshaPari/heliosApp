@@ -1,0 +1,15 @@
+{
+  "name": "helios-app",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --build",
+    "test": "bun test apps/runtime/src/renderer/__tests__/ apps/runtime/tests/",
+    "test:unit": "bun test apps/runtime/tests/unit/",
+    "test:integration": "bun test apps/runtime/tests/integration/",
+    "test:benchmark": "bun test apps/runtime/tests/benchmark/"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.8.0"
+  }
+}
