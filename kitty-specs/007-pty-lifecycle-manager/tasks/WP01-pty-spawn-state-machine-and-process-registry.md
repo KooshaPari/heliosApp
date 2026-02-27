@@ -1,8 +1,11 @@
 ---
 work_package_id: WP01
 title: PTY Spawn, State Machine, and Process Registry
-lane: "planned"
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 0a7bfe603151db516d67ea89532b4a063237c24a
+created_at: '2026-02-27T11:57:55.644931+00:00'
 subtasks:
 - T001
 - T002
@@ -12,7 +15,7 @@ subtasks:
 phase: Phase 1 - Core PTY Infrastructure
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "50539"
 review_status: ''
 reviewed_by: ''
 history:
