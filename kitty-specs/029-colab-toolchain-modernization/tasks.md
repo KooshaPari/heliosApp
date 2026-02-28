@@ -51,7 +51,7 @@
 - [x] T002: Add quality task (fmt + test + lint, mutating)
 - [x] T003: Add quality:quick (readonly, no --write)
 - [x] T004: Add quality:ci (non-mutating PR gate)
-- [ ] T005: Add quality:pre-push + quality:release-lint
+- [x] T005: Add quality:pre-push + quality:release-lint
 - [ ] T006: Add check alias → quality
 
 **Implementation Sketch**:
