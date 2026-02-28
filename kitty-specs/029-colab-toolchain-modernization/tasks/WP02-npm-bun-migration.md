@@ -1,9 +1,11 @@
 ---
 work_package_id: WP02
 title: npm→bun Migration + Dependency Cleanup
-lane: planned
+lane: "done"
 dependencies: []
 subtasks: [T007, T008, T009, T010, T011, T012, T013]
+reviewed_by: "Koosha Paridehpour"
+review_status: "approved"
 history:
 - date: '2026-02-28'
   action: created
@@ -186,3 +188,7 @@ spec-kitty implement WP02 --base WP01
 - Grep for "npm" across entire repo — only legitimate exceptions should remain
 - Verify fs-extra replacement didn't break build scripts (setup-deps.ts is critical path)
 - Check that bun.lock was regenerated after dependency removal
+
+## Activity Log
+
+- 2026-02-28T12:35:24Z – unknown – lane=done – Implemented, PR #6 created
