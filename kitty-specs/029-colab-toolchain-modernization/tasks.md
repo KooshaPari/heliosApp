@@ -144,7 +144,7 @@
 - [x] T020: Document runtime + testing + formatting decisions
 - [x] T021: Document library preferences + bun builtins policy
 - [x] T022: Document architecture principles
-- [ ] T023: Create docs/adr/001-mlx-inference-evaluation.md
+- [x] T023: Create docs/adr/001-mlx-inference-evaluation.md
 - [ ] T024: Document MLX migration path + fallback strategy
 
 **Implementation Sketch**:
