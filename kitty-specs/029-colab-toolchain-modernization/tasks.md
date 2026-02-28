@@ -52,7 +52,7 @@
 - [x] T003: Add quality:quick (readonly, no --write)
 - [x] T004: Add quality:ci (non-mutating PR gate)
 - [x] T005: Add quality:pre-push + quality:release-lint
-- [ ] T006: Add check alias → quality
+- [x] T006: Add check alias → quality
 
 **Implementation Sketch**:
 1. Create `Taskfile.yml` at repo root with `version: '3'`
