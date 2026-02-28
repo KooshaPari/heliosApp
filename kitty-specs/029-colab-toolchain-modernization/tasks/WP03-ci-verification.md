@@ -1,9 +1,11 @@
 ---
 work_package_id: WP03
 title: CI Workflow + Verification
-lane: planned
+lane: "done"
 dependencies: []
 subtasks: [T014, T015, T016, T017, T018]
+reviewed_by: "Koosha Paridehpour"
+review_status: "approved"
 history:
 - date: '2026-02-28'
   action: created
@@ -153,3 +155,7 @@ spec-kitty implement WP03 --base WP02
 - Check that npm registry publishing still works (bunx npm publish is the correct pattern)
 - Verify go-task version is v3.x compatible
 - Confirm quality:ci runs the same checks as local quality:quick (non-mutating)
+
+## Activity Log
+
+- 2026-02-28T12:35:25Z – unknown – lane=done – Implemented, PR #6 created
