@@ -19,6 +19,7 @@ GitHub Actions workflows:
 - `.github/workflows/stage-gates.yml`: branch-stage aware gates for PRs.
 - `.github/workflows/policy-gate.yml`: enforces merge-policy constraints.
 - `.github/workflows/required-check-names-guard.yml`: validates required check manifest stays aligned.
+- `.github/workflows/agent-dir-guard.yml`: enforces allowed agent-directory files in repository history.
 - `.github/workflows/vitepress-pages.yml`: builds and deploys VitePress docs on `main`.
 
 ## Required Check Governance
@@ -30,6 +31,16 @@ When adding/removing CI jobs:
 1. Update the workflow job `name` values.
 2. Update `.github/required-checks.txt` in the same pull request.
 3. Ensure `required-check-names-guard` stays green.
+
+## Agent Directory Policy
+
+Agent folders are blocked by default. The only allowlisted paths are:
+
+- `.claude/skills/**`
+- `.gemini/config.yaml`
+- `.gemini/commands/*.toml`
+
+Any other file under agent directories must not be committed.
 
 ## Docs Index
 
