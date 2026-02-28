@@ -1,0 +1,15 @@
+{
+  "name": "helios-app",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -b",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.8.0"
+  },
+  "workspaces": ["apps/*"]
+}
