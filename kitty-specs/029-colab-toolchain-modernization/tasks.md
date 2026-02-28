@@ -85,7 +85,7 @@
 - [x] T009: Replace npm references in test-plugin/README.md
 - [x] T010: Replace npm/npx in webflow-plugin sources
 - [x] T011: Replace npm references in ColabTerminal.ts comments
-- [ ] T012: Remove ansi-to-html dependency
+- [x] T012: Remove ansi-to-html dependency
 - [ ] T013: Replace fs-extra with bun-native fs APIs
 
 **Implementation Sketch**:
