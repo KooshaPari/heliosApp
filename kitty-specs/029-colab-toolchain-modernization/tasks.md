@@ -47,7 +47,7 @@
 **Priority**: P0 — foundation for all other WPs
 
 **Included Subtasks**:
-- [ ] T001: Create Taskfile.yml with dev/build/test tasks
+- [x] T001: Create Taskfile.yml with dev/build/test tasks
 - [ ] T002: Add quality task (fmt + test + lint, mutating)
 - [ ] T003: Add quality:quick (readonly, no --write)
 - [ ] T004: Add quality:ci (non-mutating PR gate)
