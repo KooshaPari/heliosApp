@@ -140,7 +140,7 @@
 **Priority**: P1 — documentation deliverables
 
 **Included Subtasks**:
-- [ ] T019: Create CONSTITUTION.md
+- [x] T019: Create CONSTITUTION.md
 - [ ] T020: Document runtime + testing + formatting decisions
 - [ ] T021: Document library preferences + bun builtins policy
 - [ ] T022: Document architecture principles
