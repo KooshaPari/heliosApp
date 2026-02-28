@@ -115,7 +115,7 @@
 - [x] T015: Add go-task installation step to CI
 - [x] T016: Wire CI quality gate to `task quality:ci`
 - [x] T017: Verify build passes without npm
-- [ ] T018: Verify all 178 tests pass
+- [x] T018: Verify all 178 tests pass
 
 **Implementation Sketch**:
 1. Replace Node.js setup with Bun setup in CI workflow
