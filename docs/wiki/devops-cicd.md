@@ -19,7 +19,7 @@ GitHub Actions workflows:
 - `.github/workflows/stage-gates.yml`: branch-stage aware gates for PRs.
 - `.github/workflows/policy-gate.yml`: enforces merge-policy constraints.
 - `.github/workflows/required-check-names-guard.yml`: validates required check manifest stays aligned.
-- `.github/workflows/agent-dir-guard.yml`: enforces allowed agent-directory files in repository history.
+- `.github/workflows/agent-dir-guard.yml`: enforces allowed agent-directory files in tracked repository content.
 - `.github/workflows/vitepress-pages.yml`: builds and deploys VitePress docs on `main`.
 
 ## Required Check Governance
@@ -34,7 +34,9 @@ When adding/removing CI jobs:
 
 ## Agent Directory Policy
 
-Agent folders are blocked by default. The only allowlisted paths are:
+Agent directories (`.claude/`, `.codex/`, `.gemini/`, `.cursor/`, `.qwen/`,
+`.opencode/`, `.windsurf/`, `.kilocode/`, `.augment/`, `.roo/`, `.amazonq/`)
+are blocked by default. The only allowlisted paths are:
 
 - `.claude/skills/**`
 - `.claude/commands/*.md`
@@ -42,6 +44,8 @@ Agent folders are blocked by default. The only allowlisted paths are:
 - `.cursor/commands/*.md`
 - `.gemini/config.yaml`
 - `.gemini/commands/*.toml`
+
+Additionally, `.github/copilot/**` is blocked by policy.
 
 Any other file under agent directories must not be committed.
 
