@@ -37,6 +37,9 @@ When adding/removing CI jobs:
 Agent folders are blocked by default. The only allowlisted paths are:
 
 - `.claude/skills/**`
+- `.claude/commands/*.md`
+- `.codex/prompts/*.md`
+- `.cursor/commands/*.md`
 - `.gemini/config.yaml`
 - `.gemini/commands/*.toml`
 
