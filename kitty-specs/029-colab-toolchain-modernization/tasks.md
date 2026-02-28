@@ -141,7 +141,7 @@
 
 **Included Subtasks**:
 - [x] T019: Create CONSTITUTION.md
-- [ ] T020: Document runtime + testing + formatting decisions
+- [x] T020: Document runtime + testing + formatting decisions
 - [ ] T021: Document library preferences + bun builtins policy
 - [ ] T022: Document architecture principles
 - [ ] T023: Create docs/adr/001-mlx-inference-evaluation.md
