@@ -1,0 +1,79 @@
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task --list
+    silent: true
+
+  preflight:
+    desc: Fail fast if required tooling is missing
+    cmds:
+      - |
+        set -euo pipefail
+        command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
+        command -v task >/dev/null 2>&1 || { echo "[FAIL] task is required"; exit 1; }
+        command -v git >/dev/null 2>&1 || { echo "[FAIL] git is required"; exit 1; }
+        test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
+        echo "[OK] preflight checks passed"
+
+  deps:
+    desc: Install dependencies with lockfile guarantees
+    deps: [preflight]
+    cmds:
+      - bun install --frozen-lockfile
+
+  typecheck:
+    desc: Run TypeScript type checks
+    cmds:
+      - bun run typecheck
+
+  lint:
+    desc: Run static lint checks
+    cmds:
+      - bun run lint
+
+  test:
+    desc: Run unit test suites
+    cmds:
+      - bun run test
+
+  coverage:
+    desc: Run unit tests with coverage
+    cmds:
+      - bun run test:coverage
+
+  docs:index:
+    desc: Generate markdown document index pages
+    cmds:
+      - bun run docs:index
+
+  docs:build:
+    desc: Build VitePress docs
+    cmds:
+      - bun run docs:build
+
+  quality:quick:
+    desc: Fast quality lane for inner-loop development
+    deps: [preflight, deps]
+    cmds:
+      - task typecheck
+      - task lint
+      - task test
+
+  quality:strict:
+    desc: Strict quality lane including coverage and docs build
+    deps: [quality:quick]
+    cmds:
+      - task coverage
+      - task docs:build
+
+  check:
+    desc: Canonical full-project check
+    deps: [quality:strict]
+
+  ci:
+    desc: CI lane (strict quality + docs index refresh)
+    deps: [check]
+    cmds:
+      - task docs:index

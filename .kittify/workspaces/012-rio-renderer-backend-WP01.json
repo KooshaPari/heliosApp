@@ -1,0 +1,12 @@
+{
+  "wp_id": "WP01",
+  "feature_slug": "012-rio-renderer-backend",
+  "worktree_path": ".worktrees/012-rio-renderer-backend-WP01",
+  "branch_name": "012-rio-renderer-backend-WP01",
+  "base_branch": "main",
+  "base_commit": "afcb42bace7a44aa362e8bdd93b292ea1a1d3bc3",
+  "dependencies": [],
+  "created_at": "2026-02-27T12:14:56.757334+00:00",
+  "created_by": "implement-command",
+  "vcs_backend": "git"
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "helios.localbus.v1/envelope",
+  "title": "Helios Local Bus Envelope",
+  "type": "object",
+  "required": ["id", "type", "ts"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "type": {"type": "string", "enum": ["command", "response", "event"]},
+    "ts": {"type": "string", "format": "date-time"},
+    "workspace_id": {"type": "string"},
+    "session_id": {"type": "string"},
+    "terminal_id": {"type": "string"},
+    "actor": {
+      "type": "object",
+      "properties": {
+        "kind": {"type": "string"},
+        "id": {"type": "string"}
+      },
+      "required": ["kind", "id"],
+      "additionalProperties": false
+    },
+    "method": {"type": "string"},
+    "topic": {"type": "string"},
+    "payload": {"type": "object"},
+    "status": {"type": "string", "enum": ["ok", "error"]},
+    "result": {"type": ["object", "null"]},
+    "error": {
+      "type": ["object", "null"],
+      "properties": {
+        "code": {"type": "string"},
+        "message": {"type": "string"},
+        "retryable": {"type": "boolean"},
+        "details": {"type": ["object", "null"]}
+      },
+      "required": ["code", "message", "retryable"],
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

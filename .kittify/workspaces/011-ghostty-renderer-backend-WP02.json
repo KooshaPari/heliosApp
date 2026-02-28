@@ -1,0 +1,14 @@
+{
+  "wp_id": "WP02",
+  "feature_slug": "011-ghostty-renderer-backend",
+  "worktree_path": ".worktrees/011-ghostty-renderer-backend-WP02",
+  "branch_name": "011-ghostty-renderer-backend-WP02",
+  "base_branch": "011-ghostty-renderer-backend-WP01",
+  "base_commit": "5213fc27d2c16ea6bca5872ce7d6aee23f119e37",
+  "dependencies": [
+    "WP01"
+  ],
+  "created_at": "2026-02-27T12:23:16.290173+00:00",
+  "created_by": "implement-command",
+  "vcs_backend": "git"
+}

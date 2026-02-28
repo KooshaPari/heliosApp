@@ -1,0 +1,139 @@
+name: Stage Gates
+
+on:
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+jobs:
+  detect-stage:
+    name: detect-stage
+    runs-on: ubuntu-latest
+    outputs:
+      stage: ${{ steps.detect.outputs.stage }}
+      gates: ${{ steps.detect.outputs.gates }}
+    steps:
+      - name: Detect stage from branch
+        id: detect
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          case "$BRANCH" in
+            spike/*)
+              echo "stage=SP" >> "$GITHUB_OUTPUT"
+              echo "gates=format" >> "$GITHUB_OUTPUT"
+              ;;
+            poc/*|preview/*)
+              echo "stage=POC" >> "$GITHUB_OUTPUT"
+              echo "gates=format,lint,unit" >> "$GITHUB_OUTPUT"
+              ;;
+            feature/*|feature-preview/*)
+              echo "stage=FEATURE" >> "$GITHUB_OUTPUT"
+              echo "gates=format,lint,unit,secrets" >> "$GITHUB_OUTPUT"
+              ;;
+            beta/*|release/beta-*)
+              echo "stage=BETA" >> "$GITHUB_OUTPUT"
+              echo "gates=format,lint,unit,coverage,secrets" >> "$GITHUB_OUTPUT"
+              ;;
+            release/*|hotfix/*)
+              echo "stage=RELEASE" >> "$GITHUB_OUTPUT"
+              echo "gates=format,lint,unit,coverage,secrets,e2e-smoke" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "stage=DEFAULT" >> "$GITHUB_OUTPUT"
+              echo "gates=format,lint,unit,coverage,secrets" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+  format-check:
+    name: format-check
+    runs-on: ubuntu-latest
+    needs: [detect-stage]
+    if: contains(needs.detect-stage.outputs.gates, 'format')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Verify format
+        run: bunx @biomejs/biome format --check .
+
+  lint-check:
+    name: lint-check
+    runs-on: ubuntu-latest
+    needs: [detect-stage]
+    if: contains(needs.detect-stage.outputs.gates, 'lint')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Run lint
+        run: bun run lint
+
+  unit-check:
+    name: unit-check
+    runs-on: ubuntu-latest
+    needs: [detect-stage]
+    if: contains(needs.detect-stage.outputs.gates, 'unit')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Run tests
+        run: bun run test
+
+  coverage-check:
+    name: coverage-check
+    runs-on: ubuntu-latest
+    needs: [detect-stage]
+    if: contains(needs.detect-stage.outputs.gates, 'coverage')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Run coverage
+        run: bun run test:coverage
+
+  secret-scan:
+    name: stage-secret-scan
+    runs-on: ubuntu-latest
+    needs: [detect-stage]
+    if: contains(needs.detect-stage.outputs.gates, 'secrets')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  e2e-smoke:
+    name: e2e-smoke
+    runs-on: ubuntu-latest
+    needs: [detect-stage]
+    if: contains(needs.detect-stage.outputs.gates, 'e2e-smoke')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+      - name: Run e2e smoke
+        run: bun run test:e2e

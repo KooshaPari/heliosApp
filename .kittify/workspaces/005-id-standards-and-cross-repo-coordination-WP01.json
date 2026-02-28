@@ -1,0 +1,12 @@
+{
+  "wp_id": "WP01",
+  "feature_slug": "005-id-standards-and-cross-repo-coordination",
+  "worktree_path": ".worktrees/005-id-standards-and-cross-repo-coordination-WP01",
+  "branch_name": "005-id-standards-and-cross-repo-coordination-WP01",
+  "base_branch": "main",
+  "base_commit": "3f963b6074171f7e751e0c490e95696090a68f54",
+  "dependencies": [],
+  "created_at": "2026-02-27T11:28:32.828578+00:00",
+  "created_by": "implement-command",
+  "vcs_backend": "git"
+}

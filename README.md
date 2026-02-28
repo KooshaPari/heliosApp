@@ -18,3 +18,18 @@ Captured on 2026-02-26 for follow-up validation and prioritization.
 
 - These entries are intentionally preserved as provided (including possible duplicates) for future source verification.
 - `awesome.ecosyste.ms` projects index: https://awesome.ecosyste.ms/projects
+
+## Engineering Baseline
+
+- Install dependencies: `bun install --frozen-lockfile`
+- Run quick quality checks: `task quality:quick` or `just quality-quick`
+- Run strict quality checks: `task quality:strict` or `just quality-strict`
+- Build docs: `bun run docs:build`
+
+CI/CD and docs deploy definitions are in:
+
+- `.github/workflows/ci.yml`
+- `.github/workflows/stage-gates.yml`
+- `.github/workflows/policy-gate.yml`
+- `.github/workflows/required-check-names-guard.yml`
+- `.github/workflows/vitepress-pages.yml`

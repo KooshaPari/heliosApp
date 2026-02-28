@@ -1,0 +1,14 @@
+{
+  "wp_id": "WP02",
+  "feature_slug": "019-ts7-and-bun-runtime-setup",
+  "worktree_path": ".worktrees/019-ts7-and-bun-runtime-setup-WP02",
+  "branch_name": "019-ts7-and-bun-runtime-setup-WP02",
+  "base_branch": "019-ts7-and-bun-runtime-setup-WP01",
+  "base_commit": "76a235c583c88d28f17942d53484e7e2d6882d48",
+  "dependencies": [
+    "WP01"
+  ],
+  "created_at": "2026-02-27T11:19:14.050454+00:00",
+  "created_by": "implement-command",
+  "vcs_backend": "git"
+}

@@ -1,0 +1,12 @@
+{
+  "wp_id": "WP01",
+  "feature_slug": "004-app-settings-and-feature-flags",
+  "worktree_path": ".worktrees/004-app-settings-and-feature-flags-WP01",
+  "branch_name": "004-app-settings-and-feature-flags-WP01",
+  "base_branch": "main",
+  "base_commit": "f95ec2c9561fb25c9f97b087363c68474f24f89f",
+  "dependencies": [],
+  "created_at": "2026-02-27T11:28:40.281844+00:00",
+  "created_by": "implement-command",
+  "vcs_backend": "git"
+}

@@ -1,0 +1,14 @@
+{
+  "wp_id": "WP03",
+  "feature_slug": "003-workspace-and-project-metadata-persistence",
+  "worktree_path": ".worktrees/003-workspace-and-project-metadata-persistence-WP03",
+  "branch_name": "003-workspace-and-project-metadata-persistence-WP03",
+  "base_branch": "003-workspace-and-project-metadata-persistence-WP02",
+  "base_commit": "d1377eb047dd343dba4bde28d2d7d708398bf1e8",
+  "dependencies": [
+    "WP02"
+  ],
+  "created_at": "2026-02-27T11:50:54.968690+00:00",
+  "created_by": "implement-command",
+  "vcs_backend": "git"
+}
