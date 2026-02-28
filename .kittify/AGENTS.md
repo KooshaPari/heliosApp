@@ -146,6 +146,9 @@ Agent directories like `.claude/`, `.codex/`, `.gemini/` contain:
 - `.kittify/templates/command-templates/` - These are templates, not final commands
 - Any `auth.json`, `credentials.json`, or similar files
 
+Exception:
+- `.gemini/config.yaml` is allowed for repository-level Gemini Code Assist policy only.
+
 ### Automatic Protection
 
 Spec Kitty automatically:
@@ -188,3 +191,12 @@ This is intentional and correct - it ensures a single source of truth for projec
 - 🧠 **Context**: Read what you need; don’t forget what you already learned.  
 - ✅ **Quality**: Follow secure, tested, documented practices.  
 - 📝 **Git**: Commit cleanly with clear messages.
+<!-- PHENOTYPE_GOVERNANCE_OVERLAY_V1 -->
+## Governance Overlay (Phenotype)
+
+- Engineering process is `TDD + BDD + SDD` for all substantive changes.
+- Architecture constraints are `Hexagonal + Clean + SOLID` by default.
+- Runtime behavior for required dependencies is fail-fast and explicit (no silent fallbacks).
+- Agent/terminal hot paths must preserve low-latency deterministic behavior.
+- Orchestration flows must emit auditable lifecycle events with correlation IDs.
+- Significant architecture/protocol changes require an ADR-style decision record in repo docs.

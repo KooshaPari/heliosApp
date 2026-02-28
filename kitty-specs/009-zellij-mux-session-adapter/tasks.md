@@ -56,11 +56,11 @@
 **Estimated Prompt Size**: ~430 lines
 
 ### Included Subtasks
-- [ ] T006 Implement pane create, close, and resize operations in `apps/runtime/src/integrations/zellij/panes.ts`
-- [ ] T007 Implement tab create, close, and switch operations in `apps/runtime/src/integrations/zellij/tabs.ts`
-- [ ] T008 Integrate pane operations with PTY lifecycle (spec 007): spawn PTY on pane create, terminate on close
-- [ ] T009 Implement minimum pane dimension enforcement (FR-009-007)
-- [ ] T010 [P] Implement layout topology tracking (current arrangement of tabs and panes with dimensions)
+- [x] T006 Implement pane create, close, and resize operations in `apps/runtime/src/integrations/zellij/panes.ts`
+- [x] T007 Implement tab create, close, and switch operations in `apps/runtime/src/integrations/zellij/tabs.ts`
+- [x] T008 Integrate pane operations with PTY lifecycle (spec 007): spawn PTY on pane create, terminate on close
+- [x] T009 Implement minimum pane dimension enforcement (FR-009-007)
+- [x] T010 [P] Implement layout topology tracking (current arrangement of tabs and panes with dimensions)
 
 ### Implementation Notes
 - Pane create must trigger PTY spawn (spec 007) and bind PTY to the pane.
