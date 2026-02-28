@@ -112,7 +112,7 @@
 
 **Included Subtasks**:
 - [x] T014: Update .github/workflows/build-release.yml npm→bun
-- [ ] T015: Add go-task installation step to CI
+- [x] T015: Add go-task installation step to CI
 - [ ] T016: Wire CI quality gate to `task quality:ci`
 - [ ] T017: Verify build passes without npm
 - [ ] T018: Verify all 178 tests pass
