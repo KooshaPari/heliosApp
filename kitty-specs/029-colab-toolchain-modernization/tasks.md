@@ -49,7 +49,7 @@
 **Included Subtasks**:
 - [x] T001: Create Taskfile.yml with dev/build/test tasks
 - [x] T002: Add quality task (fmt + test + lint, mutating)
-- [ ] T003: Add quality:quick (readonly, no --write)
+- [x] T003: Add quality:quick (readonly, no --write)
 - [ ] T004: Add quality:ci (non-mutating PR gate)
 - [ ] T005: Add quality:pre-push + quality:release-lint
 - [ ] T006: Add check alias → quality
