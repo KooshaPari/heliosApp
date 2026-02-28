@@ -145,7 +145,7 @@
 - [x] T021: Document library preferences + bun builtins policy
 - [x] T022: Document architecture principles
 - [x] T023: Create docs/adr/001-mlx-inference-evaluation.md
-- [ ] T024: Document MLX migration path + fallback strategy
+- [x] T024: Document MLX migration path + fallback strategy
 
 **Implementation Sketch**:
 1. Create CONSTITUTION.md with sections: Runtime, Testing, Formatting, Task Runner, Quality Lanes
