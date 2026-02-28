@@ -86,7 +86,7 @@
 - [x] T010: Replace npm/npx in webflow-plugin sources
 - [x] T011: Replace npm references in ColabTerminal.ts comments
 - [x] T012: Remove ansi-to-html dependency
-- [ ] T013: Replace fs-extra with bun-native fs APIs
+- [x] T013: Replace fs-extra with bun-native fs APIs
 
 **Implementation Sketch**:
 1. Update package.json push:* scripts (npm version → bun version or Taskfile)
