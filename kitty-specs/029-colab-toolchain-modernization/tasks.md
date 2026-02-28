@@ -80,7 +80,7 @@
 **Priority**: P0 — required for CI and build integrity
 
 **Included Subtasks**:
-- [ ] T007: Migrate package.json push:* scripts npm→bun
+- [x] T007: Migrate package.json push:* scripts npm→bun
 - [ ] T008: Replace npm references in README.md
 - [ ] T009: Replace npm references in test-plugin/README.md
 - [ ] T010: Replace npm/npx in webflow-plugin sources
