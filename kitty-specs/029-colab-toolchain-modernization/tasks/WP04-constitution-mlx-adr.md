@@ -1,9 +1,11 @@
 ---
 work_package_id: WP04
 title: Constitution + MLX ADR
-lane: planned
+lane: "done"
 dependencies: []
 subtasks: [T019, T020, T021, T022, T023, T024]
+reviewed_by: "Koosha Paridehpour"
+review_status: "approved"
 history:
 - date: '2026-02-28'
   action: created
@@ -260,3 +262,7 @@ spec-kitty implement WP04 --base WP01
 - Check that MLX performance numbers cite sources
 - Ensure fallback strategy covers all deployment targets
 - Constitution should NOT contain implementation details — only decisions and principles
+
+## Activity Log
+
+- 2026-02-28T12:35:25Z – unknown – lane=done – Implemented, PR #6 created
