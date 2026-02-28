@@ -7,3 +7,4 @@ ci.yml|secret-scan
 ci.yml|ci-summary
 policy-gate.yml|policy-gate
 required-check-names-guard.yml|verify-required-check-names
+agent-dir-guard.yml|enforce-agent-directory-policy

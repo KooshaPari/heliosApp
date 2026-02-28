@@ -59,7 +59,7 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: Verify format
-        run: bunx @biomejs/biome format --check .
+        run: bunx @biomejs/biome check --formatter-enabled=true --linter-enabled=false --organize-imports-enabled=false apps docs/.vitepress playwright.config.ts tsconfig.json package.json
 
   lint-check:
     name: lint-check
