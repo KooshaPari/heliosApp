@@ -1,12 +1,7 @@
 # Added by Spec Kitty CLI (auto-managed)
-.claude/
-.codex/
 .opencode/
 .windsurf/
-.gemini/
-.cursor/
 .qwen/
-.kilocode/
 .augment/
 .roo/
 .amazonq/
@@ -54,3 +49,21 @@ Thumbs.db
 npm-debug.log*
 # Excluded via sparse-checkout
 kitty-specs/
+
+
+
+
+
+
+
+# AI tool artifacts
+.claude/
+.codex/
+.cursor/
+.gemini/
+.kittify/
+.kilocode/
+.github/prompts/
+.github/copilot-instructions.md
+.claudeignore
+.llmignore

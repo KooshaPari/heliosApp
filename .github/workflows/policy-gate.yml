@@ -29,9 +29,15 @@ jobs:
           set -euo pipefail
 
           # Prevent merge commits in PR branch diff range
-          git fetch origin "$BASE_REF" --depth=1 || true
           PR_HEAD="${HEAD_SHA}"
-          MERGES=$(git rev-list --merges "origin/$BASE_REF..$PR_HEAD" || true)
+          if ! git fetch origin "$BASE_REF" --depth=1; then
+            echo "ERROR: failed to fetch base ref $BASE_REF."
+            exit 1
+          fi
+          if ! MERGES=$(git rev-list --merges "origin/$BASE_REF..$PR_HEAD"); then
+            echo "ERROR: failed to compute merge-commit range for base ref '$BASE_REF'."
+            exit 1
+          fi
           if [[ -n "$MERGES" ]]; then
             echo "ERROR: merge commits detected in PR diff range:"
             echo "$MERGES"

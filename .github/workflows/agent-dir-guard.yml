@@ -22,14 +22,18 @@ jobs:
 
           files="$(git ls-files)"
 
-          blocked=$(printf "%s\n" "$files" | \
+          if blocked=$(printf "%s\n" "$files" | \
             grep -E '^\.(claude|codex|gemini|cursor|qwen|opencode|windsurf|kilocode|augment|roo|amazonq)/|^\.github/copilot/' | \
             grep -v '^\.claude/skills/' | \
             grep -v '^\.claude/commands/.*\.md$' | \
             grep -v '^\.codex/prompts/.*\.md$' | \
             grep -v '^\.cursor/commands/.*\.md$' | \
             grep -v '^\.gemini/config.yaml$' | \
-            grep -v '^\.gemini/commands/.*\.toml$' || true)
+            grep -v '^\.gemini/commands/.*\.toml$'); then
+            :
+          else
+            blocked=""
+          fi
 
           if [[ -n "$blocked" ]]; then
             echo "Blocked agent directory files detected:" >&2
