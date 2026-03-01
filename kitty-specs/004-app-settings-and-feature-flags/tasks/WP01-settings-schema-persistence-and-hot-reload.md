@@ -248,3 +248,4 @@ Constraints:
 - 2026-02-27T11:28:40Z – wp01-settings-agent – shell_pid=28634 – lane=doing – Assigned agent via workflow command
 - 2026-02-27T11:49:44Z – wp01-settings-agent – shell_pid=28634 – lane=for_review – Ready for review: Settings schema, JSON persistence, SettingsManager with hot-reload, 40 tests
 - 2026-03-01T13:20:13Z – wp01-settings-agent – shell_pid=28634 – lane=done – Review passed: auto-approved
+- 2026-03-01T13:23:49Z – wp01-settings-agent – shell_pid=28634 – lane=done – Merged to main
