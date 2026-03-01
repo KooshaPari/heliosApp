@@ -24,11 +24,11 @@
 **Estimated Prompt Size**: ~320 lines
 
 ### Included Subtasks
-- [ ] T001 Define `PolicyRule` type: pattern (glob/regex), classification (safe/needs-approval/blocked), scope (workspace ID), priority, and description
-- [ ] T002 Implement `PolicyRuleSet` with ordered evaluation, denylist-wins conflict resolution, and deny-by-default for unmatched commands
-- [ ] T003 Implement rule storage with in-memory hot cache and file-backed persistence for durability
-- [ ] T004 Implement hot-swap rule updates: policy changes take effect within 1 second without process restart (NFR-023-003)
-- [ ] T005 [P] Add unit tests for rule matching, classification, conflict resolution (denylist-wins), deny-by-default, and hot-swap update propagation
+- [x] T001 Define `PolicyRule` type: pattern (glob/regex), classification (safe/needs-approval/blocked), scope (workspace ID), priority, and description
+- [x] T002 Implement `PolicyRuleSet` with ordered evaluation, denylist-wins conflict resolution, and deny-by-default for unmatched commands
+- [x] T003 Implement rule storage with in-memory hot cache and file-backed persistence for durability
+- [x] T004 Implement hot-swap rule updates: policy changes take effect within 1 second without process restart (NFR-023-003)
+- [x] T005 [P] Add unit tests for rule matching, classification, conflict resolution (denylist-wins), deny-by-default, and hot-swap update propagation
 
 ### Implementation Notes
 - Deny-by-default is non-negotiable: unclassified commands must never execute.
