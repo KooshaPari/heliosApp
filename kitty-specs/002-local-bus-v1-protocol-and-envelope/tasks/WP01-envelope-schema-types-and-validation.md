@@ -208,3 +208,4 @@ Implementation command:
 - 2026-02-27T11:19:15Z – wp01-bus-agent – shell_pid=22522 – lane=doing – Assigned agent via workflow command
 - 2026-02-27T11:24:07Z – wp01-bus-agent – shell_pid=22522 – lane=for_review – Ready for review: Envelope schema types, error taxonomy, creation helpers, strict validation, JSON schema, and 54 unit tests
 - 2026-03-01T13:20:10Z – wp01-bus-agent – shell_pid=22522 – lane=done – Review passed: auto-approved
+- 2026-03-01T13:23:19Z – wp01-bus-agent – shell_pid=22522 – lane=done – Merged to main
