@@ -8,6 +8,7 @@ base_commit: 566ba40040cf864c37996abe8aa5df8c6f54018b
 created_at: '2026-03-01T11:10:53.095532+00:00'
 subtasks: [T022, T023, T025]
 shell_pid: "71158"
+agent: "claude-opus"
 history:
 - date: '2026-03-01'
   action: created
@@ -159,3 +160,7 @@ Existing code:
 - Verify adapters don't break the existing AcpClient flow
 - Check graceful degradation when providers are unavailable
 - Verify hardware detection is cached (only runs once)
+
+## Activity Log
+
+- 2026-03-01T11:10:53Z – claude-opus – shell_pid=71158 – lane=doing – Assigned agent via workflow command
