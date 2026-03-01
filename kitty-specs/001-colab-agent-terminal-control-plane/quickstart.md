@@ -57,3 +57,18 @@ Expected result:
 5. Run protocol parity checks against formal assets (`specs/protocol/v1/methods.json`, `specs/protocol/v1/topics.json`) and verify no unmapped entries.
 
 Feature is ready for `/spec-kitty.tasks` when all scenarios and gates pass.
+
+## Formal Protocol Parity Verification (WP09)
+
+Run parity checks after any protocol contract/runtime/task update:
+
+```bash
+node tools/gates/protocol-parity.mjs
+bun test apps/runtime/tests/unit/protocol/protocol_parity_gate.test.ts
+```
+
+Valid annotations in `contracts/protocol-parity-matrix.json`:
+
+- `status: implemented` for shipped surfaces.
+- `status: deferred` with at least one `Txxx` task reference.
+- `status: extension` for explicit Helios deltas (for example `harness.status.changed`, `lane.attached`).
