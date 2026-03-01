@@ -35,3 +35,8 @@ export function toggleSidebar(): void {
 export function toggleTerminal(): void {
   setAppState((prev: AppState) => ({ ...prev, terminalVisible: !prev.terminalVisible }));
 }
+
+export function newChat(): void {
+  const id = `conv-${Date.now()}`;
+  setAppState((prev: AppState) => ({ ...prev, activeConversationId: id }));
+}

@@ -9,9 +9,9 @@
     "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": false,
     "resolveJsonModule": true,
-    "types": ["bun-types", "node", "@playwright/test"],
     "jsx": "preserve",
-    "jsxImportSource": "solid-js"
+    "jsxImportSource": "solid-js",
+    "types": ["bun-types", "node", "@playwright/test"]
   },
   "include": [
     "apps/**/*.ts",
