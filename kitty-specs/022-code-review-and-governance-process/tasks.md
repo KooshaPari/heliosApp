@@ -24,12 +24,12 @@
 **Estimated Prompt Size**: ~350 lines
 
 ### Included Subtasks
-- [ ] T001 Configure GitHub branch protection rules for `main`: require status checks (GCA, CodeRabbit, quality-gates), require at least one agent review approval, enforce linear history
-- [ ] T002 Configure GCA as a GitHub App/integration with required status check, auto-trigger on PR creation and update, and retry logic for rate-limiting
-- [ ] T003 Configure CodeRabbit as a required status check with auto-trigger and rate-limit retry
-- [ ] T004 Implement self-merge gating logic: verify all CI gates pass AND all required reviews approved before allowing merge
-- [ ] T005 Create append-only governance log (`governance-log.jsonl`) with schema: PR number, author, reviewers, gate results, compliance attestation, exception ADRs, timestamp
-- [ ] T006 [P] Implement `scripts/governance-log.ts` utility for appending entries and querying the log (e.g., self-merges in last 30 days, exception ADRs)
+- [x] T001 Configure GitHub branch protection rules for `main`: require status checks (GCA, CodeRabbit, quality-gates), require at least one agent review approval, enforce linear history
+- [x] T002 Configure GCA as a GitHub App/integration with required status check, auto-trigger on PR creation and update, and retry logic for rate-limiting
+- [x] T003 Configure CodeRabbit as a required status check with auto-trigger and rate-limit retry
+- [x] T004 Implement self-merge gating logic: verify all CI gates pass AND all required reviews approved before allowing merge
+- [x] T005 Create append-only governance log (`governance-log.jsonl`) with schema: PR number, author, reviewers, gate results, compliance attestation, exception ADRs, timestamp
+- [x] T006 [P] Implement `scripts/governance-log.ts` utility for appending entries and querying the log (e.g., self-merges in last 30 days, exception ADRs)
 
 ### Implementation Notes
 - Branch protection must be documented in `.github/branch-protection.md` for reproducibility.
