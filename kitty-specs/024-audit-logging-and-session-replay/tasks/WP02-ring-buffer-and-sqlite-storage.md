@@ -1,12 +1,12 @@
 ---
 work_package_id: WP02
 title: Storage Layer — Ring Buffer and SQLite Persistence
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00.000000+00:00'
+base_branch: 024-audit-logging-and-session-replay-WP01
+base_commit: 23250f22b35e5eea258e6fcd559f8bc87656ae52
+created_at: '2026-03-01T13:32:18.537580+00:00'
 subtasks:
 - T005
 - T006
@@ -14,10 +14,10 @@ subtasks:
 - T008
 phase: Phase 1 - Audit Foundation
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: ''
+shell_pid: "66147"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
