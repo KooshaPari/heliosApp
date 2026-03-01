@@ -16,7 +16,7 @@ subtasks:
 - T011
 phase: Phase 1 - Dependency Tracking
 assignee: ''
-agent: ''
+agent: "claude-haiku"
 shell_pid: "64058"
 review_status: ''
 reviewed_by: ''
@@ -226,3 +226,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z – system – lane=planned – Prompt created.
+- 2026-03-01T13:31:46Z – claude-haiku – shell_pid=64058 – lane=doing – Assigned agent via workflow command
