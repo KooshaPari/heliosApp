@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Instrumentation Hooks and Timer API
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: 39f25bd2dd6b41645c93a63f333558a581a3f652
@@ -11,6 +11,8 @@ phase: Phase 1 - Foundation
 assignee: ''
 agent: "wp01-perf-agent"
 shell_pid: "38561"
+reviewed_by: "Koosha Paridehpour"
+review_status: "approved"
 ---
 
 # Work Package Prompt: WP01 - Instrumentation Hooks and Timer API
@@ -208,3 +210,4 @@ Constraints:
 - 2026-02-27 – system – lane=planned – Prompt generated.
 - 2026-02-27T11:50:53Z – wp01-perf-agent – shell_pid=38561 – lane=doing – Assigned agent via workflow command
 - 2026-02-27T11:55:25Z – wp01-perf-agent – shell_pid=38561 – lane=for_review – Ready for review: Zero-alloc markStart/markEnd, monotonic clock, ring buffer, MetricsRegistry. 31 tests passing.
+- 2026-03-01T13:23:59Z – wp01-perf-agent – shell_pid=38561 – lane=done – Merged to main
