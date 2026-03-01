@@ -55,11 +55,11 @@
 **Estimated Prompt Size**: ~340 lines
 
 ### Included Subtasks
-- [ ] T006 Implement `PolicyEvaluationEngine` that accepts command context (command text, workspace ID, agent ID, affected paths) and returns classification + matched rule
-- [ ] T007 Integrate policy evaluation into lane execution pipeline (spec 008) as a pre-execution hook
-- [ ] T008 Integrate policy evaluation into terminal command dispatch as a pre-execution hook
-- [ ] T009 Wire every evaluation result to the audit sink (spec 024) with PolicyEvaluationResult record
-- [ ] T010 [P] Add deny-by-default verification: 1000 randomized unclassified commands, all denied; benchmarked evaluation latency < 50ms p95
+- [x] T006 Implement `PolicyEvaluationEngine` that accepts command context (command text, workspace ID, agent ID, affected paths) and returns classification + matched rule
+- [x] T007 Integrate policy evaluation into lane execution pipeline (spec 008) as a pre-execution hook
+- [x] T008 Integrate policy evaluation into terminal command dispatch as a pre-execution hook
+- [x] T009 Wire every evaluation result to the audit sink (spec 024) with PolicyEvaluationResult record
+- [x] T010 [P] Add deny-by-default verification: 1000 randomized unclassified commands, all denied; benchmarked evaluation latency < 50ms p95
 
 ### Implementation Notes
 - The engine must be synchronous or have bounded async latency (< 50ms).
