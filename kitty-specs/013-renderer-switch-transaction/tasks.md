@@ -85,12 +85,12 @@
 **Estimated Prompt Size**: ~420 lines
 
 ### Included Subtasks
-- [ ] T011 Implement restart-with-restore execution path (zmx checkpoint, teardown source, start target, restore from checkpoint) in `apps/runtime/src/renderer/restart_restore.ts`
-- [ ] T012 Implement degraded-but-safe mode for double-failure (rollback failure) with headless PTY preservation
-- [ ] T013 Implement terminal creation queueing during active switch transactions
-- [ ] T014 [P] Add fault injection tests: init failure, mid-swap failure, rollback failure, PTY buffer overflow in `apps/runtime/tests/integration/renderer/`
-- [ ] T015 [P] Add SLO validation tests for hot-swap (<3s), restart-with-restore (<8s), and rollback (<5s) at p95 in `apps/runtime/tests/integration/renderer/`
-- [ ] T016 [P] Add Playwright end-to-end tests for full switch workflow including UI feedback in `apps/desktop/tests/e2e/renderer/`
+- [x] T011 Implement restart-with-restore execution path (zmx checkpoint, teardown source, start target, restore from checkpoint) in `apps/runtime/src/renderer/restart_restore.ts`
+- [x] T012 Implement degraded-but-safe mode for double-failure (rollback failure) with headless PTY preservation
+- [x] T013 Implement terminal creation queueing during active switch transactions
+- [x] T014 [P] Add fault injection tests: init failure, mid-swap failure, rollback failure, PTY buffer overflow in `apps/runtime/tests/integration/renderer/`
+- [x] T015 [P] Add SLO validation tests for hot-swap (<3s), restart-with-restore (<8s), and rollback (<5s) at p95 in `apps/runtime/tests/integration/renderer/`
+- [x] T016 [P] Add Playwright end-to-end tests for full switch workflow including UI feedback in `apps/desktop/tests/e2e/renderer/`
 
 ### Implementation Notes
 - zmx checkpoint must capture scrollback, cursor, env, and cwd for all active terminals.
