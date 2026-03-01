@@ -16,7 +16,7 @@ subtasks:
 - T014
 phase: Phase 2 - Restoration and Hardening
 assignee: ''
-agent: ''
+agent: "claude-haiku"
 shell_pid: "72925"
 review_status: ''
 reviewed_by: ''
@@ -279,3 +279,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-03-01T13:34:04Z – claude-haiku – shell_pid=72925 – lane=doing – Assigned agent via workflow command
