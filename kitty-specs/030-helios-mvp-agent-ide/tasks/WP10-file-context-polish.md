@@ -1,7 +1,7 @@
 ---
 work_package_id: WP10
 title: File Context, First-Run, and Quality
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: 1245abe02cdb233a85a2582417ed8a64f9d3838e
@@ -9,6 +9,8 @@ created_at: '2026-03-01T11:17:21.985420+00:00'
 subtasks: [T031, T032, T033, T034, T035, T036]
 shell_pid: "81180"
 agent: "claude-opus"
+reviewed_by: "Koosha Paridehpour"
+review_status: "approved"
 history:
 - date: '2026-03-01'
   action: created
@@ -194,3 +196,4 @@ This is the polish WP that ties everything together. It depends on the chat loop
 
 - 2026-03-01T11:17:22Z – claude-opus – shell_pid=81180 – lane=doing – Assigned agent via workflow command
 - 2026-03-01T11:21:51Z – claude-opus – shell_pid=81180 – lane=for_review – File context, diff view, setup wizard, toasts
+- 2026-03-01T11:42:16Z – claude-opus – shell_pid=81180 – lane=done – Merged to main
