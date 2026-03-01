@@ -193,3 +193,4 @@ Constraints:
 - 2026-02-27T11:28:37Z – wp01-ws-agent – shell_pid=28454 – lane=doing – Assigned agent via workflow command
 - 2026-02-27T11:31:48Z – wp01-ws-agent – shell_pid=28454 – lane=for_review – Ready for review: Workspace CRUD lifecycle with types, state machine, in-memory store, service layer, and 32 passing unit tests
 - 2026-03-01T13:20:11Z – wp01-ws-agent – shell_pid=28454 – lane=done – Review passed: auto-approved
+- 2026-03-01T13:23:34Z – wp01-ws-agent – shell_pid=28454 – lane=done – Merged to main
