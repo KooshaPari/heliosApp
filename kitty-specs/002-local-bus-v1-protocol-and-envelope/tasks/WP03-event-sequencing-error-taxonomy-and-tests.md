@@ -202,3 +202,4 @@ Constraints:
 - 2026-02-27T11:50:39Z – wp03-bus-agent – shell_pid=37905 – lane=doing – Assigned agent via workflow command
 - 2026-02-27T12:31:34Z – wp03-bus-agent – shell_pid=37905 – lane=for_review – Completed
 - 2026-03-01T13:20:13Z – wp03-bus-agent – shell_pid=37905 – lane=done – Review passed: auto-approved
+- 2026-03-01T13:23:22Z – wp03-bus-agent – shell_pid=37905 – lane=done – Merged to main
