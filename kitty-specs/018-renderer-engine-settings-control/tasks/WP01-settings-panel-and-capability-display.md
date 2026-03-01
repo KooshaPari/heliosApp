@@ -1,11 +1,11 @@
 ---
 work_package_id: WP01
 title: Settings Panel, Capability Display, and Switch Trigger
-lane: "planned"
+lane: "doing"
 dependencies: []
 base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00+00:00'
+base_commit: 4e5826451eb1856b4d5f201af0d08d0286bcbf81
+created_at: '2026-03-01T13:34:22.014495+00:00'
 subtasks:
 - T001
 - T002
@@ -15,10 +15,10 @@ subtasks:
 - T006
 phase: Phase 1 - Settings Foundation
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: ''
+shell_pid: "74567"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
