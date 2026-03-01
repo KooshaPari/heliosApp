@@ -53,12 +53,12 @@
 **Estimated Prompt Size**: ~450 lines
 
 ### Included Subtasks
-- [ ] T006 Implement terminal tab surface in `apps/desktop/src/tabs/terminal_tab.ts`
-- [ ] T007 Implement agent tab surface in `apps/desktop/src/tabs/agent_tab.ts`
-- [ ] T008 Implement session tab surface in `apps/desktop/src/tabs/session_tab.ts`
-- [ ] T009 Implement chat tab surface in `apps/desktop/src/tabs/chat_tab.ts`
-- [ ] T010 Implement project tab surface in `apps/desktop/src/tabs/project_tab.ts`
-- [ ] T011 [P] Add unit tests for each tab surface in `apps/desktop/tests/unit/tabs/`
+- [x] T006 Implement terminal tab surface in `apps/desktop/src/tabs/terminal_tab.ts`
+- [x] T007 Implement agent tab surface in `apps/desktop/src/tabs/agent_tab.ts`
+- [x] T008 Implement session tab surface in `apps/desktop/src/tabs/session_tab.ts`
+- [x] T009 Implement chat tab surface in `apps/desktop/src/tabs/chat_tab.ts`
+- [x] T010 Implement project tab surface in `apps/desktop/src/tabs/project_tab.ts`
+- [x] T011 [P] Add unit tests for each tab surface in `apps/desktop/tests/unit/tabs/`
 
 ### Implementation Notes
 - Each tab subscribes to context change events and updates its content accordingly.
