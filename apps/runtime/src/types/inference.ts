@@ -1,32 +1,31 @@
-export type InferenceMessage = {
+export interface Message {
   role: "user" | "assistant" | "system";
   content: string;
-};
+}
 
-export type InferenceRequest = {
+export interface InferenceRequest {
   model: string;
-  messages: InferenceMessage[];
+  messages: Message[];
   maxTokens?: number;
   temperature?: number;
-};
+  systemPrompt?: string;
+}
 
-export type TokenUsage = {
+export interface TokenUsage {
   input: number;
   output: number;
-};
+}
 
-export type FinishReason = "end_turn" | "max_tokens" | "stop_sequence";
-
-export type InferenceResponse = {
+export interface InferenceResponse {
   content: string;
   model: string;
   tokenUsage: TokenUsage;
-  finishReason: FinishReason;
-};
+  finishReason: "end_turn" | "max_tokens" | "stop_sequence";
+}
 
-export type ModelInfo = {
+export interface ModelInfo {
   id: string;
   name: string;
   contextWindow: number;
   providerId: string;
-};
+}

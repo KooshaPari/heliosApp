@@ -1,9 +1,9 @@
-import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference.ts";
+import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
 
 export interface InferenceEngine {
   readonly id: string;
   readonly name: string;
-  readonly type: "local" | "cloud" | "server";
+  readonly type: "local" | "cloud";
 
   init(): Promise<void>;
   infer(request: InferenceRequest): Promise<InferenceResponse>;
