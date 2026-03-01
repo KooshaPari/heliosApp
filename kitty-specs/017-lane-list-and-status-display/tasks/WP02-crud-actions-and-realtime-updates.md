@@ -1,12 +1,12 @@
 ---
 work_package_id: WP02
 title: CRUD Actions, Real-Time Updates, and Tests
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 017-lane-list-and-status-display-WP01
+base_commit: c87845d6c6938059f4f9500d33801e971be90a5b
+created_at: '2026-03-01T13:32:45.065445+00:00'
 subtasks:
 - T006
 - T007
@@ -16,10 +16,10 @@ subtasks:
 - T011
 phase: Phase 2 - Interaction and Hardening
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: ''
+shell_pid: "68186"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
