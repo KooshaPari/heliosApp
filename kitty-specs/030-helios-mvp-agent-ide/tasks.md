@@ -130,9 +130,9 @@
 **Goal**: Persist conversations to GoldfishDB and restore them on app restart.
 
 **Subtasks**:
-- [ ] T019: Implement conversation save/load with GoldfishDB
-- [ ] T020: Implement session restore on app restart
-- [ ] T021: Wire sidebar conversation list to persisted data
+- [x] T019: Implement conversation save/load with GoldfishDB
+- [x] T020: Implement session restore on app restart
+- [x] T021: Wire sidebar conversation list to persisted data
 
 **Implementation sketch**: On each message send/receive, upsert conversation and append message to GoldfishDB. On app start, load all conversations and populate sidebar. Clicking a conversation loads its messages into the chat panel. New conversation creates a fresh entry.
 
