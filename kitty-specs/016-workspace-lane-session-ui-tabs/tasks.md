@@ -21,11 +21,11 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T001 Implement shared active context store with change events in `apps/desktop/src/tabs/context_switch.ts`
-- [ ] T002 Implement base tab surface component with context binding in `apps/desktop/src/tabs/tab_surface.ts`
-- [ ] T003 Implement tab bar component with selection, ordering, and reordering in `apps/desktop/src/tabs/tab_bar.ts`
-- [ ] T004 Implement tab state persistence (selection, order, per-tab scroll) in `apps/desktop/src/tabs/tab_persistence.ts`
-- [ ] T005 [P] Add unit tests for context store, tab bar, and persistence in `apps/desktop/tests/unit/tabs/`
+- [x] T001 Implement shared active context store with change events in `apps/desktop/src/tabs/context_switch.ts`
+- [x] T002 Implement base tab surface component with context binding in `apps/desktop/src/tabs/tab_surface.ts`
+- [x] T003 Implement tab bar component with selection, ordering, and reordering in `apps/desktop/src/tabs/tab_bar.ts`
+- [x] T004 Implement tab state persistence (selection, order, per-tab scroll) in `apps/desktop/src/tabs/tab_persistence.ts`
+- [x] T005 [P] Add unit tests for context store, tab bar, and persistence in `apps/desktop/tests/unit/tabs/`
 
 ### Implementation Notes
 - Context store is the single source of truth for the active workspace/lane/session.
