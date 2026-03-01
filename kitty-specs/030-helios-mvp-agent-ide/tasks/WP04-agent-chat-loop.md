@@ -1,7 +1,7 @@
 ---
 work_package_id: WP04
 title: Agent Chat Loop Wiring
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: 3ccbc7b9bf23cb68bc7a1846df0127baae8d63c0
@@ -157,3 +157,4 @@ The existing `a2a-dispatch.ts` provides `agent.run` and `agent.cancel` RPC handl
 ## Activity Log
 
 - 2026-03-01T11:13:25Z – claude-opus – shell_pid=76288 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T11:16:52Z – claude-opus – shell_pid=76288 – lane=for_review – Chat loop, multi-turn context, cancel
