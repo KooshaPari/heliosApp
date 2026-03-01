@@ -15,7 +15,7 @@ subtasks:
 - T016
 phase: Phase 3 - Integration and Hardening
 assignee: ''
-agent: ''
+agent: "claude-haiku"
 shell_pid: "80432"
 review_status: ''
 reviewed_by: ''
@@ -200,3 +200,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-03-01T13:35:33Z – claude-haiku – shell_pid=80432 – lane=doing – Assigned agent via workflow command
