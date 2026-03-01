@@ -1,26 +1,18 @@
-export interface Conversation {
-  id: string;
-  title: string;
-  createdAt: number;
-  updatedAt: number;
-  modelId: string;
-  messages: Message[];
-}
+export type MessageRole = "user" | "assistant" | "tool_call" | "tool_result";
 
-export interface Message {
-  id: string;
-  conversationId: string;
-  role: "user" | "assistant" | "tool_call" | "tool_result";
-  content: string;
-  timestamp: number;
-  metadata?: MessageMetadata;
-}
+export type MessageStatus = "pending" | "streaming" | "complete" | "error";
 
-export interface MessageMetadata {
-  model?: string;
-  tokenUsage?: { input: number; output: number };
+export type MessageMetadata = {
+  status?: MessageStatus;
   toolName?: string;
-  toolInput?: Record<string, unknown>;
+  toolInput?: unknown;
   toolOutput?: string;
-  status?: "pending" | "streaming" | "complete" | "error" | "cancelled";
-}
+};
+
+export type Message = {
+  id: string;
+  role: MessageRole;
+  content: string;
+  metadata?: MessageMetadata;
+  createdAt?: string;
+};
