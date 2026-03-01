@@ -89,6 +89,15 @@ export {
   InvalidTransitionError,
 } from "./switch_transaction.js";
 
+export type {
+  ZmxCheckpoint,
+  RestartRestoreResult,
+} from "./restart_restore.js";
+export {
+  executeRestartWithRestore,
+  RestartRestoreError,
+} from "./restart_restore.js";
+
 // ---------------------------------------------------------------------------
 // Lifecycle event types
 // ---------------------------------------------------------------------------

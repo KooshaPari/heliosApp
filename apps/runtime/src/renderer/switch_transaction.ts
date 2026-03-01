@@ -14,13 +14,14 @@ import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.j
 import type { RendererEventBus } from "./index.js";
 import { executeHotSwap, type TerminalContext } from "./hot_swap.js";
 import { executeRollback } from "./rollback.js";
+import { executeRestartWithRestore } from "./restart_restore.js";
 import type { SwitchBuffer } from "./stream_binding.js";
 
 // ---------------------------------------------------------------------------
 // State and error types
 // ---------------------------------------------------------------------------
 
-export type SwitchTransactionState = "pending" | "hot-swapping" | "restarting" | "committing" | "rolled-back" | "committed" | "failed";
+export type SwitchTransactionState = "pending" | "hot-swapping" | "restarting" | "committing" | "rolled-back" | "committed" | "degraded" | "failed";
 
 export class ConcurrentSwitchError extends Error {
   constructor(activeTransactionId: string) {
@@ -68,11 +69,12 @@ export interface SwitchTransactionRequest {
 
 const VALID_TRANSITIONS: Record<SwitchTransactionState, SwitchTransactionState[]> = {
   "pending": ["hot-swapping", "restarting"],
-  "hot-swapping": ["committing", "rolled-back"],
-  "restarting": ["committing", "rolled-back"],
-  "committing": ["committed"],
+  "hot-swapping": ["committing", "rolled-back", "degraded"],
+  "restarting": ["committing", "rolled-back", "degraded"],
+  "committing": ["committed", "degraded"],
   "committed": [],
   "rolled-back": [],
+  "degraded": ["committed", "rolled-back", "failed"],
   "failed": [],
 };
 
@@ -80,9 +82,20 @@ const VALID_TRANSITIONS: Record<SwitchTransactionState, SwitchTransactionState[]
 // Switch transaction orchestrator
 // ---------------------------------------------------------------------------
 
+// Terminal creation queue types
+interface QueuedTerminalCreation {
+  resolve: (value: unknown) => void;
+  reject: (error: Error) => void;
+  params: unknown;
+  createdAt: number;
+  queueTimeoutMs?: number;
+}
+
 export class SwitchTransactionOrchestrator {
   private _activeTransaction: SwitchTransaction | undefined;
   private readonly _eventBus: RendererEventBus | undefined;
+  private readonly _terminalCreationQueue: QueuedTerminalCreation[] = [];
+  private readonly _queueTimeoutMs = 30000; // 30 second default timeout
 
   constructor(eventBus?: RendererEventBus) {
     this._eventBus = eventBus;
@@ -100,7 +113,7 @@ export class SwitchTransactionOrchestrator {
    */
   async startSwitch(request: SwitchTransactionRequest): Promise<SwitchTransaction> {
     // Check concurrent transaction guard
-    if (this._activeTransaction !== undefined && this._activeTransaction.state !== "committed" && this._activeTransaction.state !== "rolled-back" && this._activeTransaction.state !== "failed") {
+    if (this._activeTransaction !== undefined && this._activeTransaction.state !== "committed" && this._activeTransaction.state !== "rolled-back" && this._activeTransaction.state !== "failed" && this._activeTransaction.state !== "degraded") {
       throw new ConcurrentSwitchError(this._activeTransaction.id);
     }
 
@@ -119,20 +132,26 @@ export class SwitchTransactionOrchestrator {
 
     try {
       // Route to hot-swap (WP02 focus) or restart-with-restore (WP03)
-      // For WP02, assume hot-swap capability check
-      const canHotSwap = true; // In real implementation, query capability matrix
+      // For now, assume hot-swap capability check (in real impl, query capability matrix)
+      const canHotSwap = true;
 
+      let result: SwitchTransaction;
       if (canHotSwap) {
-        return await this._executeHotSwapPath(transaction, request);
+        result = await this._executeHotSwapPath(transaction, request);
       } else {
-        // Placeholder for WP03 restart-with-restore
-        transaction.state = "failed";
-        transaction.error = new Error("hot-swap not supported for this renderer pair; restart-with-restore not yet implemented");
-        return transaction;
+        result = await this._executeRestartRestorePath(transaction, request);
       }
+
+      // Drain terminal creation queue after transaction completes
+      if (result.state === "committed" || result.state === "rolled-back" || result.state === "degraded") {
+        this._drainTerminalCreationQueue();
+      }
+
+      return result;
     } catch (error: unknown) {
       transaction.state = "failed";
       transaction.error = error instanceof Error ? error : new Error(String(error));
+      this._drainTerminalCreationQueue();
       throw error;
     }
   }
@@ -201,6 +220,69 @@ export class SwitchTransactionOrchestrator {
   }
 
   /**
+   * Execute restart-with-restore transition path (WP03).
+   * @private
+   */
+  private async _executeRestartRestorePath(
+    transaction: SwitchTransaction,
+    request: SwitchTransactionRequest,
+  ): Promise<SwitchTransaction> {
+    // Transition to restarting
+    this._transitionState(transaction, "restarting");
+    request.onProgress?.("restarting");
+
+    try {
+      // Execute restart-with-restore
+      const result = await executeRestartWithRestore(
+        request.sourceAdapter,
+        request.targetAdapter,
+        request.terminals,
+        request.streamBuffer,
+        request.config,
+        request.surface,
+        async (error: Error) => {
+          // Rollback callback
+          await executeRollback(
+            request.sourceAdapter,
+            request.targetAdapter,
+            request.terminals,
+            request.streamBuffer,
+            error.message,
+            this._eventBus,
+          );
+        },
+        this._eventBus,
+      );
+
+      if (result.success) {
+        // Transition to committing
+        this._transitionState(transaction, "committing");
+        request.onProgress?.("committing");
+
+        // Transition to committed
+        this._transitionState(transaction, "committed");
+        request.onProgress?.("committed");
+
+        return transaction;
+      } else {
+        // Restart-with-restore failed, rollback was triggered
+        this._transitionState(transaction, "rolled-back");
+        request.onProgress?.("rolled-back");
+
+        transaction.error = result.error;
+        return transaction;
+      }
+    } catch (error: unknown) {
+      // Unexpected error during restart-with-restore
+      this._transitionState(transaction, "failed");
+      request.onProgress?.("failed");
+
+      transaction.error = error instanceof Error ? error : new Error(String(error));
+      throw error;
+    }
+  }
+
+  /**
    * Transition the transaction to a new state with validation.
    * @private
    */
@@ -228,7 +310,72 @@ export class SwitchTransactionOrchestrator {
       return false;
     }
     const { state } = this._activeTransaction;
-    return state !== "committed" && state !== "rolled-back" && state !== "failed";
+    return state !== "committed" && state !== "rolled-back" && state !== "failed" && state !== "degraded";
+  }
+
+  /**
+   * Queue a terminal creation request during an active transaction.
+   *
+   * If a switch is in progress, returns a promise that resolves after
+   * the transaction completes. If no switch is active, executes immediately.
+   *
+   * @param params - Terminal creation parameters.
+   * @returns Promise that resolves when the terminal creation completes.
+   */
+  queueTerminalCreation(params: unknown): Promise<unknown> {
+    if (!this.isSwitchInProgress()) {
+      // No switch active, would execute immediately (real impl would spawn terminal)
+      return Promise.resolve(params);
+    }
+
+    // Queue the creation request
+    return new Promise<unknown>((resolve, reject) => {
+      const queued: QueuedTerminalCreation = {
+        resolve,
+        reject,
+        params,
+        createdAt: Date.now(),
+        queueTimeoutMs: this._queueTimeoutMs,
+      };
+
+      this._terminalCreationQueue.push(queued);
+
+      // Set timeout for queued request
+      const timeoutId = setTimeout(() => {
+        const index = this._terminalCreationQueue.indexOf(queued);
+        if (index >= 0) {
+          this._terminalCreationQueue.splice(index, 1);
+          reject(new Error(`Terminal creation request timed out after ${this._queueTimeoutMs}ms during active switch transaction`));
+        }
+      }, this._queueTimeoutMs);
+
+      // Store timeout ID for cleanup
+      (queued as any)._timeoutId = timeoutId;
+    });
+  }
+
+  /**
+   * Drain the terminal creation queue after transaction completion.
+   *
+   * Processes all queued creation requests in order, resolving each promise.
+   * Called automatically when a transaction completes (committed, rolled-back, or degraded).
+   *
+   * @private
+   */
+  private _drainTerminalCreationQueue(): void {
+    const queue = [...this._terminalCreationQueue];
+    this._terminalCreationQueue.length = 0;
+
+    for (const queued of queue) {
+      // Clear the timeout
+      if ((queued as any)._timeoutId) {
+        clearTimeout((queued as any)._timeoutId);
+      }
+
+      // Resolve the queued request
+      // In real impl, would actually spawn the terminal with the queued params
+      queued.resolve(queued.params);
+    }
   }
 }
 
