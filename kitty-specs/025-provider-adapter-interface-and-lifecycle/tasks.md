@@ -55,11 +55,11 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T006 Implement ACP client adapter implementing `ProviderAdapter` interface with run/cancel lifecycle in `apps/runtime/src/providers/acp-client.ts`
-- [ ] T007 Wire ACP task execution to local bus with correlation ID propagation and result capture
-- [ ] T008 Integrate policy gate pre-execute hook (spec 023) before ACP task dispatch
-- [ ] T009 [P] Implement ACP-specific health check with configurable interval and degraded/unavailable state transitions
-- [ ] T010 [P] Add integration tests for ACP lifecycle (init, execute, cancel, health, terminate) against mock ACP server in `apps/runtime/src/providers/__tests__/`
+- [x] T006 Implement ACP client adapter implementing `ProviderAdapter` interface with run/cancel lifecycle in `apps/runtime/src/providers/acp-client.ts`
+- [x] T007 Wire ACP task execution to local bus with correlation ID propagation and result capture
+- [x] T008 Integrate policy gate pre-execute hook (spec 023) before ACP task dispatch
+- [x] T009 [P] Implement ACP-specific health check with configurable interval and degraded/unavailable state transitions
+- [x] T010 [P] Add integration tests for ACP lifecycle (init, execute, cancel, health, terminate) against mock ACP server in `apps/runtime/src/providers/__tests__/`
 
 ### Implementation Notes
 - ACP client must propagate correlation IDs from originating bus request through to ACP response.
