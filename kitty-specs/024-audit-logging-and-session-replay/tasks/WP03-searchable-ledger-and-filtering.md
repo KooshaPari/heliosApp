@@ -1,12 +1,12 @@
 ---
 work_package_id: WP03
 title: Searchable Ledger and Filtering API
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP02
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00.000000+00:00'
+base_branch: 024-audit-logging-and-session-replay-WP02
+base_commit: c3003b5354b8a4232e87053fc5731dadad357570
+created_at: '2026-03-01T13:34:36.641585+00:00'
 subtasks:
 - T009
 - T010
@@ -15,10 +15,10 @@ subtasks:
 - T013
 phase: Phase 2 - Audit Querying
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: ''
+shell_pid: "76365"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
