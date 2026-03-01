@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Chat Panel and Message Rendering
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: 56569cfcbc2df300daf414f759c1a742b416e507
@@ -160,3 +160,4 @@ This is the core UI that users interact with. Messages from the user appear righ
 ## Activity Log
 
 - 2026-03-01T11:12:31Z – claude-opus – shell_pid=74724 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T11:16:47Z – claude-opus – shell_pid=74724 – lane=for_review – Chat panel, message bubbles, tool call display
