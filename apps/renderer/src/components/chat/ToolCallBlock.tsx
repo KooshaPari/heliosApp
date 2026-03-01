@@ -43,7 +43,7 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = (props) => {
         <span style={{ flex: "1" }}>{toolName()}</span>
         <span>{expanded() ? "\u25B2" : "\u25BC"}</span>
       </div>
-      <Show when={expanded() && input()}>
+      <Show when={expanded() && input() !== undefined}>
         <div style={{
           padding: "8px 12px",
           "background-color": "#11111b",
@@ -54,7 +54,7 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = (props) => {
           "max-height": "200px",
           "overflow-y": "auto",
         }}>
-          {JSON.stringify(input(), null, 2)}
+          <>{JSON.stringify(input(), null, 2)}</>
         </div>
       </Show>
     </div>
