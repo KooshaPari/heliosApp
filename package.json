@@ -14,7 +14,8 @@
     "docs:index": "bash docs/scripts/generate-doc-index.sh",
     "docs:dev": "vitepress dev docs",
     "docs:build": "bun run docs:index && vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "governance:query": "tsx scripts/governance-log.ts"
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.10.0",
