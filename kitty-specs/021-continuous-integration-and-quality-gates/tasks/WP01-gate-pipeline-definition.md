@@ -1,11 +1,11 @@
 ---
 work_package_id: WP01
 title: Gate Pipeline Definition — Typecheck, Lint, and Test Gates
-lane: "planned"
+lane: "doing"
 dependencies: []
 base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00.000000+00:00'
+base_commit: 0640fb9d8f5c4911ea5720f40bf4bf4358fd666a
+created_at: '2026-03-01T13:33:24.783799+00:00'
 subtasks:
 - T001
 - T002
@@ -15,10 +15,10 @@ subtasks:
 - T006
 phase: Phase 1 - CI Foundation
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: ''
+shell_pid: "70715"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
