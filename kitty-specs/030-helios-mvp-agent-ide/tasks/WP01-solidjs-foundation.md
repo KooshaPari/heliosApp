@@ -8,6 +8,7 @@ base_commit: 5bd4acc240771a7c260fed821c1f967c713fe14e
 created_at: '2026-03-01T10:43:54.923251+00:00'
 subtasks: [T001, T002, T003, T004]
 shell_pid: "31797"
+agent: "claude-opus"
 history:
 - date: '2026-03-01'
   action: created
@@ -281,3 +282,7 @@ The project already uses SolidJS (`solid-js: ^1.7.5` in package.json, `jsxImport
 - Check that types match the spec's entity definitions
 - Verify GoldfishDB operations are properly transactional
 - Ensure the InferenceEngine interface supports both sync and streaming inference
+
+## Activity Log
+
+- 2026-03-01T10:43:55Z – claude-opus – shell_pid=31797 – lane=doing – Assigned agent via workflow command
