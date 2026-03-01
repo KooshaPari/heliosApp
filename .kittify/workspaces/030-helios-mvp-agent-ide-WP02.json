@@ -1,0 +1,12 @@
+{
+  "wp_id": "WP02",
+  "feature_slug": "030-helios-mvp-agent-ide",
+  "worktree_path": ".worktrees/030-helios-mvp-agent-ide-WP02",
+  "branch_name": "030-helios-mvp-agent-ide-WP02",
+  "base_branch": "main",
+  "base_commit": "4f2ebc164379da1ac771b5cd51649eedff6c888e",
+  "dependencies": [],
+  "created_at": "2026-03-01T11:10:48.384119+00:00",
+  "created_by": "implement-command",
+  "vcs_backend": "git"
+}

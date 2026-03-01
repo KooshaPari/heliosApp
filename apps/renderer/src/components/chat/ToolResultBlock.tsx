@@ -44,7 +44,7 @@ export const ToolResultBlock: Component<ToolResultBlockProps> = (props) => {
           "max-height": "300px",
           "overflow-y": "auto",
         }}>
-          {output()}
+          <>{output() ?? ""}</>
         </div>
       </Show>
     </div>
