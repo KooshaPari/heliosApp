@@ -8,6 +8,7 @@ base_commit: 4f2ebc164379da1ac771b5cd51649eedff6c888e
 created_at: '2026-03-01T11:10:48.384119+00:00'
 subtasks: [T015, T016, T017, T018]
 shell_pid: "70901"
+agent: "claude-opus"
 history:
 - date: '2026-03-01'
   action: created
@@ -174,3 +175,7 @@ Dark theme matching the screenshots the user provided (dark gray backgrounds, su
 - Verify the layout matches Cursor/Windsurf style (dark theme, clean panels)
 - Check that resize state persists
 - Verify keyboard shortcuts work on macOS (Cmd) and would work on Linux (Ctrl)
+
+## Activity Log
+
+- 2026-03-01T11:10:48Z – claude-opus – shell_pid=70901 – lane=doing – Assigned agent via workflow command
