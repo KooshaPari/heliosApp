@@ -53,11 +53,11 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T006 Implement hot-swap execution path (detach source renderer, attach target renderer, replay buffered PTY) in `apps/runtime/src/renderer/hot_swap.ts`
-- [ ] T007 Implement rollback logic (restore previous renderer, replay PTY buffer, recover session state) in `apps/runtime/src/renderer/rollback.ts`
-- [ ] T008 Implement concurrent switch rejection (reject new switch requests while transaction is in progress)
-- [ ] T009 Wire hot-swap and rollback paths into the switch transaction state machine
-- [ ] T010 [P] Add integration tests for hot-swap success, hot-swap failure with rollback, and concurrent switch rejection in `apps/runtime/tests/integration/renderer/`
+- [x] T006 Implement hot-swap execution path (detach source renderer, attach target renderer, replay buffered PTY) in `apps/runtime/src/renderer/hot_swap.ts`
+- [x] T007 Implement rollback logic (restore previous renderer, replay PTY buffer, recover session state) in `apps/runtime/src/renderer/rollback.ts`
+- [x] T008 Implement concurrent switch rejection (reject new switch requests while transaction is in progress)
+- [x] T009 Wire hot-swap and rollback paths into the switch transaction state machine
+- [x] T010 [P] Add integration tests for hot-swap success, hot-swap failure with rollback, and concurrent switch rejection in `apps/runtime/tests/integration/renderer/`
 
 ### Implementation Notes
 - Hot-swap must be atomic across all terminals: all switch or none do.
