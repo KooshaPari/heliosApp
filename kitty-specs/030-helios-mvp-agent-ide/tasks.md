@@ -197,9 +197,9 @@
 **Goal**: Wire muxer dispatch to real adapters and add session sharing UI.
 
 **Subtasks**:
-- [ ] T028: Wire muxer-dispatch.spawn() to real Zellij/adapter calls
-- [ ] T029: Wire muxer attach/detach/kill to real adapter lifecycle
-- [ ] T030: Add session sharing UI (upterm/tmate link generation)
+- [x] T028: Wire muxer-dispatch.spawn() to real Zellij/adapter calls
+- [x] T029: Wire muxer attach/detach/kill to real adapter lifecycle
+- [x] T030: Add session sharing UI (upterm/tmate link generation)
 
 **Implementation sketch**: In muxer-dispatch.ts, replace in-memory session creation with calls to the real Zellij/Tmate/UPterm adapters that already exist. On spawn, call the appropriate adapter.create(). On kill, call adapter.destroy(). Session sharing UI shows a "Share" button that triggers upterm/tmate start and displays the resulting link.
 
