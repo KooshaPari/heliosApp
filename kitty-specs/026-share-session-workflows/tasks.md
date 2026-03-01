@@ -24,11 +24,11 @@
 **Estimated Prompt Size**: ~420 lines
 
 ### Included Subtasks
-- [ ] T001 Implement share session entity and on-demand worker lifecycle in `apps/runtime/src/integrations/sharing/share-session.ts` and `share-worker.ts`
-- [ ] T002 Implement upterm share backend adapter with link generation in `apps/runtime/src/integrations/sharing/upterm-adapter.ts`
-- [ ] T003 Implement tmate share backend adapter with link generation in `apps/runtime/src/integrations/sharing/tmate-adapter.ts`
-- [ ] T004 Integrate policy gate (spec 023) as deny-by-default pre-share hook
-- [ ] T005 [P] Add unit tests for share session lifecycle, worker management, upterm adapter, tmate adapter, and policy gate integration
+- [x] T001 Implement share session entity and on-demand worker lifecycle in `apps/runtime/src/integrations/sharing/share-session.ts` and `share-worker.ts`
+- [x] T002 Implement upterm share backend adapter with link generation in `apps/runtime/src/integrations/sharing/upterm-adapter.ts`
+- [x] T003 Implement tmate share backend adapter with link generation in `apps/runtime/src/integrations/sharing/tmate-adapter.ts`
+- [x] T004 Integrate policy gate (spec 023) as deny-by-default pre-share hook
+- [x] T005 [P] Add unit tests for share session lifecycle, worker management, upterm adapter, tmate adapter, and policy gate integration
 
 ### Implementation Notes
 - Share workers are on-demand processes; no background daemon per terminal.
