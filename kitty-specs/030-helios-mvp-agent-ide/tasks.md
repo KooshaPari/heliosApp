@@ -218,12 +218,12 @@
 **Goal**: Build file context panel, first-run setup flow, and pass quality gates.
 
 **Subtasks**:
-- [ ] T031: Build FileContext panel showing agent-accessed files
-- [ ] T032: Build DiffView component for proposed changes
-- [ ] T033: Wire accept/reject actions to file write operations
-- [ ] T034: First-run setup flow (API key configuration, hardware detection)
-- [ ] T035: Error handling and connection recovery UI
-- [ ] T036: Quality gate pass (lint, typecheck, tests)
+- [x] T031: Build FileContext panel showing agent-accessed files
+- [x] T032: Build DiffView component for proposed changes
+- [x] T033: Wire accept/reject actions to file write operations
+- [x] T034: First-run setup flow (API key configuration, hardware detection)
+- [x] T035: Error handling and connection recovery UI
+- [x] T036: Quality gate pass (lint, typecheck, tests)
 
 **Implementation sketch**: FileContext is a right sidebar panel listing files the agent has read/written. DiffView shows unified diffs with green/red highlighting. Accept triggers file write via RPC, reject sends feedback to agent. First-run wizard checks for API key in env, prompts if missing. Error UI shows toast notifications with retry buttons. Quality pass runs `task quality:ci`.
 
