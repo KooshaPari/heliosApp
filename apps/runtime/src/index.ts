@@ -1,7 +1,19 @@
 /**
  * @helios/runtime — Core runtime package for heliosApp.
  *
- * Exports foundational types and utilities consumed by all other packages.
+ * Exports foundational types, utilities, and service APIs consumed by all other packages.
+ *
+ * ## Service Architecture
+ *
+ * The runtime is organized into four key services, each maintaining clear boundaries
+ * and exported through a unified public API:
+ *
+ * - **PTY Service** (`services/pty`): Pseudo-terminal management
+ * - **Renderer Service** (`services/renderer`): UI rendering and switching
+ * - **Secrets Service** (`services/secrets`): Credential and sensitive data management
+ * - **Lanes Service** (`services/lanes`): Workspace/lane orchestration
+ *
+ * Import services via: `import { ptyService, rendererService, secretsService, lanesService } from '@helios/runtime/services'`
  */
 
 /** Semantic version of the runtime package. */
@@ -24,3 +36,6 @@ export function healthCheck(): HealthCheckResult {
     uptimeMs: performance.now() - startTime,
   };
 }
+
+// Re-export all services as a unified API
+export * from "./services/index.js";
