@@ -1,9 +1,13 @@
 ---
 work_package_id: WP03
 title: Chat Panel and Message Rendering
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 56569cfcbc2df300daf414f759c1a742b416e507
+created_at: '2026-03-01T11:12:30.908346+00:00'
 subtasks: [T005, T006, T008]
+shell_pid: "74724"
 history:
 - date: '2026-03-01'
   action: created
