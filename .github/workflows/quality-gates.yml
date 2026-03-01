@@ -63,22 +63,31 @@ jobs:
 
       - name: Gate 5 - Coverage
         id: gate-coverage
-        run: echo "Coverage gate - placeholder"
-        continue-on-error: true
+        run: bun run scripts/gate-coverage.ts
+        timeout-minutes: 5
+        continue-on-error: false
 
       - name: Gate 6 - Security
         id: gate-security
-        run: echo "Security gate - placeholder"
-        continue-on-error: true
+        run: bun run scripts/gate-security.ts
+        timeout-minutes: 3
+        continue-on-error: false
 
       - name: Gate 7 - Static Analysis
         id: gate-static-analysis
-        run: echo "Static Analysis gate - placeholder"
+        run: bun run scripts/gate-static-analysis.ts
+        timeout-minutes: 3
+        continue-on-error: false
+
+      - name: Coverage Manifest
+        id: coverage-manifest
+        if: always()
+        run: bun run scripts/coverage-manifest.ts
         continue-on-error: true
 
       - name: Gate 8 - Bypass Detect
         id: gate-bypass-detect
-        run: echo "Bypass Detection gate - placeholder"
+        run: echo "Bypass Detection gate - placeholder for WP03"
         continue-on-error: true
 
       - name: Upload Gate Reports
