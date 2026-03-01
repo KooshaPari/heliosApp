@@ -8,6 +8,7 @@ base_commit: 56569cfcbc2df300daf414f759c1a742b416e507
 created_at: '2026-03-01T11:12:30.908346+00:00'
 subtasks: [T005, T006, T008]
 shell_pid: "74724"
+agent: "claude-opus"
 history:
 - date: '2026-03-01'
   action: created
@@ -155,3 +156,7 @@ This is the core UI that users interact with. Messages from the user appear righ
 - Check that streaming feels smooth (no visible flicker)
 - Verify tool call blocks are informative but not overwhelming
 - Confirm the chat input UX matches Cursor/Windsurf (Enter to send, Shift+Enter for newline)
+
+## Activity Log
+
+- 2026-03-01T11:12:31Z – claude-opus – shell_pid=74724 – lane=doing – Assigned agent via workflow command
