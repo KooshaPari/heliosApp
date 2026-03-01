@@ -87,12 +87,12 @@
 **Estimated Prompt Size**: ~350 lines
 
 ### Included Subtasks
-- [ ] T012 Implement Gate 8 (bypass detection) scanning all source files for suppression directives: `@ts-ignore`, `@ts-expect-error`, `eslint-disable`, `biome-ignore`, `.skip`, `.only`, `.todo` in test files
-- [ ] T013 Create `scripts/gate-bypass-detect.ts` as a standalone scanner with file/line reporting for each detected suppression
-- [ ] T014 Implement `scripts/gates.ts` as the `bun run gates` entrypoint executing all 8 gates in the same order and config as CI
-- [ ] T015 [P] Add bypass detection tests: verify each suppression directive type is caught, verify clean files pass, verify the scanner handles edge cases (directives in comments, strings, template literals)
-- [ ] T016 [P] Add `bun run gates` parity tests: verify local execution produces identical pass/fail results as CI for the same commit
-- [ ] T017 Validate pipeline idempotency: run the same commit through the pipeline twice and verify identical results (NFR-003)
+- [x] T012 Implement Gate 8 (bypass detection) scanning all source files for suppression directives: `@ts-ignore`, `@ts-expect-error`, `eslint-disable`, `biome-ignore`, `.skip`, `.only`, `.todo` in test files
+- [x] T013 Create `scripts/gate-bypass-detect.ts` as a standalone scanner with file/line reporting for each detected suppression
+- [x] T014 Implement `scripts/gates.ts` as the `bun run gates` entrypoint executing all 8 gates in the same order and config as CI
+- [x] T015 [P] Add bypass detection tests: verify each suppression directive type is caught, verify clean files pass, verify the scanner handles edge cases (directives in comments, strings, template literals)
+- [x] T016 [P] Add `bun run gates` parity tests: verify local execution produces identical pass/fail results as CI for the same commit
+- [x] T017 Validate pipeline idempotency: run the same commit through the pipeline twice and verify identical results (NFR-003)
 
 ### Implementation Notes
 - Bypass detection must catch all known suppression patterns; the list must be extensible.
