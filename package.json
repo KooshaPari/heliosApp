@@ -11,6 +11,7 @@
     "test": "bun test apps/runtime apps/desktop/tests/unit scripts/tests/",
     "test:coverage": "bun test --coverage apps/runtime apps/desktop/tests/unit",
     "test:e2e": "playwright test",
+    "gates": "bun scripts/gates.ts",
     "docs:index": "bash docs/scripts/generate-doc-index.sh",
     "docs:dev": "vitepress dev docs",
     "docs:build": "bun run docs:index && vitepress build docs",
