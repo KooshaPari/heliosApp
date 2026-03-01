@@ -86,11 +86,11 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T011 Implement `ApprovalRequest` model: command text, affected paths, risk classification, agent rationale, status (pending/approved/denied/timed-out), timestamps
-- [ ] T012 Implement durable `ApprovalQueue` backed by SQLite: persist pending requests, survive restart, support concurrent requests from multiple lanes
-- [ ] T013 Implement approval actions: approve (with operator reason), deny (with reason), timeout (configurable, default action = deny)
-- [ ] T014 Implement approval queue UI panel in `apps/desktop/src/panels/approval-queue.ts` showing pending requests with context and approve/deny controls
-- [ ] T015 Wire approved commands to immediate execution (< 500ms from approval to execution)
+- [x] T011 Implement `ApprovalRequest` model: command text, affected paths, risk classification, agent rationale, status (pending/approved/denied/timed-out), timestamps
+- [x] T012 Implement durable `ApprovalQueue` backed by SQLite: persist pending requests, survive restart, support concurrent requests from multiple lanes
+- [x] T013 Implement approval actions: approve (with operator reason), deny (with reason), timeout (configurable, default action = deny)
+- [x] T014 Implement approval queue UI panel in `apps/desktop/src/panels/approval-queue.ts` showing pending requests with context and approve/deny controls
+- [x] T015 Wire approved commands to immediate execution (< 500ms from approval to execution)
 - [ ] T016 [P] Add chaos tests: simulated crash during pending approval, verify queue recovers with zero request loss
 - [ ] T017 [P] Add integration tests: full approval round-trip (request -> approve -> execute), denial flow, timeout flow, concurrent requests, audit trail completeness
 
