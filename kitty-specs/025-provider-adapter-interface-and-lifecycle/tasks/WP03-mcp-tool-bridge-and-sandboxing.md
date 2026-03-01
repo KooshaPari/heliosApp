@@ -15,7 +15,7 @@ subtasks:
 - T015
 phase: Phase 1 - Core Providers
 assignee: ''
-agent: ''
+agent: "claude-haiku"
 shell_pid: "76417"
 review_status: ''
 reviewed_by: ''
@@ -240,3 +240,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-03-01T13:34:37Z – claude-haiku – shell_pid=76417 – lane=doing – Assigned agent via workflow command
