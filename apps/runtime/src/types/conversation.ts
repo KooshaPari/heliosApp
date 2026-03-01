@@ -1,26 +1,18 @@
+export type MessageRole = "user" | "assistant" | "tool_call" | "tool_result";
+
+export type MessageStatus = "pending" | "streaming" | "complete" | "error";
+
 export type MessageMetadata = {
-  status?: "pending" | "streaming" | "complete" | "error" | "cancelled";
+  status?: MessageStatus;
   toolName?: string;
   toolInput?: unknown;
   toolOutput?: string;
-  [key: string]: unknown;
 };
 
 export type Message = {
   id: string;
-  conversationId?: string;
-  role: "user" | "assistant" | "system" | "tool_call" | "tool_result";
+  role: MessageRole;
   content: string;
-  timestamp: number | string;
   metadata?: MessageMetadata;
-};
-
-export type Conversation = {
-  id: string;
-  title: string;
-  messages: Message[];
-  modelId?: string;
-  createdAt: number | string;
-  updatedAt: number | string;
-  metadata?: Record<string, unknown>;
+  createdAt?: string;
 };
