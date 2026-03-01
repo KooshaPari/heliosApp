@@ -1,9 +1,13 @@
 ---
 work_package_id: WP09
 title: Muxer De-stub and Session Sharing
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: e3c5bc01c4feb2d23783c0d7905bf6628379b69e
+created_at: '2026-03-01T11:17:19.325866+00:00'
 subtasks: [T028, T029, T030]
+shell_pid: "81046"
 history:
 - date: '2026-03-01'
   action: created
