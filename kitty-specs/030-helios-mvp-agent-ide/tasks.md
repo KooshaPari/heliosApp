@@ -106,10 +106,10 @@
 **Goal**: Build terminal UI with xterm.js and support multiple concurrent terminals.
 
 **Subtasks**:
-- [ ] T011: Build TerminalPanel SolidJS component wrapping xterm.js
-- [ ] T012: Build terminal tab bar for multiple terminals
-- [ ] T013: Wire terminal I/O to existing terminal-bridge PTY
-- [ ] T014: Enable agent-driven terminal command execution (agent → bridge → PTY)
+- [x] T011: Build TerminalPanel SolidJS component wrapping xterm.js
+- [x] T012: Build terminal tab bar for multiple terminals
+- [x] T013: Wire terminal I/O to existing terminal-bridge PTY
+- [x] T014: Enable agent-driven terminal command execution (agent → bridge → PTY)
 
 **Implementation sketch**: Wrap existing xterm.js setup in a SolidJS component. Terminal tab bar manages terminal instances. Wire stdin/stdout via RPC to terminal-bridge. Add RPC handler for agent to request command execution in a named terminal.
 
