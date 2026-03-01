@@ -1,26 +1,16 @@
-export type MessageRole = "user" | "assistant" | "system";
-
-export type MessageStatus = "streaming" | "complete" | "error" | "cancelled";
-
-export type MessageMetadata = {
-  status?: MessageStatus;
-  [key: string]: unknown;
-};
-
 export type Message = {
   id: string;
-  conversationId: string;
-  role: MessageRole;
+  role: "user" | "assistant" | "system";
   content: string;
-  timestamp: number;
-  metadata?: MessageMetadata;
+  timestamp: string;
+  metadata?: Record<string, unknown>;
 };
 
 export type Conversation = {
   id: string;
   title: string;
-  createdAt: number;
-  updatedAt: number;
-  modelId: string;
   messages: Message[];
+  createdAt: string;
+  updatedAt: string;
+  metadata?: Record<string, unknown>;
 };

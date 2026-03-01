@@ -22,14 +22,34 @@ apps/*/tests/**/*.d.ts.map
 # Excluded via sparse-checkout
 kitty-specs/
 
-# AI tool artifacts
-.claude/
-.codex/
-.cursor/
-.gemini/
-.kittify/
-.kilocode/
-.github/prompts/
-.github/copilot-instructions.md
-.claudeignore
-.llmignore
+# Test / coverage
+coverage/
+.nyc_output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Worktrees (managed by spec-kitty)
+.worktrees/
+
+# Archive
+.archive/
+
+# Logs
+*.log
+npm-debug.log*
+# Excluded via sparse-checkout
+kitty-specs/
