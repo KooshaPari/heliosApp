@@ -62,9 +62,9 @@
 **Goal**: Build the chat panel with streaming message display and tool call rendering.
 
 **Subtasks**:
-- [ ] T005: Build ChatPanel SolidJS component (message list with streaming)
-- [ ] T006: Build ChatInput component (text area, send button, model selector dropdown)
-- [ ] T008: Build tool call display components (file edit, terminal command inline blocks)
+- [x] T005: Build ChatPanel SolidJS component (message list with streaming)
+- [x] T006: Build ChatInput component (text area, send button, model selector dropdown)
+- [x] T008: Build tool call display components (file edit, terminal command inline blocks)
 
 **Implementation sketch**: ChatPanel renders a scrollable message list. Each message has role-based styling (user vs agent). Streaming text appends token-by-token via SolidJS signals. Tool calls render as collapsible blocks with type icons. ChatInput is a textarea with send button and model dropdown.
 
