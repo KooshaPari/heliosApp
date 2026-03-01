@@ -86,11 +86,11 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T011 Implement MCP bridge adapter implementing `ProviderAdapter` interface with tool discovery and schema registration in `apps/runtime/src/providers/mcp-bridge.ts`
-- [ ] T012 Implement sandboxed tool invocation with execution boundary enforcement and result capture
-- [ ] T013 Wire MCP tool results to local bus with correlation ID propagation
-- [ ] T014 Handle MCP server disconnection with retryable error normalization and reconnection strategy
-- [ ] T015 [P] Add integration tests for MCP tool lifecycle (connect, discover, invoke, disconnect, reconnect) against mock MCP server in `apps/runtime/src/providers/__tests__/`
+- [x] T011 Implement MCP bridge adapter implementing `ProviderAdapter` interface with tool discovery and schema registration in `apps/runtime/src/providers/mcp-bridge.ts`
+- [x] T012 Implement sandboxed tool invocation with execution boundary enforcement and result capture
+- [x] T013 Wire MCP tool results to local bus with correlation ID propagation
+- [x] T014 Handle MCP server disconnection with retryable error normalization and reconnection strategy
+- [x] T015 [P] Add integration tests for MCP tool lifecycle (connect, discover, invoke, disconnect, reconnect) against mock MCP server in `apps/runtime/src/providers/__tests__/`
 
 ### Implementation Notes
 - Tool schema registration must include input/output schemas for validation by downstream consumers.
