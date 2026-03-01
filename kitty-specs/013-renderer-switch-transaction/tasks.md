@@ -21,11 +21,11 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T001 Implement switch transaction state machine with full state graph and transition guards in `apps/runtime/src/renderer/switch_transaction.ts`
-- [ ] T002 Implement renderer capability matrix query (hot-swap support, version constraints) in `apps/runtime/src/renderer/capability_matrix.ts`
-- [ ] T003 Implement PTY stream proxy with bounded buffering, backpressure, and replay in `apps/runtime/src/renderer/pty_stream_proxy.ts`
-- [ ] T004 Wire lifecycle event emission for switch-started, switch-committed, switch-rolled-back, switch-failed on the internal bus
-- [ ] T005 [P] Add unit tests for state machine transitions, capability queries, and PTY proxy buffering in `apps/runtime/tests/unit/renderer/`
+- [x] T001 Implement switch transaction state machine with full state graph and transition guards in `apps/runtime/src/renderer/switch_transaction.ts`
+- [x] T002 Implement renderer capability matrix query (hot-swap support, version constraints) in `apps/runtime/src/renderer/capability_matrix.ts`
+- [x] T003 Implement PTY stream proxy with bounded buffering, backpressure, and replay in `apps/runtime/src/renderer/pty_stream_proxy.ts`
+- [x] T004 Wire lifecycle event emission for switch-started, switch-committed, switch-rolled-back, switch-failed on the internal bus
+- [x] T005 [P] Add unit tests for state machine transitions, capability queries, and PTY proxy buffering in `apps/runtime/tests/unit/renderer/`
 
 ### Implementation Notes
 - State machine must be self-contained with no external side effects during transitions.
