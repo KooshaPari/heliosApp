@@ -3,7 +3,7 @@ import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types
 export interface InferenceEngine {
   readonly id: string;
   readonly name: string;
-  readonly type: "cloud" | "local";
+  readonly type: "local" | "cloud";
 
   init(): Promise<void>;
   infer(request: InferenceRequest): Promise<InferenceResponse>;
