@@ -129,3 +129,4 @@ Implementation command:
 - 2026-02-26T16:53:08Z – unknown – shell_pid=94640 – lane=for_review – Ready for review (forced lane move): lane/session lifecycle + harness routing implemented in worktree commit d2eeca5; dependency rebase conflict pending.
 - 2026-02-27T07:48:11Z – unknown – shell_pid=94640 – lane=for_review – Restacked and smoke-validated; ready for review.
 - 2026-03-01T13:20:07Z – unknown – shell_pid=94640 – lane=done – Review passed: auto-approved
+- 2026-03-01T13:22:53Z – unknown – shell_pid=94640 – lane=done – Merged to main
