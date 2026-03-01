@@ -8,6 +8,7 @@ base_commit: e3c5bc01c4feb2d23783c0d7905bf6628379b69e
 created_at: '2026-03-01T11:17:19.325866+00:00'
 subtasks: [T028, T029, T030]
 shell_pid: "81046"
+agent: "claude-opus"
 history:
 - date: '2026-03-01'
   action: created
@@ -123,3 +124,7 @@ The audit revealed that `src/helios/bridge/muxer-dispatch.ts` tracks sessions in
 - Test with at least one real muxer tool installed
 - Verify error messages are helpful when tools are missing
 - Check that kill actually cleans up processes (no zombies)
+
+## Activity Log
+
+- 2026-03-01T11:17:19Z – claude-opus – shell_pid=81046 – lane=doing – Assigned agent via workflow command
