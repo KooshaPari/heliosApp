@@ -1,7 +1,7 @@
 ---
 work_package_id: WP07
 title: Hardware Detection and MLX Adapter
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: 566ba40040cf864c37996abe8aa5df8c6f54018b
@@ -9,6 +9,8 @@ created_at: '2026-03-01T11:10:53.095532+00:00'
 subtasks: [T022, T023, T025]
 shell_pid: "71158"
 agent: "claude-opus"
+reviewed_by: "Koosha Paridehpour"
+review_status: "approved"
 history:
 - date: '2026-03-01'
   action: created
@@ -165,3 +167,4 @@ Existing code:
 
 - 2026-03-01T11:10:53Z – claude-opus – shell_pid=71158 – lane=doing – Assigned agent via workflow command
 - 2026-03-01T11:15:15Z – claude-opus – shell_pid=71158 – lane=for_review – Hardware detection, MLX, Anthropic, llama.cpp adapters
+- 2026-03-01T11:42:14Z – claude-opus – shell_pid=71158 – lane=done – Merged to main
