@@ -52,10 +52,10 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T005 Implement binding lifecycle event emission (bound, rebound, unbound, validation-failed) in `apps/runtime/src/registry/binding_events.ts`
-- [ ] T006 Implement durable persistence adapter for binding state in `apps/runtime/src/registry/persistence.ts`
-- [ ] T007 Implement lane/session lifecycle event subscription for automatic binding invalidation
-- [ ] T008 [P] Add integration tests for persistence, restart recovery, lifecycle event propagation, and latency benchmarks in `apps/runtime/tests/integration/registry/`
+- [x] T005 Implement binding lifecycle event emission (bound, rebound, unbound, validation-failed) in `apps/runtime/src/registry/binding_events.ts`
+- [x] T006 Implement durable persistence adapter for binding state in `apps/runtime/src/registry/persistence.ts`
+- [x] T007 Implement lane/session lifecycle event subscription for automatic binding invalidation
+- [x] T008 [P] Add integration tests for persistence, restart recovery, lifecycle event propagation, and latency benchmarks in `apps/runtime/tests/integration/registry/`
 
 ### Implementation Notes
 - Persistence must be file-backed or embedded SQLite for restart survival.
