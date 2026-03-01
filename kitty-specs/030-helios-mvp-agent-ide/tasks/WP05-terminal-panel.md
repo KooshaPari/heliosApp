@@ -8,6 +8,7 @@ base_commit: bb58b13bc9aa5a5c0935d48915965346520c88c4
 created_at: '2026-03-01T11:10:50.925356+00:00'
 subtasks: [T011, T012, T013, T014]
 shell_pid: "71038"
+agent: "claude-opus"
 history:
 - date: '2026-03-01'
   action: created
@@ -207,3 +208,7 @@ The old renderer (`src/renderers/helios/index.ts`) already had xterm.js integrat
 - Test terminal with common commands: `ls`, `pwd`, `echo`, `vim` (cursor mode), `htop` (full-screen)
 - Verify no memory leaks when creating/closing many terminals
 - Check that agent terminal execution is visible to the user (not hidden)
+
+## Activity Log
+
+- 2026-03-01T11:10:51Z – claude-opus – shell_pid=71038 – lane=doing – Assigned agent via workflow command
