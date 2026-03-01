@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: App Shell Layout
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: 4f2ebc164379da1ac771b5cd51649eedff6c888e
@@ -9,6 +9,8 @@ created_at: '2026-03-01T11:10:48.384119+00:00'
 subtasks: [T015, T016, T017, T018]
 shell_pid: "70901"
 agent: "claude-opus"
+reviewed_by: "Koosha Paridehpour"
+review_status: "approved"
 history:
 - date: '2026-03-01'
   action: created
@@ -180,3 +182,4 @@ Dark theme matching the screenshots the user provided (dark gray backgrounds, su
 
 - 2026-03-01T11:10:48Z – claude-opus – shell_pid=70901 – lane=doing – Assigned agent via workflow command
 - 2026-03-01T11:15:01Z – claude-opus – shell_pid=70901 – lane=for_review – App shell with sidebar, status bar, shortcuts
+- 2026-03-01T11:42:11Z – claude-opus – shell_pid=70901 – lane=done – Merged to main
