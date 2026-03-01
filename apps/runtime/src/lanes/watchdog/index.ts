@@ -12,3 +12,8 @@ export {
 export { WorktreeDetector } from "./worktree_detector.js";
 export { ZellijDetector, type SessionRegistry } from "./zellij_detector.js";
 export { PtyDetector, type TerminalRegistry } from "./pty_detector.js";
+export {
+  RemediationEngine,
+  type RemediationSuggestion,
+  type CleanupResult,
+} from "./remediation.js";
