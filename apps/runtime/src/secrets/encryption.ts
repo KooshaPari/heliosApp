@@ -2,7 +2,7 @@ import {
   createCipheriv,
   createDecipheriv,
   randomBytes,
-  createHmac,
+  hkdfSync,
 } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from "node:fs";
@@ -129,15 +129,14 @@ export class EncryptionService {
   }
 
   /**
-   * Derives a 32-byte per-provider key from the master key using HKDF (HMAC-based).
+   * Derives a 32-byte per-provider key from the master key using proper HKDF
+   * (RFC 5869) via Node's native hkdfSync. The info field encodes the provider
+   * ID to ensure domain separation between providers.
    */
   deriveKey(masterKey: Buffer, providerId: string): Buffer {
-    // HKDF-Extract + single-block Expand using HMAC-SHA256
-    // info = "helios-v1:<providerId>"
-    const info = `helios-v1:${providerId}`;
-    const prk = createHmac("sha256", masterKey).update(info).digest();
-    // prk is 32 bytes — exactly the AES-256 key size
-    return prk;
+    const info = Buffer.from(`helios-v1:${providerId}`, "utf8");
+    const derived = hkdfSync("sha256", masterKey, Buffer.alloc(32), info, 32);
+    return Buffer.from(derived);
   }
 
   /** Clears the cached master key from memory. */
