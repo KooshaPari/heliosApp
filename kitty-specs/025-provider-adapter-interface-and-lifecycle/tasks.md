@@ -24,11 +24,11 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T001 Define `ProviderAdapter` typed interface with init, health, execute, terminate lifecycle methods in `apps/runtime/src/providers/adapter.ts`
-- [ ] T002 Implement provider registry with configuration validation, credential binding, and concurrency limits in `apps/runtime/src/providers/registry.ts`
-- [ ] T003 Implement normalized error taxonomy mapping all provider error types to common codes in `apps/runtime/src/providers/errors.ts`
-- [ ] T004 [P] Implement process-level isolation wrapper for provider execution contexts with lane-scoped failure boundaries
-- [ ] T005 [P] Add unit tests for adapter interface contracts, registry lifecycle, and error normalization in `apps/runtime/src/providers/__tests__/`
+- [x] T001 Define `ProviderAdapter` typed interface with init, health, execute, terminate lifecycle methods in `apps/runtime/src/providers/adapter.ts`
+- [x] T002 Implement provider registry with configuration validation, credential binding, and concurrency limits in `apps/runtime/src/providers/registry.ts`
+- [x] T003 Implement normalized error taxonomy mapping all provider error types to common codes in `apps/runtime/src/providers/errors.ts`
+- [x] T004 [P] Implement process-level isolation wrapper for provider execution contexts with lane-scoped failure boundaries
+- [x] T005 [P] Add unit tests for adapter interface contracts, registry lifecycle, and error normalization in `apps/runtime/src/providers/__tests__/`
 
 ### Implementation Notes
 - Keep adapter interface minimal and protocol-agnostic; ACP/MCP/A2A specifics belong in downstream WPs.
