@@ -1,13 +1,14 @@
 ---
 work_package_id: WP04
 title: A2A Federation Router, Health Monitoring, and Tests
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
 - WP02
 - WP03
-base_branch: main
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 025-provider-adapter-interface-and-lifecycle-WP04-merge-base
+base_commit: 0a04f49a119debb9ec9c46a7d93bb886636b4050
+created_at: '2026-03-01T13:35:47.784430+00:00'
 subtasks:
 - T016
 - T017
@@ -17,7 +18,7 @@ subtasks:
 phase: Phase 2 - Federation and Hardening
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "81218"
 review_status: ''
 reviewed_by: ''
 history:
