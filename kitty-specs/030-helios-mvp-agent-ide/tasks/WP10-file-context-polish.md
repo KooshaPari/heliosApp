@@ -8,6 +8,7 @@ base_commit: 1245abe02cdb233a85a2582417ed8a64f9d3838e
 created_at: '2026-03-01T11:17:21.985420+00:00'
 subtasks: [T031, T032, T033, T034, T035, T036]
 shell_pid: "81180"
+agent: "claude-opus"
 history:
 - date: '2026-03-01'
   action: created
@@ -188,3 +189,7 @@ This is the polish WP that ties everything together. It depends on the chat loop
 - Test the full user journey: first run → setup → chat → terminal → file review
 - Verify quality gate passes in CI-like environment
 - Check that error recovery actually works (disconnect network, verify retry)
+
+## Activity Log
+
+- 2026-03-01T11:17:22Z – claude-opus – shell_pid=81180 – lane=doing – Assigned agent via workflow command
