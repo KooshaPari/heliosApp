@@ -1,9 +1,13 @@
 ---
 work_package_id: WP06
 title: Conversation Persistence and Session Restore
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 97b8eb21808ff2064bcdf401fd6b9274054f9df0
+created_at: '2026-03-01T11:17:12.006197+00:00'
 subtasks: [T019, T020, T021]
+shell_pid: "80561"
 history:
 - date: '2026-03-01'
   action: created
