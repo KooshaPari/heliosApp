@@ -7,7 +7,6 @@
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noPropertyAccessFromIndexSignature": true,
-
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -15,12 +14,10 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "skipLibCheck": false,
-
     "types": ["bun-types"]
   }
 }
