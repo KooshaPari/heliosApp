@@ -1,11 +1,12 @@
 ---
 work_package_id: WP02
 title: Recovery State Machine and zmx Checkpoint Strategy
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
-base_branch: main
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 027-crash-recovery-and-restoration-WP01
+base_commit: e0c44e02f0b8ddd373b23d2bf8c089235a2efc7c
+created_at: '2026-03-01T13:31:53.577089+00:00'
 subtasks:
 - T005
 - T006
@@ -15,7 +16,7 @@ subtasks:
 phase: Phase 1 - State Machine and Checkpoints
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "64666"
 review_status: ''
 reviewed_by: ''
 history:
