@@ -52,3 +52,5 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+# Excluded via sparse-checkout
+kitty-specs/
