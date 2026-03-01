@@ -1,7 +1,7 @@
 ---
 work_package_id: WP09
 title: Muxer De-stub and Session Sharing
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: e3c5bc01c4feb2d23783c0d7905bf6628379b69e
@@ -128,3 +128,4 @@ The audit revealed that `src/helios/bridge/muxer-dispatch.ts` tracks sessions in
 ## Activity Log
 
 - 2026-03-01T11:17:19Z – claude-opus – shell_pid=81046 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T11:21:42Z – claude-opus – shell_pid=81046 – lane=for_review – Muxer dispatch and session sharing
