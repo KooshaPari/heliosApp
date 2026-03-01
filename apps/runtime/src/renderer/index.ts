@@ -58,6 +58,37 @@ export {
   SwitchBuffer,
 } from "./stream_binding.js";
 
+export type {
+  HotSwapResult,
+  TerminalContext,
+} from "./hot_swap.js";
+export {
+  executeHotSwap,
+  HotSwapError,
+  HotSwapCapabilityError,
+} from "./hot_swap.js";
+
+export type {
+  RollbackResult,
+  RollbackTerminalStatus,
+} from "./rollback.js";
+export {
+  executeRollback,
+  RollbackError,
+} from "./rollback.js";
+
+export type {
+  SwitchTransaction,
+  SwitchTransactionRequest,
+  SwitchTransactionState,
+} from "./switch_transaction.js";
+export {
+  SwitchTransactionOrchestrator,
+  createSwitchOrchestrator,
+  ConcurrentSwitchError,
+  InvalidTransitionError,
+} from "./switch_transaction.js";
+
 // ---------------------------------------------------------------------------
 // Lifecycle event types
 // ---------------------------------------------------------------------------
