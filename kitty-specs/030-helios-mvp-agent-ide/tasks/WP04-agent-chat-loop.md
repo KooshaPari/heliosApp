@@ -1,9 +1,13 @@
 ---
 work_package_id: WP04
 title: Agent Chat Loop Wiring
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 3ccbc7b9bf23cb68bc7a1846df0127baae8d63c0
+created_at: '2026-03-01T11:13:24.843462+00:00'
 subtasks: [T007, T009, T010]
+shell_pid: "76288"
 history:
 - date: '2026-03-01'
   action: created
