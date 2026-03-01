@@ -24,11 +24,11 @@
 **Estimated Prompt Size**: ~310 lines
 
 ### Included Subtasks
-- [ ] T001 Create `deps-registry.json` manifest schema with fields: name, current pin, channel (alpha/beta/RC/stable), upstream source URL, known-good version history array, and last-updated timestamp
-- [ ] T002 Populate initial manifest entries for tracked prerelease dependencies (ElectroBun, ghostty, zellij) with current pins and channels
-- [ ] T003 Implement `scripts/deps-status.ts` command that reads the manifest, queries upstream registries for latest versions, and reports tabular output with current pin, latest available, channel, and days since last update
-- [ ] T004 Create `deps-changelog.json` structured log schema and append utility for recording all upgrade attempts with timestamp, versions, gate results, and actor
-- [ ] T005 [P] Add Vitest unit tests for manifest parsing, status reporting, and changelog append logic
+- [x] T001 Create `deps-registry.json` manifest schema with fields: name, current pin, channel (alpha/beta/RC/stable), upstream source URL, known-good version history array, and last-updated timestamp
+- [x] T002 Populate initial manifest entries for tracked prerelease dependencies (ElectroBun, ghostty, zellij) with current pins and channels
+- [x] T003 Implement `scripts/deps-status.ts` command that reads the manifest, queries upstream registries for latest versions, and reports tabular output with current pin, latest available, channel, and days since last update
+- [x] T004 Create `deps-changelog.json` structured log schema and append utility for recording all upgrade attempts with timestamp, versions, gate results, and actor
+- [x] T005 [P] Add Vitest unit tests for manifest parsing, status reporting, and changelog append logic
 
 ### Implementation Notes
 - The manifest must be version-controlled alongside the codebase (FR-004 / NFR-004).
