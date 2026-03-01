@@ -8,6 +8,7 @@ base_commit: 97b8eb21808ff2064bcdf401fd6b9274054f9df0
 created_at: '2026-03-01T11:17:12.006197+00:00'
 subtasks: [T019, T020, T021]
 shell_pid: "80561"
+agent: "claude-opus"
 history:
 - date: '2026-03-01'
   action: created
@@ -116,3 +117,7 @@ WP01 created the conversation persistence layer (T003). This WP wires it into th
 
 - Test: Create conversation, close app, reopen, verify conversation is there with full history
 - Verify delete actually removes data from GoldfishDB (not just UI)
+
+## Activity Log
+
+- 2026-03-01T11:17:12Z – claude-opus – shell_pid=80561 – lane=doing – Assigned agent via workflow command
