@@ -1,7 +1,7 @@
 ---
 work_package_id: WP06
 title: Conversation Persistence and Session Restore
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: 97b8eb21808ff2064bcdf401fd6b9274054f9df0
@@ -121,3 +121,4 @@ WP01 created the conversation persistence layer (T003). This WP wires it into th
 ## Activity Log
 
 - 2026-03-01T11:17:12Z – claude-opus – shell_pid=80561 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T11:21:34Z – claude-opus – shell_pid=80561 – lane=for_review – Conversation persistence with localStorage
