@@ -1,10 +1,11 @@
 ---
 work_package_id: WP01
 title: Upterm Adapter and Tmate Adapter
-lane: "planned"
+lane: "doing"
 dependencies: []
 base_branch: main
-created_at: '2026-02-27T00:00:00+00:00'
+base_commit: 9193a7f87efc98959258649efff53c5f953704d8
+created_at: '2026-03-01T13:37:06.801825+00:00'
 subtasks:
 - T001
 - T002
@@ -14,7 +15,7 @@ subtasks:
 phase: Phase 0 - Foundation
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "89230"
 review_status: ''
 reviewed_by: ''
 history:
