@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Encrypted Credential Store and Lifecycle
-lane: "for_review"
+lane: "doing"
 dependencies: []
 base_branch: main
 base_commit: 052223c7b89f74b50477c7d7de87deeb43505ccf
@@ -15,7 +15,7 @@ subtasks:
 phase: Phase 0 - Foundation
 assignee: ''
 agent: "claude-opus"
-shell_pid: "54433"
+shell_pid: "77167"
 review_status: ''
 reviewed_by: ''
 history:
@@ -279,3 +279,4 @@ Implementation command:
 - 2026-02-27T10:35:53Z – claude-opus – shell_pid=17896 – lane=planned – Deferring: starting with foundational spec 019 first
 - 2026-03-01T12:17:11Z – claude-opus – shell_pid=54433 – lane=doing – Started implementation via workflow command
 - 2026-03-01T12:24:06Z – claude-opus – shell_pid=54433 – lane=for_review – Encrypted credential store
+- 2026-03-01T12:31:23Z – claude-opus – shell_pid=77167 – lane=doing – Started review via workflow command
