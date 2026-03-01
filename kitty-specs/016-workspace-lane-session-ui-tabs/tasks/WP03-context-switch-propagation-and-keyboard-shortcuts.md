@@ -1,12 +1,12 @@
 ---
 work_package_id: WP03
 title: Context Switch Propagation, Keyboard Shortcuts, and End-to-End Tests
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP02
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 016-workspace-lane-session-ui-tabs-WP02
+base_commit: f90602393e7931f79e1b30beb7fc109e342cb183
+created_at: '2026-03-01T13:35:32.740579+00:00'
 subtasks:
 - T012
 - T013
@@ -15,10 +15,10 @@ subtasks:
 - T016
 phase: Phase 3 - Integration and Hardening
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: ''
+shell_pid: "80432"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
