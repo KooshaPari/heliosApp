@@ -117,11 +117,11 @@
 **Estimated Prompt Size**: ~450 lines
 
 ### Included Subtasks
-- [ ] T016 Implement A2A federation router stub with endpoint registration and delegation routing in `apps/runtime/src/providers/a2a-router.ts`
-- [ ] T017 Implement cross-provider health monitoring with configurable intervals, degraded/unavailable transitions, and bus status publication in `apps/runtime/src/providers/health.ts`
-- [ ] T018 Implement failover routing logic that reroutes traffic from degraded providers to healthy alternatives
-- [ ] T019 [P] Add chaos tests for provider crash isolation (SC-025-002): crash in lane A must produce zero effect on lane B
-- [ ] T020 [P] Add integration tests for A2A delegation, failover routing, credential rotation without restart (SC-025-005), and normalized error completeness (SC-025-004)
+- [x] T016 Implement A2A federation router stub with endpoint registration and delegation routing in `apps/runtime/src/providers/a2a-router.ts`
+- [x] T017 Implement cross-provider health monitoring with configurable intervals, degraded/unavailable transitions, and bus status publication in `apps/runtime/src/providers/health.ts`
+- [x] T018 Implement failover routing logic that reroutes traffic from degraded providers to healthy alternatives
+- [x] T019 [P] Add chaos tests for provider crash isolation (SC-025-002): crash in lane A must produce zero effect on lane B
+- [x] T020 [P] Add integration tests for A2A delegation, failover routing, credential rotation without restart (SC-025-005), and normalized error completeness (SC-025-004)
 
 ### Implementation Notes
 - A2A router is a stub in slice-1; full multi-endpoint failover is deferred to slice-2 but the interface must be designed for it.
