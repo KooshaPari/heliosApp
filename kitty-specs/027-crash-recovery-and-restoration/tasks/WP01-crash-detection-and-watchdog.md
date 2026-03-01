@@ -13,7 +13,7 @@ subtasks:
 - T004
 phase: Phase 0 - Detection
 assignee: ''
-agent: ''
+agent: "claude-haiku"
 shell_pid: "57374"
 review_status: ''
 reviewed_by: ''
@@ -230,3 +230,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-03-01T13:30:10Z – claude-haiku – shell_pid=57374 – lane=doing – Assigned agent via workflow command
