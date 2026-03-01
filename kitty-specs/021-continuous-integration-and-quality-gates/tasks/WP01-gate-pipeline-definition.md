@@ -15,7 +15,7 @@ subtasks:
 - T006
 phase: Phase 1 - CI Foundation
 assignee: ''
-agent: ''
+agent: "claude-haiku"
 shell_pid: "70715"
 review_status: ''
 reviewed_by: ''
@@ -219,3 +219,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z – system – lane=planned – Prompt created.
+- 2026-03-01T13:33:25Z – claude-haiku – shell_pid=70715 – lane=doing – Assigned agent via workflow command
