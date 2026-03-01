@@ -9,10 +9,16 @@
     "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": false,
     "resolveJsonModule": true,
-    "types": ["bun-types", "node"]
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "types": ["bun-types", "node", "@playwright/test"]
   },
   "include": [
-    "apps/**/*.ts"
+    "apps/**/*.ts",
+    "apps/**/*.tsx",
+    "playwright.config.ts",
+    "docs/.vitepress/**/*.ts",
+    "docs/.vitepress/**/*.d.ts"
   ],
-  "exclude": ["node_modules", "dist", "coverage"]
+  "exclude": ["node_modules", "dist", "coverage", ".worktrees"]
 }
