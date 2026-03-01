@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Restart-With-Restore Fallback and End-to-End Tests
-lane: "done"
+lane: "doing"
 dependencies:
 - WP02
 base_branch: 013-renderer-switch-transaction-WP02
@@ -18,8 +18,8 @@ phase: Phase 3 - Fallback and Hardening
 assignee: ''
 agent: "claude-haiku"
 shell_pid: "71577"
-review_status: "approved"
-reviewed_by: "Koosha Paridehpour"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -227,4 +227,3 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:33:46Z – claude-haiku – shell_pid=71577 – lane=doing – Assigned agent via workflow command
-- 2026-03-01T13:36:08Z – claude-haiku – shell_pid=71577 – lane=done – Implemented: Restart-with-restore fallback (T011), degraded-but-safe mode (T012), terminal creation queueing (T013), fault injection tests (T014), SLO validation tests (T015), and terminal queue tests (T016). 21 tests passing.
