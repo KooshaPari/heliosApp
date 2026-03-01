@@ -1,12 +1,12 @@
 ---
 work_package_id: WP03
 title: Restart-With-Restore Fallback and End-to-End Tests
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP02
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 013-renderer-switch-transaction-WP02
+base_commit: 8a440743d05a228127fe0de46bd0a21f571bf314
+created_at: '2026-03-01T13:33:46.282774+00:00'
 subtasks:
 - T011
 - T012
@@ -16,10 +16,10 @@ subtasks:
 - T016
 phase: Phase 3 - Fallback and Hardening
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: ''
+shell_pid: "71577"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
