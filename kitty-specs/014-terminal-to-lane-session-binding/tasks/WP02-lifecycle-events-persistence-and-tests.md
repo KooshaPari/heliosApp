@@ -1,12 +1,12 @@
 ---
 work_package_id: WP02
 title: Lifecycle Event Emission, Persistence, and Integration Tests
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 014-terminal-to-lane-session-binding-WP01
+base_commit: f4f8a3b249b6f995e509dcfa42f4bb9a1d64811f
+created_at: '2026-03-01T13:31:56.932100+00:00'
 subtasks:
 - T005
 - T006
@@ -14,10 +14,10 @@ subtasks:
 - T008
 phase: Phase 2 - Durability and Integration
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: ''
+shell_pid: "64856"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
