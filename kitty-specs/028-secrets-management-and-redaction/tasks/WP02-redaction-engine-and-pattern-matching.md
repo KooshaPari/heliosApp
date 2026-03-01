@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Redaction Engine and Pattern Matching
-lane: "doing"
+lane: "for_review"
 dependencies:
 - WP01
 base_branch: main
@@ -282,3 +282,4 @@ Implementation command:
 - 2026-02-27T12:27:41Z – unknown – lane=for_review – Ready for review: render loop monitoring, input passthrough, frame metrics with full test coverage (32 new tests, all passing)
 - 2026-03-01T12:36:09Z – claude-opus – shell_pid=87700 – lane=doing – Started review via workflow command
 - 2026-03-01T12:36:24Z – claude-opus – shell_pid=87700 – lane=doing – No implementation found, implementing now
+- 2026-03-01T12:40:57Z – claude-opus – shell_pid=87700 – lane=for_review – Redaction engine with 100 tests
