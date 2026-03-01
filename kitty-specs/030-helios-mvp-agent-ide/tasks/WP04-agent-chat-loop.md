@@ -8,6 +8,7 @@ base_commit: 3ccbc7b9bf23cb68bc7a1846df0127baae8d63c0
 created_at: '2026-03-01T11:13:24.843462+00:00'
 subtasks: [T007, T009, T010]
 shell_pid: "76288"
+agent: "claude-opus"
 history:
 - date: '2026-03-01'
   action: created
@@ -152,3 +153,7 @@ The existing `a2a-dispatch.ts` provides `agent.run` and `agent.cancel` RPC handl
 - Test with a real Anthropic API key to verify end-to-end flow
 - Verify cancel actually aborts the HTTP request (not just hides the UI)
 - Check that conversation history doesn't include tool_call/tool_result messages in the API payload (only user/assistant)
+
+## Activity Log
+
+- 2026-03-01T11:13:25Z – claude-opus – shell_pid=76288 – lane=doing – Assigned agent via workflow command
