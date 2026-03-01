@@ -55,12 +55,12 @@
 **Estimated Prompt Size**: ~350 lines
 
 ### Included Subtasks
-- [ ] T006 Implement `scripts/deps-rollback.ts` with atomic lockfile reversion to last known-good pin for a named dependency, including lockfile regeneration
-- [ ] T007 Implement `scripts/deps-canary.ts` canary process: create isolated branch, apply upgrade, run full quality gate suite (spec 021), auto-merge on pass or open issue on fail
-- [ ] T008 Wire canary results into `deps-changelog.json` with pass/fail status, gate details, and branch references
-- [ ] T009 [P] Add integration tests for rollback: simulate breaking upgrade, execute rollback, verify lockfile state and passing gates
-- [ ] T010 [P] Add integration tests for canary: simulate available upgrade, run canary, verify branch creation, gate execution, and merge/issue outcome
-- [ ] T011 Validate NFR compliance: rollback < 60s including lockfile regen, status < 10s warm cache, canary does not block unrelated CI
+- [x] T006 Implement `scripts/deps-rollback.ts` with atomic lockfile reversion to last known-good pin for a named dependency, including lockfile regeneration
+- [x] T007 Implement `scripts/deps-canary.ts` canary process: create isolated branch, apply upgrade, run full quality gate suite (spec 021), auto-merge on pass or open issue on fail
+- [x] T008 Wire canary results into `deps-changelog.json` with pass/fail status, gate details, and branch references
+- [x] T009 [P] Add integration tests for rollback: simulate breaking upgrade, execute rollback, verify lockfile state and passing gates
+- [x] T010 [P] Add integration tests for canary: simulate available upgrade, run canary, verify branch creation, gate execution, and merge/issue outcome
+- [x] T011 Validate NFR compliance: rollback < 60s including lockfile regen, status < 10s warm cache, canary does not block unrelated CI
 
 ### Implementation Notes
 - Rollback must be atomic: full reversion succeeds or no lockfile changes are persisted (FR-005).
