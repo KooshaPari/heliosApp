@@ -24,12 +24,12 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T001 Create `.github/workflows/quality-gates.yml` with pipeline skeleton executing 8 gates in order with fail-fast behavior and structured JSON artifact output
-- [ ] T002 Implement Gate 1 (TypeScript strict type check) using `bun run typecheck` from spec 019 with strict mode validation
-- [ ] T003 Implement Gate 2 (Biome lint/format) with maximum strictness config in `biome.json`, ESLint as secondary cross-check where needed
-- [ ] T004 Implement Gate 3 (Vitest unit tests) running all test suites, failing on any test failure including `.skip`/`.only`/`.todo` markers
-- [ ] T005 [P] Implement Gate 4 (Playwright e2e tests) running all Playwright suites against a built desktop artifact in headless mode
-- [ ] T006 [P] Create `scripts/gate-report.ts` structured JSON report generator producing per-gate reports with gate name, status, file path, line number, error detail, and remediation hint
+- [x] T001 Create `.github/workflows/quality-gates.yml` with pipeline skeleton executing 8 gates in order with fail-fast behavior and structured JSON artifact output
+- [x] T002 Implement Gate 1 (TypeScript strict type check) using `bun run typecheck` from spec 019 with strict mode validation
+- [x] T003 Implement Gate 2 (Biome lint/format) with maximum strictness config in `biome.json`, ESLint as secondary cross-check where needed
+- [x] T004 Implement Gate 3 (Vitest unit tests) running all test suites, failing on any test failure including `.skip`/`.only`/`.todo` markers
+- [x] T005 [P] Implement Gate 4 (Playwright e2e tests) running all Playwright suites against a built desktop artifact in headless mode
+- [x] T006 [P] Create `scripts/gate-report.ts` structured JSON report generator producing per-gate reports with gate name, status, file path, line number, error detail, and remediation hint
 
 ### Implementation Notes
 - Pipeline must execute gates in defined order: typecheck -> lint -> test -> e2e -> coverage -> security -> static analysis -> bypass detection.
