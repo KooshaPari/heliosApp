@@ -1,9 +1,13 @@
 ---
 work_package_id: WP02
 title: App Shell Layout
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 4f2ebc164379da1ac771b5cd51649eedff6c888e
+created_at: '2026-03-01T11:10:48.384119+00:00'
 subtasks: [T015, T016, T017, T018]
+shell_pid: "70901"
 history:
 - date: '2026-03-01'
   action: created
