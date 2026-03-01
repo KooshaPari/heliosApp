@@ -1,12 +1,13 @@
 ---
 work_package_id: WP03
 title: Restoration Pipeline, Orphan Reconciliation, UX, and Tests
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
 - WP02
-base_branch: main
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 027-crash-recovery-and-restoration-WP02
+base_commit: 2a9f87d712fe60e9a0836ef0f3ba303e35542917
+created_at: '2026-03-01T13:34:04.167467+00:00'
 subtasks:
 - T010
 - T011
@@ -16,7 +17,7 @@ subtasks:
 phase: Phase 2 - Restoration and Hardening
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "72925"
 review_status: ''
 reviewed_by: ''
 history:
