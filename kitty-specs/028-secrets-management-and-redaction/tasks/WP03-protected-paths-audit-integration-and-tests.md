@@ -1,12 +1,13 @@
 ---
 work_package_id: WP03
 title: Protected Paths, Audit Integration, and Tests
-lane: "for_review"
+lane: "doing"
 dependencies:
 - WP01
 - WP02
-base_branch: main
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 028-secrets-management-and-redaction-WP03-merge-base
+base_commit: 1caf94f03c3dab8817184f9a7f8b663965df33c2
+created_at: '2026-03-01T12:41:22.317953+00:00'
 subtasks:
 - T011
 - T012
@@ -15,8 +16,8 @@ subtasks:
 - T015
 phase: Phase 2 - Integration and Hardening
 assignee: ''
-agent: ''
-shell_pid: ''
+agent: "claude-opus"
+shell_pid: "91675"
 review_status: ''
 reviewed_by: ''
 history:
@@ -276,3 +277,4 @@ Implementation command:
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-02-27T11:55:09Z – unknown – lane=for_review – Ready for review: per-topic sequencing, AsyncLocalStorage correlation, BACKPRESSURE payload enforcement, 96 tests passing, all benchmarks within SLO
 - 2026-02-27T12:40:00Z – unknown – lane=for_review – Ready for review: PTY stream piping with backpressure, GPU rendering surface with fallback/monitoring, unit/integration/benchmark tests all passing (236/236)
+- 2026-03-01T12:41:22Z – claude-opus – shell_pid=91675 – lane=doing – Started implementation via workflow command
