@@ -16,10 +16,10 @@
 **Goal**: Replace the raw HTML/JS renderer with a SolidJS project structure and define shared types for all entities.
 
 **Subtasks**:
-- [ ] T001: Create SolidJS project structure for helios renderer [P]
-- [ ] T002: Create shared types for Conversation, Message, InferenceProvider entities [P]
-- [ ] T003: Create conversation persistence layer (GoldfishDB schema) [P]
-- [ ] T004: Create InferenceEngine strategy interface and provider registry [P]
+- [x] T001: Create SolidJS project structure for helios renderer [P]
+- [x] T002: Create shared types for Conversation, Message, InferenceProvider entities [P]
+- [x] T003: Create conversation persistence layer (GoldfishDB schema) [P]
+- [x] T004: Create InferenceEngine strategy interface and provider registry [P]
 
 **Implementation sketch**: Set up SolidJS entry point, component directory structure, CSS/Tailwind integration. Define TypeScript interfaces for all key entities. Extend GoldfishDB persistence with conversation/message tables. Create abstract InferenceEngine interface.
 
