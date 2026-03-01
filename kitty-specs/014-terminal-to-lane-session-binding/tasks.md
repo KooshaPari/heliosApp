@@ -21,10 +21,10 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T001 Implement binding triple type definitions and validation in `apps/runtime/src/registry/binding_triple.ts`
-- [ ] T002 Implement terminal registry with CRUD and multi-key indexing in `apps/runtime/src/registry/terminal_registry.ts`
-- [ ] T003 Implement pre-operation binding validation middleware in `apps/runtime/src/registry/binding_middleware.ts`
-- [ ] T004 [P] Add unit and property-based tests for registry CRUD, uniqueness, and validation in `apps/runtime/tests/unit/registry/`
+- [x] T001 Implement binding triple type definitions and validation in `apps/runtime/src/registry/binding_triple.ts`
+- [x] T002 Implement terminal registry with CRUD and multi-key indexing in `apps/runtime/src/registry/terminal_registry.ts`
+- [x] T003 Implement pre-operation binding validation middleware in `apps/runtime/src/registry/binding_middleware.ts`
+- [x] T004 [P] Add unit and property-based tests for registry CRUD, uniqueness, and validation in `apps/runtime/tests/unit/registry/`
 
 ### Implementation Notes
 - Registry must enforce: no duplicate terminal_ids, no unbound terminals, valid lane/session references.
