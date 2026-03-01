@@ -1,9 +1,13 @@
 ---
 work_package_id: WP07
 title: Hardware Detection and MLX Adapter
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 566ba40040cf864c37996abe8aa5df8c6f54018b
+created_at: '2026-03-01T11:10:53.095532+00:00'
 subtasks: [T022, T023, T025]
+shell_pid: "71158"
 history:
 - date: '2026-03-01'
   action: created
