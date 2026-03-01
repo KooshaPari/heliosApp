@@ -38,10 +38,10 @@
 **Goal**: Build the main application shell with resizable panels, sidebar, and status bar.
 
 **Subtasks**:
-- [ ] T015: Build AppShell layout (sidebar, center, bottom panels, resizable)
-- [ ] T016: Build Sidebar component (conversation list, new chat button)
-- [ ] T017: Build StatusBar component (connection status, model indicator)
-- [ ] T018: Add keyboard shortcuts (Ctrl+N new chat, Ctrl+` toggle terminal, Ctrl+1-5 tabs)
+- [x] T015: Build AppShell layout (sidebar, center, bottom panels, resizable)
+- [x] T016: Build Sidebar component (conversation list, new chat button)
+- [x] T017: Build StatusBar component (connection status, model indicator)
+- [x] T018: Add keyboard shortcuts (Ctrl+N new chat, Ctrl+` toggle terminal, Ctrl+1-5 tabs)
 
 **Implementation sketch**: Create AppShell as root SolidJS component with CSS Grid/Flexbox layout. Sidebar is collapsible left panel. StatusBar is fixed bottom strip. Wire keyboard event handlers.
 
