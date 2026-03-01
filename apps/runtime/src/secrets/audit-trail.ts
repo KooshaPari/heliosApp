@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
 import type { RedactionResult, RedactionContext } from "./redaction-engine.js";
+import type { AuditSink } from "../audit/audit-sink.js"; // Used for type annotation
 
 // ---------------------------------------------------------------------------
 // Types
@@ -30,9 +31,11 @@ export interface AuditFilter {
 export class RedactionAuditTrail {
   private records: Map<string, RedactionAuditRecord> = new Map();
   private bus: LocalBus | null;
+  private auditSink: AuditSink | null;
 
-  constructor(opts?: { bus?: LocalBus }) {
+  constructor(opts?: { bus?: LocalBus; auditSink?: AuditSink }) {
     this.bus = opts?.bus ?? null;
+    this.auditSink = opts?.auditSink ?? null;
   }
 
   record(artifactId: string, result: RedactionResult, context: RedactionContext): RedactionAuditRecord {
@@ -87,7 +90,6 @@ export class RedactionAuditTrail {
   }
 
   private async _emit(topic: string, payload: Record<string, unknown>): Promise<void> {
-    if (!this.bus) return;
     const envelope: LocalBusEnvelope = {
       id: `audit:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
       type: "event",
@@ -95,6 +97,11 @@ export class RedactionAuditTrail {
       topic,
       payload,
     };
+    // Wire to spec 024 audit sink
+    if (this.auditSink) {
+      await this.auditSink.ingest(envelope);
+    }
+    if (!this.bus) return;
     await this.bus.publish(envelope);
   }
 }
