@@ -153,9 +153,9 @@
 **Goal**: Detect hardware capabilities and implement MLX inference for Apple Silicon.
 
 **Subtasks**:
-- [ ] T022: Create hardware detection module (Apple Silicon, NVIDIA GPU, CPU-only)
-- [ ] T023: Create MLX inference adapter
-- [ ] T025: Refactor existing llama.cpp/ACP into the strategy interface
+- [x] T022: Create hardware detection module (Apple Silicon, NVIDIA GPU, CPU-only)
+- [x] T023: Create MLX inference adapter
+- [x] T025: Refactor existing llama.cpp/ACP into the strategy interface
 
 **Implementation sketch**: Hardware detection uses platform checks (process.arch, CUDA detection via nvidia-smi). MLX adapter spawns mlx_lm.server or uses mlx-lm Python bindings via subprocess. Refactor existing AcpClient to implement the InferenceEngine interface. llama.cpp adapter wraps the existing llama-cli binary.
 
