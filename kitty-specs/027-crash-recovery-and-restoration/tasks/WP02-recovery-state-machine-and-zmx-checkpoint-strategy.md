@@ -15,7 +15,7 @@ subtasks:
 - T009
 phase: Phase 1 - State Machine and Checkpoints
 assignee: ''
-agent: ''
+agent: "claude-haiku"
 shell_pid: "64666"
 review_status: ''
 reviewed_by: ''
@@ -280,3 +280,4 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-03-01T13:31:53Z – claude-haiku – shell_pid=64666 – lane=doing – Assigned agent via workflow command
