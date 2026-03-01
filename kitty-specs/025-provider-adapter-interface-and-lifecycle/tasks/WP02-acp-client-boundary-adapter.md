@@ -1,11 +1,12 @@
 ---
 work_package_id: WP02
 title: ACP Client Boundary Adapter
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
-base_branch: main
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 025-provider-adapter-interface-and-lifecycle-WP01
+base_commit: 081484ebd513e9ed30cf48638b7f53e3d8115bee
+created_at: '2026-03-01T13:33:20.498081+00:00'
 subtasks:
 - T006
 - T007
@@ -15,7 +16,7 @@ subtasks:
 phase: Phase 1 - Core Providers
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "70465"
 review_status: ''
 reviewed_by: ''
 history:
