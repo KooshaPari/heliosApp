@@ -1,12 +1,12 @@
 ---
 work_package_id: WP02
 title: Coverage, Security, and Static Analysis Gates
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00.000000+00:00'
+base_branch: 021-continuous-integration-and-quality-gates-WP01
+base_commit: 5216a91bd2b6d05aa4d8a9df19edd5b2e3d8831e
+created_at: '2026-03-01T13:35:19.314038+00:00'
 subtasks:
 - T007
 - T008
@@ -15,10 +15,10 @@ subtasks:
 - T011
 phase: Phase 1 - CI Foundation
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: ''
+shell_pid: "79606"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
