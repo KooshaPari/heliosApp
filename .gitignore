@@ -53,3 +53,21 @@ Thumbs.db
 npm-debug.log*
 # Excluded via sparse-checkout
 kitty-specs/
+
+
+
+
+
+
+
+# AI tool artifacts
+.claude/
+.codex/
+.cursor/
+.gemini/
+.kittify/
+.kilocode/
+.github/prompts/
+.github/copilot-instructions.md
+.claudeignore
+.llmignore
