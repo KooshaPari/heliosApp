@@ -83,9 +83,9 @@
 **Goal**: Wire the chat UI to the ACP client for end-to-end agent conversations.
 
 **Subtasks**:
-- [ ] T007: Wire agent chat to ACP client with streaming response display
-- [ ] T009: Implement conversation context/history management (multi-turn)
-- [ ] T010: Add agent action interrupt/cancel UI
+- [x] T007: Wire agent chat to ACP client with streaming response display
+- [x] T009: Implement conversation context/history management (multi-turn)
+- [x] T010: Add agent action interrupt/cancel UI
 
 **Implementation sketch**: On send, create a Message, call a2a-dispatch agent.run via RPC, stream response tokens into the message. Maintain conversation history array in SolidJS store. Pass full history as context on each turn. Add cancel button that calls agent.cancel RPC.
 
