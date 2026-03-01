@@ -1,13 +1,17 @@
 ---
-work_package_id: "WP01"
-title: "SolidJS Foundation and Shared Types"
-lane: "planned"
+work_package_id: WP01
+title: SolidJS Foundation and Shared Types
+lane: "doing"
 dependencies: []
-subtasks: ["T001", "T002", "T003", "T004"]
+base_branch: main
+base_commit: 5bd4acc240771a7c260fed821c1f967c713fe14e
+created_at: '2026-03-01T10:43:54.923251+00:00'
+subtasks: [T001, T002, T003, T004]
+shell_pid: "31797"
 history:
-  - date: "2026-03-01"
-    action: "created"
-    agent: "spec-kitty"
+- date: '2026-03-01'
+  action: created
+  agent: spec-kitty
 ---
 
 # WP01: SolidJS Foundation and Shared Types
