@@ -1,11 +1,11 @@
 ---
 work_package_id: WP01
 title: Switch State Machine and PTY Stream Proxy
-lane: "planned"
+lane: "doing"
 dependencies: []
 base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00+00:00'
+base_commit: 20335a842cf793dbdf80a3bc427cc500350946a2
+created_at: '2026-03-01T13:29:08.316678+00:00'
 subtasks:
 - T001
 - T002
@@ -14,10 +14,10 @@ subtasks:
 - T005
 phase: Phase 1 - Foundation
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: ''
+shell_pid: "53525"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
