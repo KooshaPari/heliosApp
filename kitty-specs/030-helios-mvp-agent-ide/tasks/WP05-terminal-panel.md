@@ -1,7 +1,7 @@
 ---
 work_package_id: WP05
 title: Terminal Panel and Multi-Terminal
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: bb58b13bc9aa5a5c0935d48915965346520c88c4
@@ -9,6 +9,8 @@ created_at: '2026-03-01T11:10:50.925356+00:00'
 subtasks: [T011, T012, T013, T014]
 shell_pid: "71038"
 agent: "claude-opus"
+reviewed_by: "Koosha Paridehpour"
+review_status: "approved"
 history:
 - date: '2026-03-01'
   action: created
@@ -213,3 +215,4 @@ The old renderer (`src/renderers/helios/index.ts`) already had xterm.js integrat
 
 - 2026-03-01T11:10:51Z – claude-opus – shell_pid=71038 – lane=doing – Assigned agent via workflow command
 - 2026-03-01T11:15:09Z – claude-opus – shell_pid=71038 – lane=for_review – Terminal panel with xterm.js, multi-tab, store
+- 2026-03-01T11:42:12Z – claude-opus – shell_pid=71038 – lane=done – Merged to main
