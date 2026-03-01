@@ -136,3 +136,27 @@ describe("CredentialStore: store and retrieve", () => {
     ).rejects.toThrow();
   });
 });
+
+describe("CredentialStore: rotate preserves file permissions", () => {
+  let tmpDir: string;
+  let store: CredentialStore;
+
+  beforeEach(() => {
+    tmpDir = mkdtempSync(join(tmpdir(), "helios-cred-rotate-"));
+    store = makeStore(tmpDir);
+  });
+
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("file permissions are 0600 after rotate (unix only)", async () => {
+    if (process.platform === "win32") return;
+    await store.store("providerA", "ws1", "rotKey", "original");
+    await store.rotate("providerA", "ws1", "rotKey", "rotated", "corr-1");
+    const filePath = join(tmpDir, "secrets", "providerA", "ws1", "rotKey.enc");
+    expect(existsSync(filePath)).toBe(true);
+    const mode = statSync(filePath).mode & 0o777;
+    expect(mode).toBe(0o600);
+  });
+});
