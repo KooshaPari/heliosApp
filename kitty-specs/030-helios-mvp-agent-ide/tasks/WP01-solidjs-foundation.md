@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: SolidJS Foundation and Shared Types
-lane: "doing"
+lane: "for_review"
 dependencies: []
 base_branch: main
 base_commit: 5bd4acc240771a7c260fed821c1f967c713fe14e
@@ -286,3 +286,4 @@ The project already uses SolidJS (`solid-js: ^1.7.5` in package.json, `jsxImport
 ## Activity Log
 
 - 2026-03-01T10:43:55Z – claude-opus – shell_pid=31797 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T11:10:38Z – claude-opus – shell_pid=31797 – lane=for_review – Ready: SolidJS foundation, types, inference engine, persistence
