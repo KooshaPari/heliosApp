@@ -1,12 +1,12 @@
 ---
 work_package_id: WP02
 title: Policy Evaluation Engine and Deny-by-Default
-lane: "planned"
+lane: "doing"
 dependencies:
 - WP01
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00.000000+00:00'
+base_branch: 023-command-policy-engine-and-approval-workflows-WP01
+base_commit: ea3eecd927fa6313ae0974c5e175c17767819a74
+created_at: '2026-03-01T13:35:28.402260+00:00'
 subtasks:
 - T006
 - T007
@@ -15,10 +15,10 @@ subtasks:
 - T010
 phase: Phase 1 - Policy Foundation
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: ''
+shell_pid: "80143"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
