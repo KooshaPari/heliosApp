@@ -87,11 +87,11 @@
 **Estimated Prompt Size**: ~420 lines
 
 ### Included Subtasks
-- [ ] T012 Implement atomic context switch propagation to all visible tabs with stale-context fallback
-- [ ] T013 Implement configurable keyboard shortcuts for tab switching in `apps/desktop/src/tabs/keyboard_shortcuts.ts`
-- [ ] T014 Implement stale-context indicator component for tabs that fail to update
-- [ ] T015 [P] Add Playwright end-to-end tests for tab navigation, context switching, and keyboard workflows in `apps/desktop/tests/e2e/tabs/`
-- [ ] T016 [P] Add performance benchmarks for tab switch latency and context propagation in `apps/desktop/tests/e2e/tabs/`
+- [x] T012 Implement atomic context switch propagation to all visible tabs with stale-context fallback
+- [x] T013 Implement configurable keyboard shortcuts for tab switching in `apps/desktop/src/tabs/keyboard_shortcuts.ts`
+- [x] T014 Implement stale-context indicator component for tabs that fail to update
+- [x] T015 [P] Add Playwright end-to-end tests for tab navigation, context switching, and keyboard workflows in `apps/desktop/tests/e2e/tabs/`
+- [x] T016 [P] Add performance benchmarks for tab switch latency and context propagation in `apps/desktop/tests/e2e/tabs/`
 
 ### Implementation Notes
 - Atomic propagation: either all tabs update or stale indicators appear on failed ones.
