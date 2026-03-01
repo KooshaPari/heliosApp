@@ -1,11 +1,11 @@
 ---
 work_package_id: WP01
 title: Audit Event Schema and Append-Only Sink
-lane: "planned"
+lane: "doing"
 dependencies: []
 base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00.000000+00:00'
+base_commit: c0c76ff4c8f9336ace18d5c5929a53f91b36e7a8
+created_at: '2026-03-01T13:29:53.391826+00:00'
 subtasks:
 - T001
 - T002
@@ -13,10 +13,10 @@ subtasks:
 - T004
 phase: Phase 1 - Audit Foundation
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: ''
+shell_pid: "55466"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
