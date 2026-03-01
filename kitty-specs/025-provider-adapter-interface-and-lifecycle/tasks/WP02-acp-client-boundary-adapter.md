@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: ACP Client Boundary Adapter
-lane: "done"
+lane: "doing"
 dependencies:
 - WP01
 base_branch: 025-provider-adapter-interface-and-lifecycle-WP01
@@ -15,10 +15,10 @@ subtasks:
 - T010
 phase: Phase 1 - Core Providers
 assignee: ''
-agent: "claude-haiku"
+agent: ''
 shell_pid: "70465"
-review_status: "approved"
-reviewed_by: "Koosha Paridehpour"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -231,5 +231,3 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
-- 2026-03-01T13:33:20Z – claude-haiku – shell_pid=70465 – lane=doing – Assigned agent via workflow command
-- 2026-03-01T13:34:32Z – claude-haiku – shell_pid=70465 – lane=done – Implemented: ACP client adapter with all lifecycle methods
