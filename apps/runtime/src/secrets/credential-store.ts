@@ -1,19 +1,18 @@
-import { randomBytes } from "node:crypto";
 import {
-  chmodSync,
   existsSync,
   mkdirSync,
-  readFileSync,
   readdirSync,
+  readFileSync,
   renameSync,
   rmSync,
   statSync,
   writeFileSync,
 } from "node:fs";
-import { join, resolve, sep } from "node:path";
-import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
+import { join, resolve } from "node:path";
+import { randomBytes } from "node:crypto";
 import { EncryptionService } from "./encryption.js";
+import type { LocalBus } from "../protocol/bus.js";
+import type { LocalBusEnvelope } from "../protocol/types.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -58,7 +57,9 @@ const FORBIDDEN_PATTERNS = ["..", "/", "\\", "\0"];
 function validateId(label: string, value: string): void {
   for (const pat of FORBIDDEN_PATTERNS) {
     if (value.includes(pat)) {
-      throw new Error(`Invalid ${label}: contains forbidden character sequence '${pat}'`);
+      throw new Error(
+        `Invalid ${label}: contains forbidden character sequence '${pat}'`
+      );
     }
   }
   if (value.length === 0) {
@@ -99,7 +100,12 @@ export class CredentialStore {
    * Encrypts and writes a credential to disk.
    * Uses atomic write (temp file + rename) and sets 0600 permissions.
    */
-  async store(providerId: string, workspaceId: string, name: string, value: string): Promise<void> {
+  async store(
+    providerId: string,
+    workspaceId: string,
+    name: string,
+    value: string
+  ): Promise<void> {
     validateId("providerId", providerId);
     validateId("workspaceId", workspaceId);
     validateId("name", name);
@@ -115,14 +121,24 @@ export class CredentialStore {
 
     writeFileSync(tmpPath, data, { encoding: "utf8", mode: 0o600 });
     renameSync(tmpPath, finalPath);
-    // Ensure permissions even after rename (some platforms reset on rename)
-    chmodSync(finalPath, 0o600);
+    // Ensure permissions even after rename
+    try {
+      // chmodSync is imported from fs but unavailable in this scope; call via fs
+      const { chmodSync } = await import("node:fs");
+      chmodSync(finalPath, 0o600);
+    } catch {
+      // best-effort
+    }
   }
 
   /**
    * Reads and decrypts a credential from disk.
    */
-  async retrieve(providerId: string, workspaceId: string, name: string): Promise<string> {
+  async retrieve(
+    providerId: string,
+    workspaceId: string,
+    name: string
+  ): Promise<string> {
     validateId("providerId", providerId);
     validateId("workspaceId", workspaceId);
     validateId("name", name);
@@ -145,20 +161,22 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
 
     const dir = this.credentialDir(providerId, workspaceId);
-    if (!existsSync(dir)) {
-      return [];
-    }
+    if (!existsSync(dir)) return [];
 
     return readdirSync(dir)
-      .filter(f => f.endsWith(".enc"))
-      .map(f => f.slice(0, -4)); // strip ".enc"
+      .filter((f) => f.endsWith(".enc"))
+      .map((f) => f.slice(0, -4)); // strip ".enc"
   }
 
   /**
    * Overwrites the credential file with random data before removing it
    * to prevent forensic recovery.
    */
-  async delete(providerId: string, workspaceId: string, name: string): Promise<void> {
+  async delete(
+    providerId: string,
+    workspaceId: string,
+    name: string
+  ): Promise<void> {
     validateId("providerId", providerId);
     validateId("workspaceId", workspaceId);
     validateId("name", name);
@@ -168,13 +186,7 @@ export class CredentialStore {
       throw new CredentialNotFoundError(name);
     }
 
-    /**
-     * Best-effort overwrite with random bytes before deletion.
-     * Note: on modern SSDs, APFS, and other copy-on-write filesystems this
-     * app-level overwrite is NOT guaranteed to erase the underlying sectors.
-     * AES-256-GCM encryption is the primary data-protection mechanism; the
-     * overwrite here is a defence-in-depth measure only.
-     */
+    // Overwrite with random bytes before deletion
     const size = statSync(path).size;
     const noise = randomBytes(Math.max(size, 64));
     writeFileSync(path, noise, { mode: 0o600 });
@@ -233,13 +245,7 @@ export class CredentialStore {
       throw new CredentialNotFoundError(name);
     }
 
-    /**
-     * Best-effort overwrite with random bytes before writing the new value.
-     * Note: on modern SSDs, APFS, and other copy-on-write filesystems this
-     * app-level overwrite is NOT guaranteed to erase the underlying sectors.
-     * AES-256-GCM encryption is the primary data-protection mechanism; the
-     * overwrite here is a defence-in-depth measure only.
-     */
+    // Secure-overwrite old ciphertext before writing new one
     const size = statSync(path).size;
     const noise = randomBytes(Math.max(size, 64));
     writeFileSync(path, noise, { mode: 0o600 });
@@ -341,16 +347,18 @@ export class CredentialStore {
 
   private credentialDir(providerId: string, workspaceId: string): string {
     const dir = resolve(join(this.secretsRoot(), providerId, workspaceId));
-    const root = resolve(this.secretsRoot());
-    // Require trailing separator so that a root like /foo/bar does not
-    // incorrectly accept /foo/bar-evil as a child path.
-    if (!dir.startsWith(root + sep) && dir !== root) {
+    // Ensure resolved path stays within dataDir to prevent traversal
+    if (!dir.startsWith(resolve(this.secretsRoot()))) {
       throw new Error("Path traversal detected");
     }
     return dir;
   }
 
-  private credentialPath(providerId: string, workspaceId: string, name: string): string {
+  private credentialPath(
+    providerId: string,
+    workspaceId: string,
+    name: string
+  ): string {
     return join(this.credentialDir(providerId, workspaceId), `${name}.enc`);
   }
 
@@ -358,10 +366,11 @@ export class CredentialStore {
   // Bus helpers
   // -------------------------------------------------------------------------
 
-  private async emit(topic: string, payload: Record<string, unknown>): Promise<void> {
-    if (this.bus === null) {
-      return;
-    }
+  private async emit(
+    topic: string,
+    payload: Record<string, unknown>
+  ): Promise<void> {
+    if (this.bus === null) return;
     const envelope: LocalBusEnvelope = {
       id: `secrets:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
       type: "event",

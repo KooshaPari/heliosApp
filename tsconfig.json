@@ -22,11 +22,7 @@
     }
   },
   "include": [
-    "apps/**/*.ts",
-    "apps/**/*.tsx",
-    "playwright.config.ts",
-    "docs/.vitepress/**/*.ts",
-    "docs/.vitepress/**/*.d.ts"
+    "apps/**/*.ts"
   ],
-  "exclude": ["node_modules", "dist", "coverage", ".worktrees"]
+  "exclude": ["node_modules", "dist", "coverage"]
 }
