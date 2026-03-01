@@ -1,9 +1,13 @@
 ---
 work_package_id: WP08
 title: vLLM Adapter and Model Selector UI
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 8d90af53aa1e54a9fec97ec4ca034d229297146d
+created_at: '2026-03-01T11:17:15.529054+00:00'
 subtasks: [T024, T026, T027]
+shell_pid: "80858"
 history:
 - date: '2026-03-01'
   action: created
