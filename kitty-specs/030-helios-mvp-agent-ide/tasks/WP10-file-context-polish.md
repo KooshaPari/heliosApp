@@ -1,9 +1,13 @@
 ---
 work_package_id: WP10
 title: File Context, First-Run, and Quality
-lane: planned
+lane: "doing"
 dependencies: []
+base_branch: main
+base_commit: 1245abe02cdb233a85a2582417ed8a64f9d3838e
+created_at: '2026-03-01T11:17:21.985420+00:00'
 subtasks: [T031, T032, T033, T034, T035, T036]
+shell_pid: "81180"
 history:
 - date: '2026-03-01'
   action: created
