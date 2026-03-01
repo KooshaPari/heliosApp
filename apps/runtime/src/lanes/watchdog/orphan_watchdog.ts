@@ -1,0 +1,191 @@
+// T001 - Orphan watchdog scheduler with checkpoint persistence
+
+import { CheckpointManager, type WatchdogCheckpoint } from "./checkpoint.js";
+import { ResourceClassifier, type ClassifiedOrphan } from "./resource_classifier.js";
+import { WorktreeDetector } from "./worktree_detector.js";
+import { ZellijDetector, type SessionRegistry } from "./zellij_detector.js";
+import { PtyDetector, type TerminalRegistry } from "./pty_detector.js";
+import type { LocalBus } from "../../protocol/bus.js";
+import type { LaneRegistry } from "../registry.js";
+
+export interface WatchdogConfig {
+  detectionInterval: number; // milliseconds
+  worktreeBaseDir: string;
+  sessionRegistry: SessionRegistry;
+  terminalRegistry: TerminalRegistry;
+  laneRegistry: LaneRegistry;
+  bus: LocalBus;
+}
+
+export class OrphanWatchdog {
+  private readonly checkpointManager = new CheckpointManager();
+  private readonly resourceClassifier = new ResourceClassifier();
+  private readonly worktreeDetector: WorktreeDetector;
+  private readonly zellijDetector: ZellijDetector;
+  private readonly ptyDetector: PtyDetector;
+
+  private readonly detectionInterval: number;
+  private readonly bus: LocalBus;
+  private cycleNumber = 0;
+  private isRunning = false;
+  private detectionTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastDetectionDuration = 0;
+  private lastClassifiedOrphans: ClassifiedOrphan[] = [];
+
+  constructor(config: WatchdogConfig) {
+    this.detectionInterval = config.detectionInterval || 60000;
+    this.bus = config.bus;
+
+    this.worktreeDetector = new WorktreeDetector(
+      config.worktreeBaseDir,
+      config.laneRegistry
+    );
+    this.zellijDetector = new ZellijDetector(config.sessionRegistry);
+    this.ptyDetector = new PtyDetector(config.terminalRegistry);
+  }
+
+  async start(): Promise<void> {
+    if (this.isRunning) {
+      console.warn("Watchdog is already running");
+      return;
+    }
+
+    this.isRunning = true;
+
+    // Load checkpoint for crash recovery
+    const checkpoint = await this.checkpointManager.load();
+    if (checkpoint) {
+      this.cycleNumber = checkpoint.cycleNumber;
+      console.log(
+        `[Watchdog] Resumed from checkpoint: cycle ${this.cycleNumber}, last run: ${checkpoint.lastCycleTimestamp}`
+      );
+    } else {
+      console.log("[Watchdog] Starting fresh with no checkpoint");
+    }
+
+    console.log(
+      `[Watchdog] Started with ${this.detectionInterval}ms interval`
+    );
+
+    // Run first cycle immediately
+    this.scheduleNextCycle();
+  }
+
+  stop(): void {
+    if (!this.isRunning) {
+      return;
+    }
+
+    this.isRunning = false;
+    if (this.detectionTimer) {
+      clearTimeout(this.detectionTimer);
+      this.detectionTimer = null;
+    }
+
+    console.log("[Watchdog] Stopped");
+  }
+
+  getLastDetectionDuration(): number {
+    return this.lastDetectionDuration;
+  }
+
+  getLastClassifiedOrphans(): ClassifiedOrphan[] {
+    return [...this.lastClassifiedOrphans];
+  }
+
+  private scheduleNextCycle(): void {
+    if (!this.isRunning) return;
+
+    this.detectionTimer = setTimeout(() => {
+      this.runDetectionCycle();
+      if (this.isRunning) {
+        this.scheduleNextCycle();
+      }
+    }, this.detectionInterval);
+  }
+
+  private async runDetectionCycle(): Promise<void> {
+    const startTime = Date.now();
+    this.cycleNumber++;
+
+    try {
+      // Run all three detectors in parallel
+      const [worktreeOrphans, zellijOrphans, ptyOrphans] = await Promise.all([
+        this.worktreeDetector.detect(),
+        this.zellijDetector.detect(),
+        this.ptyDetector.detect(),
+      ]);
+
+      const allOrphans = [
+        ...worktreeOrphans,
+        ...zellijOrphans,
+        ...ptyOrphans,
+      ];
+
+      // Classify all orphans
+      this.lastClassifiedOrphans =
+        this.resourceClassifier.classifyAll(allOrphans);
+
+      // Record detection duration
+      this.lastDetectionDuration = Date.now() - startTime;
+
+      // Warn if cycle took too long
+      if (this.lastDetectionDuration > 2000) {
+        console.warn(
+          `[Watchdog] Detection cycle took ${this.lastDetectionDuration}ms (exceeds 2s target)`
+        );
+      }
+
+      // Emit detection cycle event
+      await this.bus.publish({
+        id: `orphan-cycle-${this.cycleNumber}`,
+        type: "event",
+        ts: new Date().toISOString(),
+        topic: "orphan.detection.cycle_completed",
+        payload: {
+          cycleNumber: this.cycleNumber,
+          duration: this.lastDetectionDuration,
+          orphanCount: this.lastClassifiedOrphans.length,
+          summary: {
+            worktrees: worktreeOrphans.length,
+            zellijSessions: zellijOrphans.length,
+            ptyProcesses: ptyOrphans.length,
+          },
+        },
+      });
+
+      // Emit individual resource events
+      for (const orphan of this.lastClassifiedOrphans) {
+        await this.bus.publish({
+          id: `orphan-${this.cycleNumber}-${orphan.path || orphan.pid}`,
+          type: "event",
+          ts: new Date().toISOString(),
+          topic: "orphan.detection.resource_found",
+          payload: {
+            cycleNumber: this.cycleNumber,
+            resource: orphan,
+          },
+        });
+      }
+
+      // Save checkpoint
+      const checkpoint: WatchdogCheckpoint = {
+        cycleNumber: this.cycleNumber,
+        lastCycleTimestamp: new Date().toISOString(),
+        orphanCount: this.lastClassifiedOrphans.length,
+        detectionSummary: {
+          worktrees: worktreeOrphans.length,
+          zellijSessions: zellijOrphans.length,
+          ptyProcesses: ptyOrphans.length,
+        },
+      };
+      await this.checkpointManager.save(checkpoint);
+
+      console.log(
+        `[Watchdog] Cycle ${this.cycleNumber} completed: ${this.lastDetectionDuration}ms, ${this.lastClassifiedOrphans.length} orphans found`
+      );
+    } catch (error) {
+      console.error(`[Watchdog] Detection cycle failed:`, error);
+    }
+  }
+}
