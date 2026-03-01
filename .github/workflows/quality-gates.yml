@@ -87,8 +87,9 @@ jobs:
 
       - name: Gate 8 - Bypass Detect
         id: gate-bypass-detect
-        run: echo "Bypass Detection gate - placeholder for WP03"
-        continue-on-error: true
+        run: bun run scripts/gate-bypass-detect.ts
+        timeout-minutes: 2
+        continue-on-error: false
 
       - name: Upload Gate Reports
         if: always()
