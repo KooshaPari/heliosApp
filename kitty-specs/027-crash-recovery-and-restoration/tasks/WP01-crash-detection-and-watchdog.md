@@ -1,10 +1,11 @@
 ---
 work_package_id: WP01
 title: Crash Detection and Watchdog
-lane: "planned"
+lane: "doing"
 dependencies: []
 base_branch: main
-created_at: '2026-02-27T00:00:00+00:00'
+base_commit: 8cf5e72ef31fd586a01db0480786816a9013e2c7
+created_at: '2026-03-01T13:30:09.400341+00:00'
 subtasks:
 - T001
 - T002
@@ -13,7 +14,7 @@ subtasks:
 phase: Phase 0 - Detection
 assignee: ''
 agent: ''
-shell_pid: ''
+shell_pid: "57374"
 review_status: ''
 reviewed_by: ''
 history:
