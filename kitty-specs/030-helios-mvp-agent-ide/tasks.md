@@ -174,9 +174,9 @@
 **Goal**: Add vLLM inference support and build the model selector UI.
 
 **Subtasks**:
-- [ ] T024: Create vLLM inference adapter
-- [ ] T026: Build model selector UI with provider grouping
-- [ ] T027: Wire inference engine to chat loop with hot-swap support
+- [x] T024: Create vLLM inference adapter
+- [x] T026: Build model selector UI with provider grouping
+- [x] T027: Wire inference engine to chat loop with hot-swap support
 
 **Implementation sketch**: vLLM adapter connects to a vLLM server endpoint (OpenAI-compatible API). Model selector dropdown groups models by provider (Local/Cloud). Hot-swap updates the active engine reference without losing conversation state.
 
