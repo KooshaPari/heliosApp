@@ -56,11 +56,11 @@
 **Estimated Prompt Size**: ~340 lines
 
 ### Included Subtasks
-- [ ] T007 Implement Gate 5 (coverage threshold) enforcing >= 85% line coverage per workspace package and aggregate, using Vitest coverage output
-- [ ] T008 Implement Gate 6 (security scan) checking dependencies for known vulnerabilities, flagging high/critical as failures with severity and remediation
-- [ ] T009 Implement Gate 7 (static analysis) detecting anti-patterns, complexity violations, and dead code across the monorepo
-- [ ] T010 [P] Add coverage manifest generation: per-package and aggregate coverage summary compared against threshold, output as structured JSON
-- [ ] T011 [P] Add gate integration tests: verify each gate produces correct pass/fail for known fixture inputs (clean code, vulnerability, complexity violation)
+- [x] T007 Implement Gate 5 (coverage threshold) enforcing >= 85% line coverage per workspace package and aggregate, using Vitest coverage output
+- [x] T008 Implement Gate 6 (security scan) checking dependencies for known vulnerabilities, flagging high/critical as failures with severity and remediation
+- [x] T009 Implement Gate 7 (static analysis) detecting anti-patterns, complexity violations, and dead code across the monorepo
+- [x] T010 [P] Add coverage manifest generation: per-package and aggregate coverage summary compared against threshold, output as structured JSON
+- [x] T011 [P] Add gate integration tests: verify each gate produces correct pass/fail for known fixture inputs (clean code, vulnerability, complexity violation)
 
 ### Implementation Notes
 - Coverage must be enforced per-package AND aggregate; a single package below threshold fails the gate.
