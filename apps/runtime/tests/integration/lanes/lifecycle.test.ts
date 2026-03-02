@@ -31,6 +31,8 @@ async function createTempRepo(): Promise<string> {
   fs.writeFileSync(path.join(tmpDir, "README.md"), "# Test Repo\n");
   await runGit(["add", "."], tmpDir);
   await runGit(["commit", "-m", "initial commit"], tmpDir);
+  // Ensure the default branch is named 'main' regardless of git config
+  await runGit(["branch", "-M", "main"], tmpDir);
   return tmpDir;
 }
 
