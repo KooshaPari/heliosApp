@@ -1,3 +1,11 @@
+/**
+ * @helios/desktop — Desktop shell entry point for heliosApp.
+ *
+ * Creates the ElectroBun window and initializes the terminal surface.
+ * Cross-workspace import from @helios/runtime validates path alias resolution.
+ */
+
+import { type HealthCheckResult, healthCheck } from "@helios/runtime";
 import { InMemoryLocalBus } from "../../runtime/src/protocol/bus";
 import {
   ActiveContextStore,
@@ -13,6 +21,12 @@ import {
   switchRendererWithRollback,
 } from "./settings";
 import { type TabSurface, buildAllTabSurfaces } from "./tabs";
+
+function main(): void {
+  const _health: HealthCheckResult = healthCheck();
+}
+
+main();
 
 export type BootDesktopInput = {
   bus?: InMemoryLocalBus;
@@ -67,7 +81,7 @@ export class EditorlessControlPlane {
     const result = await this.runtimeClient.createLane(input);
     this.store.dispatch({ type: "diagnostics.set", diagnostics: result.diagnostics });
 
-    if (!result.ok || !result.id) {
+    if (!(result.ok && result.id)) {
       this.store.dispatch({
         type: "operation.failure",
         operation: "lane",
@@ -92,7 +106,7 @@ export class EditorlessControlPlane {
     this.store.dispatch({ type: "operation.start", operation: "session" });
     const result = await this.runtimeClient.ensureSession(input);
 
-    if (!result.ok || !result.id) {
+    if (!(result.ok && result.id)) {
       this.store.dispatch({
         type: "operation.failure",
         operation: "session",
@@ -117,7 +131,7 @@ export class EditorlessControlPlane {
   }): Promise<{ ok: boolean; terminalId: string | null; error: string | null }> {
     this.store.dispatch({ type: "operation.start", operation: "terminal" });
     const result = await this.runtimeClient.spawnTerminal(input);
-    if (!result.ok || !result.id) {
+    if (!(result.ok && result.id)) {
       this.store.dispatch({
         type: "operation.failure",
         operation: "terminal",
@@ -139,7 +153,7 @@ export class EditorlessControlPlane {
     options?: {
       forceError?: boolean;
       forceRollbackError?: boolean;
-    },
+    }
   ): Promise<{
     committed: boolean;
     rolledBack: boolean;
@@ -151,8 +165,8 @@ export class EditorlessControlPlane {
       targetEngine,
       runtimeClient: this.runtimeClient,
       contextStore: this.store,
-      forceError: options?.forceError,
-      forceRollbackError: options?.forceRollbackError,
+      forceError: options?.forceError ?? false,
+      forceRollbackError: options?.forceRollbackError ?? false,
     });
     this.settings = outcome.settings;
     return {

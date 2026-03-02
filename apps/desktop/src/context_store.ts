@@ -1,4 +1,4 @@
-import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
+import type { RuntimeState } from "../../runtime/src/sessions/state_machine.ts";
 
 export type ActiveTab = "terminal" | "agent" | "session" | "chat" | "project";
 
@@ -97,20 +97,23 @@ export const INITIAL_ACTIVE_CONTEXT_STATE: ActiveContextState = {
 function appendTrace(
   trace: ContextActionTrace[],
   action: string,
-  detail?: unknown,
+  detail?: unknown
 ): ContextActionTrace[] {
   return [...trace, { action, at: new Date().toISOString(), detail }];
 }
 
 export function reduceActiveContextState(
   state: ActiveContextState,
-  action: ActiveContextAction,
+  action: ActiveContextAction
 ): ActiveContextState {
   switch (action.type) {
     case "workspace.set":
       return {
         ...state,
         workspaceId: action.workspaceId,
+        laneId: null,
+        sessionId: null,
+        terminalId: null,
         trace: appendTrace(state.trace, action.type, { workspaceId: action.workspaceId }),
       };
     case "lane.set":
@@ -312,7 +315,7 @@ export function selectRuntimeDiagnostics(state: ActiveContextState): TransportDi
 }
 
 export function selectRendererSwitchStatus(
-  state: ActiveContextState,
+  state: ActiveContextState
 ): ActiveContextState["rendererSwitch"] {
   return state.rendererSwitch;
 }

@@ -4,15 +4,26 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
+    "exactOptionalPropertyTypes": true,
     "noEmit": true,
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": false,
     "resolveJsonModule": true,
-    "types": ["bun-types", "node", "@playwright/test"]
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "types": ["bun-types", "node", "@playwright/test"],
+    "baseUrl": ".",
+    "paths": {
+      "@helios/runtime": ["apps/runtime/src/index.ts"],
+      "@helios/runtime/*": ["apps/runtime/src/*"],
+      "@helios/desktop": ["apps/desktop/src/index.ts"],
+      "@helios/desktop/*": ["apps/desktop/src/*"]
+    }
   },
   "include": [
     "apps/**/*.ts",
+    "apps/**/*.tsx",
     "playwright.config.ts",
     "docs/.vitepress/**/*.ts",
     "docs/.vitepress/**/*.d.ts"

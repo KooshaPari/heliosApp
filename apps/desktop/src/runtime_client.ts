@@ -1,8 +1,8 @@
-import type { LocalBus } from "../../runtime/src/protocol/bus";
-import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
-import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
-import type { TransportDiagnostics } from "./context_store";
-import type { RendererEngine } from "./settings";
+import type { ProtocolBus as LocalBus } from "../../runtime/src/protocol/bus.ts";
+import type { LocalBusEnvelope } from "../../runtime/src/protocol/types.ts";
+import type { RuntimeState } from "../../runtime/src/sessions/state_machine.ts";
+import type { TransportDiagnostics } from "./context_store.ts";
+import type { RendererEngine } from "./settings.ts";
 
 type RuntimeResponse<T extends Record<string, unknown>> = {
   ok: boolean;
@@ -35,15 +35,19 @@ function toCommandEnvelope(
   method: string,
   payload: Record<string, unknown>,
   workspaceId: string | null,
+  laneId: string | null,
   sessionId: string | null,
-  terminalId: string | null,
+  terminalId: string | null
 ): LocalBusEnvelope {
+  const correlationId = `${method}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
   return {
-    id: `${method}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
+    id: correlationId,
     type: "command",
     ts: new Date().toISOString(),
+    correlation_id: correlationId,
     method,
     workspace_id: workspaceId ?? undefined,
+    lane_id: laneId ?? undefined,
     session_id: sessionId ?? undefined,
     terminal_id: terminalId ?? undefined,
     payload,
@@ -51,7 +55,7 @@ function toCommandEnvelope(
 }
 
 function toResponse<T extends Record<string, unknown>>(
-  response: LocalBusEnvelope,
+  response: LocalBusEnvelope
 ): RuntimeResponse<T> {
   if (response.status === "error") {
     return {
@@ -94,18 +98,22 @@ export class DesktopRuntimeClient {
     simulateDegrade?: boolean;
     forceError?: boolean;
   }): Promise<LifecycleResult> {
+    const requestedLaneId = `${input.workspaceId}:lane`;
     const response = await this.bus.request(
       toCommandEnvelope(
         "lane.create",
         {
+          id: requestedLaneId,
+          lane_id: requestedLaneId,
           preferred_transport: input.preferredTransport ?? "cliproxy_harness",
           simulate_degrade: input.simulateDegrade === true,
           force_error: input.forceError === true,
         },
         input.workspaceId,
+        requestedLaneId,
         null,
-        null,
-      ),
+        null
+      )
     );
     const parsed = toResponse<Record<string, unknown>>(response);
     return {
@@ -122,17 +130,21 @@ export class DesktopRuntimeClient {
     laneId: string;
     forceError?: boolean;
   }): Promise<LifecycleResult> {
+    const requestedSessionId = `${input.laneId}:session`;
     const response = await this.bus.request(
       toCommandEnvelope(
         "session.attach",
         {
-          id: `${input.laneId}:session`,
+          id: requestedSessionId,
+          lane_id: input.laneId,
+          session_id: requestedSessionId,
           force_error: input.forceError === true,
         },
         input.workspaceId,
-        null,
-        null,
-      ),
+        input.laneId,
+        requestedSessionId,
+        null
+      )
     );
     const parsed = toResponse<Record<string, unknown>>(response);
     return {
@@ -150,18 +162,22 @@ export class DesktopRuntimeClient {
     sessionId: string;
     forceError?: boolean;
   }): Promise<LifecycleResult> {
+    const requestedTerminalId = `${input.sessionId}:terminal`;
     const response = await this.bus.request(
       toCommandEnvelope(
         "terminal.spawn",
         {
-          id: `${input.sessionId}:terminal`,
+          id: requestedTerminalId,
           lane_id: input.laneId,
+          session_id: input.sessionId,
+          terminal_id: requestedTerminalId,
           force_error: input.forceError === true,
         },
         input.workspaceId,
+        input.laneId,
         input.sessionId,
-        null,
-      ),
+        requestedTerminalId
+      )
     );
     const parsed = toResponse<Record<string, unknown>>(response);
     return {
@@ -175,15 +191,15 @@ export class DesktopRuntimeClient {
 
   async getRendererCapabilities(workspaceId: string | null): Promise<RendererCapabilities> {
     const response = await this.bus.request(
-      toCommandEnvelope("renderer.capabilities", {}, workspaceId, null, null),
+      toCommandEnvelope("renderer.capabilities", {}, workspaceId, null, null, null)
     );
     const parsed = toResponse<Record<string, unknown>>(response);
     const activeEngine = parsed.result?.active_engine === "rio" ? "rio" : "ghostty";
-    const available: RendererEngine[] = Array.isArray(parsed.result?.available_engines)
+    const available = Array.isArray(parsed.result?.available_engines)
       ? parsed.result.available_engines.filter(
-          (value): value is RendererEngine => value === "ghostty" || value === "rio",
+          (value): value is RendererEngine => value === "ghostty" || value === "rio"
         )
-      : ["ghostty", "rio"];
+      : (["ghostty", "rio"] as RendererEngine[]);
     return {
       activeEngine,
       availableEngines: available,
@@ -206,7 +222,8 @@ export class DesktopRuntimeClient {
         input.workspaceId,
         null,
         null,
-      ),
+        null
+      )
     );
     const parsed = toResponse<Record<string, unknown>>(response);
     return {

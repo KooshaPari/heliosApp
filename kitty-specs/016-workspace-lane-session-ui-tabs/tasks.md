@@ -21,11 +21,11 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T001 Implement shared active context store with change events in `apps/desktop/src/tabs/context_switch.ts`
-- [ ] T002 Implement base tab surface component with context binding in `apps/desktop/src/tabs/tab_surface.ts`
-- [ ] T003 Implement tab bar component with selection, ordering, and reordering in `apps/desktop/src/tabs/tab_bar.ts`
-- [ ] T004 Implement tab state persistence (selection, order, per-tab scroll) in `apps/desktop/src/tabs/tab_persistence.ts`
-- [ ] T005 [P] Add unit tests for context store, tab bar, and persistence in `apps/desktop/tests/unit/tabs/`
+- [x] T001 Implement shared active context store with change events in `apps/desktop/src/tabs/context_switch.ts`
+- [x] T002 Implement base tab surface component with context binding in `apps/desktop/src/tabs/tab_surface.ts`
+- [x] T003 Implement tab bar component with selection, ordering, and reordering in `apps/desktop/src/tabs/tab_bar.ts`
+- [x] T004 Implement tab state persistence (selection, order, per-tab scroll) in `apps/desktop/src/tabs/tab_persistence.ts`
+- [x] T005 [P] Add unit tests for context store, tab bar, and persistence in `apps/desktop/tests/unit/tabs/`
 
 ### Implementation Notes
 - Context store is the single source of truth for the active workspace/lane/session.
@@ -53,12 +53,12 @@
 **Estimated Prompt Size**: ~450 lines
 
 ### Included Subtasks
-- [ ] T006 Implement terminal tab surface in `apps/desktop/src/tabs/terminal_tab.ts`
-- [ ] T007 Implement agent tab surface in `apps/desktop/src/tabs/agent_tab.ts`
-- [ ] T008 Implement session tab surface in `apps/desktop/src/tabs/session_tab.ts`
-- [ ] T009 Implement chat tab surface in `apps/desktop/src/tabs/chat_tab.ts`
-- [ ] T010 Implement project tab surface in `apps/desktop/src/tabs/project_tab.ts`
-- [ ] T011 [P] Add unit tests for each tab surface in `apps/desktop/tests/unit/tabs/`
+- [x] T006 Implement terminal tab surface in `apps/desktop/src/tabs/terminal_tab.ts`
+- [x] T007 Implement agent tab surface in `apps/desktop/src/tabs/agent_tab.ts`
+- [x] T008 Implement session tab surface in `apps/desktop/src/tabs/session_tab.ts`
+- [x] T009 Implement chat tab surface in `apps/desktop/src/tabs/chat_tab.ts`
+- [x] T010 Implement project tab surface in `apps/desktop/src/tabs/project_tab.ts`
+- [x] T011 [P] Add unit tests for each tab surface in `apps/desktop/tests/unit/tabs/`
 
 ### Implementation Notes
 - Each tab subscribes to context change events and updates its content accordingly.
@@ -87,11 +87,11 @@
 **Estimated Prompt Size**: ~420 lines
 
 ### Included Subtasks
-- [ ] T012 Implement atomic context switch propagation to all visible tabs with stale-context fallback
-- [ ] T013 Implement configurable keyboard shortcuts for tab switching in `apps/desktop/src/tabs/keyboard_shortcuts.ts`
-- [ ] T014 Implement stale-context indicator component for tabs that fail to update
-- [ ] T015 [P] Add Playwright end-to-end tests for tab navigation, context switching, and keyboard workflows in `apps/desktop/tests/e2e/tabs/`
-- [ ] T016 [P] Add performance benchmarks for tab switch latency and context propagation in `apps/desktop/tests/e2e/tabs/`
+- [x] T012 Implement atomic context switch propagation to all visible tabs with stale-context fallback
+- [x] T013 Implement configurable keyboard shortcuts for tab switching in `apps/desktop/src/tabs/keyboard_shortcuts.ts`
+- [x] T014 Implement stale-context indicator component for tabs that fail to update
+- [x] T015 [P] Add Playwright end-to-end tests for tab navigation, context switching, and keyboard workflows in `apps/desktop/tests/e2e/tabs/`
+- [x] T016 [P] Add performance benchmarks for tab switch latency and context propagation in `apps/desktop/tests/e2e/tabs/`
 
 ### Implementation Notes
 - Atomic propagation: either all tabs update or stale indicators appear on failed ones.

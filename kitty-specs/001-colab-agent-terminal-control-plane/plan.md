@@ -113,3 +113,17 @@ kitty-specs/001-colab-agent-terminal-control-plane/
   - represent the formal method/topic surface directly, or
   - document phased/deferred entries with explicit task coverage and acceptance criteria.
 - **Extension rule**: Helios-specific additions (for example `harness.status.changed`) are allowed only when listed as explicit extensions, never as silent divergence.
+
+## WP09 Formal Surface Completion Guard
+
+- Parity matrix: `kitty-specs/001-colab-agent-terminal-control-plane/contracts/protocol-parity-matrix.json`.
+- Method families: `x-formal-method-families` in `contracts/control-plane.openapi.yaml`.
+- Event families: `x-formal-event-families` in `contracts/control-plane.openapi.yaml`.
+- Gate: `node tools/gates/protocol-parity.mjs` is fail-closed on unmapped formal entries, missing contract/runtime refs, or invalid defer annotations.
+
+Examples:
+
+- Valid defer:
+  - `{ "name": "project.clone", "status": "deferred", "task_ids": ["T044"] }`
+- Valid extension:
+  - `{ "name": "harness.status.changed", "status": "extension", ... }`

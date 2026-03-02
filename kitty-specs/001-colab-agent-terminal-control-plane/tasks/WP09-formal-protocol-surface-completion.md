@@ -1,7 +1,7 @@
 ---
 work_package_id: WP09
 title: Formal Protocol Surface Completion
-lane: "for_review"
+lane: "done"
 dependencies:
 - WP08
 base_branch: 001-colab-agent-terminal-control-plane-WP08
@@ -17,8 +17,8 @@ phase: Phase 4 - Formal parity
 assignee: ''
 agent: ''
 shell_pid: "65388"
-review_status: ''
-reviewed_by: ''
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-26T13:19:35Z'
   lane: planned
@@ -101,3 +101,4 @@ Implementation command:
 
 - 2026-02-26T13:19:35Z – system – lane=planned – Prompt created.
 - 2026-02-27T08:00:46Z – unknown – shell_pid=65388 – lane=for_review – Implemented formal protocol surface parity + checker gate; ready for review.
+- 2026-03-01T13:23:03Z – unknown – shell_pid=65388 – lane=done – Merged to main

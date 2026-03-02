@@ -1,12 +1,12 @@
 ---
 work_package_id: WP03
 title: Bypass Detection, Local Gate Mirror, and Tests
-lane: "planned"
+lane: "done"
 dependencies:
 - WP02
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00.000000+00:00'
+base_branch: 021-continuous-integration-and-quality-gates-WP02
+base_commit: 24180c28790492ee483312ab481a9b593573a469
+created_at: '2026-03-01T13:37:11.509286+00:00'
 subtasks:
 - T012
 - T013
@@ -16,10 +16,10 @@ subtasks:
 - T017
 phase: Phase 2 - Enforcement
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: "claude-haiku"
+shell_pid: "90407"
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -219,3 +219,6 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z – system – lane=planned – Prompt created.
+- 2026-03-01T13:37:11Z – claude-haiku – shell_pid=90407 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T13:38:22Z – claude-haiku – shell_pid=90407 – lane=done – Implemented
+- 2026-03-01T13:41:18Z – claude-haiku – shell_pid=90407 – lane=done – Merged

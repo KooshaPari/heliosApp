@@ -1,12 +1,12 @@
 ---
 work_package_id: WP02
 title: Hot-Swap Implementation and Rollback
-lane: "planned"
+lane: "done"
 dependencies:
 - WP01
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 013-renderer-switch-transaction-WP01
+base_commit: c50a79b1b9987f1e4163a5aa7079bad940c79ac1
+created_at: '2026-03-01T13:31:18.415662+00:00'
 subtasks:
 - T006
 - T007
@@ -15,10 +15,10 @@ subtasks:
 - T010
 phase: Phase 2 - Core Switching
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: "claude-haiku"
+shell_pid: "61191"
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -203,3 +203,6 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-03-01T13:31:19Z – claude-haiku – shell_pid=61191 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T13:33:38Z – claude-haiku – shell_pid=61191 – lane=done – Implemented: Hot-swap execution (T006), rollback logic (T007), concurrent switch rejection (T008), transaction orchestrator integration (T009), and 21 integration tests (T010). All tests passing.
+- 2026-03-01T13:41:02Z – claude-haiku – shell_pid=61191 – lane=done – Merged

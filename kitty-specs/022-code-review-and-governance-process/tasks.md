@@ -24,12 +24,12 @@
 **Estimated Prompt Size**: ~350 lines
 
 ### Included Subtasks
-- [ ] T001 Configure GitHub branch protection rules for `main`: require status checks (GCA, CodeRabbit, quality-gates), require at least one agent review approval, enforce linear history
-- [ ] T002 Configure GCA as a GitHub App/integration with required status check, auto-trigger on PR creation and update, and retry logic for rate-limiting
-- [ ] T003 Configure CodeRabbit as a required status check with auto-trigger and rate-limit retry
-- [ ] T004 Implement self-merge gating logic: verify all CI gates pass AND all required reviews approved before allowing merge
-- [ ] T005 Create append-only governance log (`governance-log.jsonl`) with schema: PR number, author, reviewers, gate results, compliance attestation, exception ADRs, timestamp
-- [ ] T006 [P] Implement `scripts/governance-log.ts` utility for appending entries and querying the log (e.g., self-merges in last 30 days, exception ADRs)
+- [x] T001 Configure GitHub branch protection rules for `main`: require status checks (GCA, CodeRabbit, quality-gates), require at least one agent review approval, enforce linear history
+- [x] T002 Configure GCA as a GitHub App/integration with required status check, auto-trigger on PR creation and update, and retry logic for rate-limiting
+- [x] T003 Configure CodeRabbit as a required status check with auto-trigger and rate-limit retry
+- [x] T004 Implement self-merge gating logic: verify all CI gates pass AND all required reviews approved before allowing merge
+- [x] T005 Create append-only governance log (`governance-log.jsonl`) with schema: PR number, author, reviewers, gate results, compliance attestation, exception ADRs, timestamp
+- [x] T006 [P] Implement `scripts/governance-log.ts` utility for appending entries and querying the log (e.g., self-merges in last 30 days, exception ADRs)
 
 ### Implementation Notes
 - Branch protection must be documented in `.github/branch-protection.md` for reproducibility.
@@ -56,12 +56,12 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T007 Implement `scripts/compliance-checker.ts` that validates PR changesets against the constitution review checklist: correctness, tests, docs, types, error handling, performance, security, anti-patterns, library preference, backward-compat avoidance, regression risk
-- [ ] T008 Implement constitution section referencing: each finding links to the specific section in `.kittify/memory/constitution.md`
-- [ ] T009 Create `.github/workflows/compliance-check.yml` GitHub Action that runs the compliance checker on every PR and reports results as a required status check
-- [ ] T010 Implement ADR exception workflow: validate linked ADRs have sunset dates (or permanence justification), require 3 approvals, store ADRs in `docs/adrs/`
-- [ ] T011 [P] Add compliance checker unit tests: deliberate violations (missing tests, file > 500 lines, missing types) are caught with correct constitution references
-- [ ] T012 [P] Add ADR workflow tests: ADR without sunset date rejected, ADR with sunset date and 3 approvals accepted, governance log entry created on merge
+- [x] T007 Implement `scripts/compliance-checker.ts` that validates PR changesets against the constitution review checklist: correctness, tests, docs, types, error handling, performance, security, anti-patterns, library preference, backward-compat avoidance, regression risk
+- [x] T008 Implement constitution section referencing: each finding links to the specific section in `.kittify/memory/constitution.md`
+- [x] T009 Create `.github/workflows/compliance-check.yml` GitHub Action that runs the compliance checker on every PR and reports results as a required status check
+- [x] T010 Implement ADR exception workflow: validate linked ADRs have sunset dates (or permanence justification), require 3 approvals, store ADRs in `docs/adrs/`
+- [x] T011 [P] Add compliance checker unit tests: deliberate violations (missing tests, file > 500 lines, missing types) are caught with correct constitution references
+- [x] T012 [P] Add ADR workflow tests: ADR without sunset date rejected, ADR with sunset date and 3 approvals accepted, governance log entry created on merge
 
 ### Implementation Notes
 - Compliance checker must read the constitution dynamically so amendments are automatically reflected.

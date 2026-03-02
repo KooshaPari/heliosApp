@@ -1,7 +1,7 @@
 ---
 work_package_id: WP08
 title: Durability Follow-On Placeholder and Retention Compliance
-lane: "for_review"
+lane: "done"
 dependencies:
 - WP05
 base_branch: 001-colab-agent-terminal-control-plane-WP07
@@ -18,8 +18,8 @@ phase: Phase 4 - Durability and compliance
 assignee: ''
 agent: ''
 shell_pid: "25766"
-review_status: ''
-reviewed_by: ''
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-26T13:19:35Z'
   lane: planned
@@ -124,3 +124,4 @@ Implementation command:
 
 - 2026-02-26T13:19:35Z – system – lane=planned – Prompt created.
 - 2026-02-27T08:00:44Z – unknown – shell_pid=25766 – lane=for_review – Implemented durability placeholders + retention/export compliance; ready for review.
+- 2026-03-01T13:23:02Z – unknown – shell_pid=25766 – lane=done – Merged to main

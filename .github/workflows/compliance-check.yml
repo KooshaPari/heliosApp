@@ -1,0 +1,141 @@
+name: Compliance Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+jobs:
+  compliance-check:
+    runs-on: ubuntu-latest
+    name: Constitution Compliance Validation
+    timeout-minutes: 2
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: '1.2.20'
+
+      - name: Install dependencies
+        run: |
+          npm install -g tsx
+          bun install --frozen-lockfile
+
+      - name: Get changed files
+        id: files
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            const files = data.map(f => f.filename);
+            core.setOutput('files', JSON.stringify(files));
+            console.log('Changed files:', files);
+
+      - name: Run compliance checker
+        id: compliance
+        continue-on-error: true
+        env:
+          CHANGED_FILES: ${{ steps.files.outputs.files }}
+        run: |
+          FILES_ARRAY=$(echo "$CHANGED_FILES" | jq -r '.[]' | tr '\n' ' ')
+          tsx scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>compliance-stderr.log || true
+          if [ -s compliance-stderr.log ]; then cat compliance-stderr.log >&2; fi
+          cat compliance-result.json
+
+      - name: Parse compliance results
+        id: results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const result = JSON.parse(fs.readFileSync('compliance-result.json', 'utf-8'));
+              core.setOutput('passed', result.passed);
+              core.setOutput('findings', JSON.stringify(result.findings));
+            } catch (e) {
+              core.setOutput('passed', false);
+              core.setOutput('findings', JSON.stringify([]));
+            }
+
+      - name: Post compliance failure comment
+        if: steps.results.outputs.passed == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const findings = JSON.parse(process.env.COMPLIANCE_FINDINGS || '[]');
+
+            let comment = '## Compliance Check - Violations Found\n\n';
+            comment += `Found ${findings.length} constitution violation(s):\n\n`;
+
+            findings.forEach((f, i) => {
+              comment += `### ${i + 1}. ${f.check}`;
+              if (f.line) {
+                comment += ` (${f.filePath}:${f.line})`;
+              } else {
+                comment += ` (${f.filePath})`;
+              }
+              comment += '\n\n';
+              comment += `**Description:** ${f.description}\n\n`;
+              comment += `**Constitution Section:** ${f.constitutionSection}`;
+              if (f.constitutionLine) {
+                comment += ` ([Line ${f.constitutionLine}](.kittify/memory/constitution.md#L${f.constitutionLine}))`;
+              }
+              comment += '\n\n';
+              comment += `**Remediation:** ${f.remediationHint}\n\n`;
+            });
+
+            comment += '---\n';
+            comment += '**Note:** To proceed with an exception, create an ADR in `/docs/adrs/` and link it in the PR description.\n';
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+        env:
+          COMPLIANCE_FINDINGS: ${{ steps.results.outputs.findings }}
+
+      - name: Post compliance success comment
+        if: steps.results.outputs.passed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '## Compliance Check\n\nAll constitution compliance checks passed!'
+            });
+
+      - name: Report status
+        if: always()
+        env:
+          COMPLIANCE_PASSED: ${{ steps.results.outputs.passed }}
+        run: |
+          if [ "$COMPLIANCE_PASSED" = "true" ]; then
+            echo "Compliance check PASSED"
+            exit 0
+          else
+            echo "Compliance check FAILED"
+            exit 1
+          fi

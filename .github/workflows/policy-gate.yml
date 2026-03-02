@@ -18,8 +18,30 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: KooshaPari/phenotypeActions/actions/policy-gate@main
-        with:
-          base_branch: main
-          block_merge_commits: true
-          require_layered_fix: false
+      - name: Enforce PR policy
+        shell: bash
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
+        run: |
+          set -euo pipefail
+
+          # Prevent merge commits in PR branch diff range
+          PR_HEAD="${HEAD_SHA}"
+          if ! git fetch origin "$BASE_REF" --depth=1; then
+            echo "ERROR: failed to fetch base ref $BASE_REF."
+            exit 1
+          fi
+          if ! MERGES=$(git rev-list --merges "origin/$BASE_REF..$PR_HEAD"); then
+            echo "ERROR: failed to compute merge-commit range for base ref '$BASE_REF'."
+            exit 1
+          fi
+          if [[ -n "$MERGES" ]]; then
+            echo "ERROR: merge commits detected in PR diff range:"
+            echo "$MERGES"
+            exit 1
+          fi
+
+          echo "Policy gate passed."

@@ -1,123 +1,153 @@
-export type RuntimeMetricName =
-  | "lane_create_latency_ms"
-  | "session_restore_latency_ms"
-  | "terminal_output_backlog_depth";
+// FR-009: Bounded ring buffer and metric registration / recording.
 
-export type RuntimeMetricSample = {
-  metric: RuntimeMetricName;
-  value: number;
-  unit: "ms" | "count";
-  ts: string;
-  tags?: Record<string, string>;
-};
+import { monotonicNow } from "./hooks.js";
+import type { MetricDefinition } from "./types.js";
 
-export type RuntimeMetricSummary = {
-  metric: RuntimeMetricName;
-  unit: "ms" | "count";
-  count: number;
-  min: number;
-  max: number;
-  p50: number;
-  p95: number;
-  latest: number;
-};
+// ── Ring Buffer ────────────────────────────────────────────────────────
 
-export type RuntimeMetricsReport = {
-  samples: RuntimeMetricSample[];
-  summaries: RuntimeMetricSummary[];
-};
+const DEFAULT_CAPACITY = 10_000;
 
-type MetricUnit = RuntimeMetricSample["unit"];
+/**
+ * Fixed-capacity ring buffer backed by typed arrays.
+ *
+ * Memory per buffer: `2 * capacity * 8` bytes (two Float64Arrays).
+ * For the default 10,000 capacity that is ~160 KB.
+ */
+export class RingBuffer {
+  private readonly values: Float64Array;
+  private readonly timestamps: Float64Array;
+  private readonly capacity: number;
+  private writeIndex = 0;
+  private count = 0;
+  private overflow = 0;
 
-type TimerMark = {
-  startAtMs: number;
-  tags?: Record<string, string>;
-};
-
-export class RuntimeMetrics {
-  private readonly samples: RuntimeMetricSample[] = [];
-  private readonly timers = new Map<string, TimerMark>();
-
-  startTimer(metric: RuntimeMetricName, key: string, tags?: Record<string, string>): void {
-    this.timers.set(this.timerKey(metric, key), { startAtMs: Date.now(), tags });
-  }
-
-  endTimer(
-    metric: RuntimeMetricName,
-    key: string,
-    tags?: Record<string, string>,
-  ): RuntimeMetricSample | null {
-    const timerId = this.timerKey(metric, key);
-    const mark = this.timers.get(timerId);
-    if (!mark) {
-      return null;
+  constructor(capacity: number = DEFAULT_CAPACITY) {
+    if (capacity <= 0) {
+      throw new RangeError("RingBuffer capacity must be > 0");
     }
-    this.timers.delete(timerId);
-    const value = Math.max(0, Date.now() - mark.startAtMs);
-    return this.record(metric, value, "ms", { ...mark.tags, ...tags });
+    this.capacity = capacity;
+    this.values = new Float64Array(capacity);
+    this.timestamps = new Float64Array(capacity);
   }
 
-  record(
-    metric: RuntimeMetricName,
-    value: number,
-    unit: MetricUnit,
-    tags?: Record<string, string>,
-  ): RuntimeMetricSample {
-    const sample: RuntimeMetricSample = {
-      metric,
-      value,
-      unit,
-      ts: new Date().toISOString(),
-      tags,
-    };
-    this.samples.push(sample);
-    return sample;
-  }
-
-  getReport(): RuntimeMetricsReport {
-    const byMetric = new Map<RuntimeMetricName, RuntimeMetricSample[]>();
-    for (const sample of this.samples) {
-      const items = byMetric.get(sample.metric);
-      if (items) {
-        items.push(sample);
-      } else {
-        byMetric.set(sample.metric, [sample]);
-      }
+  /** Append a sample. Overwrites the oldest entry when full. */
+  push(value: number, timestamp: number): void {
+    if (this.count >= this.capacity) {
+      this.overflow++;
     }
-
-    const summaries: RuntimeMetricSummary[] = [];
-    for (const [metric, items] of byMetric.entries()) {
-      const sortedValues = items.map((item) => item.value).sort((a, b) => a - b);
-      const unit = items[0].unit;
-      summaries.push({
-        metric,
-        unit,
-        count: sortedValues.length,
-        min: sortedValues[0],
-        max: sortedValues[sortedValues.length - 1],
-        p50: percentile(sortedValues, 0.5),
-        p95: percentile(sortedValues, 0.95),
-        latest: items[items.length - 1].value,
-      });
+    this.values[this.writeIndex] = value;
+    this.timestamps[this.writeIndex] = timestamp;
+    this.writeIndex = (this.writeIndex + 1) % this.capacity;
+    if (this.count < this.capacity) {
+      this.count++;
     }
-
-    summaries.sort((a, b) => a.metric.localeCompare(b.metric));
-    return {
-      samples: [...this.samples],
-      summaries,
-    };
   }
 
-  private timerKey(metric: RuntimeMetricName, key: string): string {
-    return `${metric}:${key}`;
+  /**
+   * Return a *view* of valid value entries in insertion order.
+   * The returned Float64Array is a **copy** (to provide correct ordering
+   * when the buffer has wrapped).
+   */
+  getValues(): Float64Array {
+    if (this.count === 0) {
+      return new Float64Array(0);
+    }
+    if (this.count < this.capacity) {
+      // No wrap yet — return a slice of the underlying buffer.
+      return this.values.slice(0, this.count);
+    }
+    // Buffer has wrapped — stitch oldest..end + start..writeIndex.
+    const result = new Float64Array(this.capacity);
+    const tailLen = this.capacity - this.writeIndex;
+    result.set(this.values.subarray(this.writeIndex, this.writeIndex + tailLen), 0);
+    result.set(this.values.subarray(0, this.writeIndex), tailLen);
+    return result;
+  }
+
+  /** Number of valid samples currently stored (up to capacity). */
+  getCount(): number {
+    return this.count;
+  }
+
+  /** Number of oldest samples that were overwritten. */
+  getOverflowCount(): number {
+    return this.overflow;
+  }
+
+  /** Reset the buffer to empty state. */
+  clear(): void {
+    this.writeIndex = 0;
+    this.count = 0;
+    this.overflow = 0;
   }
 }
 
-function percentile(sortedValues: number[], rank: number): number {
-  if (sortedValues.length === 1) {
-    return sortedValues[0];
+// ── Metrics Registry ───────────────────────────────────────────────────
+
+interface MetricEntry {
+  definition: MetricDefinition;
+  buffer: RingBuffer | undefined; // lazy — created on first record
+}
+
+/**
+ * Central registry where subsystems register metrics and record samples.
+ * Buffers are lazily allocated on the first `record` call for each metric.
+ */
+export class MetricsRegistry {
+  private readonly metrics = new Map<string, MetricEntry>();
+
+  /**
+   * Register a new metric.
+   * @throws if a metric with the same name is already registered.
+   */
+  register(definition: MetricDefinition): void {
+    if (this.metrics.has(definition.name)) {
+      throw new Error(`Metric "${definition.name}" is already registered.`);
+    }
+    this.metrics.set(definition.name, { definition, buffer: undefined });
   }
-  const index = Math.ceil(sortedValues.length * rank) - 1;
-  const boundedIndex = Math.min(sortedValues.length - 1, Math.max(0, index));
-  return sortedValues[boundedIndex];
+
+  /**
+   * Record a sample for the given metric.
+   * If `timestamp` is omitted, `monotonicNow()` is used.
+   * Recording to an unregistered metric is a no-op with a console warning.
+   */
+  record(name: string, value: number, timestamp?: number): void {
+    const entry = this.metrics.get(name);
+    if (entry === undefined) {
+      return;
+    }
+    // Lazy buffer allocation.
+    if (entry.buffer === undefined) {
+      entry.buffer = new RingBuffer(entry.definition.bufferSize ?? DEFAULT_CAPACITY);
+    }
+    entry.buffer.push(value, timestamp ?? monotonicNow());
+  }
+
+  /** Retrieve a metric's definition and buffer (if any samples recorded). */
+  getMetric(name: string): { definition: MetricDefinition; buffer: RingBuffer } | undefined {
+    const entry = this.metrics.get(name);
+    if (entry === undefined) {
+      return undefined;
+    }
+    if (entry.buffer === undefined) {
+      return undefined;
+    }
+    return { definition: entry.definition, buffer: entry.buffer };
+  }
+
+  /** Get definition even if no samples recorded yet. */
+  getDefinition(name: string): MetricDefinition | undefined {
+    return this.metrics.get(name)?.definition;
+  }
+
+  /** List all registered metric names. */
+  listMetrics(): string[] {
+    return [...this.metrics.keys()];
+  }
+
+  /** Remove a metric and free its buffer. */
+  unregister(name: string): void {
+    this.metrics.delete(name);
+  }
 }

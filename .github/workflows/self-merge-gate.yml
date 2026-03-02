@@ -1,0 +1,148 @@
+name: Self-Merge Gate
+
+on:
+  pull_request:
+    types: [synchronize, opened, reopened]
+    branches: [main]
+  status: {}
+
+jobs:
+  check-merge-readiness:
+    runs-on: ubuntu-latest
+    name: Check Merge Readiness
+    permissions:
+      contents: read
+      statuses: read
+      pull-requests: read
+
+    steps:
+      - name: Check PR merge conditions
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo, number } = context.issue;
+            
+            // Get PR details
+            const pr = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: number
+            });
+            
+            // Check if author is the actor
+            const isAuthor = pr.data.user.login === context.actor;
+            
+            // Get reviews
+            const reviews = await github.rest.pulls.listReviews({
+              owner,
+              repo,
+              pull_number: number
+            });
+            
+            // Track latest review state per reviewer to handle DISMISSED/CHANGES_REQUESTED
+            const latestReviewByUser = {};
+            reviews.data.forEach(review => {
+              if (review.state !== 'COMMENTED') {
+                latestReviewByUser[review.user.login] = review.state;
+              }
+            });
+            const approvals = Object.fromEntries(
+              Object.entries(latestReviewByUser).filter(([, state]) => state === 'APPROVED')
+            );
+            
+            // Get commit status checks
+            const commit = pr.data.head;
+            const statuses = await github.rest.repos.getCombinedStatusForRef({
+              owner,
+              repo,
+              ref: commit.sha
+            });
+            
+            const requiredChecks = [
+              'quality-gates',
+              'gca-review',
+              'coderabbit-review',
+              'compliance-check'
+            ];
+            
+            const checkResults = {};
+            statuses.statuses.forEach(status => {
+              requiredChecks.forEach(check => {
+                if (status.context === check) {
+                  checkResults[check] = status.state === 'success';
+                }
+              });
+            });
+            
+            // Verify all required checks
+            const allChecksPassed = requiredChecks.every(check => checkResults[check] === true);
+            
+            // Verify at least one approval from agent/reviewer
+            const hasApproval = Object.keys(approvals).length > 0;
+            
+            // Determine if self-merge is allowed
+            const canSelfMerge = allChecksPassed && hasApproval && isAuthor;
+            
+            // Output status
+            console.log(`All checks passed: ${allChecksPassed}`);
+            console.log(`Has approval: ${hasApproval}`);
+            console.log(`Is author: ${isAuthor}`);
+            console.log(`Can self-merge: ${canSelfMerge}`);
+            
+            // Set output for downstream steps
+            core.setOutput('can-self-merge', canSelfMerge);
+            core.setOutput('all-checks-passed', allChecksPassed);
+            core.setOutput('has-approval', hasApproval);
+            core.setOutput('is-author', isAuthor);
+            const missing = [];
+            if (!allChecksPassed) missing.push('quality-gates');
+            if (!hasApproval) missing.push('approvals');
+            if (!isAuthor) missing.push('author');
+            core.setOutput('missing-requirements', missing.join(','));
+      
+      - name: Comment on missing requirements
+        if: steps.check.outputs.can-self-merge == 'false'
+        uses: actions/github-script@v7
+        env:
+          ALL_CHECKS_PASSED: ${{ steps.check.outputs.all-checks-passed }}
+          HAS_APPROVAL: ${{ steps.check.outputs.has-approval }}
+          IS_AUTHOR: ${{ steps.check.outputs.is-author }}
+        with:
+          script: |
+            const { owner, repo, number } = context.issue;
+            const allChecksPassed = process.env.ALL_CHECKS_PASSED === 'true';
+            const hasApproval = process.env.HAS_APPROVAL === 'true';
+            const isAuthor = process.env.IS_AUTHOR === 'true';
+
+            let message = 'Self-merge is blocked due to missing requirements:\n\n';
+            if (!allChecksPassed) {
+              message += '- Not all quality gates have passed\n';
+            }
+            if (!hasApproval) {
+              message += '- PR does not have required review approval\n';
+            }
+            if (!isAuthor) {
+              message += '- Only the PR author can self-merge\n';
+            }
+            message += '\nPlease ensure all checks pass before merging.';
+
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
+              body: message
+            });
+
+      - name: Allow self-merge
+        if: steps.check.outputs.can-self-merge == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo, number } = context.issue;
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
+              body: 'All merge requirements satisfied. You may now self-merge this PR.'
+            });

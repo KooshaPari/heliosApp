@@ -1,12 +1,12 @@
 ---
 work_package_id: WP03
 title: Approval Request Lifecycle, Queue UI, and Tests
-lane: "planned"
+lane: "done"
 dependencies:
 - WP02
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00.000000+00:00'
+base_branch: 023-command-policy-engine-and-approval-workflows-WP02
+base_commit: 3d114b8bc8038f4a7e78d7d66b23df7e0c498825
+created_at: '2026-03-01T13:36:10.511811+00:00'
 subtasks:
 - T011
 - T012
@@ -17,10 +17,10 @@ subtasks:
 - T017
 phase: Phase 2 - Approval Workflows
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: "claude-haiku"
+shell_pid: "82086"
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -258,3 +258,5 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z – system – lane=planned – Prompt created.
+- 2026-03-01T13:36:10Z – claude-haiku – shell_pid=82086 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T13:36:53Z – claude-haiku – shell_pid=82086 – lane=done – Implemented

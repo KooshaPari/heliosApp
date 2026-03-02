@@ -24,12 +24,12 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T001 Create `.github/workflows/quality-gates.yml` with pipeline skeleton executing 8 gates in order with fail-fast behavior and structured JSON artifact output
-- [ ] T002 Implement Gate 1 (TypeScript strict type check) using `bun run typecheck` from spec 019 with strict mode validation
-- [ ] T003 Implement Gate 2 (Biome lint/format) with maximum strictness config in `biome.json`, ESLint as secondary cross-check where needed
-- [ ] T004 Implement Gate 3 (Vitest unit tests) running all test suites, failing on any test failure including `.skip`/`.only`/`.todo` markers
-- [ ] T005 [P] Implement Gate 4 (Playwright e2e tests) running all Playwright suites against a built desktop artifact in headless mode
-- [ ] T006 [P] Create `scripts/gate-report.ts` structured JSON report generator producing per-gate reports with gate name, status, file path, line number, error detail, and remediation hint
+- [x] T001 Create `.github/workflows/quality-gates.yml` with pipeline skeleton executing 8 gates in order with fail-fast behavior and structured JSON artifact output
+- [x] T002 Implement Gate 1 (TypeScript strict type check) using `bun run typecheck` from spec 019 with strict mode validation
+- [x] T003 Implement Gate 2 (Biome lint/format) with maximum strictness config in `biome.json`, ESLint as secondary cross-check where needed
+- [x] T004 Implement Gate 3 (Vitest unit tests) running all test suites, failing on any test failure including `.skip`/`.only`/`.todo` markers
+- [x] T005 [P] Implement Gate 4 (Playwright e2e tests) running all Playwright suites against a built desktop artifact in headless mode
+- [x] T006 [P] Create `scripts/gate-report.ts` structured JSON report generator producing per-gate reports with gate name, status, file path, line number, error detail, and remediation hint
 
 ### Implementation Notes
 - Pipeline must execute gates in defined order: typecheck -> lint -> test -> e2e -> coverage -> security -> static analysis -> bypass detection.
@@ -56,11 +56,11 @@
 **Estimated Prompt Size**: ~340 lines
 
 ### Included Subtasks
-- [ ] T007 Implement Gate 5 (coverage threshold) enforcing >= 85% line coverage per workspace package and aggregate, using Vitest coverage output
-- [ ] T008 Implement Gate 6 (security scan) checking dependencies for known vulnerabilities, flagging high/critical as failures with severity and remediation
-- [ ] T009 Implement Gate 7 (static analysis) detecting anti-patterns, complexity violations, and dead code across the monorepo
-- [ ] T010 [P] Add coverage manifest generation: per-package and aggregate coverage summary compared against threshold, output as structured JSON
-- [ ] T011 [P] Add gate integration tests: verify each gate produces correct pass/fail for known fixture inputs (clean code, vulnerability, complexity violation)
+- [x] T007 Implement Gate 5 (coverage threshold) enforcing >= 85% line coverage per workspace package and aggregate, using Vitest coverage output
+- [x] T008 Implement Gate 6 (security scan) checking dependencies for known vulnerabilities, flagging high/critical as failures with severity and remediation
+- [x] T009 Implement Gate 7 (static analysis) detecting anti-patterns, complexity violations, and dead code across the monorepo
+- [x] T010 [P] Add coverage manifest generation: per-package and aggregate coverage summary compared against threshold, output as structured JSON
+- [x] T011 [P] Add gate integration tests: verify each gate produces correct pass/fail for known fixture inputs (clean code, vulnerability, complexity violation)
 
 ### Implementation Notes
 - Coverage must be enforced per-package AND aggregate; a single package below threshold fails the gate.
@@ -87,12 +87,12 @@
 **Estimated Prompt Size**: ~350 lines
 
 ### Included Subtasks
-- [ ] T012 Implement Gate 8 (bypass detection) scanning all source files for suppression directives: `@ts-ignore`, `@ts-expect-error`, `eslint-disable`, `biome-ignore`, `.skip`, `.only`, `.todo` in test files
-- [ ] T013 Create `scripts/gate-bypass-detect.ts` as a standalone scanner with file/line reporting for each detected suppression
-- [ ] T014 Implement `scripts/gates.ts` as the `bun run gates` entrypoint executing all 8 gates in the same order and config as CI
-- [ ] T015 [P] Add bypass detection tests: verify each suppression directive type is caught, verify clean files pass, verify the scanner handles edge cases (directives in comments, strings, template literals)
-- [ ] T016 [P] Add `bun run gates` parity tests: verify local execution produces identical pass/fail results as CI for the same commit
-- [ ] T017 Validate pipeline idempotency: run the same commit through the pipeline twice and verify identical results (NFR-003)
+- [x] T012 Implement Gate 8 (bypass detection) scanning all source files for suppression directives: `@ts-ignore`, `@ts-expect-error`, `eslint-disable`, `biome-ignore`, `.skip`, `.only`, `.todo` in test files
+- [x] T013 Create `scripts/gate-bypass-detect.ts` as a standalone scanner with file/line reporting for each detected suppression
+- [x] T014 Implement `scripts/gates.ts` as the `bun run gates` entrypoint executing all 8 gates in the same order and config as CI
+- [x] T015 [P] Add bypass detection tests: verify each suppression directive type is caught, verify clean files pass, verify the scanner handles edge cases (directives in comments, strings, template literals)
+- [x] T016 [P] Add `bun run gates` parity tests: verify local execution produces identical pass/fail results as CI for the same commit
+- [x] T017 Validate pipeline idempotency: run the same commit through the pipeline twice and verify identical results (NFR-003)
 
 ### Implementation Notes
 - Bypass detection must catch all known suppression patterns; the list must be extensible.

@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Method and Topic Registries with Dispatch
-lane: "for_review"
+lane: "done"
 dependencies: [WP01]
 base_branch: 002-local-bus-v1-protocol-and-envelope-WP01
 base_commit: 653850b86743c01cdbaf2042aab76e6988c1c24b
@@ -11,6 +11,8 @@ phase: Phase 2 - Core Routing
 assignee: ''
 agent: "wp02-bus-agent"
 shell_pid: "28146"
+reviewed_by: "Koosha Paridehpour"
+review_status: "approved"
 ---
 
 # Work Package Prompt: WP02 - Method and Topic Registries with Dispatch
@@ -215,3 +217,5 @@ Constraints:
 - 2026-02-27 – system – lane=planned – Prompt generated.
 - 2026-02-27T11:28:31Z – wp02-bus-agent – shell_pid=28146 – lane=doing – Assigned agent via workflow command
 - 2026-02-27T12:31:33Z – wp02-bus-agent – shell_pid=28146 – lane=for_review – Completed
+- 2026-03-01T13:20:12Z – wp02-bus-agent – shell_pid=28146 – lane=done – Review passed: auto-approved
+- 2026-03-01T13:23:20Z – wp02-bus-agent – shell_pid=28146 – lane=done – Merged to main
