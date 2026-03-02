@@ -1,4 +1,11 @@
-import { describe, expect, it, mock, beforeEach } from "bun:test";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+} from "bun:test";
 import { ZellijCli } from "../cli.js";
 import { ZellijNotFoundError, ZellijVersionError } from "../errors.js";
 
@@ -38,6 +45,10 @@ describe("ZellijCli", () => {
     originalSpawn = Bun.spawn;
   });
 
+  afterEach(() => {
+    Bun.spawn = originalSpawn;
+  });
+
   describe("checkAvailability", () => {
     it("returns available=true with version when zellij is found", async () => {
       // @ts-expect-error mock override
@@ -53,7 +64,7 @@ describe("ZellijCli", () => {
     });
 
     it("returns available=false when zellij binary not found", async () => {
-      // @ts-ignore mock override
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => {
         throw new Error("spawn ENOENT");
       });
@@ -72,9 +83,9 @@ describe("ZellijCli", () => {
 
       const cli = new ZellijCli();
 
-      expect(cli.checkAvailability()).rejects.toThrow(ZellijVersionError);
-
-      Bun.spawn = originalSpawn;
+      await expect(cli.checkAvailability()).rejects.toThrow(
+        ZellijVersionError
+      );
     });
 
     it("returns available=false on non-zero exit code", async () => {
@@ -86,7 +97,6 @@ describe("ZellijCli", () => {
 
       expect(result.available).toBe(false);
 
-      Bun.spawn = originalSpawn;
     });
   });
 

@@ -1,4 +1,11 @@
-import { describe, expect, it, mock, beforeEach } from "bun:test";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+} from "bun:test";
 import { ZellijCli } from "../cli.js";
 import { MuxRegistry } from "../registry.js";
 import { ZellijSessionManager, sessionNameForLane } from "../session.js";
@@ -43,6 +50,10 @@ describe("ZellijSessionManager", () => {
     originalSpawn = Bun.spawn;
   });
 
+  afterEach(() => {
+    Bun.spawn = originalSpawn;
+  });
+
   describe("createSession", () => {
     it("creates a session and registers binding", async () => {
       let callCount = 0;
@@ -84,11 +95,9 @@ describe("ZellijSessionManager", () => {
       const registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
-      expect(manager.createSession("dup")).rejects.toThrow(
+      await expect(manager.createSession("dup")).rejects.toThrow(
         SessionAlreadyExistsError
       );
-
-      Bun.spawn = originalSpawn;
     });
   });
 
@@ -124,11 +133,9 @@ describe("ZellijSessionManager", () => {
       const registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
-      expect(
+      await expect(
         manager.reattachSession("helios-lane-missing")
       ).rejects.toThrow(SessionNotFoundError);
-
-      Bun.spawn = originalSpawn;
     });
   });
 

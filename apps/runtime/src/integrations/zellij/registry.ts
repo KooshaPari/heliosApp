@@ -87,6 +87,9 @@ export class MuxRegistry {
    */
   async getOrphaned(): Promise<MuxBinding[]> {
     if (!this.cli) {
+      console.warn(
+        "[zellij-registry] getOrphaned() called without a cli; returning cached bindings only"
+      );
       return [];
     }
 
