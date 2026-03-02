@@ -11,7 +11,7 @@ export interface SettingsLockOptions {
 export class SettingsLock {
   private isLocked = false;
   private options: SettingsLockOptions;
-  private lockTimeoutId?: NodeJS.Timeout;
+  private lockTimeoutId?: NodeJS.Timeout | undefined;
   private lockedElements: Set<HTMLElement> = new Set();
 
   constructor(options: SettingsLockOptions = {}) {

@@ -1,7 +1,7 @@
 import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
 
 export interface SessionTabState extends TabState {
-  expandedSections?: string[];
+  expandedSections?: string[] | undefined;
 }
 
 export interface SessionMetadata {
@@ -10,7 +10,7 @@ export interface SessionMetadata {
   lifecycleState: string;
   harnessTransport: string;
   terminalCount: number;
-  degradationReason?: string;
+  degradationReason?: string | undefined;
 }
 
 /**

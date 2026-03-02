@@ -11,10 +11,10 @@ export interface TabState {
   tabId: string;
   tabType: TabType;
   label: string;
-  scrollPosition?: number;
-  selection?: string;
-  expandedSections?: string[];
-  customData?: Record<string, unknown>;
+  scrollPosition?: number | undefined;
+  selection?: string | undefined;
+  expandedSections?: string[] | undefined;
+  customData?: Record<string, unknown> | undefined;
 }
 
 /**

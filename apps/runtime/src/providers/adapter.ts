@@ -121,9 +121,9 @@ export interface ACPConfig {
 /** ACP execute input */
 export interface ACPExecuteInput {
   prompt: string;
-  systemPrompt?: string;
-  maxTokens?: number;
-  temperature?: number;
+  systemPrompt?: string | undefined;
+  maxTokens?: number | undefined;
+  temperature?: number | undefined;
 }
 
 /** ACP execute output */
@@ -133,7 +133,7 @@ export interface ACPExecuteOutput {
   usage?: {
     inputTokens: number;
     outputTokens: number;
-  };
+  } | undefined;
 }
 
 /** Type alias for ACP adapter implementation */

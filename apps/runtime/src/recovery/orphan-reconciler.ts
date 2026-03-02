@@ -22,7 +22,7 @@ export interface CleanupResult {
 }
 
 export class OrphanReconciler {
-  private bus?: LocalBus;
+  private bus?: LocalBus | undefined;
   private restoredSessionIds: Set<string>;
 
   constructor(restoredSessionIds: string[], bus?: LocalBus) {

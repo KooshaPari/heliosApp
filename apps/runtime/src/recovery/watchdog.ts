@@ -14,8 +14,8 @@ export interface CrashEvent {
   name: string;
   pid: number;
   reason: CrashReason;
-  exitCode?: number;
-  signal?: string;
+  exitCode?: number | undefined;
+  signal?: string | undefined;
   timestamp: number;
 }
 
@@ -33,7 +33,7 @@ export class Watchdog {
   private monitors = new Map<string, ProcessMonitor>();
   private crashHandlers: CrashHandler[] = [];
   private crashDataDir: string;
-  private bus?: LocalBus;
+  private bus?: LocalBus | undefined;
 
   constructor(crashDataDir: string, bus?: LocalBus) {
     this.crashDataDir = crashDataDir;

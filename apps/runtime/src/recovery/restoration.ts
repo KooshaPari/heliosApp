@@ -26,8 +26,8 @@ export interface RestorationResult {
 }
 
 export class RestorationPipeline {
-  private bus?: LocalBus;
-  private zellijListCache?: string[];
+  private bus?: LocalBus | undefined;
+  private zellijListCache?: string[] | undefined;
 
   constructor(bus?: LocalBus) {
     this.bus = bus;

@@ -81,12 +81,12 @@ export interface AuditEvent {
   /**
    * Optional lane ID for lane-scoped operations.
    */
-  laneId?: string;
+  laneId?: string | undefined;
 
   /**
    * Optional session ID for session tracking.
    */
-  sessionId?: string;
+  sessionId?: string | undefined;
 
   /**
    * Correlation ID linking related events across the system.

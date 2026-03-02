@@ -11,20 +11,20 @@ export type LocalBusEnvelope = {
   id: string;
   type: EnvelopeType;
   ts: string;
-  timestamp?: string;
-  correlation_id?: string;
-  workspace_id?: string;
-  session_id?: string;
-  terminal_id?: string;
-  lane_id?: string;
-  method?: string;
-  topic?: string;
-  payload?: Record<string, unknown>;
-  status?: "ok" | "error";
-  result?: Record<string, unknown> | null;
-  error?: ErrorPayload | null;
-  sequence?: number;
-  envelope_id?: string;
+  timestamp?: string | undefined;
+  correlation_id?: string | undefined;
+  workspace_id?: string | undefined;
+  session_id?: string | undefined;
+  terminal_id?: string | undefined;
+  lane_id?: string | undefined;
+  method?: string | undefined;
+  topic?: string | undefined;
+  payload?: Record<string, unknown> | undefined;
+  status?: "ok" | "error" | undefined;
+  result?: Record<string, unknown> | null | undefined;
+  error?: ErrorPayload | null | undefined;
+  sequence?: number | undefined;
+  envelope_id?: string | undefined;
 };
 
 // ---------------------------------------------------------------------------
@@ -91,7 +91,7 @@ export function isEvent(env: Envelope): env is EventEnvelope {
 
 export class ProtocolValidationError extends Error {
   readonly code: string;
-  readonly details?: Record<string, unknown>;
+  readonly details?: Record<string, unknown> | undefined;
 
   constructor(code: string, message: string, details?: Record<string, unknown>) {
     super(message);

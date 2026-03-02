@@ -482,11 +482,12 @@ export function createRuntime(opts?: Record<string, unknown>): any {
       const sessionId = `sess_${sessionCounter}`;
       const transport = preferredTransport || harness.transport;
 
+      const codexSid = body.codex_session_id as string | undefined;
       sessions.set(sessionId, {
         session_id: sessionId,
         lane_id: laneId,
         transport,
-        codex_session_id: body.codex_session_id as string | undefined,
+        ...(codexSid !== undefined && { codex_session_id: codexSid }),
       });
       lane.session_id = sessionId;
 

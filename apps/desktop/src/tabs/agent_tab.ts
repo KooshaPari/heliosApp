@@ -8,9 +8,9 @@ export interface AgentAction {
 }
 
 export interface AgentTabState extends TabState {
-  agentStatus?: "idle" | "running" | "error";
-  scrollPosition?: number;
-  actionCount?: number;
+  agentStatus?: "idle" | "running" | "error" | undefined;
+  scrollPosition?: number | undefined;
+  actionCount?: number | undefined;
 }
 
 /**

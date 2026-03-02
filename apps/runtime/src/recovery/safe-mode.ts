@@ -81,7 +81,7 @@ type SafeModeChangeListener = (active: boolean) => void;
 
 export class SafeMode {
   private active = false;
-  private bus?: LocalBus;
+  private bus?: LocalBus | undefined;
   private listeners: SafeModeChangeListener[] = [];
   private config: SafeModeConfig;
 

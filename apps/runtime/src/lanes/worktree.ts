@@ -23,8 +23,8 @@ export interface WorktreeResult {
 }
 
 export interface WorktreeLatencyMetrics {
-  provisionMs?: number;
-  cleanupMs?: number;
+  provisionMs?: number | undefined;
+  cleanupMs?: number | undefined;
 }
 
 // ── Errors ───────────────────────────────────────────────────────────────────

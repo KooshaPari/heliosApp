@@ -33,7 +33,7 @@ export interface RedactionRule {
   pattern: RegExp;
   description: string;
   enabled: boolean;
-  falsePositiveRate?: number;
+  falsePositiveRate?: number | undefined;
 }
 
 // ---------------------------------------------------------------------------

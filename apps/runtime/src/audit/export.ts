@@ -26,7 +26,7 @@ export interface ExportMetadata {
 export interface ExportBundle {
   metadata: ExportMetadata;
   events: AuditEvent[];
-  snapshots?: SessionSnapshot[];
+  snapshots?: SessionSnapshot[] | undefined;
 }
 
 /**

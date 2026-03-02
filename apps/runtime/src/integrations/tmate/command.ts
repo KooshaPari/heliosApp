@@ -30,7 +30,7 @@ export class TmateCommandAdapter implements TmateAdapter {
 
     return {
       sshCommand: sshInfo.stdout.trim(),
-      webUrl: webInfo.code === 0 ? webInfo.stdout.trim() : undefined,
+      ...(webInfo.code === 0 && { webUrl: webInfo.stdout.trim() }),
     };
   }
 

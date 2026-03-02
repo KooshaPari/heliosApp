@@ -1,9 +1,9 @@
 import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
 
 export interface TerminalTabState extends TabState {
-  terminalId?: string;
-  scrollPosition?: number;
-  lastOutputLine?: number;
+  terminalId?: string | undefined;
+  scrollPosition?: number | undefined;
+  lastOutputLine?: number | undefined;
 }
 
 /**

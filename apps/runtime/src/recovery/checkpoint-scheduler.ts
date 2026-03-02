@@ -12,7 +12,7 @@ export class CheckpointScheduler {
   private writer?: CheckpointWriter;
   private stateGetter?: () => Checkpoint;
   private isRunning = false;
-  private timerInterval?: NodeJS.Timeout;
+  private timerInterval?: NodeJS.Timeout | undefined;
   private currentInterval = DEFAULT_CHECKPOINT_INTERVAL_MS;
   private activityCounter = 0;
   private lastCheckpointTime = 0;

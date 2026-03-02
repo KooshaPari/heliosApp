@@ -45,7 +45,7 @@ export async function switchRendererWithRollback(
   const switchResult = await input.runtimeClient.switchRenderer({
     workspaceId: snapshot.workspaceId,
     targetEngine: input.targetEngine,
-    forceError: input.forceError,
+    ...(input.forceError !== undefined && { forceError: input.forceError }),
   });
 
   if (switchResult.ok) {
@@ -73,7 +73,7 @@ export async function switchRendererWithRollback(
   const rollbackResult = await input.runtimeClient.switchRenderer({
     workspaceId: snapshot.workspaceId,
     targetEngine: previousEngine,
-    forceError: input.forceRollbackError,
+    ...(input.forceRollbackError !== undefined && { forceError: input.forceRollbackError }),
   });
 
   if (rollbackResult.ok) {

@@ -11,7 +11,7 @@ export interface BannerConfig {
 }
 
 export class RecoveryBanner {
-  private bus?: LocalBus;
+  private bus?: LocalBus | undefined;
   private isVisible = false;
   private currentStage: RecoveryStage | null = null;
   private isActive = false;

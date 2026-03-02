@@ -57,7 +57,7 @@ export interface SwitchTransaction {
   createdAt: number;
   updatedAt: number;
   correlationId: string;
-  error?: Error;
+  error?: Error | undefined;
 }
 
 export interface SwitchTransactionRequest {

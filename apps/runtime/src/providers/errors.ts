@@ -92,13 +92,13 @@ export class NormalizedProviderError extends Error {
   /**
    * Optional correlation ID for bus message tracing.
    */
-  readonly correlationId?: string;
+  readonly correlationId?: string | undefined;
 
   /**
    * Original error that triggered this normalization.
    * Preserved for debugging and detailed error analysis.
    */
-  readonly originalError?: Error;
+  readonly originalError?: Error | undefined;
 
   constructor(
     code: ProviderErrorCode,

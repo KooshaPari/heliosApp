@@ -27,8 +27,8 @@ export interface LanePanelProps {
 export class LanePanel {
   private lanes: Lane[] = [];
   private activeWorkspaceId = "";
-  private activeLaneId?: string;
-  private selectedLaneId?: string;
+  private activeLaneId?: string | undefined;
+  private selectedLaneId?: string | undefined;
   private props: LanePanelProps;
   private container: HTMLElement | null = null;
   private scrollContainer: HTMLElement | null = null;

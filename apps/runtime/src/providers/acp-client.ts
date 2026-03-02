@@ -50,8 +50,8 @@ interface AcpRequest {
   correlationId: string;
   model: string;
   messages: Array<{ role: string; content: string }>;
-  maxTokens?: number;
-  temperature?: number;
+  maxTokens?: number | undefined;
+  temperature?: number | undefined;
 }
 
 /**

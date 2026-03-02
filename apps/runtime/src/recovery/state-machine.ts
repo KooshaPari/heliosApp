@@ -49,9 +49,9 @@ export class RecoveryStateMachine {
   private currentStage: RecoveryStage = RecoveryStage.CRASHED;
   private currentState: RecoveryState;
   private recoveryDataDir: string;
-  private bus?: LocalBus;
+  private bus?: LocalBus | undefined;
   private listeners: StageChangeListener[] = [];
-  private stageTimeoutId?: NodeJS.Timeout;
+  private stageTimeoutId?: NodeJS.Timeout | undefined;
 
   constructor(recoveryDataDir: string, bus?: LocalBus) {
     this.recoveryDataDir = recoveryDataDir;

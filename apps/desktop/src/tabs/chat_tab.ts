@@ -9,9 +9,9 @@ export interface ChatMessage {
 }
 
 export interface ChatTabState extends TabState {
-  scrollPosition?: number;
-  draftInput?: string;
-  messageCount?: number;
+  scrollPosition?: number | undefined;
+  draftInput?: string | undefined;
+  messageCount?: number | undefined;
 }
 
 /**

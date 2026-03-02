@@ -5,8 +5,8 @@ export interface HardwareCapabilities {
   arch: string;
   hasAppleSilicon: boolean;
   hasNvidiaGpu: boolean;
-  gpuName?: string;
-  gpuMemoryMB?: number;
+  gpuName?: string | undefined;
+  gpuMemoryMB?: number | undefined;
   cpuCores: number;
   ramMB: number;
 }
@@ -46,15 +46,16 @@ export async function detectHardware(): Promise<HardwareCapabilities> {
     // nvidia-smi not available
   }
 
-  cached = {
+  const result: HardwareCapabilities = {
     platform,
     arch,
     hasAppleSilicon,
     hasNvidiaGpu,
-    gpuName,
-    gpuMemoryMB: gpuMemoryMb,
+    ...(gpuName !== undefined && { gpuName }),
+    ...(gpuMemoryMb !== undefined && { gpuMemoryMB: gpuMemoryMb }),
     cpuCores: cpus().length,
     ramMB: Math.round(totalmem() / (1024 * 1024)),
   };
-  return cached;
+  cached = result;
+  return result;
 }
