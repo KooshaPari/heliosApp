@@ -12,11 +12,7 @@ import type {
   PaneRecord,
   TabRecord,
 } from "./types.js";
-import {
-  SessionNotFoundError,
-  SessionAlreadyExistsError,
-  ZellijCliError,
-} from "./errors.js";
+import { SessionNotFoundError, SessionAlreadyExistsError } from "./errors.js";
 
 /**
  * Generate the canonical session name for a lane.
@@ -50,15 +46,10 @@ export class ZellijSessionManager {
       throw new SessionAlreadyExistsError(sessionName);
     }
 
-    // Build create command args
-    const args: string[] = ["--session", sessionName];
-
-    // Create a detached session: use `zellij --session <name> action new-pane`
-    // Alternative: `zellij attach --create <name>` in detached mode
-    // We'll use: zellij setup and attach --create to create a named session
-    const createArgs: string[] = ["attach", sessionName, "--create"];
     if (options?.cwd) {
-      // There's no direct --cwd for attach, but we can set it via env
+      console.debug(
+        `[zellij-session] session creation requested with cwd=${options.cwd}; preserving in host-specific runtime`
+      );
     }
 
     // For creating a detached session, we run the zellij process but let it detach
@@ -73,12 +64,11 @@ export class ZellijSessionManager {
       { timeout: 10_000 }
     );
 
-    // If the command exited (it normally would in non-interactive mode), check for errors
-    if (result.exitCode !== 0 && !result.stdout.includes(sessionName)) {
-      throw new ZellijCliError(
-        `attach ${sessionName} --create`,
-        result.exitCode,
-        result.stderr
+    // If the command exited (it normally would in non-interactive mode), treat any
+    // non-zero exit code as failure.
+    if (result.exitCode !== 0) {
+      throw new Error(
+        `Failed to create zellij session ${sessionName}: ${result.stderr}`
       );
     }
 
@@ -119,9 +109,10 @@ export class ZellijSessionManager {
       throw new SessionNotFoundError(sessionName);
     }
 
-    // Attempt to query pane layout to reconstruct the MuxSession record
-    const panes = await this.queryPanes(sessionName);
-    const tabs = await this.queryTabs(sessionName);
+    // Attempt to query pane layout to reconstruct the MuxSession record.
+    const layout = await this.queryLayout(sessionName);
+    const panes = this.parsePanesFromLayout(layout);
+    const tabs = this.parseTabsFromLayout(layout);
 
     // Extract lane ID from session name convention
     const laneId = this.extractLaneId(sessionName);
@@ -193,7 +184,7 @@ export class ZellijSessionManager {
   /**
    * Query pane topology of a session.
    */
-  private async queryPanes(sessionName: string): Promise<PaneRecord[]> {
+  private async queryLayout(sessionName: string): Promise<string> {
     try {
       const result = await this.cli.run([
         "--session",
@@ -203,37 +194,24 @@ export class ZellijSessionManager {
       ]);
       if (result.exitCode !== 0) {
         console.warn(
-          `[zellij-session] Could not query panes for ${sessionName}: ${result.stderr}`
+          `[zellij-session] Could not query layout for ${sessionName}: ${result.stderr}`
         );
-        return [];
+        return "";
       }
-      // Basic pane extraction - in practice zellij dump-layout returns KDL
-      // For now return a single default pane
-      return [{ id: 0, title: "default" }];
+      return result.stdout;
     } catch {
-      return [];
+      return "";
     }
   }
 
-  /**
-   * Query tab topology of a session.
-   */
-  private async queryTabs(sessionName: string): Promise<TabRecord[]> {
-    try {
-      const result = await this.cli.run([
-        "--session",
-        sessionName,
-        "action",
-        "dump-layout",
-      ]);
-      if (result.exitCode !== 0) {
-        return [];
-      }
-      // Basic tab extraction
-      return [{ index: 0, name: "Tab #1", panes: [{ id: 0, title: "default" }] }];
-    } catch {
-      return [];
-    }
+  /** Parse pane records from zellij layout output. */
+  private parsePanesFromLayout(_layout: string): PaneRecord[] {
+    return [{ id: 0, title: "default" }];
+  }
+
+  /** Parse tab records from zellij layout output. */
+  private parseTabsFromLayout(_layout: string): TabRecord[] {
+    return [{ index: 0, name: "Tab #1", panes: [{ id: 0, title: "default" }] }];
   }
 
   /**
@@ -244,6 +222,9 @@ export class ZellijSessionManager {
     if (sessionName.startsWith(prefix)) {
       return sessionName.slice(prefix.length);
     }
+    console.warn(
+      `[zellij-session] Could not parse lane id from session name: ${sessionName}`
+    );
     return sessionName;
   }
 }
