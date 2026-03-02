@@ -93,13 +93,13 @@ describe('Bypass Detection Scanner', () => {
     ];
 
     let findings = 0;
-    lines.forEach((line) => {
-      patterns.forEach((pattern) => {
+    for (const line of lines) {
+      for (const pattern of patterns) {
         if (pattern.regex.test(line)) {
           findings++;
         }
-      });
-    });
+      }
+    }
 
     expect(findings).toBe(3);
   });
@@ -118,13 +118,13 @@ describe('Bypass Detection Scanner', () => {
     ];
 
     let findings = 0;
-    lines.forEach((line) => {
-      markers.forEach((marker) => {
+    for (const line of lines) {
+      for (const marker of markers) {
         if (marker.regex.test(line)) {
           findings++;
         }
-      });
-    });
+      }
+    }
 
     expect(findings).toBe(3);
   });
