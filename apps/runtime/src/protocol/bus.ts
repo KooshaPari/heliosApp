@@ -119,7 +119,11 @@ export class InMemoryLocalBus implements ProtocolBus {
   getMetricsReport(): MetricsReport {
     const summaries: MetricSummary[] = [];
     for (const [metric, data] of this.metricsAccumulator) {
-      const summary: MetricSummary = { metric, count: data.count, ...(data.latest !== undefined ? { latest: data.latest } : {}) };
+      const summary: MetricSummary = {
+        metric,
+        count: data.count,
+        ...(data.latest !== undefined ? { latest: data.latest } : {}),
+      };
       if (data.values.length > 0) {
         const sorted = [...data.values].sort((a, b) => a - b);
         const p95Idx = Math.ceil(0.95 * sorted.length) - 1;
@@ -263,13 +267,19 @@ export class InMemoryLocalBus implements ProtocolBus {
       // Handle terminal.output metrics
       if (topic === "terminal.output") {
         const backlogDepth =
-          typeof event.payload?.['backlog_depth'] === "number"
-            ? event.payload['backlog_depth']
+          typeof event.payload?.backlog_depth === "number"
+            ? event.payload.backlog_depth
             : undefined;
         const tags: Record<string, string> = {};
-        if (event.session_id) tags['session_id'] = event.session_id;
-        if (event.lane_id) tags['lane_id'] = event.lane_id;
-        if (event.terminal_id) tags['terminal_id'] = event.terminal_id;
+        if (event.session_id) {
+          tags.session_id = event.session_id;
+        }
+        if (event.lane_id) {
+          tags.lane_id = event.lane_id;
+        }
+        if (event.terminal_id) {
+          tags.terminal_id = event.terminal_id;
+        }
         this.recordMetric(
           "terminal_output_backlog_depth",
           backlogDepth,
@@ -323,12 +333,12 @@ export class InMemoryLocalBus implements ProtocolBus {
         this.publishLifecycleEvent("lane.created", command);
         this.recordMetric("lane_create_latency_ms", Date.now() - startTime);
         this.emitMetricEvent("lane_create_latency_ms", Date.now() - startTime);
-        const resultId = command.payload?.['id'] ?? command.payload?.['lane_id'] ?? `lane_${Date.now()}`;
+        const resultId = command.payload?.id ?? command.payload?.lane_id ?? `lane_${Date.now()}`;
         const preferredTransport =
-          typeof command.payload?.['preferred_transport'] === "string"
-            ? command.payload['preferred_transport']
+          typeof command.payload?.preferred_transport === "string"
+            ? command.payload.preferred_transport
             : "cliproxy_harness";
-        const degraded = command.payload?.['simulate_degrade'] === true;
+        const degraded = command.payload?.simulate_degrade === true;
         const resolvedTransport = degraded ? "native_openai" : preferredTransport;
         const degradedReason = degraded ? "cliproxy_harness_unhealthy" : null;
         return {
@@ -351,7 +361,7 @@ export class InMemoryLocalBus implements ProtocolBus {
 
       if (command.method === "session.attach") {
         const correlationId = command.correlation_id!;
-        const forceError = command.payload?.['force_error'] === true;
+        const forceError = command.payload?.force_error === true;
 
         if (!this.lifecycleProgress.has(correlationId)) {
           this.lifecycleProgress.set(correlationId, new Set());
@@ -372,7 +382,7 @@ export class InMemoryLocalBus implements ProtocolBus {
           };
         }
 
-        const isRestore = command.payload?.['restore'] === true;
+        const isRestore = command.payload?.restore === true;
         if (isRestore) {
           const restoreStart = Date.now();
           this.recordMetric("session_restore_latency_ms", Date.now() - restoreStart);
@@ -383,7 +393,7 @@ export class InMemoryLocalBus implements ProtocolBus {
         this.publishLifecycleEvent("session.attached", command);
         this.state = { session: "attached" };
         const sessionResultId =
-          command.payload?.['id'] ?? command.payload?.['session_id'] ?? `session_${Date.now()}`;
+          command.payload?.id ?? command.payload?.session_id ?? `session_${Date.now()}`;
         return {
           id: `res-${Date.now()}`,
           type: "response",
@@ -404,7 +414,7 @@ export class InMemoryLocalBus implements ProtocolBus {
 
       if (command.method === "terminal.spawn") {
         const correlationId = command.correlation_id!;
-        const forceError = command.payload?.['force_error'] === true;
+        const forceError = command.payload?.force_error === true;
 
         if (!this.lifecycleProgress.has(correlationId)) {
           this.lifecycleProgress.set(correlationId, new Set());
@@ -431,7 +441,7 @@ export class InMemoryLocalBus implements ProtocolBus {
         this.lifecycleProgress.get(correlationId)?.add("terminal.spawned");
         this.publishLifecycleEvent("terminal.spawned", command);
         const terminalResultId =
-          command.payload?.['id'] ?? command.payload?.['terminal_id'] ?? `terminal_${Date.now()}`;
+          command.payload?.id ?? command.payload?.terminal_id ?? `terminal_${Date.now()}`;
         this.recordMetric("terminal_spawn_latency_ms", Date.now() - startTime);
         this.emitMetricEvent("terminal_spawn_latency_ms", Date.now() - startTime);
         return {
@@ -454,7 +464,7 @@ export class InMemoryLocalBus implements ProtocolBus {
 
       if (command.method === "terminal.input") {
         // Validate data field
-        if (command.payload?.['data'] === undefined && !("data" in (command as any))) {
+        if (command.payload?.data === undefined && !("data" in (command as any))) {
           return {
             id: `res-${Date.now()}`,
             type: "response",
@@ -492,8 +502,8 @@ export class InMemoryLocalBus implements ProtocolBus {
       }
 
       if (command.method === "renderer.switch") {
-        const nextEngine = command.payload?.['target_engine'];
-        const forceError = command.payload?.['force_error'] === true;
+        const nextEngine = command.payload?.target_engine;
+        const forceError = command.payload?.force_error === true;
         const previousEngine = this.rendererEngine ?? "ghostty";
 
         if (forceError) {
@@ -577,9 +587,9 @@ function isCommandEnvelope(val: unknown): val is CommandEnvelope {
   return (
     val !== null &&
     typeof val === "object" &&
-    (val as Record<string, unknown>)['type'] === "command" &&
-    typeof (val as Record<string, unknown>)['method'] === "string" &&
-    typeof (val as Record<string, unknown>)['id'] === "string" &&
+    (val as Record<string, unknown>).type === "command" &&
+    typeof (val as Record<string, unknown>).method === "string" &&
+    typeof (val as Record<string, unknown>).id === "string" &&
     "payload" in (val as Record<string, unknown>)
   );
 }
@@ -588,8 +598,8 @@ function isEventEnvelope(val: unknown): val is EventEnvelope {
   return (
     val !== null &&
     typeof val === "object" &&
-    (val as Record<string, unknown>)['type'] === "event" &&
-    typeof (val as Record<string, unknown>)['topic'] === "string"
+    (val as Record<string, unknown>).type === "event" &&
+    typeof (val as Record<string, unknown>).topic === "string"
   );
 }
 
@@ -617,12 +627,12 @@ class CommandBusImpl implements LocalBus {
     // Guard destroyed state
     if (this.destroyed) {
       const id =
-        typeof (envelope as Record<string, unknown>)?.['id'] === "string"
-          ? ((envelope as Record<string, unknown>)['id'] as string)
+        typeof (envelope as Record<string, unknown>)?.id === "string"
+          ? ((envelope as Record<string, unknown>).id as string)
           : "unknown";
       const corr =
-        typeof (envelope as Record<string, unknown>)?.['correlation_id'] === "string"
-          ? ((envelope as Record<string, unknown>)['correlation_id'] as string)
+        typeof (envelope as Record<string, unknown>)?.correlation_id === "string"
+          ? ((envelope as Record<string, unknown>).correlation_id as string)
           : "unknown";
       return makeErrorResponse(id, corr, "", "VALIDATION_ERROR", "Bus is destroyed");
     }
@@ -630,14 +640,14 @@ class CommandBusImpl implements LocalBus {
     // Validate envelope shape
     if (!isCommandEnvelope(envelope)) {
       const id =
-        typeof (envelope as Record<string, unknown>)?.['id'] === "string"
-          ? ((envelope as Record<string, unknown>)['id'] as string)
+        typeof (envelope as Record<string, unknown>)?.id === "string"
+          ? ((envelope as Record<string, unknown>).id as string)
           : "unknown";
       const corr =
-        typeof (envelope as Record<string, unknown>)?.['correlation_id'] === "string"
-          ? ((envelope as Record<string, unknown>)['correlation_id'] as string)
+        typeof (envelope as Record<string, unknown>)?.correlation_id === "string"
+          ? ((envelope as Record<string, unknown>).correlation_id as string)
           : "unknown";
-      const type = (envelope as Record<string, unknown>)?.['type'];
+      const type = (envelope as Record<string, unknown>)?.type;
       if (type === "event" || type === "response") {
         return makeErrorResponse(id, corr, "", "VALIDATION_ERROR", "Expected a command envelope");
       }
@@ -679,7 +689,7 @@ class CommandBusImpl implements LocalBus {
       if (
         !result ||
         typeof result !== "object" ||
-        (result as Record<string, unknown>)['type'] !== "response"
+        (result as Record<string, unknown>).type !== "response"
       ) {
         return makeErrorResponse(
           cmd.id,
@@ -743,7 +753,7 @@ class CommandBusImpl implements LocalBus {
 
     // Inject active correlation_id from command context (FR-008)
     if (this.activeCorrelationId) {
-      (event as Record<string, unknown>)['correlation_id'] = this.activeCorrelationId;
+      (event as Record<string, unknown>).correlation_id = this.activeCorrelationId;
     }
 
     const topic = event.topic;
@@ -752,7 +762,7 @@ class CommandBusImpl implements LocalBus {
     const currentSeq = this.topicSequenceCounters.get(topic) ?? 0;
     const nextSeq = currentSeq + 1;
     this.topicSequenceCounters.set(topic, nextSeq);
-    (event as Record<string, unknown>)['sequence'] = nextSeq;
+    (event as Record<string, unknown>).sequence = nextSeq;
     const list = this.subscribers.get(topic);
     if (!list) {
       return;

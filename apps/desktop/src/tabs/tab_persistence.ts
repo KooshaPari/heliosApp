@@ -190,15 +190,15 @@ export class TabPersistence {
     const s = state as Record<string, unknown>;
 
     return (
-      typeof s['version'] === "number" &&
-      (s['selectedTabId'] === null || typeof s['selectedTabId'] === "string") &&
-      Array.isArray(s['tabOrder']) &&
-      s['tabOrder'].every((id: unknown) => typeof id === "string") &&
-      Array.isArray(s['pinnedTabIds']) &&
-      s['pinnedTabIds'].every((id: unknown) => typeof id === "string") &&
-      typeof s['perTabState'] === "object" &&
-      s['perTabState'] !== null &&
-      typeof s['savedAt'] === "string"
+      typeof s.version === "number" &&
+      (s.selectedTabId === null || typeof s.selectedTabId === "string") &&
+      Array.isArray(s.tabOrder) &&
+      s.tabOrder.every((id: unknown) => typeof id === "string") &&
+      Array.isArray(s.pinnedTabIds) &&
+      s.pinnedTabIds.every((id: unknown) => typeof id === "string") &&
+      typeof s.perTabState === "object" &&
+      s.perTabState !== null &&
+      typeof s.savedAt === "string"
     );
   }
 

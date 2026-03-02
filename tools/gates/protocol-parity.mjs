@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 function parseLiteralArray(tsPath, constName) {
   const source = readFileSync(tsPath, "utf8");
-  const regex = new RegExp(`export const ${constName} = \\[(?<body>[\\s\\S]*?)\\] as const;`);
+  const regex = new RegExp(`export const ${constName} = \\[(?<body>[\\s\\S]*?)\\] as const[^;]*;`);
   const match = source.match(regex);
   if (!match?.groups?.body) {
     throw new Error(`Unable to parse ${constName} from ${tsPath}`);

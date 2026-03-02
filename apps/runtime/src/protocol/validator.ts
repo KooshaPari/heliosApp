@@ -4,7 +4,7 @@ import type { LocalBusEnvelope } from "./types";
 import { ProtocolValidationError } from "./types";
 
 const METHOD_SET = new Set<string>(METHODS);
-const TOPIC_SET = new Set<string>(TOPICS);
+const _TOPIC_SET = new Set<string>(TOPICS);
 const RFC3339_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 
 const CORRELATION_REQUIRED_METHODS = new Set<string>([

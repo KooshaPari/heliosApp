@@ -81,7 +81,7 @@ export class EditorlessControlPlane {
     const result = await this.runtimeClient.createLane(input);
     this.store.dispatch({ type: "diagnostics.set", diagnostics: result.diagnostics });
 
-    if (!result.ok || !result.id) {
+    if (!(result.ok && result.id)) {
       this.store.dispatch({
         type: "operation.failure",
         operation: "lane",
@@ -106,7 +106,7 @@ export class EditorlessControlPlane {
     this.store.dispatch({ type: "operation.start", operation: "session" });
     const result = await this.runtimeClient.ensureSession(input);
 
-    if (!result.ok || !result.id) {
+    if (!(result.ok && result.id)) {
       this.store.dispatch({
         type: "operation.failure",
         operation: "session",
@@ -131,7 +131,7 @@ export class EditorlessControlPlane {
   }): Promise<{ ok: boolean; terminalId: string | null; error: string | null }> {
     this.store.dispatch({ type: "operation.start", operation: "terminal" });
     const result = await this.runtimeClient.spawnTerminal(input);
-    if (!result.ok || !result.id) {
+    if (!(result.ok && result.id)) {
       this.store.dispatch({
         type: "operation.failure",
         operation: "terminal",

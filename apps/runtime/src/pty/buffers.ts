@@ -333,6 +333,7 @@ export class OutputBuffer {
     // Log warning on first overflow.
     if (!this.firstOverflowLogged) {
       this.firstOverflowLogged = true;
+      // biome-ignore lint/suspicious/noConsole: intentional overflow warning
       console.warn(
         `[OutputBuffer] overflow: ${droppedBytes} bytes dropped for pty ${this.correlation.ptyId}`
       );

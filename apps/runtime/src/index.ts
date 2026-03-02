@@ -442,7 +442,7 @@ export function createRuntime(opts?: Record<string, unknown>): any {
     // Route: POST /v1/workspaces/:ws/lanes/:lane/sessions
     const sessionsMatch = path.match(/^\/v1\/workspaces\/([^/]+)\/lanes\/([^/]+)\/sessions$/);
     if (sessionsMatch && method === "POST") {
-      const workspaceId = sessionsMatch[1];
+      const _workspaceId = sessionsMatch[1];
       const laneId = sessionsMatch[2];
       const body = (await req.json()) as Record<string, unknown>;
 
