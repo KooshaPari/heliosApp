@@ -12,3 +12,7 @@ exact = true
 [install.lockfile]
 # Deterministic builds: always save lockfile
 save = true
+
+[test]
+# Provide DOM globals (document, window, etc.) for desktop UI tests
+preload = ["./scripts/test-setup.ts"]

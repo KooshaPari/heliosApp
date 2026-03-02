@@ -26,14 +26,25 @@ export type AuditRecord = {
 // Metrics report (for runtime_metrics tests)
 // ---------------------------------------------------------------------------
 
+export type MetricSample = {
+  metric: string;
+  value: number;
+  tags?: Record<string, string>;
+};
+
 export type MetricSummary = {
   metric: string;
   count: number;
   latest?: number;
+  p95?: number;
+  p99?: number;
+  min?: number;
+  max?: number;
 };
 
 export type MetricsReport = {
   summaries: MetricSummary[];
+  samples?: MetricSample[];
 };
 
 // ---------------------------------------------------------------------------
@@ -42,6 +53,7 @@ export type MetricsReport = {
 
 export type BusState = {
   session: "attached" | "detached";
+  terminal?: "active" | "inactive";
 };
 
 // ---------------------------------------------------------------------------
@@ -75,13 +87,29 @@ const START_TOPICS = new Set([
 export class InMemoryLocalBus implements ProtocolBus {
   private readonly eventLog: LocalBusEnvelope[] = [];
   private readonly auditLog: AuditRecord[] = [];
-  private readonly metricsAccumulator: Map<string, { count: number; latest?: number }> = new Map();
+  private readonly metricsAccumulator: Map<
+    string,
+    { count: number; latest?: number; values: number[] }
+  > = new Map();
+  private readonly metricSamples: MetricSample[] = [];
   private state: BusState = { session: "detached" };
   // Track which correlation IDs have seen which start topics
   private readonly lifecycleProgress: Map<string, Set<string>> = new Map();
 
   getEvents(): LocalBusEnvelope[] {
     return [...this.eventLog];
+  }
+
+  /**
+   * Push an event directly to the event log without validation.
+   * Used by HTTP routing layer for events that don't follow protocol lifecycle ordering.
+   */
+  pushEvent(event: LocalBusEnvelope): void {
+    if ((event as any).sequence === undefined) {
+      (event as any).sequence = this.getSequence() + 1;
+    }
+    this.auditLog.push({ envelope: event, outcome: "accepted" });
+    this.eventLog.push(event);
   }
 
   async getAuditRecords(): Promise<AuditRecord[]> {
@@ -91,31 +119,53 @@ export class InMemoryLocalBus implements ProtocolBus {
   getMetricsReport(): MetricsReport {
     const summaries: MetricSummary[] = [];
     for (const [metric, data] of this.metricsAccumulator) {
-      summaries.push({ metric, count: data.count, latest: data.latest });
+      const summary: MetricSummary = { metric, count: data.count, latest: data.latest };
+      if (data.values.length > 0) {
+        const sorted = [...data.values].sort((a, b) => a - b);
+        const p95Idx = Math.ceil(0.95 * sorted.length) - 1;
+        const p99Idx = Math.ceil(0.99 * sorted.length) - 1;
+        summary.p95 = sorted[Math.max(0, p95Idx)];
+        summary.p99 = sorted[Math.max(0, p99Idx)];
+        summary.min = sorted[0];
+        summary.max = sorted[sorted.length - 1];
+      }
+      summaries.push(summary);
     }
-    return { summaries };
+    return { summaries, samples: [...this.metricSamples] };
   }
 
   getState(): BusState {
     return { ...this.state };
   }
 
-  private recordMetric(metric: string, value?: number): void {
-    const existing = this.metricsAccumulator.get(metric) ?? { count: 0 };
-    this.metricsAccumulator.set(metric, {
+  private recordMetric(metric: string, value?: number, tags?: Record<string, string>): void {
+    const existing = this.metricsAccumulator.get(metric) ?? { count: 0, values: [] };
+    const updated = {
       count: existing.count + 1,
       latest: value !== undefined ? value : existing.latest,
-    });
+      values: existing.values,
+    };
+    if (value !== undefined) {
+      updated.values.push(value);
+    }
+    this.metricsAccumulator.set(metric, updated);
+    if (value !== undefined) {
+      this.metricSamples.push({ metric, value, tags });
+    }
   }
 
   private emitMetricEvent(metric: string, value?: number): void {
-    this.eventLog.push({
+    const seq = this.getSequence() + 1;
+    const event: LocalBusEnvelope = {
       id: `metric-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       type: "event",
       ts: new Date().toISOString(),
       topic: "diagnostics.metric",
       payload: { metric, value },
-    });
+      sequence: seq,
+    };
+    this.auditLog.push({ envelope: event, outcome: "accepted" });
+    this.eventLog.push(event);
   }
 
   private getSequence(): number {
@@ -124,7 +174,7 @@ export class InMemoryLocalBus implements ProtocolBus {
 
   private publishLifecycleEvent(topic: string, envelope: LocalBusEnvelope): void {
     const seq = this.getSequence() + 1;
-    this.eventLog.push({
+    const event: LocalBusEnvelope = {
       id: `evt-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       type: "event",
       ts: new Date().toISOString(),
@@ -136,7 +186,9 @@ export class InMemoryLocalBus implements ProtocolBus {
       correlation_id: envelope.correlation_id,
       payload: {},
       sequence: seq,
-    });
+    };
+    this.auditLog.push({ envelope: event, outcome: "accepted" });
+    this.eventLog.push(event);
   }
 
   async publish(event: LocalBusEnvelope): Promise<void> {
@@ -163,7 +215,17 @@ export class InMemoryLocalBus implements ProtocolBus {
         if (!this.lifecycleProgress.has(correlationId)) {
           this.lifecycleProgress.set(correlationId, new Set());
         }
-        this.lifecycleProgress.get(correlationId)?.add(topic);
+        const progress = this.lifecycleProgress.get(correlationId)!;
+        if (progress.has(topic)) {
+          // Duplicate start topic on same correlation — ordering violation
+          const err = new ProtocolValidationError(
+            "ORDERING_VIOLATION",
+            `Duplicate start topic "${topic}" for correlation "${correlationId}"`
+          );
+          this.auditLog.push({ envelope: event, outcome: "rejected", error: err.message });
+          throw err;
+        }
+        progress.add(topic);
         this.auditLog.push({ envelope: event, outcome: "accepted" });
         this.eventLog.push(event);
         return;
@@ -203,11 +265,23 @@ export class InMemoryLocalBus implements ProtocolBus {
           typeof event.payload?.backlog_depth === "number"
             ? event.payload.backlog_depth
             : undefined;
-        this.recordMetric("terminal_output_backlog_depth", backlogDepth);
+        const tags: Record<string, string> = {};
+        if (event.session_id) tags.session_id = event.session_id;
+        if (event.lane_id) tags.lane_id = event.lane_id;
+        if (event.terminal_id) tags.terminal_id = event.terminal_id;
+        this.recordMetric(
+          "terminal_output_backlog_depth",
+          backlogDepth,
+          Object.keys(tags).length > 0 ? tags : undefined
+        );
         this.emitMetricEvent("terminal_output_backlog_depth", backlogDepth);
       }
     }
 
+    // Assign sequence if not already set
+    if ((event as any).sequence === undefined) {
+      (event as any).sequence = this.getSequence() + 1;
+    }
     this.auditLog.push({ envelope: event, outcome: "accepted" });
     this.eventLog.push(event);
   }
@@ -248,12 +322,29 @@ export class InMemoryLocalBus implements ProtocolBus {
         this.publishLifecycleEvent("lane.created", command);
         this.recordMetric("lane_create_latency_ms", Date.now() - startTime);
         this.emitMetricEvent("lane_create_latency_ms", Date.now() - startTime);
+        const resultId = command.payload?.id ?? command.payload?.lane_id ?? `lane_${Date.now()}`;
+        const preferredTransport =
+          typeof command.payload?.preferred_transport === "string"
+            ? command.payload.preferred_transport
+            : "cliproxy_harness";
+        const degraded = command.payload?.simulate_degrade === true;
+        const resolvedTransport = degraded ? "native_openai" : preferredTransport;
+        const degradedReason = degraded ? "cliproxy_harness_unhealthy" : null;
         return {
           id: `res-${Date.now()}`,
           type: "response",
           ts: new Date().toISOString(),
           status: "ok",
-          result: {},
+          result: {
+            lane_id: resultId,
+            state: this.state,
+            diagnostics: {
+              preferred_transport: preferredTransport,
+              resolved_transport: resolvedTransport,
+              degraded_reason: degradedReason,
+              degraded_at: degraded ? new Date().toISOString() : null,
+            },
+          },
         };
       }
 
@@ -290,12 +381,144 @@ export class InMemoryLocalBus implements ProtocolBus {
         this.lifecycleProgress.get(correlationId)?.add("session.attached");
         this.publishLifecycleEvent("session.attached", command);
         this.state = { session: "attached" };
+        const sessionResultId =
+          command.payload?.id ?? command.payload?.session_id ?? `session_${Date.now()}`;
+        return {
+          id: `res-${Date.now()}`,
+          type: "response",
+          ts: new Date().toISOString(),
+          status: "ok",
+          result: {
+            session_id: sessionResultId,
+            state: this.state,
+            diagnostics: {
+              preferred_transport: "cliproxy_harness",
+              resolved_transport: "cliproxy_harness",
+              degraded_reason: null,
+              degraded_at: null,
+            },
+          },
+        };
+      }
+
+      if (command.method === "terminal.spawn") {
+        const correlationId = command.correlation_id!;
+        const forceError = command.payload?.force_error === true;
+
+        if (!this.lifecycleProgress.has(correlationId)) {
+          this.lifecycleProgress.set(correlationId, new Set());
+        }
+        this.lifecycleProgress.get(correlationId)?.add("terminal.spawn.started");
+        this.publishLifecycleEvent("terminal.spawn.started", command);
+
+        if (forceError) {
+          this.lifecycleProgress.get(correlationId)?.add("terminal.spawn.failed");
+          this.publishLifecycleEvent("terminal.spawn.failed", command);
+          return {
+            id: `res-${Date.now()}`,
+            type: "response",
+            ts: new Date().toISOString(),
+            status: "error",
+            error: { code: "TERMINAL_SPAWN_FAILED", message: "forced error", retryable: false },
+          };
+        }
+
+        // Emit state change events before final spawned event
+        this.publishLifecycleEvent("terminal.state.changed", command);
+        this.state = { ...this.state, terminal: "active" };
+        this.publishLifecycleEvent("terminal.state.changed", command);
+        this.lifecycleProgress.get(correlationId)?.add("terminal.spawned");
+        this.publishLifecycleEvent("terminal.spawned", command);
+        const terminalResultId =
+          command.payload?.id ?? command.payload?.terminal_id ?? `terminal_${Date.now()}`;
+        this.recordMetric("terminal_spawn_latency_ms", Date.now() - startTime);
+        this.emitMetricEvent("terminal_spawn_latency_ms", Date.now() - startTime);
+        return {
+          id: `res-${Date.now()}`,
+          type: "response",
+          ts: new Date().toISOString(),
+          status: "ok",
+          result: {
+            terminal_id: terminalResultId,
+            state: this.state,
+            diagnostics: {
+              preferred_transport: "cliproxy_harness",
+              resolved_transport: "cliproxy_harness",
+              degraded_reason: null,
+              degraded_at: null,
+            },
+          },
+        };
+      }
+
+      if (command.method === "terminal.input") {
+        // Validate data field
+        if (command.payload?.data === undefined && !("data" in (command as any))) {
+          return {
+            id: `res-${Date.now()}`,
+            type: "response",
+            ts: new Date().toISOString(),
+            status: "error",
+            error: {
+              code: "INVALID_TERMINAL_INPUT",
+              message: "payload.data is required",
+              retryable: false,
+            },
+          };
+        }
+
         return {
           id: `res-${Date.now()}`,
           type: "response",
           ts: new Date().toISOString(),
           status: "ok",
           result: {},
+        };
+      }
+
+      if (command.method === "renderer.capabilities") {
+        return {
+          id: `res-${Date.now()}`,
+          type: "response",
+          ts: new Date().toISOString(),
+          status: "ok",
+          result: {
+            active_engine: this.rendererEngine ?? "ghostty",
+            available_engines: ["ghostty", "rio"],
+            hot_swap_supported: true,
+          },
+        };
+      }
+
+      if (command.method === "renderer.switch") {
+        const nextEngine = command.payload?.target_engine;
+        const forceError = command.payload?.force_error === true;
+        const previousEngine = this.rendererEngine ?? "ghostty";
+
+        if (forceError) {
+          return {
+            id: `res-${Date.now()}`,
+            type: "response",
+            ts: new Date().toISOString(),
+            status: "error",
+            error: { code: "RENDERER_SWITCH_FAILED", message: "forced error", retryable: false },
+            result: {
+              active_engine: previousEngine,
+              previous_engine: previousEngine,
+            },
+          };
+        }
+
+        this.rendererEngine = nextEngine === "rio" ? "rio" : "ghostty";
+        return {
+          id: `res-${Date.now()}`,
+          type: "response",
+          ts: new Date().toISOString(),
+          status: "ok",
+          result: {
+            active_engine: this.rendererEngine,
+            previous_engine: previousEngine,
+          },
         };
       }
     }
@@ -308,6 +531,8 @@ export class InMemoryLocalBus implements ProtocolBus {
       result: {},
     };
   }
+
+  private rendererEngine: "ghostty" | "rio" = "ghostty";
 }
 
 // ---------------------------------------------------------------------------
@@ -377,7 +602,7 @@ class CommandBusImpl implements LocalBus {
   private destroyed = false;
   private activeCorrelationId: string | undefined = undefined;
   private currentDepth = 0;
-  private sequenceCounter = 0;
+  private topicSequenceCounters = new Map<string, number>();
 
   constructor(options: CommandBusOptions = {}) {
     this.options = { maxDepth: options.maxDepth ?? 10 };
@@ -515,24 +740,29 @@ class CommandBusImpl implements LocalBus {
 
     const event = evt as EventEnvelope;
 
-    // Assign sequence number
-    this.sequenceCounter++;
-    (event as Record<string, unknown>).sequence = this.sequenceCounter;
+    // Inject active correlation_id from command context (FR-008)
+    if (this.activeCorrelationId) {
+      (event as Record<string, unknown>).correlation_id = this.activeCorrelationId;
+    }
 
     const topic = event.topic;
+
+    // Assign per-topic sequence number
+    const currentSeq = this.topicSequenceCounters.get(topic) ?? 0;
+    const nextSeq = currentSeq + 1;
+    this.topicSequenceCounters.set(topic, nextSeq);
+    (event as Record<string, unknown>).sequence = nextSeq;
     const list = this.subscribers.get(topic);
     if (!list) {
       return;
     }
 
     // Snapshot before iteration (FR-010)
-    const snapshot = [...list];
-    for (const entry of snapshot) {
-      if (entry.removed) {
-        continue;
-      }
+    // Clone handler references so unsubscribe during iteration does not affect delivery
+    const snapshot = list.map(entry => entry.handler);
+    for (const handler of snapshot) {
       try {
-        await entry.handler(event);
+        await handler(event);
       } catch {
         // FR-009: subscriber isolation — errors are silently swallowed
       }

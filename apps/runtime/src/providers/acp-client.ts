@@ -487,7 +487,7 @@ export class ACPClientAdapter
     }
 
     // Mock implementation: simulate ACP processing
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         resolve({
           taskId: `task-${request.correlationId}`,

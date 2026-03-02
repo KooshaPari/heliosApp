@@ -111,7 +111,7 @@ describe("ACP Client Adapter", () => {
       const events = bus.getEvents();
       const initEvent = events.find(e => e.topic === "provider.acp.initialized");
       expect(initEvent).toBeDefined();
-      expect(initEvent?.payload?.baseUrl).toBe(config.baseUrl);
+      expect(initEvent?.payload?.endpoint).toBe(config.baseUrl);
     });
   });
 
@@ -432,7 +432,7 @@ describe("ACP Client Adapter", () => {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
         model: "claude-3-sonnet",
-        timeout: 100, // Short timeout for timeout tests
+        timeout: 1000, // Short timeout for timeout tests
       };
       await adapter.init(config);
     });

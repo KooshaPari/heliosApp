@@ -3,13 +3,13 @@
  * Handles validation, atomic writes, and schema enforcement.
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
-import type { DepsChangelog, ChangelogEntry } from './deps-types';
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
+import type { ChangelogEntry, DepsChangelog } from "./deps-types";
 
 const REPO_ROOT = process.cwd();
-const CHANGELOG_PATH = join(REPO_ROOT, 'deps-changelog.json');
+const CHANGELOG_PATH = join(REPO_ROOT, "deps-changelog.json");
 
 /**
  * Validate a changelog entry against the schema.
@@ -17,31 +17,31 @@ const CHANGELOG_PATH = join(REPO_ROOT, 'deps-changelog.json');
  */
 export function validateChangelogEntry(entry: ChangelogEntry): void {
   if (!entry.timestamp || !/^\d{4}-\d{2}-\d{2}T/.test(entry.timestamp)) {
-    throw new Error('Invalid or missing timestamp field');
+    throw new Error("Invalid or missing timestamp field");
   }
-  if (!entry.package || typeof entry.package !== 'string') {
-    throw new Error('Invalid or missing package field');
+  if (!entry.package || typeof entry.package !== "string") {
+    throw new Error("Invalid or missing package field");
   }
-  if (!entry.fromVersion || typeof entry.fromVersion !== 'string') {
-    throw new Error('Invalid or missing fromVersion field');
+  if (!entry.fromVersion || typeof entry.fromVersion !== "string") {
+    throw new Error("Invalid or missing fromVersion field");
   }
-  if (!entry.toVersion || typeof entry.toVersion !== 'string') {
-    throw new Error('Invalid or missing toVersion field');
+  if (!entry.toVersion || typeof entry.toVersion !== "string") {
+    throw new Error("Invalid or missing toVersion field");
   }
-  if (!['alpha', 'beta', 'rc', 'stable'].includes(entry.channel)) {
+  if (!["alpha", "beta", "rc", "stable"].includes(entry.channel)) {
     throw new Error(`Invalid channel: ${entry.channel}`);
   }
-  if (typeof entry.gateResults !== 'object' || entry.gateResults === null) {
-    throw new Error('Invalid or missing gateResults field');
+  if (typeof entry.gateResults !== "object" || entry.gateResults === null) {
+    throw new Error("Invalid or missing gateResults field");
   }
-  if (!['success', 'failure', 'rollback'].includes(entry.outcome)) {
+  if (!["success", "failure", "rollback"].includes(entry.outcome)) {
     throw new Error(`Invalid outcome: ${entry.outcome}`);
   }
-  if (!['user', 'ci', 'canary'].includes(entry.actor)) {
+  if (!["user", "ci", "canary"].includes(entry.actor)) {
     throw new Error(`Invalid actor: ${entry.actor}`);
   }
-  if (entry.branchRef && typeof entry.branchRef !== 'string') {
-    throw new Error('Invalid branchRef field (must be string or undefined)');
+  if (entry.branchRef && typeof entry.branchRef !== "string") {
+    throw new Error("Invalid branchRef field (must be string or undefined)");
   }
 }
 
@@ -54,9 +54,9 @@ export function loadChangelog(): DepsChangelog {
   }
 
   try {
-    const data = JSON.parse(readFileSync(CHANGELOG_PATH, 'utf-8'));
+    const data = JSON.parse(readFileSync(CHANGELOG_PATH, "utf-8"));
     if (!Array.isArray(data.entries)) {
-      throw new Error('Changelog entries is not an array');
+      throw new Error("Changelog entries is not an array");
     }
     return data as DepsChangelog;
   } catch (e) {
@@ -83,12 +83,12 @@ export function appendChangelogEntry(entry: ChangelogEntry): void {
   try {
     writeFileSync(tempFile, JSON.stringify(changelog, null, 2));
     // Atomic rename (move temp file to final location)
-    require('fs').renameSync(tempFile, CHANGELOG_PATH);
+    require("fs").renameSync(tempFile, CHANGELOG_PATH);
   } catch (e) {
     // Clean up temp file if it exists
     if (existsSync(tempFile)) {
       try {
-        require('fs').unlinkSync(tempFile);
+        require("fs").unlinkSync(tempFile);
       } catch (unlinkErr) {
         // Ignore cleanup errors
       }

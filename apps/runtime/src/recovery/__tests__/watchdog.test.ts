@@ -26,8 +26,8 @@ describe("Watchdog", () => {
     const crashEvents: CrashEvent[] = [];
     watchdog.onCrashDetected(event => crashEvents.push(event));
 
-    watchdog.registerProcess("test-proc", 1234, 2000);
-    // timer advance skipped // 2 * 2000 + 100ms
+    watchdog.registerProcess("test-proc", 1234, 10); // 10ms heartbeat interval
+    await new Promise(r => setTimeout(r, 100)); // Wait for 2 * 10ms + buffer
 
     expect(crashEvents.length).toBe(1);
     expect(crashEvents[0].reason).toBeDefined();
@@ -62,16 +62,16 @@ describe("Watchdog", () => {
     const crashEvents: CrashEvent[] = [];
     watchdog.onCrashDetected(event => crashEvents.push(event));
 
-    watchdog.registerProcess("test-proc", 1234, 1000);
-    // timer advance skipped
+    watchdog.registerProcess("test-proc", 1234, 10);
+    await new Promise(r => setTimeout(r, 100));
 
     expect(crashEvents.length).toBe(1);
     expect(crashEvents[0].reason).toBeDefined();
   });
 
   it("should publish crash event to bus", async () => {
-    watchdog.registerProcess("test-proc", 1234, 1000);
-    // timer advance skipped
+    watchdog.registerProcess("test-proc", 1234, 10);
+    await new Promise(r => setTimeout(r, 100));
 
     const events = bus.getEvents();
     expect(events.length).toBeGreaterThan(0);
@@ -80,11 +80,8 @@ describe("Watchdog", () => {
   });
 
   it("should write crash record to filesystem", async () => {
-    watchdog.registerProcess("test-proc", 1234, 1000);
-    // timer advance skipped
-
-    // Give async operations time to complete
-    await new Promise(resolve => setTimeout(resolve, 100));
+    watchdog.registerProcess("test-proc", 1234, 10);
+    await new Promise(r => setTimeout(r, 200));
 
     const recordPath = path.join(tempDir, "recovery", "last-crash.json");
     const exists = await fs
@@ -144,7 +141,7 @@ describe("Watchdog", () => {
     watchdog.registerProcess("proc1", 1001, 10);
     watchdog.registerProcess("proc2", 1002, 10);
 
-    // timer advance skipped
+    await new Promise(r => setTimeout(r, 100));
 
     expect(crashEvents.length).toBe(2);
     expect(crashEvents.map(e => e.name)).toContain("proc1");

@@ -1,7 +1,7 @@
 /**
  * Governance Log Type Definitions
  * Defines the schema for append-only governance log entries.
- * 
+ *
  * The governance log records every merge to main with full provenance,
  * enabling audit trails and compliance reporting.
  */
@@ -13,9 +13,9 @@ export interface ReviewerDecision {
   /** Name of the reviewer */
   name: string;
   /** Role of the reviewer (agent, human, bot) */
-  role: 'agent' | 'human' | 'bot';
+  role: "agent" | "human" | "bot";
   /** Review decision */
-  decision: 'approved' | 'requested-changes' | 'commented' | 'dismissed';
+  decision: "approved" | "requested-changes" | "commented" | "dismissed";
 }
 
 /**

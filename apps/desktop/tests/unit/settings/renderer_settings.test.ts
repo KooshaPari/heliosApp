@@ -171,9 +171,7 @@ describe("RendererSettings", () => {
     settings.mount(container);
 
     let activeOption = container.querySelector(".renderer-option.active");
-    expect(activeOption?.querySelector("[data-renderer]")?.getAttribute("data-renderer")).toBe(
-      "ghostty"
-    );
+    expect(activeOption?.getAttribute("data-renderer")).toBe("ghostty");
 
     const updatedRenderers = [
       { ...renderers[0], isActive: false },
@@ -183,9 +181,7 @@ describe("RendererSettings", () => {
     settings.update({ renderers: updatedRenderers });
 
     activeOption = container.querySelector(".renderer-option.active");
-    expect(activeOption?.querySelector("[data-renderer]")?.getAttribute("data-renderer")).toBe(
-      "rio"
-    );
+    expect(activeOption?.getAttribute("data-renderer")).toBe("rio");
   });
 
   it("should render radio buttons for each renderer", () => {

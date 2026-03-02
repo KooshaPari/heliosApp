@@ -45,7 +45,7 @@ export class KeyboardShortcuts {
   private handler: ShortcutHandler | null = null;
   private listeners: Set<(action: ShortcutAction) => void> = new Set();
   private configPath: string;
-  private readonly _isMac: boolean =
+  private isMac: boolean =
     typeof navigator !== "undefined" && /Mac|Darwin/.test(navigator.platform);
 
   constructor(configDir?: string) {

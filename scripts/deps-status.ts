@@ -4,14 +4,14 @@
  * Usage: bun run deps:status [--json]
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
-import type { DepsRegistry } from './deps-types';
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import { join } from "path";
+import type { DepsRegistry } from "./deps-types";
 
 const REPO_ROOT = process.cwd();
-const REGISTRY_PATH = join(REPO_ROOT, 'deps-registry.json');
-const CACHE_DIR = join(REPO_ROOT, '.cache');
-const CACHE_FILE = join(CACHE_DIR, 'deps-status-cache.json');
+const REGISTRY_PATH = join(REPO_ROOT, "deps-registry.json");
+const CACHE_DIR = join(REPO_ROOT, ".cache");
+const CACHE_FILE = join(CACHE_DIR, "deps-status-cache.json");
 
 interface CachedVersion {
   package: string;
@@ -25,7 +25,7 @@ interface StatusReport {
   latestAvailable: string | null;
   channel: string;
   daysSinceUpdate: number;
-  status: 'up-to-date' | 'upgrade-available' | 'stale' | 'error';
+  status: "up-to-date" | "upgrade-available" | "stale" | "error";
   error?: string;
 }
 
@@ -48,13 +48,13 @@ function parseDuration(duration: string): number {
   const match = duration.match(/PT(\d+)([HMS])/);
   if (!match) return 3600000; // default 1 hour
   const [, value, unit] = match;
-  const num = parseInt(value, 10);
+  const num = Number.parseInt(value, 10);
   switch (unit) {
-    case 'H':
+    case "H":
       return num * 3600000;
-    case 'M':
+    case "M":
       return num * 60000;
-    case 'S':
+    case "S":
       return num * 1000;
     default:
       return 3600000;
@@ -66,7 +66,7 @@ function parseDuration(duration: string): number {
  */
 function isCacheFresh(cacheFile: string, maxAge: number): boolean {
   if (!existsSync(cacheFile)) return false;
-  const stat = require('fs').statSync(cacheFile);
+  const stat = require("fs").statSync(cacheFile);
   const ageMs = Date.now() - stat.mtimeMs;
   return ageMs < maxAge;
 }
@@ -79,8 +79,8 @@ function loadCache(maxAge: number): Map<string, string> {
   if (!isCacheFresh(CACHE_FILE, maxAge)) return map;
 
   try {
-    const data = JSON.parse(readFileSync(CACHE_FILE, 'utf-8'));
-    (data as CachedVersion[]).forEach((entry) => {
+    const data = JSON.parse(readFileSync(CACHE_FILE, "utf-8"));
+    (data as CachedVersion[]).forEach(entry => {
       map.set(entry.package, entry.latest);
     });
   } catch (e) {
@@ -95,7 +95,7 @@ function loadCache(maxAge: number): Map<string, string> {
 function saveCache(cached: Map<string, string>): void {
   try {
     if (!existsSync(CACHE_DIR)) {
-      require('fs').mkdirSync(CACHE_DIR, { recursive: true });
+      require("fs").mkdirSync(CACHE_DIR, { recursive: true });
     }
     const data: CachedVersion[] = Array.from(cached.entries()).map(([pkg, version]) => ({
       package: pkg,
@@ -115,8 +115,8 @@ async function queryNpmRegistry(pkg: string): Promise<string | null> {
   try {
     const response = await fetch(`https://registry.npmjs.org/${pkg}`);
     if (!response.ok) return null;
-    const data = (await response.json()) as { 'dist-tags'?: { latest: string } };
-    return data['dist-tags']?.latest || null;
+    const data = (await response.json()) as { "dist-tags"?: { latest: string } };
+    return data["dist-tags"]?.latest || null;
   } catch (e) {
     return null;
   }
@@ -133,8 +133,8 @@ async function queryGitHubReleases(apiUrl: string): Promise<string | null> {
     const releases = (await response.json()) as any[];
     if (releases.length === 0) return null;
     // Get tag_name and remove 'v' prefix if present
-    const tag = releases[0].tag_name || '';
-    return tag.replace(/^v/, '');
+    const tag = releases[0].tag_name || "";
+    return tag.replace(/^v/, "");
   } catch (e) {
     return null;
   }
@@ -143,14 +143,11 @@ async function queryGitHubReleases(apiUrl: string): Promise<string | null> {
 /**
  * Fetch latest version from upstream source.
  */
-async function fetchLatestVersion(
-  pkg: string,
-  source: string,
-): Promise<string | null> {
-  if (source.includes('registry.npmjs.org')) {
-    const pkgName = source.split('/').pop();
+async function fetchLatestVersion(pkg: string, source: string): Promise<string | null> {
+  if (source.includes("registry.npmjs.org")) {
+    const pkgName = source.split("/").pop();
     return queryNpmRegistry(pkgName || pkg);
-  } else if (source.includes('github.com') || source.includes('api.github.com')) {
+  } else if (source.includes("github.com") || source.includes("api.github.com")) {
     return queryGitHubReleases(source);
   }
   return null;
@@ -163,7 +160,7 @@ async function generateReport(jsonFormat: boolean): Promise<void> {
   // Read registry
   let registry: DepsRegistry;
   try {
-    registry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf-8'));
+    registry = JSON.parse(readFileSync(REGISTRY_PATH, "utf-8"));
   } catch (e) {
     console.error(`Error reading registry: ${e}`);
     process.exit(2);
@@ -186,18 +183,18 @@ async function generateReport(jsonFormat: boolean): Promise<void> {
     }
 
     const daysSince = daysSince(dep.lastUpdated);
-    let status: 'up-to-date' | 'upgrade-available' | 'stale' | 'error';
+    let status: "up-to-date" | "upgrade-available" | "stale" | "error";
 
     if (latest === null) {
-      status = 'error';
+      status = "error";
     } else if (latest === dep.currentPin) {
-      status = 'up-to-date';
+      status = "up-to-date";
     } else {
-      status = 'upgrade-available';
+      status = "upgrade-available";
     }
 
     if (daysSince > 30) {
-      status = 'stale';
+      status = "stale";
     }
 
     reports.push({
@@ -218,21 +215,14 @@ async function generateReport(jsonFormat: boolean): Promise<void> {
     console.log(JSON.stringify(reports, null, 2));
   } else {
     // Table format
-    console.log('\nDependency Status Report');
-    console.log('========================\n');
+    console.log("\nDependency Status Report");
+    console.log("========================\n");
 
-    const headers = [
-      'Package',
-      'Current',
-      'Latest',
-      'Channel',
-      'Days Old',
-      'Status',
-    ];
-    const rows = reports.map((r) => [
+    const headers = ["Package", "Current", "Latest", "Channel", "Days Old", "Status"];
+    const rows = reports.map(r => [
       r.package,
       r.currentPin,
-      r.latestAvailable || 'unknown',
+      r.latestAvailable || "unknown",
       r.channel,
       r.daysSinceUpdate.toString(),
       r.status,
@@ -240,42 +230,32 @@ async function generateReport(jsonFormat: boolean): Promise<void> {
 
     // Simple table rendering
     const colWidths = headers.map((h, i) =>
-      Math.max(h.length, Math.max(...rows.map((r) => r[i].length))),
+      Math.max(h.length, Math.max(...rows.map(r => r[i].length)))
     );
 
-    console.log(
-      headers
-        .map((h, i) => h.padEnd(colWidths[i]))
-        .join(' │ '),
-    );
-    console.log(
-      colWidths
-        .map((w) => '─'.repeat(w))
-        .join('─┼─'),
-    );
+    console.log(headers.map((h, i) => h.padEnd(colWidths[i])).join(" │ "));
+    console.log(colWidths.map(w => "─".repeat(w)).join("─┼─"));
 
-    rows.forEach((row) => {
-      console.log(
-        row
-          .map((cell, i) => cell.padEnd(colWidths[i]))
-          .join(' │ '),
-      );
+    rows.forEach(row => {
+      console.log(row.map((cell, i) => cell.padEnd(colWidths[i])).join(" │ "));
     });
 
     console.log();
 
     // Summary
-    const upToDate = reports.filter((r) => r.status === 'up-to-date').length;
-    const upgradeable = reports.filter((r) => r.status === 'upgrade-available').length;
-    const stale = reports.filter((r) => r.status === 'stale').length;
-    const errors = reports.filter((r) => r.status === 'error').length;
+    const upToDate = reports.filter(r => r.status === "up-to-date").length;
+    const upgradeable = reports.filter(r => r.status === "upgrade-available").length;
+    const stale = reports.filter(r => r.status === "stale").length;
+    const errors = reports.filter(r => r.status === "error").length;
 
-    console.log(`Summary: ${upToDate} up-to-date, ${upgradeable} upgradeable, ${stale} stale, ${errors} errors`);
+    console.log(
+      `Summary: ${upToDate} up-to-date, ${upgradeable} upgradeable, ${stale} stale, ${errors} errors`
+    );
   }
 
   // Exit code based on status
-  const hasUpgrades = reports.some((r) => r.status === 'upgrade-available');
-  const hasErrors = reports.some((r) => r.status === 'error');
+  const hasUpgrades = reports.some(r => r.status === "upgrade-available");
+  const hasErrors = reports.some(r => r.status === "error");
 
   if (hasErrors) {
     process.exit(2);
@@ -288,8 +268,8 @@ async function generateReport(jsonFormat: boolean): Promise<void> {
 
 // Main entry point
 const args = process.argv.slice(2);
-const jsonFormat = args.includes('--json');
-generateReport(jsonFormat).catch((e) => {
+const jsonFormat = args.includes("--json");
+generateReport(jsonFormat).catch(e => {
   console.error(`Error: ${e}`);
   process.exit(2);
 });
