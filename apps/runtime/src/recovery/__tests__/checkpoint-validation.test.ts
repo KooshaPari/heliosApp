@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "bun:test";
 import {
-  validateCheckpoint,
   CHECKPOINT_VERSION,
   type Checkpoint,
   type CheckpointSession,
+  validateCheckpoint,
 } from "../checkpoint.js";
 
 describe("Checkpoint Validation", () => {
@@ -44,7 +44,7 @@ describe("Checkpoint Validation", () => {
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.field === "version")).toBe(true);
+      expect(result.errors.some(e => e.field === "version")).toBe(true);
     });
 
     it("should accept current schema version", () => {
@@ -62,7 +62,7 @@ describe("Checkpoint Validation", () => {
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.field === "timestamp")).toBe(true);
+      expect(result.errors.some(e => e.field === "timestamp")).toBe(true);
     });
 
     it("should accept timestamp within future tolerance", () => {
@@ -79,7 +79,7 @@ describe("Checkpoint Validation", () => {
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.field === "timestamp")).toBe(true);
+      expect(result.errors.some(e => e.field === "timestamp")).toBe(true);
     });
 
     it("should accept recent timestamp", () => {
@@ -110,7 +110,7 @@ describe("Checkpoint Validation", () => {
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.field === "sessionId")).toBe(true);
+      expect(result.errors.some(e => e.field === "sessionId")).toBe(true);
     });
 
     it("should reject session missing terminalId", () => {
@@ -131,7 +131,7 @@ describe("Checkpoint Validation", () => {
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.field === "terminalId")).toBe(true);
+      expect(result.errors.some(e => e.field === "terminalId")).toBe(true);
     });
 
     it("should reject session missing laneId", () => {
@@ -152,7 +152,7 @@ describe("Checkpoint Validation", () => {
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.field === "laneId")).toBe(true);
+      expect(result.errors.some(e => e.field === "laneId")).toBe(true);
     });
 
     it("should reject session missing workingDirectory", () => {
@@ -173,7 +173,7 @@ describe("Checkpoint Validation", () => {
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.field === "workingDirectory")).toBe(true);
+      expect(result.errors.some(e => e.field === "workingDirectory")).toBe(true);
     });
   });
 
@@ -208,7 +208,7 @@ describe("Checkpoint Validation", () => {
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.sessionId === "sess-2")).toBe(true);
+      expect(result.errors.some(e => e.sessionId === "sess-2")).toBe(true);
     });
 
     it("should allow partial validity", () => {

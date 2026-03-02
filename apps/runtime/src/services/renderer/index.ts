@@ -23,7 +23,7 @@ export type {
 export type {
   RendererCapabilities,
   CapabilityDiff,
-  CapabilityDiffEntry,
+  CapabilityDiff as CapabilityDiffEntry,
 } from "../../renderer/capabilities.js";
 export { queryCapabilities, compareCapabilities } from "../../renderer/capabilities.js";
 

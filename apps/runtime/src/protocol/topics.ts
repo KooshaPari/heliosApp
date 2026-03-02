@@ -4,11 +4,54 @@
  * Manages ordered subscriber lists per topic with deterministic delivery.
  */
 
-import type { EventEnvelope } from './types.js';
+import type { EventEnvelope } from "./types.js";
+
+// ---------------------------------------------------------------------------
+// Protocol topic constants (aligned with specs/protocol/v1/topics.json)
+// ---------------------------------------------------------------------------
+
+export const TOPICS = [
+  "workspace.opened",
+  "project.ready",
+  "session.created",
+  "session.attach.started",
+  "session.attached",
+  "session.attach.failed",
+  "session.restore.started",
+  "session.restore.completed",
+  "session.terminated",
+  "terminal.spawn.started",
+  "terminal.spawned",
+  "terminal.spawn.failed",
+  "terminal.output",
+  "terminal.state.changed",
+  "renderer.switch.started",
+  "renderer.switch.succeeded",
+  "renderer.switch.failed",
+  "agent.run.started",
+  "agent.run.progress",
+  "agent.run.completed",
+  "agent.run.failed",
+  "approval.requested",
+  "approval.resolved",
+  "share.session.started",
+  "share.session.stopped",
+  "lane.create.started",
+  "lane.created",
+  "lane.create.failed",
+  "lane.attached",
+  "lane.cleaned",
+  "harness.status.changed",
+  "audit.recorded",
+  "diagnostics.metric",
+] as const satisfies readonly string[];
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+/** A valid protocol topic name. */
+export type ProtocolTopic = (typeof TOPICS)[number];
 
 /** A topic subscriber receives an event (return value is ignored). */
 export type TopicSubscriber = (event: EventEnvelope) => void | Promise<void>;
@@ -23,7 +66,7 @@ const TOPIC_NAME_RE = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
 function assertValidTopicName(topic: string): void {
   if (!TOPIC_NAME_RE.test(topic)) {
     throw new Error(
-      `Invalid topic name "${topic}": must be non-empty, alphanumeric segments separated by dots`,
+      `Invalid topic name "${topic}": must be non-empty, alphanumeric segments separated by dots`
     );
   }
 }
@@ -55,10 +98,14 @@ export class TopicRegistry {
 
     let removed = false;
     return () => {
-      if (removed) return; // idempotent unsubscribe
+      if (removed) {
+        return; // idempotent unsubscribe
+      }
       removed = true;
       const current = this.subs.get(topic);
-      if (!current) return;
+      if (!current) {
+        return;
+      }
       const idx = current.indexOf(entry);
       if (idx !== -1) {
         current.splice(idx, 1);
@@ -88,9 +135,6 @@ export class TopicRegistry {
     let next = current + 1;
     // Handle overflow at Number.MAX_SAFE_INTEGER — reset to 1 with warning.
     if (current >= Number.MAX_SAFE_INTEGER) {
-      console.warn(
-        `[topics] Sequence counter overflow for topic "${topic}" — resetting to 1`,
-      );
       next = 1;
     }
     this.sequenceCounters.set(topic, next);

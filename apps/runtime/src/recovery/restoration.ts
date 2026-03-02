@@ -1,7 +1,7 @@
-import type { LocalBus } from "../protocol/bus.js";
+import { randomUUID } from "node:crypto";
+import { promises as fs } from "node:fs";
+import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
 import type { Checkpoint, CheckpointSession } from "./checkpoint.js";
-import { randomUUID } from "crypto";
-import { promises as fs } from "fs";
 
 export interface RestoredSession {
   sessionId: string;
@@ -52,16 +52,16 @@ export class RestorationPipeline {
           // Reattach surviving session
           try {
             await this.reattachZelijjSession(session, matching);
-            const restored_session: RestoredSession = {
+            const restoredSession: RestoredSession = {
               sessionId: session.sessionId,
               terminalId: session.terminalId,
               laneId: session.laneId,
               zellijSessionName: matching,
               status: "reattached",
             };
-            restored.push(restored_session);
-            await this.publishSessionRestored(restored_session);
-          } catch (err) {
+            restored.push(restoredSession);
+            await this.publishSessionRestored(restoredSession);
+          } catch (_err) {
             // Fall through to respawn attempt
             await this.attemptRespawn(session, restored, failed);
           }
@@ -77,20 +77,21 @@ export class RestorationPipeline {
 
       const duration = Date.now() - startTime;
       return { restored, failed, duration };
-    } catch (err) {
+    } catch (_err) {
       const duration = Date.now() - startTime;
-      console.error("Restoration pipeline failed:", err);
       return {
         restored,
         failed: [
           ...failed,
           ...checkpoint.sessions
             .filter(
-              (s) =>
-                !restored.some((r) => r.sessionId === s.sessionId) &&
-                !failed.some((f) => f.sessionId === s.sessionId)
+              s =>
+                !(
+                  restored.some(r => r.sessionId === s.sessionId) ||
+                  failed.some(f => f.sessionId === s.sessionId)
+                )
             )
-            .map((s) => ({
+            .map(s => ({
               sessionId: s.sessionId,
               terminalId: s.terminalId,
               laneId: s.laneId,
@@ -120,11 +121,11 @@ export class RestorationPipeline {
     sessionName: string,
     survivingSessions: string[]
   ): string | undefined {
-    return survivingSessions.find((s) => s === sessionName);
+    return survivingSessions.find(s => s === sessionName);
   }
 
   private async reattachZelijjSession(
-    session: CheckpointSession,
+    _session: CheckpointSession,
     zellijSessionName: string
   ): Promise<void> {
     // In a real implementation, this would use zellij IPC to reattach
@@ -147,7 +148,7 @@ export class RestorationPipeline {
       // For now, just mark as respawned
       const newZelijjSessionName = `restored-${session.sessionId}`;
 
-      const restored_session: RestoredSession = {
+      const restoredSession: RestoredSession = {
         sessionId: session.sessionId,
         terminalId: session.terminalId,
         laneId: session.laneId,
@@ -155,8 +156,8 @@ export class RestorationPipeline {
         status: "respawned",
       };
 
-      restored.push(restored_session);
-      await this.publishSessionRestored(restored_session);
+      restored.push(restoredSession);
+      await this.publishSessionRestored(restoredSession);
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
       const failedSession: FailedSession = {
@@ -175,7 +176,9 @@ export class RestorationPipeline {
   }
 
   private async publishSessionRestored(session: RestoredSession): Promise<void> {
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
 
     await this.bus.publish({
       id: randomUUID(),
@@ -191,7 +194,9 @@ export class RestorationPipeline {
   }
 
   private async publishSessionFailed(session: FailedSession): Promise<void> {
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
 
     await this.bus.publish({
       id: randomUUID(),

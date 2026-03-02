@@ -60,7 +60,6 @@ export {
 
 // State Machine
 export {
-  type TransitionEntry,
   InvalidLaneTransitionError,
   transition,
   recordTransition,

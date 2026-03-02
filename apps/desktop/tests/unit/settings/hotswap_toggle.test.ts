@@ -1,12 +1,13 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { HotSwapToggle } from '../../../src/settings/hotswap_toggle';
+import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+const vi = { fn: mock, spyOn: spyOn };
+import { HotSwapToggle } from "../../../src/settings/hotswap_toggle";
 
-describe('HotSwapToggle', () => {
+describe("HotSwapToggle", () => {
   let container: HTMLDivElement;
   let toggle: HotSwapToggle;
 
   beforeEach(() => {
-    container = document.createElement('div');
+    container = document.createElement("div");
     document.body.appendChild(container);
   });
 
@@ -17,7 +18,7 @@ describe('HotSwapToggle', () => {
     document.body.removeChild(container);
   });
 
-  it('should render toggle in enabled state', () => {
+  it("should render toggle in enabled state", () => {
     const onToggle = vi.fn();
     toggle = new HotSwapToggle({
       isEnabled: true,
@@ -26,11 +27,11 @@ describe('HotSwapToggle', () => {
 
     toggle.mount(container);
 
-    const label = container.querySelector('.hotswap-label');
-    expect(label?.textContent).toContain('Prefer hot-swap when available');
+    const label = container.querySelector(".hotswap-label");
+    expect(label?.textContent).toContain("Prefer hot-swap when available");
   });
 
-  it('should render toggle in disabled state', () => {
+  it("should render toggle in disabled state", () => {
     const onToggle = vi.fn();
     toggle = new HotSwapToggle({
       isEnabled: false,
@@ -39,11 +40,11 @@ describe('HotSwapToggle', () => {
 
     toggle.mount(container);
 
-    const label = container.querySelector('.hotswap-label');
-    expect(label?.textContent).toContain('Always use restart-with-restore');
+    const label = container.querySelector(".hotswap-label");
+    expect(label?.textContent).toContain("Always use restart-with-restore");
   });
 
-  it('should toggle when clicked', () => {
+  it("should toggle when clicked", () => {
     const onToggle = vi.fn();
     toggle = new HotSwapToggle({
       isEnabled: true,
@@ -52,13 +53,13 @@ describe('HotSwapToggle', () => {
 
     toggle.mount(container);
 
-    const toggleSwitch = container.querySelector('.hotswap-switch') as HTMLElement;
+    const toggleSwitch = container.querySelector(".hotswap-switch") as HTMLElement;
     toggleSwitch?.click();
 
     expect(onToggle).toHaveBeenCalledWith(false);
   });
 
-  it('should show correct tooltip for enabled state', () => {
+  it("should show correct tooltip for enabled state", () => {
     const onToggle = vi.fn();
     toggle = new HotSwapToggle({
       isEnabled: true,
@@ -67,11 +68,11 @@ describe('HotSwapToggle', () => {
 
     toggle.mount(container);
 
-    const tooltip = container.querySelector('.tooltip-icon');
-    expect(tooltip?.getAttribute('title')).toContain('3s');
+    const tooltip = container.querySelector(".tooltip-icon");
+    expect(tooltip?.getAttribute("title")).toContain("3s");
   });
 
-  it('should show correct tooltip for disabled state', () => {
+  it("should show correct tooltip for disabled state", () => {
     const onToggle = vi.fn();
     toggle = new HotSwapToggle({
       isEnabled: false,
@@ -80,11 +81,11 @@ describe('HotSwapToggle', () => {
 
     toggle.mount(container);
 
-    const tooltip = container.querySelector('.tooltip-icon');
-    expect(tooltip?.getAttribute('title')).toContain('8s');
+    const tooltip = container.querySelector(".tooltip-icon");
+    expect(tooltip?.getAttribute("title")).toContain("8s");
   });
 
-  it('should update when update() is called', () => {
+  it("should update when update() is called", () => {
     const onToggle = vi.fn();
     toggle = new HotSwapToggle({
       isEnabled: true,
@@ -93,16 +94,16 @@ describe('HotSwapToggle', () => {
 
     toggle.mount(container);
 
-    let label = container.querySelector('.hotswap-label');
-    expect(label?.textContent).toContain('Prefer hot-swap');
+    let label = container.querySelector(".hotswap-label");
+    expect(label?.textContent).toContain("Prefer hot-swap");
 
     toggle.update({ isEnabled: false });
 
-    label = container.querySelector('.hotswap-label');
-    expect(label?.textContent).toContain('Always use restart');
+    label = container.querySelector(".hotswap-label");
+    expect(label?.textContent).toContain("Always use restart");
   });
 
-  it('should handle keyboard activation', () => {
+  it("should handle keyboard activation", () => {
     const onToggle = vi.fn();
     toggle = new HotSwapToggle({
       isEnabled: true,
@@ -111,14 +112,14 @@ describe('HotSwapToggle', () => {
 
     toggle.mount(container);
 
-    const toggleSwitch = container.querySelector('.hotswap-switch') as HTMLElement;
-    const spaceEvent = new KeyboardEvent('keydown', { key: ' ' });
+    const toggleSwitch = container.querySelector(".hotswap-switch") as HTMLElement;
+    const spaceEvent = new KeyboardEvent("keydown", { key: " " });
     toggleSwitch?.dispatchEvent(spaceEvent);
 
     expect(onToggle).toHaveBeenCalled();
   });
 
-  it('should have proper accessibility attributes', () => {
+  it("should have proper accessibility attributes", () => {
     const onToggle = vi.fn();
     toggle = new HotSwapToggle({
       isEnabled: true,
@@ -127,8 +128,8 @@ describe('HotSwapToggle', () => {
 
     toggle.mount(container);
 
-    const toggleSwitch = container.querySelector('.hotswap-switch');
-    expect(toggleSwitch?.getAttribute('role')).toBe('switch');
-    expect(toggleSwitch?.getAttribute('aria-checked')).toBe('true');
+    const toggleSwitch = container.querySelector(".hotswap-switch");
+    expect(toggleSwitch?.getAttribute("role")).toBe("switch");
+    expect(toggleSwitch?.getAttribute("aria-checked")).toBe("true");
   });
 });

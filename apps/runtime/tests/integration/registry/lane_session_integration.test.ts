@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import type { BindingTriple } from "../../../src/registry/binding_triple.js";
+import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 
 describe("Lane/Session Lifecycle Integration", () => {
   let registry: TerminalRegistry;
@@ -83,7 +83,7 @@ describe("Lane/Session Lifecycle Integration", () => {
       const lanes = ["lane-1", "lane-2"];
       const terminals = [];
 
-      for (let lane of lanes) {
+      for (const lane of lanes) {
         for (let i = 0; i < 3; i++) {
           const terminalId = `terminal-${lane}-${i}`;
           terminals.push(terminalId);
@@ -100,7 +100,7 @@ describe("Lane/Session Lifecycle Integration", () => {
 
       const remaining = registry.getAll();
       expect(remaining).toHaveLength(3);
-      expect(remaining.every((b) => b.binding.laneId === "lane-2")).toBe(true);
+      expect(remaining.every(b => b.binding.laneId === "lane-2")).toBe(true);
     });
   });
 

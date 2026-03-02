@@ -40,13 +40,16 @@ jobs:
               pull_number: number
             });
             
-            // Find latest approvals
-            const approvals = {};
+            // Track latest review state per reviewer to handle DISMISSED/CHANGES_REQUESTED
+            const latestReviewByUser = {};
             reviews.data.forEach(review => {
-              if (review.state === 'APPROVED') {
-                approvals[review.user.login] = true;
+              if (review.state !== 'COMMENTED') {
+                latestReviewByUser[review.user.login] = review.state;
               }
             });
+            const approvals = Object.fromEntries(
+              Object.entries(latestReviewByUser).filter(([, state]) => state === 'APPROVED')
+            );
             
             // Get commit status checks
             const commit = pr.data.head;
@@ -92,28 +95,38 @@ jobs:
             core.setOutput('all-checks-passed', allChecksPassed);
             core.setOutput('has-approval', hasApproval);
             core.setOutput('is-author', isAuthor);
-            core.setOutput('missing-requirements', getMissingRequirements(allChecksPassed, hasApproval, isAuthor));
+            const missing = [];
+            if (!allChecksPassed) missing.push('quality-gates');
+            if (!hasApproval) missing.push('approvals');
+            if (!isAuthor) missing.push('author');
+            core.setOutput('missing-requirements', missing.join(','));
       
       - name: Comment on missing requirements
         if: steps.check.outputs.can-self-merge == 'false'
         uses: actions/github-script@v7
+        env:
+          ALL_CHECKS_PASSED: ${{ steps.check.outputs.all-checks-passed }}
+          HAS_APPROVAL: ${{ steps.check.outputs.has-approval }}
+          IS_AUTHOR: ${{ steps.check.outputs.is-author }}
         with:
           script: |
             const { owner, repo, number } = context.issue;
-            const missingReqs = "${{ steps.check.outputs.missing-requirements }}".split(',');
-            
-            let message = '⚠️ **Self-merge is blocked due to missing requirements:**\n\n';
-            if (!${{ steps.check.outputs.all-checks-passed }}) {
-              message += '- ❌ Not all quality gates have passed\n';
+            const allChecksPassed = process.env.ALL_CHECKS_PASSED === 'true';
+            const hasApproval = process.env.HAS_APPROVAL === 'true';
+            const isAuthor = process.env.IS_AUTHOR === 'true';
+
+            let message = 'Self-merge is blocked due to missing requirements:\n\n';
+            if (!allChecksPassed) {
+              message += '- Not all quality gates have passed\n';
             }
-            if (!${{ steps.check.outputs.has-approval }}) {
-              message += '- ❌ PR does not have required review approval\n';
+            if (!hasApproval) {
+              message += '- PR does not have required review approval\n';
             }
-            if (!${{ steps.check.outputs.is-author }}) {
-              message += '- ℹ️ Only the PR author can self-merge\n';
+            if (!isAuthor) {
+              message += '- Only the PR author can self-merge\n';
             }
             message += '\nPlease ensure all checks pass before merging.';
-            
+
             github.rest.issues.createComment({
               owner,
               repo,
@@ -131,14 +144,5 @@ jobs:
               owner,
               repo,
               issue_number: number,
-              body: '✅ All merge requirements satisfied. You may now self-merge this PR.'
+              body: 'All merge requirements satisfied. You may now self-merge this PR.'
             });
-
-# Helper function (in comments - needs to be inline in actual workflow)
-# function getMissingRequirements(checksPassed, approval, isAuthor) {
-#   const missing = [];
-#   if (!checksPassed) missing.push('quality-gates');
-#   if (!approval) missing.push('approvals');
-#   if (!isAuthor) missing.push('author');
-#   return missing.join(',');
-# }

@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, rmSync, existsSync, statSync, readFileSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { randomBytes } from "node:crypto";
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { CredentialNotFoundError, CredentialStore } from "../credential-store.js";
 import { EncryptionService } from "../encryption.js";
-import { CredentialStore, CredentialNotFoundError, CredentialAlreadyExistsError } from "../credential-store.js";
 
 function makeStore(dataDir: string): CredentialStore {
   const fixedKey = randomBytes(32);
@@ -47,7 +47,9 @@ describe("CredentialStore: store and retrieve", () => {
   });
 
   it("stores file with 0600 permissions on unix", async () => {
-    if (process.platform === "win32") return;
+    if (process.platform === "win32") {
+      return;
+    }
     await store.store("providerA", "ws1", "myKey", "secret");
     const filePath = join(tmpDir, "secrets", "providerA", "ws1", "myKey.enc");
     const mode = statSync(filePath).mode & 0o777;
@@ -107,33 +109,23 @@ describe("CredentialStore: store and retrieve", () => {
   });
 
   it("rejects path traversal in providerId", async () => {
-    await expect(
-      store.store("../evil", "ws1", "key", "val")
-    ).rejects.toThrow();
+    await expect(store.store("../evil", "ws1", "key", "val")).rejects.toThrow();
   });
 
   it("rejects path traversal in workspaceId", async () => {
-    await expect(
-      store.store("providerA", "../../etc", "key", "val")
-    ).rejects.toThrow();
+    await expect(store.store("providerA", "../../etc", "key", "val")).rejects.toThrow();
   });
 
   it("rejects null bytes in name", async () => {
-    await expect(
-      store.store("providerA", "ws1", "key\0evil", "val")
-    ).rejects.toThrow();
+    await expect(store.store("providerA", "ws1", "key\0evil", "val")).rejects.toThrow();
   });
 
   it("rejects slash in name", async () => {
-    await expect(
-      store.store("providerA", "ws1", "key/evil", "val")
-    ).rejects.toThrow();
+    await expect(store.store("providerA", "ws1", "key/evil", "val")).rejects.toThrow();
   });
 
   it("rejects backslash in name", async () => {
-    await expect(
-      store.store("providerA", "ws1", "key\\evil", "val")
-    ).rejects.toThrow();
+    await expect(store.store("providerA", "ws1", "key\\evil", "val")).rejects.toThrow();
   });
 });
 
@@ -151,7 +143,9 @@ describe("CredentialStore: rotate preserves file permissions", () => {
   });
 
   it("file permissions are 0600 after rotate (unix only)", async () => {
-    if (process.platform === "win32") return;
+    if (process.platform === "win32") {
+      return;
+    }
     await store.store("providerA", "ws1", "rotKey", "original");
     await store.rotate("providerA", "ws1", "rotKey", "rotated", "corr-1");
     const filePath = join(tmpDir, "secrets", "providerA", "ws1", "rotKey.enc");

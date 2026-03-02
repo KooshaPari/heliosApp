@@ -54,7 +54,6 @@ export type {
 export { RedactionEngine } from "../../secrets/redaction-engine.js";
 
 // Redaction Rules
-export type { RedactionRule };
 export {
   getDefaultRules,
   RedactionRuleManager,

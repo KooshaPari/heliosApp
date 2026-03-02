@@ -1,10 +1,10 @@
 // Performance test for detection and remediation
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
+import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
 
 describe("Performance", () => {
   let engine: RemediationEngine;
@@ -24,7 +24,7 @@ describe("Performance", () => {
       laneRegistry.register({
         laneId,
         workspaceId: `ws-${i}`,
-        state: "active",
+        state: "active" as any,
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -110,7 +110,7 @@ describe("Performance", () => {
     // Create 50 lanes with various states
     for (let i = 0; i < 50; i++) {
       const laneId = `lane-state-${i}`;
-      const state = i % 4 === 0 ? "recovering" : "active";
+      const state = (i % 4 === 0 ? "recovering" : "active") as any;
 
       laneRegistry.register({
         laneId,

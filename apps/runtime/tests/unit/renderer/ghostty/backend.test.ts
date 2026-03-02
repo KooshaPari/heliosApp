@@ -7,14 +7,14 @@
  * Tags: FR-011-001, FR-011-003, FR-011-004
  */
 
-import { describe, test, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
+import type { RenderSurface, RendererConfig } from "../../../../src/renderer/adapter.js";
 import {
+  GhosttyAlreadyInitializedError,
   GhosttyBackend,
   GhosttyNotInitializedError,
   GhosttyNotRunningError,
-  GhosttyAlreadyInitializedError,
 } from "../../../../src/renderer/ghostty/backend.js";
-import type { RendererConfig, RenderSurface } from "../../../../src/renderer/adapter.js";
 import type { PtyWriter } from "../../../../src/renderer/ghostty/input.js";
 
 const TEST_CONFIG: RendererConfig = {
@@ -44,7 +44,7 @@ function makeInfiniteStream(): { stream: ReadableStream<Uint8Array>; cancel: () 
   const stream = new ReadableStream<Uint8Array>({
     async pull(controller) {
       // Wait indefinitely unless cancelled
-      await new Promise<void>((resolve) => {
+      await new Promise<void>(resolve => {
         const id = setInterval(() => {
           if (cancelled) {
             clearInterval(id);
@@ -60,7 +60,12 @@ function makeInfiniteStream(): { stream: ReadableStream<Uint8Array>; cancel: () 
       cancelled = true;
     },
   });
-  return { stream, cancel: () => { cancelled = true; } };
+  return {
+    stream,
+    cancel: () => {
+      cancelled = true;
+    },
+  };
 }
 
 describe("GhosttyBackend - lifecycle (T012)", () => {
@@ -188,7 +193,7 @@ describe("GhosttyBackend - stream bind/unbind (T012, T010)", () => {
     const stream = makeStream([new Uint8Array([0x41]), new Uint8Array([0x42])]);
     backend.bindStream("pty-1", stream);
     // Wait for pump to complete
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise(r => setTimeout(r, 50));
     const latencies = backend.getPipingLatencies("pty-1");
     expect(latencies.length).toBeGreaterThanOrEqual(0);
   });
@@ -197,7 +202,7 @@ describe("GhosttyBackend - stream bind/unbind (T012, T010)", () => {
     const stream = makeStream([new Uint8Array([0x41])]);
     backend.bindStream("pty-1", stream);
     // Wait for pump to finish (stream closes after 1 chunk)
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise(r => setTimeout(r, 50));
     // Stream ended but binding still active until explicit unbind
     expect(backend.getBoundStreamCount()).toBe(1);
   });
@@ -214,7 +219,7 @@ describe("GhosttyBackend - input handling (T012)", () => {
   test("handleInput when not running throws", async () => {
     await backend.stop();
     expect(() => backend.handleInput("pty-1", new Uint8Array([0x41]))).toThrow(
-      GhosttyNotRunningError,
+      GhosttyNotRunningError
     );
   });
 
@@ -341,7 +346,9 @@ describe("GhosttyBackend - render loop (T012)", () => {
 
   test("onRenderEvent registers handler", () => {
     let called = false;
-    backend.onRenderEvent(() => { called = true; });
+    backend.onRenderEvent(() => {
+      called = true;
+    });
     expect(called).toBe(false);
   });
 
@@ -355,7 +362,9 @@ describe("GhosttyBackend - render loop (T012)", () => {
 
   test("onCrash registers handler", () => {
     let called = false;
-    backend.onCrash(() => { called = true; });
+    backend.onCrash(() => {
+      called = true;
+    });
     expect(called).toBe(false);
   });
 });

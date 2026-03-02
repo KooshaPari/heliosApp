@@ -6,15 +6,11 @@
  * SC-025-002: Provider crash isolation across lanes.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
-import {
-  A2ARouterAdapter,
-  HealthMonitoringCoordinator,
-  type A2AEndpoint,
-} from "../a2a-router.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { NormalizedProviderError } from "../errors.js";
+import { A2ARouterAdapter, HealthMonitoringCoordinator } from "../a2a-router.js";
 import type { ProviderHealthStatus } from "../adapter.js";
+import { NormalizedProviderError } from "../errors.js";
 
 describe("A2A Router Adapter", () => {
   let adapter: A2ARouterAdapter;
@@ -42,11 +38,11 @@ describe("A2A Router Adapter", () => {
             capabilities: ["task-execution"],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
 
-      await adapter.init(config);
+      await adapter.init(config as any);
 
       const health = await adapter.health();
       expect(health.state).toBe("healthy");
@@ -55,11 +51,11 @@ describe("A2A Router Adapter", () => {
     it("should reject missing endpoints", async () => {
       const config = {
         endpoints: [],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
 
-      await expect(adapter.init(config)).rejects.toThrow(/init failed/i);
+      await expect(adapter.init(config as any)).rejects.toThrow(/init failed/i);
     });
 
     it("should sort endpoints by priority", async () => {
@@ -84,11 +80,11 @@ describe("A2A Router Adapter", () => {
             capabilities: [],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
 
-      await adapter.init(config);
+      await adapter.init(config as any);
 
       const endpoints = adapter.getEndpoints();
       expect(endpoints[0].id).toBe("agent-1");
@@ -106,14 +102,14 @@ describe("A2A Router Adapter", () => {
             capabilities: [],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
 
-      await adapter.init(config);
+      await adapter.init(config as any);
 
       const events = bus.getEvents();
-      const initEvent = events.find((e) => e.topic === "provider.a2a.initialized");
+      const initEvent = events.find(e => e.topic === "provider.a2a.initialized");
       expect(initEvent).toBeDefined();
       expect(initEvent?.payload?.endpointCount).toBe(1);
     });
@@ -136,10 +132,10 @@ describe("A2A Router Adapter", () => {
             capabilities: ["inference"],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
-      await adapter.init(config);
+      await adapter.init(config as any);
     });
 
     it("should delegate to endpoint with matching capabilities", async () => {
@@ -211,9 +207,7 @@ describe("A2A Router Adapter", () => {
       );
 
       const events = bus.getEvents();
-      const completedEvent = events.find(
-        (e) => e.topic === "provider.a2a.delegation.completed"
-      );
+      const completedEvent = events.find(e => e.topic === "provider.a2a.delegation.completed");
       expect(completedEvent).toBeDefined();
       expect(completedEvent?.payload?.correlationId).toBe("corr-123");
     });
@@ -249,10 +243,10 @@ describe("A2A Router Adapter", () => {
             capabilities: ["inference"],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
-      await adapter.init(config);
+      await adapter.init(config as any);
     });
 
     it("should route to healthy endpoint", async () => {
@@ -322,10 +316,10 @@ describe("A2A Router Adapter", () => {
             capabilities: [],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
-      await adapter.init(config);
+      await adapter.init(config as any);
     });
 
     it("should report healthy initially", async () => {
@@ -351,10 +345,10 @@ describe("A2A Router Adapter", () => {
             capabilities: [],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
-      await adapter.init(config);
+      await adapter.init(config as any);
     });
 
     it("should terminate successfully", async () => {
@@ -373,7 +367,7 @@ describe("A2A Router Adapter", () => {
       await adapter.terminate();
 
       const events = bus.getEvents();
-      const terminatedEvent = events.find((e) => e.topic === "provider.a2a.terminated");
+      const terminatedEvent = events.find(e => e.topic === "provider.a2a.terminated");
       expect(terminatedEvent).toBeDefined();
     });
 
@@ -404,10 +398,10 @@ describe("A2A Router Adapter", () => {
             capabilities: ["inference"],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
-      await adapter.init(config);
+      await adapter.init(config as any);
     });
 
     it("should emit error event on delegation failure", async () => {
@@ -422,14 +416,12 @@ describe("A2A Router Adapter", () => {
           },
           "corr-123"
         );
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
       const events = bus.getEvents();
-      const errorEvent = events.find(
-        (e) => e.topic === "provider.a2a.delegation.failed"
-      );
+      const errorEvent = events.find(e => e.topic === "provider.a2a.delegation.failed");
       expect(errorEvent).toBeDefined();
     });
   });
@@ -538,8 +530,8 @@ describe("Health Monitoring Coordinator", () => {
       coordinator.registerProvider("mcp-provider-1", 5000, checkFunction);
 
       // Since initial state is unavailable, they won't be returned as healthy
-      const healthyACP = coordinator.getHealthyProvidersByType("acp");
-      expect(healthyACP).toBeDefined();
+      const healthyAcp = coordinator.getHealthyProvidersByType("acp");
+      expect(healthyAcp).toBeDefined();
     });
   });
 });
@@ -561,12 +553,12 @@ describe("Provider Crash Isolation (SC-025-002)", () => {
           capabilities: ["task"],
         },
       ],
-      timeoutMs: 30000,
+      timeout: 30000,
       failoverEnabled: true,
     };
 
-    await laneAAdapter.init(config);
-    await laneBAdapter.init(config);
+    await laneAAdapter.init(config as any);
+    await laneBAdapter.init(config as any);
 
     // Lane A executes successfully
     const resultA = await laneAAdapter.execute(
@@ -613,10 +605,10 @@ describe("Error Taxonomy Completeness (SC-025-004)", () => {
           capabilities: ["task"],
         },
       ],
-      timeoutMs: 30000,
+      timeout: 30000,
       failoverEnabled: true,
     };
-    await adapter.init(config);
+    await adapter.init(config as any);
   });
 
   it("should map all delegation errors to normalized error codes", async () => {
@@ -630,7 +622,7 @@ describe("Error Taxonomy Completeness (SC-025-004)", () => {
         },
         "corr-123"
       )
-      .catch((e) => e);
+      .catch(e => e);
 
     expect(error).toBeInstanceOf(NormalizedProviderError);
     expect((error as NormalizedProviderError).code).toBeTruthy();

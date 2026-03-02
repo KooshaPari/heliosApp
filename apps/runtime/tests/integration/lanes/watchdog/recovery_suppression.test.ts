@@ -1,10 +1,10 @@
 // Integration tests for recovery-aware suppression
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
+import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
 
 describe("Recovery Suppression", () => {
   let engine: RemediationEngine;
@@ -22,7 +22,7 @@ describe("Recovery Suppression", () => {
     laneRegistry.register({
       laneId: "lane-abc123",
       workspaceId: "ws1",
-      state: "recovering",
+      state: "recovering" as any,
       worktreePath: "/tmp/lane-abc123",
       parTaskPid: null,
       attachedAgents: [],
@@ -55,7 +55,7 @@ describe("Recovery Suppression", () => {
     laneRegistry.register({
       laneId,
       workspaceId: "ws2",
-      state: "recovering",
+      state: "recovering" as any,
       worktreePath: "/tmp/lane-xyz",
       parTaskPid: null,
       attachedAgents: [],
@@ -132,7 +132,7 @@ describe("Recovery Suppression", () => {
     laneRegistry.register({
       laneId: "lane-active",
       workspaceId: "ws1",
-      state: "active",
+      state: "active" as any,
       worktreePath: "/tmp/lane-active",
       parTaskPid: null,
       attachedAgents: [],
@@ -144,7 +144,7 @@ describe("Recovery Suppression", () => {
     laneRegistry.register({
       laneId: "lane-recovering",
       workspaceId: "ws2",
-      state: "recovering",
+      state: "recovering" as any,
       worktreePath: "/tmp/lane-recovering",
       parTaskPid: null,
       attachedAgents: [],
@@ -175,7 +175,7 @@ describe("Recovery Suppression", () => {
     const suggestions = await engine.generateSuggestions(orphans);
 
     // Active lane should have suggestion, recovering should not
-    const paths = suggestions.map((s) => s.resource.path);
+    const paths = suggestions.map(s => s.resource.path);
     expect(paths).toContain("/tmp/lane-active");
     expect(paths).not.toContain("/tmp/lane-recovering");
   });

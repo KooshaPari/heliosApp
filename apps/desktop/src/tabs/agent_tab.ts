@@ -1,4 +1,4 @@
-import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
+import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
 
 export interface AgentAction {
   timestamp: string;
@@ -26,7 +26,7 @@ export interface AgentTabState extends TabState {
 export class AgentTab extends TabSurface {
   private agentStatus: "idle" | "running" | "error" = "idle";
   private actions: AgentAction[] = [];
-  private errorMessage: string | null = null;
+  // errorMessage is inherited from TabSurface (protected)
   private contentEl: HTMLElement | null = null;
 
   constructor() {
@@ -153,7 +153,6 @@ export class AgentTab extends TabSurface {
     restartBtn.style.fontSize = "12px";
     restartBtn.addEventListener("click", () => {
       this.agentStatus = "running";
-      console.log("Restart agent action triggered");
     });
 
     const logBtn = document.createElement("button");
@@ -165,9 +164,7 @@ export class AgentTab extends TabSurface {
     logBtn.style.borderRadius = "3px";
     logBtn.style.cursor = "pointer";
     logBtn.style.fontSize = "12px";
-    logBtn.addEventListener("click", () => {
-      console.log("View full log action triggered");
-    });
+    logBtn.addEventListener("click", () => {});
 
     const copyBtn = document.createElement("button");
     copyBtn.textContent = "Copy";
@@ -179,12 +176,10 @@ export class AgentTab extends TabSurface {
     copyBtn.style.cursor = "pointer";
     copyBtn.style.fontSize = "12px";
     copyBtn.addEventListener("click", async () => {
-      const text = this.actions.map((a) => `[${a.timestamp}] ${a.action}: ${a.output}`).join("\n");
+      const text = this.actions.map(a => `[${a.timestamp}] ${a.action}: ${a.output}`).join("\n");
       try {
         await navigator.clipboard.writeText(text);
-      } catch {
-        console.error("Failed to copy to clipboard");
-      }
+      } catch {}
     });
 
     footerEl.appendChild(restartBtn);
@@ -260,7 +255,7 @@ export class AgentTab extends TabSurface {
       ...baseState,
       agentStatus: this.agentStatus,
       scrollPosition: this.contentEl?.scrollTop,
-      actionCount: this.actions.length
+      actionCount: this.actions.length,
     };
   }
 
@@ -284,19 +279,19 @@ export class AgentTab extends TabSurface {
         timestamp: new Date(now.getTime() - 10000).toISOString(),
         action: "Initialize session",
         status: "success",
-        output: `Session ${context.sessionId} initialized`
+        output: `Session ${context.sessionId} initialized`,
       },
       {
         timestamp: new Date(now.getTime() - 5000).toISOString(),
         action: "Analyze context",
         status: "success",
-        output: `Analyzed workspace ${context.workspaceId}`
+        output: `Analyzed workspace ${context.workspaceId}`,
       },
       {
         timestamp: now.toISOString(),
         action: "Waiting for commands",
-        status: "pending"
-      }
+        status: "pending",
+      },
     ];
   }
 }

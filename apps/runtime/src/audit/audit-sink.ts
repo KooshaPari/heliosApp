@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import type { LocalBus } from "../protocol/bus.js";
+import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
 
 // ---------------------------------------------------------------------------
@@ -52,7 +52,7 @@ export class AuditSink {
     topics?: string[];
     persistRecord?: (record: AuditRecord) => Promise<void>;
   }) {
-    this.redactFn = opts?.redactFn ?? ((s) => s);
+    this.redactFn = opts?.redactFn ?? (s => s);
     this.watchedTopics = new Set(
       opts?.topics ?? [
         "secrets.credential.created",
@@ -79,11 +79,12 @@ export class AuditSink {
    */
   async ingest(envelope: LocalBusEnvelope): Promise<AuditRecord | null> {
     const topic = envelope.topic ?? "";
-    if (!this.watchedTopics.has(topic)) return null;
+    if (!this.watchedTopics.has(topic)) {
+      return null;
+    }
 
     const correlationId: string =
-      (envelope.payload?.correlationId as string | undefined) ??
-      randomBytes(8).toString("hex");
+      (envelope.payload?.correlationId as string | undefined) ?? randomBytes(8).toString("hex");
 
     // Serialize payload, apply redaction, re-parse
     const rawPayload = JSON.stringify(envelope.payload ?? {});
@@ -152,14 +153,14 @@ export class AuditSink {
     let results = [...this.records];
 
     if (filter?.topic) {
-      results = results.filter((r) => r.topic === filter.topic);
+      results = results.filter(r => r.topic === filter.topic);
     }
     if (filter?.correlationId) {
-      results = results.filter((r) => r.correlationId === filter.correlationId);
+      results = results.filter(r => r.correlationId === filter.correlationId);
     }
     if (filter?.since) {
       const since = filter.since;
-      results = results.filter((r) => new Date(r.timestamp) >= since);
+      results = results.filter(r => new Date(r.timestamp) >= since);
     }
 
     return results;
@@ -172,7 +173,7 @@ export class AuditSink {
    * do not match secret patterns and are preserved verbatim.
    */
   export(): AuditExportBundle {
-    const redactedRecords = this.records.map((r) => {
+    const redactedRecords = this.records.map(r => {
       const rawPayload = JSON.stringify(r.payload);
       const redactedPayload = this.redactFn(rawPayload);
       let parsedPayload: Record<string, unknown>;

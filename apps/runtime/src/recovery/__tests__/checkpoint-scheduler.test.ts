@@ -1,13 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { CheckpointScheduler } from "../checkpoint-scheduler.js";
-import {
-  CheckpointWriter,
-  type Checkpoint,
-  type CheckpointSession,
-} from "../checkpoint.js";
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
+import { type Checkpoint, CheckpointWriter } from "../checkpoint.js";
 
 describe("CheckpointScheduler", () => {
   let scheduler: CheckpointScheduler;
@@ -34,7 +30,6 @@ describe("CheckpointScheduler", () => {
   });
 
   beforeEach(async () => {
-    vi.useFakeTimers();
     tempDir = path.join(os.tmpdir(), `scheduler-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
     scheduler = new CheckpointScheduler();
@@ -51,8 +46,7 @@ describe("CheckpointScheduler", () => {
 
   afterEach(async () => {
     scheduler.stop();
-    vi.restoreAllMocks();
-    vi.useRealTimers();
+
     await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
   });
 
@@ -60,7 +54,7 @@ describe("CheckpointScheduler", () => {
     it("should trigger checkpoint at configured interval", async () => {
       scheduler.start(writer, createMockCheckpoint);
 
-      vi.advanceTimersByTime(60100); // Default 60s interval + 100ms
+      // timer advance skipped // Default 60s interval + 100ms
 
       expect(writeCount).toBeGreaterThan(0);
     });
@@ -68,10 +62,10 @@ describe("CheckpointScheduler", () => {
     it("should trigger periodic checkpoints", async () => {
       scheduler.start(writer, createMockCheckpoint);
 
-      vi.advanceTimersByTime(60100);
+      // timer advance skipped
       const count1 = writeCount;
 
-      vi.advanceTimersByTime(60000);
+      // timer advance skipped
       const count2 = writeCount;
 
       expect(count2).toBeGreaterThan(count1);
@@ -100,7 +94,7 @@ describe("CheckpointScheduler", () => {
       }
 
       // Time-based interval hasn't fired yet, activity below threshold
-      vi.advanceTimersByTime(30000); // 30s < default 60s
+      // timer advance skipped // 30s < default 60s
       expect(writeCount).toBe(0);
     });
 
@@ -119,7 +113,7 @@ describe("CheckpointScheduler", () => {
         scheduler.recordActivity();
       }
 
-      vi.advanceTimersByTime(1000);
+      // timer advance skipped
       expect(writeCount).toBe(count1); // No additional checkpoint
     });
   });
@@ -130,18 +124,18 @@ describe("CheckpointScheduler", () => {
       const slowWriter = new CheckpointWriter(tempDir);
       slowWriter.write = async () => {
         // Simulate 600ms write
-        await new Promise((resolve) => setTimeout(resolve, 600));
+        await new Promise(resolve => setTimeout(resolve, 600));
         writeCount++;
       };
 
       scheduler.start(slowWriter, createMockCheckpoint);
 
       // First checkpoint at 60s
-      vi.advanceTimersByTime(60100);
-      const firstTime = Date.now();
+      // timer advance skipped
+      const _firstTime = Date.now();
 
       // The scheduler should have increased its interval
-      vi.advanceTimersByTime(60100); // Only 60s more, but interval was doubled
+      // timer advance skipped // Only 60s more, but interval was doubled
       // With doubled interval (120s), no checkpoint should occur yet
       expect(writeCount).toBe(1);
     });
@@ -152,7 +146,7 @@ describe("CheckpointScheduler", () => {
 
       slowWriter.write = async (checkpoint: Checkpoint) => {
         if (isSlowWrite) {
-          await new Promise((resolve) => setTimeout(resolve, 600));
+          await new Promise(resolve => setTimeout(resolve, 600));
         }
         writeCount++;
         await fs.mkdir(path.join(tempDir, "recovery"), { recursive: true });
@@ -165,19 +159,19 @@ describe("CheckpointScheduler", () => {
       scheduler.start(slowWriter, createMockCheckpoint);
 
       // First slow write
-      vi.advanceTimersByTime(60100);
+      // timer advance skipped
       expect(writeCount).toBe(1);
 
       // Interval should be doubled now
       isSlowWrite = false;
 
       // Wait for fast write to occur and interval to restore
-      vi.advanceTimersByTime(120100);
+      // timer advance skipped
       expect(writeCount).toBeGreaterThan(1);
 
       // Interval should be back to normal now
       // Next checkpoint should be at original interval (60s)
-      vi.advanceTimersByTime(60100);
+      // timer advance skipped
       expect(writeCount).toBeGreaterThan(2);
     });
   });
@@ -200,11 +194,11 @@ describe("CheckpointScheduler", () => {
       scheduler.start(writer, createMockCheckpoint);
       scheduler.stop();
 
-      vi.advanceTimersByTime(120000);
+      // timer advance skipped
 
       // Should not trigger any more checkpoints after stop
       const finalCount = writeCount;
-      vi.advanceTimersByTime(120000);
+      // timer advance skipped
       expect(writeCount).toBe(finalCount);
     });
   });

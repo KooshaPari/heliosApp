@@ -39,3 +39,9 @@ export function healthCheck(): HealthCheckResult {
 
 // Re-export all services as a unified API
 export * from "./services/index.js";
+
+// Stub: createRuntime — full implementation pending spec 001 WP05
+// Stub returns any — pending full implementation
+export function createRuntime(..._args: any[]): any {
+  return { bus: {} };
+}

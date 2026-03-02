@@ -1,4 +1,4 @@
-import { type Component, createSignal, For, Show } from "solid-js";
+import { type Component, For, Show, createSignal } from "solid-js";
 
 type ModelGroup = {
   provider: string;
@@ -10,7 +10,7 @@ type ModelSelectorProps = {
   onSelect: (modelId: string) => void;
 };
 
-export const ModelSelector: Component<ModelSelectorProps> = (props) => {
+export const ModelSelector: Component<ModelSelectorProps> = props => {
   const [isOpen, setIsOpen] = createSignal(false);
 
   const modelGroups: ModelGroup[] = [
@@ -30,16 +30,16 @@ export const ModelSelector: Component<ModelSelectorProps> = (props) => {
     },
     {
       provider: "Server (vLLM)",
-      models: [
-        { id: "vllm/default", name: "vLLM Default", available: false },
-      ],
+      models: [{ id: "vllm/default", name: "vLLM Default", available: false }],
     },
   ];
 
   const activeModelName = () => {
     for (const group of modelGroups) {
       const found = group.models.find(m => m.id === props.activeModel);
-      if (found) return found.name;
+      if (found) {
+        return found.name;
+      }
     }
     return props.activeModel.split("/").pop() ?? props.activeModel;
   };
@@ -49,43 +49,71 @@ export const ModelSelector: Component<ModelSelectorProps> = (props) => {
       <button
         onClick={() => setIsOpen(!isOpen())}
         style={{
-          background: "none", border: "1px solid #45475a", color: "#a6adc8",
-          "border-radius": "6px", padding: "4px 8px", cursor: "pointer",
-          "font-size": "12px", "white-space": "nowrap",
+          background: "none",
+          border: "1px solid #45475a",
+          color: "#a6adc8",
+          "border-radius": "6px",
+          padding: "4px 8px",
+          cursor: "pointer",
+          "font-size": "12px",
+          "white-space": "nowrap",
         }}
       >
         {activeModelName()} ▾
       </button>
       <Show when={isOpen()}>
-        <div style={{
-          position: "absolute", bottom: "100%", left: "0", "margin-bottom": "4px",
-          "background-color": "#313244", "border-radius": "8px", border: "1px solid #45475a",
-          padding: "8px 0", "min-width": "220px", "z-index": "100",
-          "box-shadow": "0 4px 12px rgba(0,0,0,0.4)",
-        }}>
+        <div
+          style={{
+            position: "absolute",
+            bottom: "100%",
+            left: "0",
+            "margin-bottom": "4px",
+            "background-color": "#313244",
+            "border-radius": "8px",
+            border: "1px solid #45475a",
+            padding: "8px 0",
+            "min-width": "220px",
+            "z-index": "100",
+            "box-shadow": "0 4px 12px rgba(0,0,0,0.4)",
+          }}
+        >
           <For each={modelGroups}>
-            {(group) => (
+            {group => (
               <div>
-                <div style={{
-                  padding: "4px 12px", "font-size": "11px", color: "#6c7086",
-                  "text-transform": "uppercase", "letter-spacing": "0.5px",
-                }}>
+                <div
+                  style={{
+                    padding: "4px 12px",
+                    "font-size": "11px",
+                    color: "#6c7086",
+                    "text-transform": "uppercase",
+                    "letter-spacing": "0.5px",
+                  }}
+                >
                   {group.provider}
                 </div>
                 <For each={group.models}>
-                  {(model) => (
+                  {model => (
                     <div
-                      onClick={() => { if (model.available) { props.onSelect(model.id); setIsOpen(false); } }}
+                      onClick={() => {
+                        if (model.available) {
+                          props.onSelect(model.id);
+                          setIsOpen(false);
+                        }
+                      }}
                       style={{
-                        padding: "6px 12px", cursor: model.available ? "pointer" : "default",
+                        padding: "6px 12px",
+                        cursor: model.available ? "pointer" : "default",
                         color: model.available ? "#cdd6f4" : "#585b70",
                         "font-size": "13px",
-                        "background-color": model.id === props.activeModel ? "#45475a" : "transparent",
+                        "background-color":
+                          model.id === props.activeModel ? "#45475a" : "transparent",
                       }}
                     >
                       {model.name}
                       <Show when={!model.available}>
-                        <span style={{ "font-size": "11px", "margin-left": "8px", color: "#585b70" }}>
+                        <span
+                          style={{ "font-size": "11px", "margin-left": "8px", color: "#585b70" }}
+                        >
                           (not configured)
                         </span>
                       </Show>

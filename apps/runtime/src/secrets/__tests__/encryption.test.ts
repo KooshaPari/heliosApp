@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { randomBytes } from "node:crypto";
 import { EncryptionService } from "../encryption.js";
 
@@ -64,9 +64,7 @@ describe("EncryptionService", () => {
   it("throws on unsupported version", async () => {
     const payload = await svc.encrypt("secret", "provider-a");
     const bad = { ...payload, version: 99 };
-    await expect(svc.decrypt(bad, "provider-a")).rejects.toThrow(
-      "Unsupported key version"
-    );
+    await expect(svc.decrypt(bad, "provider-a")).rejects.toThrow("Unsupported key version");
   });
 
   it("fails to decrypt with wrong provider salt", async () => {

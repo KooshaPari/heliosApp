@@ -5,22 +5,18 @@
  */
 
 import type { ZellijCli } from "./cli.js";
+import { SessionAlreadyExistsError, SessionNotFoundError, ZellijCliError } from "./errors.js";
+import type { MuxEventEmitter, SessionReattachedEvent } from "./events.js";
+import { MuxEventType } from "./events.js";
 import type { MuxRegistry } from "./registry.js";
 import type { TopologyTracker } from "./topology.js";
-import type { MuxEventEmitter } from "./events.js";
-import { MuxEventType } from "./events.js";
 import type {
   MuxSession,
-  SessionOptions,
   PaneRecord,
-  TabRecord,
   PtyManagerInterface,
+  SessionOptions,
+  TabRecord,
 } from "./types.js";
-import {
-  SessionNotFoundError,
-  SessionAlreadyExistsError,
-  ZellijCliError,
-} from "./errors.js";
 
 /**
  * Generate the canonical session name for a lane.
@@ -43,7 +39,7 @@ export class ZellijSessionManager {
       topology?: TopologyTracker;
       ptyManager?: PtyManagerInterface;
       emitter?: MuxEventEmitter;
-    },
+    }
   ) {
     this.cli = cli;
     this.registry = registry;
@@ -55,26 +51,23 @@ export class ZellijSessionManager {
   /**
    * T002 - Create a new zellij session bound to a lane.
    */
-  async createSession(
-    laneId: string,
-    options?: SessionOptions
-  ): Promise<MuxSession> {
+  async createSession(laneId: string, options?: SessionOptions): Promise<MuxSession> {
     const sessionName = sessionNameForLane(laneId);
     const startMs = performance.now();
 
     // Check if session already exists
     const existing = await this.cli.listSessions();
-    if (existing.some((s) => s.name === sessionName)) {
+    if (existing.some(s => s.name === sessionName)) {
       throw new SessionAlreadyExistsError(sessionName);
     }
 
     // Build create command args
-    const args: string[] = ["--session", sessionName];
+    const _args: string[] = ["--session", sessionName];
 
     // Create a detached session: use `zellij --session <name> action new-pane`
     // Alternative: `zellij attach --create <name>` in detached mode
     // We'll use: zellij setup and attach --create to create a named session
-    const createArgs: string[] = ["attach", sessionName, "--create"];
+    const _createArgs: string[] = ["attach", sessionName, "--create"];
     if (options?.cwd) {
       // There's no direct --cwd for attach, but we can set it via env
     }
@@ -86,28 +79,20 @@ export class ZellijSessionManager {
     //
     // Simplest reliable approach: spawn `zellij attach <name> --create` backgrounded,
     // then immediately detach.
-    const result = await this.cli.run(
-      ["attach", sessionName, "--create", "--force-run-client"],
-      { timeout: 10_000 }
-    );
+    const result = await this.cli.run(["attach", sessionName, "--create", "--force-run-client"], {
+      timeout: 10_000,
+    });
 
     // If the command exited (it normally would in non-interactive mode), check for errors
     if (result.exitCode !== 0 && !result.stdout.includes(sessionName)) {
-      throw new ZellijCliError(
-        `attach ${sessionName} --create`,
-        result.exitCode,
-        result.stderr
-      );
+      throw new ZellijCliError(`attach ${sessionName} --create`, result.exitCode, result.stderr);
     }
 
     // Verify session was created
     const postSessions = await this.cli.listSessions();
-    const created = postSessions.find((s) => s.name === sessionName);
+    const created = postSessions.find(s => s.name === sessionName);
 
-    const durationMs = performance.now() - startMs;
-    console.debug(
-      `[zellij-session] createSession(${laneId}) completed in ${durationMs.toFixed(1)}ms`
-    );
+    const _durationMs = performance.now() - startMs;
 
     const muxSession: MuxSession = {
       sessionName,
@@ -135,7 +120,7 @@ export class ZellijSessionManager {
 
     // Verify the session exists
     const sessions = await this.cli.listSessions();
-    const target = sessions.find((s) => s.name === sessionName);
+    const target = sessions.find(s => s.name === sessionName);
 
     if (!target) {
       throw new SessionNotFoundError(sessionName);
@@ -178,12 +163,7 @@ export class ZellijSessionManager {
               });
               this.topology.bindPty(sessionName, paneTopo.paneId, ptyResult.ptyId);
               record.ptyId = ptyResult.ptyId;
-            } catch (err) {
-              console.warn(
-                `[zellij-session] PTY re-bind failed for pane ${paneTopo.paneId}:`,
-                err,
-              );
-            }
+            } catch (_err) {}
           }
         }
 
@@ -199,10 +179,7 @@ export class ZellijSessionManager {
       tabs = await this.queryTabs(sessionName);
     }
 
-    const durationMs = performance.now() - startMs;
-    console.debug(
-      `[zellij-session] reattachSession(${sessionName}) completed in ${durationMs.toFixed(1)}ms`,
-    );
+    const _durationMs = performance.now() - startMs;
 
     const muxSession: MuxSession = {
       sessionName,
@@ -218,7 +195,7 @@ export class ZellijSessionManager {
 
     // T012: Emit reattach event
     if (this.emitter) {
-      this.emitter.emitTyped({
+      this.emitter.emitTyped<SessionReattachedEvent>({
         type: MuxEventType.SESSION_REATTACHED,
         sessionName,
         laneId,
@@ -244,34 +221,23 @@ export class ZellijSessionManager {
       !result.stderr.includes("No session")
     ) {
       // Retry once after a delay
-      await new Promise((resolve) => setTimeout(resolve, 2_000));
+      await new Promise(resolve => setTimeout(resolve, 2_000));
       const retry = await this.cli.run(["kill-session", sessionName]);
       if (
         retry.exitCode !== 0 &&
         !retry.stderr.includes("not found") &&
         !retry.stderr.includes("No session")
       ) {
-        console.error(
-          `[zellij-session] Failed to kill session ${sessionName}: ${retry.stderr}`
-        );
       }
     }
 
     // Verify session is gone
     const sessions = await this.cli.listSessions();
-    if (sessions.some((s) => s.name === sessionName)) {
-      console.warn(
-        `[zellij-session] Session ${sessionName} still exists after kill attempt`
-      );
+    if (sessions.some(s => s.name === sessionName)) {
     }
 
     // Remove from binding registry regardless
     this.registry.unbind(sessionName);
-
-    // Publish terminated event (log-based for now; bus integration in later WPs)
-    console.debug(
-      `[zellij-session] mux.session.terminated: ${sessionName}`
-    );
   }
 
   /**
@@ -279,16 +245,8 @@ export class ZellijSessionManager {
    */
   private async queryPanes(sessionName: string): Promise<PaneRecord[]> {
     try {
-      const result = await this.cli.run([
-        "--session",
-        sessionName,
-        "action",
-        "dump-layout",
-      ]);
+      const result = await this.cli.run(["--session", sessionName, "action", "dump-layout"]);
       if (result.exitCode !== 0) {
-        console.warn(
-          `[zellij-session] Could not query panes for ${sessionName}: ${result.stderr}`
-        );
         return [];
       }
       // Basic pane extraction - in practice zellij dump-layout returns KDL
@@ -304,12 +262,7 @@ export class ZellijSessionManager {
    */
   private async queryTabs(sessionName: string): Promise<TabRecord[]> {
     try {
-      const result = await this.cli.run([
-        "--session",
-        sessionName,
-        "action",
-        "dump-layout",
-      ]);
+      const result = await this.cli.run(["--session", sessionName, "action", "dump-layout"]);
       if (result.exitCode !== 0) {
         return [];
       }

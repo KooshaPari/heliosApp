@@ -1,5 +1,5 @@
-import { AuditEvent } from './event';
-import { AuditRingBuffer } from './ring-buffer';
+import type { AuditEvent } from "./event";
+import { AuditRingBuffer } from "./ring-buffer";
 
 /**
  * Extended metrics including ring buffer and overflow tracking.
@@ -87,7 +87,7 @@ export class DefaultAuditSink implements AuditSink {
 
   constructor(
     private storage: AuditStorage,
-    ringBufferCapacity: number = 10_000,
+    ringBufferCapacity = 10_000
   ) {
     this.ringBuffer = new AuditRingBuffer(ringBufferCapacity);
     this.startPeriodicFlush();
@@ -104,9 +104,7 @@ export class DefaultAuditSink implements AuditSink {
       this.overflowQueue.push(evicted);
 
       // Try to persist overflow immediately
-      this.persistOverflow().catch((err) => {
-        console.error('[AuditSink] Overflow persistence failed:', err);
-      });
+      this.persistOverflow().catch(_err => {});
     }
 
     // Also buffer for periodic flush
@@ -120,10 +118,7 @@ export class DefaultAuditSink implements AuditSink {
     // Check if buffer is at capacity
     if (this.buffer.length >= this.MAX_BUFFER_SIZE) {
       // Trigger immediate persistence without awaiting
-      this.persistWithRetry().catch((err) => {
-        // Log error but do not throw; event stays in buffer
-        console.error('[AuditSink] Persistence failed, events retained in buffer:', err);
-      });
+      this.persistWithRetry().catch(_err => {});
     }
   }
 
@@ -135,7 +130,10 @@ export class DefaultAuditSink implements AuditSink {
 
     // Keep trying until all events are persisted
     let retries = 0;
-    while ((this.buffer.length > 0 || this.overflowQueue.length > 0) && retries < this.MAX_RETRIES) {
+    while (
+      (this.buffer.length > 0 || this.overflowQueue.length > 0) &&
+      retries < this.MAX_RETRIES
+    ) {
       try {
         // First flush overflow queue
         if (this.overflowQueue.length > 0) {
@@ -154,7 +152,7 @@ export class DefaultAuditSink implements AuditSink {
           throw new Error(`[AuditSink] Failed to flush after ${this.MAX_RETRIES} retries: ${err}`);
         }
         // Wait before retry
-        await new Promise((resolve) => setTimeout(resolve, this.RETRY_BACKOFF_MS * retries));
+        await new Promise(resolve => setTimeout(resolve, this.RETRY_BACKOFF_MS * retries));
       }
     }
   }
@@ -192,23 +190,21 @@ export class DefaultAuditSink implements AuditSink {
           // Clear buffer on success
           this.buffer = [];
           break;
-        } catch (err) {
+        } catch (_err) {
           this.metrics.persistenceFailures++;
           this.metrics.retryCount++;
 
           retries++;
           if (retries < this.MAX_RETRIES) {
             // Exponential backoff
-            await new Promise((resolve) =>
-              setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1)),
+            await new Promise(resolve =>
+              setTimeout(resolve, this.RETRY_BACKOFF_MS * 2 ** (retries - 1))
             );
           }
         }
       }
 
       if (this.buffer.length > 0) {
-        // Events still in buffer after retries; they will be retried on next write
-        console.warn('[AuditSink] Events retained in buffer after retries; will retry on next write');
       }
     } finally {
       this.persistenceInProgress = false;
@@ -233,15 +229,15 @@ export class DefaultAuditSink implements AuditSink {
         // Clear overflow queue on success
         this.overflowQueue = [];
         break;
-      } catch (err) {
+      } catch (_err) {
         this.metrics.sqliteWriteFailures!++;
         this.metrics.sqliteRetryCount!++;
 
         retries++;
         if (retries < this.MAX_RETRIES) {
           // Exponential backoff
-          await new Promise((resolve) =>
-            setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1)),
+          await new Promise(resolve =>
+            setTimeout(resolve, this.RETRY_BACKOFF_MS * 2 ** (retries - 1))
           );
         }
       }
@@ -254,9 +250,7 @@ export class DefaultAuditSink implements AuditSink {
   private startPeriodicFlush(): void {
     this.flushTimer = setInterval(() => {
       if (this.buffer.length > 0 || this.overflowQueue.length > 0) {
-        this.persistWithRetry().catch((err) => {
-          console.error('[AuditSink] Periodic flush failed:', err);
-        });
+        this.persistWithRetry().catch(_err => {});
       }
     }, this.FLUSH_INTERVAL_MS) as unknown as number;
   }

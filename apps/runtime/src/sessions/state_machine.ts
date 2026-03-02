@@ -1,5 +1,5 @@
-import type { LocalBus } from "../protocol/bus";
-import type { ProtocolTopic } from "../protocol/topics";
+import type { ProtocolBus as LocalBus } from "../protocol/bus.ts";
+import type { ProtocolTopic } from "../protocol/topics.ts";
 
 export type LaneState =
   | "new"
@@ -45,7 +45,7 @@ export type RuntimeEvent =
 export const INITIAL_RUNTIME_STATE: RuntimeState = {
   lane: "new",
   session: "detached",
-  terminal: "idle"
+  terminal: "idle",
 };
 
 const LANE_TRANSITIONS: Record<LaneState, LaneState[]> = {
@@ -57,7 +57,7 @@ const LANE_TRANSITIONS: Record<LaneState, LaneState[]> = {
   shared: ["running", "failed", "cleaning", "closed"],
   failed: ["provisioning", "closed"],
   cleaning: ["closed"],
-  closed: []
+  closed: [],
 };
 
 export type LaneRecord = {
@@ -98,11 +98,17 @@ export class LaneLifecycleService {
       display_name: input.display_name,
       status: "new",
       created_at: nowIso,
-      updated_at: nowIso
+      updated_at: nowIso,
     };
 
     this.lanes.set(laneId, lane);
-    await this.transition(laneId, "provisioning", "lane.create.started", "lane.create.requested", correlationId);
+    await this.transition(
+      laneId,
+      "provisioning",
+      "lane.create.started",
+      "lane.create.requested",
+      correlationId
+    );
     await this.transition(laneId, "ready", "lane.created", "lane.create.succeeded", correlationId);
     return this.getRequired(laneId);
   }
@@ -181,8 +187,8 @@ export class LaneLifecycleService {
       payload: {
         runtime_event: runtimeEvent,
         lane_id: lane.lane_id,
-        state: lane.status
-      }
+        state: lane.status,
+      },
     });
   }
 }

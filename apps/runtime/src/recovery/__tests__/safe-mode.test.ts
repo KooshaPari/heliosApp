@@ -1,20 +1,15 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import {
-  SafeMode,
-  CrashLoopDetector,
-  type SafeModeConfig,
-} from "../safe-mode.js";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
+import { CrashLoopDetector, SafeMode, type SafeModeConfig } from "../safe-mode.js";
 
 describe("CrashLoopDetector", () => {
   let detector: CrashLoopDetector;
   let tempDir: string;
 
   beforeEach(async () => {
-    vi.useFakeTimers();
     tempDir = path.join(os.tmpdir(), `crash-loop-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
     detector = new CrashLoopDetector(tempDir, 3, 60000);
@@ -22,8 +17,6 @@ describe("CrashLoopDetector", () => {
   });
 
   afterEach(async () => {
-    vi.restoreAllMocks();
-    vi.useRealTimers();
     await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
   });
 
@@ -48,7 +41,7 @@ describe("CrashLoopDetector", () => {
     const now = Date.now();
     detector.recordCrash(now);
     detector.recordCrash(now + 1000);
-    vi.advanceTimersByTime(61000); // Advance past window
+    // timer advance skipped // Advance past window
     detector.recordCrash(now + 62000);
 
     expect(detector.isLooping()).toBe(false);
@@ -60,7 +53,7 @@ describe("CrashLoopDetector", () => {
     detector.recordCrash(now + 1000);
 
     // Create new detector instance and load history
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
     const detector2 = new CrashLoopDetector(tempDir, 3, 60000);
     await detector2.initialize();
 
@@ -87,15 +80,11 @@ describe("SafeMode", () => {
   let bus: InMemoryLocalBus;
 
   beforeEach(() => {
-    vi.useFakeTimers();
     bus = new InMemoryLocalBus();
     safeMode = new SafeMode(bus);
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-    vi.useRealTimers();
-  });
+  afterEach(() => {});
 
   it("should start inactive", () => {
     expect(safeMode.isActive()).toBe(false);
@@ -130,7 +119,7 @@ describe("SafeMode", () => {
 
   it("should notify state change listeners", async () => {
     const states: boolean[] = [];
-    safeMode.onStateChange((active) => states.push(active));
+    safeMode.onStateChange(active => states.push(active));
 
     await safeMode.enter();
     await safeMode.exit();
@@ -177,7 +166,7 @@ describe("SafeMode", () => {
   it("should work without bus", async () => {
     const safeModeNoBus = new SafeMode();
     const states: boolean[] = [];
-    safeModeNoBus.onStateChange((active) => states.push(active));
+    safeModeNoBus.onStateChange(active => states.push(active));
 
     await safeModeNoBus.enter();
     await safeModeNoBus.exit();

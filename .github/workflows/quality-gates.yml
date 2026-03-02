@@ -57,7 +57,7 @@ jobs:
 
       - name: Gate 4 - E2E Tests
         id: gate-e2e
-        run: playwright test
+        run: bun run test:e2e
         timeout-minutes: 5
         continue-on-error: false
 

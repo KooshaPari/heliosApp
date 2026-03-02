@@ -3,10 +3,10 @@
  * Persists policy rules to disk with in-memory caching and hot-swap support.
  */
 
-import { promises as fs } from 'fs';
-import * as path from 'path';
-import { PolicyRule, PolicyRuleInput } from './types';
-import { PolicyRuleSet } from './rules';
+import { promises as fs } from "node:fs";
+import * as path from "node:path";
+import { PolicyRuleSet } from "./rules";
+import type { PolicyRule } from "./types";
 
 export type RulesChangedCallback = (workspaceId: string, rules: PolicyRule[]) => void;
 
@@ -20,7 +20,7 @@ export class PolicyStorage {
   private changeCallbacks: RulesChangedCallback[] = [];
   private debounceTimers: Map<string, NodeJS.Timeout> = new Map();
 
-  constructor(policyDir: string = path.join(process.env.HOME || '/tmp', '.helios/policies')) {
+  constructor(policyDir: string = path.join(process.env.HOME || "/tmp", ".helios/policies")) {
     this.policyDir = policyDir;
   }
 
@@ -57,7 +57,7 @@ export class PolicyStorage {
     const filePath = path.join(this.policyDir, `${workspaceId}.json`);
 
     try {
-      const content = await fs.readFile(filePath, 'utf-8');
+      const content = await fs.readFile(filePath, "utf-8");
       const rules = JSON.parse(content) as PolicyRule[];
 
       // Validate rules
@@ -65,7 +65,7 @@ export class PolicyStorage {
 
       return rules;
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         // File doesn't exist: return empty (deny-by-default)
         return [];
       }
@@ -90,7 +90,7 @@ export class PolicyStorage {
     try {
       // Write to temp file
       const content = JSON.stringify(rules, null, 2);
-      await fs.writeFile(tempPath, content, 'utf-8');
+      await fs.writeFile(tempPath, content, "utf-8");
 
       // Atomic rename
       await fs.rename(tempPath, filePath);
@@ -143,8 +143,7 @@ export class PolicyStorage {
             }
             this.cache.set(workspaceId, ruleSet);
             this.notifyChangedDebounced(workspaceId, rules);
-          } catch (error) {
-            console.error(`Failed to reload policy rules for ${workspaceId}:`, error);
+          } catch (_error) {
             // Keep previous rules on error
           }
         }
@@ -158,7 +157,7 @@ export class PolicyStorage {
     const timer = setInterval(checkFile, 500); // Check every 500ms
 
     this.watchers.set(workspaceId, {
-      abort: () => clearInterval(timer)
+      abort: () => clearInterval(timer),
     } as any);
 
     // Check immediately
@@ -195,23 +194,27 @@ export class PolicyStorage {
    */
   private validateRules(rules: PolicyRule[]): void {
     if (!Array.isArray(rules)) {
-      throw new Error('Rules must be an array');
+      throw new Error("Rules must be an array");
     }
 
     for (const rule of rules) {
-      if (!rule.id || typeof rule.id !== 'string') {
-        throw new Error('Rule must have an id field');
+      if (!rule.id || typeof rule.id !== "string") {
+        throw new Error("Rule must have an id field");
       }
-      if (!rule.pattern || typeof rule.pattern !== 'string') {
+      if (!rule.pattern || typeof rule.pattern !== "string") {
         throw new Error(`Rule ${rule.id} must have a pattern field`);
       }
-      if (!rule.patternType || !['glob', 'regex'].includes(rule.patternType)) {
+      if (!(rule.patternType && ["glob", "regex"].includes(rule.patternType))) {
         throw new Error(`Rule ${rule.id} has invalid patternType`);
       }
-      if (!rule.classification || !['safe', 'needs-approval', 'blocked'].includes(rule.classification)) {
+      if (
+        !(
+          rule.classification && ["safe", "needs-approval", "blocked"].includes(rule.classification)
+        )
+      ) {
         throw new Error(`Rule ${rule.id} has invalid classification`);
       }
-      if (typeof rule.priority !== 'number') {
+      if (typeof rule.priority !== "number") {
         throw new Error(`Rule ${rule.id} must have a numeric priority`);
       }
     }

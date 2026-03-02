@@ -5,10 +5,10 @@
  * start new -> rebind streams. On failure the old renderer is restored.
  */
 
-import type { RendererAdapter, RenderSurface, RendererConfig } from "./adapter.js";
+import type { RenderSurface, RendererAdapter, RendererConfig } from "./adapter.js";
+import type { RendererEventBus } from "./index.js";
 import type { RendererRegistry } from "./registry.js";
 import type { RendererStateMachine } from "./state_machine.js";
-import type { RendererEventBus } from "./index.js";
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -56,21 +56,21 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
       reject(new SwitchTimeoutError(ms));
     }, ms);
     promise.then(
-      (v) => {
+      v => {
         clearTimeout(timer);
         resolve(v);
       },
       (e: unknown) => {
         clearTimeout(timer);
         reject(e);
-      },
+      }
     );
   });
 }
 
 function rebindStreams(
   adapter: RendererAdapter,
-  streams: Map<string, ReadableStream<Uint8Array>>,
+  streams: Map<string, ReadableStream<Uint8Array>>
 ): void {
   for (const [ptyId, stream] of streams) {
     adapter.bindStream(ptyId, stream);
@@ -79,7 +79,7 @@ function rebindStreams(
 
 function unbindStreams(
   adapter: RendererAdapter,
-  streams: Map<string, ReadableStream<Uint8Array>>,
+  streams: Map<string, ReadableStream<Uint8Array>>
 ): void {
   for (const [ptyId] of streams) {
     adapter.unbindStream(ptyId);
@@ -107,7 +107,7 @@ function unbindStreams(
 export async function switchRenderer(
   fromId: string,
   toId: string,
-  ctx: SwitchContext,
+  ctx: SwitchContext
 ): Promise<void> {
   if (fromId === toId) {
     throw new SwitchSameRendererError(fromId);
@@ -149,7 +149,7 @@ export async function switchRenderer(
         // 5. Mark new renderer as active
         registry.setActive(toId);
       })(),
-      timeoutMs,
+      timeoutMs
     );
 
     // Success

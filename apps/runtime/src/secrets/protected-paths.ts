@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import type { LocalBus } from "../protocol/bus.js";
+import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
 
 // ---------------------------------------------------------------------------
@@ -143,13 +143,19 @@ function matchesPattern(filePath: string, pattern: string): boolean {
   }
 
   // Direct filename match (no glob)
-  if (!pattern.includes("*") && !pattern.includes("?")) {
+  if (!(pattern.includes("*") || pattern.includes("?"))) {
     const base = filePath.split("/").pop() ?? filePath;
     const patBase = pattern.split("/").pop() ?? pattern;
-    if (base === patBase) return true;
+    if (base === patBase) {
+      return true;
+    }
     // Full path match
-    if (filePath.endsWith(pattern) || filePath === pattern) return true;
-    if (expandedPath.endsWith(expandedPattern) || expandedPath === expandedPattern) return true;
+    if (filePath.endsWith(pattern) || filePath === pattern) {
+      return true;
+    }
+    if (expandedPath.endsWith(expandedPattern) || expandedPath === expandedPattern) {
+      return true;
+    }
     return false;
   }
 
@@ -168,7 +174,9 @@ function globToRegex(glob: string): string {
     if (ch === "*" && glob[i + 1] === "*") {
       result += ".*";
       i += 2;
-      if (glob[i] === "/") i++; // consume optional slash after **
+      if (glob[i] === "/") {
+        i++; // consume optional slash after **
+      }
     } else if (ch === "*") {
       result += "[^/]*";
       i++;
@@ -176,14 +184,14 @@ function globToRegex(glob: string): string {
       result += "[^/]";
       i++;
     } else if (/[.+^${}()|[\]\\]/.test(ch)) {
-      result += "\\" + ch;
+      result += `\\${ch}`;
       i++;
     } else {
       result += ch;
       i++;
     }
   }
-  return "(^|/|^.*[/\\\\])" + result + "($|[/\\\\])";
+  return `(^|/|^.*[/\\\\])${result}($|[/\\\\])`;
 }
 
 // ---------------------------------------------------------------------------
@@ -194,7 +202,9 @@ function extractFilePaths(command: string): string[] {
   const paths: string[] = [];
   const tokens = tokenizeCommand(command);
 
-  if (tokens.length === 0) return paths;
+  if (tokens.length === 0) {
+    return paths;
+  }
 
   const cmd = tokens[0];
 
@@ -204,7 +214,9 @@ function extractFilePaths(command: string): string[] {
       const tok = tokens[i];
       if ((tok === "-d" || tok === "--data" || tok === "--data-binary") && i + 1 < tokens.length) {
         const next = tokens[i + 1];
-        if (next.startsWith("@")) paths.push(next.slice(1));
+        if (next.startsWith("@")) {
+          paths.push(next.slice(1));
+        }
         i++;
       } else if (tok.startsWith("@")) {
         paths.push(tok.slice(1));
@@ -217,9 +229,13 @@ function extractFilePaths(command: string): string[] {
   if (cmd === "scp") {
     for (let i = 1; i < tokens.length; i++) {
       const tok = tokens[i];
-      if (tok.startsWith("-")) continue;
+      if (tok.startsWith("-")) {
+        continue;
+      }
       // Skip remote:path patterns (contain colon)
-      if (tok.includes(":")) continue;
+      if (tok.includes(":")) {
+        continue;
+      }
       paths.push(tok);
     }
     return paths;
@@ -268,7 +284,9 @@ function tokenizeCommand(command: string): string[] {
       current += ch;
     }
   }
-  if (current.length > 0) tokens.push(current);
+  if (current.length > 0) {
+    tokens.push(current);
+  }
   return tokens;
 }
 
@@ -320,7 +338,11 @@ export class ProtectedPathConfig {
       isDefault: false,
     };
     this.patterns.set(id, entry);
-    void this._emit("secrets.protected_paths.config.changed", { action: "add", patternId: id, pattern });
+    void this._emit("secrets.protected_paths.config.changed", {
+      action: "add",
+      patternId: id,
+      pattern,
+    });
     return entry;
   }
 
@@ -334,14 +356,18 @@ export class ProtectedPathConfig {
 
   disablePattern(id: string): void {
     const p = this.patterns.get(id);
-    if (!p) throw new Error(`Pattern '${id}' not found`);
+    if (!p) {
+      throw new Error(`Pattern '${id}' not found`);
+    }
     p.enabled = false;
     void this._emit("secrets.protected_paths.config.changed", { action: "disable", patternId: id });
   }
 
   enablePattern(id: string): void {
     const p = this.patterns.get(id);
-    if (!p) throw new Error(`Pattern '${id}' not found`);
+    if (!p) {
+      throw new Error(`Pattern '${id}' not found`);
+    }
     p.enabled = true;
     void this._emit("secrets.protected_paths.config.changed", { action: "enable", patternId: id });
   }
@@ -354,35 +380,48 @@ export class ProtectedPathConfig {
     const raw = readFileSync(path, "utf8");
     const parsed = JSON.parse(raw) as ProtectedPathPattern[];
     for (const p of parsed) {
-      if (!p.id || !p.pattern) continue;
+      if (!(p.id && p.pattern)) {
+        continue;
+      }
       this.patterns.set(p.id, { ...p });
     }
-    void this._emit("secrets.protected_paths.config.changed", { action: "import", count: parsed.length });
+    void this._emit("secrets.protected_paths.config.changed", {
+      action: "import",
+      count: parsed.length,
+    });
   }
 
   async exportPatterns(path: string): Promise<void> {
     const data = Array.from(this.patterns.values());
     const dir = dirname(path);
-    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+    }
     writeFileSync(path, JSON.stringify(data, null, 2), "utf8");
   }
 
   async loadFromDisk(): Promise<void> {
-    if (!this.configPath || !existsSync(this.configPath)) return;
+    if (!(this.configPath && existsSync(this.configPath))) {
+      return;
+    }
     await this.importPatterns(this.configPath);
   }
 
   async saveToDisk(): Promise<void> {
-    if (!this.configPath) return;
+    if (!this.configPath) {
+      return;
+    }
     await this.exportPatterns(this.configPath);
   }
 
   getEnabledPatterns(): ProtectedPathPattern[] {
-    return Array.from(this.patterns.values()).filter((p) => p.enabled);
+    return Array.from(this.patterns.values()).filter(p => p.enabled);
   }
 
   private async _emit(topic: string, payload: Record<string, unknown>): Promise<void> {
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
     const envelope: LocalBusEnvelope = {
       id: `protected-paths:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
       type: "event",
@@ -420,9 +459,14 @@ export class ProtectedPathDetector {
    * Scans a terminal command for protected path references.
    * Returns all matches and fires warning callbacks + bus events.
    */
-  check(command: string, opts?: { terminalId?: string; correlationId?: string }): ProtectedPathMatch[] {
+  check(
+    command: string,
+    opts?: { terminalId?: string; correlationId?: string }
+  ): ProtectedPathMatch[] {
     const filePaths = extractFilePaths(command);
-    if (filePaths.length === 0) return [];
+    if (filePaths.length === 0) {
+      return [];
+    }
 
     const enabledPatterns = this.config.getEnabledPatterns();
     const matches: ProtectedPathMatch[] = [];
@@ -432,10 +476,14 @@ export class ProtectedPathDetector {
       for (const pattern of enabledPatterns) {
         if (matchesPattern(filePath, pattern.pattern)) {
           const dedupeKey = `${pattern.id}:${filePath}`;
-          if (seen.has(dedupeKey)) continue;
+          if (seen.has(dedupeKey)) {
+            continue;
+          }
           seen.add(dedupeKey);
 
-          if (this._isDebounced(pattern.id, filePath)) continue;
+          if (this._isDebounced(pattern.id, filePath)) {
+            continue;
+          }
 
           // Redact the command (strip any inline secret-looking values)
           const redactedCommand = redactCommandForAudit(command);
@@ -502,12 +550,16 @@ export class ProtectedPathDetector {
   private _isDebounced(patternId: string, matchedPath: string): boolean {
     const key = `${patternId}:${matchedPath}`;
     const ack = this.acknowledgments.get(key);
-    if (!ack) return false;
+    if (!ack) {
+      return false;
+    }
     return Date.now() - ack.acknowledgedAt < DEBOUNCE_MS;
   }
 
   private async _emit(topic: string, payload: Record<string, unknown>): Promise<void> {
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
     const envelope: LocalBusEnvelope = {
       id: `protected-paths:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
       type: "event",

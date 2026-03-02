@@ -4,11 +4,11 @@
  */
 import { describe, expect, it } from "bun:test";
 import {
-  RendererStateMachine,
   InvalidRendererTransitionError,
+  RendererStateMachine,
   transition,
 } from "../../../src/renderer/state_machine.js";
-import type { RendererEvent, RendererState } from "../../../src/renderer/state_machine.js";
+import type { RendererEvent } from "../../../src/renderer/state_machine.js";
 
 describe("RendererStateMachine", () => {
   it("starts in uninitialized state", () => {
@@ -109,9 +109,18 @@ describe("RendererStateMachine", () => {
     sm.transition("stop_complete");
 
     const events: RendererEvent[] = [
-      "init", "init_success", "init_failure", "switch_request",
-      "stop_request", "crash", "switch_success", "switch_rollback",
-      "switch_failure", "stop_complete", "recovery_attempt", "give_up",
+      "init",
+      "init_success",
+      "init_failure",
+      "switch_request",
+      "stop_request",
+      "crash",
+      "switch_success",
+      "switch_rollback",
+      "switch_failure",
+      "stop_complete",
+      "recovery_attempt",
+      "give_up",
     ];
 
     for (const event of events) {
@@ -132,25 +141,21 @@ describe("RendererStateMachine", () => {
     sm.transition("init_success");
 
     expect(sm.history.length).toBe(2);
-    expect(sm.history[0]!.from).toBe("uninitialized");
-    expect(sm.history[0]!.to).toBe("initializing");
-    expect(sm.history[0]!.event).toBe("init");
-    expect(sm.history[1]!.from).toBe("initializing");
-    expect(sm.history[1]!.to).toBe("running");
+    expect(sm.history[0]?.from).toBe("uninitialized");
+    expect(sm.history[0]?.to).toBe("initializing");
+    expect(sm.history[0]?.event).toBe("init");
+    expect(sm.history[1]?.from).toBe("initializing");
+    expect(sm.history[1]?.to).toBe("running");
   });
 
   it("limits history to 10 entries", () => {
     const sm = new RendererStateMachine();
     // Create many transitions by cycling through states
-    for (let i = 0; i < 6; i++) {
-      sm.transition("init");
-      sm.transition("init_failure");
-      sm.transition("recovery_attempt");
-      sm.transition("init_failure");
-      sm.transition("give_up");
-      // Reset: stopped has no transitions, so create new SM
-      break;
-    }
+    sm.transition("init");
+    sm.transition("init_failure");
+    sm.transition("recovery_attempt");
+    sm.transition("init_failure");
+    sm.transition("give_up");
     // Do enough transitions to exceed 10
     const sm2 = new RendererStateMachine();
     sm2.transition("init");
@@ -175,8 +180,8 @@ describe("RendererStateMachine", () => {
     sm.transition("init");
     const after = Date.now();
 
-    expect(sm.history[0]!.timestamp).toBeGreaterThanOrEqual(before);
-    expect(sm.history[0]!.timestamp).toBeLessThanOrEqual(after);
+    expect(sm.history[0]?.timestamp).toBeGreaterThanOrEqual(before);
+    expect(sm.history[0]?.timestamp).toBeLessThanOrEqual(after);
   });
 });
 
@@ -188,7 +193,9 @@ describe("transition (pure function)", () => {
   });
 
   it("throws for invalid transitions", () => {
-    expect(() => transition("uninitialized", "init_success")).toThrow(InvalidRendererTransitionError);
+    expect(() => transition("uninitialized", "init_success")).toThrow(
+      InvalidRendererTransitionError
+    );
     expect(() => transition("stopped", "init")).toThrow(InvalidRendererTransitionError);
   });
 });

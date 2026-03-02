@@ -26,6 +26,11 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: '1.2.20'
+
       - name: Install dependencies
         run: |
           npm install -g tsx
@@ -48,9 +53,10 @@ jobs:
       - name: Run compliance checker
         id: compliance
         continue-on-error: true
+        env:
+          CHANGED_FILES: ${{ steps.files.outputs.files }}
         run: |
-          FILES='${{ steps.files.outputs.files }}'
-          FILES_ARRAY=$(echo "$FILES" | jq -r '.[]' | tr '\n' ' ')
+          FILES_ARRAY=$(echo "$CHANGED_FILES" | jq -r '.[]' | tr '\n' ' ')
           tsx scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>&1
           cat compliance-result.json
 
@@ -74,11 +80,11 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const findings = JSON.parse('${{ steps.results.outputs.findings }}');
-            
+            const findings = JSON.parse(process.env.COMPLIANCE_FINDINGS || '[]');
+
             let comment = '## Compliance Check - Violations Found\n\n';
             comment += `Found ${findings.length} constitution violation(s):\n\n`;
-            
+
             findings.forEach((f, i) => {
               comment += `### ${i + 1}. ${f.check}`;
               if (f.line) {
@@ -95,16 +101,18 @@ jobs:
               comment += '\n\n';
               comment += `**Remediation:** ${f.remediationHint}\n\n`;
             });
-            
+
             comment += '---\n';
             comment += '**Note:** To proceed with an exception, create an ADR in `/docs/adrs/` and link it in the PR description.\n';
-            
+
             github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
               body: comment
             });
+        env:
+          COMPLIANCE_FINDINGS: ${{ steps.results.outputs.findings }}
 
       - name: Post compliance success comment
         if: steps.results.outputs.passed == 'true'
@@ -115,13 +123,15 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: '## Compliance Check ✅\n\nAll constitution compliance checks passed!'
+              body: '## Compliance Check\n\nAll constitution compliance checks passed!'
             });
 
       - name: Report status
         if: always()
+        env:
+          COMPLIANCE_PASSED: ${{ steps.results.outputs.passed }}
         run: |
-          if [ "${{ steps.results.outputs.passed }}" = "true" ]; then
+          if [ "$COMPLIANCE_PASSED" = "true" ]; then
             echo "Compliance check PASSED"
             exit 0
           else

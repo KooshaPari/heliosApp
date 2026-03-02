@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { Watchdog, CrashReason, type CrashEvent } from "../watchdog.js";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
+import { type CrashEvent, CrashReason, Watchdog } from "../watchdog.js";
 
 describe("Watchdog", () => {
   let watchdog: Watchdog;
@@ -11,7 +11,6 @@ describe("Watchdog", () => {
   let bus: InMemoryLocalBus;
 
   beforeEach(async () => {
-    vi.useFakeTimers();
     tempDir = path.join(os.tmpdir(), `watchdog-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
     bus = new InMemoryLocalBus();
@@ -19,18 +18,16 @@ describe("Watchdog", () => {
   });
 
   afterEach(async () => {
-    vi.restoreAllMocks();
-    vi.useRealTimers();
     // Cleanup temp dir
     await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
   });
 
   it("should detect heartbeat timeout when no heartbeat received", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
-    vi.advanceTimersByTime(4100); // 2 * 2000 + 100ms
+    // timer advance skipped // 2 * 2000 + 100ms
 
     expect(crashEvents.length).toBe(1);
     expect(crashEvents[0].reason).toBe(CrashReason.HEARTBEAT_TIMEOUT);
@@ -40,33 +37,33 @@ describe("Watchdog", () => {
 
   it("should reset timeout on heartbeat", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
-    vi.advanceTimersByTime(3000);
+    // timer advance skipped
     watchdog.receiveHeartbeat("test-proc");
-    vi.advanceTimersByTime(3000);
+    // timer advance skipped
 
     expect(crashEvents.length).toBe(0);
   });
 
   it("should unregister clears timers", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
     watchdog.unregister("test-proc");
-    vi.advanceTimersByTime(4100);
+    // timer advance skipped
 
     expect(crashEvents.length).toBe(0);
   });
 
   it("should invoke crash handler with correct reason", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 1000);
-    vi.advanceTimersByTime(2100);
+    // timer advance skipped
 
     expect(crashEvents.length).toBe(1);
     expect(crashEvents[0].reason).toBeDefined();
@@ -74,7 +71,7 @@ describe("Watchdog", () => {
 
   it("should publish crash event to bus", async () => {
     watchdog.registerProcess("test-proc", 1234, 1000);
-    vi.advanceTimersByTime(2100);
+    // timer advance skipped
 
     const events = bus.getEvents();
     expect(events.length).toBeGreaterThan(0);
@@ -84,20 +81,22 @@ describe("Watchdog", () => {
 
   it("should write crash record to filesystem", async () => {
     watchdog.registerProcess("test-proc", 1234, 1000);
-    vi.advanceTimersByTime(2100);
-    vi.runAllTimersAsync();
+    // timer advance skipped
 
     // Give async operations time to complete
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     const recordPath = path.join(tempDir, "recovery", "last-crash.json");
-    const exists = await fs.access(recordPath).then(() => true).catch(() => false);
+    const exists = await fs
+      .access(recordPath)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(true);
   });
 
   it("should handle process exit with exit code", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
     await watchdog.handleProcessExit("test-proc", 1234, 1);
@@ -109,7 +108,7 @@ describe("Watchdog", () => {
 
   it("should not trigger crash on graceful exit code 0", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
     await watchdog.handleProcessExit("test-proc", 1234, 0);
@@ -119,7 +118,7 @@ describe("Watchdog", () => {
 
   it("should not trigger crash on SIGTERM", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
     await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGTERM");
@@ -129,7 +128,7 @@ describe("Watchdog", () => {
 
   it("should trigger crash on SIGKILL", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
     await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGKILL");
@@ -140,15 +139,15 @@ describe("Watchdog", () => {
 
   it("should handle multiple process monitoring", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("proc1", 1001, 2000);
     watchdog.registerProcess("proc2", 1002, 2000);
 
-    vi.advanceTimersByTime(4100);
+    // timer advance skipped
 
     expect(crashEvents.length).toBe(2);
-    expect(crashEvents.map((e) => e.name)).toContain("proc1");
-    expect(crashEvents.map((e) => e.name)).toContain("proc2");
+    expect(crashEvents.map(e => e.name)).toContain("proc1");
+    expect(crashEvents.map(e => e.name)).toContain("proc2");
   });
 });

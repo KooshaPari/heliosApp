@@ -1,18 +1,18 @@
 import { describe, expect, it } from "bun:test";
 import {
+  InvalidLaneTransitionError,
+  type LaneEvent,
+  type LaneState,
+  clearTransitionHistory,
+  getTransitionHistory,
+  recordTransition,
   transition,
   withLaneLock,
-  recordTransition,
-  getTransitionHistory,
-  clearTransitionHistory,
-  InvalidLaneTransitionError,
-  type LaneState,
-  type LaneEvent,
 } from "../../src/lanes/state_machine.js";
 
 describe("Lane State Machine", () => {
   describe("valid transitions", () => {
-    const cases: Array<[LaneState, LaneEvent, LaneState]> = [
+    const cases: [LaneState, LaneEvent, LaneState][] = [
       ["new", "create", "provisioning"],
       ["provisioning", "provision_complete", "ready"],
       ["provisioning", "provision_failed", "closed"],
@@ -44,7 +44,7 @@ describe("Lane State Machine", () => {
 
     it("throws for new + provision_complete", () => {
       expect(() => transition("new", "provision_complete", "lane-1")).toThrow(
-        InvalidLaneTransitionError,
+        InvalidLaneTransitionError
       );
     });
 
@@ -67,7 +67,7 @@ describe("Lane State Machine", () => {
       const order: number[] = [];
 
       const p1 = withLaneLock("lane-a", async () => {
-        await new Promise((r) => setTimeout(r, 50));
+        await new Promise(r => setTimeout(r, 50));
         order.push(1);
       });
 
@@ -83,7 +83,7 @@ describe("Lane State Machine", () => {
       const order: string[] = [];
 
       const p1 = withLaneLock("lane-x", async () => {
-        await new Promise((r) => setTimeout(r, 50));
+        await new Promise(r => setTimeout(r, 50));
         order.push("x");
       });
 
@@ -107,10 +107,10 @@ describe("Lane State Machine", () => {
 
       const history = getTransitionHistory(laneId);
       expect(history.length).toBe(2);
-      expect(history[0]!.fromState).toBe("new");
-      expect(history[0]!.toState).toBe("provisioning");
-      expect(history[1]!.fromState).toBe("provisioning");
-      expect(history[1]!.toState).toBe("ready");
+      expect(history[0]?.fromState).toBe("new");
+      expect(history[0]?.toState).toBe("provisioning");
+      expect(history[1]?.fromState).toBe("provisioning");
+      expect(history[1]?.toState).toBe("ready");
 
       clearTransitionHistory(laneId);
     });
