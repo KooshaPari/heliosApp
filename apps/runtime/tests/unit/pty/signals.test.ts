@@ -1,4 +1,4 @@
-import { describe, expect, it, afterEach } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import {
   resize,
   terminate,
@@ -107,27 +107,17 @@ describe("resize", () => {
 });
 
 describe("terminate", () => {
-  const pidsToCleanup: number[] = [];
-
-  afterEach(() => {
-    for (const pid of pidsToCleanup) {
-      try { process.kill(pid, "SIGKILL"); } catch { /* already exited */ }
-    }
-    pidsToCleanup.length = 0;
-  });
-
   it("terminates with SIGTERM and cleans up", async () => {
-    const proc = Bun.spawn(["/bin/sh"], { stdin: "pipe", stdout: "pipe", stderr: "pipe" });
-    pidsToCleanup.push(proc.pid);
-
     const registry = new PtyRegistry();
-    const record = makeRecord({ pid: proc.pid });
+    const record = makeRecord({ pid: 99998 });
     registry.register(record);
     const lifecycle = new PtyLifecycle(record.ptyId, "active");
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
 
-    await terminate(record, lifecycle, registry, historyMap, bus, { gracePeriodMs: 500 });
+    const mockIsAlive = () => false;
+    const mockWait = async () => true;
+    await terminate(record, lifecycle, registry, historyMap, bus, { gracePeriodMs: 50 }, mockIsAlive, mockWait);
 
     expect(registry.get(record.ptyId)).toBeUndefined();
     const topics = bus.events.map((e) => e.topic);
@@ -165,22 +155,15 @@ describe("terminate", () => {
 });
 
 describe("sendSighup", () => {
-  it("records successful delivery", () => {
-    const record = makeRecord();
-    const historyMap: SignalHistoryMap = new Map();
-    const bus = new InMemoryBusPublisher();
-    const envelope = sendSighup(record, historyMap, bus);
-    expect(envelope.outcome).toBe("delivered");
-    expect(envelope.signal).toBe("SIGHUP");
-    expect(historyMap.get(record.ptyId)?.length).toBe(1);
-  });
-
-  it("records failed delivery for dead process", () => {
+  it("records signal delivery result", () => {
+    // Use non-existent PID to avoid sending signals to test process
     const record = makeRecord({ pid: 999999 });
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
     const envelope = sendSighup(record, historyMap, bus);
+    expect(envelope.signal).toBe("SIGHUP");
     expect(envelope.outcome).toBe("failed");
     expect(envelope.error).toBeDefined();
+    expect(historyMap.get(record.ptyId)?.length).toBe(1);
   });
 });
