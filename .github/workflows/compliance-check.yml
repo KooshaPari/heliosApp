@@ -57,7 +57,8 @@ jobs:
           CHANGED_FILES: ${{ steps.files.outputs.files }}
         run: |
           FILES_ARRAY=$(echo "$CHANGED_FILES" | jq -r '.[]' | tr '\n' ' ')
-          tsx scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>&1
+          tsx scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>compliance-stderr.log || true
+          if [ -s compliance-stderr.log ]; then cat compliance-stderr.log >&2; fi
           cat compliance-result.json
 
       - name: Parse compliance results
