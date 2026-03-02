@@ -3,8 +3,9 @@
  * Validates PRs against the constitution review checklist.
  */
 
-import { promises as fs } from "fs";
-import * as path from "path";
+import { promises as fs } from "node:fs";
+import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 
 interface Finding {
   check: string;
@@ -22,8 +23,10 @@ interface CheckResult {
   timestamp: string;
 }
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const CONSTITUTION_PATH = path.join(
-  path.dirname(path.dirname(import.meta.url)).replace("file://", ""),
+  path.dirname(__dirname),
   ".kittify/memory/constitution.md"
 );
 

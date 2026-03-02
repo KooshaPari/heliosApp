@@ -7,7 +7,8 @@
       "docs/.generated/**",
       ".worktrees/**",
       "kitty-specs/**",
-      "docs/sessions/**"
+      "docs/sessions/**",
+      "tsconfig*.json"
     ]
   },
   "formatter": {
