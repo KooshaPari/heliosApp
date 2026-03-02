@@ -218,8 +218,18 @@ export class AuditLedger {
 
     visited.add(correlationId);
 
-    // Get all events with this correlation ID
-    const events = this.store.getByCorrelationChain(correlationId);
+    // Get all events with this correlation ID from both ring buffer and store
+    const ringEvents = this.ringBuffer.getByCorrelationId(correlationId);
+    const storeEvents = this.store.getByCorrelationChain(correlationId);
+    // Deduplicate by ID
+    const seen = new Set<string>();
+    const events: AuditEvent[] = [];
+    for (const e of [...ringEvents, ...storeEvents]) {
+      if (!seen.has(e.id)) {
+        seen.add(e.id);
+        events.push(e);
+      }
+    }
 
     if (events.length === 0) {
       return;

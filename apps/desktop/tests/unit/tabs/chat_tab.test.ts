@@ -70,7 +70,7 @@ describe("ChatTab", () => {
       await tab.onContextChange(context);
       const el = tab.render();
 
-      expect(el.textContent).toContain("agent");
+      expect(el.textContent).toContain("Agent");
     });
 
     it("should show agent and user messages", async () => {

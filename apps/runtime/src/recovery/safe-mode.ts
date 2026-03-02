@@ -56,11 +56,15 @@ export class CrashLoopDetector {
 
   private persistCrashHistory(): void {
     try {
-      const historyPath = path.join(this.crashDataDir, "recovery", "crash-history.json");
+      const dir = path.join(this.crashDataDir, "recovery");
+      const historyPath = path.join(dir, "crash-history.json");
       const tempPath = `${historyPath}.tmp`;
 
-      // Atomic write
-      fs.writeFile(tempPath, JSON.stringify(this.crashHistory), { encoding: "utf-8" })
+      // Atomic write (ensure directory exists first)
+      fs.mkdir(dir, { recursive: true })
+        .then(() =>
+          fs.writeFile(tempPath, JSON.stringify(this.crashHistory), { encoding: "utf-8" })
+        )
         .then(() => fs.rename(tempPath, historyPath))
         .catch(_err => {});
     } catch (_err) {}

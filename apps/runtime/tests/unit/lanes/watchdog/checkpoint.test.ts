@@ -22,6 +22,12 @@ describe("CheckpointManager", () => {
     } catch {
       // Ignore cleanup errors
     }
+    // Clean up any real checkpoint file left by other tests
+    try {
+      await manager.delete();
+    } catch {
+      // Ignore if not present
+    }
   });
 
   afterEach(async () => {

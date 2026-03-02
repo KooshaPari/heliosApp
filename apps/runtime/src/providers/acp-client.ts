@@ -85,6 +85,7 @@ export class ACPClientAdapter
   private config: ACPConfig | null = null;
   private bus: LocalBus | null = null;
   private policyGate: PolicyGate;
+  private terminated = false;
   private healthStatus: ProviderHealthStatus = {
     state: "unavailable",
     lastCheck: new Date(),
@@ -182,6 +183,9 @@ export class ACPClientAdapter
    */
   async health(): Promise<ProviderHealthStatus> {
     if (!this.config) {
+      if (this.terminated) {
+        return { ...this.healthStatus };
+      }
       return {
         state: "unavailable",
         lastCheck: new Date(),
@@ -268,7 +272,7 @@ export class ACPClientAdapter
     if (!this.config) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        "ACP client not initialized",
+        "ACP client unavailable: not initialized",
         "acp"
       );
     }
@@ -290,7 +294,7 @@ export class ACPClientAdapter
 
         throw new NormalizedProviderError(
           "PROVIDER_POLICY_DENIED",
-          `ACP execution denied by policy: ${reason}`,
+          `ACP execution policy denied: ${reason}`,
           "acp",
           false,
           correlationId
@@ -387,7 +391,7 @@ export class ACPClientAdapter
     if (!this.config) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        "ACP client not initialized",
+        "ACP client unavailable: not initialized",
         "acp"
       );
     }
@@ -431,6 +435,7 @@ export class ACPClientAdapter
 
       // Clear config
       this.config = null;
+      this.terminated = true;
 
       this.healthStatus = {
         state: "unavailable",
@@ -482,7 +487,7 @@ export class ACPClientAdapter
     }
 
     // Mock implementation: simulate ACP processing
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         resolve({
           taskId: `task-${request.correlationId}`,
@@ -498,7 +503,7 @@ export class ACPClientAdapter
       // Clean up on abort
       signal.addEventListener("abort", () => {
         clearTimeout(timeout);
-        throw new Error("Request cancelled");
+        reject(new Error("Request cancelled"));
       });
     });
   }

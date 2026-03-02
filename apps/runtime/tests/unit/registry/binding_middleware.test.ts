@@ -90,18 +90,18 @@ describe("BindingMiddleware", () => {
 
     it("should update binding state to validation_failed on stale triple", () => {
       const triple: BindingTriple = {
-        workspaceId: "ws-invalid", // will fail validation
+        workspaceId: "WS_INVALID", // will fail format validation (uppercase)
         laneId: "lane-1",
         sessionId: "session-1",
       };
 
-      // Bypass validation to create binding with invalid triple
+      // Bypass validation to create binding with valid triple
       const binding = registry.register("terminal-1", {
         workspaceId: "ws-1",
         laneId: "lane-1",
         sessionId: "session-1",
       });
-      // Manually corrupt binding
+      // Manually corrupt binding to use invalid format
       binding.binding = triple;
 
       const result = middleware.validateBeforeOperation("terminal-1", "write");
@@ -255,9 +255,9 @@ describe("BindingMiddleware", () => {
 
       const binding = registry.register("terminal-1", triple);
 
-      // Corrupt the binding
+      // Corrupt the binding with invalid format (uppercase)
       binding.binding = {
-        workspaceId: "ws-nonexistent",
+        workspaceId: "WS_NONEXISTENT",
         laneId: "lane-1",
         sessionId: "session-1",
       };

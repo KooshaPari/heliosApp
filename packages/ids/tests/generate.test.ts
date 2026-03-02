@@ -1,17 +1,17 @@
-import { describe, it, expect } from 'bun:test';
-import { generateId, generateCorrelationId, type EntityType } from '../src/index.js';
+import { describe, expect, it } from "bun:test";
+import { type EntityType, generateCorrelationId, generateId } from "../src/index.js";
 
 const FORMAT_REGEX = /^[a-z]{2,3}_[0-9A-HJKMNP-TV-Z]{26}$/;
 
 // FR-004: generateId public API
-describe('generateId', () => {
+describe("generateId", () => {
   const cases: [EntityType, string][] = [
-    ['workspace', 'ws'],
-    ['lane', 'ln'],
-    ['session', 'ss'],
-    ['terminal', 'tm'],
-    ['run', 'rn'],
-    ['correlation', 'cor'],
+    ["workspace", "ws"],
+    ["lane", "ln"],
+    ["session", "ss"],
+    ["terminal", "tm"],
+    ["run", "rn"],
+    ["correlation", "cor"],
   ];
 
   for (const [entity, prefix] of cases) {
@@ -23,21 +23,21 @@ describe('generateId', () => {
   }
 
   // FR-005: Uniqueness
-  it('generates 10,000 unique IDs', () => {
-    const ids = new Set(Array.from({ length: 10_000 }, () => generateId('workspace')));
+  it("generates 10,000 unique IDs", () => {
+    const ids = new Set(Array.from({ length: 10_000 }, () => generateId("workspace")));
     expect(ids.size).toBe(10_000);
   });
 });
 
 // FR-006: generateCorrelationId convenience
-describe('generateCorrelationId', () => {
-  it('returns cor_ prefix', () => {
+describe("generateCorrelationId", () => {
+  it("returns cor_ prefix", () => {
     const id = generateCorrelationId();
-    expect(id.startsWith('cor_')).toBe(true);
+    expect(id.startsWith("cor_")).toBe(true);
     expect(id).toMatch(FORMAT_REGEX);
   });
 
-  it('generates unique correlation IDs', () => {
+  it("generates unique correlation IDs", () => {
     const ids = new Set(Array.from({ length: 1000 }, () => generateCorrelationId()));
     expect(ids.size).toBe(1000);
   });

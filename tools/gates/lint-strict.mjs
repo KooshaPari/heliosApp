@@ -10,7 +10,7 @@ const blocked = [
   { pattern: /eslint-disable/, message: "eslint-disable bypass comments are forbidden" },
   { pattern: /semgrep:\s*ignore/, message: "semgrep ignore comments are forbidden" },
   { pattern: /\b(test|describe|it)\.only\b/, message: "Focused tests are forbidden" },
-  { pattern: /\bany\b/, message: "any is forbidden in strict gate" }
+  { pattern: /\bany\b/, message: "any is forbidden in strict gate" },
 ];
 
 for (const file of files) {

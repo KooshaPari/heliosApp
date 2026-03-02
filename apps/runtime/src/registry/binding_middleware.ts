@@ -67,7 +67,9 @@ export class BindingMiddleware {
         error: {
           code: "INVALID_BINDING_STATE",
           message: `Terminal binding is in ${binding.state} state, expected 'bound' or 'rebound'`,
-          fatal: binding.state === BindingState.validation_failed,
+          fatal:
+            binding.state === BindingState.validation_failed ||
+            binding.state === BindingState.unbound,
         },
         binding,
       };

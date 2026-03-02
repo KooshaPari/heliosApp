@@ -106,6 +106,11 @@ export class TabBar {
       this.pinnedTabIds.delete(tabId);
     }
 
+    // Reorder: pinned tabs first, then unpinned, preserving relative order
+    const pinnedOrder = this.tabOrder.filter(id => this.pinnedTabIds.has(id));
+    const unpinnedOrder = this.tabOrder.filter(id => !this.pinnedTabIds.has(id));
+    this.tabOrder = [...pinnedOrder, ...unpinnedOrder];
+
     this.config.onTabPinned(tabId, pinned);
   }
 

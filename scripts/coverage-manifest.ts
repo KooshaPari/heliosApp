@@ -4,8 +4,8 @@
  * Creates a structured coverage report for per-package and aggregate metrics
  */
 
-import { writeFileSync } from 'fs';
-import { join } from 'path';
+import { writeFileSync } from "fs";
+import { join } from "path";
 
 interface PackageCoverage {
   name: string;
@@ -43,7 +43,7 @@ function generateManifest(): CoverageManifest {
   // Sample data (in production, would parse Vitest coverage output)
   const packages: PackageCoverage[] = [
     {
-      name: 'runtime',
+      name: "runtime",
       lines: 92,
       functions: 90,
       branches: 85,
@@ -51,7 +51,7 @@ function generateManifest(): CoverageManifest {
       pass: true,
     },
     {
-      name: 'desktop',
+      name: "desktop",
       lines: 88,
       functions: 87,
       branches: 84,
@@ -70,7 +70,7 @@ function generateManifest(): CoverageManifest {
 
   return {
     timestamp: new Date().toISOString(),
-    commitSha: process.env.GITHUB_SHA || 'unknown',
+    commitSha: process.env.GITHUB_SHA || "unknown",
     threshold,
     packages,
     aggregate,
@@ -86,11 +86,11 @@ function generateManifest(): CoverageManifest {
  */
 async function main(): Promise<void> {
   const manifest = generateManifest();
-  const outputPath = join(process.cwd(), '.gate-reports/coverage-manifest.json');
+  const outputPath = join(process.cwd(), ".gate-reports/coverage-manifest.json");
 
   // Ensure directory exists
-  const fs = require('fs');
-  const dir = require('path').dirname(outputPath);
+  const fs = require("fs");
+  const dir = require("path").dirname(outputPath);
   fs.mkdirSync(dir, { recursive: true });
 
   writeFileSync(outputPath, JSON.stringify(manifest, null, 2));
@@ -98,7 +98,7 @@ async function main(): Promise<void> {
   console.log(JSON.stringify(manifest, null, 2));
 }
 
-main().catch((e) => {
+main().catch(e => {
   console.error(`Error: ${e}`);
   process.exit(2);
 });

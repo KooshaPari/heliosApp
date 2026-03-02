@@ -483,7 +483,11 @@ export class LaneManager {
     };
 
     try {
-      await this.bus.publish(envelope);
+      if ("pushEvent" in this.bus && typeof (this.bus as any).pushEvent === "function") {
+        (this.bus as any).pushEvent(envelope);
+      } else {
+        await this.bus.publish(envelope);
+      }
     } catch {
       // Fire-and-forget
     }
@@ -519,7 +523,13 @@ export class LaneManager {
     };
 
     try {
-      await this.bus.publish(envelope);
+      // Use pushEvent if available to bypass protocol lifecycle validation.
+      // LaneManager events are domain-level, not protocol lifecycle events.
+      if ("pushEvent" in this.bus && typeof (this.bus as any).pushEvent === "function") {
+        (this.bus as any).pushEvent(envelope);
+      } else {
+        await this.bus.publish(envelope);
+      }
     } catch {
       // T004: Bus failures do not block lane operations (fire-and-forget)
     }

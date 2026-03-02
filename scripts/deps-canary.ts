@@ -4,14 +4,14 @@
  * Usage: bun run deps:canary [package] [--dry-run]
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
-import type { DepsRegistry, ChangelogEntry } from './deps-types';
-import { appendChangelogEntry } from './deps-changelog-util';
+import { existsSync, readFileSync } from "fs";
+import { join } from "path";
+import { appendChangelogEntry } from "./deps-changelog-util";
+import type { ChangelogEntry, DepsRegistry } from "./deps-types";
 
 const REPO_ROOT = process.cwd();
-const REGISTRY_PATH = join(REPO_ROOT, 'deps-registry.json');
-const PACKAGE_JSON_PATH = join(REPO_ROOT, 'package.json');
+const REGISTRY_PATH = join(REPO_ROOT, "deps-registry.json");
+const PACKAGE_JSON_PATH = join(REPO_ROOT, "package.json");
 
 interface UpgradeCandidate {
   package: string;
@@ -26,7 +26,7 @@ interface UpgradeCandidate {
 function findUpgradeCandidates(registry: DepsRegistry, targetPackage?: string): UpgradeCandidate[] {
   const candidates: UpgradeCandidate[] = [];
 
-  registry.dependencies.forEach((dep) => {
+  registry.dependencies.forEach(dep => {
     if (targetPackage && dep.name !== targetPackage) {
       return;
     }
@@ -42,11 +42,11 @@ function findUpgradeCandidates(registry: DepsRegistry, targetPackage?: string): 
 /**
  * Execute canary upgrade process.
  */
-async function runCanary(targetPackage?: string, dryRun: boolean = false): Promise<void> {
+async function runCanary(targetPackage?: string, dryRun = false): Promise<void> {
   // Load registry
   let registry: DepsRegistry;
   try {
-    registry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf-8'));
+    registry = JSON.parse(readFileSync(REGISTRY_PATH, "utf-8"));
   } catch (e) {
     console.error(`Failed to read registry: ${e}`);
     process.exit(2);
@@ -56,19 +56,19 @@ async function runCanary(targetPackage?: string, dryRun: boolean = false): Promi
   const candidates = findUpgradeCandidates(registry, targetPackage);
 
   if (candidates.length === 0) {
-    console.log('No upgrades available.');
+    console.log("No upgrades available.");
 
     // Record skip entry if target was specified
     if (targetPackage) {
       const entry: ChangelogEntry = {
         timestamp: new Date().toISOString(),
         package: targetPackage,
-        fromVersion: 'N/A',
-        toVersion: 'N/A',
-        channel: 'stable',
+        fromVersion: "N/A",
+        toVersion: "N/A",
+        channel: "stable",
         gateResults: {},
-        outcome: 'skipped',
-        actor: 'ci',
+        outcome: "skipped",
+        actor: "ci",
       };
       try {
         appendChangelogEntry(entry);
@@ -81,12 +81,12 @@ async function runCanary(targetPackage?: string, dryRun: boolean = false): Promi
   }
 
   console.log(`Found ${candidates.length} upgrade candidate(s):`);
-  candidates.forEach((c) => {
+  candidates.forEach(c => {
     console.log(`  ${c.package}: ${c.currentPin} -> ${c.availableVersion}`);
   });
 
   if (dryRun) {
-    console.log('\n(Dry-run mode: no changes made)');
+    console.log("\n(Dry-run mode: no changes made)");
     process.exit(0);
   }
 
@@ -110,8 +110,8 @@ async function runCanary(targetPackage?: string, dryRun: boolean = false): Promi
       toVersion: candidate.availableVersion,
       channel: candidate.channel,
       gateResults: { lint: true, test: true, typecheck: true },
-      outcome: 'success',
-      actor: 'ci',
+      outcome: "success",
+      actor: "ci",
       branchRef: `canary/${candidate.package}-${candidate.availableVersion}-${Date.now()}`,
     };
 
@@ -123,7 +123,7 @@ async function runCanary(targetPackage?: string, dryRun: boolean = false): Promi
     }
   }
 
-  console.log('\nCanary process complete.');
+  console.log("\nCanary process complete.");
   process.exit(0);
 }
 
@@ -131,37 +131,40 @@ async function runCanary(targetPackage?: string, dryRun: boolean = false): Promi
  * Pretty-print the changelog.
  */
 async function printChangelog(): Promise<void> {
-  const changelogPath = join(REPO_ROOT, 'deps-changelog.json');
+  const changelogPath = join(REPO_ROOT, "deps-changelog.json");
 
   if (!existsSync(changelogPath)) {
-    console.log('Changelog is empty.');
+    console.log("Changelog is empty.");
     process.exit(0);
   }
 
   try {
-    const data = JSON.parse(readFileSync(changelogPath, 'utf-8'));
+    const data = JSON.parse(readFileSync(changelogPath, "utf-8"));
     const entries = data.entries || [];
 
     if (entries.length === 0) {
-      console.log('Changelog is empty.');
+      console.log("Changelog is empty.");
       process.exit(0);
     }
 
-    console.log('\nDependency Changelog');
-    console.log('====================\n');
+    console.log("\nDependency Changelog");
+    console.log("====================\n");
 
-    entries.slice().reverse().forEach((entry: ChangelogEntry, index: number) => {
-      console.log(`${index + 1}. ${entry.timestamp}`);
-      console.log(`   Package: ${entry.package}`);
-      console.log(`   ${entry.fromVersion} -> ${entry.toVersion}`);
-      console.log(`   Channel: ${entry.channel}`);
-      console.log(`   Outcome: ${entry.outcome}`);
-      console.log(`   Actor: ${entry.actor}`);
-      if (entry.branchRef) {
-        console.log(`   Branch: ${entry.branchRef}`);
-      }
-      console.log();
-    });
+    entries
+      .slice()
+      .reverse()
+      .forEach((entry: ChangelogEntry, index: number) => {
+        console.log(`${index + 1}. ${entry.timestamp}`);
+        console.log(`   Package: ${entry.package}`);
+        console.log(`   ${entry.fromVersion} -> ${entry.toVersion}`);
+        console.log(`   Channel: ${entry.channel}`);
+        console.log(`   Outcome: ${entry.outcome}`);
+        console.log(`   Actor: ${entry.actor}`);
+        if (entry.branchRef) {
+          console.log(`   Branch: ${entry.branchRef}`);
+        }
+        console.log();
+      });
   } catch (e) {
     console.error(`Failed to read changelog: ${e}`);
     process.exit(2);
@@ -170,9 +173,9 @@ async function printChangelog(): Promise<void> {
 
 // Main entry point
 const args = process.argv.slice(2);
-const logCommand = args.includes('log');
-const dryRun = args.includes('--dry-run');
-const packageName = args.find((a) => !a.startsWith('--') && a !== 'log');
+const logCommand = args.includes("log");
+const dryRun = args.includes("--dry-run");
+const packageName = args.find(a => !a.startsWith("--") && a !== "log");
 
 if (logCommand) {
   printChangelog();

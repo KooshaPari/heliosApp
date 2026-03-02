@@ -191,7 +191,10 @@ export function normalizeError(
       );
     }
 
-    if (error.message.includes("init") || error.message.includes("initialization")) {
+    if (
+      error.message.toLowerCase().includes("init") ||
+      error.message.toLowerCase().includes("initialization")
+    ) {
       return new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
         error.message,
@@ -202,7 +205,13 @@ export function normalizeError(
       );
     }
 
-    if (error.message.includes("crash") || error.message.includes("exit")) {
+    if (
+      error.message.includes("crash") ||
+      error.message.includes("exit") ||
+      error.message.includes("killed") ||
+      error.message.includes("SIGTERM") ||
+      error.message.includes("SIGKILL")
+    ) {
       return new NormalizedProviderError(
         "PROVIDER_CRASHED",
         error.message,

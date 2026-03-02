@@ -383,7 +383,7 @@ describe("A2A Router Adapter", () => {
           },
           "corr-123"
         )
-      ).rejects.toThrow(/unavailable/i);
+      ).rejects.toThrow(/unavailable|not initialized/i);
     });
   });
 

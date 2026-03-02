@@ -183,7 +183,7 @@ describe("TabBar", () => {
       const selectedTab = element.querySelector('[data-tab-id="tab1"]') as HTMLElement;
 
       expect(selectedTab).toBeDefined();
-      expect(selectedTab.style.backgroundColor).toBe("rgb(255, 255, 255)");
+      expect(selectedTab.style.backgroundColor).toBe("#ffffff");
     });
 
     it("should show stale context indicator", () => {

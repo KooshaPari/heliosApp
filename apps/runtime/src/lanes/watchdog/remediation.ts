@@ -84,7 +84,7 @@ export class RemediationEngine {
       this.suggestions.set(suggestion.id, suggestion);
 
       // Emit suggestion event
-      await this.bus.publish({
+      await this.publishEvent({
         id: `remediation-suggested-${suggestion.id}`,
         type: "event",
         ts: new Date().toISOString(),
@@ -98,6 +98,14 @@ export class RemediationEngine {
         },
       });
     }
+
+    // Sort by risk level: high > medium > low
+    const riskOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
+    suggestions.sort((a, b) => {
+      const aOrder = riskOrder[a.resource.riskLevel] ?? 3;
+      const bOrder = riskOrder[b.resource.riskLevel] ?? 3;
+      return aOrder - bOrder;
+    });
 
     return suggestions;
   }
@@ -118,7 +126,7 @@ export class RemediationEngine {
     }
 
     // Emit confirmation event
-    await this.bus.publish({
+    await this.publishEvent({
       id: `remediation-confirmed-${suggestionId}`,
       type: "event",
       ts: new Date().toISOString(),
@@ -137,7 +145,7 @@ export class RemediationEngine {
     this.suggestions.delete(suggestionId);
 
     // Emit completion event
-    await this.bus.publish({
+    await this.publishEvent({
       id: `remediation-completed-${suggestionId}`,
       type: "event",
       ts: new Date().toISOString(),
@@ -171,7 +179,7 @@ export class RemediationEngine {
     this.suggestions.delete(suggestionId);
 
     // Emit declined event
-    this.bus.publish({
+    this.publishEvent({
       id: `remediation-declined-${suggestionId}`,
       type: "event",
       ts: new Date().toISOString(),
@@ -440,6 +448,18 @@ export class RemediationEngine {
         fs.writeFile(this.cooldownPath, JSON.stringify(entries, null, 2));
       });
     } catch (_error) {}
+  }
+
+  private async publishEvent(envelope: any): Promise<void> {
+    try {
+      if ("pushEvent" in this.bus && typeof (this.bus as any).pushEvent === "function") {
+        (this.bus as any).pushEvent(envelope);
+      } else {
+        await this.bus.publish(envelope);
+      }
+    } catch {
+      // Fire-and-forget
+    }
   }
 
   private sleep(ms: number): Promise<void> {

@@ -55,7 +55,8 @@ export class OrphanWatchdog {
     } else {
     }
 
-    // Run first cycle immediately
+    // Run first cycle immediately, then schedule subsequent ones
+    await this.runDetectionCycle();
     this.scheduleNextCycle();
   }
 
@@ -84,8 +85,8 @@ export class OrphanWatchdog {
       return;
     }
 
-    this.detectionTimer = setTimeout(() => {
-      this.runDetectionCycle();
+    this.detectionTimer = setTimeout(async () => {
+      await this.runDetectionCycle();
       if (this.isRunning) {
         this.scheduleNextCycle();
       }

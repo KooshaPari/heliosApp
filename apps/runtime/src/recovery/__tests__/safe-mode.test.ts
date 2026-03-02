@@ -39,25 +39,27 @@ describe("CrashLoopDetector", () => {
 
   it("should not detect loop with crashes outside window", () => {
     const now = Date.now();
-    detector.recordCrash(now);
-    detector.recordCrash(now + 1000);
-    // timer advance skipped // Advance past window
-    detector.recordCrash(now + 62000);
+    // Record two old crashes outside the window
+    detector.recordCrash(now - 120000);
+    detector.recordCrash(now - 90000);
+    // Record one recent crash within the window
+    detector.recordCrash(now - 1000);
 
+    // Only 1 crash within the 60s window, threshold is 3
     expect(detector.isLooping()).toBe(false);
   });
 
   it("should persist and restore crash history", async () => {
     const now = Date.now();
-    detector.recordCrash(now);
-    detector.recordCrash(now + 1000);
+    detector.recordCrash(now - 3000);
+    detector.recordCrash(now - 2000);
 
-    // Create new detector instance and load history
-    await new Promise(resolve => setTimeout(resolve, 50));
+    // Wait for async persist to complete (fire-and-forget write)
+    await new Promise(resolve => setTimeout(resolve, 200));
     const detector2 = new CrashLoopDetector(tempDir, 3, 60000);
     await detector2.initialize();
 
-    detector2.recordCrash(now + 2000);
+    detector2.recordCrash(now - 1000);
     expect(detector2.isLooping()).toBe(true);
   });
 
@@ -110,11 +112,11 @@ describe("SafeMode", () => {
 
   it("should publish exit event to bus", async () => {
     await safeMode.enter();
-    bus.getEvents().length = 0; // Clear events
+    const enterEventCount = bus.getEvents().length;
     await safeMode.exit();
     const events = bus.getEvents();
-    expect(events.length).toBe(1);
-    expect(events[0].topic).toBe("recovery.safemode.exited");
+    expect(events.length).toBe(enterEventCount + 1);
+    expect(events[events.length - 1].topic).toBe("recovery.safemode.exited");
   });
 
   it("should notify state change listeners", async () => {

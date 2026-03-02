@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'bun:test';
-import { parseId } from '../src/parse.js';
-import { generateId, type EntityType } from '../src/index.js';
+import { describe, expect, it } from "bun:test";
+import { type EntityType, generateId } from "../src/index.js";
+import { parseId } from "../src/parse.js";
 
 // FR-007: parseId round-trip
-describe('parseId', () => {
-  const entities: EntityType[] = ['workspace', 'lane', 'session', 'terminal', 'run', 'correlation'];
+describe("parseId", () => {
+  const entities: EntityType[] = ["workspace", "lane", "session", "terminal", "run", "correlation"];
 
   for (const entity of entities) {
     it(`round-trips ${entity} ID`, () => {
@@ -23,14 +23,14 @@ describe('parseId', () => {
     });
   }
 
-  it('returns null for invalid ID', () => {
-    expect(parseId('')).toBeNull();
-    expect(parseId('garbage')).toBeNull();
-    expect(parseId('xx_01HXYZ1234567890ABCDEFGHIJ')).toBeNull();
+  it("returns null for invalid ID", () => {
+    expect(parseId("")).toBeNull();
+    expect(parseId("garbage")).toBeNull();
+    expect(parseId("xx_01HXYZ1234567890ABCDEFGHIJ")).toBeNull();
   });
 
-  it('extracts correct ULID body', () => {
-    const id = generateId('workspace');
+  it("extracts correct ULID body", () => {
+    const id = generateId("workspace");
     const parsed = parseId(id);
     expect(parsed).not.toBeNull();
     if (!parsed) return;
@@ -38,13 +38,13 @@ describe('parseId', () => {
     expect(id).toBe(`ws_${parsed.ulid}`);
   });
 
-  it('handles tampered but valid-format ULID', () => {
+  it("handles tampered but valid-format ULID", () => {
     // Construct a valid-looking ID with a known timestamp
-    const id = 'ws_00000000000000000000000000';
+    const id = "ws_00000000000000000000000000";
     const parsed = parseId(id);
     expect(parsed).not.toBeNull();
     if (!parsed) return;
     expect(parsed.timestamp.getTime()).toBe(0); // epoch
-    expect(parsed.entityType).toBe('workspace');
+    expect(parsed.entityType).toBe("workspace");
   });
 });

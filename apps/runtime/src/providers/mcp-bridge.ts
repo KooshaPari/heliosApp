@@ -51,6 +51,7 @@ export class MCPBridgeAdapter
 {
   private config: MCPConfig | null = null;
   private bus: LocalBus | null = null;
+  private terminated = false;
   private connection: McpConnection = {
     connected: false,
     lastConnectionAttempt: new Date(),
@@ -121,6 +122,9 @@ export class MCPBridgeAdapter
    */
   async health(): Promise<ProviderHealthStatus> {
     if (!this.config) {
+      if (this.terminated) {
+        return { ...this.healthStatus };
+      }
       return {
         state: "unavailable",
         lastCheck: new Date(),
@@ -179,7 +183,7 @@ export class MCPBridgeAdapter
     if (!(this.config && this.connection.connected)) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        "MCP bridge not initialized or disconnected",
+        "MCP bridge unavailable: not initialized or disconnected",
         "mcp"
       );
     }
@@ -299,6 +303,7 @@ export class MCPBridgeAdapter
       this.toolCatalog.clear();
 
       this.config = null;
+      this.terminated = true;
 
       this.healthStatus = {
         state: "unavailable",
@@ -478,7 +483,15 @@ export class MCPBridgeAdapter
       list_directory: { entries: ["file1.txt", "file2.txt", "subdir/"] },
     };
 
-    return results[toolName] || { message: `Mock result for ${toolName}` };
+    const result = results[toolName] || { message: `Mock result for ${toolName}` };
+
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => resolve(result), 5);
+      signal.addEventListener("abort", () => {
+        clearTimeout(timeout);
+        reject(new Error("Tool invocation cancelled"));
+      });
+    });
   }
 
   /**

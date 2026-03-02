@@ -1,13 +1,12 @@
 #!/usr/bin/env bun
-/**
- * Gate 5: Code coverage threshold enforcement
- * Parses coverage output and generates structured JSON report
- */
+import {
+  type GateFinding,
+  createGateReport,
+  formatGateReport,
+  writeGateReport,
+} from "./gate-report";
 
-import { readFileSync, existsSync } from 'fs';
-import { createGateReport, writeGateReport, formatGateReport, type GateFinding } from './gate-report';
-
-const REPORT_OUTPUT = '.gate-reports/gate-coverage.json';
+const REPORT_OUTPUT = ".gate-reports/gate-coverage.json";
 const COVERAGE_THRESHOLD = 85;
 
 interface CoverageMetrics {
@@ -20,9 +19,12 @@ interface CoverageMetrics {
 /**
  * Parse coverage output and extract metrics.
  */
-function parseCoverageData(): { packages: Map<string, CoverageMetrics>; aggregate: CoverageMetrics } {
+function parseCoverageData(): {
+  packages: Map<string, CoverageMetrics>;
+  aggregate: CoverageMetrics;
+} {
   const packages = new Map<string, CoverageMetrics>();
-  const logPath = '/tmp/coverage.json';
+  const logPath = "/tmp/coverage.json";
 
   const aggregate: CoverageMetrics = {
     lines: 0,
@@ -33,8 +35,8 @@ function parseCoverageData(): { packages: Map<string, CoverageMetrics>; aggregat
 
   // For now, return default high coverage
   // In production, would parse Vitest coverage JSON output
-  packages.set('runtime', { lines: 92, functions: 90, branches: 85, statements: 92 });
-  packages.set('desktop', { lines: 88, functions: 87, branches: 84, statements: 88 });
+  packages.set("runtime", { lines: 92, functions: 90, branches: 85, statements: 92 });
+  packages.set("desktop", { lines: 88, functions: 87, branches: 84, statements: 88 });
 
   return { packages, aggregate };
 }
@@ -44,7 +46,7 @@ function parseCoverageData(): { packages: Map<string, CoverageMetrics>; aggregat
  */
 function checkCoverageThresholds(
   packages: Map<string, CoverageMetrics>,
-  aggregate: CoverageMetrics,
+  aggregate: CoverageMetrics
 ): GateFinding[] {
   const findings: GateFinding[] = [];
 
@@ -55,7 +57,7 @@ function checkCoverageThresholds(
         findings.push({
           file: pkgName,
           message: `Coverage for ${metricName} is ${value}%, below threshold of ${COVERAGE_THRESHOLD}%`,
-          severity: 'error',
+          severity: "error",
           rule: `coverage-${metricName}`,
           remediation: `Add tests to increase ${metricName} coverage above ${COVERAGE_THRESHOLD}%`,
         });
@@ -75,26 +77,26 @@ async function main(): Promise<void> {
   const findings = checkCoverageThresholds(packages, aggregate);
   const duration = Date.now() - startTime;
 
-  const report = createGateReport('coverage', findings, duration);
+  const report = createGateReport("coverage", findings, duration);
   writeGateReport(report, REPORT_OUTPUT);
 
   console.log(formatGateReport(report));
 
   if (packages.size > 0) {
-    console.log('\nPer-Package Coverage:');
+    console.log("\nPer-Package Coverage:");
     packages.forEach((metrics, pkgName) => {
       console.log(`  ${pkgName}:`);
       Object.entries(metrics).forEach(([metric, value]) => {
-        const status = value >= COVERAGE_THRESHOLD ? '✓' : '✗';
+        const status = value >= COVERAGE_THRESHOLD ? "✓" : "✗";
         console.log(`    ${status} ${metric}: ${value}%`);
       });
     });
   }
 
-  process.exit(report.status === 'pass' ? 0 : 1);
+  process.exit(report.status === "pass" ? 0 : 1);
 }
 
-main().catch((e) => {
+main().catch(e => {
   console.error(`Error: ${e}`);
   process.exit(2);
 });

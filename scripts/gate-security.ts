@@ -1,18 +1,17 @@
 #!/usr/bin/env bun
-/**
- * Gate 6: Security vulnerability scanning
- * Scans dependencies for known vulnerabilities using npm audit
- */
+import {
+  type GateFinding,
+  createGateReport,
+  formatGateReport,
+  writeGateReport,
+} from "./gate-report";
 
-import { readFileSync, existsSync } from 'fs';
-import { createGateReport, writeGateReport, formatGateReport, type GateFinding } from './gate-report';
-
-const REPORT_OUTPUT = '.gate-reports/gate-security.json';
+const REPORT_OUTPUT = ".gate-reports/gate-security.json";
 
 interface Vulnerability {
   id: string;
   package: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   remediation: string;
 }
@@ -31,12 +30,12 @@ function parseSecurityScan(): Vulnerability[] {
  */
 function vulnerabilitiesToFindings(vulns: Vulnerability[]): GateFinding[] {
   return vulns
-    .filter((v) => v.severity === 'high' || v.severity === 'critical')
-    .map((v) => ({
+    .filter(v => v.severity === "high" || v.severity === "critical")
+    .map(v => ({
       file: v.package,
       message: `[${v.severity.toUpperCase()}] ${v.id}: ${v.description}`,
-      severity: v.severity === 'critical' ? 'error' : 'error',
-      rule: 'security-vulnerability',
+      severity: v.severity === "critical" ? "error" : "error",
+      rule: "security-vulnerability",
       remediation: v.remediation,
     }));
 }
@@ -50,19 +49,19 @@ async function main(): Promise<void> {
   const findings = vulnerabilitiesToFindings(vulnerabilities);
   const duration = Date.now() - startTime;
 
-  const report = createGateReport('security', findings, duration);
+  const report = createGateReport("security", findings, duration);
   writeGateReport(report, REPORT_OUTPUT);
 
   console.log(formatGateReport(report));
 
   if (findings.length === 0) {
-    console.log('No high or critical security vulnerabilities found.');
+    console.log("No high or critical security vulnerabilities found.");
   }
 
-  process.exit(report.status === 'pass' ? 0 : 1);
+  process.exit(report.status === "pass" ? 0 : 1);
 }
 
-main().catch((e) => {
+main().catch(e => {
   console.error(`Error: ${e}`);
   process.exit(2);
 });

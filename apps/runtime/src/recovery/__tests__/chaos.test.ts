@@ -249,12 +249,10 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
       await stateMachine.transition(RecoveryStage.DETECTING);
 
-      // Try 3 times
+      // Retry MAX_RETRIES times (3)
       for (let i = 0; i < 3; i++) {
         await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
-        if (i < 2) {
-          await stateMachine.transition(RecoveryStage.DETECTING);
-        }
+        await stateMachine.transition(RecoveryStage.DETECTING);
       }
 
       // Fourth attempt should fail

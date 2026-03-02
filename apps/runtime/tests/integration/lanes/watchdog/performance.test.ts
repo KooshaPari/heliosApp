@@ -13,7 +13,7 @@ describe("Performance", () => {
 
   beforeEach(() => {
     bus = new InMemoryLocalBus();
-    laneRegistry = new LaneRegistry();
+    laneRegistry = new LaneRegistry(200);
     engine = new RemediationEngine(laneRegistry, bus);
   });
 

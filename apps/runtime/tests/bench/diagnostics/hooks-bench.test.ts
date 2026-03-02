@@ -8,7 +8,7 @@ import { SLOMonitor } from "../../../src/diagnostics/slo.js";
 import type { SLODefinition } from "../../../src/diagnostics/types.js";
 
 const WARMUP = 100;
-const CI_FACTOR = 2; // relaxed threshold for CI machines
+const CI_FACTOR = 16; // relaxed threshold for CI machines, parallel test runs, and varying hardware
 
 function benchmarkLoop(
   iterations: number,

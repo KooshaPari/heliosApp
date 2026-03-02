@@ -86,18 +86,14 @@ export function validateBindingTriple(
     );
   }
 
-  if (errors.length > 0) {
-    return { valid: false, errors };
-  }
-
-  // Validate existence in registries
-  if (!queryInterface.workspaceExists(triple.workspaceId)) {
+  // Validate existence in registries (only for format-valid IDs)
+  if (isValidIdFormat(triple.workspaceId) && !queryInterface.workspaceExists(triple.workspaceId)) {
     errors.push(`Workspace does not exist: ${triple.workspaceId}`);
   }
-  if (!queryInterface.laneExists(triple.laneId)) {
+  if (isValidIdFormat(triple.laneId) && !queryInterface.laneExists(triple.laneId)) {
     errors.push(`Lane does not exist: ${triple.laneId}`);
   }
-  if (!queryInterface.sessionExists(triple.sessionId)) {
+  if (isValidIdFormat(triple.sessionId) && !queryInterface.sessionExists(triple.sessionId)) {
     errors.push(`Session does not exist: ${triple.sessionId}`);
   }
 

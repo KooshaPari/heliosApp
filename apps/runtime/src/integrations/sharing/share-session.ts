@@ -6,6 +6,7 @@
  * FR-026-003: Policy gate integration.
  */
 
+import { randomUUID } from "node:crypto";
 import type { ProtocolBus as LocalBus } from "../../protocol/bus.js";
 
 /**
@@ -176,7 +177,7 @@ export class ShareSessionManager {
 
     if (!policyDecision.allowed) {
       const session: ShareSession = {
-        id: `share-${Date.now()}`,
+        id: `share-${randomUUID()}`,
         terminalId,
         backend,
         shareLink: null,
@@ -199,7 +200,7 @@ export class ShareSessionManager {
 
     // Create session in pending state
     const session: ShareSession = {
-      id: `share-${Date.now()}`,
+      id: `share-${randomUUID()}`,
       terminalId,
       backend,
       shareLink: null,

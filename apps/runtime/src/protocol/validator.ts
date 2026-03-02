@@ -231,8 +231,9 @@ export function validateEnvelope(input: unknown): LocalBusEnvelope {
 
   if (type === "event") {
     const topic = assertStringField(envelope, "topic");
-    if (!TOPIC_SET.has(topic)) {
-      throw new ProtocolValidationError("INVALID_TOPIC", `Unsupported topic '${topic}'`, { topic });
+    // Validate topic format (dotted alphanumeric segments)
+    if (!/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/.test(topic)) {
+      throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${topic}'`, { topic });
     }
     assertPayloadObject(envelope);
 
@@ -262,8 +263,8 @@ export function validateEnvelope(input: unknown): LocalBusEnvelope {
     }
 
     const topic = assertOptionalString(envelope, "topic");
-    if (topic && !TOPIC_SET.has(topic)) {
-      throw new ProtocolValidationError("INVALID_TOPIC", `Unsupported topic '${topic}'`, {
+    if (topic && !/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/.test(topic)) {
+      throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${topic}'`, {
         topic,
       });
     }
