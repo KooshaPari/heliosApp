@@ -12,7 +12,7 @@ export const ChatPanel: Component<ChatPanelProps> = props => {
 
   // Auto-scroll to bottom on new messages
   createEffect(() => {
-    const _ = props.messages.length;
+    void props.messages.length;
     if (containerRef) {
       requestAnimationFrame(() => {
         containerRef!.scrollTop = containerRef?.scrollHeight ?? 0;

@@ -165,8 +165,8 @@ export class EditorlessControlPlane {
       targetEngine,
       runtimeClient: this.runtimeClient,
       contextStore: this.store,
-      forceError: options?.forceError,
-      forceRollbackError: options?.forceRollbackError,
+      forceError: options?.forceError ?? false,
+      forceRollbackError: options?.forceRollbackError ?? false,
     });
     this.settings = outcome.settings;
     return {
