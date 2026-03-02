@@ -25,10 +25,7 @@ interface CheckResult {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const CONSTITUTION_PATH = path.join(
-  path.dirname(__dirname),
-  ".kittify/memory/constitution.md"
-);
+const CONSTITUTION_PATH = path.join(path.dirname(__dirname), ".kittify/memory/constitution.md");
 
 /**
  * Load and parse the constitution.

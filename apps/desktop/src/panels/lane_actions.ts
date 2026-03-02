@@ -119,7 +119,7 @@ export class LaneActions {
     }
   }
 
-  private handleActionError(code: string, error: any, revertFn?: ActionCallback): void {
+  private handleActionError(code: string, error: unknown, revertFn?: ActionCallback): void {
     const message = error instanceof Error ? error.message : String(error);
     const actionError: LaneActionError = {
       code,

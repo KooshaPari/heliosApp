@@ -130,10 +130,12 @@ export interface ACPExecuteInput {
 export interface ACPExecuteOutput {
   content: string;
   stopReason: string;
-  usage?: {
-    inputTokens: number;
-    outputTokens: number;
-  } | undefined;
+  usage?:
+    | {
+        inputTokens: number;
+        outputTokens: number;
+      }
+    | undefined;
 }
 
 /** Type alias for ACP adapter implementation */
