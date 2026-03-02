@@ -22,6 +22,40 @@ GitHub Actions workflows:
 - `.github/workflows/agent-dir-guard.yml`: enforces allowed agent-directory files in tracked repository content.
 - `.github/workflows/vitepress-pages.yml`: builds and deploys VitePress docs on `main`.
 
+## Shared DevOps Helpers
+
+This repo uses shared Phenotype DevOps helpers from `agent-devops-setups`:
+
+- `scripts/push-heliosapp-with-fallback.sh` delegates to
+  `../agent-devops-setups/scripts/repo-push-fallback.sh`.
+- `scripts/devops-checker.sh` delegates to
+  `../agent-devops-setups/scripts/repo-devops-checker.sh`.
+
+Set `PHENOTYPE_DEVOPS_REPO_ROOT` to point to the shared repository root when layouts differ.
+Optional: override single commands with `PHENOTYPE_DEVOPS_PUSH_HELPER` or
+`PHENOTYPE_DEVOPS_CHECKER_HELPER` for explicit script targets.
+
+Common commands:
+
+```bash
+# Shared preflight/devops checks
+task devops:check
+task devops:check:ci
+task devops:check:ci-summary
+
+# Shared push with primary+fallback remote behavior
+task devops:push
+task devops:push:origin
+
+# Justfile aliases
+just devops-status
+just devops-check
+just devops-check-ci
+just devops-checker --check-ci --emit-summary
+just devops-push
+just devops-push-origin
+```
+
 ## Required Check Governance
 
 Branch protection should use names from `.github/required-checks.txt`.
