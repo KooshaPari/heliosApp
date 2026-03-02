@@ -7,7 +7,7 @@ type ShareModalProps = {
   onClose: () => void;
 };
 
-export const ShareModal: Component<ShareModalProps> = (props) => {
+export const ShareModal: Component<ShareModalProps> = props => {
   const [copied, setCopied] = createSignal(false);
 
   const copyToClipboard = async () => {

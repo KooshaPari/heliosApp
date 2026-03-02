@@ -96,4 +96,116 @@ export class GhosttySurface {
     // Notify ghostty of the dimension change.
     // In a real integration this would send a resize message via IPC.
   }
+
+  // -------------------------------------------------------------------------
+  // T011: GPU rendering initialisation & fallback
+  // -------------------------------------------------------------------------
+
+  /**
+   * Attempt to initialise GPU rendering.  Falls back to software
+   * rendering if GPU init fails.
+   */
+  private _initGpuRendering(gpuAvailable: boolean): void {
+    if (!gpuAvailable) {
+      // No GPU on system -- software rendering from start, no fallback event
+      this._gpuMode = "software";
+      return;
+    }
+
+    try {
+      // In a real integration: pass GPU preference to ghostty via IPC
+      //   { type: "gpu_init", preference: this._gpuPreference }
+      // and verify GPU is in use via diagnostics.
+      void this._gpuPreference;
+      this._gpuMode = "gpu";
+    } catch {
+      this._fallbackToSoftwareRendering("gpu_init_failed");
+    }
+  }
+
+  /**
+   * Fall back to software rendering when GPU is unavailable or fails.
+   */
+  private _fallbackToSoftwareRendering(reason: string): void {
+    this._gpuMode = "software";
+    this._gpuFallbackOccurred = true;
+
+    // Publish fallback event (SC-011-003)
+    this._eventHandler?.("renderer.ghostty.gpu_fallback", {
+      reason,
+      timestamp: Date.now(),
+    });
+  }
+
+  /**
+   * Handle a GPU driver reset or crash (T011).
+   *
+   * Attempts to reinitialise the GPU surface.  If reinit fails,
+   * falls back to software rendering.
+   */
+  handleGpuReset(): void {
+    if (!this._bound) {
+      return;
+    }
+
+    this._gpuReinitAttempted = true;
+
+    try {
+      // Attempt GPU reinitialisation
+      // In a real integration: send IPC to ghostty to re-create the GL/Metal context
+      this._gpuMode = "gpu";
+    } catch {
+      this._fallbackToSoftwareRendering("gpu_reinit_failed");
+    }
+  }
+
+  /**
+   * Simulate a GPU driver crash for testing (T011).
+   * In production this would be triggered by a system event or render stall.
+   */
+  simulateGpuCrash(): void {
+    if (!this._bound || this._gpuMode !== "gpu") {
+      return;
+    }
+    this._gpuMode = "unknown";
+    this.handleGpuReset();
+  }
+
+  /**
+   * Update the GPU memory usage reading (T011).
+   * Called by the memory monitor or externally by system probes.
+   */
+  updateGpuMemory(bytes: number): void {
+    this._gpuMemoryBytes = bytes;
+
+    if (bytes > MAX_GPU_MEMORY_PER_TERMINAL_BYTES) {
+      this._eventHandler?.("renderer.ghostty.gpu_memory_exceeded", {
+        memoryBytes: bytes,
+        limitBytes: MAX_GPU_MEMORY_PER_TERMINAL_BYTES,
+        timestamp: Date.now(),
+      });
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // T011: GPU memory monitoring
+  // -------------------------------------------------------------------------
+
+  private _startMemoryMonitoring(): void {
+    // Poll GPU memory every 2 seconds
+    this._memoryCheckTimer = setInterval(() => {
+      if (!this._bound || this._gpuMode !== "gpu") {
+        return;
+      }
+      // In a real integration: query system GPU memory APIs
+      // For now, the consumer calls updateGpuMemory externally.
+    }, 2_000);
+  }
+
+  private _stopMemoryMonitoring(): void {
+    if (this._memoryCheckTimer !== undefined) {
+      clearInterval(this._memoryCheckTimer);
+      this._memoryCheckTimer = undefined;
+    }
+  }
 }

@@ -24,7 +24,7 @@ export function ApprovalWorkflowPage() {
     setLoading(false);
   });
 
-  const handleApprove = (id: string) => {
+  const handleApprove = async (id: string) => {
     setRequests(requests().map(r => (r.id === id ? { ...r, status: ApprovalStatus.Approved } : r)));
   };
 

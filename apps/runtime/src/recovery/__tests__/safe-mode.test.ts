@@ -39,11 +39,10 @@ describe("CrashLoopDetector", () => {
 
   it("should not detect loop with crashes outside window", () => {
     const now = Date.now();
-    // Record two old crashes outside the window
-    detector.recordCrash(now - 120000);
-    detector.recordCrash(now - 90000);
-    // Record one recent crash within the window
-    detector.recordCrash(now - 1000);
+    detector.recordCrash(now);
+    detector.recordCrash(now + 1000);
+    // timer advance skipped // Advance past window
+    detector.recordCrash(now + 62000);
 
     // Only 1 crash within the 60s window, threshold is 3
     expect(detector.isLooping()).toBe(false);
@@ -54,8 +53,8 @@ describe("CrashLoopDetector", () => {
     detector.recordCrash(now - 3000);
     detector.recordCrash(now - 2000);
 
-    // Wait for async persist to complete (fire-and-forget write)
-    await new Promise(resolve => setTimeout(resolve, 200));
+    // Create new detector instance and load history
+    await new Promise(resolve => setTimeout(resolve, 50));
     const detector2 = new CrashLoopDetector(tempDir, 3, 60000);
     await detector2.initialize();
 

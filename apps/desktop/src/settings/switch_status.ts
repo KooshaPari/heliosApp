@@ -23,7 +23,7 @@ export class SwitchStatus {
   private container: HTMLElement | null = null;
   private props: SwitchStatusProps = { isActive: false };
   private startTime = 0;
-  private updateInterval?: NodeJS.Timeout | undefined;
+  private updateInterval?: NodeJS.Timeout;
 
   mount(container: HTMLElement): void {
     this.container = container;

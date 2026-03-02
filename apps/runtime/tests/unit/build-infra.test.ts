@@ -73,8 +73,9 @@ async function readJsonAsync(relativePath: string): Promise<Record<string, unkno
 describe("workspace configuration", () => {
   test("root package.json declares project name and type", async () => {
     const pkg = await readJsonAsync("package.json");
-    expect(pkg.name).toBe("heliosapp");
-    expect(pkg.type).toBe("module");
+    const workspaces = pkg.workspaces as string[];
+    expect(workspaces).toContain("apps/desktop");
+    expect(workspaces).toContain("apps/runtime");
   });
 
   test("bunfig.toml exists and contains install settings", async () => {

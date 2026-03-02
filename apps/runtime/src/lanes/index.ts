@@ -1,23 +1,12 @@
 // T003 - Lane lifecycle commands + T004 - Event publishing to local bus
 
-import type { LocalBus } from "../protocol/bus.js";
+import * as path from "node:path";
+import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
-import { LaneRegistry, type LaneRecord, LaneNotFoundError } from "./registry.js";
-import {
-  transition,
-  withLaneLock,
-  recordTransition,
-  type LaneState,
-  type LaneEvent,
-} from "./state_machine.js";
-import {
-  shareLane,
-  attachAgent,
-  detachAgent,
-  forceDetachAll,
-  LaneClosedError,
-  SharedLaneCleanupError,
-} from "./sharing.js";
+import { LaneNotFoundError, type LaneRecord, LaneRegistry } from "./registry.js";
+import { SharedLaneCleanupError, attachAgent, detachAgent, shareLane } from "./sharing.js";
+import { type LaneState, recordTransition, transition, withLaneLock } from "./state_machine.js";
+import { provisionWorktree, reconcileOrphanedWorktrees, removeWorktree } from "./worktree.js";
 
 // ── T016: Full Reconciliation Result ─────────────────────────────────────────
 
@@ -121,6 +110,50 @@ export class LaneManager {
     });
   }
 
+  // ── T006+T010: provision worktree for a lane in provisioning state ──────
+
+  async provision(laneId: string, workspaceRepoPath: string): Promise<LaneRecord> {
+    return withLaneLock(laneId, async () => {
+      const lane = this.registry.get(laneId);
+      if (!lane) {
+        throw new LaneNotFoundError(laneId);
+      }
+      if (lane.state !== "provisioning") {
+        throw new Error(`Cannot provision lane in state ${lane.state}`);
+      }
+
+      try {
+        const result = await provisionWorktree({
+          workspaceRepoPath,
+          laneId,
+          baseBranch: lane.baseBranch,
+        });
+
+        // Transition provisioning -> ready
+        const fromState = lane.state;
+        const toState = transition(fromState, "provision_complete", laneId);
+        recordTransition(laneId, fromState, "provision_complete", toState);
+        this.registry.update(laneId, {
+          state: toState,
+          worktreePath: result.worktreePath,
+        });
+
+        await this.emitEvent("lane.state.changed", laneId, lane.workspaceId, fromState, toState);
+        return this.registry.get(laneId)!;
+      } catch (err) {
+        // T010: Partial provisioning failure - clean up and close lane
+        const fromState = lane.state;
+        const toState = transition(fromState, "provision_failed", laneId);
+        recordTransition(laneId, fromState, "provision_failed", toState);
+        this.registry.update(laneId, { state: toState });
+
+        await this.emitEvent("lane.provision_failed", laneId, lane.workspaceId, fromState, toState);
+
+        throw err;
+      }
+    });
+  }
+
   // ── T003: list ───────────────────────────────────────────────────────────
 
   list(workspaceId?: string): LaneRecord[] {
@@ -147,7 +180,7 @@ export class LaneManager {
         laneId,
         lane?.workspaceId ?? "",
         result.fromState,
-        result.toState,
+        result.toState
       );
     }
   }
@@ -163,14 +196,14 @@ export class LaneManager {
         laneId,
         lane?.workspaceId ?? "",
         result.fromState,
-        result.toState,
+        result.toState
       );
     }
   }
 
   // ── T003: cleanup ────────────────────────────────────────────────────────
 
-  async cleanup(laneId: string, force: boolean = false): Promise<void> {
+  async cleanup(laneId: string, force = false): Promise<void> {
     await withLaneLock(laneId, async () => {
       const lane = this.registry.get(laneId);
       if (!lane) {
@@ -204,7 +237,13 @@ export class LaneManager {
           const cleaningState = transition(midState, "request_cleanup", laneId);
           recordTransition(laneId, midState, "request_cleanup", cleaningState);
           this.registry.update(laneId, { state: cleaningState });
-          await this.emitEvent("lane.cleaning", laneId, lane.workspaceId, lane.state, cleaningState);
+          await this.emitEvent(
+            "lane.cleaning",
+            laneId,
+            lane.workspaceId,
+            lane.state,
+            cleaningState
+          );
         } else {
           throw new SharedLaneCleanupError(laneId, lane.attachedAgents.length);
         }
@@ -232,7 +271,9 @@ export class LaneManager {
   // ── T008: Graceful PTY termination before worktree removal ───────────────
 
   private async terminateLanePtys(laneId: string, workspaceId: string): Promise<void> {
-    if (!this.ptyManager) return;
+    if (!this.ptyManager) {
+      return;
+    }
 
     let ptys: PtyHandle[];
     try {
@@ -242,21 +283,23 @@ export class LaneManager {
       return;
     }
 
-    if (ptys.length === 0) return;
+    if (ptys.length === 0) {
+      return;
+    }
 
-    let forceKilled = 0;
-    const terminationPromises = ptys.map(async (pty) => {
+    let _forceKilled = 0;
+    const terminationPromises = ptys.map(async pty => {
       try {
-        const timeout = new Promise<"timeout">((resolve) =>
-          setTimeout(() => resolve("timeout"), this.ptyTerminationTimeoutMs),
+        const timeout = new Promise<"timeout">(resolve =>
+          setTimeout(() => resolve("timeout"), this.ptyTerminationTimeoutMs)
         );
-        const termination = this.ptyManager!.terminate(pty.ptyId).then(() => "done" as const);
+        const termination = this.ptyManager?.terminate(pty.ptyId).then(() => "done" as const);
         const result = await Promise.race([termination, timeout]);
         if (result === "timeout") {
-          forceKilled++;
+          _forceKilled++;
         }
       } catch {
-        forceKilled++;
+        _forceKilled++;
       }
     });
 
@@ -269,7 +312,7 @@ export class LaneManager {
 
   async reconcileOrphans(
     workspaceRepoPath: string,
-    options?: { timeoutMs?: number },
+    options?: { timeoutMs?: number }
   ): Promise<FullReconciliationResult> {
     const timeoutMs = options?.timeoutMs ?? 30_000;
     const startTime = Date.now();
@@ -304,7 +347,7 @@ export class LaneManager {
             } catch {
               // Lane may not exist in registry
             }
-          },
+          }
         );
         result.orphanedWorktrees = worktreeResult.orphanedWorktrees;
         result.cleaned += worktreeResult.cleaned;
@@ -315,7 +358,9 @@ export class LaneManager {
       if (!isTimedOut()) {
         const fsModule = await import("node:fs");
         for (const lane of activeLanes) {
-          if (isTimedOut()) break;
+          if (isTimedOut()) {
+            break;
+          }
           if (lane.worktreePath && !fsModule.existsSync(lane.worktreePath)) {
             result.orphanedRecords++;
             result.totalCleaned++;
@@ -328,7 +373,9 @@ export class LaneManager {
       if (!isTimedOut()) {
         const allLanes = this.registry.list();
         for (const lane of allLanes) {
-          if (isTimedOut()) break;
+          if (isTimedOut()) {
+            break;
+          }
           if (lane.parTaskPid !== null && lane.state !== "closed") {
             // Check if the process is still alive
             try {
@@ -345,11 +392,11 @@ export class LaneManager {
 
       // Phase 3: Orphaned PTYs - delegate to ptyManager if available
       if (!isTimedOut() && this.ptyManager) {
-        const closedLanes = this.registry
-          .list()
-          .filter((l) => l.state === "closed");
+        const closedLanes = this.registry.list().filter(l => l.state === "closed");
         for (const lane of closedLanes) {
-          if (isTimedOut()) break;
+          if (isTimedOut()) {
+            break;
+          }
           try {
             const ptys = this.ptyManager.getByLane(lane.laneId);
             for (const pty of ptys) {
@@ -381,7 +428,9 @@ export class LaneManager {
   }
 
   private async emitReconciliationEvent(result: FullReconciliationResult): Promise<void> {
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
 
     const envelope: LocalBusEnvelope = {
       id: `reconciliation:${Date.now()}`,
@@ -412,9 +461,11 @@ export class LaneManager {
     laneId: string,
     workspaceId: string,
     fromState: LaneState,
-    toState: LaneState,
+    toState: LaneState
   ): Promise<void> {
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
 
     const envelope: LocalBusEnvelope = {
       id: `${laneId}:${topic}:${Date.now()}`,
@@ -443,5 +494,10 @@ export class LaneManager {
 // Re-export public types
 export { LaneRegistry, type LaneRecord, LaneNotFoundError } from "./registry.js";
 export type { LaneState, LaneEvent } from "./state_machine.js";
-export { InvalidLaneTransitionError, transition, withLaneLock, getTransitionHistory } from "./state_machine.js";
+export {
+  InvalidLaneTransitionError,
+  transition,
+  withLaneLock,
+  getTransitionHistory,
+} from "./state_machine.js";
 export { LaneClosedError, SharedLaneCleanupError } from "./sharing.js";

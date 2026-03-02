@@ -5,12 +5,14 @@ import { ProtocolValidationError } from "./types";
 
 const METHOD_SET = new Set<string>(METHODS);
 const TOPIC_SET = new Set<string>(TOPICS);
-const ISO_8601_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
+const RFC3339_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 
 const CORRELATION_REQUIRED_METHODS = new Set<string>([
   "lane.create",
   "session.attach",
-  "terminal.spawn"
+  "terminal.spawn",
+  "terminal.input",
+  "terminal.resize",
 ]);
 
 const CORRELATION_REQUIRED_TOPICS = new Set<string>([
@@ -22,7 +24,9 @@ const CORRELATION_REQUIRED_TOPICS = new Set<string>([
   "session.attach.failed",
   "terminal.spawn.started",
   "terminal.spawned",
-  "terminal.spawn.failed"
+  "terminal.spawn.failed",
+  "terminal.output",
+  "terminal.state.changed",
 ]);
 
 const METHOD_CONTEXT_REQUIREMENTS: Record<
@@ -31,7 +35,9 @@ const METHOD_CONTEXT_REQUIREMENTS: Record<
 > = {
   "lane.create": ["workspace_id"],
   "session.attach": ["workspace_id", "lane_id", "session_id"],
-  "terminal.spawn": ["workspace_id", "lane_id", "session_id"]
+  "terminal.spawn": ["workspace_id", "lane_id", "session_id"],
+  "terminal.input": ["workspace_id", "lane_id", "session_id", "terminal_id"],
+  "terminal.resize": ["workspace_id", "lane_id", "session_id", "terminal_id"],
 };
 
 const TOPIC_CONTEXT_REQUIREMENTS: Record<
@@ -46,7 +52,9 @@ const TOPIC_CONTEXT_REQUIREMENTS: Record<
   "session.attach.failed": ["workspace_id", "lane_id", "session_id"],
   "terminal.spawn.started": ["workspace_id", "lane_id", "session_id"],
   "terminal.spawned": ["workspace_id", "lane_id", "session_id", "terminal_id"],
-  "terminal.spawn.failed": ["workspace_id", "lane_id", "session_id"]
+  "terminal.spawn.failed": ["workspace_id", "lane_id", "session_id"],
+  "terminal.output": ["workspace_id", "lane_id", "session_id", "terminal_id"],
+  "terminal.state.changed": ["workspace_id", "lane_id", "session_id", "terminal_id"],
 };
 
 function assertRecord(value: unknown): asserts value is Record<string, unknown> {
@@ -74,7 +82,7 @@ function assertIsoTimestamp(value: string, field: string): void {
       `Envelope field '${field}' must be an ISO timestamp`,
       {
         field,
-        value
+        value,
       }
     );
   }
@@ -87,7 +95,7 @@ function assertPayloadObject(envelope: Record<string, unknown>): void {
       "MISSING_REQUIRED_FIELD",
       "Envelope field 'payload' must be an object",
       {
-        field: "payload"
+        field: "payload",
       }
     );
   }
@@ -106,7 +114,7 @@ function assertOptionalString(
       "MISSING_CONTEXT_ID",
       `Envelope field '${field}' must be a non-empty string`,
       {
-        field
+        field,
       }
     );
   }
@@ -124,7 +132,7 @@ function assertContext(
         "MISSING_CONTEXT_ID",
         `Envelope field '${field}' is required`,
         {
-          field
+          field,
         }
       );
     }
@@ -145,10 +153,10 @@ function assertErrorPayload(envelope: Record<string, unknown>): void {
 
   const typedError = error as Record<string, unknown>;
   if (typeof typedError.code !== "string" || typeof typedError.message !== "string") {
-      throw new ProtocolValidationError(
-        "INVALID_ERROR_PAYLOAD",
-        "Envelope error payload must include code and message"
-      );
+    throw new ProtocolValidationError(
+      "INVALID_ERROR_PAYLOAD",
+      "Envelope error payload must include code and message"
+    );
   }
   if (typeof typedError.retryable !== "boolean") {
     throw new ProtocolValidationError(
@@ -170,7 +178,7 @@ function assertCorrelationId(
       "Envelope field 'correlation_id' is required",
       {
         required_by: requiredBy,
-        name
+        name,
       }
     );
   }
@@ -206,11 +214,9 @@ export function validateEnvelope(input: unknown): LocalBusEnvelope {
   if (type === "command") {
     const method = assertStringField(envelope, "method");
     if (!METHOD_SET.has(method)) {
-      throw new ProtocolValidationError(
-        "INVALID_METHOD",
-        `Unsupported method '${method}'`,
-        { method }
-      );
+      throw new ProtocolValidationError("INVALID_METHOD", `Unsupported method '${method}'`, {
+        method,
+      });
     }
     assertPayloadObject(envelope);
 
@@ -242,27 +248,23 @@ export function validateEnvelope(input: unknown): LocalBusEnvelope {
   if (type === "response") {
     const status = assertStringField(envelope, "status");
     if (status !== "ok" && status !== "error") {
-      throw new ProtocolValidationError(
-        "INVALID_STATUS",
-        `Unsupported status '${status}'`,
-        { status }
-      );
+      throw new ProtocolValidationError("INVALID_STATUS", `Unsupported status '${status}'`, {
+        status,
+      });
     }
     assertErrorPayload(envelope);
 
     const method = assertOptionalString(envelope, "method");
     if (method && !METHOD_SET.has(method)) {
-      throw new ProtocolValidationError(
-        "INVALID_METHOD",
-        `Unsupported method '${method}'`,
-        { method }
-      );
+      throw new ProtocolValidationError("INVALID_METHOD", `Unsupported method '${method}'`, {
+        method,
+      });
     }
 
     const topic = assertOptionalString(envelope, "topic");
     if (topic && !TOPIC_SET.has(topic)) {
       throw new ProtocolValidationError("INVALID_TOPIC", `Unsupported topic '${topic}'`, {
-        topic
+        topic,
       });
     }
   }

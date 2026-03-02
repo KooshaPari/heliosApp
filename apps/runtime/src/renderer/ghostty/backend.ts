@@ -5,16 +5,15 @@
  * ghostty terminal emulator backend.
  */
 
-import type {
-  RendererAdapter,
-  RendererConfig,
-  RendererState,
-  RenderSurface,
-} from "../adapter.js";
+import type { RenderSurface, RendererAdapter, RendererConfig, RendererState } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
+import { detectCapabilities, getCachedCapabilities } from "./capabilities.js";
+import { GhosttyInputRelay } from "./input.js";
+import type { PtyWriter } from "./input.js";
+import { GhosttyMetrics } from "./metrics.js";
+import type { MetricsPublisher, MetricsSnapshot } from "./metrics.js";
 import { GhosttyProcess } from "./process.js";
 import { GhosttySurface } from "./surface.js";
-import { detectCapabilities, getCachedCapabilities } from "./capabilities.js";
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -61,7 +60,7 @@ export class GhosttyBackend implements RendererAdapter {
     this.version = version;
 
     // Wire process crash events to the adapter crash handler
-    this._process.onCrash((error) => {
+    this._process.onCrash(error => {
       this._state = "errored";
       this._crashHandler?.(error);
     });
@@ -206,7 +205,70 @@ export class GhosttyBackend implements RendererAdapter {
   }
 
   // -------------------------------------------------------------------------
-  // Internal
+  // Internal: render loop monitoring (T006)
+  // -------------------------------------------------------------------------
+
+  private _startRenderLoopMonitoring(): void {
+    this._fpsWindowStart = Date.now();
+    this._fpsWindowFrames = 0;
+    this._lastFrameTimestamp = Date.now();
+    this._degradedStart = 0;
+
+    // Stall check every 500ms
+    this._stallCheckTimer = setInterval(() => {
+      this._checkRenderStall();
+    }, 500);
+  }
+
+  private _stopRenderLoopMonitoring(): void {
+    if (this._stallCheckTimer !== undefined) {
+      clearInterval(this._stallCheckTimer);
+      this._stallCheckTimer = undefined;
+    }
+    if (this._renderLoopTimer !== undefined) {
+      clearInterval(this._renderLoopTimer);
+      this._renderLoopTimer = undefined;
+    }
+  }
+
+  private _checkFpsDegradation(currentFps: number, timestamp: number): void {
+    const threshold = this._targetFps - 5; // < 55 FPS
+    if (currentFps < threshold) {
+      if (this._degradedStart === 0) {
+        this._degradedStart = timestamp;
+      } else if (timestamp - this._degradedStart > 2_000) {
+        // Sustained degradation for > 2 seconds
+        this._fpsEventHandler?.("renderer.ghostty.fps_degraded", {
+          currentFps: Math.round(currentFps * 100) / 100,
+          targetFps: this._targetFps,
+          degradedForMs: timestamp - this._degradedStart,
+          timestamp,
+        });
+      }
+    } else {
+      this._degradedStart = 0;
+    }
+  }
+
+  private _checkRenderStall(): void {
+    if (this._state !== "running") {
+      return;
+    }
+    if (this._lastFrameTimestamp === 0) {
+      return;
+    }
+
+    const elapsed = Date.now() - this._lastFrameTimestamp;
+    if (elapsed > 500) {
+      // Check if the process is alive
+      if (this._process.isRunning()) {
+      }
+      // If process is dead, crash detection in WP01 T002 handles it.
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Internal: stream pump
   // -------------------------------------------------------------------------
 
   /**
@@ -215,7 +277,7 @@ export class GhosttyBackend implements RendererAdapter {
   private async _pumpStream(
     ptyId: string,
     reader: ReadableStreamDefaultReader<Uint8Array>,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): Promise<void> {
     try {
       while (!signal.aborted) {

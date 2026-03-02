@@ -450,18 +450,6 @@ export class RemediationEngine {
     } catch (_error) {}
   }
 
-  private async publishEvent(envelope: any): Promise<void> {
-    try {
-      if ("pushEvent" in this.bus && typeof (this.bus as any).pushEvent === "function") {
-        (this.bus as any).pushEvent(envelope);
-      } else {
-        await this.bus.publish(envelope);
-      }
-    } catch {
-      // Fire-and-forget
-    }
-  }
-
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }

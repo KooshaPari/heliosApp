@@ -33,8 +33,6 @@ function createTempGitRepo(): string {
   fs.writeFileSync(path.join(dir, "README.md"), "# test repo\n");
   (Bun as any).spawnSync(["git", "add", "."], { cwd: dir });
   (Bun as any).spawnSync(["git", "commit", "-m", "initial"], { cwd: dir });
-  // Ensure the default branch is named 'main' regardless of git config
-  (Bun as any).spawnSync(["git", "branch", "-M", "main"], { cwd: dir });
 
   return dir;
 }

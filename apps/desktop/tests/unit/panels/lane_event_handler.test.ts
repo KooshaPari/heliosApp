@@ -37,7 +37,7 @@ describe("LaneEventHandler", () => {
     expect(mockBus.subscribe).toHaveBeenCalledWith("lane.created", expect.any(Function));
   });
 
-  it("should handle state changed events", async () => {
+  it("should handle state changed events", () => {
     const onStateChanged = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
@@ -55,8 +55,9 @@ describe("LaneEventHandler", () => {
     stateChangedHandler?.(event);
 
     // Wait for RAF
-    await new Promise(resolve => setTimeout(resolve, 20));
-    expect(onStateChanged).toHaveBeenCalledWith("lane-1", "running");
+    setTimeout(() => {
+      expect(onStateChanged).toHaveBeenCalledWith("lane-1", "running");
+    }, 10);
   });
 
   it("should handle lane created events", () => {
@@ -135,7 +136,7 @@ describe("LaneEventHandler", () => {
     // Should only render final state due to batching
   });
 
-  it("should discard out-of-order events", async () => {
+  it("should discard out-of-order events", () => {
     const onStateChanged = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
@@ -161,9 +162,10 @@ describe("LaneEventHandler", () => {
     });
 
     // Wait for RAF
-    await new Promise(resolve => setTimeout(resolve, 30));
-    // The out-of-order event should be discarded
-    expect(onStateChanged).toHaveBeenCalledWith("lane-1", "running");
+    setTimeout(() => {
+      // The out-of-order event should be discarded
+      expect(onStateChanged).toHaveBeenCalledWith("lane-1", "running");
+    }, 20);
   });
 
   it("should monitor bus connectivity", async () => {

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import {
-  transition,
-  PtyLifecycle,
   InvalidTransitionError,
-  type PtyState,
   type PtyEvent,
+  PtyLifecycle,
+  type PtyState,
+  transition,
 } from "../state_machine.js";
 
 describe("transition()", () => {
@@ -20,17 +20,12 @@ describe("transition()", () => {
     ["errored", "cleanup", "stopped"],
   ];
 
-  it.each(validTransitions)(
-    "%s + %s -> %s",
-    (from, event, expected) => {
-      expect(transition(from, event, "test-pty")).toBe(expected);
-    },
-  );
+  it.each(validTransitions)("%s + %s -> %s", (from, event, expected) => {
+    expect(transition(from, event, "test-pty")).toBe(expected);
+  });
 
   it("rejects invalid transitions with InvalidTransitionError", () => {
-    expect(() => transition("idle", "spawn_succeeded", "pty-1")).toThrow(
-      InvalidTransitionError,
-    );
+    expect(() => transition("idle", "spawn_succeeded", "pty-1")).toThrow(InvalidTransitionError);
   });
 
   it("includes diagnostic context in error", () => {
@@ -62,9 +57,7 @@ describe("transition()", () => {
       "cleanup",
     ];
     for (const event of events) {
-      expect(() => transition("stopped", event, "pty-x")).toThrow(
-        InvalidTransitionError,
-      );
+      expect(() => transition("stopped", event, "pty-x")).toThrow(InvalidTransitionError);
     }
   });
 });
@@ -83,10 +76,10 @@ describe("PtyLifecycle", () => {
 
     expect(lc.state).toBe("active");
     expect(lc.history).toHaveLength(2);
-    expect(lc.history[0]!.from).toBe("idle");
-    expect(lc.history[0]!.to).toBe("spawning");
-    expect(lc.history[1]!.from).toBe("spawning");
-    expect(lc.history[1]!.to).toBe("active");
+    expect(lc.history[0]?.from).toBe("idle");
+    expect(lc.history[0]?.to).toBe("spawning");
+    expect(lc.history[1]?.from).toBe("spawning");
+    expect(lc.history[1]?.to).toBe("active");
   });
 
   it("bounds history to 10 entries", () => {

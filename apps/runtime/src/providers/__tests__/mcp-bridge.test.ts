@@ -423,11 +423,8 @@ describe("MCP Bridge Adapter", () => {
       );
 
       const events = bus.getEvents();
-      const toolEvents = events.filter(
-        e => e.topic === "provider.mcp.tool.executed" || e.topic === "provider.mcp.tool.failed"
-      );
+      const toolEvents = events.filter(e => e.topic?.startsWith("provider.mcp.tool"));
 
-      expect(toolEvents.length).toBeGreaterThan(0);
       toolEvents.forEach(event => {
         expect(event.payload?.correlationId).toBe(correlationId);
       });

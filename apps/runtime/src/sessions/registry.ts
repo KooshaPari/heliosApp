@@ -33,9 +33,7 @@ export class InMemorySessionRegistry {
     const activeSessionId = this.activeLaneSessions.get(input.lane_id);
     if (activeSessionId) {
       const active = this.bySessionId.get(activeSessionId);
-      if (!active) {
-        this.activeLaneSessions.delete(input.lane_id);
-      } else {
+      if (active) {
         if (input.codex_session_id && input.codex_session_id !== active.codex_session_id) {
           throw new SessionRegistryError(
             `lane ${input.lane_id} already mapped to codex session ${active.codex_session_id}`
@@ -47,6 +45,7 @@ export class InMemorySessionRegistry {
         active.last_heartbeat_at = nowIso;
         return { session: { ...active }, created: false };
       }
+      this.activeLaneSessions.delete(input.lane_id);
     }
 
     const codexSessionId = input.codex_session_id ?? this.generateCodexSessionId();
@@ -66,7 +65,7 @@ export class InMemorySessionRegistry {
       codex_session_id: codexSessionId,
       transport: input.transport,
       status: "attached",
-      last_heartbeat_at: nowIso
+      last_heartbeat_at: nowIso,
     };
 
     this.bySessionId.set(session.session_id, session);

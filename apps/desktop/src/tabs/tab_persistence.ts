@@ -193,9 +193,9 @@ export class TabPersistence {
       typeof s.version === "number" &&
       (s.selectedTabId === null || typeof s.selectedTabId === "string") &&
       Array.isArray(s.tabOrder) &&
-      s.tabOrder.every((id: unknown) => typeof id === "string") &&
+      s.tabOrder.every(id => typeof id === "string") &&
       Array.isArray(s.pinnedTabIds) &&
-      s.pinnedTabIds.every((id: unknown) => typeof id === "string") &&
+      s.pinnedTabIds.every(id => typeof id === "string") &&
       typeof s.perTabState === "object" &&
       s.perTabState !== null &&
       typeof s.savedAt === "string"

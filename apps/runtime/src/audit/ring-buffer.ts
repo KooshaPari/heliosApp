@@ -134,7 +134,7 @@ export class AuditRingBuffer {
    * @returns Array of matching events
    */
   getByCorrelationId(correlationId: string): AuditEvent[] {
-    return this.query({ correlationId });
+    return this.query({ correlationId: correlationId } as any);
   }
 
   /**

@@ -119,7 +119,7 @@ export class LaneActions {
     }
   }
 
-  private handleActionError(code: string, error: unknown, revertFn?: ActionCallback): void {
+  private handleActionError(code: string, error: any, revertFn?: ActionCallback): void {
     const message = error instanceof Error ? error.message : String(error);
     const actionError: LaneActionError = {
       code,
@@ -151,9 +151,7 @@ export class LaneActions {
   }
 
   clearAllErrors(): void {
-    for (const timeout of this.errorTimeouts.values()) {
-      clearTimeout(timeout);
-    }
+    this.errorTimeouts.forEach(timeout => clearTimeout(timeout));
     this.errorTimeouts.clear();
   }
 

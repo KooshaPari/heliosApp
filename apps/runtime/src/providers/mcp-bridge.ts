@@ -51,7 +51,6 @@ export class MCPBridgeAdapter
 {
   private config: MCPConfig | null = null;
   private bus: LocalBus | null = null;
-  private terminated = false;
   private connection: McpConnection = {
     connected: false,
     lastConnectionAttempt: new Date(),

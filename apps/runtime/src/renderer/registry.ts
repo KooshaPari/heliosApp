@@ -64,9 +64,7 @@ export class RendererRegistry {
   }
 
   getActive(): RendererAdapter | undefined {
-    return this._activeId !== undefined
-      ? this._adapters.get(this._activeId)
-      : undefined;
+    return this._activeId !== undefined ? this._adapters.get(this._activeId) : undefined;
   }
 
   setActive(id: string): void {

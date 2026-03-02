@@ -333,10 +333,6 @@ export class OutputBuffer {
     // Log warning on first overflow.
     if (!this.firstOverflowLogged) {
       this.firstOverflowLogged = true;
-      console.warn(
-        // intentional overflow warning
-        `[OutputBuffer] overflow: ${droppedBytes} bytes dropped for pty ${this.correlation.ptyId}`
-      );
     }
 
     // Debounce overflow events: max 1 per overflowDebounceMs per PTY.

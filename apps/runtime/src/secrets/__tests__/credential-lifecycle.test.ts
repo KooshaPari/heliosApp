@@ -1,15 +1,15 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { randomBytes } from "node:crypto";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { EncryptionService } from "../encryption.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 import {
-  CredentialStore,
   CredentialAlreadyExistsError,
   CredentialNotFoundError,
+  CredentialStore,
 } from "../credential-store.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { EncryptionService } from "../encryption.js";
 
 function makeStore(dataDir: string, bus: InMemoryLocalBus): CredentialStore {
   const fixedKey = randomBytes(32);
@@ -40,7 +40,7 @@ describe("CredentialStore: lifecycle operations", () => {
   it("create emits secrets.credential.created event", async () => {
     await store.create("providerA", "ws1", "myKey", "secret", "corr-001");
     const events = bus.getEvents();
-    const created = events.find((e) => e.topic === "secrets.credential.created");
+    const created = events.find(e => e.topic === "secrets.credential.created");
     expect(created).toBeDefined();
     expect(created?.payload?.name).toBe("myKey");
     expect(created?.payload?.correlationId).toBe("corr-001");
@@ -82,7 +82,7 @@ describe("CredentialStore: lifecycle operations", () => {
     await store.create("providerA", "ws1", "myKey", "v1", "corr-001");
     await store.rotate("providerA", "ws1", "myKey", "v2", "corr-002");
     const events = bus.getEvents();
-    const rotated = events.find((e) => e.topic === "secrets.credential.rotated");
+    const rotated = events.find(e => e.topic === "secrets.credential.rotated");
     expect(rotated).toBeDefined();
     expect(rotated?.payload?.name).toBe("myKey");
     expect(rotated?.payload?.correlationId).toBe("corr-002");
@@ -109,16 +109,16 @@ describe("CredentialStore: lifecycle operations", () => {
   it("revoke removes the credential", async () => {
     await store.create("providerA", "ws1", "myKey", "secret", "corr-001");
     await store.revoke("providerA", "ws1", "myKey", "corr-002");
-    await expect(
-      store.retrieve("providerA", "ws1", "myKey")
-    ).rejects.toBeInstanceOf(CredentialNotFoundError);
+    await expect(store.retrieve("providerA", "ws1", "myKey")).rejects.toBeInstanceOf(
+      CredentialNotFoundError
+    );
   });
 
   it("revoke emits secrets.credential.revoked event", async () => {
     await store.create("providerA", "ws1", "myKey", "secret", "corr-001");
     await store.revoke("providerA", "ws1", "myKey", "corr-002");
     const events = bus.getEvents();
-    const revoked = events.find((e) => e.topic === "secrets.credential.revoked");
+    const revoked = events.find(e => e.topic === "secrets.credential.revoked");
     expect(revoked).toBeDefined();
     expect(revoked?.payload?.name).toBe("myKey");
     expect(revoked?.payload?.correlationId).toBe("corr-002");
@@ -133,9 +133,9 @@ describe("CredentialStore: lifecycle operations", () => {
   });
 
   it("revoke throws on non-existent credential", async () => {
-    await expect(
-      store.revoke("providerA", "ws1", "noSuchKey", "corr-001")
-    ).rejects.toBeInstanceOf(CredentialNotFoundError);
+    await expect(store.revoke("providerA", "ws1", "noSuchKey", "corr-001")).rejects.toBeInstanceOf(
+      CredentialNotFoundError
+    );
   });
 
   // -------------------------------------------------------------------------
@@ -144,13 +144,17 @@ describe("CredentialStore: lifecycle operations", () => {
   it("retrieveWithContext emits secrets.credential.accessed", async () => {
     await store.create("providerA", "ws1", "myKey", "secret", "corr-001");
     await store.retrieveWithContext(
-      { requestingProviderId: "providerA", requestingWorkspaceId: "ws1", correlationId: "corr-002" },
+      {
+        requestingProviderId: "providerA",
+        requestingWorkspaceId: "ws1",
+        correlationId: "corr-002",
+      },
       "providerA",
       "ws1",
       "myKey"
     );
     const events = bus.getEvents();
-    const accessed = events.find((e) => e.topic === "secrets.credential.accessed");
+    const accessed = events.find(e => e.topic === "secrets.credential.accessed");
     expect(accessed).toBeDefined();
     expect(accessed?.payload?.name).toBe("myKey");
   });
@@ -158,7 +162,11 @@ describe("CredentialStore: lifecycle operations", () => {
   it("accessed event does NOT include credential value", async () => {
     await store.create("providerA", "ws1", "myKey", "ultra-secret", "corr-001");
     await store.retrieveWithContext(
-      { requestingProviderId: "providerA", requestingWorkspaceId: "ws1", correlationId: "corr-002" },
+      {
+        requestingProviderId: "providerA",
+        requestingWorkspaceId: "ws1",
+        correlationId: "corr-002",
+      },
       "providerA",
       "ws1",
       "myKey"

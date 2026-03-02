@@ -26,6 +26,11 @@ jobs:
         with:
           bun-version: '1.2.20'
 
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: '1.2.20'
+
       - name: Install dependencies
         run: bun install
 
@@ -50,8 +55,7 @@ jobs:
           CHANGED_FILES: ${{ steps.files.outputs.files }}
         run: |
           FILES_ARRAY=$(echo "$CHANGED_FILES" | jq -r '.[]' | tr '\n' ' ')
-          bun run scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>compliance-stderr.log || true
-          if [ -s compliance-stderr.log ]; then cat compliance-stderr.log >&2; fi
+          tsx scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>&1
           cat compliance-result.json
 
       - name: Parse compliance results

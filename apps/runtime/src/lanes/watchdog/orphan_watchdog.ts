@@ -55,8 +55,7 @@ export class OrphanWatchdog {
     } else {
     }
 
-    // Run first cycle immediately, then schedule subsequent ones
-    await this.runDetectionCycle();
+    // Run first cycle immediately
     this.scheduleNextCycle();
   }
 
