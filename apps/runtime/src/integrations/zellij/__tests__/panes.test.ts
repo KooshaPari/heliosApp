@@ -21,9 +21,9 @@ function makeMockCli(): ZellijCli {
 function makeMockPtyManager(): PtyManagerInterface {
   let counter = 0;
   return {
-    spawn: mock(async () => ({ ptyId: `pty-${++counter}`, pid: 1000 + counter })),
-    terminate: mock(async () => {}),
-    resize: mock(() => {}),
+    spawn: mock(() => Promise.resolve({ ptyId: `pty-${++counter}`, pid: 1000 + counter })),
+    terminate: mock(() => Promise.resolve()),
+    resize: mock(() => undefined),
   };
 }
 
@@ -63,16 +63,14 @@ describe("ZellijPaneManager", () => {
 
     it("closes pane and throws PtyBindingError when PTY spawn fails", async () => {
       const failingPty: PtyManagerInterface = {
-        spawn: mock(async () => {
-          throw new Error("spawn failed");
-        }),
-        terminate: mock(async () => {}),
-        resize: mock(() => {}),
+        spawn: mock(() => Promise.reject(new Error("spawn failed"))),
+        terminate: mock(() => Promise.resolve()),
+        resize: mock(() => undefined),
       };
       const mgr = new ZellijPaneManager({ cli, topology, ptyManager: failingPty });
       topology.initializeTopology("test-session");
 
-      expect(mgr.createPane("test-session", "lane-1")).rejects.toThrow(PtyBindingError);
+      await expect(mgr.createPane("test-session", "lane-1")).rejects.toThrow(PtyBindingError);
     });
 
     it("passes direction and cwd to CLI", async () => {
@@ -103,11 +101,9 @@ describe("ZellijPaneManager", () => {
 
     it("closes pane even when PTY terminate fails", async () => {
       const failTerminate: PtyManagerInterface = {
-        spawn: mock(async () => ({ ptyId: "pty-1", pid: 1001 })),
-        terminate: mock(async () => {
-          throw new Error("already dead");
-        }),
-        resize: mock(() => {}),
+        spawn: mock(() => Promise.resolve({ ptyId: "pty-1", pid: 1001 })),
+        terminate: mock(() => Promise.reject(new Error("already dead"))),
+        resize: mock(() => undefined),
       };
       const mgr = new ZellijPaneManager({ cli, topology, ptyManager: failTerminate });
       topology.initializeTopology("test-session");
@@ -132,7 +128,7 @@ describe("ZellijPaneManager", () => {
       topology.initializeTopology("test-session", { cols: 12, rows: 5 });
 
       // The pane is 12 cols, shrinking left by 5 would make it 7 < minCols (10)
-      expect(paneManager.resizePane("test-session", 0, "left", 5)).rejects.toThrow(
+      await expect(paneManager.resizePane("test-session", 0, "left", 5)).rejects.toThrow(
         PaneTooSmallError
       );
     });
@@ -181,7 +177,7 @@ describe("ZellijPaneManager", () => {
       // Session with pane at exactly minimum size
       topology.initializeTopology("tiny-session", { cols: 10, rows: 3 });
 
-      expect(
+      await expect(
         paneManager.createPane("tiny-session", "lane-1", { direction: "vertical" })
       ).rejects.toThrow(PaneTooSmallError);
     });

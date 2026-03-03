@@ -40,31 +40,44 @@ function createMockAdapter(
   return {
     id,
     version: "1.0.0",
-    init: async () => {
+    init: () => {
       if (opts?.initFail) {
         throw new Error(`${id} init failed`);
       }
       state = "initializing";
+      return Promise.resolve();
     },
-    start: async () => {
+    start: () => {
       if (opts?.startFail) {
         throw new Error(`${id} start failed`);
       }
       state = "running";
+      return Promise.resolve();
     },
-    stop: async () => {
+    stop: () => {
       if (opts?.stopFail) {
         throw new Error(`${id} stop failed`);
       }
       state = "stopped";
+      return Promise.resolve();
     },
-    bindStream: () => {},
-    unbindStream: () => {},
-    handleInput: () => {},
-    resize: () => {},
+    bindStream: () => {
+      // no-op
+    },
+    unbindStream: () => {
+      // no-op
+    },
+    handleInput: () => {
+      // no-op
+    },
+    resize: () => {
+      // no-op
+    },
     queryCapabilities: () => DEFAULT_CAPS,
     getState: () => state,
-    onCrash: () => {},
+    onCrash: () => {
+      // no-op
+    },
   };
 }
 

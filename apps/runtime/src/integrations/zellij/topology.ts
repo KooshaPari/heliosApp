@@ -98,7 +98,10 @@ export class TopologyTracker {
         tab.panes.splice(idx, 1);
         // If removed pane was focused, focus the first remaining pane
         if (wasFocused && tab.panes.length > 0) {
-          tab.panes[0]!.focused = true;
+          const firstPane = tab.panes[0];
+          if (firstPane) {
+            firstPane.focused = true;
+          }
         }
         return;
       }
@@ -190,50 +193,15 @@ export class TopologyTracker {
    */
   async refreshTopology(sessionName: string): Promise<LayoutTopology> {
     const result = await this.cli.run(["--session", sessionName, "action", "dump-layout"]);
-
-    // Preserve existing PTY bindings before refresh
     const existingTopology = this.topologies.get(sessionName);
-    const ptyBindings = new Map<number, string>();
-    if (existingTopology) {
-      for (const tab of existingTopology.tabs) {
-        for (const pane of tab.panes) {
-          if (pane.ptyId) {
-            ptyBindings.set(pane.paneId, pane.ptyId);
-          }
-        }
-      }
-    }
+    const ptyBindings = this.collectPtyBindings(existingTopology);
 
-    let topology: LayoutTopology;
+    const topology =
+      result.exitCode === 0 && result.stdout.trim()
+        ? this.parseLayoutDump(sessionName, result.stdout)
+        : this.getFallbackTopology(sessionName);
 
-    if (result.exitCode !== 0 || !result.stdout.trim()) {
-      // If we cannot query zellij, return a minimal topology
-      topology = {
-        sessionName,
-        tabs: [
-          {
-            tabId: 0,
-            name: "Tab #1",
-            panes: [{ paneId: 0, dimensions: { cols: 80, rows: 24 }, focused: true }],
-            layout: "horizontal",
-          },
-        ],
-        activeTabId: 0,
-      };
-    } else {
-      topology = this.parseLayoutDump(sessionName, result.stdout);
-    }
-
-    // Restore PTY bindings
-    for (const tab of topology.tabs) {
-      for (const pane of tab.panes) {
-        const ptyId = ptyBindings.get(pane.paneId);
-        if (ptyId) {
-          pane.ptyId = ptyId;
-        }
-      }
-    }
-
+    this.rebindTopologyPtys(topology, ptyBindings);
     this.topologies.set(sessionName, topology);
     return topology;
   }
@@ -288,77 +256,149 @@ export class TopologyTracker {
    * Zellij dump-layout returns KDL format; we do a best-effort parse.
    */
   private parseLayoutDump(sessionName: string, output: string): LayoutTopology {
-    const tabs: TabTopology[] = [];
-    let activeTabId = 0;
-
-    // Simple line-based parse for KDL layout output
     const lines = output.split("\n");
-    let currentTabId = 0;
-    let currentTabName = "Tab #1";
-    let panes: PaneTopology[] = [];
-    let paneCounter = 0;
+
+    const parseState = {
+      tabs: [] as TabTopology[],
+      activeTabId: 0,
+      currentTabId: 0,
+      currentTabName: "Tab #1",
+      panes: [] as PaneTopology[],
+      paneCounter: 0,
+    };
 
     for (const line of lines) {
       const trimmed = line.trim();
-
-      // Detect tab boundaries
-      const tabMatch = trimmed.match(/tab\s+name="([^"]*)"(?:\s+focus=true)?/);
-      if (tabMatch) {
-        // Save previous tab if it had panes
-        if (panes.length > 0) {
-          tabs.push({
-            tabId: currentTabId,
-            name: currentTabName,
-            panes: [...panes],
-            layout: "horizontal",
-          });
-        }
-        currentTabId = tabs.length;
-        currentTabName = tabMatch[1] ?? `Tab #${currentTabId + 1}`;
-        if (trimmed.includes("focus=true")) {
-          activeTabId = currentTabId;
-        }
-        panes = [];
+      if (!trimmed) {
+        continue;
       }
 
-      // Detect pane entries
-      const paneMatch = trimmed.match(/pane\s+/);
+      const updatedTab = this.parseTabStart(trimmed);
+      if (updatedTab) {
+        this.appendCurrentTab(parseState);
+        parseState.currentTabId = parseState.tabs.length;
+        parseState.currentTabName = updatedTab.name;
+        parseState.activeTabId = updatedTab.isActive
+          ? parseState.currentTabId
+          : parseState.activeTabId;
+        parseState.panes = [];
+        continue;
+      }
+
+      const paneMatch = this.parsePane(trimmed, parseState.paneCounter);
       if (paneMatch) {
-        const colsMatch = trimmed.match(/size_cols\s*=?\s*(\d+)/);
-        const rowsMatch = trimmed.match(/size_rows\s*=?\s*(\d+)/);
-        const focusMatch = trimmed.includes("focus=true");
-
-        panes.push({
-          paneId: paneCounter++,
-          dimensions: {
-            cols: colsMatch ? Number.parseInt(colsMatch[1]!, 10) : 80,
-            rows: rowsMatch ? Number.parseInt(rowsMatch[1]!, 10) : 24,
-          },
-          focused: focusMatch,
-        });
+        parseState.panes.push(paneMatch.pane);
+        parseState.paneCounter += 1;
       }
     }
 
-    // Push the last tab
-    if (panes.length > 0) {
-      tabs.push({
-        tabId: currentTabId,
-        name: currentTabName,
-        panes,
-        layout: "horizontal",
-      });
+    this.appendCurrentTab(parseState);
+
+    if (parseState.tabs.length === 0) {
+      return this.getFallbackTopology(sessionName);
     }
 
-    // If nothing was parsed, return minimal topology
-    if (tabs.length === 0) {
-      tabs.push({
-        tabId: 0,
-        name: "Tab #1",
-        panes: [{ paneId: 0, dimensions: { cols: 80, rows: 24 }, focused: true }],
-        layout: "horizontal",
-      });
+    return { sessionName, tabs: parseState.tabs, activeTabId: parseState.activeTabId };
+  }
+
+  private parseTabStart(trimmed: string): { name: string; isActive: boolean } | null {
+    const tabMatch = trimmed.match(/tab\s+name="([^"]*)"(?:\s+focus=true)?/);
+    if (!tabMatch) {
+      return null;
+    }
+    const [, name = "Tab #1"] = tabMatch;
+    return {
+      name,
+      isActive: trimmed.includes("focus=true"),
+    };
+  }
+
+  private parsePane(trimmed: string, paneCounter: number): { pane: PaneTopology } | null {
+    if (!trimmed.startsWith("pane")) {
+      return null;
     }
 
-    return { sessionName, tabs, activeTabId };
+    const colsMatch = trimmed.match(/size_cols\s*=?\s*(\d+)/);
+    const rowsMatch = trimmed.match(/size_rows\s*=?\s*(\d+)/);
+    const focusMatch = trimmed.includes("focus=true");
+
+    return {
+      pane: {
+        paneId: paneCounter,
+        dimensions: {
+          cols: this.parseDimension(colsMatch),
+          rows: this.parseDimension(rowsMatch),
+        },
+        focused: focusMatch,
+      },
+    };
+  }
+
+  private parseDimension(match: RegExpMatchArray | null): number {
+    if (!match?.[1]) {
+      return 80;
+    }
+    return Number.parseInt(match[1], 10);
+  }
+
+  private getFallbackTopology(sessionName: string): LayoutTopology {
+    return {
+      sessionName,
+      tabs: [
+        {
+          tabId: 0,
+          name: "Tab #1",
+          panes: [{ paneId: 0, dimensions: { cols: 80, rows: 24 }, focused: true }],
+          layout: "horizontal",
+        },
+      ],
+      activeTabId: 0,
+    };
+  }
+
+  private collectPtyBindings(topology?: LayoutTopology): Map<number, string> {
+    const ptyBindings = new Map<number, string>();
+    if (!topology) {
+      return ptyBindings;
+    }
+
+    for (const tab of topology.tabs) {
+      for (const pane of tab.panes) {
+        if (pane.ptyId) {
+          ptyBindings.set(pane.paneId, pane.ptyId);
+        }
+      }
+    }
+
+    return ptyBindings;
+  }
+
+  private rebindTopologyPtys(topology: LayoutTopology, ptyBindings: Map<number, string>): void {
+    for (const tab of topology.tabs) {
+      for (const pane of tab.panes) {
+        const ptyId = ptyBindings.get(pane.paneId);
+        if (ptyId) {
+          pane.ptyId = ptyId;
+        }
+      }
+    }
+  }
+
+  private appendCurrentTab(parseState: {
+    tabs: TabTopology[];
+    currentTabName: string;
+    currentTabId: number;
+    panes: PaneTopology[];
+  }): void {
+    if (parseState.panes.length === 0) {
+      return;
+    }
+
+    parseState.tabs.push({
+      tabId: parseState.currentTabId,
+      name: parseState.currentTabName,
+      panes: [...parseState.panes],
+      layout: "horizontal",
+    });
   }
 }

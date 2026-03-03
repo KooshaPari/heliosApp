@@ -1,5 +1,18 @@
 export type EnvelopeType = "command" | "response" | "event";
 
+type OptionalString = string | undefined;
+type OptionalRecord = Record<string, unknown> | undefined;
+
+type CamelToSnake<S extends string> = S extends `${infer Head}${infer Tail}`
+  ? Head extends Lowercase<Head>
+    ? `${Head}${CamelToSnake<Tail>}`
+    : `_${Lowercase<Head>}${CamelToSnake<Tail>}`
+  : S;
+
+type SnakeCaseRecord<T extends Record<string, unknown>> = {
+  [K in keyof T as K extends string ? CamelToSnake<K> : K]: T[K];
+};
+
 export type ErrorPayload = {
   code: string;
   message: string;
@@ -7,25 +20,27 @@ export type ErrorPayload = {
   details?: Record<string, unknown> | null;
 };
 
-export type LocalBusEnvelope = {
+type LocalBusEnvelopeBase = {
   id: string;
   type: EnvelopeType;
   ts: string;
-  timestamp?: string | undefined;
-  correlation_id?: string | undefined;
-  workspace_id?: string | undefined;
-  session_id?: string | undefined;
-  terminal_id?: string | undefined;
-  lane_id?: string | undefined;
-  method?: string | undefined;
-  topic?: string | undefined;
-  payload?: Record<string, unknown> | undefined;
-  status?: "ok" | "error" | undefined;
-  result?: Record<string, unknown> | null | undefined;
-  error?: ErrorPayload | null | undefined;
-  sequence?: number | undefined;
-  envelope_id?: string | undefined;
+  timestamp?: OptionalString;
+  correlationId?: OptionalString;
+  workspaceId?: OptionalString;
+  sessionId?: OptionalString;
+  terminalId?: OptionalString;
+  laneId?: OptionalString;
+  method?: OptionalString;
+  topic?: OptionalString;
+  payload?: OptionalRecord | null;
+  status?: "ok" | "error";
+  result?: OptionalRecord | null;
+  error?: ErrorPayload | null;
+  sequence?: number;
+  envelopeId?: OptionalString;
 };
+
+export type LocalBusEnvelope = SnakeCaseRecord<LocalBusEnvelopeBase>;
 
 // ---------------------------------------------------------------------------
 // Envelope types for the bus.ts / envelope.ts subsystem
@@ -37,9 +52,9 @@ export type BusError = {
   readonly details?: unknown;
 };
 
-export type CommandEnvelope = {
+type CommandEnvelopeBase = {
   id: string;
-  correlation_id: string;
+  correlationId: string;
   timestamp: number;
   type: "command";
   method: string;
@@ -47,9 +62,9 @@ export type CommandEnvelope = {
   error?: BusError;
 };
 
-export type ResponseEnvelope = {
+type ResponseEnvelopeBase = {
   id: string;
-  correlation_id: string;
+  correlationId: string;
   timestamp: number;
   type: "response";
   method: string;
@@ -57,15 +72,19 @@ export type ResponseEnvelope = {
   error?: BusError;
 };
 
-export type EventEnvelope = {
+type EventEnvelopeBase = {
   id: string;
-  correlation_id: string;
+  correlationId: string;
   timestamp: number;
   type: "event";
   topic: string;
   payload: unknown;
   sequence: number;
 };
+
+export type CommandEnvelope = SnakeCaseRecord<CommandEnvelopeBase>;
+export type ResponseEnvelope = SnakeCaseRecord<ResponseEnvelopeBase>;
+export type EventEnvelope = SnakeCaseRecord<EventEnvelopeBase>;
 
 export type Envelope = CommandEnvelope | ResponseEnvelope | EventEnvelope;
 

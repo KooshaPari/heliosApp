@@ -23,7 +23,9 @@ function makeMockProc(stdout: string, stderr: string, exitCode: number) {
     stdout: stdoutStream,
     stderr: stderrStream,
     exited: Promise.resolve(exitCode),
-    kill: mock(() => {}),
+    kill: mock(() => {
+      // Intentionally no-op: kill is not exercised by these tests.
+    }),
   };
 }
 

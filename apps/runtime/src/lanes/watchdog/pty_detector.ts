@@ -50,7 +50,9 @@ export class PtyDetector {
           },
         });
       }
-    } catch (_error) {}
+    } catch (error) {
+      console.warn(`PTY leak detection failed: ${String(error)}`);
+    }
 
     return orphans;
   }
@@ -101,7 +103,8 @@ export class PtyDetector {
       }
 
       return processes;
-    } catch (_error) {
+    } catch (error) {
+      console.warn(`Failed to list PTY processes: ${String(error)}`);
       return [];
     }
   }

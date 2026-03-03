@@ -53,6 +53,7 @@ export class OrphanWatchdog {
     if (checkpoint) {
       this.cycleNumber = checkpoint.cycleNumber;
     } else {
+      // No checkpoint persisted; start from cycle 0.
     }
 
     // Run first cycle immediately, then schedule subsequent ones
@@ -115,6 +116,10 @@ export class OrphanWatchdog {
 
       // Warn if cycle took too long
       if (this.lastDetectionDuration > 2000) {
+        // High latency warning intentionally logged for triage correlation.
+        console.warn(
+          `Orphan watchdog detection cycle ${this.cycleNumber} took ${this.lastDetectionDuration}ms`
+        );
       }
 
       // Emit detection cycle event
@@ -161,6 +166,8 @@ export class OrphanWatchdog {
         },
       };
       await this.checkpointManager.save(checkpoint);
-    } catch (_error) {}
+    } catch (error) {
+      console.error("Orphan watchdog detection cycle failed", error);
+    }
   }
 }

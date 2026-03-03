@@ -51,3 +51,78 @@ Status legend:
 - [status:done] Fix wrapper regression: `--dry-run` and explicit option forwarding to shared helper.
 - [status:done] Publish to local mirror remote successfully using queue/queue-worker mode.
 - [status:done] Push to upstream origin branch when network and branch alignment are available.
+
+## Phase 6 — Immediate Next Actions (24-task run)
+- [status:done] Validate remaining ghostty and lane files against formatter/lint:
+  - [status:done] `apps/runtime/src/renderer/ghostty/index.ts`
+  - [status:done] `apps/runtime/src/renderer/ghostty/process.ts`
+  - [status:done] `apps/runtime/src/renderer/ghostty/capabilities.ts`
+  - [status:done] `apps/runtime/src/lanes/index.ts`
+- [status:done] Remove remaining test hygiene blockers in renderer stubs:
+  - [status:done] `apps/runtime/src/renderer/__tests__/switch.test.ts`
+  - [status:done] `apps/runtime/src/renderer/__tests__/stream_binding.test.ts`
+  - [status:done] `apps/runtime/src/renderer/__tests__/rio.test.ts`
+  - [status:done] `apps/runtime/src/policy/rules.ts` complexity/format adjustments
+- [status:done] Create/update reusable reconciliation and cleanup flow:
+  - [status:done] Decompose lane cleanup path into dedicated helper methods.
+  - [status:done] Decompose orphan-reconciliation into per-phase helpers.
+  - [status:done] Fix lane cleanup event sequence and state transition logic.
+  - [status:done] Keep API behavior unchanged (no semantic interface changes).
+- [status:done] Expand validation beyond touched files:
+  - [status:done] Run `bunx @biomejs/biome check --diagnostic-level=warn apps/runtime/src`
+  - [status:done] Run `bun test apps/runtime/tests/integration/renderer/lifecycle.test.ts`
+  - [status:done] Run `bun test apps/runtime/tests/integration/lanes/lifecycle.test.ts`
+  - [status:done] Capture and attach output snapshots for all runs.
+- [status:done] Hardening for publish in restricted environments:
+  - [status:done] Audit `scripts/repo-push-fallback.sh` for DNS/fallback behavior and shared-helper handoff.
+  - [status:done] Add deterministic retry + error taxonomy for push blockers in wrapper flow.
+  - [status:done] Add one-shot remediation note for missing upstream local-object temp paths.
+  - [status:done] Add `docs/sessions/.../05_KNOWN_ISSUES.md` entry for network/DNS constraints.
+- [status:done] CI and policy alignment wave:
+  - [status:done] Ensure CodeRabbit and Gemini review triggers remain available.
+  - [status:done] Validate required check names via `required-check-names-guard` in task output.
+  - [status:done] Verify required checks list in `.github/required-checks.txt` and governance docs.
+  - [status:done] Confirm `task devops:check:ci-summary` and policy workflows execute without hard failures.
+- [status:done] Documentation + handoff:
+  - [status:done] Update `/docs/sessions/20260303-heliosapp-stabilization/04_IMPLEMENTATION_STRATEGY.md`.
+  - [status:done] Update `/docs/sessions/20260303-heliosapp-stabilization/06_TESTING_STRATEGY.md`.
+  - [status:done] Add post-change risk note in `05_KNOWN_ISSUES.md`.
+  - [status:done] Prepare minimal handoff summary and scope note for next push task.
+
+## Phase 7 — Next 24-task execution wave (all remaining work, 4 tasks per lane)
+
+### Wave A (Gates and policy)
+- [status:done] Pull live branch-protection and required-check settings via API/`required-checks.txt`.
+- [status:done] Validate `required_pull_request_reviews` and status-check scopes against branch policy.
+- [status:done] Snapshot branch-protection drift proof in `docs/sessions/20260303-heliosapp-stabilization/artifacts/branch-protection-check.txt`.
+- [status:done] Resolve any policy drift before next merge window (alignment by removing optional file-only checks from `required-checks.txt` to match enforced branch policy).
+
+### Wave B (Publish worker reliability)
+- [status:done] Add JSON output mode for push failures in `scripts/push-heliosapp-with-fallback.sh`.
+- [status:done] Add local retry counters for `dns_network` and `object_tmp_dir`.
+- [status:done] Add dry-run integration coverage for queue drain/replay.
+- [status:done] Document remediation sequence for persistent queue failures.
+
+### Wave C (DevOps checkers docs)
+- [status:done] Create/update `docs/wiki/devops-checkers.md` with checker catalog.
+- [status:done] Add cross-repo check-reference notes for sibling Phenotype repositories.
+- [status:done] Add bot trigger/cooldown guidance to the checker page.
+- [status:done] Regenerate docs index and validate links after checker doc updates.
+
+### Wave D (Task/just parity)
+- [status:done] Add explicit task/just alias parity table in VitePress checker docs.
+- [status:done] Add one-line cheat-sheet commands for queue and dry-run lanes.
+- [status:done] Track alias drift check in `04_IMPLEMENTATION_STRATEGY.md`.
+- [status:pending] Keep `Justfile` and `Taskfile` aliases aligned during future additions.
+
+### Wave E (Runtime warning hardening)
+- [status:pending] Resolve remaining branch-warning hotspots in `apps/runtime/src/registry`.
+- [status:pending] Resolve remaining branch-warning hotspots in `apps/runtime/src/sessions`.
+- [status:pending] Resolve remaining branch-warning hotspots in `apps/runtime/src/recovery`.
+- [status:pending] Re-run `bunx @biomejs/biome check --diagnostic-level=warn apps/runtime/src`.
+
+### Wave F (Coverage confidence)
+- [status:pending] Add branch coverage tests for warning-heavy modules.
+- [status:pending] Re-run `task quality:strict` after targeted coverage additions.
+- [status:pending] Confirm coverage/quality artifact stability in next `ci-summary` handoff.
+- [status:pending] Update `docs/sessions/20260303-heliosapp-stabilization/artifacts` with every run.

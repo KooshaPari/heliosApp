@@ -47,7 +47,9 @@ export class ZellijDetector {
           },
         });
       }
-    } catch (_error) {}
+    } catch (error) {
+      console.warn(`Zellij session detection failed: ${String(error)}`);
+    }
 
     return orphans;
   }

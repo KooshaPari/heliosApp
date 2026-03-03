@@ -34,9 +34,9 @@ function createMockAdapter(id: string): RendererAdapter & {
   return {
     id,
     version: "1.0.0",
-    init: async () => {},
-    start: async () => {},
-    stop: async () => {},
+    init: () => Promise.resolve(),
+    start: () => Promise.resolve(),
+    stop: () => Promise.resolve(),
     bindStream: (ptyId: string, stream: ReadableStream<Uint8Array>) => {
       boundStreams.set(ptyId, stream);
     },
@@ -44,18 +44,28 @@ function createMockAdapter(id: string): RendererAdapter & {
       boundStreams.delete(ptyId);
       unboundPtys.push(ptyId);
     },
-    handleInput: () => {},
-    resize: () => {},
+    handleInput: () => {
+      // no-op
+    },
+    resize: () => {
+      // no-op
+    },
     queryCapabilities: () => DEFAULT_CAPS,
     getState: (): RendererState => "running",
-    onCrash: () => {},
+    onCrash: () => {
+      // no-op
+    },
     boundStreams,
     unboundPtys,
   };
 }
 
 function openStream(): ReadableStream<Uint8Array> {
-  return new ReadableStream({ start() {} });
+  return new ReadableStream({
+    start() {
+      // no-op
+    },
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -95,7 +105,7 @@ describe("StreamBindingManager", () => {
     const latency = mgr.getRelayLatency("pty-1");
     expect(latency).toBeDefined();
     expect(typeof latency).toBe("number");
-    expect(latency!).toBeGreaterThanOrEqual(0);
+    expect(latency ?? -1).toBeGreaterThanOrEqual(0);
   });
 
   // Edge case: bind already bound PTY replaces existing binding

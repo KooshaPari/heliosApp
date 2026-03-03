@@ -239,9 +239,11 @@ describe("terminal lifecycle and streaming data plane", () => {
     });
     expect(firstInput.status).toBe("ok");
     expect(firstInput.result?.output_seq).toBe(1);
-    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry: any) => entry.seq)).toEqual(
-      [1]
-    );
+    expect(
+      (runtime.getTerminalBuffer("term-reused").entries as Array<{ seq: number }>).map(
+        entry => entry.seq
+      )
+    ).toEqual([1]);
 
     const secondSpawn = await runtime.bus.request({
       id: "cmd-spawn-reuse-2",
@@ -271,9 +273,11 @@ describe("terminal lifecycle and streaming data plane", () => {
     });
     expect(secondInput.status).toBe("ok");
     expect(secondInput.result?.output_seq).toBe(1);
-    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry: any) => entry.seq)).toEqual(
-      [1]
-    );
+    expect(
+      (runtime.getTerminalBuffer("term-reused").entries as Array<{ seq: number }>).map(
+        entry => entry.seq
+      )
+    ).toEqual([1]);
   });
 
   test("rejects terminal input when payload.data is missing", async () => {

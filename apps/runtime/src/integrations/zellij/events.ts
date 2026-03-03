@@ -12,17 +12,17 @@ import type { PaneDimensions } from "./types.js";
 // ---------------------------------------------------------------------------
 
 export const MuxEventType = {
-  SESSION_CREATED: "mux.session.created",
-  SESSION_REATTACHED: "mux.session.reattached",
-  SESSION_TERMINATED: "mux.session.terminated",
-  PANE_ADDED: "mux.pane.added",
-  PANE_CLOSED: "mux.pane.closed",
-  PANE_RESIZED: "mux.pane.resized",
-  PANE_PTY_BOUND: "mux.pane.pty_bound",
-  PANE_DIMENSION_REJECTED: "mux.pane.dimension_rejected",
-  TAB_CREATED: "mux.tab.created",
-  TAB_CLOSED: "mux.tab.closed",
-  TAB_SWITCHED: "mux.tab.switched",
+  sessionCreated: "mux.session.created",
+  sessionReattached: "mux.session.reattached",
+  sessionTerminated: "mux.session.terminated",
+  paneAdded: "mux.pane.added",
+  paneClosed: "mux.pane.closed",
+  paneResized: "mux.pane.resized",
+  panePtyBound: "mux.pane.pty_bound",
+  paneDimensionRejected: "mux.pane.dimension_rejected",
+  tabCreated: "mux.tab.created",
+  tabClosed: "mux.tab.closed",
+  tabSwitched: "mux.tab.switched",
 } as const;
 
 export type MuxEventTypeValue = (typeof MuxEventType)[keyof typeof MuxEventType];
@@ -44,17 +44,17 @@ export interface MuxEventBase {
 // ---------------------------------------------------------------------------
 
 export interface SessionCreatedEvent extends MuxEventBase {
-  type: typeof MuxEventType.SESSION_CREATED;
+  type: typeof MuxEventType.sessionCreated;
 }
 
 export interface SessionReattachedEvent extends MuxEventBase {
-  type: typeof MuxEventType.SESSION_REATTACHED;
+  type: typeof MuxEventType.sessionReattached;
   recoveredPaneCount: number;
   recoveredTabCount: number;
 }
 
 export interface SessionTerminatedEvent extends MuxEventBase {
-  type: typeof MuxEventType.SESSION_TERMINATED;
+  type: typeof MuxEventType.sessionTerminated;
 }
 
 // ---------------------------------------------------------------------------
@@ -62,31 +62,31 @@ export interface SessionTerminatedEvent extends MuxEventBase {
 // ---------------------------------------------------------------------------
 
 export interface PaneAddedEvent extends MuxEventBase {
-  type: typeof MuxEventType.PANE_ADDED;
+  type: typeof MuxEventType.paneAdded;
   paneId: number;
   dimensions: PaneDimensions;
 }
 
 export interface PaneClosedEvent extends MuxEventBase {
-  type: typeof MuxEventType.PANE_CLOSED;
+  type: typeof MuxEventType.paneClosed;
   paneId: number;
 }
 
 export interface PaneResizedEvent extends MuxEventBase {
-  type: typeof MuxEventType.PANE_RESIZED;
+  type: typeof MuxEventType.paneResized;
   paneId: number;
   oldDimensions: PaneDimensions;
   newDimensions: PaneDimensions;
 }
 
 export interface PanePtyBoundEvent extends MuxEventBase {
-  type: typeof MuxEventType.PANE_PTY_BOUND;
+  type: typeof MuxEventType.panePtyBound;
   paneId: number;
   ptyId: string;
 }
 
 export interface PaneDimensionRejectedEvent extends MuxEventBase {
-  type: typeof MuxEventType.PANE_DIMENSION_REJECTED;
+  type: typeof MuxEventType.paneDimensionRejected;
   paneId: number;
   requestedDimensions: PaneDimensions;
   minDimensions: PaneDimensions;
@@ -97,18 +97,18 @@ export interface PaneDimensionRejectedEvent extends MuxEventBase {
 // ---------------------------------------------------------------------------
 
 export interface TabCreatedEvent extends MuxEventBase {
-  type: typeof MuxEventType.TAB_CREATED;
+  type: typeof MuxEventType.tabCreated;
   tabId: number;
   tabName: string;
 }
 
 export interface TabClosedEvent extends MuxEventBase {
-  type: typeof MuxEventType.TAB_CLOSED;
+  type: typeof MuxEventType.tabClosed;
   tabId: number;
 }
 
 export interface TabSwitchedEvent extends MuxEventBase {
-  type: typeof MuxEventType.TAB_SWITCHED;
+  type: typeof MuxEventType.tabSwitched;
   fromTabId: number;
   toTabId: number;
 }
@@ -163,7 +163,10 @@ export class MuxEventEmitter {
    * Emit an event. Bus failures are caught and logged but never propagated.
    */
   emit(event: MuxEvent): void {
-    this.bus.publish(event).catch(_err => {});
+    this.bus.publish(event).catch(() => {
+      // Best-effort telemetry: bus failures must not block runtime operation.
+      // Non-blocking best-effort publish; errors are intentionally ignored.
+    });
   }
 
   /**
