@@ -40,6 +40,7 @@ export const SetupWizard: Component<SetupWizardProps> = props => {
               projects.
             </p>
             <button
+              type="button"
               onClick={() => setStep(1)}
               style={{
                 background: "#89b4fa",
@@ -79,6 +80,7 @@ export const SetupWizard: Component<SetupWizardProps> = props => {
             />
             <div style={{ display: "flex", gap: "8px", "justify-content": "flex-end" }}>
               <button
+                type="button"
                 onClick={() => props.onSkip()}
                 style={{
                   background: "none",
@@ -92,6 +94,7 @@ export const SetupWizard: Component<SetupWizardProps> = props => {
                 Skip
               </button>
               <button
+                type="button"
                 onClick={() => props.onComplete(apiKey())}
                 style={{
                   background: "#89b4fa",

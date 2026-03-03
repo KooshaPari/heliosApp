@@ -5,7 +5,7 @@
 
 export interface BusEvent {
   topic: string;
-  payload: Record<string, any>;
+  payload: Record<string, any>; // biome-ignore lint/suspicious/noExplicitAny: bus event payloads are heterogeneous
   sequenceNumber?: number;
   timestamp: number;
 }
@@ -152,9 +152,9 @@ export class LaneEventHandler {
 
     // Notify about orphan status changes
     if (this.options.onOrphanStatusChanged) {
-      orphanedLanes.forEach((laneId: string) => {
+      for (const laneId of orphanedLanes) {
         this.options.onOrphanStatusChanged?.(laneId, true);
-      });
+      }
     }
   }
 
