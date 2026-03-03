@@ -1,198 +1,178 @@
 import type { LocalBusEnvelope } from "../protocol/types";
+import { createRetentionPolicyConfig, type RetentionPolicyConfig } from "../config/retention";
 
 export type AuditOutcome = "accepted" | "rejected";
 
-export type AuditFilter = {
-  workspace_id?: string;
-  lane_id?: string;
-  session_id?: string;
-  correlation_id?: string;
-};
-
 export type AuditRecord = {
-  id: string;
   recorded_at: string;
   sequence: number | null;
   outcome: AuditOutcome;
   reason: string | null;
   envelope: LocalBusEnvelope | Record<string, unknown>;
-  action?: string;
-  type?: "command" | "response" | "event" | "system";
-  status?: "ok" | "error";
-  workspace_id?: string;
-  lane_id?: string;
-  session_id?: string;
-  terminal_id?: string;
-  correlation_id?: string;
-  error_code?: string;
-  payload?: Record<string, unknown>;
-};
-
-export type AuditBundle = {
-  generated_at: string;
-  filters: AuditFilter;
-  count: number;
-  records: AuditRecord[];
 };
 
 export interface AuditSink {
-  append(record: {
-    recorded_at: string;
-    sequence: number | null;
-    outcome: AuditOutcome;
-    reason: string | null;
-    envelope: LocalBusEnvelope | Record<string, unknown>;
-  }): Promise<void>;
+  append(record: AuditRecord): Promise<void>;
+}
+
+export type AuditExportRecord = {
+  recorded_at: string;
+  sequence: number | null;
+  outcome: AuditOutcome;
+  reason: string | null;
+  envelope_id: string;
+  envelope_type: string;
+  correlation_id: string | null;
+  workspace_id: string | null;
+  lane_id: string | null;
+  session_id: string | null;
+  terminal_id: string | null;
+  method_or_topic: string | null;
+  envelope: LocalBusEnvelope | Record<string, unknown>;
+};
+
+export interface AuditRetentionSink extends AuditSink {
+  enforceRetention(now?: Date): Promise<{ deleted_count: number }>;
+  exportRecords(): Promise<AuditExportRecord[]>;
 }
 
 export class InMemoryAuditSink implements AuditSink {
   private readonly records: AuditRecord[] = [];
+  private readonly retentionPolicy: RetentionPolicyConfig;
 
-  async append(record: {
-    recorded_at: string;
-    sequence: number | null;
-    outcome: AuditOutcome;
-    reason: string | null;
-    envelope: LocalBusEnvelope | Record<string, unknown>;
-  }): Promise<void> {
-    this.records.push(this.enrichRecord(record));
+  constructor(policy?: Partial<RetentionPolicyConfig>) {
+    this.retentionPolicy = createRetentionPolicyConfig(policy);
   }
 
-  async appendSystem(input: {
-    action: string;
-    ts: string;
-    status: "ok" | "error";
-    payload?: Record<string, unknown>;
-    correlation_id?: string;
-    error_code?: string;
-  }): Promise<void> {
-    const envelope: Record<string, unknown> = {
-      type: "event",
-      topic: "audit.recorded",
-      correlation_id: input.correlation_id,
-      payload: input.payload ?? {}
-    };
-
-    await this.append({
-      recorded_at: input.ts,
-      sequence: null,
-      outcome: input.status === "ok" ? "accepted" : "rejected",
-      reason: input.status === "ok" ? null : input.error_code ?? "system_error",
-      envelope
-    });
-
-    const last = this.records[this.records.length - 1];
-    if (last) {
-      last.action = input.action;
-      last.type = "system";
-      last.status = input.status;
-      last.error_code = input.error_code;
-      last.payload = sanitize(input.payload ?? {});
-    }
+  async append(record: AuditRecord): Promise<void> {
+    this.records.push(record);
   }
 
   getRecords(): AuditRecord[] {
     return [...this.records];
   }
 
-  query(filter: AuditFilter = {}): AuditRecord[] {
-    return this.records.filter((record) => {
-      if (filter.workspace_id && record.workspace_id !== filter.workspace_id) {
-        return false;
+  async enforceRetention(now: Date = new Date()): Promise<{ deleted_count: number }> {
+    const keep: AuditRecord[] = [];
+    const expired: AuditRecord[] = [];
+    for (const record of this.records) {
+      if (shouldRetainRecord(record, this.retentionPolicy, now)) {
+        keep.push(record);
+      } else {
+        expired.push(record);
       }
-      if (filter.lane_id && record.lane_id !== filter.lane_id) {
-        return false;
-      }
-      if (filter.session_id && record.session_id !== filter.session_id) {
-        return false;
-      }
-      if (filter.correlation_id && record.correlation_id !== filter.correlation_id) {
-        return false;
-      }
-      return true;
-    });
+    }
+
+    this.records.length = 0;
+    this.records.push(...keep);
+
+    if (expired.length > 0) {
+      this.records.push(buildDeletionProofRecord(expired.length, now));
+    }
+
+    return { deleted_count: expired.length };
   }
 
-  exportBundle(filter: AuditFilter = {}): AuditBundle {
-    const records = this.query(filter);
-    return {
-      generated_at: new Date().toISOString(),
-      filters: { ...filter },
-      count: records.length,
-      records
-    };
-  }
-
-  private enrichRecord(record: {
-    recorded_at: string;
-    sequence: number | null;
-    outcome: AuditOutcome;
-    reason: string | null;
-    envelope: LocalBusEnvelope | Record<string, unknown>;
-  }): AuditRecord {
-    const envelope = sanitizeEnvelope(record.envelope);
-    const payload = sanitize(getRecordPayload(envelope));
-
-    return {
-      id: `${record.recorded_at}:${this.records.length + 1}`,
-      recorded_at: record.recorded_at,
-      sequence: record.sequence,
-      outcome: record.outcome,
-      reason: record.reason,
-      envelope,
-      action: getString(envelope.topic) ?? getString(envelope.method) ?? "audit.recorded",
-      type: inferType(envelope),
-      status: record.outcome === "accepted" ? "ok" : "error",
-      workspace_id: getString(envelope.workspace_id),
-      lane_id: getString(envelope.lane_id) ?? getString((envelope.payload as Record<string, unknown>)?.lane_id),
-      session_id:
-        getString(envelope.session_id) ?? getString((envelope.payload as Record<string, unknown>)?.session_id),
-      terminal_id:
-        getString(envelope.terminal_id) ?? getString((envelope.payload as Record<string, unknown>)?.terminal_id),
-      correlation_id: getString(envelope.correlation_id),
-      error_code: getString((envelope.error as Record<string, unknown>)?.code),
-      payload
-    };
+  async exportRecords(): Promise<AuditExportRecord[]> {
+    return this.records.map((record) => toExportRecord(record, this.retentionPolicy));
   }
 }
 
-function inferType(envelope: Record<string, unknown>): AuditRecord["type"] {
-  const value = envelope.type;
-  if (value === "command" || value === "response" || value === "event") {
-    return value;
-  }
-  return "system";
+function toExportRecord(record: AuditRecord, policy: RetentionPolicyConfig): AuditExportRecord {
+  const envelope = sanitizeEnvelope(record.envelope, policy.redacted_fields);
+  const envelopeObject = envelope as Record<string, unknown>;
+  const methodOrTopic =
+    readString(envelopeObject.method) ?? readString(envelopeObject.topic) ?? null;
+
+  return {
+    recorded_at: record.recorded_at,
+    sequence: record.sequence,
+    outcome: record.outcome,
+    reason: record.reason,
+    envelope_id: readString(envelopeObject.envelope_id) ?? readString(envelopeObject.id) ?? "unknown",
+    envelope_type: readString(envelopeObject.type) ?? "unknown",
+    correlation_id: readString(envelopeObject.correlation_id) ?? null,
+    workspace_id: readString(envelopeObject.workspace_id) ?? null,
+    lane_id: readString(envelopeObject.lane_id) ?? null,
+    session_id: readString(envelopeObject.session_id) ?? null,
+    terminal_id: readString(envelopeObject.terminal_id) ?? null,
+    method_or_topic: methodOrTopic,
+    envelope
+  };
 }
 
-function getRecordPayload(envelope: Record<string, unknown>): unknown {
-  return envelope.payload ?? envelope.result ?? envelope.error ?? {};
+function sanitizeEnvelope(
+  envelope: LocalBusEnvelope | Record<string, unknown>,
+  redactedFields: string[]
+): LocalBusEnvelope | Record<string, unknown> {
+  const redactionSet = new Set(redactedFields.map((field) => field.toLowerCase()));
+  return deepRedact(envelope, redactionSet) as LocalBusEnvelope | Record<string, unknown>;
 }
 
-function sanitizeEnvelope(envelope: LocalBusEnvelope | Record<string, unknown>): Record<string, unknown> {
-  return sanitize(envelope) as Record<string, unknown>;
-}
-
-function sanitize(value: unknown): unknown {
+function deepRedact(value: unknown, redactionSet: ReadonlySet<string>): unknown {
   if (Array.isArray(value)) {
-    return value.map((entry) => sanitize(entry));
+    return value.map((item) => deepRedact(item, redactionSet));
   }
   if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => {
-        if (isSensitiveKey(key)) {
-          return [key, "[REDACTED]"];
-        }
-        return [key, sanitize(item)];
-      })
-    );
+    const input = value as Record<string, unknown>;
+    const output: Record<string, unknown> = {};
+    for (const [key, nested] of Object.entries(input)) {
+      if (redactionSet.has(key.toLowerCase())) {
+        output[key] = "[REDACTED]";
+      } else {
+        output[key] = deepRedact(nested, redactionSet);
+      }
+    }
+    return output;
   }
   return value;
 }
 
-function isSensitiveKey(key: string): boolean {
-  return /(token|secret|password|api[_-]?key|authorization|bearer)/i.test(key);
+function shouldRetainRecord(
+  record: AuditRecord,
+  policy: RetentionPolicyConfig,
+  now: Date
+): boolean {
+  const topic = readEnvelopeTopic(record.envelope);
+  if (topic && policy.exempt_topics.includes(topic)) {
+    return true;
+  }
+
+  const recordedAtMs = Date.parse(record.recorded_at);
+  if (Number.isNaN(recordedAtMs)) {
+    return true;
+  }
+
+  const ttlMs = policy.retention_days * 24 * 60 * 60 * 1000;
+  return now.getTime() - recordedAtMs <= ttlMs;
 }
 
-function getString(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
+function readEnvelopeTopic(envelope: LocalBusEnvelope | Record<string, unknown>): string | null {
+  if (!envelope || typeof envelope !== "object") {
+    return null;
+  }
+  const value = (envelope as Record<string, unknown>).topic;
+  return typeof value === "string" && value.length > 0 ? value : null;
+}
+
+function buildDeletionProofRecord(expiredCount: number, now: Date): AuditRecord {
+  return {
+    recorded_at: now.toISOString(),
+    sequence: null,
+    outcome: "accepted",
+    reason: "retention_enforced",
+    envelope: {
+      id: `audit.retention.deleted:${now.getTime()}`,
+      type: "event",
+      ts: now.toISOString(),
+      topic: "audit.retention.deleted",
+      payload: {
+        deleted_count: expiredCount
+      }
+    }
+  };
+}
+
+function readString(input: unknown): string | null {
+  return typeof input === "string" && input.length > 0 ? input : null;
 }
