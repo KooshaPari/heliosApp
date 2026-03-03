@@ -47,6 +47,7 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
   return (
     <div style={{ position: "relative" }}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen())}
         style={{
           background: "none",
@@ -98,6 +99,14 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
                         if (model.available) {
                           props.onSelect(model.id);
                           setIsOpen(false);
+                        }
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          if (model.available) {
+                            props.onSelect(model.id);
+                            setIsOpen(false);
+                          }
                         }
                       }}
                       style={{

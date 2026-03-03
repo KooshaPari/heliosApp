@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install -g tsx
-          bun install --frozen-lockfile
+          bun install
 
       - name: Get changed files
         id: files

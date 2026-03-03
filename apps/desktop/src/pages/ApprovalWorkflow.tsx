@@ -12,7 +12,7 @@ export function ApprovalWorkflowPage() {
   const [workflow, setWorkflow] = createSignal<ApprovalWorkflow | null>(null);
   const [loading, setLoading] = createSignal(true);
 
-  onMount(async () => {
+  onMount(() => {
     setRequests([]);
     setWorkflow({
       userId: "current-user",
@@ -24,11 +24,11 @@ export function ApprovalWorkflowPage() {
     setLoading(false);
   });
 
-  const handleApprove = async (id: string) => {
+  const handleApprove = (id: string) => {
     setRequests(requests().map(r => (r.id === id ? { ...r, status: ApprovalStatus.Approved } : r)));
   };
 
-  const handleReject = async (id: string, reason: string) => {
+  const handleReject = (id: string, reason: string) => {
     setRequests(
       requests().map(r =>
         r.id === id ? { ...r, status: ApprovalStatus.Rejected, rejectedReason: reason } : r

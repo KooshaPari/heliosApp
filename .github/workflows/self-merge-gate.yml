@@ -67,7 +67,7 @@ jobs:
             ];
             
             const checkResults = {};
-            statuses.statuses.forEach(status => {
+            (statuses.data.statuses || []).forEach(status => {
               requiredChecks.forEach(check => {
                 if (status.context === check) {
                   checkResults[check] = status.state === 'success';
