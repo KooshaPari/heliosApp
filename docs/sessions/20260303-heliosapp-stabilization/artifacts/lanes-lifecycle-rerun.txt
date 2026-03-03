@@ -1,0 +1,14 @@
+bun test v1.3.10 (30e609e0)
+
+apps/runtime/tests/integration/lanes/lifecycle.test.ts:
+(pass) Lane Lifecycle Integration (FR-008-001, FR-008-002) > create + provision: worktree exists on disk and branch created [1308.58ms]
+(pass) Lane Lifecycle Integration (FR-008-001, FR-008-002) > execute command in lane worktree context [1561.65ms]
+(pass) Lane Lifecycle Integration (FR-008-001, FR-008-002) > cleanup removes worktree directory and branch [1175.45ms]
+(pass) Lane Lifecycle Integration (FR-008-001, FR-008-002) > sharing: two agents can attach and detach [935.13ms]
+(pass) Lane Lifecycle Integration (FR-008-001, FR-008-002) > bus events published for each transition (FR-008-004) [905.05ms]
+(pass) Lane Lifecycle Integration (FR-008-001, FR-008-002) > cleanup is idempotent [1203.79ms]
+
+ 6 pass
+ 0 fail
+ 22 expect() calls
+Ran 6 tests across 1 file. [8.79s]

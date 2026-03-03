@@ -8,13 +8,13 @@
 
 import { beforeEach, describe, expect, it } from "bun:test";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
+import { AcpClientAdapter, type PolicyGate as AcpPolicyGate } from "../acp-client.js";
 import { NormalizedProviderError } from "../errors.js";
 
 /**
  * Mock policy gate for testing.
  */
-class MockPolicyGate implements PolicyGate {
+class MockPolicyGate implements AcpPolicyGate {
   private shouldDeny = false;
   private denialReason = "Test denial";
 
@@ -25,29 +25,29 @@ class MockPolicyGate implements PolicyGate {
     }
   }
 
-  async evaluate(
+  evaluate(
     _action: string,
     _context: Record<string, unknown>
   ): Promise<{ allowed: boolean; reason?: string }> {
     if (this.shouldDeny) {
-      return {
+      return Promise.resolve({
         allowed: false,
         reason: this.denialReason,
-      };
+      });
     }
-    return { allowed: true };
+    return Promise.resolve({ allowed: true });
   }
 }
 
 describe("ACP Client Adapter", () => {
-  let adapter: ACPClientAdapter;
+  let adapter: AcpClientAdapter;
   let bus: InMemoryLocalBus;
   let policyGate: MockPolicyGate;
 
   beforeEach(() => {
     bus = new InMemoryLocalBus();
     policyGate = new MockPolicyGate();
-    adapter = new ACPClientAdapter(bus, policyGate);
+    adapter = new AcpClientAdapter(bus, policyGate);
   });
 
   describe("Initialization", () => {
@@ -137,7 +137,7 @@ describe("ACP Client Adapter", () => {
       expect(health.state).toBe("healthy");
 
       // Simulate multiple failed checks by reinitializing with broken endpoint
-      const brokenAdapter = new ACPClientAdapter(bus, policyGate);
+      const brokenAdapter = new AcpClientAdapter(bus, policyGate);
       await brokenAdapter.init({
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
@@ -154,13 +154,13 @@ describe("ACP Client Adapter", () => {
       bus.getEvents(); // Clear initial events
 
       // Get initial health
-      const health1 = await adapter.health();
-      expect(health1.state).toBe("healthy");
+      const firstHealth = await adapter.health();
+      expect(firstHealth.state).toBe("healthy");
 
       // In a real implementation, health check failure would trigger transition
       // For mock, we verify the health check completes
-      const health2 = await adapter.health();
-      expect(health2.state).toBe("healthy");
+      const secondHealth = await adapter.health();
+      expect(secondHealth.state).toBe("healthy");
     });
   });
 
@@ -211,7 +211,7 @@ describe("ACP Client Adapter", () => {
     });
 
     it("should reject execution before init", async () => {
-      const freshAdapter = new ACPClientAdapter(bus, policyGate);
+      const freshAdapter = new AcpClientAdapter(bus, policyGate);
 
       await expect(freshAdapter.execute({ prompt: "Test" }, "corr-123")).rejects.toThrow(
         /unavailable/i
@@ -326,7 +326,7 @@ describe("ACP Client Adapter", () => {
     });
 
     it("should reject cancel before init", async () => {
-      const freshAdapter = new ACPClientAdapter(bus, policyGate);
+      const freshAdapter = new AcpClientAdapter(bus, policyGate);
 
       await expect(freshAdapter.cancel("task-123")).rejects.toThrow(/unavailable/i);
     });
@@ -402,9 +402,9 @@ describe("ACP Client Adapter", () => {
       const events = bus.getEvents();
       const relevantEvents = events.filter(e => e.topic?.startsWith("provider.acp.execute"));
 
-      relevantEvents.forEach(event => {
+      for (const event of relevantEvents) {
         expect(event.payload?.correlationId).toBe(correlationId);
-      });
+      }
     });
 
     it("should preserve correlation ID through error cases", async () => {

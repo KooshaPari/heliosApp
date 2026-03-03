@@ -48,6 +48,7 @@ export class ZellijDetector {
         });
       }
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: watchdog warning is intentional for operator triage.
       console.warn(`Zellij session detection failed: ${String(error)}`);
     }
 

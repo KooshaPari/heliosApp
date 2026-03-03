@@ -9,13 +9,13 @@
  */
 
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
-import type { A2AConfig, ProviderAdapter, ProviderHealthStatus } from "./adapter.js";
+import type { ProviderAdapter, ProviderHealthStatus } from "./adapter.js";
 import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * A2A endpoint configuration.
  */
-export interface A2AEndpoint {
+export interface A2aEndpoint {
   id: string;
   url: string;
   priority: number;
@@ -26,7 +26,7 @@ export interface A2AEndpoint {
 /**
  * A2A delegation context.
  */
-export interface A2ADelegation {
+export interface A2aDelegation {
   taskDescription: string;
   requiredCapabilities: string[];
   context: Record<string, unknown>;
@@ -35,7 +35,7 @@ export interface A2ADelegation {
 /**
  * A2A delegation result.
  */
-export interface A2AResult {
+export interface A2aResult {
   endpointId: string;
   result: unknown;
   correlationId: string;
@@ -45,8 +45,13 @@ export interface A2AResult {
 /**
  * A2A Router Configuration.
  */
-export interface A2ARouterConfig extends A2AConfig {
+export interface A2aRouterConfig {
+  agentId?: string;
+  endpoint?: string;
+  apiKey?: string;
+  timeout?: number;
   endpoints?: Array<{ id: string; url: string; priority: number; capabilities: string[] }>;
+  failoverEnabled?: boolean;
 }
 
 /**
@@ -60,12 +65,12 @@ export interface A2ARouterConfig extends A2AConfig {
  *
  * FR-025-005: A2A federation with external agent delegation.
  */
-export class A2ARouterAdapter
-  implements ProviderAdapter<A2ARouterConfig, A2ADelegation & { correlationId?: string }, A2AResult>
+export class A2aRouterAdapter
+  implements ProviderAdapter<A2aRouterConfig, A2aDelegation & { correlationId?: string }, A2aResult>
 {
-  private config: A2ARouterConfig | null = null;
+  private config: A2aRouterConfig | null = null;
   private bus: LocalBus | null = null;
-  private endpoints: A2AEndpoint[] = [];
+  private endpoints: A2aEndpoint[] = [];
   private healthStatus: ProviderHealthStatus = {
     state: "unavailable",
     lastCheck: new Date(),
@@ -85,7 +90,7 @@ export class A2ARouterAdapter
    * @param config A2A router configuration
    * @throws NormalizedProviderError if init fails
    */
-  async init(config: A2ARouterConfig): Promise<void> {
+  async init(config: A2aRouterConfig): Promise<void> {
     try {
       // Validate config
       if (!(config.endpoints && Array.isArray(config.endpoints)) || config.endpoints.length === 0) {
@@ -112,7 +117,7 @@ export class A2ARouterAdapter
       // Perform initial health probes
       for (const endpoint of this.endpoints) {
         try {
-          await this.probeEndpoint(endpoint);
+          this.probeEndpoint(endpoint);
         } catch (error) {
           endpoint.healthStatus = {
             state: "unavailable",
@@ -204,9 +209,9 @@ export class A2ARouterAdapter
    * @throws NormalizedProviderError on failure
    */
   async execute(
-    input: A2ADelegation & { correlationId?: string },
+    input: A2aDelegation & { correlationId?: string },
     correlationId: string
-  ): Promise<A2AResult> {
+  ): Promise<A2aResult> {
     if (!this.config || this.endpoints.length === 0) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
@@ -235,7 +240,7 @@ export class A2ARouterAdapter
         const startTime = Date.now();
 
         // Send delegation request
-        const result = await this.sendDelegation(
+        const result = this.sendDelegation(
           selectedEndpoint,
           input,
           correlationId,
@@ -334,7 +339,7 @@ export class A2ARouterAdapter
    *
    * @returns Array of endpoints
    */
-  getEndpoints(): A2AEndpoint[] {
+  getEndpoints(): A2aEndpoint[] {
     return [...this.endpoints];
   }
 
@@ -362,7 +367,7 @@ export class A2ARouterAdapter
    * @param requiredCapabilities Required capabilities
    * @returns Selected endpoint or undefined if no match
    */
-  private selectEndpoint(requiredCapabilities: string[]): A2AEndpoint | undefined {
+  private selectEndpoint(requiredCapabilities: string[]): A2aEndpoint | undefined {
     // First pass: look for healthy endpoint with matching capabilities
     let selected = this.endpoints.find(
       ep => ep.healthStatus?.state === "healthy" && this.hasCapabilities(ep, requiredCapabilities)
@@ -391,7 +396,7 @@ export class A2ARouterAdapter
    * @param requiredCapabilities Required capabilities
    * @returns true if endpoint has all required capabilities
    */
-  private hasCapabilities(endpoint: A2AEndpoint, requiredCapabilities: string[]): boolean {
+  private hasCapabilities(endpoint: A2aEndpoint, requiredCapabilities: string[]): boolean {
     if (requiredCapabilities.length === 0) {
       return true;
     }
@@ -406,7 +411,7 @@ export class A2ARouterAdapter
    * @param endpoint Endpoint to probe
    * @throws Error if probe fails
    */
-  private async probeEndpoint(endpoint: A2AEndpoint): Promise<void> {
+  private probeEndpoint(endpoint: A2aEndpoint): void {
     // Mock implementation: always succeeds for localhost/127.0.0.1
     if (endpoint.url.includes("localhost") || endpoint.url.includes("127.0.0.1")) {
       return;
@@ -425,12 +430,12 @@ export class A2ARouterAdapter
    * @param signal Abort signal
    * @returns Delegation result
    */
-  private async sendDelegation(
-    _endpoint: A2AEndpoint,
-    delegation: A2ADelegation & { correlationId?: string },
+  private sendDelegation(
+    _endpoint: A2aEndpoint,
+    delegation: A2aDelegation & { correlationId?: string },
     _correlationId: string,
     signal: AbortSignal
-  ): Promise<unknown> {
+  ): unknown {
     // Check for abort
     if (signal.aborted) {
       throw new Error("Delegation cancelled");
@@ -463,7 +468,9 @@ export class A2ARouterAdapter
         topic,
         payload,
       });
-    } catch (_error) {}
+    } catch (_error) {
+      // Best-effort bus publish; monitor path should not fail caller flow.
+    }
   }
 }
 
@@ -522,7 +529,9 @@ export class HealthMonitoringCoordinator {
             failureCount: status.failureCount,
           });
         }
-      } catch (_error) {}
+      } catch (_error) {
+        // Best-effort health polling; keep interval alive on transient failures.
+      }
     }, interval);
 
     this.healthCheckIntervals.set(providerId, intervalId);
@@ -599,6 +608,8 @@ export class HealthMonitoringCoordinator {
         topic,
         payload,
       });
-    } catch (_error) {}
+    } catch (_error) {
+      // Best-effort bus publish; monitor path should not fail caller flow.
+    }
   }
 }

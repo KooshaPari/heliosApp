@@ -51,6 +51,7 @@ export class PtyDetector {
         });
       }
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: watchdog warning is intentional for operator triage.
       console.warn(`PTY leak detection failed: ${String(error)}`);
     }
 
@@ -104,6 +105,7 @@ export class PtyDetector {
 
       return processes;
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: watchdog warning is intentional for operator triage.
       console.warn(`Failed to list PTY processes: ${String(error)}`);
       return [];
     }

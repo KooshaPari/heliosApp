@@ -26,7 +26,7 @@ describe("RecoveryStateMachine", () => {
 
   describe("stage progression", () => {
     it("should start in CRASHED stage", () => {
-      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.CRASHED);
+      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.Crashed);
     });
 
     it("should progress through all stages in order", async () => {
@@ -36,49 +36,49 @@ describe("RecoveryStateMachine", () => {
         stages.push(to);
       });
 
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.INVENTORYING);
-      await stateMachine.transition(RecoveryStage.RESTORING);
-      await stateMachine.transition(RecoveryStage.RECONCILING);
-      await stateMachine.transition(RecoveryStage.LIVE);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.Inventorying);
+      await stateMachine.transition(RecoveryStage.Restoring);
+      await stateMachine.transition(RecoveryStage.Reconciling);
+      await stateMachine.transition(RecoveryStage.Live);
 
       expect(stages).toEqual([
-        RecoveryStage.DETECTING,
-        RecoveryStage.INVENTORYING,
-        RecoveryStage.RESTORING,
-        RecoveryStage.RECONCILING,
-        RecoveryStage.LIVE,
+        RecoveryStage.Detecting,
+        RecoveryStage.Inventorying,
+        RecoveryStage.Restoring,
+        RecoveryStage.Reconciling,
+        RecoveryStage.Live,
       ]);
     });
 
     it("should reject illegal transitions", async () => {
-      await stateMachine.transition(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.Detecting);
 
-      await expect(stateMachine.transition(RecoveryStage.RESTORING)).rejects.toThrow(
+      await expect(stateMachine.transition(RecoveryStage.Restoring)).rejects.toThrow(
         "Illegal transition"
       );
     });
 
     it("should allow transition to failure state", async () => {
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.DetectionFailed);
 
-      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.DETECTION_FAILED);
+      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.DetectionFailed);
     });
 
     it("should allow retry from failure state", async () => {
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
-      await stateMachine.transition(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.DetectionFailed);
+      await stateMachine.transition(RecoveryStage.Detecting);
 
-      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.DETECTING);
+      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.Detecting);
     });
   });
 
   describe("persistence and resume", () => {
     it("should persist state to filesystem", async () => {
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.INVENTORYING);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.Inventorying);
 
       const statePath = path.join(tempDir, "recovery", "recovery-state.json");
       const exists = await fs
@@ -89,37 +89,117 @@ describe("RecoveryStateMachine", () => {
 
       const content = await fs.readFile(statePath, "utf-8");
       const state = JSON.parse(content) as RecoveryState;
-      expect(state.stage).toBe(RecoveryStage.INVENTORYING);
+      expect(state.stage).toBe(RecoveryStage.Inventorying);
     });
 
     it("should resume from persisted stage", async () => {
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.INVENTORYING);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.Inventorying);
 
       // Create new state machine instance
       const stateMachine2 = new RecoveryStateMachine(tempDir, bus);
       const resumedStage = await stateMachine2.resume();
 
-      expect(resumedStage).toBe(RecoveryStage.INVENTORYING);
-      expect(stateMachine2.getCurrentStage()).toBe(RecoveryStage.INVENTORYING);
+      expect(resumedStage).toBe(RecoveryStage.Inventorying);
+      expect(stateMachine2.getCurrentStage()).toBe(RecoveryStage.Inventorying);
     });
 
     it("should handle missing persisted state gracefully", async () => {
       const stateMachine2 = new RecoveryStateMachine(tempDir, bus);
       await stateMachine2.initialize();
 
-      expect(stateMachine2.getCurrentStage()).toBe(RecoveryStage.CRASHED);
+      expect(stateMachine2.getCurrentStage()).toBe(RecoveryStage.Crashed);
     });
 
     it("should reset state after successful recovery", async () => {
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.INVENTORYING);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.Inventorying);
       await stateMachine.reset();
 
       // Create new instance - should start from CRASHED
       const stateMachine2 = new RecoveryStateMachine(tempDir, bus);
       await stateMachine2.initialize();
-      expect(stateMachine2.getCurrentStage()).toBe(RecoveryStage.CRASHED);
+      expect(stateMachine2.getCurrentStage()).toBe(RecoveryStage.Crashed);
+    });
+
+    it("should fall back to CRASHED when persisted state contains invalid JSON", async () => {
+      const statePath = path.join(tempDir, "recovery", "recovery-state.json");
+      await fs.mkdir(path.dirname(statePath), { recursive: true });
+      await fs.writeFile(statePath, "{invalid");
+
+      const stateMachine2 = new RecoveryStateMachine(tempDir, bus);
+      const resumed = await stateMachine2.resume();
+
+      expect(resumed).toBe(RecoveryStage.Crashed);
+      expect(stateMachine2.getCurrentStage()).toBe(RecoveryStage.Crashed);
+    });
+
+    it("should fall back to CRASHED when persisted payload is not an object", async () => {
+      const statePath = path.join(tempDir, "recovery", "recovery-state.json");
+      await fs.mkdir(path.dirname(statePath), { recursive: true });
+      await fs.writeFile(statePath, JSON.stringify(["LIVE", Date.now(), 1]));
+
+      const stateMachine2 = new RecoveryStateMachine(tempDir, bus);
+      const resumed = await stateMachine2.resume();
+
+      expect(resumed).toBe(RecoveryStage.Crashed);
+      expect(stateMachine2.getCurrentStage()).toBe(RecoveryStage.Crashed);
+    });
+
+    it("should deterministically fall back to CRASHED for invalid persisted stage", async () => {
+      const statePath = path.join(tempDir, "recovery", "recovery-state.json");
+      await fs.mkdir(path.dirname(statePath), { recursive: true });
+      await fs.writeFile(
+        statePath,
+        JSON.stringify({
+          stage: "NOT_A_REAL_STAGE",
+          timestamp: Date.now(),
+          attemptCount: 2,
+          lastError: "unexpected stage",
+        })
+      );
+
+      const stateMachine2 = new RecoveryStateMachine(tempDir, bus);
+      const resumed = await stateMachine2.resume();
+
+      expect(resumed).toBe(RecoveryStage.Crashed);
+      expect(stateMachine2.getCurrentStage()).toBe(RecoveryStage.Crashed);
+    });
+
+    it("should fall back to CRASHED when persisted timestamp is invalid", async () => {
+      const statePath = path.join(tempDir, "recovery", "recovery-state.json");
+      await fs.mkdir(path.dirname(statePath), { recursive: true });
+      await fs.writeFile(
+        statePath,
+        JSON.stringify({
+          stage: RecoveryStage.Inventorying,
+          timestamp: "not-a-number",
+          attemptCount: 0,
+        })
+      );
+
+      const stateMachine2 = new RecoveryStateMachine(tempDir, bus);
+      const resumed = await stateMachine2.resume();
+
+      expect(resumed).toBe(RecoveryStage.Crashed);
+    });
+
+    it("should fall back to CRASHED when persisted attemptCount is invalid", async () => {
+      const statePath = path.join(tempDir, "recovery", "recovery-state.json");
+      await fs.mkdir(path.dirname(statePath), { recursive: true });
+      await fs.writeFile(
+        statePath,
+        JSON.stringify({
+          stage: RecoveryStage.Restoring,
+          timestamp: Date.now(),
+          attemptCount: -1,
+        })
+      );
+
+      const stateMachine2 = new RecoveryStateMachine(tempDir, bus);
+      const resumed = await stateMachine2.resume();
+
+      expect(resumed).toBe(RecoveryStage.Crashed);
     });
   });
 
@@ -131,33 +211,33 @@ describe("RecoveryStateMachine", () => {
         attempts.push(attemptCount);
       });
 
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
-      await stateMachine.transition(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.DetectionFailed);
+      await stateMachine.transition(RecoveryStage.Detecting);
 
       expect(attempts).toContain(1); // Second attempt
     });
 
     it("should fail after max retries exceeded", async () => {
-      await stateMachine.transition(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.Detecting);
 
       // Try 3 times
       for (let i = 0; i < 3; i++) {
-        await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
-        await stateMachine.transition(RecoveryStage.DETECTING);
+        await stateMachine.transition(RecoveryStage.DetectionFailed);
+        await stateMachine.transition(RecoveryStage.Detecting);
       }
 
       // Fourth attempt should fail
-      await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
-      await expect(stateMachine.transition(RecoveryStage.DETECTING)).rejects.toThrow("Max retries");
+      await stateMachine.transition(RecoveryStage.DetectionFailed);
+      await expect(stateMachine.transition(RecoveryStage.Detecting)).rejects.toThrow("Max retries");
     });
 
     it("should reset attempt count when moving to next stage", async () => {
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.INVENTORYING);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.Inventorying);
 
       // Attempt count should be reset for new stage
-      await stateMachine.transition(RecoveryStage.INVENTORY_FAILED);
+      await stateMachine.transition(RecoveryStage.InventoryFailed);
       const statePath = path.join(tempDir, "recovery", "recovery-state.json");
       const content = await fs.readFile(statePath, "utf-8");
       const state = JSON.parse(content) as RecoveryState;
@@ -167,39 +247,39 @@ describe("RecoveryStateMachine", () => {
 
   describe("stage timeout", () => {
     it("should transition to failure state on timeout", async () => {
-      await stateMachine.transition(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.Detecting);
       // Manually transition to failure state (simulating timeout behavior)
-      await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
+      await stateMachine.transition(RecoveryStage.DetectionFailed);
 
-      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.DETECTION_FAILED);
+      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.DetectionFailed);
     });
 
     it("should not timeout when transitioned to next stage", async () => {
-      await stateMachine.transition(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.Detecting);
       // timer advance skipped // Halfway through timeout
-      await stateMachine.transition(RecoveryStage.INVENTORYING);
+      await stateMachine.transition(RecoveryStage.Inventorying);
       // timer advance skipped // Would timeout if detection timeout still running
 
       // Should be in INVENTORYING, not DETECTION_FAILED
-      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.INVENTORYING);
+      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.Inventorying);
     });
   });
 
   describe("bus events", () => {
     it("should publish stage change events", async () => {
-      await stateMachine.transition(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.Detecting);
       const events = bus.getEvents();
       expect(events.length).toBeGreaterThan(0);
       expect(events[0].topic).toBe("recovery.stage.changed");
     });
 
     it("should include correct payload in stage change event", async () => {
-      await stateMachine.transition(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.Detecting);
       const events = bus.getEvents();
       const event = events[0];
       expect(event.payload).toMatchObject({
-        previous: RecoveryStage.CRASHED,
-        current: RecoveryStage.DETECTING,
+        previous: RecoveryStage.Crashed,
+        current: RecoveryStage.Detecting,
         attemptCount: 0,
       });
     });
@@ -209,7 +289,7 @@ describe("RecoveryStateMachine", () => {
       await stateMachineNoBus.initialize();
 
       // Should not throw
-      await expect(stateMachineNoBus.transition(RecoveryStage.DETECTING)).resolves.toBeUndefined();
+      await expect(stateMachineNoBus.transition(RecoveryStage.Detecting)).resolves.toBeUndefined();
     });
   });
 
@@ -221,12 +301,12 @@ describe("RecoveryStateMachine", () => {
         changes.push([from, to, attemptCount]);
       });
 
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.INVENTORYING);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.Inventorying);
 
       expect(changes.length).toBe(2);
-      expect(changes[0]).toEqual([RecoveryStage.CRASHED, RecoveryStage.DETECTING, 0]);
-      expect(changes[1]).toEqual([RecoveryStage.DETECTING, RecoveryStage.INVENTORYING, 0]);
+      expect(changes[0]).toEqual([RecoveryStage.Crashed, RecoveryStage.Detecting, 0]);
+      expect(changes[1]).toEqual([RecoveryStage.Detecting, RecoveryStage.Inventorying, 0]);
     });
   });
 });

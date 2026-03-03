@@ -1,0 +1,14 @@
+bun test v1.3.10 (30e609e0)
+
+apps/runtime/tests/integration/renderer/lifecycle.test.ts:
+(pass) Renderer lifecycle integration > (a) registers mock ghostty and rio, both appear in registry (SC-010-002) [0.53ms]
+(pass) Renderer lifecycle integration > (b) init and start ghostty, state is running, active is ghostty [0.76ms]
+(pass) Renderer lifecycle integration > (c) bind a mock PTY stream, verify data flows to renderer [1.27ms]
+(pass) Renderer lifecycle integration > (d) switch ghostty -> rio, verify state transitions, streams rebound, output continuity (SC-010-003) [3.09ms]
+(pass) Renderer lifecycle integration > (e) switch rio -> ghostty round-trip [0.40ms]
+(pass) Renderer lifecycle integration > (f) inject failure during switch, verify rollback to ghostty (SC-010-001) [2.18ms]
+
+ 6 pass
+ 0 fail
+ 20 expect() calls
+Ran 6 tests across 1 file. [1.96s]

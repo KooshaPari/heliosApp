@@ -1,0 +1,16 @@
+# Lane F rerun artifact manifest
+generated_at_utc: 2026-03-03T16:21:58Z
+repo: /Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp
+
+- file: docs/sessions/20260303-heliosapp-stabilization/artifacts/lanes-lifecycle-rerun.txt
+  bytes: 860
+  lines: 14
+- file: docs/sessions/20260303-heliosapp-stabilization/artifacts/renderer-lifecycle-rerun.txt
+  bytes: 860
+  lines: 14
+- file: docs/sessions/20260303-heliosapp-stabilization/artifacts/quality-strict-20260303-rerun.txt
+  bytes: 230889
+  lines: 3293
+- file: docs/sessions/20260303-heliosapp-stabilization/artifacts/ci-summary-20260303-rerun.txt
+  bytes: 224223
+  lines: 3102

@@ -159,9 +159,9 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const startTime = Date.now();
 
       // Full cycle
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.INVENTORYING);
-      await stateMachine.transition(RecoveryStage.RESTORING);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.Inventorying);
+      await stateMachine.transition(RecoveryStage.Restoring);
 
       const result = await pipeline.restore(checkpoint);
 
@@ -172,8 +172,8 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const report = await reconciler.scan();
       await reconciler.cleanup(report);
 
-      await stateMachine.transition(RecoveryStage.RECONCILING);
-      await stateMachine.transition(RecoveryStage.LIVE);
+      await stateMachine.transition(RecoveryStage.Reconciling);
+      await stateMachine.transition(RecoveryStage.Live);
 
       const totalDuration = Date.now() - startTime;
 
@@ -189,7 +189,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const stateMachine = new RecoveryStateMachine(tempDir, bus);
       await stateMachine.initialize();
 
-      await stateMachine.transition(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.Detecting);
 
       // Simulate concurrent activity
       const activityPromises: Promise<void>[] = [];
@@ -204,7 +204,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
         );
       }
 
-      await stateMachine.transition(RecoveryStage.INVENTORYING);
+      await stateMachine.transition(RecoveryStage.Inventorying);
       const result = await Promise.all([pipeline.restore(checkpoint), ...activityPromises]);
 
       expect(result[0].restored.length).toBeGreaterThan(0);
@@ -237,29 +237,29 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const stateMachine = new RecoveryStateMachine(tempDir, bus);
       await stateMachine.initialize();
 
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.DetectionFailed);
 
       // Should be able to retry
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.Detecting);
     });
 
     it("should enforce max retry limit", async () => {
       const stateMachine = new RecoveryStateMachine(tempDir, bus);
       await stateMachine.initialize();
 
-      await stateMachine.transition(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.Detecting);
 
       // Retry MAX_RETRIES times (3)
       for (let i = 0; i < 3; i++) {
-        await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
-        await stateMachine.transition(RecoveryStage.DETECTING);
+        await stateMachine.transition(RecoveryStage.DetectionFailed);
+        await stateMachine.transition(RecoveryStage.Detecting);
       }
 
       // Fourth attempt should fail
-      await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
-      await expect(stateMachine.transition(RecoveryStage.DETECTING)).rejects.toThrow("Max retries");
+      await stateMachine.transition(RecoveryStage.DetectionFailed);
+      await expect(stateMachine.transition(RecoveryStage.Detecting)).rejects.toThrow("Max retries");
     });
   });
 });

@@ -52,6 +52,7 @@ export class WorktreeDetector {
         });
       }
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: watchdog warning is intentional for operator triage.
       console.warn(`Failed to read worktree directory ${this.baseDir}: ${String(error)}`);
     }
 

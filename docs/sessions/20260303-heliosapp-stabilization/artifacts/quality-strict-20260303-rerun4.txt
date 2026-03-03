@@ -1,0 +1,382 @@
+task: [preflight] set -euo pipefail
+command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
+command -v task >/dev/null 2>&1 || { echo "[FAIL] task is required"; exit 1; }
+command -v git >/dev/null 2>&1 || { echo "[FAIL] git is required"; exit 1; }
+test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
+echo "[OK] preflight checks passed"
+
+task: [preflight] set -euo pipefail
+command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
+command -v task >/dev/null 2>&1 || { echo "[FAIL] task is required"; exit 1; }
+command -v git >/dev/null 2>&1 || { echo "[FAIL] git is required"; exit 1; }
+test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
+echo "[OK] preflight checks passed"
+
+[OK] preflight checks passed
+[OK] preflight checks passed
+task: [deps] bun install --frozen-lockfile
+bun install v1.3.10 (30e609e0)
+
+Checked 203 installs across 282 packages (no changes) [13.00ms]
+task: [quality:quick] task typecheck
+task: [typecheck] bun run typecheck
+$ tsc --noEmit
+task: [quality:quick] task lint
+task: [lint] bun run lint
+$ biome check apps docs/.vitepress playwright.config.ts tsconfig.json package.json
+apps/runtime/src/providers/__tests__/errors.test.ts:125:21 lint/suspicious/noExplicitAny ━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    123 │   it("should handle custom error objects with code field", () => {
+    124 │     const customError = new Error("Test error");
+  > 125 │     (customError as any).code = "PROVIDER_TIMEOUT";
+        │                     ^^^
+    126 │ 
+    127 │     const error = normalizeError(customError, "a2a");
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps/runtime/src/providers/__tests__/errors.test.ts:215:5 lint/complexity/noForEach ━━━━━━━━━━━━━━━━
+
+  ! Prefer for...of instead of forEach.
+  
+    213 │     const codes = Object.values(PROVIDER_ERROR_CODES);
+    214 │ 
+  > 215 │     codes.forEach(code => {
+        │     ^^^^^^^^^^^^^^^^^^^^^^^
+  > 216 │       const message = getErrorMessage(code as any);
+  > 217 │       expect(message).toBeTruthy();
+  > 218 │       expect(message.length).toBeGreaterThan(0);
+  > 219 │     });
+        │     ^^
+    220 │   });
+    221 │ });
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+apps/runtime/src/providers/__tests__/errors.test.ts:216:47 lint/suspicious/noExplicitAny ━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    215 │     codes.forEach(code => {
+  > 216 │       const message = getErrorMessage(code as any);
+        │                                               ^^^
+    217 │       expect(message).toBeTruthy();
+    218 │       expect(message.length).toBeGreaterThan(0);
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps/runtime/src/providers/__tests__/errors.test.ts:301:18 lint/suspicious/noExplicitAny ━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    299 │   it("should enable error investigation via originalError", () => {
+    300 │     const original = new Error("Database connection failed");
+  > 301 │     (original as any).code = "ECONNREFUSED";
+        │                  ^^^
+    302 │ 
+    303 │     const normalized = normalizeError(original, "acp");
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps/runtime/src/providers/__tests__/acp-client.test.ts:28:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    26 │   }
+    27 │ 
+  > 28 │   async evaluate(
+       │   ^^^^^^^^^^^^^^^
+  > 29 │     _action: string,
+        ...
+  > 38 │     return { allowed: true };
+  > 39 │   }
+       │   ^
+    40 │ }
+    41 │ 
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    26 │   }
+    27 │ 
+  > 28 │   async evaluate(
+       │   ^^^^^^^^^^^^^^^
+  > 29 │     _action: string,
+        ...
+  > 38 │     return { allowed: true };
+  > 39 │   }
+       │   ^
+    40 │ }
+    41 │ 
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/providers/__tests__/acp-client.test.ts:405:7 lint/complexity/noForEach ━━━━━━━━━━━━
+
+  ! Prefer for...of instead of forEach.
+  
+    403 │       const relevantEvents = events.filter(e => e.topic?.startsWith("provider.acp.execute"));
+    404 │ 
+  > 405 │       relevantEvents.forEach(event => {
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 406 │         expect(event.payload?.correlationId).toBe(correlationId);
+  > 407 │       });
+        │       ^^
+    408 │     });
+    409 │ 
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+apps/runtime/src/protocol/bus.ts:123:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    121 │   }
+    122 │ 
+  > 123 │   async getAuditRecords(): Promise<AuditRecord[]> {
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 124 │     return [...this.auditLog];
+  > 125 │   }
+        │   ^
+    126 │ 
+    127 │   getMetricsReport(): MetricsReport {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    121 │   }
+    122 │ 
+  > 123 │   async getAuditRecords(): Promise<AuditRecord[]> {
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 124 │     return [...this.auditLog];
+  > 125 │   }
+        │   ^
+    126 │ 
+    127 │   getMetricsReport(): MetricsReport {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/protocol/bus.ts:231:26 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    229 │           this.lifecycleProgress.set(correlationId, new Set());
+    230 │         }
+  > 231 │         const progress = this.lifecycleProgress.get(correlationId)!;
+        │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    232 │         if (progress.has(topic)) {
+    233 │           // Duplicate start topic on same correlation — ordering violation
+  
+
+apps/runtime/src/protocol/bus.ts:207:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    205 │   }
+    206 │ 
+  > 207 │   async publish(event: LocalBusEnvelope): Promise<void> {
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 208 │     // Validate the envelope
+         ...
+  > 306 │     this.eventLog.push(event);
+  > 307 │   }
+        │   ^
+    308 │ 
+    309 │   async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    205 │   }
+    206 │ 
+  > 207 │   async publish(event: LocalBusEnvelope): Promise<void> {
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 208 │     // Validate the envelope
+         ...
+  > 306 │     this.eventLog.push(event);
+  > 307 │   }
+        │   ^
+    308 │ 
+    309 │   async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/protocol/bus.ts:207:9 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━
+
+  ! Excessive complexity of 49 detected (max: 15).
+  
+    205 │   }
+    206 │ 
+  > 207 │   async publish(event: LocalBusEnvelope): Promise<void> {
+        │         ^^^^^^^
+    208 │     // Validate the envelope
+    209 │     try {
+  
+  i Please refactor this function to reduce its complexity score from 49 to the max allowed complexity 15.
+  
+
+apps/runtime/src/protocol/bus.ts:336:31 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    335 │       if (command.method === "lane.create") {
+  > 336 │         const correlationId = command.correlation_id!;
+        │                               ^^^^^^^^^^^^^^^^^^^^^^^
+    337 │         if (!this.lifecycleProgress.has(correlationId)) {
+    338 │           this.lifecycleProgress.set(correlationId, new Set());
+  
+
+apps/runtime/src/protocol/bus.ts:372:31 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    371 │       if (command.method === "session.attach") {
+  > 372 │         const correlationId = command.correlation_id!;
+        │                               ^^^^^^^^^^^^^^^^^^^^^^^
+    373 │         const forceError = command.payload?.force_error === true;
+    374 │ 
+  
+
+apps/runtime/src/protocol/bus.ts:425:31 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    424 │       if (command.method === "terminal.spawn") {
+  > 425 │         const correlationId = command.correlation_id!;
+        │                               ^^^^^^^^^^^^^^^^^^^^^^^
+    426 │         const forceError = command.payload?.force_error === true;
+    427 │ 
+  
+
+apps/runtime/src/protocol/bus.ts:309:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    307 │   }
+    308 │ 
+  > 309 │   async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 310 │     // Validate correlation_id for lifecycle commands
+         ...
+  > 552 │     };
+  > 553 │   }
+        │   ^
+    554 │ 
+    555 │   private rendererEngine: "ghostty" | "rio" = "ghostty";
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    307 │   }
+    308 │ 
+  > 309 │   async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 310 │     // Validate correlation_id for lifecycle commands
+         ...
+  > 552 │     };
+  > 553 │   }
+        │   ^
+    554 │ 
+    555 │   private rendererEngine: "ghostty" | "rio" = "ghostty";
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/protocol/bus.ts:309:9 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━
+
+  ! Excessive complexity of 61 detected (max: 15).
+  
+    307 │   }
+    308 │ 
+  > 309 │   async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+        │         ^^^^^^^
+    310 │     // Validate correlation_id for lifecycle commands
+    311 │     if (command.method) {
+  
+  i Please refactor this function to reduce its complexity score from 61 to the max allowed complexity 15.
+  
+
+apps/runtime/src/protocol/bus.ts:635:9 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━
+
+  ! Excessive complexity of 21 detected (max: 15).
+  
+    633 │   }
+    634 │ 
+  > 635 │   async send(envelope: unknown): Promise<ResponseEnvelope> {
+        │         ^^^^
+    636 │     // Guard destroyed state
+    637 │     if (this.destroyed) {
+  
+  i Please refactor this function to reduce its complexity score from 21 to the max allowed complexity 15.
+  
+
+apps/runtime/src/protocol/bus.ts:195:51 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object property name should be in camelCase.
+  
+    193 │       ts: new Date().toISOString(),
+    194 │       topic,
+  > 195 │       ...(envelope.workspace_id !== undefined ? { workspace_id: envelope.workspace_id } : {}),
+        │                                                   ^^^^^^^^^^^^
+    196 │       ...(envelope.lane_id !== undefined ? { lane_id: envelope.lane_id } : {}),
+    197 │       ...(envelope.session_id !== undefined ? { session_id: envelope.session_id } : {}),
+  
+
+apps/runtime/src/protocol/bus.ts:196:46 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object property name should be in camelCase.
+  
+    194 │       topic,
+    195 │       ...(envelope.workspace_id !== undefined ? { workspace_id: envelope.workspace_id } : {}),
+  > 196 │       ...(envelope.lane_id !== undefined ? { lane_id: envelope.lane_id } : {}),
+        │                                              ^^^^^^^
+    197 │       ...(envelope.session_id !== undefined ? { session_id: envelope.session_id } : {}),
+    198 │       ...(envelope.terminal_id !== undefined ? { terminal_id: envelope.terminal_id } : {}),
+  
+
+apps/runtime/src/protocol/bus.ts:197:49 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object property name should be in camelCase.
+  
+    195 │       ...(envelope.workspace_id !== undefined ? { workspace_id: envelope.workspace_id } : {}),
+    196 │       ...(envelope.lane_id !== undefined ? { lane_id: envelope.lane_id } : {}),
+  > 197 │       ...(envelope.session_id !== undefined ? { session_id: envelope.session_id } : {}),
+        │                                                 ^^^^^^^^^^
+    198 │       ...(envelope.terminal_id !== undefined ? { terminal_id: envelope.terminal_id } : {}),
+    199 │       ...(envelope.correlation_id !== undefined ? { correlation_id: envelope.correlation_id } : {}),
+  
+
+apps/runtime/src/protocol/bus.ts:198:50 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object property name should be in camelCase.
+  
+    196 │       ...(envelope.lane_id !== undefined ? { lane_id: envelope.lane_id } : {}),
+    197 │       ...(envelope.session_id !== undefined ? { session_id: envelope.session_id } : {}),
+  > 198 │       ...(envelope.terminal_id !== undefined ? { terminal_id: envelope.terminal_id } : {}),
+        │                                                  ^^^^^^^^^^^
+    199 │       ...(envelope.correlation_id !== undefined ? { correlation_id: envelope.correlation_id } : {}),
+    200 │       payload: {},
+  
+
+Skipped 1 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --fix --unsafe
+
+The number of diagnostics exceeds the number allowed by Biome.
+Diagnostics not shown: 698.
+Checked 440 files in 205ms. No fixes applied.
+Found 2 errors.
+Found 652 warnings.
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+error: script "lint" exited with code 1
+task: Failed to run task "lint": exit status 1
+task: Failed to run task "quality:strict": task: Failed to run task "quality:quick": exit status 201

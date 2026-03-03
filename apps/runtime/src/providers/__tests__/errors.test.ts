@@ -9,6 +9,7 @@ import { describe, expect, it } from "bun:test";
 import {
   NormalizedProviderError,
   PROVIDER_ERROR_CODES,
+  type ProviderErrorCode,
   getErrorMessage,
   isRetryable,
   normalizeError,
@@ -121,8 +122,12 @@ describe("normalizeError", () => {
   });
 
   it("should handle custom error objects with code field", () => {
-    const customError = new Error("Test error");
-    (customError as any).code = "PROVIDER_TIMEOUT";
+    const customError: Error & { code: ProviderErrorCode } = Object.assign(
+      new Error("Test error"),
+      {
+        code: "PROVIDER_TIMEOUT" as const,
+      }
+    );
 
     const error = normalizeError(customError, "a2a");
 
@@ -210,13 +215,12 @@ describe("getErrorMessage", () => {
   });
 
   it("should have message for every error code", () => {
-    const codes = Object.values(PROVIDER_ERROR_CODES);
-
-    codes.forEach(code => {
-      const message = getErrorMessage(code as any);
+    const codes = Object.values(PROVIDER_ERROR_CODES) as readonly ProviderErrorCode[];
+    for (const code of codes) {
+      const message = getErrorMessage(code);
       expect(message).toBeTruthy();
       expect(message.length).toBeGreaterThan(0);
-    });
+    }
   });
 });
 
@@ -297,8 +301,12 @@ describe("Error Traceability", () => {
   });
 
   it("should enable error investigation via originalError", () => {
-    const original = new Error("Database connection failed");
-    (original as any).code = "ECONNREFUSED";
+    const original: Error & { code: string } = Object.assign(
+      new Error("Database connection failed"),
+      {
+        code: "ECONNREFUSED",
+      }
+    );
 
     const normalized = normalizeError(original, "acp");
 

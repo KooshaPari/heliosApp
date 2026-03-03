@@ -38,8 +38,8 @@ export interface PolicyGate {
  * Used until spec 023 delivers the real policy engine.
  */
 class DefaultPolicyGate implements PolicyGate {
-  async evaluate(): Promise<{ allowed: boolean }> {
-    return { allowed: true };
+  evaluate(_action: string, _context: Record<string, unknown>): Promise<{ allowed: boolean }> {
+    return Promise.resolve({ allowed: true });
   }
 }
 
@@ -79,7 +79,7 @@ interface AcpResponse {
  *
  * FR-025-003: ACP protocol client for Claude.
  */
-export class ACPClientAdapter
+export class AcpClientAdapter
   implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
 {
   private config: ACPConfig | null = null;
@@ -325,7 +325,7 @@ export class ACPClientAdapter
         };
 
         // Execute task (mock implementation)
-        const result = await this.sendACPRequest(acpRequest, abortController.signal);
+        const result = await this.sendAcpRequest(acpRequest, abortController.signal);
 
         const duration = Date.now() - startTime;
 
@@ -463,7 +463,7 @@ export class ACPClientAdapter
    * @param endpoint Endpoint URL
    * @returns true if reachable, false otherwise
    */
-  private async probeEndpoint(endpoint: string): Promise<boolean> {
+  private probeEndpoint(endpoint: string): boolean {
     // Mock implementation: always return true for test endpoints
     if (endpoint.includes("localhost") || endpoint.includes("127.0.0.1")) {
       return true;
@@ -480,7 +480,7 @@ export class ACPClientAdapter
    * @param signal Abort signal
    * @returns ACP response
    */
-  private async sendACPRequest(request: AcpRequest, signal: AbortSignal): Promise<AcpResponse> {
+  private async sendAcpRequest(request: AcpRequest, signal: AbortSignal): Promise<AcpResponse> {
     // Check for abort
     if (signal.aborted) {
       throw new Error("Request aborted");
@@ -527,6 +527,9 @@ export class ACPClientAdapter
         topic,
         payload,
       });
-    } catch (_error) {}
+    } catch {
+      // Intentionally non-blocking: event bus failures must not affect provider operations.
+      return;
+    }
   }
 }

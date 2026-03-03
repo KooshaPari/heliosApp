@@ -32,6 +32,8 @@ class MockProvider extends BaseProviderAdapter<ACPConfig, ACPExecuteInput, ACPEx
   }
 
   async init(config: ACPConfig): Promise<void> {
+    await Promise.resolve();
+
     if (this.failInit) {
       throw new Error("Init failed");
     }
@@ -47,6 +49,8 @@ class MockProvider extends BaseProviderAdapter<ACPConfig, ACPExecuteInput, ACPEx
   }
 
   async health(): Promise<ProviderHealthStatus> {
+    await Promise.resolve();
+
     if (this.failHealth) {
       return {
         state: "unavailable",
@@ -73,6 +77,8 @@ class MockProvider extends BaseProviderAdapter<ACPConfig, ACPExecuteInput, ACPEx
   }
 
   async execute(input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+    await Promise.resolve();
+
     if (this.failExecute) {
       throw new Error("Execute failed");
     }
@@ -92,6 +98,8 @@ class MockProvider extends BaseProviderAdapter<ACPConfig, ACPExecuteInput, ACPEx
   }
 
   async terminate(): Promise<void> {
+    await Promise.resolve();
+
     this.isInitialized = false;
     this.isHealthy = false;
     this.updateHealthStatus({
@@ -251,10 +259,12 @@ describe("ProviderAdapter Interface", () => {
 
       class CustomProvider extends BaseProviderAdapter<CustomConfig, CustomInput, CustomOutput> {
         async init(config: CustomConfig): Promise<void> {
+          await Promise.resolve();
           expect(config.customField).toBeDefined();
         }
 
         async health(): Promise<ProviderHealthStatus> {
+          await Promise.resolve();
           return {
             state: "healthy",
             lastCheck: new Date(),
@@ -263,6 +273,7 @@ describe("ProviderAdapter Interface", () => {
         }
 
         async execute(input: CustomInput, _correlationId: string): Promise<CustomOutput> {
+          await Promise.resolve();
           expect(input.options.timeout).toBeGreaterThan(0);
           return {
             answer: "Custom answer",
@@ -270,7 +281,9 @@ describe("ProviderAdapter Interface", () => {
           };
         }
 
-        async terminate(): Promise<void> {}
+        async terminate(): Promise<void> {
+          await Promise.resolve();
+        }
       }
 
       const provider = new CustomProvider();

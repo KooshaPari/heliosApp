@@ -42,23 +42,25 @@ type StageChangeListener = (
 ) => void;
 
 const LEGAL_TRANSITIONS: Record<RecoveryStage, RecoveryStage[]> = {
-  [RecoveryStage.CRASHED]: [RecoveryStage.DETECTING],
-  [RecoveryStage.DETECTING]: [RecoveryStage.INVENTORYING, RecoveryStage.DETECTION_FAILED],
-  [RecoveryStage.INVENTORYING]: [RecoveryStage.RESTORING, RecoveryStage.INVENTORY_FAILED],
-  [RecoveryStage.RESTORING]: [RecoveryStage.RECONCILING, RecoveryStage.RESTORATION_FAILED],
-  [RecoveryStage.RECONCILING]: [RecoveryStage.LIVE, RecoveryStage.RECONCILIATION_FAILED],
-  [RecoveryStage.LIVE]: [], // Terminal state
-  [RecoveryStage.DETECTION_FAILED]: [RecoveryStage.DETECTING], // Retry
-  [RecoveryStage.INVENTORY_FAILED]: [RecoveryStage.INVENTORYING],
-  [RecoveryStage.RESTORATION_FAILED]: [RecoveryStage.RESTORING],
-  [RecoveryStage.RECONCILIATION_FAILED]: [RecoveryStage.RECONCILING],
+  [RecoveryStage.Crashed]: [RecoveryStage.Detecting],
+  [RecoveryStage.Detecting]: [RecoveryStage.Inventorying, RecoveryStage.DetectionFailed],
+  [RecoveryStage.Inventorying]: [RecoveryStage.Restoring, RecoveryStage.InventoryFailed],
+  [RecoveryStage.Restoring]: [RecoveryStage.Reconciling, RecoveryStage.RestorationFailed],
+  [RecoveryStage.Reconciling]: [RecoveryStage.Live, RecoveryStage.ReconciliationFailed],
+  [RecoveryStage.Live]: [], // Terminal state
+  [RecoveryStage.DetectionFailed]: [RecoveryStage.Detecting], // Retry
+  [RecoveryStage.InventoryFailed]: [RecoveryStage.Inventorying],
+  [RecoveryStage.RestorationFailed]: [RecoveryStage.Restoring],
+  [RecoveryStage.ReconciliationFailed]: [RecoveryStage.Reconciling],
 };
 
 const MAX_RETRIES_PER_STAGE = 3;
 const STAGE_TIMEOUT_MS = 30000; // 30 seconds
+const RECOVERY_STATE_FILE = "recovery-state.json";
+const RECOVERY_DIR = "recovery";
 
 export class RecoveryStateMachine {
-  private currentStage: RecoveryStage = RecoveryStage.CRASHED;
+  private currentStage: RecoveryStage = RecoveryStage.Crashed;
   private currentState: RecoveryState;
   private recoveryDataDir: string;
   private bus?: LocalBus | undefined;
@@ -69,7 +71,7 @@ export class RecoveryStateMachine {
     this.recoveryDataDir = recoveryDataDir;
     this.bus = bus;
     this.currentState = {
-      stage: RecoveryStage.CRASHED,
+      stage: RecoveryStage.Crashed,
       timestamp: Date.now(),
       attemptCount: 0,
     };
@@ -143,9 +145,9 @@ export class RecoveryStateMachine {
   }
 
   async reset(): Promise<void> {
-    this.currentStage = RecoveryStage.CRASHED;
+    this.currentStage = RecoveryStage.Crashed;
     this.currentState = {
-      stage: RecoveryStage.CRASHED,
+      stage: RecoveryStage.Crashed,
       timestamp: Date.now(),
       attemptCount: 0,
     };
@@ -161,31 +163,92 @@ export class RecoveryStateMachine {
     return stage.includes("FAILED");
   }
 
+  private createDefaultState(): RecoveryState {
+    return {
+      stage: RecoveryStage.Crashed,
+      timestamp: Date.now(),
+      attemptCount: 0,
+    };
+  }
+
+  private parsePersistedState(rawData: string): RecoveryState | undefined {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(rawData);
+    } catch {
+      return undefined;
+    }
+
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      return undefined;
+    }
+
+    const candidate = parsed as Record<string, unknown>;
+    if (typeof candidate.stage !== "string") {
+      return undefined;
+    }
+
+    const allowedStages = new Set(Object.values(RecoveryStage));
+    if (!allowedStages.has(candidate.stage as RecoveryStage)) {
+      return {
+        stage: RecoveryStage.Crashed,
+        timestamp: Date.now(),
+        attemptCount: 0,
+      };
+    }
+
+    if (!Number.isFinite(candidate.timestamp) || typeof candidate.timestamp !== "number") {
+      return undefined;
+    }
+
+    if (
+      !Number.isInteger(candidate.attemptCount) ||
+      typeof candidate.attemptCount !== "number" ||
+      candidate.attemptCount < 0
+    ) {
+      return undefined;
+    }
+
+    if (candidate.lastError !== undefined && typeof candidate.lastError !== "string") {
+      return undefined;
+    }
+
+    const state: RecoveryState = {
+      stage: candidate.stage as RecoveryStage,
+      timestamp: candidate.timestamp,
+      attemptCount: candidate.attemptCount,
+    };
+    if (typeof candidate.lastError === "string") {
+      state.lastError = candidate.lastError;
+    }
+    return state;
+  }
+
   private async loadState(): Promise<void> {
     try {
-      const statePath = path.join(this.recoveryDataDir, "recovery", "recovery-state.json");
+      const statePath = path.join(this.recoveryDataDir, RECOVERY_DIR, RECOVERY_STATE_FILE);
       const data = await fs.readFile(statePath, "utf-8");
-      const state = JSON.parse(data) as RecoveryState;
+      const state = this.parsePersistedState(data);
+      if (!state) {
+        throw new Error("Invalid persisted recovery state");
+      }
       this.currentStage = state.stage;
       this.currentState = state;
     } catch {
       // No persisted state - start fresh
-      this.currentStage = RecoveryStage.CRASHED;
-      this.currentState = {
-        stage: RecoveryStage.CRASHED,
-        timestamp: Date.now(),
-        attemptCount: 0,
-      };
+      const defaultState = this.createDefaultState();
+      this.currentStage = defaultState.stage;
+      this.currentState = defaultState;
     }
   }
 
   private async persistState(): Promise<void> {
     try {
-      await fs.mkdir(path.join(this.recoveryDataDir, "recovery"), {
+      await fs.mkdir(path.join(this.recoveryDataDir, RECOVERY_DIR), {
         recursive: true,
       });
 
-      const statePath = path.join(this.recoveryDataDir, "recovery", "recovery-state.json");
+      const statePath = path.join(this.recoveryDataDir, RECOVERY_DIR, RECOVERY_STATE_FILE);
       const tempPath = `${statePath}.tmp`;
 
       // Atomic write
@@ -199,7 +262,7 @@ export class RecoveryStateMachine {
 
   private async deleteState(): Promise<void> {
     try {
-      const statePath = path.join(this.recoveryDataDir, "recovery", "recovery-state.json");
+      const statePath = path.join(this.recoveryDataDir, RECOVERY_DIR, RECOVERY_STATE_FILE);
       await fs.unlink(statePath);
     } catch {
       // File doesn't exist - ok
@@ -242,16 +305,16 @@ export class RecoveryStateMachine {
 
   private getFailureStateFor(stage: RecoveryStage): RecoveryStage | undefined {
     const failureMap: Record<RecoveryStage, RecoveryStage | undefined> = {
-      [RecoveryStage.DETECTING]: RecoveryStage.DETECTION_FAILED,
-      [RecoveryStage.INVENTORYING]: RecoveryStage.INVENTORY_FAILED,
-      [RecoveryStage.RESTORING]: RecoveryStage.RESTORATION_FAILED,
-      [RecoveryStage.RECONCILING]: RecoveryStage.RECONCILIATION_FAILED,
-      [RecoveryStage.CRASHED]: RecoveryStage.CRASHED,
-      [RecoveryStage.LIVE]: undefined,
-      [RecoveryStage.DETECTION_FAILED]: undefined,
-      [RecoveryStage.INVENTORY_FAILED]: undefined,
-      [RecoveryStage.RESTORATION_FAILED]: undefined,
-      [RecoveryStage.RECONCILIATION_FAILED]: undefined,
+      [RecoveryStage.Detecting]: RecoveryStage.DetectionFailed,
+      [RecoveryStage.Inventorying]: RecoveryStage.InventoryFailed,
+      [RecoveryStage.Restoring]: RecoveryStage.RestorationFailed,
+      [RecoveryStage.Reconciling]: RecoveryStage.ReconciliationFailed,
+      [RecoveryStage.Crashed]: RecoveryStage.Crashed,
+      [RecoveryStage.Live]: undefined,
+      [RecoveryStage.DetectionFailed]: undefined,
+      [RecoveryStage.InventoryFailed]: undefined,
+      [RecoveryStage.RestorationFailed]: undefined,
+      [RecoveryStage.ReconciliationFailed]: undefined,
     };
     return failureMap[stage];
   }

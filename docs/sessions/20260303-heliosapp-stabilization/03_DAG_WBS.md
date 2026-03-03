@@ -161,10 +161,104 @@ Status legend:
 - [status:done] Resolve `apps/runtime/src/registry/binding_events.ts` naming warnings for topics + envelope keys.
 - [status:done] Resolve `apps/runtime/src/registry/persistence.ts` warnings (`noExplicitAny`, empty block, async without await).
 - [status:done] Resolve `apps/runtime/src/registry/binding_middleware.ts` warnings (`noNonNullAssertion`, async without await).
-- [status:pending] Re-run focused registry/sessions/recovery warning scans and close residual warnings.
+- [status:done] Re-run focused registry/sessions/recovery warning scans and close residual warnings.
 
 ### Lane F (Validation and evidence)
-- [status:pending] Re-run targeted integration lifecycle tests and capture artifact output.
-- [status:pending] Re-run `task quality:strict` and capture output artifact.
-- [status:pending] Re-run `task devops:check:ci-summary` and capture handoff artifact.
-- [status:pending] Refresh artifact manifest + checksums and link updates in testing strategy.
+- [status:done] Re-run targeted integration lifecycle tests and capture artifact output.
+- [status:done] Re-run `task quality:strict` and capture output artifact.
+- [status:done] Re-run `task devops:check:ci-summary` and capture handoff artifact.
+- [status:done] Refresh artifact manifest + checksums and link updates in testing strategy.
+- [status:done] 2026-03-03 targeted runtime-contract rerun confirms lifecycle/parity regressions are resolved:
+  - `bun test apps/runtime/tests/integration/runtime/test_terminal_lifecycle.test.ts`
+  - `bun test apps/runtime/tests/unit/protocol/protocol_assets.test.ts apps/runtime/tests/unit/protocol/protocol_parity_gate.test.ts`
+- [status:partial] Remaining blockers in rerun artifacts are non-contract broad-gate issues (timing-sensitive benchmark/timeouts and lint surface), not runtime contract breakage.
+
+## Phase 11 — Child-Agent Identify-First Execution Plan (24 tasks, 6 lanes x 4)
+
+Priority order: Lane F -> Lane E -> Lane B -> Lane C -> Lane D -> Lane A
+
+### Child Agent A (Governance parity execution)
+- [status:done] Identify baseline governance drift by inventorying `.github/workflows/*`, `.coderabbit.yaml`, `.gemini/config.yaml`, and branch/ruleset docs against current required-check policy.
+- [status:done] Apply governance parity updates in one focused pass (required-check alignment, policy-gate wiring, bot severity thresholds, automation markers).
+- [status:done] Validate governance parity locally using `task governance:required-checks` and consistency checks across workflow/config surfaces.
+- [status:done] Document closure in session docs with parity diff, evidence commands, and explicit blocked items/owners (if any).
+
+### Child Agent B (Registry warning execution)
+- [status:done] Identify baseline registry warning inventory and persist artifact summary for `apps/runtime/src/registry` and related registry tests.
+- [status:done] Implement fixes for highest-priority registry warnings first (`binding_events`, lifecycle/middleware test typing, loop/empty-block/evolving-type hotspots).
+- [status:done] Re-run lane-scoped registry checks/tests and regenerate warning inventory to prove warning delta and residual justification.
+- [status:done] Publish Lane B closure bundle (inventory diff, risk ledger, pass/fail evidence, merge-readiness decision).
+
+### Child Agent C (Recovery persistence execution)
+- [status:done] Identify baseline gaps in `apps/runtime/src/recovery` persistence/enum surfaces from targeted test + type outputs and record matrix artifact.
+- [status:done] Implement forward-only fixes for deserialize/serialize safety and enum-parity handling in recovery checkpoint/resume paths.
+- [status:done] Add/update focused recovery tests for corruption, partial state, and canonical enum persistence behavior.
+- [status:done] Run recovery-focused type/quality gates, resolve remaining diagnostics, and publish Lane C closure evidence.
+
+### Child Agent D (Sessions contract execution)
+- [status:done] Identify baseline sessions contract gaps across session/terminal request and response surfaces plus command parsing entry points.
+- [status:partial] Implement strict camelCase contract enforcement for sessions/terminals and fail fast on snake_case payloads (HTTP create endpoints + runtime helper command inputs locked; bus-protocol snake_case envelopes intentionally retained for protocol compatibility).
+- [status:done] Expand contract tests (positive + rejection paths) across unit/integration lifecycle suites and run targeted validations.
+- [status:partial] Publish Lane D closure notes with behavioral diff, test evidence, and remaining limitation: LocalBusEnvelope command paths stay snake_case by design.
+
+### Child Agent E (Docs/repro execution)
+- [status:done] Identify missing Lane 6 doc/artifact outputs by diffing pending WBS/testing strategy items against existing session artifacts.
+- [status:done] Generate missing reproducibility artifacts (test matrix, risk ledger, checksums manifest) under `docs/sessions/20260303-heliosapp-stabilization/artifacts`.
+- [status:done] Update `06_TESTING_STRATEGY.md` and `05_KNOWN_ISSUES.md` with command provenance, artifact links, and reproducibility details.
+- [status:done] Cross-link new artifacts from docs indexes/session overview and mark Lane E status transitions in WBS.
+
+### Child Agent F (Validation/handoff execution)
+- [status:done] Identify baseline required-gate status (`tests`, `lint`, `types`, `build`, policy gates) and classify pass/fail/blocked with causes.
+- [status:done] Re-run validations in strict order (targeted fast checks first, then broader required suite) and capture timestamped artifacts.
+- [status:done] Produce before/after gate matrix with deterministic vs flaky outcomes and link corresponding artifact evidence.
+- [status:partial] Finalize handoff confidence with residual risks, owner actions, and explicit go/no-go recommendation (runtime-contract lane is green as of 2026-03-03; broad-gate no-go remains pending non-contract stabilization).
+
+## Phase 12 — Child-Agent Provider Wave Execution (24 tasks, 6 lanes x 4)
+
+Execution note:
+- This section records lane ownership and task breakdown for the provider-focused wave.
+- Statuses stay `pending` until lane artifacts are attached in `artifacts/lane-provider-wave-20260303.md`.
+
+Lane ownership:
+- Lane A owner: Child Agent A (provider contracts and interfaces).
+- Lane B owner: Child Agent B (provider adapters and error surfaces).
+- Lane C owner: Child Agent C (provider protocol boundaries).
+- Lane D owner: Child Agent D (provider tests and fixtures).
+- Lane E owner: Child Agent E (provider docs and evidence collation).
+- Lane F owner: Child Agent F (validation and integration handoff).
+
+### Lane A (Provider contracts and interfaces)
+- [status:pending] Inventory provider contract entrypoints and map current call graph.
+- [status:pending] Normalize contract typing across provider request/response boundaries.
+- [status:pending] Update contract-focused tests for typed payload parity.
+- [status:pending] Publish lane artifact with changed files and unresolved contract risks.
+
+### Lane B (Provider adapters and error surfaces)
+- [status:pending] Audit provider adapter implementations for lint/type hotspots.
+- [status:pending] Refactor adapter error normalization for deterministic behavior.
+- [status:pending] Update adapter regression tests for failure-class coverage.
+- [status:pending] Publish lane artifact with warning deltas and residual adapter issues.
+
+### Lane C (Provider protocol boundaries)
+- [status:pending] Audit provider-to-protocol translation paths for naming-rule conflicts.
+- [status:pending] Apply protocol-safe lint fixes without wire-format drift.
+- [status:pending] Add targeted protocol boundary tests for provider message paths.
+- [status:pending] Publish lane artifact with boundary compatibility notes.
+
+### Lane D (Provider tests and fixtures)
+- [status:pending] Consolidate provider test fixture setup for deterministic runs.
+- [status:pending] Remove warning-prone test patterns in provider test files.
+- [status:pending] Add focused provider isolation and routing assertions.
+- [status:pending] Publish lane artifact with test command outputs and unresolved gaps.
+
+### Lane E (Provider docs and evidence collation)
+- [status:pending] Build provider-wave evidence index and map command-to-artifact outputs.
+- [status:pending] Update session docs with provider-wave status and open risks.
+- [status:pending] Generate checksum-ready manifest entries for new provider artifacts.
+- [status:pending] Publish lane artifact bundle for parent integration.
+
+### Lane F (Validation and integration handoff)
+- [status:pending] Run focused provider lint/type/test validation commands.
+- [status:pending] Capture command outputs in `artifacts/lane-provider-wave-20260303.md`.
+- [status:pending] Classify pass/fail/blocked per command with evidence links.
+- [status:pending] Publish handoff-ready summary for parent integration decision.

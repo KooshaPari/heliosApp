@@ -39,7 +39,7 @@ describe("Exit Code Monitoring", () => {
       await watchdog.handleProcessExit("test-proc", 1234, 1);
 
       expect(crashEvents.length).toBe(1);
-      expect(crashEvents[0].reason).toBe(CrashReason.EXIT_CODE);
+      expect(crashEvents[0].reason).toBe(CrashReason.ExitCode);
       expect(crashEvents[0].exitCode).toBe(1);
     });
 
@@ -68,7 +68,7 @@ describe("Exit Code Monitoring", () => {
       await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGKILL");
 
       expect(crashEvents.length).toBe(1);
-      expect(crashEvents[0].reason).toBe(CrashReason.SIGNAL);
+      expect(crashEvents[0].reason).toBe(CrashReason.Signal);
       expect(crashEvents[0].signal).toBe("SIGKILL");
     });
 
@@ -77,7 +77,7 @@ describe("Exit Code Monitoring", () => {
       await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGSEGV");
 
       expect(crashEvents.length).toBe(1);
-      expect(crashEvents[0].reason).toBe(CrashReason.SIGNAL);
+      expect(crashEvents[0].reason).toBe(CrashReason.Signal);
       expect(crashEvents[0].signal).toBe("SIGSEGV");
     });
 
@@ -86,7 +86,7 @@ describe("Exit Code Monitoring", () => {
       await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGBUS");
 
       expect(crashEvents.length).toBe(1);
-      expect(crashEvents[0].reason).toBe(CrashReason.SIGNAL);
+      expect(crashEvents[0].reason).toBe(CrashReason.Signal);
     });
 
     it("should trigger crash on SIGABRT (abort signal)", async () => {
@@ -94,7 +94,7 @@ describe("Exit Code Monitoring", () => {
       await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGABRT");
 
       expect(crashEvents.length).toBe(1);
-      expect(crashEvents[0].reason).toBe(CrashReason.SIGNAL);
+      expect(crashEvents[0].reason).toBe(CrashReason.Signal);
     });
   });
 
@@ -164,7 +164,7 @@ describe("Exit Code Monitoring", () => {
       expect(events.length).toBeGreaterThan(0);
       const crashEvent = events.find(e => e.topic === "recovery.crash.detected");
       expect(crashEvent).toBeDefined();
-      expect(crashEvent?.payload?.reason).toBe(CrashReason.EXIT_CODE);
+      expect(crashEvent?.payload?.reason).toBe(CrashReason.ExitCode);
     });
 
     it("should include full crash details in bus event", async () => {

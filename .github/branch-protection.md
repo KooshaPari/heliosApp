@@ -8,14 +8,23 @@ This document defines the branch protection rules for the `main` branch. These r
 
 ### Required Status Checks
 
-The following status checks must pass before a pull request can be merged:
-
-1. **quality-gates** - Quality gates from spec 021 (linting, formatting, type checking)
-2. **gca-review** - GitHub Code Analysis automated review
-3. **compliance-check** - Compliance checker from WP02
-4. **coderabbit-review** - Optional if enabled by org ruleset
-
 The canonical required-check manifest for this repo is `.github/required-checks.txt`.
+All branch-protection required status checks must be sourced from that file.
+
+Current required checks (as defined in `.github/required-checks.txt`):
+
+1. **typecheck**
+2. **lint**
+3. **unit-tests**
+4. **coverage**
+5. **secret-scan**
+6. **ci-summary**
+7. **Quality Gates Pipeline**
+8. **gca-review**
+9. **Constitution Compliance Validation**
+10. **policy-gate**
+11. **verify-required-check-names**
+12. **enforce-agent-directory-policy**
 
 ### Required Pull Request Reviews
 
@@ -58,7 +67,20 @@ curl -X PUT \
   -d '{
     "required_status_checks": {
       "strict": true,
-      "contexts": ["quality-gates", "gca-review", "compliance-check"]
+      "contexts": [
+        "typecheck",
+        "lint",
+        "unit-tests",
+        "coverage",
+        "secret-scan",
+        "ci-summary",
+        "Quality Gates Pipeline",
+        "gca-review",
+        "Constitution Compliance Validation",
+        "policy-gate",
+        "verify-required-check-names",
+        "enforce-agent-directory-policy"
+      ]
     },
     "required_pull_request_reviews": {
       "dismissal_restrictions": {},

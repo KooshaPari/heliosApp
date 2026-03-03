@@ -22,6 +22,7 @@ const suppName2 = "@" + "ts-expect-error";
 const suppName3 = "@" + "ts-nocheck";
 const suppName4 = "eslint" + "-disable";
 const suppName5 = "biome" + "-ignore";
+const suppName6 = "oxlint" + "-disable";
 
 const SUPPRESSION_PATTERNS = [
   { regex: new RegExp(suppName1), name: suppName1 },
@@ -29,6 +30,7 @@ const SUPPRESSION_PATTERNS = [
   { regex: new RegExp(suppName3), name: suppName3 },
   { regex: new RegExp(suppName4 + "(-line|-next-line)?"), name: suppName4 },
   { regex: new RegExp(suppName5), name: suppName5 },
+  { regex: new RegExp(suppName6 + "(-line|-next-line|-file)?"), name: suppName6 },
 ];
 
 const TEST_MARKERS = [

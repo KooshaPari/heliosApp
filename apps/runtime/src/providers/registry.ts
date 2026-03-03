@@ -19,8 +19,8 @@ import { NormalizedProviderError, normalizeError } from "./errors.js";
 interface RegisteredProvider {
   id: string;
   type: "acp" | "mcp" | "a2a";
-  adapter: ProviderAdapter<any, any, any>;
-  registration: ProviderRegistration<any>;
+  adapter: ProviderAdapter<unknown, unknown, unknown>;
+  registration: ProviderRegistration<unknown>;
   healthStatus: ProviderHealthStatus;
   inFlightCount: number;
   laneIds: Set<string>; // Lanes this provider is bound to
@@ -62,9 +62,9 @@ export class ProviderRegistry {
    * @param adapter Pre-created adapter instance to manage
    * @throws NormalizedProviderError if validation fails or init fails
    */
-  async register<TConfig, TInput, TOutput>(
-    registration: ProviderRegistration<TConfig>,
-    adapter: ProviderAdapter<TConfig, TInput, TOutput>
+  async register<Config, Input, Output>(
+    registration: ProviderRegistration<Config>,
+    adapter: ProviderAdapter<Config, Input, Output>
   ): Promise<void> {
     // Validate registration configuration
     this.validateRegistration(registration);
@@ -174,7 +174,7 @@ export class ProviderRegistry {
    * @param providerId ID of provider to retrieve
    * @returns Registered provider or undefined if not found
    */
-  get(providerId: string): ProviderAdapter<any, any, any> | undefined {
+  get(providerId: string): ProviderAdapter<unknown, unknown, unknown> | undefined {
     const provider = this.providers.get(providerId);
     return provider?.adapter;
   }
@@ -185,8 +185,8 @@ export class ProviderRegistry {
    * @param type Provider type to filter by
    * @returns Array of adapters matching the type
    */
-  listByType(type: "acp" | "mcp" | "a2a"): ProviderAdapter<any, any, any>[] {
-    const result: ProviderAdapter<any, any, any>[] = [];
+  listByType(type: "acp" | "mcp" | "a2a"): ProviderAdapter<unknown, unknown, unknown>[] {
+    const result: ProviderAdapter<unknown, unknown, unknown>[] = [];
 
     for (const provider of this.providers.values()) {
       if (provider.type === type) {
@@ -203,8 +203,8 @@ export class ProviderRegistry {
    * @param workspaceId Workspace ID to filter by
    * @returns Array of adapters bound to the workspace
    */
-  listByWorkspace(workspaceId: string): ProviderAdapter<any, any, any>[] {
-    const result: ProviderAdapter<any, any, any>[] = [];
+  listByWorkspace(workspaceId: string): ProviderAdapter<unknown, unknown, unknown>[] {
+    const result: ProviderAdapter<unknown, unknown, unknown>[] = [];
 
     for (const provider of this.providers.values()) {
       if (provider.registration.workspaceId === workspaceId) {
@@ -356,7 +356,7 @@ export class ProviderRegistry {
    * @param registration Registration to validate
    * @throws NormalizedProviderError if validation fails
    */
-  private validateRegistration<TConfig>(registration: ProviderRegistration<TConfig>): void {
+  private validateRegistration<Config>(registration: ProviderRegistration<Config>): void {
     // Check required fields
     if (!registration.id || typeof registration.id !== "string") {
       throw new NormalizedProviderError(
@@ -427,6 +427,9 @@ export class ProviderRegistry {
         topic,
         payload,
       });
-    } catch (_error) {}
+    } catch {
+      // Best-effort event emission; registry behavior must continue without bus.
+      return;
+    }
   }
 }

@@ -117,6 +117,7 @@ export class OrphanWatchdog {
       // Warn if cycle took too long
       if (this.lastDetectionDuration > 2000) {
         // High latency warning intentionally logged for triage correlation.
+        // biome-ignore lint/suspicious/noConsole: watchdog warning is intentional for operator triage.
         console.warn(
           `Orphan watchdog detection cycle ${this.cycleNumber} took ${this.lastDetectionDuration}ms`
         );
@@ -167,6 +168,7 @@ export class OrphanWatchdog {
       };
       await this.checkpointManager.save(checkpoint);
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: watchdog error is intentional for operator triage.
       console.error("Orphan watchdog detection cycle failed", error);
     }
   }

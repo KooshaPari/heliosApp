@@ -1,0 +1,442 @@
+task: [devops:check:ci-summary] bash scripts/devops-checker.sh --check-ci --emit-summary
+[2026-03-03T16:34:45Z] Running DevOps check suite at /Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp
+[2026-03-03T16:34:45Z] PASS: git-command
+[2026-03-03T16:34:45Z] PASS: git-repo
+[2026-03-03T16:34:45Z] PASS: git-remotes
+[2026-03-03T16:34:45Z] PASS: git-clean
+task: [preflight] set -euo pipefail
+command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
+command -v task >/dev/null 2>&1 || { echo "[FAIL] task is required"; exit 1; }
+command -v git >/dev/null 2>&1 || { echo "[FAIL] git is required"; exit 1; }
+test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
+echo "[OK] preflight checks passed"
+
+task: [preflight] set -euo pipefail
+command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
+command -v task >/dev/null 2>&1 || { echo "[FAIL] task is required"; exit 1; }
+command -v git >/dev/null 2>&1 || { echo "[FAIL] git is required"; exit 1; }
+test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
+echo "[OK] preflight checks passed"
+
+[OK] preflight checks passed
+[OK] preflight checks passed
+task: [deps] bun install --frozen-lockfile
+bun install v1.3.10 (30e609e0)
+
+Checked 203 installs across 282 packages (no changes) [10.00ms]
+task: [quality:quick] task typecheck
+task: [typecheck] bun run typecheck
+$ tsc --noEmit
+task: [quality:quick] task lint
+task: [lint] bun run lint
+$ biome check apps docs/.vitepress playwright.config.ts tsconfig.json package.json
+apps/runtime/tests/unit/renderer/ghostty/capabilities.test.ts format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    21 21 │   
+    22 22 │     Bun.spawn = ((command: string[]) => {
+    23    │ - ····const·stdoutText·=·command[0]·===·"system_profiler"·?·"Metal·Support:·Yes"·:·"OpenGL·version·string:·4.6";
+       23 │ + ····const·stdoutText·=
+       24 │ + ······command[0]·===·"system_profiler"·?·"Metal·Support:·Yes"·:·"OpenGL·version·string:·4.6";
+    24 25 │       const stdout = new ReadableStream<Uint8Array>({
+    25 26 │         start(controller) {
+  
+
+apps/runtime/src/providers/__tests__/errors.test.ts:125:21 lint/suspicious/noExplicitAny ━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    123 │   it("should handle custom error objects with code field", () => {
+    124 │     const customError = new Error("Test error");
+  > 125 │     (customError as any).code = "PROVIDER_TIMEOUT";
+        │                     ^^^
+    126 │ 
+    127 │     const error = normalizeError(customError, "a2a");
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps/runtime/src/providers/__tests__/errors.test.ts:215:5 lint/complexity/noForEach ━━━━━━━━━━━━━━━━
+
+  ! Prefer for...of instead of forEach.
+  
+    213 │     const codes = Object.values(PROVIDER_ERROR_CODES);
+    214 │ 
+  > 215 │     codes.forEach(code => {
+        │     ^^^^^^^^^^^^^^^^^^^^^^^
+  > 216 │       const message = getErrorMessage(code as any);
+  > 217 │       expect(message).toBeTruthy();
+  > 218 │       expect(message.length).toBeGreaterThan(0);
+  > 219 │     });
+        │     ^^
+    220 │   });
+    221 │ });
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+apps/runtime/src/providers/__tests__/errors.test.ts:216:47 lint/suspicious/noExplicitAny ━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    215 │     codes.forEach(code => {
+  > 216 │       const message = getErrorMessage(code as any);
+        │                                               ^^^
+    217 │       expect(message).toBeTruthy();
+    218 │       expect(message.length).toBeGreaterThan(0);
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps/runtime/src/providers/__tests__/errors.test.ts:301:18 lint/suspicious/noExplicitAny ━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+  
+    299 │   it("should enable error investigation via originalError", () => {
+    300 │     const original = new Error("Database connection failed");
+  > 301 │     (original as any).code = "ECONNREFUSED";
+        │                  ^^^
+    302 │ 
+    303 │     const normalized = normalizeError(original, "acp");
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+apps/runtime/src/providers/__tests__/isolation.test.ts:32:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    30 │   }
+    31 │ 
+  > 32 │   async init(_config: ACPConfig): Promise<void> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 33 │     this.initialized = true;
+  > 34 │   }
+       │   ^
+    35 │ 
+    36 │   async health(): Promise<ProviderHealthStatus> {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    30 │   }
+    31 │ 
+  > 32 │   async init(_config: ACPConfig): Promise<void> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 33 │     this.initialized = true;
+  > 34 │   }
+       │   ^
+    35 │ 
+    36 │   async health(): Promise<ProviderHealthStatus> {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/providers/__tests__/isolation.test.ts:36:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    34 │   }
+    35 │ 
+  > 36 │   async health(): Promise<ProviderHealthStatus> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 37 │     return {
+        ...
+  > 41 │     };
+  > 42 │   }
+       │   ^
+    43 │ 
+    44 │   async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    34 │   }
+    35 │ 
+  > 36 │   async health(): Promise<ProviderHealthStatus> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 37 │     return {
+        ...
+  > 41 │     };
+  > 42 │   }
+       │   ^
+    43 │ 
+    44 │   async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/providers/__tests__/isolation.test.ts:44:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    42 │   }
+    43 │ 
+  > 44 │   async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 45 │     if (!this.initialized) {
+        ...
+  > 57 │     };
+  > 58 │   }
+       │   ^
+    59 │ 
+    60 │   async terminate(): Promise<void> {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    42 │   }
+    43 │ 
+  > 44 │   async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 45 │     if (!this.initialized) {
+        ...
+  > 57 │     };
+  > 58 │   }
+       │   ^
+    59 │ 
+    60 │   async terminate(): Promise<void> {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/providers/__tests__/isolation.test.ts:60:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    58 │   }
+    59 │ 
+  > 60 │   async terminate(): Promise<void> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 61 │     this.initialized = false;
+  > 62 │   }
+       │   ^
+    63 │ 
+    64 │   // Test helpers
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    58 │   }
+    59 │ 
+  > 60 │   async terminate(): Promise<void> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 61 │     this.initialized = false;
+  > 62 │   }
+       │   ^
+    63 │ 
+    64 │   // Test helpers
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/providers/__tests__/isolation.test.ts:209:7 lint/complexity/noForEach ━━━━━━━━━━━━━
+
+  ! Prefer for...of instead of forEach.
+  
+    207 │       // All should succeed
+    208 │       expect(results).toHaveLength(laneCount);
+  > 209 │       results.forEach(result => {
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 210 │         expect(result.content).toBeTruthy();
+  > 211 │       });
+        │       ^^
+    212 │     });
+    213 │ 
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+apps/runtime/src/providers/__tests__/isolation.test.ts:77:13 lint/style/useNamingConvention ━━━━━━━━━━
+
+  ! Two consecutive uppercase characters are not allowed in camelCase because strictCase is set to `true`.
+  
+    75 │   describe("Lane-Scoped Isolation", () => {
+    76 │     it("should isolate provider crashes to specific lanes", async () => {
+  > 77 │       const laneAProvider = new MockIsolatedProvider("lane-a");
+       │             ^^^^^^^^^^^^^
+    78 │       const laneBProvider = new MockIsolatedProvider("lane-b");
+    79 │ 
+  
+  i If you want to use consecutive uppercase characters in camelCase, then set the strictCase option to `false`.
+    See the rule options for more details.
+  
+
+apps/runtime/src/providers/__tests__/isolation.test.ts:78:13 lint/style/useNamingConvention ━━━━━━━━━━
+
+  ! Two consecutive uppercase characters are not allowed in camelCase because strictCase is set to `true`.
+  
+    76 │     it("should isolate provider crashes to specific lanes", async () => {
+    77 │       const laneAProvider = new MockIsolatedProvider("lane-a");
+  > 78 │       const laneBProvider = new MockIsolatedProvider("lane-b");
+       │             ^^^^^^^^^^^^^
+    79 │ 
+    80 │       // Initialize both providers
+  
+  i If you want to use consecutive uppercase characters in camelCase, then set the strictCase option to `false`.
+    See the rule options for more details.
+  
+
+apps/runtime/src/providers/__tests__/isolation.test.ts:96:13 lint/style/useNamingConvention ━━━━━━━━━━
+
+  ! Two consecutive uppercase characters are not allowed in camelCase because strictCase is set to `true`.
+  
+    95 │     it("should track crashes per lane", async () => {
+  > 96 │       const laneAProvider = new MockIsolatedProvider("lane-a");
+       │             ^^^^^^^^^^^^^
+    97 │       const laneBProvider = new MockIsolatedProvider("lane-b");
+    98 │ 
+  
+  i If you want to use consecutive uppercase characters in camelCase, then set the strictCase option to `false`.
+    See the rule options for more details.
+  
+
+apps/runtime/src/providers/__tests__/isolation.test.ts:97:13 lint/style/useNamingConvention ━━━━━━━━━━
+
+  ! Two consecutive uppercase characters are not allowed in camelCase because strictCase is set to `true`.
+  
+    95 │     it("should track crashes per lane", async () => {
+    96 │       const laneAProvider = new MockIsolatedProvider("lane-a");
+  > 97 │       const laneBProvider = new MockIsolatedProvider("lane-b");
+       │             ^^^^^^^^^^^^^
+    98 │ 
+    99 │       await laneAProvider.init({ apiKey: "test", model: "claude-3-sonnet" });
+  
+  i If you want to use consecutive uppercase characters in camelCase, then set the strictCase option to `false`.
+    See the rule options for more details.
+  
+
+apps/runtime/src/providers/__tests__/isolation.test.ts:113:13 lint/style/useNamingConvention ━━━━━━━━━━
+
+  ! Two consecutive uppercase characters are not allowed in camelCase because strictCase is set to `true`.
+  
+    112 │       // Check lane A health
+  > 113 │       const laneAHealth = await laneAProvider.health();
+        │             ^^^^^^^^^^^
+    114 │       expect(laneAHealth.failureCount).toBe(3);
+    115 │ 
+  
+  i If you want to use consecutive uppercase characters in camelCase, then set the strictCase option to `false`.
+    See the rule options for more details.
+  
+
+apps/runtime/src/providers/__tests__/isolation.test.ts:117:13 lint/style/useNamingConvention ━━━━━━━━━━
+
+  ! Two consecutive uppercase characters are not allowed in camelCase because strictCase is set to `true`.
+  
+    116 │       // Check lane B health (should be unaffected)
+  > 117 │       const laneBHealth = await laneBProvider.health();
+        │             ^^^^^^^^^^^
+    118 │       expect(laneBHealth.failureCount).toBe(0);
+    119 │       expect(laneBHealth.state).toBe("healthy");
+  
+  i If you want to use consecutive uppercase characters in camelCase, then set the strictCase option to `false`.
+    See the rule options for more details.
+  
+
+apps/runtime/src/providers/__tests__/acp-client.test.ts:28:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    26 │   }
+    27 │ 
+  > 28 │   async evaluate(
+       │   ^^^^^^^^^^^^^^^
+  > 29 │     _action: string,
+        ...
+  > 38 │     return { allowed: true };
+  > 39 │   }
+       │   ^
+    40 │ }
+    41 │ 
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    26 │   }
+    27 │ 
+  > 28 │   async evaluate(
+       │   ^^^^^^^^^^^^^^^
+  > 29 │     _action: string,
+        ...
+  > 38 │     return { allowed: true };
+  > 39 │   }
+       │   ^
+    40 │ }
+    41 │ 
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/providers/__tests__/acp-client.test.ts:405:7 lint/complexity/noForEach ━━━━━━━━━━━━
+
+  ! Prefer for...of instead of forEach.
+  
+    403 │       const relevantEvents = events.filter(e => e.topic?.startsWith("provider.acp.execute"));
+    404 │ 
+  > 405 │       relevantEvents.forEach(event => {
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 406 │         expect(event.payload?.correlationId).toBe(correlationId);
+  > 407 │       });
+        │       ^^
+    408 │     });
+    409 │ 
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+apps/runtime/src/protocol/bus.ts:123:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    121 │   }
+    122 │ 
+  > 123 │   async getAuditRecords(): Promise<AuditRecord[]> {
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 124 │     return [...this.auditLog];
+  > 125 │   }
+        │   ^
+    126 │ 
+    127 │   getMetricsReport(): MetricsReport {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    121 │   }
+    122 │ 
+  > 123 │   async getAuditRecords(): Promise<AuditRecord[]> {
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 124 │     return [...this.auditLog];
+  > 125 │   }
+        │   ^
+    126 │ 
+    127 │   getMetricsReport(): MetricsReport {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/protocol/bus.ts:231:26 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    229 │           this.lifecycleProgress.set(correlationId, new Set());
+    230 │         }
+  > 231 │         const progress = this.lifecycleProgress.get(correlationId)!;
+        │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    232 │         if (progress.has(topic)) {
+    233 │           // Duplicate start topic on same correlation — ordering violation
+  
+
+Skipped 1 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --fix --unsafe
+
+The number of diagnostics exceeds the number allowed by Biome.
+Diagnostics not shown: 698.
+Checked 440 files in 213ms. No fixes applied.
+Found 2 errors.
+Found 652 warnings.
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+error: script "lint" exited with code 1
+task: Failed to run task "lint": exit status 1
+task: Failed to run task "ci": task: Failed to run task "check": task: Failed to run task "quality:strict": task: Failed to run task "quality:quick": exit status 201
+[2026-03-03T16:34:49Z] FAIL: task-ci
+task: Failed to run task "devops:check:ci-summary": exit status 1

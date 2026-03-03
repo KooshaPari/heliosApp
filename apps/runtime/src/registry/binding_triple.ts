@@ -124,7 +124,7 @@ export function createBinding(terminalId: string, triple: BindingTriple): Termin
   return {
     terminalId,
     binding: triple,
-    state: BindingState.bound,
+    state: BindingState.Bound,
     createdAt: now,
     updatedAt: now,
   };

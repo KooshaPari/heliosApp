@@ -1,0 +1,35 @@
+task: [preflight] set -euo pipefail
+command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
+command -v task >/dev/null 2>&1 || { echo "[FAIL] task is required"; exit 1; }
+command -v git >/dev/null 2>&1 || { echo "[FAIL] git is required"; exit 1; }
+test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
+echo "[OK] preflight checks passed"
+
+task: [preflight] set -euo pipefail
+command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
+command -v task >/dev/null 2>&1 || { echo "[FAIL] task is required"; exit 1; }
+command -v git >/dev/null 2>&1 || { echo "[FAIL] git is required"; exit 1; }
+test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
+echo "[OK] preflight checks passed"
+
+[OK] preflight checks passed
+[OK] preflight checks passed
+task: [deps] bun install --frozen-lockfile
+bun install v1.3.10 (30e609e0)
+
+Checked 203 installs across 282 packages (no changes) [93.00ms]
+task: [quality:quick] task typecheck
+task: [typecheck] bun run typecheck
+$ tsc --noEmit
+apps/runtime/tests/unit/lanes/watchdog/pty_detector.test.ts(33,17): error TS2749: 'PtyDetector' refers to a value, but is being used as a type here. Did you mean 'typeof PtyDetector'?
+apps/runtime/tests/unit/renderer/ghostty/backend.test.ts(98,16): error TS2749: 'GhosttyBackend' refers to a value, but is being used as a type here. Did you mean 'typeof GhosttyBackend'?
+apps/runtime/tests/unit/renderer/ghostty/backend.test.ts(165,16): error TS2749: 'GhosttyBackend' refers to a value, but is being used as a type here. Did you mean 'typeof GhosttyBackend'?
+apps/runtime/tests/unit/renderer/ghostty/backend.test.ts(238,16): error TS2749: 'GhosttyBackend' refers to a value, but is being used as a type here. Did you mean 'typeof GhosttyBackend'?
+apps/runtime/tests/unit/renderer/ghostty/backend.test.ts(258,16): error TS2749: 'GhosttyBackend' refers to a value, but is being used as a type here. Did you mean 'typeof GhosttyBackend'?
+apps/runtime/tests/unit/renderer/ghostty/backend.test.ts(276,16): error TS2749: 'GhosttyBackend' refers to a value, but is being used as a type here. Did you mean 'typeof GhosttyBackend'?
+apps/runtime/tests/unit/renderer/ghostty/backend.test.ts(297,28): error TS7006: Parameter '_topic' implicitly has an 'any' type.
+apps/runtime/tests/unit/renderer/ghostty/backend.test.ts(297,36): error TS7006: Parameter 'payload' implicitly has an 'any' type.
+apps/runtime/tests/unit/renderer/ghostty/backend.test.ts(335,16): error TS2749: 'GhosttyBackend' refers to a value, but is being used as a type here. Did you mean 'typeof GhosttyBackend'?
+apps/runtime/tests/unit/renderer/ghostty/backend.test.ts(363,16): error TS2749: 'GhosttyBackend' refers to a value, but is being used as a type here. Did you mean 'typeof GhosttyBackend'?
+task: Failed to run task "typecheck": exit status 2
+task: Failed to run task "quality:strict": task: Failed to run task "quality:quick": exit status 201

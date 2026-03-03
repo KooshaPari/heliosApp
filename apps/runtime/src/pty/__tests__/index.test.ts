@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "bun:test";
+import { afterEach, describe, expect, it, mock } from "bun:test";
 import { InMemoryBusPublisher, PtyManager } from "../index.js";
 
 describe("PtyManager", () => {
@@ -149,8 +149,19 @@ describe("PtyManager", () => {
 
   it("reconcileOrphans completes without error", async () => {
     const mgr = new PtyManager();
+    const terminateOrphan = mock(async (_pid: number, _gracePeriodMs: number) => {});
+    const scanForOrphans = mock(async () => [42421, 42422]);
+
+    // Force deterministic reconciliation behavior: no process table scan or signal delays.
+    (mgr.registry as any).scanForOrphans = scanForOrphans;
+    (mgr.registry as any).terminateOrphan = terminateOrphan;
+
     const summary = await mgr.reconcileOrphans();
+    expect(scanForOrphans).toHaveBeenCalledTimes(1);
+    expect(terminateOrphan).toHaveBeenCalledTimes(2);
     expect(summary.durationMs).toBeGreaterThanOrEqual(0);
-    expect(summary.found).toBeGreaterThanOrEqual(0);
+    expect(summary.found).toBe(2);
+    expect(summary.terminated).toBe(2);
+    expect(summary.errors).toBe(0);
   });
 });

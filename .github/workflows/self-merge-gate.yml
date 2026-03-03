@@ -102,9 +102,32 @@ jobs:
 
             const requiredChecks = [
               {
-                key: 'quality-gates',
+                key: 'typecheck',
+                aliases: ['typecheck'],
+              },
+              {
+                key: 'lint',
+                aliases: ['lint'],
+              },
+              {
+                key: 'unit-tests',
+                aliases: ['unit-tests'],
+              },
+              {
+                key: 'coverage',
+                aliases: ['coverage'],
+              },
+              {
+                key: 'secret-scan',
+                aliases: ['secret-scan'],
+              },
+              {
+                key: 'ci-summary',
+                aliases: ['ci-summary'],
+              },
+              {
+                key: 'Quality Gates Pipeline',
                 aliases: [
-                  'quality-gates',
                   'quality gates',
                   'quality gates pipeline',
                   'Quality Gates Pipeline'
@@ -115,16 +138,24 @@ jobs:
                 aliases: ['gca-review', 'gca review', 'GCA Code Analysis', 'gca'],
               },
               {
-                key: 'coderabbit-review',
-                aliases: ['coderabbit-review', 'coderabbit review'],
+                key: 'Constitution Compliance Validation',
+                aliases: [
+                  'Constitution Compliance Validation',
+                  'constitution compliance validation',
+                  'compliance-check'
+                ],
               },
               {
-                key: 'compliance-check',
-                aliases: [
-                  'compliance-check',
-                  'Constitution Compliance Validation',
-                  'constitution compliance validation'
-                ],
+                key: 'policy-gate',
+                aliases: ['policy-gate'],
+              },
+              {
+                key: 'verify-required-check-names',
+                aliases: ['verify-required-check-names'],
+              },
+              {
+                key: 'enforce-agent-directory-policy',
+                aliases: ['enforce-agent-directory-policy'],
               },
             ];
 

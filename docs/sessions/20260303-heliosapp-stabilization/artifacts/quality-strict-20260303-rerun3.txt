@@ -1,0 +1,492 @@
+task: [preflight] set -euo pipefail
+command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
+command -v task >/dev/null 2>&1 || { echo "[FAIL] task is required"; exit 1; }
+command -v git >/dev/null 2>&1 || { echo "[FAIL] git is required"; exit 1; }
+test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
+echo "[OK] preflight checks passed"
+
+task: [preflight] set -euo pipefail
+command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
+command -v task >/dev/null 2>&1 || { echo "[FAIL] task is required"; exit 1; }
+command -v git >/dev/null 2>&1 || { echo "[FAIL] git is required"; exit 1; }
+test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
+echo "[OK] preflight checks passed"
+
+[OK] preflight checks passed
+[OK] preflight checks passed
+task: [deps] bun install --frozen-lockfile
+bun install v1.3.10 (30e609e0)
+
+Checked 203 installs across 282 packages (no changes) [14.00ms]
+task: [quality:quick] task typecheck
+task: [typecheck] bun run typecheck
+$ tsc --noEmit
+task: [quality:quick] task lint
+task: [lint] bun run lint
+$ biome check apps docs/.vitepress playwright.config.ts tsconfig.json package.json
+apps/runtime/src/lanes/watchdog/worktree_detector.ts:55:7 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━
+
+  ! Don't use console.
+  
+    53 │       }
+    54 │     } catch (error) {
+  > 55 │       console.warn(`Failed to read worktree directory ${this.baseDir}: ${String(error)}`);
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │     }
+    57 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    53 53 │         }
+    54 54 │       } catch (error) {
+    55    │ - ······console.warn(`Failed·to·read·worktree·directory·${this.baseDir}:·${String(error)}`);
+    56 55 │       }
+    57 56 │   
+  
+
+apps/runtime/src/lanes/watchdog/orphan_watchdog.ts:120:9 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━
+
+  ! Don't use console.
+  
+    118 │       if (this.lastDetectionDuration > 2000) {
+    119 │         // High latency warning intentionally logged for triage correlation.
+  > 120 │         console.warn(
+        │         ^^^^^^^^^^^^^
+  > 121 │           `Orphan watchdog detection cycle ${this.cycleNumber} took ${this.lastDetectionDuration}ms`
+  > 122 │         );
+        │         ^^
+    123 │       }
+    124 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    117 117 │         // Warn if cycle took too long
+    118 118 │         if (this.lastDetectionDuration > 2000) {
+    119     │ - ········//·High·latency·warning·intentionally·logged·for·triage·correlation.
+    120     │ - ········console.warn(
+    121     │ - ··········`Orphan·watchdog·detection·cycle·${this.cycleNumber}·took·${this.lastDetectionDuration}ms`
+    122     │ - ········);
+    123 119 │         }
+    124 120 │   
+  
+
+apps/runtime/src/lanes/watchdog/orphan_watchdog.ts:170:7 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━
+
+  ! Don't use console.
+  
+    168 │       await this.checkpointManager.save(checkpoint);
+    169 │     } catch (error) {
+  > 170 │       console.error("Orphan watchdog detection cycle failed", error);
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    171 │     }
+    172 │   }
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    168 168 │         await this.checkpointManager.save(checkpoint);
+    169 169 │       } catch (error) {
+    170     │ - ······console.error("Orphan·watchdog·detection·cycle·failed",·error);
+    171 170 │       }
+    172 171 │     }
+  
+
+apps/runtime/src/lanes/watchdog/zellij_detector.ts:51:7 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━
+
+  ! Don't use console.
+  
+    49 │       }
+    50 │     } catch (error) {
+  > 51 │       console.warn(`Zellij session detection failed: ${String(error)}`);
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │     }
+    53 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    49 49 │         }
+    50 50 │       } catch (error) {
+    51    │ - ······console.warn(`Zellij·session·detection·failed:·${String(error)}`);
+    52 51 │       }
+    53 52 │   
+  
+
+apps/runtime/src/lanes/watchdog/pty_detector.ts:54:7 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    52 │       }
+    53 │     } catch (error) {
+  > 54 │       console.warn(`PTY leak detection failed: ${String(error)}`);
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │     }
+    56 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+     52  52 │         }
+     53  53 │       } catch (error) {
+     54     │ - ······console.warn(`PTY·leak·detection·failed:·${String(error)}`);
+     55  54 │       }
+     56  55 │   
+  
+
+apps/runtime/src/lanes/watchdog/pty_detector.ts:107:7 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━
+
+  ! Don't use console.
+  
+    105 │       return processes;
+    106 │     } catch (error) {
+  > 107 │       console.warn(`Failed to list PTY processes: ${String(error)}`);
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    108 │       return [];
+    109 │     }
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    105 105 │         return processes;
+    106 106 │       } catch (error) {
+    107     │ - ······console.warn(`Failed·to·list·PTY·processes:·${String(error)}`);
+    108 107 │         return [];
+    109 108 │       }
+  
+
+apps/runtime/src/protocol/envelope.ts:17:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This let name should be in camelCase or PascalCase.
+  
+    16 │ /** Maximum serialised payload size in bytes (default 1 MB). */
+  > 17 │ export let MAX_PAYLOAD_SIZE = 1_048_576;
+       │            ^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ /** Override the maximum payload size (for testing or configuration). */
+  
+
+apps/runtime/src/protocol/envelope.ts:65:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object property name should be in camelCase.
+  
+    63 │   return {
+    64 │     id: generateId("cmd"),
+  > 65 │     correlation_id: correlationId ?? generateId("cor"),
+       │     ^^^^^^^^^^^^^^
+    66 │     timestamp: monotonicNow(),
+    67 │     type: "command",
+  
+
+apps/runtime/src/protocol/envelope.ts:87:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object property name should be in camelCase.
+  
+    85 │   const base: ResponseEnvelope = {
+    86 │     id: generateId("res"),
+  > 87 │     correlation_id: command.correlation_id,
+       │     ^^^^^^^^^^^^^^
+    88 │     timestamp: monotonicNow(),
+    89 │     type: "response",
+  
+
+apps/runtime/src/protocol/envelope.ts:119:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object property name should be in camelCase.
+  
+    117 │   return {
+    118 │     id: generateId("evt"),
+  > 119 │     correlation_id: correlationId ?? generateId("cor"),
+        │     ^^^^^^^^^^^^^^
+    120 │     timestamp: monotonicNow(),
+    121 │     type: "event",
+  
+
+apps/runtime/src/protocol/validator.ts:187:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  ! Excessive complexity of 28 detected (max: 15).
+  
+    185 │ }
+    186 │ 
+  > 187 │ export function validateEnvelope(input: unknown): LocalBusEnvelope {
+        │                 ^^^^^^^^^^^^^^^^
+    188 │   assertRecord(input);
+    189 │ 
+  
+  i Please refactor this function to reduce its complexity score from 28 to the max allowed complexity 15.
+  
+
+apps/runtime/src/protocol/validator.ts:180:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object property name should be in camelCase.
+  
+    178 │       "Envelope field 'correlation_id' is required",
+    179 │       {
+  > 180 │         required_by: requiredBy,
+        │         ^^^^^^^^^^^
+    181 │         name,
+    182 │       }
+  
+
+apps/runtime/src/providers/__tests__/adapter.test.ts:34:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    32 │   }
+    33 │ 
+  > 34 │   async init(config: ACPConfig): Promise<void> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 35 │     if (this.failInit) {
+        ...
+  > 46 │     });
+  > 47 │   }
+       │   ^
+    48 │ 
+    49 │   async health(): Promise<ProviderHealthStatus> {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    32 │   }
+    33 │ 
+  > 34 │   async init(config: ACPConfig): Promise<void> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 35 │     if (this.failInit) {
+        ...
+  > 46 │     });
+  > 47 │   }
+       │   ^
+    48 │ 
+    49 │   async health(): Promise<ProviderHealthStatus> {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/providers/__tests__/adapter.test.ts:49:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    47 │   }
+    48 │ 
+  > 49 │   async health(): Promise<ProviderHealthStatus> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 50 │     if (this.failHealth) {
+        ...
+  > 72 │     };
+  > 73 │   }
+       │   ^
+    74 │ 
+    75 │   async execute(input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    47 │   }
+    48 │ 
+  > 49 │   async health(): Promise<ProviderHealthStatus> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 50 │     if (this.failHealth) {
+        ...
+  > 72 │     };
+  > 73 │   }
+       │   ^
+    74 │ 
+    75 │   async execute(input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/providers/__tests__/adapter.test.ts:75:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    73 │   }
+    74 │ 
+  > 75 │   async execute(input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 76 │     if (this.failExecute) {
+        ...
+  > 91 │     };
+  > 92 │   }
+       │   ^
+    93 │ 
+    94 │   async terminate(): Promise<void> {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    73 │   }
+    74 │ 
+  > 75 │   async execute(input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 76 │     if (this.failExecute) {
+        ...
+  > 91 │     };
+  > 92 │   }
+       │   ^
+    93 │ 
+    94 │   async terminate(): Promise<void> {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/providers/__tests__/adapter.test.ts:94:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+     92 │   }
+     93 │ 
+   > 94 │   async terminate(): Promise<void> {
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 95 │     this.isInitialized = false;
+         ...
+  > 102 │     });
+  > 103 │   }
+        │   ^
+    104 │ 
+    105 │   // Test helpers
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+     92 │   }
+     93 │ 
+   > 94 │   async terminate(): Promise<void> {
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 95 │     this.isInitialized = false;
+         ...
+  > 102 │     });
+  > 103 │   }
+        │   ^
+    104 │ 
+    105 │   // Test helpers
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/providers/__tests__/adapter.test.ts:253:9 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    252 │       class CustomProvider extends BaseProviderAdapter<CustomConfig, CustomInput, CustomOutput> {
+  > 253 │         async init(config: CustomConfig): Promise<void> {
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 254 │           expect(config.customField).toBeDefined();
+  > 255 │         }
+        │         ^
+    256 │ 
+    257 │         async health(): Promise<ProviderHealthStatus> {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    252 │       class CustomProvider extends BaseProviderAdapter<CustomConfig, CustomInput, CustomOutput> {
+  > 253 │         async init(config: CustomConfig): Promise<void> {
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 254 │           expect(config.customField).toBeDefined();
+  > 255 │         }
+        │         ^
+    256 │ 
+    257 │         async health(): Promise<ProviderHealthStatus> {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/providers/__tests__/adapter.test.ts:257:9 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    255 │         }
+    256 │ 
+  > 257 │         async health(): Promise<ProviderHealthStatus> {
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 258 │           return {
+         ...
+  > 262 │           };
+  > 263 │         }
+        │         ^
+    264 │ 
+    265 │         async execute(input: CustomInput, _correlationId: string): Promise<CustomOutput> {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    255 │         }
+    256 │ 
+  > 257 │         async health(): Promise<ProviderHealthStatus> {
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 258 │           return {
+         ...
+  > 262 │           };
+  > 263 │         }
+        │         ^
+    264 │ 
+    265 │         async execute(input: CustomInput, _correlationId: string): Promise<CustomOutput> {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/providers/__tests__/adapter.test.ts:265:9 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    263 │         }
+    264 │ 
+  > 265 │         async execute(input: CustomInput, _correlationId: string): Promise<CustomOutput> {
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 266 │           expect(input.options.timeout).toBeGreaterThan(0);
+         ...
+  > 270 │           };
+  > 271 │         }
+        │         ^
+    272 │ 
+    273 │         async terminate(): Promise<void> {}
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    263 │         }
+    264 │ 
+  > 265 │         async execute(input: CustomInput, _correlationId: string): Promise<CustomOutput> {
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 266 │           expect(input.options.timeout).toBeGreaterThan(0);
+         ...
+  > 270 │           };
+  > 271 │         }
+        │         ^
+    272 │ 
+    273 │         async terminate(): Promise<void> {}
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+apps/runtime/src/providers/__tests__/adapter.test.ts:273:42 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    271 │         }
+    272 │ 
+  > 273 │         async terminate(): Promise<void> {}
+        │                                          ^^
+    274 │       }
+    275 │ 
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+Skipped 1 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --fix --unsafe
+
+The number of diagnostics exceeds the number allowed by Biome.
+Diagnostics not shown: 718.
+Checked 440 files in 236ms. No fixes applied.
+Found 2 errors.
+Found 672 warnings.
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+error: script "lint" exited with code 1
+task: Failed to run task "lint": exit status 1
+task: Failed to run task "quality:strict": task: Failed to run task "quality:quick": exit status 201

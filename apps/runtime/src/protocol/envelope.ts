@@ -14,6 +14,7 @@ import type { CommandEnvelope, Envelope, EventEnvelope, ResponseEnvelope } from 
 // ---------------------------------------------------------------------------
 
 /** Maximum serialised payload size in bytes (default 1 MB). */
+// biome-ignore lint/style/useNamingConvention: Public protocol constant is intentionally upper snake case.
 export let MAX_PAYLOAD_SIZE = 1_048_576;
 
 /** Override the maximum payload size (for testing or configuration). */
@@ -62,6 +63,7 @@ export function createCommand(
   }
   return {
     id: generateId("cmd"),
+    // biome-ignore lint/style/useNamingConvention: Protocol envelope field is snake_case by contract.
     correlation_id: correlationId ?? generateId("cor"),
     timestamp: monotonicNow(),
     type: "command",
@@ -84,6 +86,7 @@ export function createResponse(
 ): ResponseEnvelope {
   const base: ResponseEnvelope = {
     id: generateId("res"),
+    // biome-ignore lint/style/useNamingConvention: Protocol envelope field is snake_case by contract.
     correlation_id: command.correlation_id,
     timestamp: monotonicNow(),
     type: "response",
@@ -116,6 +119,7 @@ export function createEvent(
   }
   return {
     id: generateId("evt"),
+    // biome-ignore lint/style/useNamingConvention: Protocol envelope field is snake_case by contract.
     correlation_id: correlationId ?? generateId("cor"),
     timestamp: monotonicNow(),
     type: "event",

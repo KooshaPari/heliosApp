@@ -188,33 +188,33 @@ function getRuntimeNumber(params: RuntimeCommand, key: string): number | undefin
 
 function parseSpawnCommand(params: RuntimeCommand): SpawnCommand {
   return {
-    commandId: getRuntimeString(params, "command_id"),
-    correlationId: getRuntimeString(params, "correlation_id"),
-    workspaceId: getRuntimeString(params, "workspace_id"),
-    laneId: getRuntimeString(params, "lane_id"),
-    sessionId: getRuntimeString(params, "session_id"),
+    commandId: getRuntimeString(params, "commandId"),
+    correlationId: getRuntimeString(params, "correlationId"),
+    workspaceId: getRuntimeString(params, "workspaceId"),
+    laneId: getRuntimeString(params, "laneId"),
+    sessionId: getRuntimeString(params, "sessionId"),
     title: getRuntimeString(params, "title"),
   };
 }
 
 function parseInputCommand(params: RuntimeCommand): TerminalInputCommand {
   return {
-    correlationId: getRuntimeString(params, "correlation_id"),
-    workspaceId: getRuntimeString(params, "workspace_id"),
-    laneId: getRuntimeString(params, "lane_id"),
-    sessionId: getRuntimeString(params, "session_id"),
-    terminalId: getRuntimeString(params, "terminal_id"),
+    correlationId: getRuntimeString(params, "correlationId"),
+    workspaceId: getRuntimeString(params, "workspaceId"),
+    laneId: getRuntimeString(params, "laneId"),
+    sessionId: getRuntimeString(params, "sessionId"),
+    terminalId: getRuntimeString(params, "terminalId"),
     data: asString((params as Record<string, unknown>).data),
   };
 }
 
 function parseResizeCommand(params: RuntimeCommand): TerminalResizeCommand {
   return {
-    correlationId: getRuntimeString(params, "correlation_id"),
-    workspaceId: getRuntimeString(params, "workspace_id"),
-    laneId: getRuntimeString(params, "lane_id"),
-    sessionId: getRuntimeString(params, "session_id"),
-    terminalId: getRuntimeString(params, "terminal_id"),
+    correlationId: getRuntimeString(params, "correlationId"),
+    workspaceId: getRuntimeString(params, "workspaceId"),
+    laneId: getRuntimeString(params, "laneId"),
+    sessionId: getRuntimeString(params, "sessionId"),
+    terminalId: getRuntimeString(params, "terminalId"),
     cols: getRuntimeNumber(params, "cols"),
     rows: getRuntimeNumber(params, "rows"),
   };
@@ -244,6 +244,28 @@ function toProtocolRecord<T extends Record<string, unknown>>(value: T): Record<s
     protocol[toProtocolName(key)] = toProtocolValue(rawValue);
   }
   return protocol;
+}
+
+function hasOwn(value: Record<string, unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(value, key);
+}
+
+function findDisallowedSnakeCaseKeys(
+  body: Record<string, unknown>,
+  keys: readonly string[]
+): string[] {
+  return keys.filter(key => hasOwn(body, key));
+}
+
+function findDisallowedSnakeCaseCommandKeys(
+  params: RuntimeCommand,
+  keys: readonly string[]
+): string[] {
+  return keys.filter(key => hasOwn(params, key));
+}
+
+function createJsonResponse(body: Record<string, unknown>, status: number): Response {
+  return new Response(JSON.stringify(body), { status });
 }
 
 function asResponseError(
@@ -361,6 +383,13 @@ export function createRuntime(opts: RuntimeOptions = {}): {
       correlationId,
       undefined,
       asResponseError(code, message)
+    );
+  }
+
+  function createSnakeCaseCommandError(disallowedKeys: string[]): LocalBusEnvelope {
+    return createErrorResponseEnvelope(
+      "SNAKE_CASE_NOT_SUPPORTED",
+      `snake_case_not_supported:${disallowedKeys.join(",")}`
     );
   }
 
@@ -521,31 +550,43 @@ export function createRuntime(opts: RuntimeOptions = {}): {
     }
 
     const body = (await req.json()) as Record<string, unknown>;
-    const preferredTransport = asString(body.preferred_transport);
+    const disallowedSnakeCaseKeys = findDisallowedSnakeCaseKeys(body, [
+      "preferred_transport",
+      "codex_session_id",
+      "session_id",
+      "terminal_id",
+      "degrade_reason",
+    ]);
+    if (disallowedSnakeCaseKeys.length > 0) {
+      return createJsonResponse(
+        {
+          error: "snake_case_not_supported",
+          disallowedKeys: disallowedSnakeCaseKeys,
+        },
+        400
+      );
+    }
+
+    const preferredTransport = asString(body.preferredTransport);
     const validTransports = ["cliproxy_harness", "native_openai", undefined];
 
     if (preferredTransport && !validTransports.includes(preferredTransport)) {
-      return new Response(
-        JSON.stringify(toProtocolRecord({ error: "invalid_preferred_transport" })),
-        { status: 400 }
-      );
+      return createJsonResponse({ error: "invalid_preferred_transport" }, 400);
     }
 
     if (lane.sessionId) {
       const existing = sessions.get(lane.sessionId);
       if (existing) {
-        return new Response(
-          JSON.stringify(
-            toProtocolRecord({
-              sessionId: existing.sessionId,
-              transport: existing.transport,
-              status: "attached",
-              codexSessionId:
-                (asString(body.codex_session_id) as string | undefined) || existing.codexSessionId,
-              diagnostics: { degradeReason: null },
-            })
-          ),
-          { status: 200 }
+        return createJsonResponse(
+          {
+            sessionId: existing.sessionId,
+            transport: existing.transport,
+            status: "attached",
+            codexSessionId:
+              (asString(body.codexSessionId) as string | undefined) || existing.codexSessionId,
+            diagnostics: { degradeReason: null },
+          },
+          200
         );
       }
     }
@@ -553,7 +594,7 @@ export function createRuntime(opts: RuntimeOptions = {}): {
     const { transport, degradeReason } = await checkHarness();
     sessionCounter += 1;
     const sessionId = `sess_${sessionCounter}`;
-    const codexSessionId = asString(body.codex_session_id);
+    const codexSessionId = asString(body.codexSessionId);
     const sessionRecord: SessionRecord = {
       sessionId,
       laneId,
@@ -565,17 +606,15 @@ export function createRuntime(opts: RuntimeOptions = {}): {
 
     await publishHttpEvent("session.created", { sessionId, laneId, transport });
 
-    return new Response(
-      JSON.stringify(
-        toProtocolRecord({
-          sessionId,
-          transport,
-          status: "attached",
-          codexSessionId,
-          diagnostics: { degradeReason },
-        })
-      ),
-      { status: 200 }
+    return createJsonResponse(
+      {
+        sessionId,
+        transport,
+        status: "attached",
+        codexSessionId,
+        diagnostics: { degradeReason },
+      },
+      200
     );
   }
 
@@ -583,7 +622,24 @@ export function createRuntime(opts: RuntimeOptions = {}): {
     const workspaceId = match[1];
     const laneId = match[2];
     const body = (await req.json()) as Record<string, unknown>;
-    const sessionId = asString(body.session_id);
+    const disallowedSnakeCaseKeys = findDisallowedSnakeCaseKeys(body, [
+      "preferred_transport",
+      "codex_session_id",
+      "session_id",
+      "terminal_id",
+      "degrade_reason",
+    ]);
+    if (disallowedSnakeCaseKeys.length > 0) {
+      return createJsonResponse(
+        {
+          error: "snake_case_not_supported",
+          disallowedKeys: disallowedSnakeCaseKeys,
+        },
+        400
+      );
+    }
+
+    const sessionId = asString(body.sessionId);
 
     const lane = lanes.get(laneId);
     if (!lane) {
@@ -646,16 +702,14 @@ export function createRuntime(opts: RuntimeOptions = {}): {
       terminalState = "active";
     }
 
-    return new Response(
-      JSON.stringify(
-        toProtocolRecord({
-          terminalId,
-          laneId,
-          sessionId,
-          state: "active",
-        })
-      ),
-      { status: 201 }
+    return createJsonResponse(
+      {
+        terminalId,
+        laneId,
+        sessionId,
+        state: "active",
+      },
+      201
     );
   }
 
@@ -669,18 +723,28 @@ export function createRuntime(opts: RuntimeOptions = {}): {
   }
 
   function handleStatus(): Response {
-    return new Response(
-      JSON.stringify(
-        toProtocolRecord({
-          status: harnessStatus.status,
-          degradeReason: harnessStatus.degradeReason,
-        })
-      ),
-      { status: 200 }
+    return createJsonResponse(
+      {
+        status: harnessStatus.status,
+        degradeReason: harnessStatus.degradeReason,
+      },
+      200
     );
   }
 
   async function spawnTerminal(params: RuntimeCommand): Promise<LocalBusEnvelope> {
+    const disallowedSnakeCaseKeys = findDisallowedSnakeCaseCommandKeys(params, [
+      "command_id",
+      "correlation_id",
+      "workspace_id",
+      "lane_id",
+      "session_id",
+      "terminal_id",
+    ]);
+    if (disallowedSnakeCaseKeys.length > 0) {
+      return createSnakeCaseCommandError(disallowedSnakeCaseKeys);
+    }
+
     const command = parseSpawnCommand(params);
     const terminalId = makeTerminalId(command.sessionId || "unknown");
 
@@ -752,6 +816,18 @@ export function createRuntime(opts: RuntimeOptions = {}): {
   }
 
   async function inputTerminal(params: RuntimeCommand): Promise<LocalBusEnvelope> {
+    const disallowedSnakeCaseKeys = findDisallowedSnakeCaseCommandKeys(params, [
+      "command_id",
+      "correlation_id",
+      "workspace_id",
+      "lane_id",
+      "session_id",
+      "terminal_id",
+    ]);
+    if (disallowedSnakeCaseKeys.length > 0) {
+      return createSnakeCaseCommandError(disallowedSnakeCaseKeys);
+    }
+
     const command = parseInputCommand(params);
     const validationError = getInputValidationError(command);
     if (validationError) {
@@ -808,6 +884,18 @@ export function createRuntime(opts: RuntimeOptions = {}): {
   }
 
   async function resizeTerminal(params: RuntimeCommand): Promise<LocalBusEnvelope> {
+    const disallowedSnakeCaseKeys = findDisallowedSnakeCaseCommandKeys(params, [
+      "command_id",
+      "correlation_id",
+      "workspace_id",
+      "lane_id",
+      "session_id",
+      "terminal_id",
+    ]);
+    if (disallowedSnakeCaseKeys.length > 0) {
+      return createSnakeCaseCommandError(disallowedSnakeCaseKeys);
+    }
+
     const command = parseResizeCommand(params);
     const terminalId = command.terminalId || "";
     const terminal = terminals.get(terminalId);
@@ -866,10 +954,12 @@ export function createRuntime(opts: RuntimeOptions = {}): {
   }
 
   function findTerminalForInputCommand(command: LocalBusEnvelope): TerminalRecord | undefined {
+    // LocalBusEnvelope stays protocol-native snake_case by design.
     return terminals.get(asString((command as Record<string, unknown>).terminal_id) || "");
   }
 
   function buildTerminalCommandFromBus(command: LocalBusEnvelope): SpawnCommand {
+    // Bus-protocol replay/interop still consumes snake_case payload fields.
     const payload = command.payload as Record<string, unknown> | undefined;
     return {
       commandId: command.id,
