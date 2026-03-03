@@ -13,6 +13,7 @@ let nextId = 0;
 export async function handleMuxerCommand(
   envelope: LocalBusEnvelope
 ): Promise<Record<string, unknown>> {
+  await Promise.resolve();
   const method = envelope.method ?? "";
   const payload = (envelope.payload ?? {}) as Record<string, unknown>;
 
@@ -20,6 +21,7 @@ export async function handleMuxerCommand(
     case "muxer.list":
       return {
         sessions: Array.from(sessions.values()),
+        // biome-ignore lint/style/useNamingConvention: Protocol payload uses snake_case keys.
         available_types: ["zellij", "tmate", "upterm"],
       };
 
@@ -34,7 +36,12 @@ export async function handleMuxerCommand(
       };
       sessions.set(id, session);
       // TODO: Wire to real adapter when CLIs are available
-      return { session_id: id, type, status: "active" };
+      return {
+        // biome-ignore lint/style/useNamingConvention: Protocol payload uses snake_case keys.
+        session_id: id,
+        type,
+        status: "active",
+      };
     }
 
     case "muxer.attach": {
@@ -44,7 +51,11 @@ export async function handleMuxerCommand(
         return { error: `Session ${sessionId} not found` };
       }
       session.status = "attached";
-      return { session_id: sessionId, status: "attached" };
+      return {
+        // biome-ignore lint/style/useNamingConvention: Protocol payload uses snake_case keys.
+        session_id: sessionId,
+        status: "attached",
+      };
     }
 
     case "muxer.detach": {
@@ -54,13 +65,21 @@ export async function handleMuxerCommand(
         return { error: `Session ${sessionId} not found` };
       }
       session.status = "detached";
-      return { session_id: sessionId, status: "detached" };
+      return {
+        // biome-ignore lint/style/useNamingConvention: Protocol payload uses snake_case keys.
+        session_id: sessionId,
+        status: "detached",
+      };
     }
 
     case "muxer.kill": {
       const sessionId = payload.session_id as string;
       sessions.delete(sessionId);
-      return { session_id: sessionId, status: "terminated" };
+      return {
+        // biome-ignore lint/style/useNamingConvention: Protocol payload uses snake_case keys.
+        session_id: sessionId,
+        status: "terminated",
+      };
     }
 
     default:
