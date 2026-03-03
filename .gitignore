@@ -21,6 +21,7 @@ apps/*/tests/**/*.js
 apps/*/tests/**/*.js.map
 apps/*/tests/**/*.d.ts
 apps/*/tests/**/*.d.ts.map
+.gate-reports/
 # Excluded via sparse-checkout
 kitty-specs/
 
