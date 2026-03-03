@@ -10,6 +10,12 @@ export enum CrashReason {
   Signal = "SIGNAL",
 }
 
+const crashReasonEnumCompat = CrashReason as Record<string, CrashReason>;
+crashReasonEnumCompat.HEARTBEAT_TIMEOUT = CrashReason.HeartbeatTimeout;
+crashReasonEnumCompat.UNRESPONSIVE = CrashReason.Unresponsive;
+crashReasonEnumCompat.EXIT_CODE = CrashReason.ExitCode;
+crashReasonEnumCompat.SIGNAL = CrashReason.Signal;
+
 export interface CrashEvent {
   name: string;
   pid: number;

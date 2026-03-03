@@ -16,6 +16,18 @@ export enum RecoveryStage {
   ReconciliationFailed = "RECONCILIATION_FAILED",
 }
 
+const recoveryStageEnumCompat = RecoveryStage as Record<string, RecoveryStage>;
+recoveryStageEnumCompat.CRASHED = RecoveryStage.Crashed;
+recoveryStageEnumCompat.DETECTING = RecoveryStage.Detecting;
+recoveryStageEnumCompat.INVENTORYING = RecoveryStage.Inventorying;
+recoveryStageEnumCompat.RESTORING = RecoveryStage.Restoring;
+recoveryStageEnumCompat.RECONCILING = RecoveryStage.Reconciling;
+recoveryStageEnumCompat.LIVE = RecoveryStage.Live;
+recoveryStageEnumCompat.DETECTION_FAILED = RecoveryStage.DetectionFailed;
+recoveryStageEnumCompat.INVENTORY_FAILED = RecoveryStage.InventoryFailed;
+recoveryStageEnumCompat.RESTORATION_FAILED = RecoveryStage.RestorationFailed;
+recoveryStageEnumCompat.RECONCILIATION_FAILED = RecoveryStage.ReconciliationFailed;
+
 export interface RecoveryState {
   stage: RecoveryStage;
   timestamp: number;
