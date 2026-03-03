@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { execCommand } from "../../integrations/exec.js";
 import type { ProtocolBus as LocalBus } from "../../protocol/bus.js";
+import type { LocalBusEnvelope } from "../../protocol/types.js";
 import type { LaneRegistry } from "../registry.js";
 import type { ClassifiedOrphan, ResourceType } from "./resource_classifier.js";
 
@@ -27,6 +28,11 @@ interface CooldownEntry {
   resourceKey: string;
   expiresAt: number; // milliseconds since epoch
 }
+
+type PushEventBus = LocalBus & { pushEvent: (envelope: LocalBusEnvelope) => void };
+
+const hasPushEvent = (bus: LocalBus): bus is PushEventBus =>
+  "pushEvent" in bus && typeof (bus as PushEventBus).pushEvent === "function";
 
 export class RemediationEngine {
   private suggestions = new Map<string, RemediationSuggestion>();
@@ -447,13 +453,16 @@ export class RemediationEngine {
         const entries = Array.from(this.cooldownMap.values());
         fs.writeFile(this.cooldownPath, JSON.stringify(entries, null, 2));
       });
-    } catch (_error) {}
+    } catch (_error) {
+      // Ignore filesystem write failures for cooldown persistence.
+      return;
+    }
   }
 
-  private async publishEvent(envelope: any): Promise<void> {
+  private async publishEvent(envelope: LocalBusEnvelope): Promise<void> {
     try {
-      if ("pushEvent" in this.bus && typeof (this.bus as any).pushEvent === "function") {
-        (this.bus as any).pushEvent(envelope);
+      if (hasPushEvent(this.bus)) {
+        this.bus.pushEvent(envelope);
       } else {
         await this.bus.publish(envelope);
       }

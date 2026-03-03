@@ -6,6 +6,7 @@
  */
 
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
+import type { LocalBusEnvelope } from "../protocol/types.js";
 const uuidv4 = () => crypto.randomUUID();
 import type { BindingTriple, TerminalBinding } from "./binding_triple.js";
 
@@ -19,13 +20,14 @@ export const BINDING_TOPICS = {
 
 export type BindingEventTopic = (typeof BINDING_TOPICS)[keyof typeof BINDING_TOPICS];
 
-export interface BindingEventPayload {
+export interface BindingEventPayload extends Record<string, unknown> {
   terminalId: string;
   binding: BindingTriple;
   previousBinding?: BindingTriple;
   state: string;
   timestamp: string;
   correlationId: string;
+  reason?: string;
 }
 
 /**
@@ -44,7 +46,7 @@ export class BindingEventEmitter {
    * Emit event for a terminal binding state change.
    */
   private async emitEvent(topic: BindingEventTopic, payload: BindingEventPayload): Promise<void> {
-    const event = {
+    const event: LocalBusEnvelope = {
       id: uuidv4(),
       type: "event" as const,
       ts: new Date().toISOString(),
@@ -53,12 +55,14 @@ export class BindingEventEmitter {
       lane_id: payload.binding.laneId,
       session_id: payload.binding.sessionId,
       workspace_id: payload.binding.workspaceId,
-      payload,
+      payload: { ...payload },
     };
 
     try {
-      await this.bus.publish(event as any);
-    } catch (_error) {}
+      await this.bus.publish(event);
+    } catch (_error) {
+      // Ignore publish failures to keep eventing non-blocking.
+    }
   }
 
   /**
@@ -113,30 +117,13 @@ export class BindingEventEmitter {
     reason: string,
     correlationId: string = uuidv4()
   ): Promise<void> {
-    const payloadWithReason = {
+    await this.emitEvent(BINDING_TOPICS.VALIDATION_FAILED, {
       terminalId: binding.terminalId,
       binding: binding.binding,
       state: binding.state,
       timestamp: new Date(binding.updatedAt).toISOString(),
       correlationId,
       reason,
-    };
-
-    // Emit with reason in payload
-    const event = {
-      id: uuidv4(),
-      type: "event" as const,
-      ts: new Date().toISOString(),
-      topic: BINDING_TOPICS.VALIDATION_FAILED,
-      terminal_id: binding.terminalId,
-      lane_id: binding.binding.laneId,
-      session_id: binding.binding.sessionId,
-      workspace_id: binding.binding.workspaceId,
-      payload: payloadWithReason,
-    };
-
-    try {
-      await this.bus.publish(event as any);
-    } catch (_error) {}
+    });
   }
 }
