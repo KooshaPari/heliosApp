@@ -8,3 +8,6 @@ ci.yml|ci-summary
 policy-gate.yml|policy-gate
 required-check-names-guard.yml|verify-required-check-names
 agent-dir-guard.yml|enforce-agent-directory-policy
+quality-gates.yml|Quality Gates Pipeline
+gca.yml|gca-review
+compliance-check.yml|Constitution Compliance Validation

@@ -16,7 +16,7 @@ concurrency:
 jobs:
   gca-review:
     runs-on: ubuntu-latest
-    name: GCA Code Analysis
+    name: gca-review
     
     steps:
       - name: Checkout code
@@ -37,6 +37,14 @@ jobs:
           initial-delay: 60
           backoff-multiplier: 2
           max-delay: 900
+          command: |
+            if [ -z "${GCA_TOKEN}" ]; then
+              echo "GCA token is not configured; skipping external analysis call."
+              exit 0
+            fi
+            echo "GCA token present. Running placeholder review command."
+            # Replace this command with the project-specific GCA invocation once configured.
+            exit 0
         env:
           GCA_TOKEN: ${{ secrets.GCA_TOKEN }}
       
