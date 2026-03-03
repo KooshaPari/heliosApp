@@ -7,6 +7,7 @@
 
 import type { RegistryQueryInterface, TerminalBinding } from "./binding_triple.js";
 import { BindingState, validateBindingTriple } from "./binding_triple.js";
+import { TerminalNotFound, InvalidBinding } from "./terminal_registry.js";
 import type { TerminalRegistry } from "./terminal_registry.js";
 
 export interface ValidationError {
@@ -46,7 +47,10 @@ export class BindingMiddleware {
    *
    * If re-validation fails, updates binding state to 'validation_failed'.
    */
-  validateBeforeOperation(terminalId: string, _operation?: string): MiddlewareValidationResult {
+  validateBeforeOperation(
+    terminalId: string,
+    _operation?: string,
+  ): MiddlewareValidationResult {
     // Check terminal exists
     const binding = this.registry.get(terminalId);
     if (!binding) {
@@ -76,7 +80,10 @@ export class BindingMiddleware {
     }
 
     // Re-validate binding triple against current state
-    const validation = validateBindingTriple(binding.binding, this.registryQueryInterface);
+    const validation = validateBindingTriple(
+      binding.binding,
+      this.registryQueryInterface,
+    );
 
     if (!validation.valid) {
       // Mark binding as validation failed
@@ -108,10 +115,10 @@ export class BindingMiddleware {
    * @param operation Optional operation name for logging
    * @returns Result of handler or validation error
    */
-  wrapOperation<T>(
+  async wrapOperation<T>(
     terminalId: string,
     handler: (binding: TerminalBinding) => Promise<T>,
-    operation?: string
+    operation?: string,
   ): Promise<T> {
     const validation = this.validateBeforeOperation(terminalId, operation);
 
@@ -124,11 +131,7 @@ export class BindingMiddleware {
       throw new Error(`${error.code}: ${error.message}`);
     }
 
-    const binding = validation.binding;
-    if (!binding) {
-      throw new Error("VALIDATION_FAILED: Validation succeeded without binding payload");
-    }
-    return handler(binding);
+    return handler(validation.binding!);
   }
 
   /**
@@ -137,7 +140,7 @@ export class BindingMiddleware {
   wrapOperationSync<T>(
     terminalId: string,
     handler: (binding: TerminalBinding) => T,
-    operation?: string
+    operation?: string,
   ): T {
     const validation = this.validateBeforeOperation(terminalId, operation);
 
@@ -150,11 +153,7 @@ export class BindingMiddleware {
       throw new Error(`${error.code}: ${error.message}`);
     }
 
-    const binding = validation.binding;
-    if (!binding) {
-      throw new Error("VALIDATION_FAILED: Validation succeeded without binding payload");
-    }
-    return handler(binding);
+    return handler(validation.binding!);
   }
 }
 
@@ -169,7 +168,7 @@ export function createMiddlewareHandler<T>(
   middleware: BindingMiddleware,
   terminalId: string,
   handler: (binding: TerminalBinding) => Promise<T>,
-  operation?: string
+  operation?: string,
 ): () => Promise<T> {
   return () => middleware.wrapOperation(terminalId, handler, operation);
 }
@@ -181,7 +180,7 @@ export function createMiddlewareHandlerSync<T>(
   middleware: BindingMiddleware,
   terminalId: string,
   handler: (binding: TerminalBinding) => T,
-  operation?: string
+  operation?: string,
 ): () => T {
   return () => middleware.wrapOperationSync(terminalId, handler, operation);
 }

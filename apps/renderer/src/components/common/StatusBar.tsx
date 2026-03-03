@@ -6,12 +6,8 @@ export const StatusBar: Component = () => {
 
   function connectionColor(): string {
     const status = state().connectionStatus;
-    if (status === "connected") {
-      return "#a6e3a1";
-    }
-    if (status === "reconnecting") {
-      return "#f9e2af";
-    }
+    if (status === "connected") return "#a6e3a1";
+    if (status === "reconnecting") return "#f9e2af";
     return "#f38ba8";
   }
 
@@ -42,8 +38,12 @@ export const StatusBar: Component = () => {
         />
         <span>{state().connectionStatus}</span>
       </div>
-      <div style={{ color: "#89b4fa", "font-weight": "500" }}>{state().activeModel}</div>
-      <div>session: --</div>
+      <div style={{ color: "#89b4fa", "font-weight": "500" }}>
+        {state().activeModel}
+      </div>
+      <div>
+        session: --
+      </div>
     </div>
   );
 };

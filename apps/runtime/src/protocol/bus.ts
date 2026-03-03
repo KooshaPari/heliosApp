@@ -1,17 +1,6 @@
 import type { LocalBusEnvelope } from "./types.js";
-import type { CommandEnvelope, EventEnvelope, ResponseEnvelope } from "./types.js";
-import { ProtocolValidationError } from "./types.js";
-import { validateEnvelope } from "./validator.js";
 
-export type { LocalBusEnvelope } from "./types.js";
-
-type LocalBusEnvelopeWithSequence = LocalBusEnvelope & { sequence?: number };
-
-// ---------------------------------------------------------------------------
-// Protocol-level bus interface (used by InMemoryLocalBus for lifecycle commands)
-// ---------------------------------------------------------------------------
-
-export interface ProtocolBus {
+export interface LocalBus {
   publish(event: LocalBusEnvelope): Promise<void>;
   request(command: LocalBusEnvelope): Promise<LocalBusEnvelope>;
 }
@@ -620,7 +609,7 @@ export class InMemoryLocalBus implements ProtocolBus {
     }
 
     return {
-      id: command.id,
+      id: _command.id,
       type: "response",
       ts: new Date().toISOString(),
       status: "ok",

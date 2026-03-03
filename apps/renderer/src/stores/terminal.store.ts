@@ -19,7 +19,7 @@ export function createTerminal(): string {
 }
 
 export function closeTerminal(id: string): void {
-  setTerminals((prev: TerminalInfo[]) => prev.filter(t => t.id !== id));
+  setTerminals((prev: TerminalInfo[]) => prev.filter((t) => t.id !== id));
   const remaining = terminals();
   if (activeTerminalId() === id) {
     setActiveTerminalId(remaining.length > 0 ? remaining[remaining.length - 1].id : null);
@@ -39,6 +39,7 @@ export function getActiveTerminalId() {
 }
 
 // Stub for terminal write - will be wired to PTY bridge later
-export function writeToTerminal(_terminalId: string, _data: string): void {
-  // TODO: wire to PTY bridge
+export function writeToTerminal(terminalId: string, data: string): void {
+  // TODO: Wire to ElectroBun RPC terminal.write
+  console.log(`[terminal ${terminalId}] write: ${data}`);
 }

@@ -1,10 +1,10 @@
 // Integration tests for remediation workflow
 
-import { beforeEach, describe, expect, it } from "bun:test";
-import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
 import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
 
 describe("Remediation Workflow", () => {
   let engine: RemediationEngine;
@@ -59,7 +59,7 @@ describe("Remediation Workflow", () => {
     laneRegistry.register({
       laneId: "lane-recovering",
       workspaceId: "ws1",
-      state: "recovering" as any,
+      state: "recovering",
       worktreePath: "/tmp/lane-recovering",
       parTaskPid: null,
       attachedAgents: [],
@@ -121,7 +121,9 @@ describe("Remediation Workflow", () => {
     await engine.generateSuggestions(orphans);
     const events = bus.getEvents();
 
-    const suggestionEvent = events.find(e => e.topic === "orphan.remediation.suggested");
+    const suggestionEvent = events.find(
+      (e) => e.topic === "orphan.remediation.suggested"
+    );
     expect(suggestionEvent).toBeDefined();
     expect(suggestionEvent?.payload?.resourceType).toBe("pty_process");
   });
@@ -142,7 +144,7 @@ describe("Remediation Workflow", () => {
     engine.declineCleanup(suggestions[0].id);
 
     const events = bus.getEvents();
-    const declineEvent = events.find(e => e.topic === "orphan.remediation.declined");
+    const declineEvent = events.find((e) => e.topic === "orphan.remediation.declined");
     expect(declineEvent).toBeDefined();
   });
 
@@ -190,7 +192,7 @@ describe("Remediation Workflow", () => {
     ];
 
     const suggestions = await engine.generateSuggestions(orphans);
-    const ids = suggestions.map(s => s.id);
+    const ids = suggestions.map((s) => s.id);
 
     expect(ids.length).toBe(2);
     expect(new Set(ids).size).toBe(2); // All IDs are unique

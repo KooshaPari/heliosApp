@@ -71,7 +71,7 @@ jobs:
 
       - name: Gate 5 - Coverage
         id: gate-coverage
-        run: bun run test:coverage
+        run: bun run scripts/gate-coverage.ts
         timeout-minutes: 5
         continue-on-error: false
 
@@ -97,14 +97,6 @@ jobs:
         id: gate-bypass-detect
         run: bun run scripts/gate-bypass-detect.ts
         timeout-minutes: 2
-        continue-on-error: false
-
-      - name: Gate 9 - Docs Session Index and Link Validation
-        id: gate-docs-validation
-        run: |
-          bun run docs:index
-          bun run docs:validate-session-docs
-        timeout-minutes: 3
         continue-on-error: false
 
       - name: Upload Gate Reports

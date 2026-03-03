@@ -4,12 +4,10 @@
     "ignore": [
       "node_modules/**",
       "docs/.vitepress/dist/**",
-      "apps/**/dist/**",
       "docs/.generated/**",
       ".worktrees/**",
       "kitty-specs/**",
-      "docs/sessions/**",
-      "tsconfig*.json"
+      "docs/sessions/**"
     ]
   },
   "formatter": {
@@ -23,50 +21,19 @@
     "rules": {
       "recommended": true,
       "suspicious": {
-        "all": true,
-        "noExplicitAny": "warn",
-        "useAwait": "warn",
-        "noEmptyBlockStatements": "warn",
-        "noEvolvingTypes": "warn",
-        "noMisplacedAssertion": "warn",
-        "noAssignInExpressions": "warn"
+        "all": true
       },
       "correctness": {
-        "all": true,
-        "noNodejsModules": "off",
-        "useImportExtensions": "off",
-        "noUndeclaredVariables": "off",
-        "noUndeclaredDependencies": "off",
-        "useHookAtTopLevel": "warn"
+        "all": true
       },
       "style": {
-        "all": true,
-        "useNamingConvention": "warn",
-        "noNonNullAssertion": "warn",
-        "noParameterProperties": "off",
-        "noNamespaceImport": "warn",
-        "noDefaultExport": "off",
-        "useFilenamingConvention": "off",
-        "noDoneCallback": "warn",
-        "useForOf": "warn",
-        "useDefaultSwitchClause": "warn",
-        "useCollapsedElseIf": "warn",
-        "useConst": "warn"
+        "all": true
       },
       "complexity": {
-        "all": true,
-        "noExcessiveCognitiveComplexity": "warn",
-        "noVoid": "warn",
-        "noForEach": "warn"
+        "all": true
       },
       "security": {
         "all": true
-      },
-      "a11y": {
-        "useButtonType": "warn",
-        "useKeyWithClickEvents": "warn",
-        "noLabelWithoutControl": "warn",
-        "useFocusableInteractive": "warn"
       }
     }
   },
@@ -78,7 +45,7 @@
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
       "semicolons": "always",
-      "trailingCommas": "es5"
+      "trailingComma": "es5"
     }
   },
   "overrides": [

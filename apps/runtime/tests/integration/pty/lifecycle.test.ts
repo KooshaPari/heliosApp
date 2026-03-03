@@ -1,22 +1,18 @@
 /**
  * Integration tests — spawn real PTYs and verify output, state transitions, events.
  *
- * These tests use (Bun as any).spawn to create actual shell processes.
+ * These tests use Bun.spawn to create actual shell processes.
  */
 
-import { afterEach, describe, expect, it } from "bun:test";
-import { InMemoryBusPublisher } from "../../../src/pty/events.js";
+import { describe, expect, it, afterEach } from "bun:test";
 import { PtyManager } from "../../../src/pty/index.js";
+import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 
 const pidsToCleanup: number[] = [];
 
 afterEach(() => {
   for (const pid of pidsToCleanup) {
-    try {
-      process.kill(pid, "SIGKILL");
-    } catch {
-      /* already exited */
-    }
+    try { process.kill(pid, "SIGKILL"); } catch { /* already exited */ }
   }
   pidsToCleanup.length = 0;
 });
@@ -42,12 +38,12 @@ describe("PTY lifecycle integration", () => {
     expect(record.pid).toBeGreaterThan(0);
 
     // Verify spawned event was emitted.
-    const spawnedEvt = bus.events.find(e => e.topic === "pty.spawned");
+    const spawnedEvt = bus.events.find((e) => e.topic === "pty.spawned");
     expect(spawnedEvt).toBeDefined();
-    expect(spawnedEvt?.payload.pid).toBe(record.pid);
+    expect(spawnedEvt!.payload["pid"]).toBe(record.pid);
 
     // Verify state.changed event.
-    const stateEvt = bus.events.find(e => e.topic === "pty.state.changed");
+    const stateEvt = bus.events.find((e) => e.topic === "pty.state.changed");
     expect(stateEvt).toBeDefined();
 
     // Clean up.
@@ -62,7 +58,7 @@ describe("PTY lifecycle integration", () => {
     const mgr = new PtyManager(10, bus);
 
     // Spawn a shell.
-    const proc = (Bun as any).spawn(["/bin/sh"], {
+    const proc = Bun.spawn(["/bin/sh"], {
       stdin: "pipe",
       stdout: "pipe",
       stderr: "pipe",
@@ -85,7 +81,7 @@ describe("PTY lifecycle integration", () => {
     mgr.writeInput(record.ptyId, input);
 
     // Give it a moment.
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise((r) => setTimeout(r, 200));
 
     await mgr.terminate(record.ptyId, { gracePeriodMs: 500 });
   });
@@ -108,9 +104,9 @@ describe("PTY lifecycle integration", () => {
 
     mgr.resize(record.ptyId, 120, 40);
 
-    const resizeEvt = bus.events.find(e => e.topic === "pty.resized");
+    const resizeEvt = bus.events.find((e) => e.topic === "pty.resized");
     expect(resizeEvt).toBeDefined();
-    expect(resizeEvt?.payload.newDimensions).toEqual({ cols: 120, rows: 40 });
+    expect(resizeEvt!.payload["newDimensions"]).toEqual({ cols: 120, rows: 40 });
 
     const updated = mgr.get(record.ptyId);
     expect(updated?.dimensions).toEqual({ cols: 120, rows: 40 });
@@ -140,7 +136,7 @@ describe("PTY lifecycle integration", () => {
     }
 
     // Wait for process to die.
-    await new Promise(r => setTimeout(r, 300));
+    await new Promise((r) => setTimeout(r, 300));
 
     // Terminate should be idempotent / handle dead process gracefully.
     await mgr.terminate(record.ptyId, { gracePeriodMs: 200 });
@@ -167,7 +163,7 @@ describe("PTY lifecycle integration", () => {
     expect(mgr.getByLane("lane-2")).toHaveLength(1);
 
     // Verify each has a unique ptyId.
-    const ids = new Set(records.map(r => r.ptyId));
+    const ids = new Set(records.map((r) => r.ptyId));
     expect(ids.size).toBe(3);
 
     // Verify each has a buffer.
@@ -177,7 +173,7 @@ describe("PTY lifecycle integration", () => {
     }
 
     // Terminate all.
-    await Promise.all(records.map(r => mgr.terminate(r.ptyId, { gracePeriodMs: 500 })));
+    await Promise.all(records.map((r) => mgr.terminate(r.ptyId, { gracePeriodMs: 500 })));
 
     for (const r of records) {
       expect(mgr.get(r.ptyId)).toBeUndefined();

@@ -1,12 +1,12 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import { BindingState, type BindingTriple } from "../../../src/registry/binding_triple.js";
+import { describe, it, expect, beforeEach } from "vitest";
 import {
-  DuplicateSessionId,
+  TerminalRegistry,
   DuplicateTerminalId,
+  DuplicateSessionId,
   InvalidBinding,
   TerminalNotFound,
-  TerminalRegistry,
 } from "../../../src/registry/terminal_registry.js";
+import { BindingState, type BindingTriple } from "../../../src/registry/binding_triple.js";
 
 describe("TerminalRegistry", () => {
   let registry: TerminalRegistry;
@@ -252,8 +252,8 @@ describe("TerminalRegistry", () => {
       const results = registry.getByLane("lane-1");
 
       expect(results).toHaveLength(2);
-      expect(results.map(b => b.terminalId)).toContain("terminal-1");
-      expect(results.map(b => b.terminalId)).toContain("terminal-2");
+      expect(results.map((b) => b.terminalId)).toContain("terminal-1");
+      expect(results.map((b) => b.terminalId)).toContain("terminal-2");
     });
 
     it("should query by session", () => {

@@ -1,23 +1,23 @@
 // Integration test for false positive rate validation
 
-import { beforeEach, describe, expect, it } from "bun:test";
-import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
+import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { LaneRegistry } from "../../../../src/lanes/registry.js";
 import { ResourceClassifier } from "../../../../src/lanes/watchdog/resource_classifier.js";
 import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
-import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
 
 describe("False Positive Rate", () => {
   let engine: RemediationEngine;
   let bus: InMemoryLocalBus;
   let laneRegistry: LaneRegistry;
-  let _classifier: ResourceClassifier;
+  let classifier: ResourceClassifier;
 
   beforeEach(() => {
     bus = new InMemoryLocalBus();
     laneRegistry = new LaneRegistry();
     engine = new RemediationEngine(laneRegistry, bus);
-    _classifier = new ResourceClassifier();
+    classifier = new ResourceClassifier();
   });
 
   it("should have zero false positives with healthy system", async () => {
@@ -27,7 +27,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: `ws-${i}`,
-        state: "active" as any,
+        state: "active",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -56,7 +56,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: "ws1",
-        state: "active" as any,
+        state: "active",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -68,7 +68,7 @@ describe("False Positive Rate", () => {
 
     // If somehow these lanes appear as orphans (shouldn't happen),
     // they should not get suggestions due to registry check
-    const orphans: ClassifiedOrphan[] = activeLanes.map(laneId => ({
+    const orphans: ClassifiedOrphan[] = activeLanes.map((laneId) => ({
       type: "worktree",
       path: `/tmp/${laneId}`,
       age: 100,
@@ -79,10 +79,9 @@ describe("False Positive Rate", () => {
 
     const suggestions = await engine.generateSuggestions(orphans);
 
-    // The remediation engine generates suggestions for all orphans passed to it.
-    // In production, the detector layer filters active lanes before calling this.
-    // Here, all 3 orphans get suggestions since they were explicitly passed in.
-    expect(suggestions.length).toBe(3);
+    // Since lanes are active in registry, no suggestions should be created
+    // (The detector wouldn't report them as orphans in the first place)
+    expect(suggestions.length).toBe(0);
   });
 
   it("should track false positives over 500 cycles", async () => {
@@ -92,7 +91,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: `ws-${i}`,
-        state: "active" as any,
+        state: "active",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -124,7 +123,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: "ws1",
-        state: "active" as any,
+        state: "active",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],

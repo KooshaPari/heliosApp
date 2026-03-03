@@ -1,7 +1,7 @@
-import { promises as fs } from "node:fs";
-import { homedir } from "node:os";
-import { join } from "node:path";
-import type { TabState, TabSurface } from "./tab_surface.ts";
+import { promises as fs } from "fs";
+import * as path from "path";
+import { homedir } from "os";
+import type { TabSurface, TabState } from "./tab_surface";
 
 /**
  * Persisted tab state structure.
@@ -30,11 +30,12 @@ export class TabPersistence {
   private readonly storagePath: string;
   private debounceTimer: NodeJS.Timeout | null = null;
   private pendingState: TabPersistedState | null = null;
-  private lastLoadTime = 0;
+  private lastLoadTime: number = 0;
 
   constructor(storageDir?: string) {
-    this.storageDir = storageDir ?? join(homedir(), ".helios", "data");
-    this.storagePath = join(this.storageDir, "tab_state.json");
+    this.storageDir =
+      storageDir ?? path.join(homedir(), ".helios", "data");
+    this.storagePath = path.join(this.storageDir, "tab_state.json");
   }
 
   /**
@@ -50,10 +51,17 @@ export class TabPersistence {
 
       // Validate structure
       if (!this.validateState(state)) {
+        console.warn("Invalid tab state file, using defaults");
         return null;
       }
 
       this.lastLoadTime = Date.now() - startTime;
+
+      if (this.lastLoadTime > 100) {
+        console.warn(
+          `Tab state load took ${this.lastLoadTime}ms (target: <100ms)`
+        );
+      }
 
       return state;
     } catch (error) {
@@ -64,8 +72,7 @@ export class TabPersistence {
           return null;
         }
       }
-      // Ignore persistence errors and start from defaults.
-      const _error = error;
+      console.warn("Failed to load tab state:", error);
       return null;
     }
   }
@@ -82,7 +89,7 @@ export class TabPersistence {
     this.pendingState = state;
 
     // Debounce: wait 500ms before writing
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.debounceTimer = setTimeout(async () => {
         this.debounceTimer = null;
 
@@ -102,8 +109,7 @@ export class TabPersistence {
           const data = JSON.stringify(stateToWrite, null, 2);
           await fs.writeFile(this.storagePath, data, "utf-8");
         } catch (error) {
-          // Ignore persistence errors for debounced writes.
-          const _error = error;
+          console.error("Failed to save tab state:", error);
         }
 
         resolve();
@@ -133,8 +139,7 @@ export class TabPersistence {
       const data = JSON.stringify(stateToWrite, null, 2);
       await fs.writeFile(this.storagePath, data, "utf-8");
     } catch (error) {
-      // Ignore persistence errors during flush.
-      const _error = error;
+      console.error("Failed to flush tab state:", error);
     }
   }
 
@@ -159,7 +164,7 @@ export class TabPersistence {
       tabOrder,
       pinnedTabIds,
       perTabState,
-      savedAt: new Date().toISOString(),
+      savedAt: new Date().toISOString()
     };
   }
 
@@ -167,7 +172,7 @@ export class TabPersistence {
    * Restore persisted state to tab instances.
    */
   restoreState(state: TabPersistedState, tabs: TabSurface[]): void {
-    const tabMap = new Map(tabs.map(t => [t.getTabId(), t]));
+    const tabMap = new Map(tabs.map((t) => [t.getTabId(), t]));
 
     for (const [tabId, tabState] of Object.entries(state.perTabState)) {
       const tab = tabMap.get(tabId);
@@ -187,7 +192,7 @@ export class TabPersistence {
   /**
    * Validate persisted state structure.
    */
-  validateState(state: unknown): state is TabPersistedState {
+  private validateState(state: unknown): state is TabPersistedState {
     if (typeof state !== "object" || state === null) {
       return false;
     }
@@ -198,9 +203,9 @@ export class TabPersistence {
       typeof s.version === "number" &&
       (s.selectedTabId === null || typeof s.selectedTabId === "string") &&
       Array.isArray(s.tabOrder) &&
-      s.tabOrder.every((id: unknown) => typeof id === "string") &&
+      s.tabOrder.every((id) => typeof id === "string") &&
       Array.isArray(s.pinnedTabIds) &&
-      s.pinnedTabIds.every((id: unknown) => typeof id === "string") &&
+      s.pinnedTabIds.every((id) => typeof id === "string") &&
       typeof s.perTabState === "object" &&
       s.perTabState !== null &&
       typeof s.savedAt === "string"
@@ -217,8 +222,7 @@ export class TabPersistence {
       if (error instanceof Error && "code" in error) {
         const nodeError = error as NodeJS.ErrnoException;
         if (nodeError.code !== "ENOENT") {
-          // Ignore non-missing-file delete errors.
-          const _error = error;
+          console.error("Failed to delete tab state:", error);
         }
       }
     }

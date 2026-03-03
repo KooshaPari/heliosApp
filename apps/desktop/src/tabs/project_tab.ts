@@ -1,4 +1,4 @@
-import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
+import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
 
 export interface LaneInfo {
   laneId: string;
@@ -39,12 +39,12 @@ export class ProjectTab extends TabSurface {
     super("project-tab", "project", "Project");
   }
 
-  onContextChange(context: ActiveContext | null): Promise<void> {
+  async onContextChange(context: ActiveContext | null): Promise<void> {
     // When context changes, query workspace/project metadata
     this.metadata = null;
 
     if (!context) {
-      return Promise.resolve();
+      return;
     }
 
     // In a real implementation, query workspace registry:
@@ -61,26 +61,24 @@ export class ProjectTab extends TabSurface {
           laneId: context.laneId,
           name: "Current Lane",
           state: "active",
-          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          createdAt: new Date(Date.now() - 86400000).toISOString()
         },
         {
           laneId: "lane-2",
           name: "Feature Branch",
           state: "inactive",
-          createdAt: new Date(Date.now() - 172800000).toISOString(),
+          createdAt: new Date(Date.now() - 172800000).toISOString()
         },
         {
           laneId: "lane-3",
           name: "Experimental",
           state: "paused",
-          createdAt: new Date(Date.now() - 604800000).toISOString(),
-        },
+          createdAt: new Date(Date.now() - 604800000).toISOString()
+        }
       ],
       gitStatus: "On branch main, 3 commits ahead of origin/main",
-      recentActivity: "Last update 10 minutes ago",
+      recentActivity: "Last update 10 minutes ago"
     };
-
-    return Promise.resolve();
   }
 
   render(): HTMLElement {
@@ -122,7 +120,7 @@ export class ProjectTab extends TabSurface {
       retryBtn.style.cursor = "pointer";
       retryBtn.style.fontSize = "12px";
       retryBtn.addEventListener("click", () => {
-        this.render();
+        console.log("Retry workspace load");
       });
 
       errorEl.appendChild(titleEl);
@@ -146,7 +144,11 @@ export class ProjectTab extends TabSurface {
     scrollEl.appendChild(infoSectionEl);
 
     // Lanes Section
-    const lanesSectionEl = this.renderSection("lanes", "Lanes", this.renderLanesInfo());
+    const lanesSectionEl = this.renderSection(
+      "lanes",
+      "Lanes",
+      this.renderLanesInfo()
+    );
     scrollEl.appendChild(lanesSectionEl);
 
     // Actions Section
@@ -158,7 +160,11 @@ export class ProjectTab extends TabSurface {
     return container;
   }
 
-  private renderSection(sectionId: string, title: string, contentEl: HTMLElement): HTMLElement {
+  private renderSection(
+    sectionId: string,
+    title: string,
+    contentEl: HTMLElement
+  ): HTMLElement {
     const sectionEl = document.createElement("div");
     sectionEl.style.marginBottom = "16px";
     sectionEl.style.backgroundColor = "white";
@@ -226,7 +232,7 @@ export class ProjectTab extends TabSurface {
     const rows = [
       ["Project Name", this.metadata.projectName],
       ["Workspace Path", this.metadata.workspacePath],
-      ["Active Lanes", this.metadata.lanesCount.toString()],
+      ["Active Lanes", this.metadata.lanesCount.toString()]
     ];
 
     for (const [label, value] of rows) {
@@ -371,7 +377,7 @@ export class ProjectTab extends TabSurface {
     createBtn.style.fontSize = "12px";
     createBtn.style.width = "100%";
     createBtn.addEventListener("click", () => {
-      this.contentEl?.dispatchEvent(new CustomEvent("helios:project:create-lane"));
+      console.log("Create lane action triggered");
     });
 
     const openBtn = document.createElement("button");
@@ -385,7 +391,7 @@ export class ProjectTab extends TabSurface {
     openBtn.style.fontSize = "12px";
     openBtn.style.width = "100%";
     openBtn.addEventListener("click", () => {
-      this.contentEl?.dispatchEvent(new CustomEvent("helios:project:open-workspace"));
+      console.log("Open workspace in file manager");
     });
 
     bodyEl.appendChild(createBtn);
@@ -401,7 +407,7 @@ export class ProjectTab extends TabSurface {
     const baseState = super.getState();
     return {
       ...baseState,
-      expandedSections: Array.from(this.expandedSections),
+      expandedSections: Array.from(this.expandedSections)
     };
   }
 

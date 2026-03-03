@@ -1,5 +1,9 @@
+import type {
+  SettingsSchema,
+  SettingsStore,
+  SettingChangeEvent,
+} from "./types.js";
 import { getAllDefaults, validateValue } from "./schema.js";
-import type { SettingChangeEvent, SettingsSchema, SettingsStore } from "./types.js";
 
 type BusPublishFn = (topic: string, payload: SettingChangeEvent) => void;
 type ChangeListener = (event: SettingChangeEvent) => void;
@@ -18,7 +22,11 @@ export class SettingsManager {
   private changedRestartKeys: Set<string> = new Set();
   private unwatch: (() => void) | undefined;
 
-  constructor(schema: SettingsSchema, store: SettingsStore, busPublish?: BusPublishFn) {
+  constructor(
+    schema: SettingsSchema,
+    store: SettingsStore,
+    busPublish?: BusPublishFn,
+  ) {
     this.schema = schema;
     this.store = store;
     this.busPublish = busPublish;
@@ -32,9 +40,7 @@ export class SettingsManager {
 
     // Wire external-edit detection.
     this.unwatch = this.store.watch(() => {
-      this.handleExternalChange().catch(() => {
-        // Ignore transient file-watch failures to keep settings pipeline non-blocking.
-      });
+      void this.handleExternalChange();
     });
   }
 
@@ -81,7 +87,7 @@ export class SettingsManager {
   }
 
   /** Reset a key to its schema default. */
-  reset(key: string): Promise<SettingChangeEvent> {
+  async reset(key: string): Promise<SettingChangeEvent> {
     const def = this.schema[key];
     const defaultVal: unknown = def?.default;
     return this.set(key, defaultVal);
@@ -122,8 +128,8 @@ export class SettingsManager {
       // Hot-reloadable → publish on bus if available.
       try {
         this.busPublish?.("settings.changed", event);
-      } catch (_error) {
-        // Ignore non-blocking publish failures.
+      } catch {
+        console.warn("[settings] Bus publish failed, skipping event emission.");
       }
     }
 

@@ -1,7 +1,7 @@
 // ID parsing — extracts entity type, timestamp, and ULID body
-import type { EntityType } from "./prefixes.js";
-import { decodeTime } from "./ulid.js";
-import { validateId } from "./validate.js";
+import { type EntityType, REVERSE_PREFIX_MAP } from './prefixes.js';
+import { decodeTime } from './ulid.js';
+import { validateId } from './validate.js';
 
 export interface ParsedId {
   entityType: EntityType;
@@ -15,7 +15,7 @@ export function parseId(raw: string): ParsedId | null {
     return null;
   }
 
-  const sepIdx = raw.indexOf("_");
+  const sepIdx = raw.indexOf('_');
   const body = raw.substring(sepIdx + 1);
 
   const timeComponent = body.substring(0, 10);

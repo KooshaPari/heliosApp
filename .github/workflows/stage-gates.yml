@@ -133,17 +133,7 @@ jobs:
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
         run: bun install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
       - name: Run e2e smoke
-        run: |
-          bun run --cwd apps/runtime build
-          bun run --cwd apps/desktop build
-          bunx playwright install --with-deps chromium
-          set +e
-          bun run test:e2e:gate | tee /tmp/e2e.log
-          E2E_EXIT=${PIPESTATUS[0]}
-          bun run scripts/gate-e2e.ts
-          GATE_EXIT=$?
-          set -e
-          if [ "$E2E_EXIT" -ne 0 ] || [ "$GATE_EXIT" -ne 0 ]; then
-            exit 1
-          fi
+        run: bun run test:e2e

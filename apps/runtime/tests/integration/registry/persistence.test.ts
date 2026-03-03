@@ -1,10 +1,13 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import type { BindingTriple } from "../../../src/registry/binding_triple.js";
-import { InMemoryPersistence, JsonFilePersistence } from "../../../src/registry/persistence.js";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
+import {
+  JsonFilePersistence,
+  InMemoryPersistence,
+} from "../../../src/registry/persistence.js";
+import { promises as fs } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
+import type { BindingTriple } from "../../../src/registry/binding_triple.js";
 
 describe("Persistence Integration", () => {
   let registry: TerminalRegistry;
@@ -24,7 +27,9 @@ describe("Persistence Integration", () => {
 
   describe("JsonFilePersistence", () => {
     it("should save and reload bindings", async () => {
-      const persistence = new JsonFilePersistence(join(tempDir, "bindings.json"));
+      const persistence = new JsonFilePersistence(
+        join(tempDir, "bindings.json"),
+      );
 
       // Register bindings
       const bindings: BindingTriple[] = Array.from({ length: 10 }, (_, i) => ({
@@ -54,14 +59,14 @@ describe("Persistence Integration", () => {
       const loaded = await persistence.load();
       expect(loaded).toHaveLength(10);
 
-      loaded.forEach(binding => {
+      loaded.forEach((binding) => {
         newRegistry.register(binding.terminalId, binding.binding);
       });
 
       const restored = newRegistry.getAll();
       expect(restored).toHaveLength(10);
-      expect(restored.map(b => b.terminalId).sort()).toEqual(
-        allBindings.map(b => b.terminalId).sort()
+      expect(restored.map((b) => b.terminalId).sort()).toEqual(
+        allBindings.map((b) => b.terminalId).sort(),
       );
     });
 

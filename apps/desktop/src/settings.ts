@@ -11,7 +11,7 @@ export type DesktopSettings = {
 
 export const DEFAULT_SETTINGS: DesktopSettings = {
   rendererEngine: "ghostty",
-  hotSwapPreferred: true,
+  hotSwapPreferred: true
 };
 
 export type SwitchRendererInput = {
@@ -39,61 +39,61 @@ export async function switchRendererWithRollback(
   input.contextStore.dispatch({
     type: "renderer.switch.started",
     previousEngine,
-    targetEngine: input.targetEngine,
+    targetEngine: input.targetEngine
   });
 
   const switchResult = await input.runtimeClient.switchRenderer({
     workspaceId: snapshot.workspaceId,
     targetEngine: input.targetEngine,
-    ...(input.forceError !== undefined && { forceError: input.forceError }),
+    forceError: input.forceError
   });
 
   if (switchResult.ok) {
     input.contextStore.dispatch({
       type: "renderer.switch.succeeded",
-      targetEngine: switchResult.activeEngine,
+      targetEngine: switchResult.activeEngine
     });
 
     return {
       settings: {
         ...input.settings,
-        rendererEngine: switchResult.activeEngine,
+        rendererEngine: switchResult.activeEngine
       },
       committed: true,
       rolledBack: false,
-      message: `renderer switched to ${switchResult.activeEngine}`,
+      message: `renderer switched to ${switchResult.activeEngine}`
     };
   }
 
   input.contextStore.dispatch({
     type: "renderer.switch.failed",
-    message: switchResult.error ?? "renderer switch failed",
+    message: switchResult.error ?? "renderer switch failed"
   });
 
   const rollbackResult = await input.runtimeClient.switchRenderer({
     workspaceId: snapshot.workspaceId,
     targetEngine: previousEngine,
-    ...(input.forceRollbackError !== undefined && { forceError: input.forceRollbackError }),
+    forceError: input.forceRollbackError
   });
 
   if (rollbackResult.ok) {
     input.contextStore.dispatch({
       type: "renderer.switch.rolled_back",
       engine: previousEngine,
-      message: `renderer rollback to ${previousEngine} applied`,
+      message: `renderer rollback to ${previousEngine} applied`
     });
 
     return {
       settings: { ...input.settings, rendererEngine: previousEngine },
       committed: false,
       rolledBack: true,
-      message: `renderer switch failed; rolled back to ${previousEngine}`,
+      message: `renderer switch failed; rolled back to ${previousEngine}`
     };
   }
 
   input.contextStore.dispatch({
     type: "renderer.switch.failed",
-    message: `renderer switch failed; rollback failed (${rollbackResult.error ?? "unknown"})`,
+    message: `renderer switch failed; rollback failed (${rollbackResult.error ?? "unknown"})`
   });
 
   const observed = await input.runtimeClient.getRendererCapabilities(snapshot.workspaceId);
@@ -104,6 +104,6 @@ export async function switchRendererWithRollback(
     rolledBack: false,
     message:
       `renderer switch and rollback failed (${rollbackResult.error ?? "unknown"}); ` +
-      `runtime engine is ${observed.activeEngine}`,
+      `runtime engine is ${observed.activeEngine}`
   };
 }

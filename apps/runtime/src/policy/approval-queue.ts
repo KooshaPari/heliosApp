@@ -4,10 +4,10 @@
  */
 
 export enum ApprovalStatus {
-  Pending = "pending",
-  Approved = "approved",
-  Rejected = "rejected",
-  Expired = "expired",
+  Pending = 'pending',
+  Approved = 'approved',
+  Rejected = 'rejected',
+  Expired = 'expired'
 }
 
 export interface ApprovalRequest {
@@ -54,7 +54,7 @@ export class ApprovalQueue {
       requesterName,
       status: ApprovalStatus.Pending,
       createdAt: now.toISOString(),
-      expiresAt: expiresAt.toISOString(),
+      expiresAt: expiresAt.toISOString()
     };
 
     this.requests.set(id, request);

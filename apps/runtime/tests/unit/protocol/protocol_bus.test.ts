@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { InMemoryLocalBus } from "../../../src/protocol/bus";
-import { type LocalBusEnvelope, ProtocolValidationError } from "../../../src/protocol/types";
+import { ProtocolValidationError, type LocalBusEnvelope } from "../../../src/protocol/types";
 import { validateEnvelope } from "../../../src/protocol/validator";
 
 function createLifecycleCommand(overrides: Partial<LocalBusEnvelope> = {}): LocalBusEnvelope {
@@ -18,7 +18,7 @@ function createLifecycleCommand(overrides: Partial<LocalBusEnvelope> = {}): Loca
     correlation_id: "corr-1",
     method: "session.attach",
     payload: {},
-    ...overrides,
+    ...overrides
   };
 }
 
@@ -34,8 +34,7 @@ describe("protocol validator", () => {
 
   test("returns error response when lifecycle command is missing correlation_id", async () => {
     const bus = new InMemoryLocalBus();
-    const command = createLifecycleCommand();
-    command.correlation_id = undefined;
+    const command = createLifecycleCommand({ correlation_id: undefined });
     const response = await bus.request(command);
     expect(response.type).toBe("response");
     expect(response.status).toBe("error");
@@ -49,7 +48,7 @@ describe("protocol validator", () => {
         type: "event",
         ts: "2026-02-26T00:00:00",
         topic: "workspace.opened",
-        payload: {},
+        payload: {}
       })
     ).toThrow("Envelope field 'ts' must be an RFC3339 timestamp with timezone");
   });
@@ -60,7 +59,7 @@ describe("protocol validator", () => {
       type: "event",
       ts: "2026-02-26T00:00:00+00:00",
       topic: "workspace.opened",
-      payload: {},
+      payload: {}
     });
 
     expect(envelope.ts).toBe("2026-02-26T00:00:00+00:00");
@@ -74,7 +73,7 @@ describe("protocol validator", () => {
         ts: "2026-02-26T00:00:00.000Z",
         timestamp: "2026-02-26T00:00:00",
         topic: "workspace.opened",
-        payload: {},
+        payload: {}
       })
     ).toThrow("Envelope field 'timestamp' must be an RFC3339 timestamp with timezone");
   });
@@ -86,7 +85,7 @@ describe("protocol validator", () => {
       ts: "2026-02-26T00:00:00.000Z",
       timestamp: "2026-02-26T00:00:00+00:00",
       topic: "workspace.opened",
-      payload: {},
+      payload: {}
     });
 
     expect(envelope.timestamp).toBe("2026-02-26T00:00:00+00:00");
@@ -126,11 +125,11 @@ describe("protocol sequencing and audit", () => {
         // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         correlation_id: "corr-1",
         topic: "session.attached",
-        payload: {},
+        payload: {}
       })
     ).rejects.toMatchObject({
       name: "ProtocolValidationError",
-      code: "ORDERING_VIOLATION",
+      code: "ORDERING_VIOLATION"
     });
   });
 
@@ -147,7 +146,7 @@ describe("protocol sequencing and audit", () => {
       // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
       correlation_id: "corr-accepted",
       topic: "lane.create.started",
-      payload: {},
+      payload: {}
     });
 
     await expect(
@@ -162,11 +161,11 @@ describe("protocol sequencing and audit", () => {
         // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         correlation_id: "corr-accepted",
         topic: "lane.create.started",
-        payload: {},
+        payload: {}
       })
     ).rejects.toMatchObject({
       name: "ProtocolValidationError",
-      code: "ORDERING_VIOLATION",
+      code: "ORDERING_VIOLATION"
     });
 
     const records = await bus.getAuditRecords();

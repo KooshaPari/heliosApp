@@ -1,16 +1,16 @@
-import { afterEach, describe, expect, it } from "bun:test";
-import { InMemoryBusPublisher } from "../../../src/pty/events.js";
-import { PtyRegistry } from "../../../src/pty/registry.js";
-import type { PtyRecord } from "../../../src/pty/registry.js";
+import { describe, expect, it } from "bun:test";
 import {
-  InvalidDimensionsError,
-  SignalHistory,
   resize,
-  sendSighup,
   terminate,
+  sendSighup,
+  SignalHistory,
+  InvalidDimensionsError,
 } from "../../../src/pty/signals.js";
 import type { SignalHistoryMap } from "../../../src/pty/signals.js";
+import { PtyRegistry } from "../../../src/pty/registry.js";
+import type { PtyRecord } from "../../../src/pty/registry.js";
 import { PtyLifecycle } from "../../../src/pty/state_machine.js";
+import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   return {
@@ -18,7 +18,7 @@ function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
     laneId: "lane-1",
     sessionId: "session-1",
     terminalId: "term-1",
-    pid: 99999, // non-existent PID — avoids signalling the test runner
+    pid: process.pid,
     state: "active",
     dimensions: { cols: 80, rows: 24 },
     createdAt: Date.now(),
@@ -47,7 +47,7 @@ describe("SignalHistory", () => {
     h.add({ ptyId: "p1", signal: "SIGTERM", timestamp: 1, outcome: "delivered", pid: 1 });
     h.add({ ptyId: "p1", signal: "SIGKILL", timestamp: 2, outcome: "escalated", pid: 1 });
     expect(h.length).toBe(2);
-    expect(h.getAll()[0]?.signal).toBe("SIGTERM");
+    expect(h.getAll()[0]!.signal).toBe("SIGTERM");
   });
 
   it("bounds history to maxRecords", () => {
@@ -56,24 +56,11 @@ describe("SignalHistory", () => {
     h.add({ ptyId: "p1", signal: "SIGTERM", timestamp: 2, outcome: "delivered", pid: 1 });
     h.add({ ptyId: "p1", signal: "SIGKILL", timestamp: 3, outcome: "escalated", pid: 1 });
     expect(h.length).toBe(2);
-    expect(h.getAll()[0]?.signal).toBe("SIGTERM");
+    expect(h.getAll()[0]!.signal).toBe("SIGTERM");
   });
 });
 
 describe("resize", () => {
-  const pidsToCleanup: number[] = [];
-
-  afterEach(() => {
-    for (const pid of pidsToCleanup) {
-      try {
-        process.kill(pid, "SIGKILL");
-      } catch {
-        /* already exited */
-      }
-    }
-    pidsToCleanup.length = 0;
-  });
-
   it("updates dimensions and emits events", () => {
     // Spawn a real child so SIGWINCH delivery succeeds.
     const pid = spawnShellProcess();
@@ -88,7 +75,7 @@ describe("resize", () => {
     resize(record, 120, 40, registry, historyMap, bus);
 
     expect(registry.get(record.ptyId)?.dimensions).toEqual({ cols: 120, rows: 40 });
-    const topics = bus.events.map(e => e.topic);
+    const topics = bus.events.map((e) => e.topic);
     expect(topics).toContain("pty.signal.delivered");
     expect(topics).toContain("pty.resized");
   });
@@ -97,71 +84,46 @@ describe("resize", () => {
     const registry = new PtyRegistry();
     const record = makeRecord();
     registry.register(record);
-    expect(() => resize(record, 0, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
-      InvalidDimensionsError
-    );
+    expect(() => resize(record, 0, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(InvalidDimensionsError);
   });
 
   it("rejects zero rows", () => {
     const registry = new PtyRegistry();
     const record = makeRecord();
     registry.register(record);
-    expect(() => resize(record, 80, 0, registry, new Map(), new InMemoryBusPublisher())).toThrow(
-      InvalidDimensionsError
-    );
+    expect(() => resize(record, 80, 0, registry, new Map(), new InMemoryBusPublisher())).toThrow(InvalidDimensionsError);
   });
 
   it("rejects cols > 10000", () => {
     const registry = new PtyRegistry();
     const record = makeRecord();
     registry.register(record);
-    expect(() =>
-      resize(record, 10001, 24, registry, new Map(), new InMemoryBusPublisher())
-    ).toThrow(InvalidDimensionsError);
+    expect(() => resize(record, 10001, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(InvalidDimensionsError);
   });
 
   it("rejects non-integer dimensions", () => {
     const registry = new PtyRegistry();
     const record = makeRecord();
     registry.register(record);
-    expect(() => resize(record, 80.5, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
-      InvalidDimensionsError
-    );
+    expect(() => resize(record, 80.5, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(InvalidDimensionsError);
   });
 
   it("rejects resize on errored PTY", () => {
     const registry = new PtyRegistry();
     const record = makeRecord({ state: "errored" });
     registry.register(record);
-    expect(() => resize(record, 80, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
-      "Cannot resize"
-    );
+    expect(() => resize(record, 80, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow("Cannot resize");
   });
 
   it("rejects resize on stopped PTY", () => {
     const registry = new PtyRegistry();
     const record = makeRecord({ state: "stopped" });
     registry.register(record);
-    expect(() => resize(record, 80, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
-      "Cannot resize"
-    );
+    expect(() => resize(record, 80, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow("Cannot resize");
   });
 });
 
 describe("terminate", () => {
-  const pidsToCleanup: number[] = [];
-
-  afterEach(() => {
-    for (const pid of pidsToCleanup) {
-      try {
-        process.kill(pid, "SIGKILL");
-      } catch {
-        /* already exited */
-      }
-    }
-    pidsToCleanup.length = 0;
-  });
-
   it("terminates with SIGTERM and cleans up", async () => {
     const pid = spawnShellProcess() as number;
     pidsToCleanup.push(pid);
@@ -173,10 +135,12 @@ describe("terminate", () => {
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
 
-    await terminate(record, lifecycle, registry, historyMap, bus, { gracePeriodMs: 500 });
+    const mockIsAlive = () => false;
+    const mockWait = async () => true;
+    await terminate(record, lifecycle, registry, historyMap, bus, { gracePeriodMs: 50 }, mockIsAlive, mockWait);
 
     expect(registry.get(record.ptyId)).toBeUndefined();
-    const topics = bus.events.map(e => e.topic);
+    const topics = bus.events.map((e) => e.topic);
     expect(topics).toContain("pty.terminating");
     expect(topics).toContain("pty.stopped");
   });
@@ -202,18 +166,9 @@ describe("terminate", () => {
       return Promise.resolve(callCount > 1);
     };
 
-    await terminate(
-      record,
-      lifecycle,
-      registry,
-      new Map(),
-      bus,
-      { gracePeriodMs: 50 },
-      () => true,
-      mockWait
-    );
+    await terminate(record, lifecycle, registry, new Map(), bus, { gracePeriodMs: 50 }, () => true, mockWait);
 
-    const topics = bus.events.map(e => e.topic);
+    const topics = bus.events.map((e) => e.topic);
     expect(topics).toContain("pty.force_killed");
     expect(topics).toContain("pty.stopped");
   });
@@ -252,7 +207,9 @@ describe("sendSighup", () => {
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
     const envelope = sendSighup(record, historyMap, bus);
+    expect(envelope.signal).toBe("SIGHUP");
     expect(envelope.outcome).toBe("failed");
     expect(envelope.error).toBeDefined();
+    expect(historyMap.get(record.ptyId)?.length).toBe(1);
   });
 });

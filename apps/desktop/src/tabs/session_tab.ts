@@ -1,7 +1,7 @@
-import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
+import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
 
 export interface SessionTabState extends TabState {
-  expandedSections?: string[] | undefined;
+  expandedSections?: string[];
 }
 
 export interface SessionMetadata {
@@ -10,7 +10,7 @@ export interface SessionMetadata {
   lifecycleState: string;
   harnessTransport: string;
   terminalCount: number;
-  degradationReason?: string | undefined;
+  degradationReason?: string;
 }
 
 /**
@@ -32,11 +32,11 @@ export class SessionTab extends TabSurface {
     super("session-tab", "session", "Session");
   }
 
-  onContextChange(context: ActiveContext | null): Promise<void> {
+  async onContextChange(context: ActiveContext | null): Promise<void> {
     // When context changes, query session metadata
     if (!context) {
       this.metadata = null;
-      return Promise.resolve();
+      return;
     }
 
     // In a real implementation, query session registry:
@@ -50,10 +50,8 @@ export class SessionTab extends TabSurface {
       lifecycleState: "active",
       harnessTransport: "cliproxy_harness",
       terminalCount: 2,
-      degradationReason: undefined,
+      degradationReason: null
     };
-
-    return Promise.resolve();
   }
 
   render(): HTMLElement {
@@ -99,7 +97,11 @@ export class SessionTab extends TabSurface {
     scrollEl.appendChild(diagSectionEl);
 
     // Timeline Section
-    const timelineSectionEl = this.renderSection("timeline", "Timeline", this.renderTimeline());
+    const timelineSectionEl = this.renderSection(
+      "timeline",
+      "Timeline",
+      this.renderTimeline()
+    );
     scrollEl.appendChild(timelineSectionEl);
 
     container.appendChild(scrollEl);
@@ -107,7 +109,11 @@ export class SessionTab extends TabSurface {
     return container;
   }
 
-  private renderSection(sectionId: string, title: string, contentEl: HTMLElement): HTMLElement {
+  private renderSection(
+    sectionId: string,
+    title: string,
+    contentEl: HTMLElement
+  ): HTMLElement {
     const sectionEl = document.createElement("div");
     sectionEl.style.marginBottom = "16px";
     sectionEl.style.backgroundColor = "white";
@@ -176,7 +182,7 @@ export class SessionTab extends TabSurface {
       ["Session ID", this.metadata.sessionId],
       ["Created", new Date(this.metadata.createdAt).toLocaleString()],
       ["Lifecycle State", this.metadata.lifecycleState],
-      ["Terminal Count", this.metadata.terminalCount.toString()],
+      ["Terminal Count", this.metadata.terminalCount.toString()]
     ];
 
     for (const [label, value] of rows) {
@@ -277,7 +283,7 @@ export class SessionTab extends TabSurface {
       { time: new Date(Date.now() - 1800000), event: "Terminal 1 spawned" },
       { time: new Date(Date.now() - 1200000), event: "Terminal 2 spawned" },
       { time: new Date(Date.now() - 600000), event: "Agent initialized" },
-      { time: new Date(), event: "Current" },
+      { time: new Date(), event: "Current" }
     ];
 
     for (const { time, event } of events) {
@@ -317,7 +323,7 @@ export class SessionTab extends TabSurface {
     const baseState = super.getState();
     return {
       ...baseState,
-      expandedSections: Array.from(this.expandedSections),
+      expandedSections: Array.from(this.expandedSections)
     };
   }
 

@@ -5,8 +5,13 @@
  * using Bun.spawn for process execution.
  */
 
-import { ZellijNotFoundError, ZellijTimeoutError, ZellijVersionError } from "./errors.js";
 import type { AvailabilityResult, CliResult, ZellijSession } from "./types.js";
+import {
+  ZellijNotFoundError,
+  ZellijVersionError,
+  ZellijCliError,
+  ZellijTimeoutError,
+} from "./errors.js";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const MINIMUM_VERSION = "0.40.0";
@@ -21,12 +26,8 @@ function compareSemver(a: string, b: string): number {
   for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
     const va = pa[i] ?? 0;
     const vb = pb[i] ?? 0;
-    if (va < vb) {
-      return -1;
-    }
-    if (va > vb) {
-      return 1;
-    }
+    if (va < vb) return -1;
+    if (va > vb) return 1;
   }
   return 0;
 }
@@ -43,26 +44,27 @@ export class ZellijCli {
   /**
    * Run a zellij CLI command with optional timeout.
    */
-  async run(args: string[], options?: { timeout?: number }): Promise<CliResult> {
+  async run(
+    args: string[],
+    options?: { timeout?: number }
+  ): Promise<CliResult> {
     const timeout = options?.timeout ?? this.defaultTimeout;
     const command = `${this.zellijPath} ${args.join(" ")}`;
     const startMs = performance.now();
 
-    let proc: ReturnType<typeof Bun.spawn> & { kill: () => void };
+    let proc: ReturnType<typeof Bun.spawn>;
     try {
       proc = Bun.spawn([this.zellijPath, ...args], {
         stdout: "pipe",
         stderr: "pipe",
-      }) as ReturnType<typeof Bun.spawn> & { kill: () => void };
+      });
     } catch {
       throw new ZellijNotFoundError();
     }
 
     // Race between process completion and timeout
-    const timeoutPromise = new Promise<"timeout">(resolve =>
-      setTimeout(() => {
-        resolve("timeout");
-      }, timeout)
+    const timeoutPromise = new Promise<"timeout">((resolve) =>
+      setTimeout(() => { resolve("timeout"); }, timeout)
     );
 
     const exitPromise = proc.exited.then(() => "done" as const);
@@ -79,9 +81,14 @@ export class ZellijCli {
       proc.exited,
     ]);
 
-    const _durationMs = performance.now() - startMs;
+    const durationMs = performance.now() - startMs;
     const stdout = new TextDecoder().decode(stdoutBuf);
     const stderr = new TextDecoder().decode(stderrBuf);
+
+    // Debug logging for all CLI calls
+    console.debug(
+      `[zellij-cli] ${command} -> exit=${exitCode} duration=${durationMs.toFixed(1)}ms`
+    );
 
     return { stdout, stderr, exitCode };
   }
@@ -138,7 +145,10 @@ export class ZellijCli {
 
     // If no sessions, zellij may return exit code 0 with empty output
     // or exit code 1 with "No active zellij sessions found."
-    if (result.exitCode !== 0 && result.stdout.includes("No active")) {
+    if (
+      result.exitCode !== 0 &&
+      result.stdout.includes("No active")
+    ) {
       return [];
     }
 
@@ -165,22 +175,22 @@ export class ZellijCli {
    */
   private parseSessionLine(line: string): ZellijSession | undefined {
     const trimmed = line.trim();
-    if (trimmed === "") {
-      return undefined;
-    }
+    if (trimmed === "") return undefined;
 
     // The session name is the first whitespace-delimited token
     const parts = trimmed.split(/\s+/);
     const name = parts[0];
-    if (!name) {
-      return undefined;
-    }
+    if (!name) return undefined;
 
     const attached = /\(ATTACHED\)/i.test(trimmed) || trimmed.includes("ATTACHED");
 
     // Try to extract creation date/time if present; otherwise use now
-    const dateMatch = trimmed.match(/(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})/);
-    const created = dateMatch ? new Date(`${dateMatch[1]}T${dateMatch[2]}`) : new Date();
+    const dateMatch = trimmed.match(
+      /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})/
+    );
+    const created = dateMatch
+      ? new Date(`${dateMatch[1]}T${dateMatch[2]}`)
+      : new Date();
 
     return { name, created, attached };
   }

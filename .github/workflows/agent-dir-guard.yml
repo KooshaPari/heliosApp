@@ -2,7 +2,6 @@ name: agent-dir-guard
 
 on:
   pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -30,7 +29,7 @@ jobs:
             grep -v '^\.codex/prompts/.*\.md$' | \
             grep -v '^\.cursor/commands/.*\.md$' | \
             grep -v '^\.gemini/config.yaml$' | \
-            grep -v '^\.gemini/commands/'); then
+            grep -v '^\.gemini/commands/.*\.toml$'); then
             :
           else
             blocked=""

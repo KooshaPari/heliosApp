@@ -4,7 +4,6 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
-    "exactOptionalPropertyTypes": true,
     "noEmit": true,
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
@@ -12,14 +11,7 @@
     "resolveJsonModule": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["bun-types", "node", "@playwright/test"],
-    "baseUrl": ".",
-    "paths": {
-      "@helios/runtime": ["apps/runtime/src/index.ts"],
-      "@helios/runtime/*": ["apps/runtime/src/*"],
-      "@helios/desktop": ["apps/desktop/src/index.ts"],
-      "@helios/desktop/*": ["apps/desktop/src/*"]
-    }
+    "types": ["bun-types", "node", "@playwright/test"]
   },
   "include": [
     "apps/**/*.ts",

@@ -12,10 +12,10 @@ The following status checks must pass before a pull request can be merged:
 
 1. **quality-gates** - Quality gates from spec 021 (linting, formatting, type checking)
 2. **gca-review** - GitHub Code Analysis automated review
-3. **compliance-check** - Compliance checker from WP02
-4. **coderabbit-review** - Optional if enabled by org ruleset
+3. **coderabbit-review** - CodeRabbit automated code review
+4. **compliance-check** - Compliance checker from WP02
 
-The canonical required-check manifest for this repo is `.github/required-checks.txt`.
+All status checks must pass before merge is allowed.
 
 ### Required Pull Request Reviews
 
@@ -58,7 +58,7 @@ curl -X PUT \
   -d '{
     "required_status_checks": {
       "strict": true,
-      "contexts": ["quality-gates", "gca-review", "compliance-check"]
+      "contexts": ["quality-gates", "gca-review", "coderabbit-review", "compliance-check"]
     },
     "required_pull_request_reviews": {
       "dismissal_restrictions": {},
@@ -82,7 +82,7 @@ curl -X PUT \
 4. Enable:
    - Require a pull request before merging
    - Require status checks to pass before merging
-   - Add required checks from `.github/required-checks.txt`
+   - Add required checks: quality-gates, gca-review, coderabbit-review, compliance-check
    - Require branches to be up to date before merging
    - Require linear history
    - Restrict who can push to matching branches
@@ -91,7 +91,7 @@ curl -X PUT \
 ## Validation Checklist
 
 - [ ] Branch protection rule exists for `main`
-- [ ] Required status checks match `.github/required-checks.txt`
+- [ ] All four status checks are required
 - [ ] At least one approval required
 - [ ] Stale review dismissal enabled
 - [ ] Linear history enforced
@@ -103,3 +103,4 @@ curl -X PUT \
 - Review this configuration quarterly
 - Update status check names if spec changes
 - Add new required checks as governance requirements evolve
+

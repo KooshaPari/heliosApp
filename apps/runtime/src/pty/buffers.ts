@@ -105,9 +105,7 @@ export class RingBuffer {
    */
   peek(count?: number): Uint8Array {
     const n = Math.min(count ?? this._size, this._size);
-    if (n === 0) {
-      return new Uint8Array(0);
-    }
+    if (n === 0) return new Uint8Array(0);
 
     const result = new Uint8Array(n);
     const firstChunk = Math.min(n, this._capacity - this.head);
@@ -201,7 +199,11 @@ export class OutputBuffer {
   /** Whether the first overflow warning has been logged. */
   private firstOverflowLogged = false;
 
-  constructor(bus: BusPublisher, correlation: PtyEventCorrelation, config?: OutputBufferConfig) {
+  constructor(
+    bus: BusPublisher,
+    correlation: PtyEventCorrelation,
+    config?: OutputBufferConfig,
+  ) {
     const capacity = config?.capacityBytes ?? 4 * 1024 * 1024;
     this.ring = new RingBuffer(capacity);
     this.bus = bus;

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import {
-  InvalidRendererTransitionError,
   RendererStateMachine,
+  InvalidRendererTransitionError,
   transition,
 } from "../state_machine.js";
-import type { RendererEvent } from "../state_machine.js";
+import type { RendererEvent, RendererState } from "../state_machine.js";
 
 describe("RendererStateMachine", () => {
   it("starts in uninitialized state", () => {
@@ -73,7 +73,9 @@ describe("RendererStateMachine", () => {
 
   it("rejects invalid transitions", () => {
     const sm = new RendererStateMachine();
-    expect(() => sm.transition("init_success")).toThrow(InvalidRendererTransitionError);
+    expect(() => sm.transition("init_success")).toThrow(
+      InvalidRendererTransitionError,
+    );
   });
 
   it("rejects switch during switch", () => {
@@ -81,32 +83,28 @@ describe("RendererStateMachine", () => {
     sm.transition("init");
     sm.transition("init_success");
     sm.transition("switch_request");
-    expect(() => sm.transition("switch_request")).toThrow(InvalidRendererTransitionError);
+    expect(() => sm.transition("switch_request")).toThrow(
+      InvalidRendererTransitionError,
+    );
   });
 
   it("tracks transition history (max 10)", () => {
     const sm = new RendererStateMachine();
     // Generate 12 transitions by cycling through recovery
     const events: RendererEvent[] = [
-      "init",
-      "init_failure",
-      "recovery_attempt",
-      "init_failure",
-      "recovery_attempt",
-      "init_failure",
-      "recovery_attempt",
-      "init_failure",
-      "recovery_attempt",
-      "init_failure",
-      "recovery_attempt",
-      "init_success",
+      "init", "init_failure",
+      "recovery_attempt", "init_failure",
+      "recovery_attempt", "init_failure",
+      "recovery_attempt", "init_failure",
+      "recovery_attempt", "init_failure",
+      "recovery_attempt", "init_success",
     ];
     for (const e of events) {
       sm.transition(e);
     }
     expect(sm.history.length).toBe(10);
     // First two (init, init_failure) should have been evicted
-    expect(sm.history[0]?.event).toBe("recovery_attempt");
+    expect(sm.history[0]!.event).toBe("recovery_attempt");
   });
 });
 
@@ -117,6 +115,8 @@ describe("transition (pure function)", () => {
   });
 
   it("throws for invalid transition", () => {
-    expect(() => transition("stopped", "init")).toThrow(InvalidRendererTransitionError);
+    expect(() => transition("stopped", "init")).toThrow(
+      InvalidRendererTransitionError,
+    );
   });
 });

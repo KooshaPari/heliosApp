@@ -1,7 +1,7 @@
-import { randomUUID } from "node:crypto";
-import { promises as fs } from "node:fs";
-import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
+import type { LocalBus } from "../protocol/bus.js";
 import type { Checkpoint, CheckpointSession } from "./checkpoint.js";
+import { randomUUID } from "crypto";
+import { promises as fs } from "fs";
 
 export interface RestoredSession {
   sessionId: string;
@@ -26,8 +26,8 @@ export interface RestorationResult {
 }
 
 export class RestorationPipeline {
-  private bus?: LocalBus | undefined;
-  private zellijListCache?: string[] | undefined;
+  private bus?: LocalBus;
+  private zellijListCache?: string[];
 
   constructor(bus?: LocalBus) {
     this.bus = bus;
@@ -52,16 +52,16 @@ export class RestorationPipeline {
           // Reattach surviving session
           try {
             await this.reattachZelijjSession(session, matching);
-            const restoredSession: RestoredSession = {
+            const restored_session: RestoredSession = {
               sessionId: session.sessionId,
               terminalId: session.terminalId,
               laneId: session.laneId,
               zellijSessionName: matching,
               status: "reattached",
             };
-            restored.push(restoredSession);
-            await this.publishSessionRestored(restoredSession);
-          } catch (_err) {
+            restored.push(restored_session);
+            await this.publishSessionRestored(restored_session);
+          } catch (err) {
             // Fall through to respawn attempt
             await this.attemptRespawn(session, restored, failed);
           }
@@ -77,21 +77,20 @@ export class RestorationPipeline {
 
       const duration = Date.now() - startTime;
       return { restored, failed, duration };
-    } catch (_err) {
+    } catch (err) {
       const duration = Date.now() - startTime;
+      console.error("Restoration pipeline failed:", err);
       return {
         restored,
         failed: [
           ...failed,
           ...checkpoint.sessions
             .filter(
-              s =>
-                !(
-                  restored.some(r => r.sessionId === s.sessionId) ||
-                  failed.some(f => f.sessionId === s.sessionId)
-                )
+              (s) =>
+                !restored.some((r) => r.sessionId === s.sessionId) &&
+                !failed.some((f) => f.sessionId === s.sessionId)
             )
-            .map(s => ({
+            .map((s) => ({
               sessionId: s.sessionId,
               terminalId: s.terminalId,
               laneId: s.laneId,
@@ -103,7 +102,7 @@ export class RestorationPipeline {
     }
   }
 
-  private getSurvivingZelijjSessions(): string[] {
+  private async getSurvivingZelijjSessions(): Promise<string[]> {
     if (this.zellijListCache) {
       return this.zellijListCache;
     }
@@ -121,10 +120,13 @@ export class RestorationPipeline {
     sessionName: string,
     survivingSessions: string[]
   ): string | undefined {
-    return survivingSessions.find(s => s === sessionName);
+    return survivingSessions.find((s) => s === sessionName);
   }
 
-  private reattachZelijjSession(_session: CheckpointSession, zellijSessionName: string): void {
+  private async reattachZelijjSession(
+    session: CheckpointSession,
+    zellijSessionName: string
+  ): Promise<void> {
     // In a real implementation, this would use zellij IPC to reattach
     // For now, we just verify the session exists
     if (!zellijSessionName) {
@@ -145,7 +147,7 @@ export class RestorationPipeline {
       // For now, just mark as respawned
       const newZelijjSessionName = `restored-${session.sessionId}`;
 
-      const restoredSession: RestoredSession = {
+      const restored_session: RestoredSession = {
         sessionId: session.sessionId,
         terminalId: session.terminalId,
         laneId: session.laneId,
@@ -153,8 +155,8 @@ export class RestorationPipeline {
         status: "respawned",
       };
 
-      restored.push(restoredSession);
-      await this.publishSessionRestored(restoredSession);
+      restored.push(restored_session);
+      await this.publishSessionRestored(restored_session);
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
       const failedSession: FailedSession = {
@@ -173,9 +175,7 @@ export class RestorationPipeline {
   }
 
   private async publishSessionRestored(session: RestoredSession): Promise<void> {
-    if (!this.bus) {
-      return;
-    }
+    if (!this.bus) return;
 
     await this.bus.publish({
       id: randomUUID(),
@@ -191,9 +191,7 @@ export class RestorationPipeline {
   }
 
   private async publishSessionFailed(session: FailedSession): Promise<void> {
-    if (!this.bus) {
-      return;
-    }
+    if (!this.bus) return;
 
     await this.bus.publish({
       id: randomUUID(),

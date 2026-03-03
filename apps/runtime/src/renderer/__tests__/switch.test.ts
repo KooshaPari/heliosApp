@@ -1,10 +1,10 @@
-import { describe, expect, it } from "bun:test";
-import type { RenderSurface, RendererAdapter, RendererConfig, RendererState } from "../adapter.js";
-import type { RendererCapabilities } from "../capabilities.js";
-import type { RendererEventBus, RendererLifecycleEvent } from "../index.js";
+import { describe, expect, it, mock } from "bun:test";
+import { switchRenderer, SwitchSameRendererError } from "../switch.js";
 import { RendererRegistry } from "../registry.js";
 import { RendererStateMachine } from "../state_machine.js";
-import { SwitchSameRendererError, switchRenderer } from "../switch.js";
+import type { RendererAdapter, RendererConfig, RenderSurface, RendererState } from "../adapter.js";
+import type { RendererCapabilities } from "../capabilities.js";
+import type { RendererEventBus, RendererLifecycleEvent } from "../index.js";
 
 const DEFAULT_CAPS: RendererCapabilities = {
   gpuAccelerated: true,
@@ -28,56 +28,34 @@ const CONFIG: RendererConfig = {
   maxDimensions: { cols: 200, rows: 50 },
 };
 
-function createMockAdapter(
-  id: string,
-  opts?: {
-    initFail?: boolean;
-    startFail?: boolean;
-    stopFail?: boolean;
-  }
-): RendererAdapter {
+function createMockAdapter(id: string, opts?: {
+  initFail?: boolean;
+  startFail?: boolean;
+  stopFail?: boolean;
+}): RendererAdapter {
   let state: RendererState = "uninitialized";
   return {
     id,
     version: "1.0.0",
-    init: () => {
-      if (opts?.initFail) {
-        throw new Error(`${id} init failed`);
-      }
+    init: async () => {
+      if (opts?.initFail) throw new Error(`${id} init failed`);
       state = "initializing";
-      return Promise.resolve();
     },
-    start: () => {
-      if (opts?.startFail) {
-        throw new Error(`${id} start failed`);
-      }
+    start: async () => {
+      if (opts?.startFail) throw new Error(`${id} start failed`);
       state = "running";
-      return Promise.resolve();
     },
-    stop: () => {
-      if (opts?.stopFail) {
-        throw new Error(`${id} stop failed`);
-      }
+    stop: async () => {
+      if (opts?.stopFail) throw new Error(`${id} stop failed`);
       state = "stopped";
-      return Promise.resolve();
     },
-    bindStream: () => {
-      // no-op
-    },
-    unbindStream: () => {
-      // no-op
-    },
-    handleInput: () => {
-      // no-op
-    },
-    resize: () => {
-      // no-op
-    },
+    bindStream: () => {},
+    unbindStream: () => {},
+    handleInput: () => {},
+    resize: () => {},
     queryCapabilities: () => DEFAULT_CAPS,
     getState: () => state,
-    onCrash: () => {
-      // no-op
-    },
+    onCrash: () => {},
   };
 }
 
@@ -100,7 +78,7 @@ describe("switchRenderer", () => {
     const to = createMockAdapter("rio");
     const { reg, sm } = setupRegistry(from, to);
     const events: RendererLifecycleEvent[] = [];
-    const bus: RendererEventBus = { publish: e => events.push(e) };
+    const bus: RendererEventBus = { publish: (e) => events.push(e) };
 
     await switchRenderer("ghostty", "rio", {
       registry: reg,
@@ -114,7 +92,7 @@ describe("switchRenderer", () => {
     expect(reg.getActive()?.id).toBe("rio");
     expect(sm.state).toBe("running");
     expect(events.length).toBe(1);
-    expect(events[0]?.type).toBe("renderer.switched");
+    expect(events[0]!.type).toBe("renderer.switched");
   });
 
   it("throws for same renderer", async () => {
@@ -128,7 +106,7 @@ describe("switchRenderer", () => {
         surface: SURFACE,
         config: CONFIG,
         boundStreams: new Map(),
-      })
+      }),
     ).rejects.toThrow(SwitchSameRendererError);
   });
 
@@ -137,7 +115,7 @@ describe("switchRenderer", () => {
     const to = createMockAdapter("rio", { initFail: true });
     const { reg, sm } = setupRegistry(from, to);
     const events: RendererLifecycleEvent[] = [];
-    const bus: RendererEventBus = { publish: e => events.push(e) };
+    const bus: RendererEventBus = { publish: (e) => events.push(e) };
 
     await expect(
       switchRenderer("ghostty", "rio", {
@@ -147,13 +125,13 @@ describe("switchRenderer", () => {
         config: CONFIG,
         boundStreams: new Map(),
         eventBus: bus,
-      })
+      }),
     ).rejects.toThrow("rio init failed");
 
     // Should have rolled back
     expect(reg.getActive()?.id).toBe("ghostty");
     expect(sm.state).toBe("running");
-    expect(events.some(e => e.type === "renderer.switch_failed")).toBe(true);
+    expect(events.some((e) => e.type === "renderer.switch_failed")).toBe(true);
   });
 
   it("enters errored state on double failure", async () => {
@@ -171,7 +149,7 @@ describe("switchRenderer", () => {
     // Override from's init to fail (simulating rollback failure)
     // from is already set up with initFail: true
     const events: RendererLifecycleEvent[] = [];
-    const bus: RendererEventBus = { publish: e => events.push(e) };
+    const bus: RendererEventBus = { publish: (e) => events.push(e) };
 
     await expect(
       switchRenderer("ghostty", "rio", {
@@ -181,11 +159,11 @@ describe("switchRenderer", () => {
         config: CONFIG,
         boundStreams: new Map(),
         eventBus: bus,
-      })
+      }),
     ).rejects.toThrow();
 
     expect(sm.state).toBe("errored");
-    expect(events.some(e => e.type === "renderer.errored")).toBe(true);
+    expect(events.some((e) => e.type === "renderer.errored")).toBe(true);
   });
 
   it("rebinds streams on successful switch", async () => {
@@ -193,15 +171,11 @@ describe("switchRenderer", () => {
     const unboundPtys: string[] = [];
     const from = {
       ...createMockAdapter("ghostty"),
-      unbindStream: (ptyId: string) => {
-        unboundPtys.push(ptyId);
-      },
+      unbindStream: (ptyId: string) => { unboundPtys.push(ptyId); },
     };
     const to = {
       ...createMockAdapter("rio"),
-      bindStream: (ptyId: string) => {
-        boundPtys.push(ptyId);
-      },
+      bindStream: (ptyId: string) => { boundPtys.push(ptyId); },
     };
     const { reg, sm } = setupRegistry(from, to);
 

@@ -7,7 +7,7 @@
  * Tags: NFR-011-001, SC-011-004
  */
 
-import { beforeEach, describe, expect, test } from "bun:test";
+import { describe, test, expect, beforeEach } from "bun:test";
 import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
 import type { MetricsSnapshot } from "../../../../src/renderer/ghostty/metrics.js";
 
@@ -200,19 +200,17 @@ describe("GhosttyMetrics - publisher", () => {
     metrics.recordFrame(now + 16);
 
     // Wait for at least one publish
-    await new Promise(r => setTimeout(r, 120));
+    await new Promise((r) => setTimeout(r, 120));
 
     metrics.disable();
     expect(published.length).toBeGreaterThanOrEqual(1);
-    expect(published[0]?.rendererId).toBe("ghostty");
+    expect(published[0]!.rendererId).toBe("ghostty");
   });
 
   test("clearPublisher stops publishing", () => {
     const metrics = new GhosttyMetrics({ publishIntervalMs: 50 });
     const published: MetricsSnapshot[] = [];
-    metrics.setPublisher((_topic, payload) => {
-      published.push(payload);
-    });
+    metrics.setPublisher((_topic, payload) => { published.push(payload); });
     metrics.enable();
     metrics.clearPublisher();
     metrics.disable();

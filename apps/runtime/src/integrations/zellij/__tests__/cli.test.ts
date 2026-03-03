@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { ZellijCli } from "../cli.js";
-import { ZellijVersionError } from "../errors.js";
+import { ZellijNotFoundError, ZellijVersionError } from "../errors.js";
 
 /**
  * Unit tests for ZellijCli.
@@ -27,9 +27,7 @@ function makeMockProc(stdout: string, stderr: string, exitCode: number) {
     stdout: stdoutStream,
     stderr: stderrStream,
     exited: Promise.resolve(exitCode),
-    kill: mock(() => {
-      // Intentionally no-op: kill is not exercised by these tests.
-    }),
+    kill: mock(() => {}),
   };
 }
 
@@ -42,6 +40,7 @@ describe("ZellijCli", () => {
 
   describe("checkAvailability", () => {
     it("returns available=true with version when zellij is found", async () => {
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => makeMockProc("zellij 0.41.2\n", "", 0));
 
       const cli = new ZellijCli();
@@ -54,6 +53,7 @@ describe("ZellijCli", () => {
     });
 
     it("returns available=false when zellij binary not found", async () => {
+      // @ts-ignore mock override
       Bun.spawn = mock(() => {
         throw new Error("spawn ENOENT");
       });
@@ -67,6 +67,7 @@ describe("ZellijCli", () => {
     });
 
     it("throws ZellijVersionError when version is too old", async () => {
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => makeMockProc("zellij 0.39.0\n", "", 0));
 
       const cli = new ZellijCli();
@@ -77,6 +78,7 @@ describe("ZellijCli", () => {
     });
 
     it("returns available=false on non-zero exit code", async () => {
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => makeMockProc("", "segfault", 139));
 
       const cli = new ZellijCli();
@@ -90,6 +92,7 @@ describe("ZellijCli", () => {
 
   describe("run", () => {
     it("returns stdout, stderr, and exitCode", async () => {
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => makeMockProc("output\n", "", 0));
 
       const cli = new ZellijCli();
@@ -110,6 +113,7 @@ describe("ZellijCli", () => {
         "another-session  2026-02-27 11:00:00",
       ].join("\n");
 
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => makeMockProc(output, "", 0));
 
       const cli = new ZellijCli();
@@ -125,7 +129,10 @@ describe("ZellijCli", () => {
     });
 
     it("returns empty array when no sessions", async () => {
-      Bun.spawn = mock(() => makeMockProc("No active zellij sessions found.", "", 1));
+      // @ts-expect-error mock override
+      Bun.spawn = mock(() =>
+        makeMockProc("No active zellij sessions found.", "", 1)
+      );
 
       const cli = new ZellijCli();
       const sessions = await cli.listSessions();

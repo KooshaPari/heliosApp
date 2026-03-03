@@ -13,7 +13,7 @@ import {
   writeGateReport,
 } from "./gate-report";
 
-const REPORT_OUTPUT = ".gate-reports/gate-static-analysis.json";
+const REPORT_OUTPUT = '.gate-reports/gate-static-analysis.json';
 const MAX_FILE_LENGTH = 500;
 const SOURCE_DIRECTORIES = [
   join(process.cwd(), "apps/runtime/src"),
@@ -121,7 +121,7 @@ function main(): void {
   const findings = scanForViolations();
   const duration = Date.now() - startTime;
 
-  const report = createGateReport("static-analysis", findings, duration);
+  const report = createGateReport('static-analysis', findings, duration);
   writeGateReport(report, REPORT_OUTPUT);
   process.stdout.write(`${formatGateReport(report)}\n`);
   process.exit(report.status === "pass" ? 0 : 1);

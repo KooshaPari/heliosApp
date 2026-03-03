@@ -2,24 +2,23 @@
  * Approval Workflow Management Page
  */
 
-import { createSignal, onMount } from "solid-js";
-import { ApprovalPanel } from "../components/approval/ApprovalPanel";
-import { ApprovalStatus } from "../types/approval";
-import type { ApprovalRequest, ApprovalWorkflow } from "../types/approval";
+import { createSignal, onMount } from 'solid-js';
+import { ApprovalPanel } from '../components/approval/ApprovalPanel';
+import type { ApprovalRequest, ApprovalWorkflow } from '../types/approval';
 
 export function ApprovalWorkflowPage() {
   const [requests, setRequests] = createSignal<ApprovalRequest[]>([]);
   const [workflow, setWorkflow] = createSignal<ApprovalWorkflow | null>(null);
   const [loading, setLoading] = createSignal(true);
 
-  onMount(() => {
+  onMount(async () => {
     setRequests([]);
     setWorkflow({
-      userId: "current-user",
+      userId: 'current-user',
       totalRequests: 0,
       pendingRequests: 0,
       approvedRequests: 0,
-      rejectedRequests: 0,
+      rejectedRequests: 0
     });
     setLoading(false);
   });
@@ -31,7 +30,7 @@ export function ApprovalWorkflowPage() {
   const handleReject = (id: string, reason: string) => {
     setRequests(
       requests().map(r =>
-        r.id === id ? { ...r, status: ApprovalStatus.Rejected, rejectedReason: reason } : r
+        r.id === id ? { ...r, status: 'rejected' as const, rejectedReason: reason } : r
       )
     );
   };
@@ -51,24 +50,28 @@ export function ApprovalWorkflowPage() {
             <div class="workflow-stats">
               <div class="stat">
                 <span class="label">Total</span>
-                <span class="value">{workflow()?.totalRequests}</span>
+                <span class="value">{workflow()!.totalRequests}</span>
               </div>
               <div class="stat">
                 <span class="label">Pending</span>
-                <span class="value pending">{workflow()?.pendingRequests}</span>
+                <span class="value pending">{workflow()!.pendingRequests}</span>
               </div>
               <div class="stat">
                 <span class="label">Approved</span>
-                <span class="value approved">{workflow()?.approvedRequests}</span>
+                <span class="value approved">{workflow()!.approvedRequests}</span>
               </div>
               <div class="stat">
                 <span class="label">Rejected</span>
-                <span class="value rejected">{workflow()?.rejectedRequests}</span>
+                <span class="value rejected">{workflow()!.rejectedRequests}</span>
               </div>
             </div>
           )}
 
-          <ApprovalPanel requests={requests()} onApprove={handleApprove} onReject={handleReject} />
+          <ApprovalPanel
+            requests={requests()}
+            onApprove={handleApprove}
+            onReject={handleReject}
+          />
         </div>
       )}
 

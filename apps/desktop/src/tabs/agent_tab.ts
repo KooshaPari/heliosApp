@@ -1,4 +1,4 @@
-import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
+import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
 
 export interface AgentAction {
   timestamp: string;
@@ -8,9 +8,9 @@ export interface AgentAction {
 }
 
 export interface AgentTabState extends TabState {
-  agentStatus?: "idle" | "running" | "error" | undefined;
-  scrollPosition?: number | undefined;
-  actionCount?: number | undefined;
+  agentStatus?: "idle" | "running" | "error";
+  scrollPosition?: number;
+  actionCount?: number;
 }
 
 /**
@@ -26,21 +26,21 @@ export interface AgentTabState extends TabState {
 export class AgentTab extends TabSurface {
   private agentStatus: "idle" | "running" | "error" = "idle";
   private actions: AgentAction[] = [];
-  // errorMessage is inherited from TabSurface (protected)
+  private errorMessage: string | null = null;
   private contentEl: HTMLElement | null = null;
 
   constructor() {
     super("agent-tab", "agent", "Agent");
   }
 
-  onContextChange(context: ActiveContext | null): Promise<void> {
+  async onContextChange(context: ActiveContext | null): Promise<void> {
     // When context changes, query agent state for this session
     this.actions = [];
     this.errorMessage = null;
 
     if (!context) {
       this.agentStatus = "idle";
-      return Promise.resolve();
+      return;
     }
 
     // In a real implementation, query agent registry:
@@ -51,7 +51,6 @@ export class AgentTab extends TabSurface {
     // Simulate: generate mock agent activity
     this.agentStatus = "idle";
     this.generateMockAgentActions(context);
-    return Promise.resolve();
   }
 
   render(): HTMLElement {
@@ -154,6 +153,7 @@ export class AgentTab extends TabSurface {
     restartBtn.style.fontSize = "12px";
     restartBtn.addEventListener("click", () => {
       this.agentStatus = "running";
+      console.log("Restart agent action triggered");
     });
 
     const logBtn = document.createElement("button");
@@ -166,7 +166,7 @@ export class AgentTab extends TabSurface {
     logBtn.style.cursor = "pointer";
     logBtn.style.fontSize = "12px";
     logBtn.addEventListener("click", () => {
-      this.errorMessage = "Full log feature is coming soon.";
+      console.log("View full log action triggered");
     });
 
     const copyBtn = document.createElement("button");
@@ -179,11 +179,11 @@ export class AgentTab extends TabSurface {
     copyBtn.style.cursor = "pointer";
     copyBtn.style.fontSize = "12px";
     copyBtn.addEventListener("click", async () => {
-      const text = this.actions.map(a => `[${a.timestamp}] ${a.action}: ${a.output}`).join("\n");
+      const text = this.actions.map((a) => `[${a.timestamp}] ${a.action}: ${a.output}`).join("\n");
       try {
         await navigator.clipboard.writeText(text);
-      } catch (error) {
-        this.errorMessage = error instanceof Error ? error.message : "Copy to clipboard failed";
+      } catch {
+        console.error("Failed to copy to clipboard");
       }
     });
 
@@ -260,7 +260,7 @@ export class AgentTab extends TabSurface {
       ...baseState,
       agentStatus: this.agentStatus,
       scrollPosition: this.contentEl?.scrollTop,
-      actionCount: this.actions.length,
+      actionCount: this.actions.length
     };
   }
 
@@ -284,19 +284,19 @@ export class AgentTab extends TabSurface {
         timestamp: new Date(now.getTime() - 10000).toISOString(),
         action: "Initialize session",
         status: "success",
-        output: `Session ${context.sessionId} initialized`,
+        output: `Session ${context.sessionId} initialized`
       },
       {
         timestamp: new Date(now.getTime() - 5000).toISOString(),
         action: "Analyze context",
         status: "success",
-        output: `Analyzed workspace ${context.workspaceId}`,
+        output: `Analyzed workspace ${context.workspaceId}`
       },
       {
         timestamp: now.toISOString(),
         action: "Waiting for commands",
-        status: "pending",
-      },
+        status: "pending"
+      }
     ];
   }
 }

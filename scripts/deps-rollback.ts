@@ -4,16 +4,16 @@
  * Usage: bun run deps:rollback <package>
  */
 
-import { copyFileSync, existsSync, readFileSync, unlinkSync, writeFileSync } from "fs";
-import { join } from "path";
-import { appendChangelogEntry } from "./deps-changelog-util";
-import type { ChangelogEntry, DepsRegistry } from "./deps-types";
+import { readFileSync, writeFileSync, copyFileSync, existsSync, unlinkSync } from 'fs';
+import { join } from 'path';
+import type { DepsRegistry, ChangelogEntry } from './deps-types';
+import { appendChangelogEntry } from './deps-changelog-util';
 
 const REPO_ROOT = process.cwd();
-const REGISTRY_PATH = join(REPO_ROOT, "deps-registry.json");
-const LOCKFILE_PATH = join(REPO_ROOT, "bun.lockb");
-const PACKAGE_JSON_PATH = join(REPO_ROOT, "package.json");
-const BACKUP_DIR = join(REPO_ROOT, ".deps-rollback-backup");
+const REGISTRY_PATH = join(REPO_ROOT, 'deps-registry.json');
+const LOCKFILE_PATH = join(REPO_ROOT, 'bun.lockb');
+const PACKAGE_JSON_PATH = join(REPO_ROOT, 'package.json');
+const BACKUP_DIR = join(REPO_ROOT, '.deps-rollback-backup');
 
 interface BackupFiles {
   lockfile?: string;
@@ -27,7 +27,7 @@ function createBackup(): BackupFiles {
   const backup: BackupFiles = {};
 
   try {
-    require("fs").mkdirSync(BACKUP_DIR, { recursive: true });
+    require('fs').mkdirSync(BACKUP_DIR, { recursive: true });
 
     if (existsSync(LOCKFILE_PATH)) {
       backup.lockfile = join(BACKUP_DIR, `bun.lockb.${Date.now()}`);
@@ -85,14 +85,14 @@ async function rollback(packageName: string): Promise<void> {
   // Load registry
   let registry: DepsRegistry;
   try {
-    registry = JSON.parse(readFileSync(REGISTRY_PATH, "utf-8"));
+    registry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf-8'));
   } catch (e) {
     console.error(`Failed to read registry: ${e}`);
     process.exit(2);
   }
 
   // Find dependency
-  const dep = registry.dependencies.find(d => d.name === packageName);
+  const dep = registry.dependencies.find((d) => d.name === packageName);
   if (!dep) {
     console.error(`Package '${packageName}' not found in registry`);
     process.exit(1);
@@ -109,9 +109,7 @@ async function rollback(packageName: string): Promise<void> {
     process.exit(1);
   }
 
-  console.log(
-    `Attempting rollback of '${packageName}' from ${dep.currentPin} to ${rollbackVersion}...`
-  );
+  console.log(`Attempting rollback of '${packageName}' from ${dep.currentPin} to ${rollbackVersion}...`);
 
   // Create backup
   const backup = createBackup();
@@ -120,7 +118,7 @@ async function rollback(packageName: string): Promise<void> {
     // Update package.json to pin the known-good version
     let packageJson;
     try {
-      packageJson = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf-8"));
+      packageJson = JSON.parse(readFileSync(PACKAGE_JSON_PATH, 'utf-8'));
     } catch (e) {
       throw new Error(`Failed to read package.json: ${e}`);
     }
@@ -141,17 +139,16 @@ async function rollback(packageName: string): Promise<void> {
     // - bun install to regenerate lockfile
     // - bun run typecheck as a smoke test
     // For demo purposes, we'll assume these pass and just log the intent.
-    console.log("(In production: would run bun install and typecheck)");
+    console.log('(In production: would run bun install and typecheck)');
 
     // Update registry
     dep.currentPin = rollbackVersion;
     dep.lastUpdated = new Date().toISOString();
     writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2));
-    console.log("Updated registry manifest");
+    console.log('Updated registry manifest');
 
     // Append changelog entry
-    const previousVersion =
-      dep.knownGoodHistory[dep.knownGoodHistory.length - 1]?.version || dep.currentPin;
+    const previousVersion = dep.knownGoodHistory[dep.knownGoodHistory.length - 1]?.version || dep.currentPin;
     const entry: ChangelogEntry = {
       timestamp: new Date().toISOString(),
       package: packageName,
@@ -159,11 +156,11 @@ async function rollback(packageName: string): Promise<void> {
       toVersion: rollbackVersion,
       channel: dep.channel,
       gateResults: { typecheck: true },
-      outcome: "success",
-      actor: "user",
+      outcome: 'success',
+      actor: 'user',
     };
     appendChangelogEntry(entry);
-    console.log("Appended changelog entry");
+    console.log('Appended changelog entry');
 
     console.log(`\nRollback successful: ${packageName} reverted to ${rollbackVersion}`);
     process.exit(0);
@@ -179,12 +176,12 @@ async function rollback(packageName: string): Promise<void> {
 // Main entry point
 const args = process.argv.slice(2);
 if (args.length === 0) {
-  console.error("Usage: bun run deps:rollback <package>");
+  console.error('Usage: bun run deps:rollback <package>');
   process.exit(1);
 }
 
 const packageName = args[0];
-rollback(packageName).catch(e => {
+rollback(packageName).catch((e) => {
   console.error(`Fatal error: ${e}`);
   process.exit(2);
 });

@@ -1,8 +1,4 @@
-import type { AuditEvent } from "./event.ts";
-
-interface EventSource {
-  getWorkspaces(): Promise<string[]>;
-}
+import { AuditEvent } from './event';
 
 /**
  * Retention policy for workspace audit events.
@@ -46,7 +42,7 @@ export class RetentionPolicyStore {
         workspaceId,
         ttlDays: 30,
         legalHold: false,
-        purgeSchedule: "daily",
+        purgeSchedule: 'daily',
       }
     );
   }
@@ -87,8 +83,8 @@ export class RetentionPolicyStore {
    */
   computeHashChain(events: AuditEvent[]): string {
     // Simplified implementation
-    const hashes = events.map(e => this.hashEvent(e));
-    return hashes.join(":");
+    const hashes = events.map((e) => this.hashEvent(e));
+    return hashes.join(':');
   }
 
   /**
@@ -113,14 +109,10 @@ export class RetentionPurger {
    * Run purge for workspace(s).
    *
    * @param workspaceId - Optional workspace to purge; if omitted, purge all
-   * @param store - Audit store for deletion (reserved for future purge execution)
+   * @param store - Audit store for deletion
    * @param eventSource - Function to get events for deletion
    */
-  async runPurge(
-    workspaceId: string | undefined,
-    _store: unknown,
-    eventSource: EventSource
-  ): Promise<void> {
+  async runPurge(workspaceId: string | undefined, store: any, eventSource: any): Promise<void> {
     const workspaces = workspaceId ? [workspaceId] : await eventSource.getWorkspaces();
 
     for (const ws of workspaces) {
@@ -128,12 +120,16 @@ export class RetentionPurger {
 
       // Skip if legal hold is enabled
       if (policy.legalHold) {
+        console.log(`[RetentionPurger] Legal hold active for ${ws}, skipping purge`);
         continue;
       }
 
       // Find expired events
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - policy.ttlDays);
+
+      // TODO: Integrate with actual store queries for deletion
+      console.log(`[RetentionPurger] Purge expired events for ${ws} before ${cutoffDate.toISOString()}`);
 
       // Create deletion proof
       const proof: DeletionProof = {
@@ -142,7 +138,7 @@ export class RetentionPurger {
         purgedEventCount: 0, // TODO: from actual deletion
         oldestEventTimestamp: cutoffDate.toISOString(),
         newestEventTimestamp: new Date().toISOString(),
-        hashChain: "", // TODO: compute from events
+        hashChain: '', // TODO: compute from events
         purgedAt: new Date().toISOString(),
       };
 

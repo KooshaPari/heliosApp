@@ -28,7 +28,7 @@ jobs:
             const pr = await github.rest.pulls.get({
               owner,
               repo,
-              pull_number: pullRequestNumber
+              pull_number: number
             });
 
             // Check if author is the actor
@@ -38,14 +38,14 @@ jobs:
             const reviews = await github.rest.pulls.listReviews({
               owner,
               repo,
-              pull_number: pullRequestNumber
+              pull_number: number
             });
 
             // Track latest review state per reviewer to handle DISMISSED/CHANGES_REQUESTED
             const latestReviewByUser = {};
             reviews.data.forEach(review => {
-              if (review.state !== 'COMMENTED') {
-                latestReviewByUser[review.user.login] = review.state;
+              if (review.state === 'APPROVED') {
+                approvals[review.user.login] = true;
               }
             });
             const approvals = Object.fromEntries(
@@ -130,38 +130,25 @@ jobs:
             core.setOutput('missing-requirements', missing.join('; '));
       
       - name: Comment on missing requirements
-        if: steps.check.outputs.can-self-merge == 'false' && steps.check.outputs.pr-number != ''
+        if: steps.check.outputs.can-self-merge == 'false'
         uses: actions/github-script@v7
-        env:
-          PR_NUMBER: ${{ steps.check.outputs.pr-number }}
-          ALL_CHECKS_PASSED: ${{ steps.check.outputs.all-checks-passed }}
-          HAS_APPROVAL: ${{ steps.check.outputs.has-approval }}
-          IS_AUTHOR: ${{ steps.check.outputs.is-author }}
-          MISSING_CHECKS: ${{ steps.check.outputs.missing-checks }}
         with:
           script: |
-            const { owner, repo } = context.repo;
-            const number = Number(process.env.PR_NUMBER);
-            const allChecksPassed = process.env.ALL_CHECKS_PASSED === 'true';
-            const hasApproval = process.env.HAS_APPROVAL === 'true';
-            const isAuthor = process.env.IS_AUTHOR === 'true';
-            const missingChecks = process.env.MISSING_CHECKS ? process.env.MISSING_CHECKS.split('\n') : [];
-
-            let message = 'Self-merge is blocked due to missing requirements:\n\n';
-            if (!allChecksPassed) {
-              message += '- Required checks missing or not passing:\n';
-              for (const check of missingChecks) {
-                message += `  - ${check}\n`;
-              }
+            const { owner, repo, number } = context.issue;
+            const missingReqs = "${{ steps.check.outputs.missing-requirements }}".split(',');
+            
+            let message = '⚠️ **Self-merge is blocked due to missing requirements:**\n\n';
+            if (!${{ steps.check.outputs.all-checks-passed }}) {
+              message += '- ❌ Not all quality gates have passed\n';
             }
-            if (!hasApproval) {
-              message += '- PR does not have required review approval\n';
+            if (!${{ steps.check.outputs.has-approval }}) {
+              message += '- ❌ PR does not have required review approval\n';
             }
-            if (!isAuthor) {
-              message += '- Only the PR author can self-merge\n';
+            if (!${{ steps.check.outputs.is-author }}) {
+              message += '- ℹ️ Only the PR author can self-merge\n';
             }
             message += '\nPlease ensure all checks pass before merging.';
-
+            
             github.rest.issues.createComment({
               owner,
               repo,
@@ -174,11 +161,19 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const { owner, repo } = context.repo;
-            const number = Number('${{ steps.check.outputs.pr-number }}');
+            const { owner, repo, number } = context.issue;
             github.rest.issues.createComment({
               owner,
               repo,
               issue_number: number,
-              body: 'All merge requirements satisfied. You may now self-merge this PR.'
+              body: '✅ All merge requirements satisfied. You may now self-merge this PR.'
             });
+
+# Helper function (in comments - needs to be inline in actual workflow)
+# function getMissingRequirements(checksPassed, approval, isAuthor) {
+#   const missing = [];
+#   if (!checksPassed) missing.push('quality-gates');
+#   if (!approval) missing.push('approvals');
+#   if (!isAuthor) missing.push('author');
+#   return missing.join(',');
+# }
