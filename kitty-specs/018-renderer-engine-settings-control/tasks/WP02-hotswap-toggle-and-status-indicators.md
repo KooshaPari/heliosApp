@@ -1,7 +1,7 @@
 ---
 work_package_id: WP02
 title: Hot-Swap Toggle, Status Indicators, and Tests
-lane: "done"
+lane: "doing"
 dependencies:
 - WP01
 base_branch: 018-renderer-engine-settings-control-WP01
@@ -17,8 +17,8 @@ phase: Phase 2 - Interaction and Hardening
 assignee: ''
 agent: "claude-haiku"
 shell_pid: "84824"
-review_status: "approved"
-reviewed_by: "Koosha Paridehpour"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -214,4 +214,3 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:36:36Z – claude-haiku – shell_pid=84824 – lane=doing – Assigned agent via workflow command
-- 2026-03-01T13:37:52Z – claude-haiku – shell_pid=84824 – lane=done – Implemented
