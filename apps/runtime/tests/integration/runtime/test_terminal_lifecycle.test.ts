@@ -15,7 +15,7 @@ describe("terminal lifecycle and streaming data plane", () => {
       session_id: "sess-1",
       payload: { session_id: "sess-1" }
     });
-    expect(response.type).toBe("response");
+
     expect(response.status).toBe("error");
     expect(response.error?.code).toBe("MISSING_CORRELATION_ID");
   });

@@ -27,14 +27,22 @@ export function healthCheck(): HealthCheckResult {
 
 // Exports from protocol and audit subsystems
 import type { AuditSink } from "./audit/sink";
-import { HarnessRouteSelector, type HarnessProbe } from "./integrations/exec";
+import {
+  buildInputTerminalCommand,
+  buildResizeTerminalCommand,
+  buildSpawnTerminalCommand,
+  HarnessRouteSelector,
+  type HarnessProbe
+} from "./integrations/exec";
 import { InMemoryLocalBus } from "./protocol/bus";
+import type { LocalBusEnvelope } from "./protocol/types";
 import { InMemorySessionRegistry, SessionRegistryError, type SessionTransport } from "./sessions/registry";
 import { LaneLifecycleError, LaneLifecycleService } from "./sessions/state_machine";
 
 type RuntimeOptions = {
   auditSink?: AuditSink;
   harnessProbe?: HarnessProbe;
+  terminalBufferCapBytes?: number;
 };
 
 function json(status: number, payload: Record<string, unknown>): Response {
@@ -85,10 +93,14 @@ function splitPath(pathname: string): string[] {
 }
 
 export function createRuntime(options: RuntimeOptions = {}) {
-  const bus = new InMemoryLocalBus({ auditSink: options.auditSink });
+  const bus = new InMemoryLocalBus({
+    auditSink: options.auditSink,
+    terminalBufferCapBytes: options.terminalBufferCapBytes
+  });
   const laneService = new LaneLifecycleService(bus);
   const sessionRegistry = new InMemorySessionRegistry();
   const harnessRouter = new HarnessRouteSelector(bus, options.harnessProbe);
+  const busRequest = (command: LocalBusEnvelope) => bus.request(command);
 
   const fetch = async (request: Request): Promise<Response> => {
     const url = new URL(request.url);
@@ -261,14 +273,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
         const laneId = segments[4];
         const sessionId = asString(body, "session_id") as string;
         const title = asString(body, "title", false);
-        const lane = laneService.getRequired(laneId);
-
-        if (lane.workspace_id !== workspaceId) {
-          return json(409, { error: `lane ${laneId} does not belong to workspace ${workspaceId}` });
-        }
-        if (lane.status === "closed") {
-          return json(409, { error: "lane_closed", details: { lane_id: laneId } });
-        }
+        await laneService.attach(workspaceId, laneId);
 
         const session = sessionRegistry.get(sessionId);
         if (!session) {
@@ -283,38 +288,32 @@ export function createRuntime(options: RuntimeOptions = {}) {
 
         const terminalId = `term_${crypto.randomUUID()}`;
         const correlationId = `terminal.spawn:${terminalId}:${Date.now()}`;
-
-        const response = await bus.request({
-          id: `terminal:${terminalId}:spawn:${Date.now()}`,
-          type: "command",
-          ts: new Date().toISOString(),
-          workspace_id: workspaceId,
-          lane_id: laneId,
-          session_id: sessionId,
-          terminal_id: terminalId,
-          correlation_id: correlationId,
-          method: "terminal.spawn",
-          payload: {
-            id: terminalId,
+        const response = await busRequest(
+          buildSpawnTerminalCommand({
+            command_id: `cmd:terminal.spawn:${terminalId}`,
+            correlation_id: correlationId,
+            workspace_id: workspaceId,
             lane_id: laneId,
             session_id: sessionId,
-            title: title ?? null
-          }
-        });
-
-        if (response.status !== "ok") {
+            terminal_id: terminalId,
+            title
+          })
+        );
+        if (response.type !== "response") {
+          return json(500, { error: "terminal_spawn_invalid_response" });
+        }
+        if (response.status === "error") {
           return json(409, {
             error: "terminal_spawn_failed",
-            details: response.error ?? { lane_id: laneId, session_id: sessionId }
+            details: {
+              code: response.error?.code ?? null,
+              message: response.error?.message ?? null,
+              retryable: response.error?.retryable ?? false
+            }
           });
         }
 
-        return json(201, {
-          terminal_id: terminalId,
-          lane_id: laneId,
-          session_id: sessionId,
-          state: "active"
-        });
+        return json(201, response.result as Record<string, unknown>);
       }
 
       if (request.method === "GET" && url.pathname === "/v1/harness/cliproxy/status") {
@@ -342,6 +341,35 @@ export function createRuntime(options: RuntimeOptions = {}) {
     getState: () => bus.getState(),
     getEvents: () => bus.getEvents(),
     getAuditRecords: () => bus.getAuditRecords(),
+    getTerminal: (terminalId: string) => bus.getTerminal(terminalId),
+    getTerminalBuffer: (terminalId: string) => bus.getTerminalBuffer(terminalId),
+    spawnTerminal: (input: {
+      command_id: string;
+      correlation_id: string;
+      workspace_id: string;
+      lane_id: string;
+      session_id: string;
+      title?: string;
+    }) => busRequest(buildSpawnTerminalCommand(input)),
+    inputTerminal: (input: {
+      command_id: string;
+      correlation_id: string;
+      workspace_id: string;
+      lane_id: string;
+      session_id: string;
+      terminal_id: string;
+      data: string;
+    }) => busRequest(buildInputTerminalCommand(input)),
+    resizeTerminal: (input: {
+      command_id: string;
+      correlation_id: string;
+      workspace_id: string;
+      lane_id: string;
+      session_id: string;
+      terminal_id: string;
+      cols: number;
+      rows: number;
+    }) => busRequest(buildResizeTerminalCommand(input)),
     getHarnessStatus: () => harnessRouter.getStatus(),
     getSession: (sessionId: string) => sessionRegistry.get(sessionId)
   };
