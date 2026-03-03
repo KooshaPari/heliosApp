@@ -1,5 +1,7 @@
 // T003 - Lane lifecycle commands + T004 - Event publishing to local bus
+// T006-T010 - Worktree provisioning, cleanup, PTY termination, orphan reconciliation
 
+import * as path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
 import { LaneRegistry, type LaneRecord, LaneNotFoundError } from "./registry.js";
@@ -18,6 +20,13 @@ import {
   LaneClosedError,
   SharedLaneCleanupError,
 } from "./sharing.js";
+import {
+  provisionWorktree,
+  removeWorktree,
+  reconcileOrphanedWorktrees,
+  WorktreeProvisionError,
+  type ReconciliationResult,
+} from "./worktree.js";
 
 // ── Errors ───────────────────────────────────────────────────────────────────
 
@@ -28,6 +37,18 @@ export class NotImplementedError extends Error {
   }
 }
 
+// ── PTY Manager Interface (T008) ────────────────────────────────────────────
+
+export interface PtyHandle {
+  ptyId: string;
+  laneId: string;
+}
+
+export interface PtyManager {
+  getByLane(laneId: string): PtyHandle[];
+  terminate(ptyId: string): Promise<void>;
+}
+
 // ── Event Types ──────────────────────────────────────────────────────────────
 
 export type LaneBusEventTopic =
@@ -35,7 +56,9 @@ export type LaneBusEventTopic =
   | "lane.state.changed"
   | "lane.shared"
   | "lane.cleaning"
-  | "lane.closed";
+  | "lane.closed"
+  | "lane.ptys_terminated"
+  | "lane.provision_failed";
 
 // ── ID Generation ────────────────────────────────────────────────────────────
 
@@ -56,15 +79,21 @@ export function _resetIdCounter(): void {
 export interface LaneManagerOptions {
   bus?: LocalBus | null;
   capacityLimit?: number;
+  ptyManager?: PtyManager | null;
+  ptyTerminationTimeoutMs?: number;
 }
 
 export class LaneManager {
   private readonly registry: LaneRegistry;
   private readonly bus: LocalBus | null;
+  private readonly ptyManager: PtyManager | null;
+  private readonly ptyTerminationTimeoutMs: number;
 
   constructor(options: LaneManagerOptions = {}) {
     this.registry = new LaneRegistry(options.capacityLimit ?? 50);
     this.bus = options.bus ?? null;
+    this.ptyManager = options.ptyManager ?? null;
+    this.ptyTerminationTimeoutMs = options.ptyTerminationTimeoutMs ?? 5000;
   }
 
   /** Expose registry for testing / sharing module integration. */
@@ -103,6 +132,48 @@ export class LaneManager {
 
       const updated = this.registry.get(laneId);
       return updated!;
+    });
+  }
+
+  // ── T006+T010: provision worktree for a lane in provisioning state ──────
+
+  async provision(laneId: string, workspaceRepoPath: string): Promise<LaneRecord> {
+    return withLaneLock(laneId, async () => {
+      const lane = this.registry.get(laneId);
+      if (!lane) throw new LaneNotFoundError(laneId);
+      if (lane.state !== "provisioning") {
+        throw new Error(`Cannot provision lane in state ${lane.state}`);
+      }
+
+      try {
+        const result = await provisionWorktree({
+          workspaceRepoPath,
+          laneId,
+          baseBranch: lane.baseBranch,
+        });
+
+        // Transition provisioning -> ready
+        const fromState = lane.state;
+        const toState = transition(fromState, "provision_complete", laneId);
+        recordTransition(laneId, fromState, "provision_complete", toState);
+        this.registry.update(laneId, {
+          state: toState,
+          worktreePath: result.worktreePath,
+        });
+
+        await this.emitEvent("lane.state.changed", laneId, lane.workspaceId, fromState, toState);
+        return this.registry.get(laneId)!;
+      } catch (err) {
+        // T010: Partial provisioning failure - clean up and close lane
+        const fromState = lane.state;
+        const toState = transition(fromState, "provision_failed", laneId);
+        recordTransition(laneId, fromState, "provision_failed", toState);
+        this.registry.update(laneId, { state: toState });
+
+        await this.emitEvent("lane.provision_failed", laneId, lane.workspaceId, fromState, toState);
+
+        throw err;
+      }
     });
   }
 
@@ -202,16 +273,101 @@ export class LaneManager {
         await this.emitEvent("lane.cleaning", laneId, lane.workspaceId, fromState, toState);
       }
 
-      // Placeholder: WP02 worktree cleanup, WP03 par/PTY cleanup would go here
-      // For now, immediately transition to closed
+      // T008: Terminate PTYs before worktree removal
+      await this.terminateLanePtys(laneId, lane.workspaceId);
 
+      // T007: Remove worktree if one was provisioned
       const currentLane = this.registry.get(laneId)!;
-      const cleaningFrom = currentLane.state;
+      if (currentLane.worktreePath) {
+        try {
+          // Infer workspaceRepoPath from worktreePath
+          // worktreePath = <workspaceRepoPath>/.helios-worktrees/<laneId>
+          const worktreeParent = path.dirname(currentLane.worktreePath);
+          const workspaceRepoPath = path.dirname(worktreeParent);
+          await removeWorktree(currentLane.worktreePath, workspaceRepoPath);
+        } catch {
+          // Best-effort: worktree may already be removed
+        }
+        this.registry.update(laneId, { worktreePath: null });
+      }
+
+      // Transition cleaning -> closed
+      const updatedLane = this.registry.get(laneId)!;
+      const cleaningFrom = updatedLane.state;
       const closedState = transition(cleaningFrom, "cleanup_complete", laneId);
       recordTransition(laneId, cleaningFrom, "cleanup_complete", closedState);
       this.registry.update(laneId, { state: closedState });
       await this.emitEvent("lane.closed", laneId, lane.workspaceId, cleaningFrom, closedState);
     });
+  }
+
+  // ── T008: Graceful PTY termination before worktree removal ───────────────
+
+  private async terminateLanePtys(laneId: string, workspaceId: string): Promise<void> {
+    if (!this.ptyManager) return;
+
+    let ptys: PtyHandle[];
+    try {
+      ptys = this.ptyManager.getByLane(laneId);
+    } catch {
+      // PTY manager unavailable - proceed with best effort
+      return;
+    }
+
+    if (ptys.length === 0) return;
+
+    let forceKilled = 0;
+    const terminationPromises = ptys.map(async (pty) => {
+      try {
+        const timeout = new Promise<"timeout">((resolve) =>
+          setTimeout(() => resolve("timeout"), this.ptyTerminationTimeoutMs),
+        );
+        const termination = this.ptyManager!.terminate(pty.ptyId).then(() => "done" as const);
+        const result = await Promise.race([termination, timeout]);
+        if (result === "timeout") {
+          forceKilled++;
+        }
+      } catch {
+        forceKilled++;
+      }
+    });
+
+    await Promise.all(terminationPromises);
+
+    await this.emitEvent("lane.ptys_terminated", laneId, workspaceId, "cleaning", "cleaning");
+  }
+
+  // ── T009: Orphan reconciliation on startup ──────────────────────────────
+
+  async reconcileOrphans(workspaceRepoPath: string): Promise<ReconciliationResult> {
+    const knownLaneIds = new Set<string>();
+    const activeLanes = this.registry.getActive();
+    for (const lane of activeLanes) {
+      knownLaneIds.add(lane.laneId);
+    }
+
+    const result = await reconcileOrphanedWorktrees(
+      workspaceRepoPath,
+      knownLaneIds,
+      (laneId: string) => {
+        try {
+          this.registry.update(laneId, { state: "closed" });
+        } catch {
+          // Lane may not exist in registry
+        }
+      },
+    );
+
+    // Check for lane records that claim worktree paths that don't exist
+    const fs = await import("node:fs");
+    for (const lane of activeLanes) {
+      if (lane.worktreePath && !fs.existsSync(lane.worktreePath)) {
+        result.orphanedRecords++;
+        this.registry.update(lane.laneId, { state: "closed", worktreePath: null });
+      }
+    }
+
+    return result;
   }
 
   // ── T004: Event Publishing ───────────────────────────────────────────────
@@ -254,3 +410,15 @@ export { LaneRegistry, type LaneRecord, LaneNotFoundError } from "./registry.js"
 export type { LaneState, LaneEvent } from "./state_machine.js";
 export { InvalidLaneTransitionError, transition, withLaneLock, getTransitionHistory } from "./state_machine.js";
 export { LaneClosedError, SharedLaneCleanupError } from "./sharing.js";
+export {
+  provisionWorktree,
+  removeWorktree,
+  reconcileOrphanedWorktrees,
+  WorktreeProvisionError,
+  WorktreeCleanupError,
+  computeWorktreePath,
+  computeBranchName,
+  type WorktreeOptions,
+  type WorktreeResult,
+  type ReconciliationResult,
+} from "./worktree.js";
