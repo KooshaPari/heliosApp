@@ -21,17 +21,12 @@ export {
 export { GhosttyProcess, GhosttyBinaryNotFoundError, GhosttyProcessError } from "./process.js";
 export type { GhosttyOptions } from "./process.js";
 export { GhosttySurface, SurfaceBindingError } from "./surface.js";
-export type { GpuRenderingMode, GpuSurfaceStatus, SurfaceEventHandler } from "./surface.js";
 export {
   detectCapabilities,
   getCachedCapabilities,
   clearCapabilityCache,
   detectGpu,
 } from "./capabilities.js";
-export { GhosttyMetrics } from "./metrics.js";
-export type { FrameSample, InputLatencySample, MetricsSnapshot, MetricsConfig, MetricsPublisher } from "./metrics.js";
-export { GhosttyInputRelay, InputRelayError } from "./input.js";
-export type { PtyWriter, GhosttyInputEvent, InputEventListener } from "./input.js";
 
 // ---------------------------------------------------------------------------
 // Binary detection

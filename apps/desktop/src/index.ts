@@ -1,2 +1,4 @@
-// Desktop app entry point (placeholder)
+/**
+ * Desktop app entry point (placeholder).
+ */
 export {};
