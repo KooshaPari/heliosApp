@@ -28,19 +28,26 @@ Status legend:
   - [status:done] `bun test apps/runtime/tests/unit/renderer/stream_binding.test.ts`
   - [status:done] `bun test apps/runtime/tests/integration/diagnostics/slo.test.ts`
 
-## Phase 3 — Remaining Non-Blocking Warnings (pending)
-- [status:pending] Clean high-volume lint warnings in:
-  - [status:pending] `apps/runtime/src/config/settings.ts` (`noVoid`, `useAwait`, empty catch).
-  - [status:pending] `apps/runtime/src/integrations/inference/*` (async/noVoid/naming/style consistency).
-  - [status:pending] `apps/runtime/src/integrations/inference/hardware.ts` (strictCase naming adjustments).
-  - [status:pending] `apps/runtime/src/diagnostics/types.ts` (SLO* naming rule compatibility).
+## Phase 3 — Remaining Non-Blocking Warnings (partial)
+- [status:done] Clean high-volume lint warnings in:
+  - [status:done] `apps/runtime/src/config/settings.ts` (`noVoid`, `useAwait`, empty catch).
+  - [status:done] `apps/runtime/src/integrations/inference/*` (async/noVoid/naming/style consistency).
+  - [status:done] `apps/runtime/src/integrations/inference/hardware.ts` (strictCase naming adjustments).
+  - [status:done] `apps/runtime/src/diagnostics/types.ts` (SLO* naming rule compatibility).
+- [status:done] Validate each file-set after cleanup by targeted `bunx biome check`.
+- [status:partial] Remaining non-blocking lint surface in unrelated `apps/runtime/src/integrations/exec.ts` (`noVoid`, `useNamingConvention`) for separate follow-on.
 - [status:pending] Decide whether to keep `SLO*` naming as public compatibility surfaces.
-- [status:pending] Validate each file-set after cleanup by targeted `bunx biome check`.
 
 ## Phase 4 — Closure and Handoff
 - [status:done] Re-run `task devops:check:ci-summary` after every cleanup pass (passes; warnings remain, no failures).
-- [status:pending] Decide scope of commit bundling:
-  - [status:pending] Commit Phase 2 hardening only (minimal diff).
-  - [status:pending] Optionally include broader prior working-tree items only after separate review.
-- [status:pending] Update session index links:
-  - [status:pending] `docs/index/*.md` entries for current checkpoint if required.
+- [status:done] Decide scope of commit bundling and stage/commit:
+  - [status:done] Commit Phase 2 hardening and current working-tree stabilization.
+  - [status:done] Include broader related docs/runtime/desktop stability items after local review.
+- [status:done] Update session index links:
+  - [status:done] `docs/index/*.md` entries and `docs/sessions/20260303-heliosapp-stabilization`.
+
+## Phase 5 — Publish Readiness and Non-Sandbox Flow
+- [status:done] Validate shared helper delegation path (`repo-push-fallback.sh`) and local fallback checks.
+- [status:done] Fix wrapper regression: `--dry-run` and explicit option forwarding to shared helper.
+- [status:done] Publish to local mirror remote successfully using queue/queue-worker mode.
+- [status:pending] Push to upstream origin when network and branch alignment are available.
