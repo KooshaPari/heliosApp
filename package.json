@@ -8,13 +8,14 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome check apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
     "format": "biome format --write apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
-    "test": "bun test apps/runtime apps/desktop/tests/unit",
+    "test": "bun test apps/runtime apps/desktop/tests/unit scripts/tests/",
     "test:coverage": "bun test --coverage apps/runtime apps/desktop/tests/unit",
     "test:e2e": "playwright test",
     "docs:index": "bash docs/scripts/generate-doc-index.sh",
     "docs:dev": "vitepress dev docs",
     "docs:build": "bun run docs:index && vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "deps:status": "bun scripts/deps-status.ts"
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.10.0",
