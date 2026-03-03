@@ -38,10 +38,38 @@ tasks:
     cmds:
       - bun run test
 
+  test:e2e:build:
+    desc: Build runtime and desktop artifacts for E2E execution
+    cmds:
+      - bun run --cwd apps/runtime build
+      - bun run --cwd apps/desktop build
+
+  test:e2e:playwright:
+    desc: Run E2E tests with existing report + gate handling
+    cmds:
+      - |
+        set -euo pipefail
+        set +e
+        bun run test:e2e:gate | tee /tmp/e2e.log
+        E2E_EXIT=${PIPESTATUS[0]}
+        bun run scripts/gate-e2e.ts
+        GATE_EXIT=$?
+        set -e
+        if [ "$E2E_EXIT" -ne 0 ] || [ "$GATE_EXIT" -ne 0 ]; then
+          exit 1
+        fi
+
   coverage:
     desc: Run unit tests with coverage
     cmds:
       - bun run test:coverage
+
+  test:e2e:
+    desc: Canonical E2E lane with build + install + gate
+    cmds:
+      - bunx playwright install --with-deps chromium
+      - task test:e2e:build
+      - task test:e2e:playwright
 
   docs:index:
     desc: Generate markdown document index pages
