@@ -136,16 +136,21 @@ jobs:
           ALL_CHECKS_PASSED: ${{ steps.check.outputs.all-checks-passed }}
           HAS_APPROVAL: ${{ steps.check.outputs.has-approval }}
           IS_AUTHOR: ${{ steps.check.outputs.is-author }}
+          MISSING_CHECKS: ${{ steps.check.outputs.missing-checks }}
         with:
           script: |
             const { owner, repo, number } = context.issue;
             const allChecksPassed = process.env.ALL_CHECKS_PASSED === 'true';
             const hasApproval = process.env.HAS_APPROVAL === 'true';
             const isAuthor = process.env.IS_AUTHOR === 'true';
+            const missingChecks = process.env.MISSING_CHECKS ? process.env.MISSING_CHECKS.split('\n') : [];
 
             let message = 'Self-merge is blocked due to missing requirements:\n\n';
             if (!allChecksPassed) {
-              message += '- Not all quality gates have passed\n';
+              message += '- Required checks missing or not passing:\n';
+              for (const check of missingChecks) {
+                message += `  - ${check}\n`;
+              }
             }
             if (!hasApproval) {
               message += '- PR does not have required review approval\n';
