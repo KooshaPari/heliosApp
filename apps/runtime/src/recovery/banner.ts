@@ -108,7 +108,10 @@ export class RecoveryBanner {
     };
   }
 
-  private clearBanner(): void {}
+  private clearBanner(): void {
+    // Rendering is intentionally deferred in this minimal implementation.
+    this.isActive = false;
+  }
 
   private subscribeToStageChanges(): void {
     if (!this.bus) {

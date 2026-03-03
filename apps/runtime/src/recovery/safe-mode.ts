@@ -66,8 +66,12 @@ export class CrashLoopDetector {
           fs.writeFile(tempPath, JSON.stringify(this.crashHistory), { encoding: "utf-8" })
         )
         .then(() => fs.rename(tempPath, historyPath))
-        .catch(_err => {});
-    } catch (_err) {}
+        .catch(_error => {
+          // Ignore persistence failures to keep crash-loop detection non-blocking.
+        });
+    } catch (_error) {
+      // Ignore synchronous persistence setup errors to keep safe mode responsive.
+    }
   }
 }
 

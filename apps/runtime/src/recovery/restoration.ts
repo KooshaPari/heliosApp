@@ -103,7 +103,7 @@ export class RestorationPipeline {
     }
   }
 
-  private async getSurvivingZelijjSessions(): Promise<string[]> {
+  private getSurvivingZelijjSessions(): string[] {
     if (this.zellijListCache) {
       return this.zellijListCache;
     }
@@ -124,10 +124,7 @@ export class RestorationPipeline {
     return survivingSessions.find(s => s === sessionName);
   }
 
-  private async reattachZelijjSession(
-    _session: CheckpointSession,
-    zellijSessionName: string
-  ): Promise<void> {
+  private reattachZelijjSession(_session: CheckpointSession, zellijSessionName: string): void {
     // In a real implementation, this would use zellij IPC to reattach
     // For now, we just verify the session exists
     if (!zellijSessionName) {

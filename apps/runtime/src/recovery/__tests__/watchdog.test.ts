@@ -19,7 +19,9 @@ describe("Watchdog", () => {
 
   afterEach(async () => {
     // Cleanup temp dir
-    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {
+      // Best-effort cleanup in test teardown.
+    });
   });
 
   it("should detect heartbeat timeout when no heartbeat received", async () => {

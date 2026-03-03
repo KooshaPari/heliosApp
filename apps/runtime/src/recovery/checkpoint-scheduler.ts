@@ -62,7 +62,9 @@ export class CheckpointScheduler {
 
       // Adjust interval based on write time
       this.adjustInterval();
-    } catch (_err) {}
+    } catch (_error) {
+      // Ignore transient checkpoint write failures and keep scheduler running.
+    }
   }
 
   recordActivity(): void {
@@ -70,12 +72,16 @@ export class CheckpointScheduler {
 
     // Check if activity threshold exceeded
     if (this.activityCounter >= ACTIVITY_THRESHOLD) {
-      this.triggerNow().catch(_err => {});
+      this.triggerNow().catch(_error => {
+        // Best effort checkpoint trigger; failures are non-blocking.
+      });
     }
   }
 
   private onTimer(): void {
-    this.triggerNow().catch(_err => {});
+    this.triggerNow().catch(_error => {
+      // Timer-triggered checkpoint failures are expected under shutdown/IO pressure.
+    });
   }
 
   private adjustInterval(): void {
@@ -111,7 +117,9 @@ export class CheckpointScheduler {
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Checkpoint timeout")), FINAL_CHECKPOINT_TIMEOUT)
       ),
-    ]).catch(_err => {});
+    ]).catch(_error => {
+      // Final checkpoint may not complete during rapid process termination.
+    });
 
     this.stop();
   }

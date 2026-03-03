@@ -36,7 +36,9 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
   });
 
   afterEach(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {
+      // Best-effort cleanup in test teardown.
+    });
   });
 
   describe("Crash during checkpoint write", () => {
@@ -190,11 +192,11 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       await stateMachine.transition(RecoveryStage.DETECTING);
 
       // Simulate concurrent activity
-      const activityPromises = [];
+      const activityPromises: Promise<void>[] = [];
       for (let i = 0; i < 5; i++) {
         activityPromises.push(
           new Promise(resolve => {
-            setTimeout(async () => {
+            setTimeout(() => {
               // Simulate user activity
               resolve(undefined);
             }, Math.random() * 1000);
@@ -211,7 +213,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
   describe("Repeated chaos scenarios", () => {
     it("should maintain consistency across 5 recovery cycles", async () => {
-      const results = [];
+      const results: Awaited<ReturnType<RestorationPipeline["restore"]>>[] = [];
 
       for (let i = 0; i < 5; i++) {
         const checkpoint = createMockCheckpoint(3);

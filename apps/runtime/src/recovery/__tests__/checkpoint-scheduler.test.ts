@@ -38,7 +38,7 @@ describe("CheckpointScheduler", () => {
 
     // Mock writer to track calls
     const originalWrite = writer.write.bind(writer);
-    writer.write = async (checkpoint: Checkpoint) => {
+    writer.write = (checkpoint: Checkpoint): Promise<void> => {
       writeCount++;
       return originalWrite(checkpoint);
     };
@@ -47,7 +47,9 @@ describe("CheckpointScheduler", () => {
   afterEach(async () => {
     scheduler.stop();
 
-    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {
+      // Best-effort cleanup in test teardown.
+    });
   });
 
   describe("time-based intervals", () => {
@@ -128,10 +130,11 @@ describe("CheckpointScheduler", () => {
     it("should increase interval when write is slow", async () => {
       // Mock slow write
       const slowWriter = new CheckpointWriter(tempDir);
-      slowWriter.write = async () => {
-        // Simulate 600ms write
-        await new Promise(resolve => setTimeout(resolve, 600));
+      slowWriter.write = (): Promise<void> => {
         writeCount++;
+        return new Promise(resolve => {
+          setTimeout(resolve, 600);
+        });
       };
 
       scheduler.start(slowWriter, createMockCheckpoint);
@@ -146,15 +149,23 @@ describe("CheckpointScheduler", () => {
       const slowWriter = new CheckpointWriter(tempDir);
       let isSlowWrite = true;
 
-      slowWriter.write = async (checkpoint: Checkpoint) => {
-        if (isSlowWrite) {
-          await new Promise(resolve => setTimeout(resolve, 600));
-        }
+      slowWriter.write = (checkpoint: Checkpoint): Promise<void> => {
+        const writeOp = isSlowWrite
+          ? new Promise<void>(resolve => {
+              setTimeout(resolve, 600);
+            })
+          : Promise.resolve();
+
         writeCount++;
-        await fs.mkdir(path.join(tempDir, "recovery"), { recursive: true });
-        await fs.writeFile(
-          path.join(tempDir, "recovery", "checkpoint.json"),
-          JSON.stringify(checkpoint)
+        return writeOp.then(() =>
+          fs
+            .mkdir(path.join(tempDir, "recovery"), { recursive: true })
+            .then(() =>
+              fs.writeFile(
+                path.join(tempDir, "recovery", "checkpoint.json"),
+                JSON.stringify(checkpoint)
+              )
+            )
         );
       };
 
@@ -209,8 +220,8 @@ describe("CheckpointScheduler", () => {
 
     it("should not crash on write failure", async () => {
       const failingWriter = new CheckpointWriter(tempDir);
-      failingWriter.write = async () => {
-        throw new Error("Write failed");
+      failingWriter.write = (): Promise<void> => {
+        return Promise.reject(new Error("Write failed"));
       };
 
       scheduler.start(failingWriter, createMockCheckpoint);

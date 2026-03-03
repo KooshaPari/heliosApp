@@ -17,7 +17,9 @@ describe("CrashLoopDetector", () => {
   });
 
   afterEach(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {
+      // Best-effort cleanup in test teardown.
+    });
   });
 
   it("should not detect loop with fewer than threshold crashes", () => {
@@ -85,8 +87,6 @@ describe("SafeMode", () => {
     bus = new InMemoryLocalBus();
     safeMode = new SafeMode(bus);
   });
-
-  afterEach(() => {});
 
   it("should start inactive", () => {
     expect(safeMode.isActive()).toBe(false);
