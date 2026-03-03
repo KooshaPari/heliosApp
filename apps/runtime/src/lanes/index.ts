@@ -1,6 +1,5 @@
 // T003 - Lane lifecycle commands + T004 - Event publishing to local bus
 // T006-T010 - Worktree provisioning, cleanup, PTY termination, orphan reconciliation
-// T011-T015 - Par task binding, termination, execution, stale detection, lifecycle events
 
 import * as path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
@@ -29,6 +28,18 @@ import {
   type ReconciliationResult,
 } from "./worktree.js";
 
+// ── T016: Full Reconciliation Result ─────────────────────────────────────────
+
+export interface FullReconciliationResult {
+  orphanedWorktrees: number;
+  orphanedRecords: number;
+  orphanedParTasks: number;
+  orphanedPtys: number;
+  totalCleaned: number;
+  cleaned: number;
+  timedOut: boolean;
+}
+
 // ── Errors ───────────────────────────────────────────────────────────────────
 
 export class NotImplementedError extends Error {
@@ -52,9 +63,7 @@ export interface PtyManager {
 
 // ── Event Types ──────────────────────────────────────────────────────────────
 
-// T015: Comprehensive lane lifecycle event catalog
 export type LaneBusEventTopic =
-  // Core lane lifecycle
   | "lane.created"
   | "lane.state.changed"
   | "lane.shared"
@@ -62,19 +71,7 @@ export type LaneBusEventTopic =
   | "lane.closed"
   | "lane.ptys_terminated"
   | "lane.provision_failed"
-  // Par task lifecycle (T015)
-  | "lane.par_task.bound"
-  | "lane.par_task.terminated"
-  | "lane.par_task.stale"
-  | "lane.par_task.force_killed"
-  // Worktree lifecycle (T015)
-  | "lane.worktree.provisioned"
-  | "lane.worktree.removed"
-  | "lane.worktree.orphan_cleaned"
-  // Command execution lifecycle (T015)
-  | "lane.command.started"
-  | "lane.command.completed"
-  | "lane.command.timeout";
+  | "reconciliation.completed";
 
 // ── ID Generation ────────────────────────────────────────────────────────────
 
@@ -177,7 +174,6 @@ export class LaneManager {
           worktreePath: result.worktreePath,
         });
 
-        await this.emitEvent("lane.worktree.provisioned", laneId, lane.workspaceId, fromState, toState);
         await this.emitEvent("lane.state.changed", laneId, lane.workspaceId, fromState, toState);
         return this.registry.get(laneId)!;
       } catch (err) {
@@ -302,7 +298,6 @@ export class LaneManager {
           const worktreeParent = path.dirname(currentLane.worktreePath);
           const workspaceRepoPath = path.dirname(worktreeParent);
           await removeWorktree(currentLane.worktreePath, workspaceRepoPath);
-          await this.emitEvent("lane.worktree.removed", laneId, lane.workspaceId, "cleaning", "cleaning");
         } catch {
           // Best-effort: worktree may already be removed
         }
@@ -355,37 +350,144 @@ export class LaneManager {
     await this.emitEvent("lane.ptys_terminated", laneId, workspaceId, "cleaning", "cleaning");
   }
 
-  // ── T009: Orphan reconciliation on startup ──────────────────────────────
+  // ── T016: Full orphaned lane reconciliation on startup ─────────────────
 
-  async reconcileOrphans(workspaceRepoPath: string): Promise<ReconciliationResult> {
-    const knownLaneIds = new Set<string>();
-    const activeLanes = this.registry.getActive();
-    for (const lane of activeLanes) {
-      knownLaneIds.add(lane.laneId);
-    }
+  async reconcileOrphans(
+    workspaceRepoPath: string,
+    options?: { timeoutMs?: number },
+  ): Promise<FullReconciliationResult> {
+    const timeoutMs = options?.timeoutMs ?? 30_000;
+    const startTime = Date.now();
 
-    const result = await reconcileOrphanedWorktrees(
-      workspaceRepoPath,
-      knownLaneIds,
-      (laneId: string) => {
-        try {
-          this.registry.update(laneId, { state: "closed" });
-        } catch {
-          // Lane may not exist in registry
-        }
-      },
-    );
+    const result: FullReconciliationResult = {
+      orphanedWorktrees: 0,
+      orphanedRecords: 0,
+      orphanedParTasks: 0,
+      orphanedPtys: 0,
+      totalCleaned: 0,
+      cleaned: 0,
+      timedOut: false,
+    };
 
-    // Check for lane records that claim worktree paths that don't exist
-    const fs = await import("node:fs");
-    for (const lane of activeLanes) {
-      if (lane.worktreePath && !fs.existsSync(lane.worktreePath)) {
-        result.orphanedRecords++;
-        this.registry.update(lane.laneId, { state: "closed", worktreePath: null });
+    const isTimedOut = (): boolean => Date.now() - startTime >= timeoutMs;
+
+    try {
+      // Phase 1: Scan worktree directories vs registry
+      const knownLaneIds = new Set<string>();
+      const activeLanes = this.registry.getActive();
+      for (const lane of activeLanes) {
+        knownLaneIds.add(lane.laneId);
       }
+
+      if (!isTimedOut()) {
+        const worktreeResult = await reconcileOrphanedWorktrees(
+          workspaceRepoPath,
+          knownLaneIds,
+          (laneId: string) => {
+            try {
+              this.registry.update(laneId, { state: "closed" });
+            } catch {
+              // Lane may not exist in registry
+            }
+          },
+        );
+        result.orphanedWorktrees = worktreeResult.orphanedWorktrees;
+        result.cleaned += worktreeResult.cleaned;
+        result.totalCleaned += worktreeResult.cleaned;
+      }
+
+      // Phase 1b: Registry entries without worktrees
+      if (!isTimedOut()) {
+        const fsModule = await import("node:fs");
+        for (const lane of activeLanes) {
+          if (isTimedOut()) break;
+          if (lane.worktreePath && !fsModule.existsSync(lane.worktreePath)) {
+            result.orphanedRecords++;
+            result.totalCleaned++;
+            this.registry.update(lane.laneId, { state: "closed", worktreePath: null });
+          }
+        }
+      }
+
+      // Phase 2: Orphaned par tasks - check for parTaskPid entries with no running process
+      if (!isTimedOut()) {
+        const allLanes = this.registry.list();
+        for (const lane of allLanes) {
+          if (isTimedOut()) break;
+          if (lane.parTaskPid !== null && lane.state !== "closed") {
+            // Check if the process is still alive
+            try {
+              process.kill(lane.parTaskPid, 0);
+            } catch {
+              // Process does not exist - orphaned par task
+              result.orphanedParTasks++;
+              result.totalCleaned++;
+              this.registry.update(lane.laneId, { parTaskPid: null });
+            }
+          }
+        }
+      }
+
+      // Phase 3: Orphaned PTYs - delegate to ptyManager if available
+      if (!isTimedOut() && this.ptyManager) {
+        const closedLanes = this.registry
+          .list()
+          .filter((l) => l.state === "closed");
+        for (const lane of closedLanes) {
+          if (isTimedOut()) break;
+          try {
+            const ptys = this.ptyManager.getByLane(lane.laneId);
+            for (const pty of ptys) {
+              result.orphanedPtys++;
+              result.totalCleaned++;
+              try {
+                await this.ptyManager.terminate(pty.ptyId);
+              } catch {
+                // Best-effort
+              }
+            }
+          } catch {
+            // PTY manager unavailable
+          }
+        }
+      }
+    } catch {
+      // Partial reconciliation - log and continue
     }
+
+    if (isTimedOut()) {
+      result.timedOut = true;
+    }
+
+    // Publish reconciliation.completed event
+    await this.emitReconciliationEvent(result);
 
     return result;
+  }
+
+  private async emitReconciliationEvent(result: FullReconciliationResult): Promise<void> {
+    if (!this.bus) return;
+
+    const envelope: LocalBusEnvelope = {
+      id: `reconciliation:${Date.now()}`,
+      type: "event",
+      ts: new Date().toISOString(),
+      topic: "reconciliation.completed",
+      payload: {
+        orphanedWorktrees: result.orphanedWorktrees,
+        orphanedRecords: result.orphanedRecords,
+        orphanedParTasks: result.orphanedParTasks,
+        orphanedPtys: result.orphanedPtys,
+        totalCleaned: result.totalCleaned,
+        timedOut: result.timedOut,
+      },
+    };
+
+    try {
+      await this.bus.publish(envelope);
+    } catch {
+      // Fire-and-forget
+    }
   }
 
   // ── T004: Event Publishing ───────────────────────────────────────────────
@@ -440,16 +542,3 @@ export {
   type WorktreeResult,
   type ReconciliationResult,
 } from "./worktree.js";
-export {
-  ParManager,
-  ParNotFoundError,
-  ParSpawnError,
-  LaneNotReadyError,
-  ExecTimeoutError,
-  _resetParIdCounter,
-  type ParBinding,
-  type ExecResult,
-  type ParManagerOptions,
-  type SpawnFn,
-  type SpawnResult,
-} from "./par.js";
