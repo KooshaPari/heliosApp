@@ -2,18 +2,12 @@
 
 ## /Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp
 - Command: `node tools/gates/protocol-parity.mjs`
+- Exit: 0
 - Result: PASS
-- Runtime counts:
-  - methods: 24
-  - topics: 48
-- Parity matrix counts:
-  - method mappings: 24
-  - topic mappings: 48
+- Output: `Protocol parity gate passed.`
 
-## /Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp-colab
+## /Users/kooshapari/CodeProjects/Phenotype/repos/colab-wtrees/ts-debt-parity-20260303
 - Command: `node tools/gates/protocol-parity.mjs`
+- Exit: 1
 - Result: FAIL
-- Error: `MODULE_NOT_FOUND` for `tools/gates/protocol-parity.mjs`
-- Guard coverage counts:
-  - parity gate scripts found: 0
-  - executed parity guards: 0
+- Error: `MODULE_NOT_FOUND` (`tools/gates/protocol-parity.mjs` not present in colab repo)
