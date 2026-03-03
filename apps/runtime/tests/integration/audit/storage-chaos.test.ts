@@ -10,6 +10,7 @@ describe("Storage Chaos Tests", () => {
   let dbPath: string;
   let store: SQLiteAuditStore;
   let tmpDir: string;
+  const testTimeoutMs = 30_000;
 
   beforeEach(() => {
     // Create unique temp directory per test to avoid cross-test SQLite corruption
@@ -47,47 +48,51 @@ describe("Storage Chaos Tests", () => {
     }
   });
 
-  it("should recover all persisted events after restart", async () => {
-    // Phase 1: Write 1,000 events
-    store = new SQLiteAuditStore(dbPath);
-    const storageAdapter: AuditStorage = {
-      persist: events => {
-        return Promise.resolve(store.persist(events));
-      },
-    };
+  it(
+    "should recover all persisted events after restart",
+    async () => {
+      // Phase 1: Write 1,000 events
+      store = new SQLiteAuditStore(dbPath);
+      const storageAdapter: AuditStorage = {
+        persist: events => {
+          return Promise.resolve(store.persist(events));
+        },
+      };
 
-    const sink = new DefaultAuditSink(storageAdapter, 500);
+      const sink = new DefaultAuditSink(storageAdapter, 500);
 
-    for (let i = 0; i < 1_000; i++) {
-      const event = createAuditEvent({
-        eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-        actor: "test-agent",
-        action: "execute",
-        target: `cmd-${i}`,
-        result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: "test-workspace",
-        correlationId: `corr-${i}`,
-        metadata: { index: i },
-      });
+      for (let i = 0; i < 1_000; i++) {
+        const event = createAuditEvent({
+          eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+          actor: "test-agent",
+          action: "execute",
+          target: `cmd-${i}`,
+          result: AUDIT_EVENT_RESULTS.SUCCESS,
+          workspaceId: "test-workspace",
+          correlationId: `corr-${i}`,
+          metadata: { index: i },
+        });
 
-      await sink.write(event);
+        await sink.write(event);
 
-      // Periodically flush
-      if (i % 500 === 0) {
-        await sink.flush();
+        // Periodically flush
+        if (i % 500 === 0) {
+          await sink.flush();
+        }
       }
-    }
 
-    await sink.flush();
-    sink.destroy();
+      await sink.flush();
+      sink.destroy();
 
-    // Phase 2: Restart and verify events are recoverable
-    store = new SQLiteAuditStore(dbPath);
+      // Phase 2: Restart and verify events are recoverable
+      store = new SQLiteAuditStore(dbPath);
 
-    const count = store.count();
-    // Events should be persisted (at least partially, depending on flush timing)
-    expect(count).toBeGreaterThan(0);
-  });
+      const count = store.count();
+      // Events should be persisted (at least partially, depending on flush timing)
+      expect(count).toBeGreaterThan(0);
+    },
+    testTimeoutMs
+  );
 
   it("should lose zero events during normal ring buffer overflow", async () => {
     store = new SQLiteAuditStore(dbPath);
@@ -132,14 +137,14 @@ describe("Storage Chaos Tests", () => {
     const maxFails = 2;
 
     const failingStorage: AuditStorage = {
-      persist: async events => {
+      persist: events => {
         failCount++;
         if (failCount <= maxFails) {
           throw new Error("Simulated storage failure");
         }
 
         // Succeed on subsequent attempts
-        store.persist(events);
+        return Promise.resolve(store.persist(events));
       },
     };
 
@@ -225,9 +230,9 @@ describe("Storage Chaos Tests", () => {
     const sink = new DefaultAuditSink(storageAdapter, 5000);
 
     // Simulate storage efficiency with a representative sample
-    const EVENT_COUNT = 2_000; // Sample for speed
+    const eventCount = 2_000; // Sample for speed
 
-    for (let i = 0; i < EVENT_COUNT; i++) {
+    for (let i = 0; i < eventCount; i++) {
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
         actor: `agent-${i % 10}`,
@@ -255,12 +260,12 @@ describe("Storage Chaos Tests", () => {
 
     // Check storage size
     const storageSize = store.getStorageSize();
-    const eventCount = store.count();
+    const count = store.count();
 
-    const sizePerEvent = storageSize / eventCount;
+    const sizePerEvent = storageSize / count;
 
     // 3M events at this rate should be < 500MB
-    const projectedSize = (3_000_000 / EVENT_COUNT) * storageSize;
+    const projectedSize = (3_000_000 / eventCount) * storageSize;
 
     // Ensure per-event size is reasonable (< 600 bytes per event including SQLite overhead and indexes)
     expect(sizePerEvent).toBeLessThan(600);

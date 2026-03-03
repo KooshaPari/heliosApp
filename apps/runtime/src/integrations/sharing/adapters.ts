@@ -6,7 +6,12 @@
  * FR-026-004: Tmate backend adapter.
  */
 
-// ChildProcess is not exported from bun directly; using any for process types
+/**
+ * Minimal process handle abstraction for mocked share adapters.
+ */
+export type ShareProcessHandle = {
+  pid: number;
+};
 
 /**
  * Share backend adapter interface.
@@ -16,8 +21,8 @@ export interface ShareBackendAdapter {
   startShare(
     terminalId: string,
     zellijSessionName: string
-  ): Promise<{ link: string; process: any }>;
-  stopShare(process: any): Promise<void>;
+  ): Promise<{ link: string; process: ShareProcessHandle }>;
+  stopShare(process: ShareProcessHandle): Promise<void>;
 }
 
 /**
@@ -44,9 +49,9 @@ export class UptermAdapter implements ShareBackendAdapter {
   /**
    * Check if upterm binary is available.
    */
-  async checkAvailability(): Promise<boolean> {
+  checkAvailability(): Promise<boolean> {
     // Mock implementation: always return true
-    return true;
+    return Promise.resolve(true);
   }
 
   /**
@@ -59,7 +64,7 @@ export class UptermAdapter implements ShareBackendAdapter {
   async startShare(
     terminalId: string,
     zellijSessionName: string
-  ): Promise<{ link: string; process: any }> {
+  ): Promise<{ link: string; process: ShareProcessHandle }> {
     try {
       // Validate inputs
       if (!(terminalId && zellijSessionName)) {
@@ -73,10 +78,10 @@ export class UptermAdapter implements ShareBackendAdapter {
       // Mock implementation: return simulated result
       const link = `https://upterm.io/${terminalId}-${Date.now()}`;
 
-      return {
+      return await Promise.resolve({
         link,
         process: { pid: Math.floor(Math.random() * 100000) + 1000 },
-      };
+      });
     } catch (error) {
       if (String(error).includes("not found")) {
         throw new Error(
@@ -92,12 +97,13 @@ export class UptermAdapter implements ShareBackendAdapter {
    *
    * @param process Process handle
    */
-  async stopShare(process: any): Promise<void> {
+  stopShare(process: ShareProcessHandle): Promise<void> {
     // Mock implementation: just mark as stopped
     if (!process) {
       throw new Error("Invalid process");
     }
     // In real implementation, would send SIGTERM/SIGKILL
+    return Promise.resolve();
   }
 }
 
@@ -124,9 +130,9 @@ export class TmateAdapter implements ShareBackendAdapter {
   /**
    * Check if tmate binary is available.
    */
-  async checkAvailability(): Promise<boolean> {
+  checkAvailability(): Promise<boolean> {
     // Mock implementation: always return true
-    return true;
+    return Promise.resolve(true);
   }
 
   /**
@@ -139,7 +145,7 @@ export class TmateAdapter implements ShareBackendAdapter {
   async startShare(
     terminalId: string,
     zellijSessionName: string
-  ): Promise<{ link: string; process: any }> {
+  ): Promise<{ link: string; process: ShareProcessHandle }> {
     try {
       // Validate inputs
       if (!(terminalId && zellijSessionName)) {
@@ -154,10 +160,10 @@ export class TmateAdapter implements ShareBackendAdapter {
       // Tmate typically outputs link to stderr
       const link = `https://tmate.io/${terminalId}-${Date.now()}`;
 
-      return {
+      return await Promise.resolve({
         link,
         process: { pid: Math.floor(Math.random() * 100000) + 1000 },
-      };
+      });
     } catch (error) {
       if (String(error).includes("not found")) {
         throw new Error(
@@ -173,12 +179,13 @@ export class TmateAdapter implements ShareBackendAdapter {
    *
    * @param process Process handle
    */
-  async stopShare(process: any): Promise<void> {
+  stopShare(process: ShareProcessHandle): Promise<void> {
     // Mock implementation: just mark as stopped
     if (!process) {
       throw new Error("Invalid process");
     }
     // In real implementation, would send SIGTERM/SIGKILL
+    return Promise.resolve();
   }
 }
 
@@ -189,7 +196,10 @@ export class TmateAdapter implements ShareBackendAdapter {
  * @param config Backend-specific configuration
  * @returns Adapter instance
  */
-export function getBackendAdapter(backend: string, config?: any): ShareBackendAdapter {
+export function getBackendAdapter(
+  backend: string,
+  config?: UptermConfig | TmateConfig
+): ShareBackendAdapter {
   switch (backend) {
     case "upterm":
       return new UptermAdapter(config as UptermConfig | undefined);
