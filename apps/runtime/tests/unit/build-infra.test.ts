@@ -173,10 +173,6 @@ describe("lint suppression directives", () => {
     for (const dir of srcDirs) {
       if (!existsSync(dir)) continue;
       for await (const path of glob.scan({ cwd: dir, absolute: true })) {
-        // Skip test files - they are allowed to have suppression directives
-        if (path.includes("__tests__") || path.includes(".test.") || path.includes(".spec.")) {
-          continue;
-        }
         const content = await Bun.file(path).text();
         const relativePath = path.replace(ROOT + "/", "");
         expect(

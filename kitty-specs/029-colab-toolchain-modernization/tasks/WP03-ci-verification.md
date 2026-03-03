@@ -156,7 +156,6 @@ spec-kitty implement WP03 --base WP02
 - Verify go-task version is v3.x compatible
 - Confirm quality:ci runs the same checks as local quality:quick (non-mutating)
 
-
 ## Activity Log
 
 - 2026-02-28T12:35:25Z – unknown – lane=done – Implemented, PR #6 created

@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Active Context Store and Tab Surface Framework
-lane: "done"
+lane: "doing"
 dependencies: []
 base_branch: main
 base_commit: d96fb53a83841cde41a446e6c69ba26e888cd207
@@ -16,8 +16,8 @@ phase: Phase 1 - Foundation
 assignee: ''
 agent: "claude-haiku"
 shell_pid: "53948"
-review_status: "approved"
-reviewed_by: "Koosha Paridehpour"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -220,5 +220,3 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:29:17Z – claude-haiku – shell_pid=53948 – lane=doing – Assigned agent via workflow command
-- 2026-03-01T13:32:31Z – claude-haiku – shell_pid=53948 – lane=done – Implemented WP01
-- 2026-03-01T13:41:10Z – claude-haiku – shell_pid=53948 – lane=done – Merged

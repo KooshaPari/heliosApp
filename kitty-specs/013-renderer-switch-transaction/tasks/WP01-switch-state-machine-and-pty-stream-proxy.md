@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Switch State Machine and PTY Stream Proxy
-lane: "done"
+lane: "doing"
 dependencies: []
 base_branch: main
 base_commit: 20335a842cf793dbdf80a3bc427cc500350946a2
@@ -14,10 +14,10 @@ subtasks:
 - T005
 phase: Phase 1 - Foundation
 assignee: ''
-agent: "claude-haiku"
+agent: ''
 shell_pid: "53525"
-review_status: "approved"
-reviewed_by: "Koosha Paridehpour"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -193,6 +193,3 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
-- 2026-03-01T13:29:08Z – claude-haiku – shell_pid=53525 – lane=doing – Assigned agent via workflow command
-- 2026-03-01T13:30:57Z – claude-haiku – shell_pid=53525 – lane=done – Implemented: Switch state machine, capability matrix, PTY stream proxy, and lifecycle event emission with comprehensive unit tests (54 tests passing)
-- 2026-03-01T13:41:01Z – claude-haiku – shell_pid=53525 – lane=done – Merged

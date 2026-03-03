@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Crash Detection and Watchdog
-lane: "done"
+lane: "doing"
 dependencies: []
 base_branch: main
 base_commit: 8cf5e72ef31fd586a01db0480786816a9013e2c7
@@ -15,8 +15,8 @@ phase: Phase 0 - Detection
 assignee: ''
 agent: "claude-haiku"
 shell_pid: "57374"
-review_status: "approved"
-reviewed_by: "Koosha Paridehpour"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -231,5 +231,3 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:30:10Z – claude-haiku – shell_pid=57374 – lane=doing – Assigned agent via workflow command
-- 2026-03-01T13:31:39Z – claude-haiku – shell_pid=57374 – lane=done – Implemented
-- 2026-03-01T13:41:30Z – claude-haiku – shell_pid=57374 – lane=done – Merged
