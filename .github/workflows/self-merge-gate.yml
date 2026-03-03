@@ -13,6 +13,7 @@ jobs:
     permissions:
       contents: read
       statuses: read
+      checks: read
       pull-requests: read
 
     steps:
@@ -22,6 +23,7 @@ jobs:
         with:
           script: |
             const { owner, repo, number } = context.issue;
+            const normalize = value => String(value || "").toLowerCase();
             
             // Get PR details
             const pr = await github.rest.pulls.get({
@@ -58,28 +60,108 @@ jobs:
               repo,
               ref: commit.sha
             });
-            
+
             const requiredChecks = [
-              'quality-gates',
-              'gca-review',
-              'coderabbit-review',
-              'compliance-check'
+              {
+                key: 'quality-gates',
+                aliases: [
+                  'quality-gates',
+                  'quality gates',
+                  'quality gates pipeline'
+                ],
+              },
+              {
+                key: 'gca-review',
+                aliases: ['gca-review', 'gca review'],
+              },
+              {
+                key: 'coderabbit-review',
+                aliases: ['coderabbit-review', 'coderabbit review'],
+              },
+              {
+                key: 'compliance-check',
+                aliases: [
+                  'compliance-check',
+                  'Constitution Compliance Validation',
+                  'constitution compliance validation'
+                ],
+              },
             ];
-            
+
             const checkResults = {};
-            statuses.statuses.forEach(status => {
-              requiredChecks.forEach(check => {
-                if (status.context === check) {
-                  checkResults[check] = status.state === 'success';
-                }
+            const requirementStatus = {};
+            const aliasToCheck = new Map();
+
+            requiredChecks.forEach(({ key, aliases }) => {
+              checkResults[key] = false;
+              requirementStatus[key] = "not found";
+              aliases.forEach(alias => {
+                aliasToCheck.set(normalize(alias), key);
               });
             });
-            
-            // Verify all required checks
-            const allChecksPassed = requiredChecks.every(check => checkResults[check] === true);
+
+            const updateRequirement = (key, passed, reason) => {
+              if (!checkResults[key] || passed) {
+                checkResults[key] = passed;
+                if (passed) {
+                  requirementStatus[key] = "passed";
+                } else if (reason) {
+                  requirementStatus[key] = reason;
+                }
+              }
+            };
+
+            // Check legacy status checks
+            (statuses.data?.statuses || []).forEach(status => {
+              const key = aliasToCheck.get(normalize(status.context));
+              if (!key) {
+                return;
+              }
+              const state = normalize(status.state);
+              if (state === "success") {
+                updateRequirement(key, true, "passed");
+              } else {
+                updateRequirement(key, false, `status check failed with ${state}`);
+              }
+            });
+
+            // Check rich check runs when available
+            let checkRuns = [];
+            try {
+              checkRuns = await github.paginate(github.rest.checks.listForRef, {
+                owner,
+                repo,
+                ref: commit.sha,
+              });
+            } catch (error) {
+              console.log(`Unable to fetch check runs: ${error.message}`);
+            }
+
+            checkRuns.forEach(run => {
+              const key = aliasToCheck.get(normalize(run.name));
+              if (!key) {
+                return;
+              }
+              const status = normalize(run.status);
+              const conclusion = normalize(run.conclusion);
+              const isPassing = status === "completed" && conclusion === "success";
+              if (isPassing) {
+                updateRequirement(key, true, "passed");
+              } else {
+                const reason = conclusion ? `check run ${status}/${conclusion}` : `check run ${status}`;
+                updateRequirement(key, false, reason);
+              }
+            });
+
+            const allChecksPassed = requiredChecks.every(({ key }) => checkResults[key] === true);
+            const missingChecks = requiredChecks
+              .filter(({ key }) => !checkResults[key])
+              .map(({ key }) => `${key} (${requirementStatus[key]})`);
             
             // Verify at least one approval from agent/reviewer
             const hasApproval = Object.keys(approvals).length > 0;
+            const isApprovalMissing = !hasApproval;
+            const isAuthorMissing = !isAuthor;
             
             // Determine if self-merge is allowed
             const canSelfMerge = allChecksPassed && hasApproval && isAuthor;
@@ -95,11 +177,13 @@ jobs:
             core.setOutput('all-checks-passed', allChecksPassed);
             core.setOutput('has-approval', hasApproval);
             core.setOutput('is-author', isAuthor);
-            const missing = [];
-            if (!allChecksPassed) missing.push('quality-gates');
-            if (!hasApproval) missing.push('approvals');
-            if (!isAuthor) missing.push('author');
-            core.setOutput('missing-requirements', missing.join(','));
+            const missingRequirements = [
+              ...missingChecks,
+              ...(isApprovalMissing ? ["approvals"] : []),
+              ...(isAuthorMissing ? ["author"] : []),
+            ];
+            core.setOutput('missing-requirements', missingRequirements.join(','));
+            core.setOutput('missing-checks', missingChecks.join('\n'));
       
       - name: Comment on missing requirements
         if: steps.check.outputs.can-self-merge == 'false'
@@ -108,16 +192,21 @@ jobs:
           ALL_CHECKS_PASSED: ${{ steps.check.outputs.all-checks-passed }}
           HAS_APPROVAL: ${{ steps.check.outputs.has-approval }}
           IS_AUTHOR: ${{ steps.check.outputs.is-author }}
+          MISSING_CHECKS: ${{ steps.check.outputs.missing-checks }}
         with:
           script: |
             const { owner, repo, number } = context.issue;
             const allChecksPassed = process.env.ALL_CHECKS_PASSED === 'true';
             const hasApproval = process.env.HAS_APPROVAL === 'true';
             const isAuthor = process.env.IS_AUTHOR === 'true';
+            const missingChecks = process.env.MISSING_CHECKS ? process.env.MISSING_CHECKS.split('\n') : [];
 
             let message = 'Self-merge is blocked due to missing requirements:\n\n';
             if (!allChecksPassed) {
-              message += '- Not all quality gates have passed\n';
+              message += '- Required checks missing or not passing:\n';
+              for (const check of missingChecks) {
+                message += `  - ${check}\n`;
+              }
             }
             if (!hasApproval) {
               message += '- PR does not have required review approval\n';
