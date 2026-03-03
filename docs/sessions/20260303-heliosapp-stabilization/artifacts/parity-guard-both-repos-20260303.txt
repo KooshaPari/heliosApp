@@ -3,6 +3,7 @@
 ## /Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp
 - Command: `node tools/gates/protocol-parity.mjs`
 - Result: PASS
+- Output: `Protocol parity gate passed.`
 - Runtime counts:
   - methods: 24
   - topics: 48
@@ -12,8 +13,11 @@
 
 ## /Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp-colab
 - Command: `node tools/gates/protocol-parity.mjs`
-- Result: FAIL
-- Error: `MODULE_NOT_FOUND` for `tools/gates/protocol-parity.mjs`
-- Guard coverage counts:
-  - parity gate scripts found: 0
-  - executed parity guards: 0
+- Result: PASS
+- Output: `Protocol parity gate passed.`
+- Runtime counts:
+  - methods: 24
+  - topics: 48
+- Parity matrix counts:
+  - method mappings: 24
+  - topic mappings: 48
