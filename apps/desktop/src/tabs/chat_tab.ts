@@ -35,13 +35,13 @@ export class ChatTab extends TabSurface {
     super("chat-tab", "chat", "Chat");
   }
 
-  async onContextChange(context: ActiveContext | null): Promise<void> {
+  onContextChange(context: ActiveContext | null): Promise<void> {
     // When context changes, load chat history for this lane/session
     this.messages = [];
     this.draftInput = "";
 
     if (!context) {
-      return;
+      return Promise.resolve();
     }
 
     // In a real implementation, query chat history:
@@ -50,6 +50,7 @@ export class ChatTab extends TabSurface {
 
     // Simulate: generate mock chat history
     this.generateMockChatHistory(context);
+    return Promise.resolve();
   }
 
   render(): HTMLElement {

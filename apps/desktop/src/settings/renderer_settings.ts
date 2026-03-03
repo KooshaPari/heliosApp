@@ -105,9 +105,9 @@ export class RendererSettings {
       optionsContainer.style.flexDirection = "column";
       optionsContainer.style.gap = "12px";
 
-      this.props.renderers.forEach(renderer => {
+      for (const renderer of this.props.renderers) {
         optionsContainer.appendChild(this.createRendererOption(renderer));
-      });
+      }
 
       section.appendChild(optionsContainer);
     }

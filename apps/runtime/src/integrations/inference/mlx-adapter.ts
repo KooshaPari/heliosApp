@@ -62,8 +62,8 @@ export class MlxInferenceEngine implements InferenceEngine {
     yield response.content;
   }
 
-  async listModels(): Promise<ModelInfo[]> {
-    return [
+  listModels(): Promise<ModelInfo[]> {
+    return Promise.resolve([
       {
         id: "mlx-community/Llama-3.2-3B-Instruct",
         name: "Llama 3.2 3B",
@@ -76,7 +76,7 @@ export class MlxInferenceEngine implements InferenceEngine {
         contextWindow: 32768,
         providerId: "mlx",
       },
-    ];
+    ]);
   }
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
@@ -96,7 +96,7 @@ export class MlxInferenceEngine implements InferenceEngine {
     }
   }
 
-  async terminate(): Promise<void> {
-    // No persistent process to terminate
+  terminate(): Promise<void> {
+    return Promise.resolve();
   }
 }

@@ -1,6 +1,6 @@
+import { bootDesktop, renderControlPlaneSnapshot } from "@helios/desktop";
+import { createRuntime } from "@helios/runtime";
 import { expect, test } from "@playwright/test";
-import { createRuntime } from "../../../runtime/dist";
-import { bootDesktop, renderControlPlaneSnapshot } from "../../dist";
 
 test("lane/session context remains cohesive across all tabs", async ({ page }) => {
   const runtime = createRuntime();

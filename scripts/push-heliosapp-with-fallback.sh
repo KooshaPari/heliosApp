@@ -309,8 +309,38 @@ DEFAULT_PUSH_HELPER="$SHARED_HELPER_DIR/scripts/repo-push-fallback.sh"
 SHARED_HELPER="${PHENOTYPE_DEVOPS_PUSH_HELPER:-$DEFAULT_PUSH_HELPER}"
 
 if (( DRAIN_QUEUE == 0 && QUEUE_MODE == 0 )) && [[ -x "$SHARED_HELPER" ]]; then
+  HELPER_ARGS=(
+    --repo-root
+    "$REPO_ROOT"
+  )
+
+  if [[ "$PRIMARY_REMOTE" != "upstream" ]]; then
+    HELPER_ARGS+=(--primary-remote "$PRIMARY_REMOTE")
+  fi
+
+  if [[ "$FALLBACK_REMOTE" != "origin" ]]; then
+    HELPER_ARGS+=(--fallback-remote "$FALLBACK_REMOTE")
+  fi
+
+  if [[ -n "$ORIGIN_OBJECTS_TMP_DIR" ]]; then
+    HELPER_ARGS+=(--origin-objects-tmp-dir "$ORIGIN_OBJECTS_TMP_DIR")
+  fi
+
+  if (( SKIP_PRIMARY == 1 )); then
+    HELPER_ARGS+=(--skip-primary)
+  fi
+
+  if (( DRY_RUN == 1 )); then
+    HELPER_ARGS+=(--dry-run)
+  fi
+
+  if [[ -n "$BRANCH" ]]; then
+    HELPER_ARGS+=("$BRANCH")
+  fi
+
   log "Using shared helper: $SHARED_HELPER"
-  exec "$SHARED_HELPER" --repo-root "$REPO_ROOT" "$@"
+  log "Shared helper args: ${HELPER_ARGS[*]}"
+  exec "$SHARED_HELPER" "${HELPER_ARGS[@]}"
 fi
 
 if ! cd "$REPO_ROOT"; then

@@ -177,7 +177,7 @@ describe("LaneListItem", () => {
       "closed",
     ];
 
-    statesList.forEach(state => {
+    for (const state of statesList) {
       item = new LaneListItem({ ...mockProps, state });
       item.mount(container);
 
@@ -188,7 +188,7 @@ describe("LaneListItem", () => {
       while (container.firstChild) {
         container.removeChild(container.firstChild);
       }
-    });
+    }
   });
 
   it("should handle both orphaned and active states together", () => {

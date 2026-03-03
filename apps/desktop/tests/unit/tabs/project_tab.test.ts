@@ -234,7 +234,9 @@ describe("ProjectTab", () => {
       const newTab = new ProjectTab();
       newTab.restoreState(originalState);
 
-      expect(newTab.getState().expandedSections).toEqual(originalState.expandedSections as any);
+      expect(newTab.getState().expandedSections ?? []).toEqual(
+        originalState.expandedSections ?? []
+      );
     });
   });
 

@@ -31,7 +31,7 @@ export class SwitchConfirmation {
     this.container = null;
   }
 
-  async open(): Promise<void> {
+  open(): void {
     if (this.isOpen || !this.container) {
       return;
     }
@@ -255,12 +255,10 @@ export class SwitchConfirmation {
         event.preventDefault();
         buttons[buttons.length - 1].focus();
       }
-    } else {
+    } else if (focusedIndex >= buttons.length - 1) {
       // Tab
-      if (focusedIndex >= buttons.length - 1) {
-        event.preventDefault();
-        buttons[0].focus();
-      }
+      event.preventDefault();
+      buttons[0].focus();
     }
   }
 }
