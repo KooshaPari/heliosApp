@@ -108,7 +108,7 @@ export class BindingMiddleware {
    * @param operation Optional operation name for logging
    * @returns Result of handler or validation error
    */
-  async wrapOperation<T>(
+  wrapOperation<T>(
     terminalId: string,
     handler: (binding: TerminalBinding) => Promise<T>,
     operation?: string
