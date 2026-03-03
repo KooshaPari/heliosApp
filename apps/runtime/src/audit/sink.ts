@@ -1,13 +1,17 @@
 import { AuditEvent } from './event';
+import { AuditRingBuffer } from './ring-buffer';
 
 /**
- * Metrics for monitoring audit sink health and performance.
+ * Extended metrics including ring buffer and overflow tracking.
  */
 export interface AuditSinkMetrics {
   totalEventsWritten: number;
   bufferHighWaterMark: number;
   persistenceFailures: number;
   retryCount: number;
+  eventsOverflowed?: number;
+  sqliteWriteFailures?: number;
+  sqliteRetryCount?: number;
 }
 
 /**
@@ -56,29 +60,57 @@ export interface AuditSink {
 }
 
 /**
- * Default implementation of AuditSink with in-memory buffering and async persistence.
+ * Default implementation of AuditSink with ring buffer and SQLite persistence.
+ * Integrates WP01 (sink) with WP02 (ring buffer and storage).
  */
 export class DefaultAuditSink implements AuditSink {
   private buffer: AuditEvent[] = [];
+  private ringBuffer: AuditRingBuffer;
   private readonly MAX_BUFFER_SIZE = 10_000;
   private readonly RETRY_BACKOFF_MS = 100;
   private readonly MAX_RETRIES = 5;
+  private readonly FLUSH_INTERVAL_MS = 10_000; // 10 seconds
 
   private metrics: AuditSinkMetrics = {
     totalEventsWritten: 0,
     bufferHighWaterMark: 0,
     persistenceFailures: 0,
     retryCount: 0,
+    eventsOverflowed: 0,
+    sqliteWriteFailures: 0,
+    sqliteRetryCount: 0,
   };
 
   private persistenceInProgress = false;
+  private flushTimer: number | null = null;
+  private overflowQueue: AuditEvent[] = [];
 
-  constructor(private storage: AuditStorage) {}
+  constructor(
+    private storage: AuditStorage,
+    ringBufferCapacity: number = 10_000,
+  ) {
+    this.ringBuffer = new AuditRingBuffer(ringBufferCapacity);
+    this.startPeriodicFlush();
+  }
 
   async write(event: AuditEvent): Promise<void> {
-    // Non-blocking: just append to buffer (< 1ms)
-    this.buffer.push(event);
+    // Non-blocking: push to ring buffer (< 1ms)
     this.metrics.totalEventsWritten++;
+    const evicted = this.ringBuffer.push(event);
+
+    // If an event was evicted from ring buffer, persist it immediately to SQLite
+    if (evicted) {
+      this.metrics.eventsOverflowed!++;
+      this.overflowQueue.push(evicted);
+
+      // Try to persist overflow immediately
+      this.persistOverflow().catch((err) => {
+        console.error('[AuditSink] Overflow persistence failed:', err);
+      });
+    }
+
+    // Also buffer for periodic flush
+    this.buffer.push(event);
 
     // Update high-water mark
     if (this.buffer.length > this.metrics.bufferHighWaterMark) {
@@ -92,28 +124,29 @@ export class DefaultAuditSink implements AuditSink {
         // Log error but do not throw; event stays in buffer
         console.error('[AuditSink] Persistence failed, events retained in buffer:', err);
       });
-    } else if (!this.persistenceInProgress) {
-      // Trigger async persistence for non-full buffer
-      // Schedule with setImmediate to avoid blocking
-      setImmediate(() => {
-        this.persistWithRetry().catch((err) => {
-          console.error('[AuditSink] Async persistence failed:', err);
-        });
-      });
     }
   }
 
   async flush(): Promise<void> {
-    // Persist all buffered events synchronously
-    if (this.buffer.length === 0) {
+    // Persist all buffered events and overflow queue
+    if (this.buffer.length === 0 && this.overflowQueue.length === 0) {
       return;
     }
 
     // Keep trying until all events are persisted
     let retries = 0;
-    while (this.buffer.length > 0 && retries < this.MAX_RETRIES) {
+    while ((this.buffer.length > 0 || this.overflowQueue.length > 0) && retries < this.MAX_RETRIES) {
       try {
-        await this.persistWithRetry();
+        // First flush overflow queue
+        if (this.overflowQueue.length > 0) {
+          await this.persistOverflow();
+        }
+
+        // Then flush main buffer
+        if (this.buffer.length > 0) {
+          await this.persistWithRetry();
+        }
+
         break;
       } catch (err) {
         retries++;
@@ -147,7 +180,6 @@ export class DefaultAuditSink implements AuditSink {
 
     try {
       let retries = 0;
-      let lastError: Error | null = null;
 
       while (retries < this.MAX_RETRIES) {
         try {
@@ -161,7 +193,6 @@ export class DefaultAuditSink implements AuditSink {
           this.buffer = [];
           break;
         } catch (err) {
-          lastError = err instanceof Error ? err : new Error(String(err));
           this.metrics.persistenceFailures++;
           this.metrics.retryCount++;
 
@@ -182,6 +213,69 @@ export class DefaultAuditSink implements AuditSink {
     } finally {
       this.persistenceInProgress = false;
     }
+  }
+
+  /**
+   * Persist overflow events to SQLite.
+   */
+  private async persistOverflow(): Promise<void> {
+    if (this.overflowQueue.length === 0) {
+      return;
+    }
+
+    let retries = 0;
+
+    while (retries < this.MAX_RETRIES && this.overflowQueue.length > 0) {
+      try {
+        const eventsToPersist = [...this.overflowQueue];
+        await this.storage.persist(eventsToPersist);
+
+        // Clear overflow queue on success
+        this.overflowQueue = [];
+        break;
+      } catch (err) {
+        this.metrics.sqliteWriteFailures!++;
+        this.metrics.sqliteRetryCount!++;
+
+        retries++;
+        if (retries < this.MAX_RETRIES) {
+          // Exponential backoff
+          await new Promise((resolve) =>
+            setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1)),
+          );
+        }
+      }
+    }
+  }
+
+  /**
+   * Start periodic flush timer.
+   */
+  private startPeriodicFlush(): void {
+    this.flushTimer = setInterval(() => {
+      if (this.buffer.length > 0 || this.overflowQueue.length > 0) {
+        this.persistWithRetry().catch((err) => {
+          console.error('[AuditSink] Periodic flush failed:', err);
+        });
+      }
+    }, this.FLUSH_INTERVAL_MS) as unknown as number;
+  }
+
+  /**
+   * Stop periodic flush timer.
+   */
+  private stopPeriodicFlush(): void {
+    if (this.flushTimer !== null) {
+      clearInterval(this.flushTimer);
+      this.flushTimer = null;
+    }
+  }
+
+  /**
+   * Cleanup resources.
+   */
+  destroy(): void {
+    this.stopPeriodicFlush();
   }
 }
 
