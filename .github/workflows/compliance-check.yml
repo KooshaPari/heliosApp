@@ -21,20 +21,13 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
       - name: Set up Bun
         uses: oven-sh/setup-bun@v1
         with:
           bun-version: '1.2.20'
 
       - name: Install dependencies
-        run: |
-          npm install -g tsx
-          bun install
+        run: bun install
 
       - name: Get changed files
         id: files
@@ -57,7 +50,7 @@ jobs:
           CHANGED_FILES: ${{ steps.files.outputs.files }}
         run: |
           FILES_ARRAY=$(echo "$CHANGED_FILES" | jq -r '.[]' | tr '\n' ' ')
-          tsx scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>compliance-stderr.log || true
+          bun run scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>compliance-stderr.log || true
           if [ -s compliance-stderr.log ]; then cat compliance-stderr.log >&2; fi
           cat compliance-result.json
 
