@@ -19,12 +19,16 @@ This page is the VitePress index for all production gates, checker scripts, and 
 ## GitHub workflow gates
 
 - `.github/workflows/ci.yml`
+- `.github/workflows/quality-gates.yml`
+- `.github/workflows/compliance-check.yml`
+- `.github/workflows/gca.yml`
+- `.github/workflows/stage-gates.yml`
 - `.github/workflows/policy-gate.yml`
 - `.github/workflows/required-check-names-guard.yml`
 - `.github/workflows/agent-dir-guard.yml`
 - `.github/workflows/vitepress-pages.yml`
 
-Keep gate names in `.github/required-checks.txt` aligned with workflow `name:` values.
+Keep gate names in `.github/required-checks.txt` aligned with workflow job `name:` values.
 
 ## Push and Queue Worker Gates
 
@@ -38,6 +42,7 @@ Common queue commands:
 
 - `./scripts/push-heliosapp-with-fallback.sh --queue-only`
 - `./scripts/push-heliosapp-with-fallback.sh --drain-queue`
+- `PHENOTYPE_PUBLISH_WORKER_NON_SANDBOX=1 ./scripts/publish-worker.sh --once`
 
 Cheat-sheet:
 
@@ -45,6 +50,7 @@ Cheat-sheet:
 - `just devops-push-origin` = push to fallback remote only
 - `just devops-push-queue` = queue push request when remote path is blocked
 - `just devops-push-drain-queue` = replay queued push requests
+- `just devops-publish-worker-once` = one publish-worker cycle outside sandbox
 
 Bot review triggers and cooldown:
 
@@ -71,9 +77,12 @@ Persistent queue failure remediation:
 | `task quality:strict` | `just quality-strict` | strict quality lane |
 | `task ci` | `just ci` | strict + docs updates |
 | `task devops:check:ci-summary` | `just devops-check-ci-summary` | strict + JSON summary |
+| `task governance:required-checks` | `just governance-required-checks` | verify required check manifest parity |
 | `task devops:push:origin` | `just devops-push-origin` | push fallback only |
 | `task devops:push:queue` | `just devops-push-queue` | queue-only push |
 | `task devops:push:drain-queue` | `just devops-push-drain-queue` | drain queue |
+| `task devops:publish-worker:once` | `just devops-publish-worker-once` | one queue drain cycle |
+| `task devops:publish-worker:loop` | `just devops-publish-worker-loop` | background queue worker |
 
 ## Cross-repo context
 

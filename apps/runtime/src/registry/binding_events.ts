@@ -12,10 +12,10 @@ import type { BindingTriple, TerminalBinding } from "./binding_triple.js";
 
 // Event topics
 export const BINDING_TOPICS = {
-  BOUND: "terminal.binding.bound",
-  REBOUND: "terminal.binding.rebound",
-  UNBOUND: "terminal.binding.unbound",
-  VALIDATION_FAILED: "terminal.binding.validation_failed",
+  bound: "terminal.binding.bound",
+  rebound: "terminal.binding.rebound",
+  unbound: "terminal.binding.unbound",
+  validationFailed: "terminal.binding.validation_failed",
 } as const;
 
 export type BindingEventTopic = (typeof BINDING_TOPICS)[keyof typeof BINDING_TOPICS];
@@ -51,9 +51,13 @@ export class BindingEventEmitter {
       type: "event" as const,
       ts: new Date().toISOString(),
       topic,
+      // biome-ignore lint/style/useNamingConvention: bus envelope protocol is snake_case.
       terminal_id: payload.terminalId,
+      // biome-ignore lint/style/useNamingConvention: bus envelope protocol is snake_case.
       lane_id: payload.binding.laneId,
+      // biome-ignore lint/style/useNamingConvention: bus envelope protocol is snake_case.
       session_id: payload.binding.sessionId,
+      // biome-ignore lint/style/useNamingConvention: bus envelope protocol is snake_case.
       workspace_id: payload.binding.workspaceId,
       payload: { ...payload },
     };
@@ -69,7 +73,7 @@ export class BindingEventEmitter {
    * Emit 'bound' event when a terminal is registered.
    */
   async emitBound(binding: TerminalBinding, correlationId: string = uuidv4()): Promise<void> {
-    await this.emitEvent(BINDING_TOPICS.BOUND, {
+    await this.emitEvent(BINDING_TOPICS.bound, {
       terminalId: binding.terminalId,
       binding: binding.binding,
       state: binding.state,
@@ -86,7 +90,7 @@ export class BindingEventEmitter {
     previousBinding: BindingTriple,
     correlationId: string = uuidv4()
   ): Promise<void> {
-    await this.emitEvent(BINDING_TOPICS.REBOUND, {
+    await this.emitEvent(BINDING_TOPICS.rebound, {
       terminalId: binding.terminalId,
       binding: binding.binding,
       previousBinding,
@@ -100,7 +104,7 @@ export class BindingEventEmitter {
    * Emit 'unbound' event when a terminal is unregistered.
    */
   async emitUnbound(binding: TerminalBinding, correlationId: string = uuidv4()): Promise<void> {
-    await this.emitEvent(BINDING_TOPICS.UNBOUND, {
+    await this.emitEvent(BINDING_TOPICS.unbound, {
       terminalId: binding.terminalId,
       binding: binding.binding,
       state: binding.state,
@@ -117,7 +121,7 @@ export class BindingEventEmitter {
     reason: string,
     correlationId: string = uuidv4()
   ): Promise<void> {
-    await this.emitEvent(BINDING_TOPICS.VALIDATION_FAILED, {
+    await this.emitEvent(BINDING_TOPICS.validationFailed, {
       terminalId: binding.terminalId,
       binding: binding.binding,
       state: binding.state,

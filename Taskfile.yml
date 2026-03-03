@@ -71,6 +71,11 @@ tasks:
       - task test:e2e:build
       - task test:e2e:playwright
 
+  governance:required-checks:
+    desc: Validate .github/required-checks.txt against workflow job names
+    cmds:
+      - bash .github/scripts/verify-required-check-names.sh
+
   docs:index:
     desc: Generate markdown document index pages
     cmds:
@@ -147,3 +152,13 @@ tasks:
     desc: Drain queued push requests
     cmds:
       - bash scripts/push-heliosapp-with-fallback.sh --drain-queue {{.CLI_ARGS}}
+
+  devops:publish-worker:once:
+    desc: Run publish worker once (requires non-sandbox environment opt-in)
+    cmds:
+      - bash scripts/publish-worker.sh --once {{.CLI_ARGS}}
+
+  devops:publish-worker:loop:
+    desc: Run publish worker loop (requires non-sandbox environment opt-in)
+    cmds:
+      - bash scripts/publish-worker.sh {{.CLI_ARGS}}

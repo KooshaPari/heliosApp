@@ -26,6 +26,16 @@ task devops:push:drain-queue
 ./scripts/push-heliosapp-with-fallback.sh --drain-queue
 ```
 
+## Publish worker
+
+```bash
+# Single non-sandbox execution
+PHENOTYPE_PUBLISH_WORKER_NON_SANDBOX=1 task devops:publish-worker:once
+
+# Continuous worker loop (operator lane)
+PHENOTYPE_PUBLISH_WORKER_NON_SANDBOX=1 task devops:publish-worker:loop -- --poll-seconds 30
+```
+
 ## Related shared helpers
 
 - `../agent-devops-setups/scripts/repo-push-fallback.sh`
@@ -41,6 +51,7 @@ Set env overrides only when needed:
 
 ## Notes
 
-- Queue entries are tab-separated and currently include context + branch/remotes.
+- Queue entries are NDJSON and include context + branch/remotes.
 - Dry-run queue entries are kept for manual audit.
 - For regular pushes on a healthy networked environment, keep using normal `devops:push` flow.
+- Publish worker uses a lock directory at `.git/publish-worker.lock` to prevent concurrent drains.
