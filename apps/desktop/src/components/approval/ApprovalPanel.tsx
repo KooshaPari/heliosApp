@@ -67,23 +67,27 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
         <div class="approval-details">
           <h3>Review Request</h3>
           <div class="detail-group">
-            <label>Command:</label>
+            <span aria-label="Command">Command:</span>
             <code>{selectedRequest()?.command}</code>
           </div>
           <div class="detail-group">
-            <label>Requested by:</label>
+            <span aria-label="Requested by">Requested by:</span>
             <span>{selectedRequest()?.requesterName}</span>
           </div>
           <div class="detail-group">
-            <label>Workspace:</label>
+            <span aria-label="Workspace">Workspace:</span>
             <span>{selectedRequest()?.workspaceId}</span>
           </div>
 
           <div class="approval-actions">
-            <button class="approve-btn" onclick={() => handleApprove(selectedRequest()?.id ?? "")}>
+            <button
+              type="button"
+              class="approve-btn"
+              onclick={() => handleApprove(selectedRequest()?.id ?? "")}
+            >
               Approve
             </button>
-            <button class="reject-btn" onclick={() => setRejectReason("focused")}>
+            <button type="button" class="reject-btn" onclick={() => setRejectReason("focused")}>
               Reject
             </button>
           </div>
@@ -96,8 +100,12 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
                 oninput={e => setRejectReason(e.currentTarget.value)}
               />
               <div class="reject-actions">
-                <button onclick={handleReject}>Confirm Reject</button>
-                <button onclick={() => setRejectReason("")}>Cancel</button>
+                <button type="button" onclick={handleReject}>
+                  Confirm Reject
+                </button>
+                <button type="button" onclick={() => setRejectReason("")}>
+                  Cancel
+                </button>
               </div>
             </div>
           )}
