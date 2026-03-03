@@ -8,6 +8,7 @@ const theme: Theme = {
   enhanceApp({ app }) {
     app.component("CategorySwitcher", CategorySwitcher);
   },
+  // biome-ignore lint/style/useNamingConvention: VitePress theme API requires `Layout`.
   Layout: DefaultTheme.Layout,
 };
 

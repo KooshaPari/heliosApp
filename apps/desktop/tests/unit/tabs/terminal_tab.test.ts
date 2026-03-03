@@ -196,7 +196,11 @@ describe("TerminalTab", () => {
 
       await tab.onContextChange(context);
       const state = tab.getState();
-      const terminalId = state.terminalId!;
+      const terminalId = state.terminalId;
+
+      if (terminalId === undefined) {
+        throw new Error("terminalId should be present after context change");
+      }
 
       const newTab = new TerminalTab();
       newTab.restoreState(state);

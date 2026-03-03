@@ -74,8 +74,66 @@ export class SwitchStatus {
     this.container.appendChild(status);
   }
 
+  private isProgressPhase(): boolean {
+    return (
+      this.props.phase === "started" ||
+      this.props.phase === "initializing" ||
+      this.props.phase === "swapping" ||
+      this.props.phase === "committing"
+    );
+  }
+
+  private getStatusConfig(): {
+    backgroundColor: string;
+    borderColor: string;
+    textColor: string;
+    icon: string;
+    message: string;
+  } {
+    const currentPhase = this.props.phase;
+
+    switch (currentPhase) {
+      case "started":
+      case "initializing":
+      case "swapping":
+      case "committing":
+        return {
+          backgroundColor: "#dbeafe",
+          borderColor: "#93c5fd",
+          textColor: "#0c4a6e",
+          icon: "⟳",
+          message: `Switching renderer... ${this.getElapsedTime()}`,
+        };
+      case "rolled_back":
+        return {
+          backgroundColor: "#fed7aa",
+          borderColor: "#fb923c",
+          textColor: "#92400e",
+          icon: "⚠",
+          message: `Switch rolled back${this.props.failureReason ? `: ${this.props.failureReason}` : ""}`,
+        };
+      case "failed":
+        return {
+          backgroundColor: "#fee2e2",
+          borderColor: "#fca5a5",
+          textColor: "#7f1d1d",
+          icon: "✕",
+          message: `Switch failed${this.props.failureReason ? `: ${this.props.failureReason}` : ""}`,
+        };
+      default:
+        return {
+          backgroundColor: "#f0fdf4",
+          borderColor: "#86efac",
+          textColor: "#166534",
+          icon: "✓",
+          message: "Switch successful",
+        };
+    }
+  }
+
   private createStatusElement(): HTMLElement {
     const container = document.createElement("div");
+    const statusConfig = this.getStatusConfig();
     container.className = "switch-status";
     container.style.padding = "12px";
     container.style.marginTop = "12px";
@@ -84,57 +142,19 @@ export class SwitchStatus {
     container.style.alignItems = "center";
     container.style.gap = "12px";
 
-    // Determine status styling
-    let backgroundColor = "#f0fdf4";
-    let borderColor = "#86efac";
-    let textColor = "#166534";
-    let icon = "✓";
-    let message = "Switch successful";
-
-    if (this.props.phase === "started" || this.props.phase === "initializing") {
-      backgroundColor = "#fef3c7";
-      borderColor = "#fcd34d";
-      textColor = "#92400e";
-      icon = "⟳";
-      message = "Switching renderer...";
-    } else if (this.props.phase === "swapping" || this.props.phase === "committing") {
-      backgroundColor = "#dbeafe";
-      borderColor = "#93c5fd";
-      textColor = "#0c4a6e";
-      icon = "⟳";
-      message = `Switching renderer... ${this.getElapsedTime()}`;
-    } else if (this.props.phase === "rolled_back") {
-      backgroundColor = "#fed7aa";
-      borderColor = "#fb923c";
-      textColor = "#92400e";
-      icon = "⚠";
-      message = `Switch rolled back${this.props.failureReason ? `: ${this.props.failureReason}` : ""}`;
-    } else if (this.props.phase === "failed") {
-      backgroundColor = "#fee2e2";
-      borderColor = "#fca5a5";
-      textColor = "#7f1d1d";
-      icon = "✕";
-      message = `Switch failed${this.props.failureReason ? `: ${this.props.failureReason}` : ""}`;
-    }
-
-    container.style.backgroundColor = backgroundColor;
-    container.style.border = `1px solid ${borderColor}`;
-    container.style.color = textColor;
+    container.style.backgroundColor = statusConfig.backgroundColor;
+    container.style.border = `1px solid ${statusConfig.borderColor}`;
+    container.style.color = statusConfig.textColor;
 
     // Icon
     const statusIcon = document.createElement("span");
     statusIcon.className = "switch-status-icon";
-    statusIcon.textContent = icon;
+    statusIcon.textContent = statusConfig.icon;
     statusIcon.style.fontSize = "18px";
     statusIcon.style.fontWeight = "bold";
     statusIcon.style.minWidth = "24px";
 
-    if (
-      this.props.phase === "started" ||
-      this.props.phase === "initializing" ||
-      this.props.phase === "swapping" ||
-      this.props.phase === "committing"
-    ) {
+    if (this.isProgressPhase()) {
       statusIcon.style.animation = "spin 1s linear infinite";
     }
 
@@ -143,7 +163,7 @@ export class SwitchStatus {
     // Message
     const messageSpan = document.createElement("span");
     messageSpan.className = "switch-status-message";
-    messageSpan.textContent = message;
+    messageSpan.textContent = statusConfig.message;
     messageSpan.style.fontSize = "13px";
     messageSpan.style.fontWeight = "500";
     messageSpan.style.flex = "1";
@@ -151,12 +171,7 @@ export class SwitchStatus {
     container.appendChild(messageSpan);
 
     // Progress bar
-    if (
-      this.props.phase === "started" ||
-      this.props.phase === "initializing" ||
-      this.props.phase === "swapping" ||
-      this.props.phase === "committing"
-    ) {
+    if (this.isProgressPhase()) {
       const progressContainer = document.createElement("div");
       progressContainer.style.width = "100%";
       progressContainer.style.marginTop = "8px";
@@ -167,12 +182,12 @@ export class SwitchStatus {
 
       const progress = document.createElement("div");
       const elapsed = this.props.elapsedMs || Date.now() - this.startTime;
-      const maxDuration = (this.props.phase as string) === "committed" ? 3000 : 8000; // 3s for hot-swap, 8s for restart
+      const maxDuration = this.props.phase === "initializing" ? 3000 : 8000;
       const percentage = Math.min((elapsed / maxDuration) * 100, 100);
 
       progress.style.width = `${percentage}%`;
       progress.style.height = "100%";
-      progress.style.backgroundColor = textColor;
+      progress.style.backgroundColor = statusConfig.textColor;
       progress.style.transition = "width 100ms linear";
 
       progressContainer.appendChild(progress);

@@ -4,11 +4,12 @@ import {
   ContextPropagator,
   resetContextPropagator,
 } from "../../../src/tabs/context_switch_propagation";
+import type { TabSurface } from "../../../src/tabs/tab_surface";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
 
 describe("ContextPropagator", () => {
   let propagator: ContextPropagator;
-  let mockTabs: any[] = [];
+  let mockTabs: TabSurface[] = [];
 
   beforeEach(() => {
     resetContextPropagator();
@@ -57,7 +58,7 @@ describe("ContextPropagator", () => {
 
       expect(result.successful.length).toBeGreaterThan(0);
       expect(result.failed.length).toBe(0);
-      expect(result.timed_out.length).toBe(0);
+      expect(result.timedOut.length).toBe(0);
     });
 
     it("should track propagation duration", async () => {
@@ -69,7 +70,7 @@ describe("ContextPropagator", () => {
 
       const result = await propagator.propagateContext(context);
 
-      expect(result.duration_ms).toBeGreaterThanOrEqual(0);
+      expect(result.durationMs).toBeGreaterThanOrEqual(0);
     });
 
     it("should propagate null context", async () => {
@@ -84,9 +85,7 @@ describe("ContextPropagator", () => {
       const failingTab = mockTabs[0];
 
       // Make the tab's onContextChange throw an error
-      failingTab.onContextChange = async () => {
-        throw new Error("Context change failed");
-      };
+      failingTab.onContextChange = () => Promise.reject(new Error("Context change failed"));
 
       const context: ActiveContext = {
         workspaceId: "ws1",
@@ -115,7 +114,7 @@ describe("ContextPropagator", () => {
 
       const result = await propagator.propagateContext(context);
 
-      expect(result.timed_out.length).toBeGreaterThan(0);
+      expect(result.timedOut.length).toBeGreaterThan(0);
     });
   });
 
@@ -156,13 +155,9 @@ describe("ContextPropagator", () => {
 
   describe("Mixed Results", () => {
     it("should handle mixed success and failure", async () => {
-      mockTabs[0].onContextChange = async () => {
-        throw new Error("Failed");
-      };
+      mockTabs[0].onContextChange = () => Promise.reject(new Error("Failed"));
 
-      mockTabs[1].onContextChange = async () => {
-        // Success
-      };
+      mockTabs[1].onContextChange = () => Promise.resolve();
 
       mockTabs[2].onContextChange = async () => {
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -178,7 +173,7 @@ describe("ContextPropagator", () => {
 
       expect(result.successful.length).toBe(1);
       expect(result.failed.length).toBe(1);
-      expect(result.timed_out.length).toBe(1);
+      expect(result.timedOut.length).toBe(1);
     });
   });
 

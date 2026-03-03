@@ -44,11 +44,16 @@ function toCommandEnvelope(
     id: correlationId,
     type: "command",
     ts: new Date().toISOString(),
+    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     correlation_id: correlationId,
     method,
+    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     workspace_id: workspaceId ?? undefined,
+    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     lane_id: laneId ?? undefined,
+    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     session_id: sessionId ?? undefined,
+    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     terminal_id: terminalId ?? undefined,
     payload,
   };
@@ -104,9 +109,13 @@ export class DesktopRuntimeClient {
         "lane.create",
         {
           id: requestedLaneId,
+          // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
           lane_id: requestedLaneId,
+          // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
           preferred_transport: input.preferredTransport ?? "cliproxy_harness",
+          // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
           simulate_degrade: input.simulateDegrade === true,
+          // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
           force_error: input.forceError === true,
         },
         input.workspaceId,
@@ -136,8 +145,11 @@ export class DesktopRuntimeClient {
         "session.attach",
         {
           id: requestedSessionId,
+          // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
           lane_id: input.laneId,
+          // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
           session_id: requestedSessionId,
+          // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
           force_error: input.forceError === true,
         },
         input.workspaceId,
@@ -168,9 +180,13 @@ export class DesktopRuntimeClient {
         "terminal.spawn",
         {
           id: requestedTerminalId,
+          // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
           lane_id: input.laneId,
+          // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
           session_id: input.sessionId,
+          // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
           terminal_id: requestedTerminalId,
+          // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
           force_error: input.forceError === true,
         },
         input.workspaceId,
@@ -216,7 +232,9 @@ export class DesktopRuntimeClient {
       toCommandEnvelope(
         "renderer.switch",
         {
+          // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
           target_engine: input.targetEngine,
+          // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
           force_error: input.forceError === true,
         },
         input.workspaceId,

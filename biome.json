@@ -4,6 +4,7 @@
     "ignore": [
       "node_modules/**",
       "docs/.vitepress/dist/**",
+      "apps/**/dist/**",
       "docs/.generated/**",
       ".worktrees/**",
       "kitty-specs/**",

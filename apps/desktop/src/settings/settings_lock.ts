@@ -50,7 +50,7 @@ export class SettingsLock {
     const interactiveSelectors = 'input, button, [role="button"], [role="switch"]';
     const elements = container.querySelectorAll(interactiveSelectors) as NodeListOf<HTMLElement>;
 
-    elements.forEach(element => {
+    for (const element of elements) {
       if (element instanceof HTMLInputElement || element instanceof HTMLButtonElement) {
         element.disabled = true;
       } else {
@@ -62,7 +62,7 @@ export class SettingsLock {
       }
 
       this.lockedElements.add(element);
-    });
+    }
 
     // Add visual overlay/grayed-out effect
     container.style.opacity = "0.7";
@@ -70,7 +70,7 @@ export class SettingsLock {
   }
 
   private removeLock(container: HTMLElement): void {
-    this.lockedElements.forEach(element => {
+    for (const element of this.lockedElements) {
       if (element instanceof HTMLInputElement || element instanceof HTMLButtonElement) {
         element.disabled = false;
       } else {
@@ -80,7 +80,7 @@ export class SettingsLock {
         element.style.cursor = "";
         element.removeAttribute("title");
       }
-    });
+    }
 
     this.lockedElements.clear();
     container.style.opacity = "";

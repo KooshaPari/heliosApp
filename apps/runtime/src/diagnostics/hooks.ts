@@ -114,7 +114,8 @@ export function markEnd(metric: string, handle: number): number {
   }
 
   const end = s.clock.now();
-  const duration = end - s.startTimes[handle]!;
+  const start = s.startTimes[handle];
+  const duration = end - start;
 
   // Clear slot so it can be reused.
   s.metricNames[handle] = "";
@@ -174,7 +175,8 @@ export function createInstrumentationHooks(opts?: {
         return Number.NaN;
       }
       const end = state.clock.now();
-      const duration = end - state.startTimes[handle]!;
+      const start = state.startTimes[handle];
+      const duration = end - start;
       state.metricNames[handle] = "";
       if (state.onSample !== undefined) {
         state.onSample(metric, duration, end);

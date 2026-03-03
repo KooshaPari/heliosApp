@@ -39,12 +39,12 @@ export class ProjectTab extends TabSurface {
     super("project-tab", "project", "Project");
   }
 
-  async onContextChange(context: ActiveContext | null): Promise<void> {
+  onContextChange(context: ActiveContext | null): Promise<void> {
     // When context changes, query workspace/project metadata
     this.metadata = null;
 
     if (!context) {
-      return;
+      return Promise.resolve();
     }
 
     // In a real implementation, query workspace registry:
@@ -79,6 +79,8 @@ export class ProjectTab extends TabSurface {
       gitStatus: "On branch main, 3 commits ahead of origin/main",
       recentActivity: "Last update 10 minutes ago",
     };
+
+    return Promise.resolve();
   }
 
   render(): HTMLElement {
@@ -119,7 +121,9 @@ export class ProjectTab extends TabSurface {
       retryBtn.style.borderRadius = "3px";
       retryBtn.style.cursor = "pointer";
       retryBtn.style.fontSize = "12px";
-      retryBtn.addEventListener("click", () => {});
+      retryBtn.addEventListener("click", () => {
+        this.render();
+      });
 
       errorEl.appendChild(titleEl);
       errorEl.appendChild(msgEl);
@@ -366,7 +370,9 @@ export class ProjectTab extends TabSurface {
     createBtn.style.cursor = "pointer";
     createBtn.style.fontSize = "12px";
     createBtn.style.width = "100%";
-    createBtn.addEventListener("click", () => {});
+    createBtn.addEventListener("click", () => {
+      this.contentEl?.dispatchEvent(new CustomEvent("helios:project:create-lane"));
+    });
 
     const openBtn = document.createElement("button");
     openBtn.textContent = "Open in File Manager";
@@ -378,7 +384,9 @@ export class ProjectTab extends TabSurface {
     openBtn.style.cursor = "pointer";
     openBtn.style.fontSize = "12px";
     openBtn.style.width = "100%";
-    openBtn.addEventListener("click", () => {});
+    openBtn.addEventListener("click", () => {
+      this.contentEl?.dispatchEvent(new CustomEvent("helios:project:open-workspace"));
+    });
 
     bodyEl.appendChild(createBtn);
     bodyEl.appendChild(openBtn);

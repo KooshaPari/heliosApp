@@ -1,5 +1,9 @@
 import type { AuditEvent } from "./event.ts";
 
+interface EventSource {
+  getWorkspaces(): Promise<string[]>;
+}
+
 /**
  * Retention policy for workspace audit events.
  */
@@ -109,10 +113,14 @@ export class RetentionPurger {
    * Run purge for workspace(s).
    *
    * @param workspaceId - Optional workspace to purge; if omitted, purge all
-   * @param store - Audit store for deletion
+   * @param store - Audit store for deletion (reserved for future purge execution)
    * @param eventSource - Function to get events for deletion
    */
-  async runPurge(workspaceId: string | undefined, _store: any, eventSource: any): Promise<void> {
+  async runPurge(
+    workspaceId: string | undefined,
+    _store: unknown,
+    eventSource: EventSource
+  ): Promise<void> {
     const workspaces = workspaceId ? [workspaceId] : await eventSource.getWorkspaces();
 
     for (const ws of workspaces) {

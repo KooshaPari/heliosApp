@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 const vi = { fn: mock, spyOn: spyOn };
-import { LaneActions, type RuntimeAPI } from "../../../src/panels/lane_actions";
+import { LaneActions, type RuntimeApi } from "../../../src/panels/lane_actions";
 
 describe("LaneActions", () => {
   let actions: LaneActions;
-  let mockApi: RuntimeAPI;
+  let mockApi: RuntimeApi;
 
-  const createMockApi = (): RuntimeAPI => ({
+  const createMockApi = (): RuntimeApi => ({
     createLane: vi.fn().mockResolvedValue({ id: "lane-new", name: "New Lane" }),
     attachLane: vi.fn().mockResolvedValue(undefined),
     detachLane: vi.fn().mockResolvedValue(undefined),
@@ -26,7 +26,7 @@ describe("LaneActions", () => {
   it("should create lane successfully", async () => {
     const onLaneCreated = vi.fn();
     actions = new LaneActions({
-      runtimeAPI: mockApi,
+      runtimeApi: mockApi,
       onLaneCreated,
     });
 
@@ -38,7 +38,7 @@ describe("LaneActions", () => {
 
   it("should call optimistic callback on create", async () => {
     actions = new LaneActions({
-      runtimeAPI: mockApi,
+      runtimeApi: mockApi,
     });
 
     const optimisticCallback = vi.fn();
@@ -54,21 +54,21 @@ describe("LaneActions", () => {
     const onError = vi.fn();
 
     actions = new LaneActions({
-      runtimeAPI: mockApi,
+      runtimeApi: mockApi,
       onError,
     });
 
     await actions.createLane("ws-1");
 
     expect(onError).toHaveBeenCalled();
-    const errorArg = (onError as any).mock.calls[0][0];
+    const errorArg = onError.mock.calls[0][0] as { code: string };
     expect(errorArg.code).toBe("CREATE_FAILED");
   });
 
   it("should attach lane successfully", async () => {
     const onLaneAttached = vi.fn();
     actions = new LaneActions({
-      runtimeAPI: mockApi,
+      runtimeApi: mockApi,
       onLaneAttached,
     });
 
@@ -83,21 +83,21 @@ describe("LaneActions", () => {
     const onError = vi.fn();
 
     actions = new LaneActions({
-      runtimeAPI: mockApi,
+      runtimeApi: mockApi,
       onError,
     });
 
     await actions.attachLane("lane-1");
 
     expect(onError).toHaveBeenCalled();
-    const errorArg = (onError as any).mock.calls[0][0];
+    const errorArg = onError.mock.calls[0][0] as { code: string };
     expect(errorArg.code).toBe("ATTACH_FAILED");
   });
 
   it("should detach lane successfully", async () => {
     const onLaneDetached = vi.fn();
     actions = new LaneActions({
-      runtimeAPI: mockApi,
+      runtimeApi: mockApi,
       onLaneDetached,
     });
 
@@ -112,7 +112,7 @@ describe("LaneActions", () => {
     const onError = vi.fn();
 
     actions = new LaneActions({
-      runtimeAPI: mockApi,
+      runtimeApi: mockApi,
       onError,
     });
 
@@ -124,7 +124,7 @@ describe("LaneActions", () => {
   it("should cleanup lane successfully", async () => {
     const onLaneCleaned = vi.fn();
     actions = new LaneActions({
-      runtimeAPI: mockApi,
+      runtimeApi: mockApi,
       onLaneCleaned,
     });
 
@@ -140,7 +140,7 @@ describe("LaneActions", () => {
     const onError = vi.fn();
 
     actions = new LaneActions({
-      runtimeAPI: mockApi,
+      runtimeApi: mockApi,
       onError,
     });
 
@@ -153,7 +153,7 @@ describe("LaneActions", () => {
   it("should dismiss error by code", async () => {
     const onError = vi.fn();
     actions = new LaneActions({
-      runtimeAPI: mockApi,
+      runtimeApi: mockApi,
       onError,
       errorDismissTimeout: 10000,
     });
@@ -170,7 +170,7 @@ describe("LaneActions", () => {
   it("should clear all errors", async () => {
     const onError = vi.fn();
     actions = new LaneActions({
-      runtimeAPI: mockApi,
+      runtimeApi: mockApi,
       onError,
       errorDismissTimeout: 10000,
     });
@@ -193,7 +193,7 @@ describe("LaneActions", () => {
     const revertCallback = vi.fn();
 
     actions = new LaneActions({
-      runtimeAPI: mockApi,
+      runtimeApi: mockApi,
       onError,
     });
 

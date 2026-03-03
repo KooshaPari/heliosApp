@@ -136,7 +136,7 @@ export class AuditSink {
         await sink.ingest(event);
         await bus.publish(event);
       },
-      async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+      request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
         return bus.request(command);
       },
     };
@@ -204,7 +204,7 @@ export class AuditSink {
   }
 
   // Overrideable persistence hook
-  private async _persistRecord(record: AuditRecord): Promise<void> {
+  private _persistRecord(record: AuditRecord): void {
     this.records.push(record);
   }
 }

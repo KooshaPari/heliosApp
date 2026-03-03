@@ -74,9 +74,7 @@ describe("bus error isolation", () => {
   });
 
   test("async bus error does not fail create", async () => {
-    const asyncThrowingPublish = async () => {
-      throw new Error("async bus exploded");
-    };
+    const asyncThrowingPublish = () => Promise.reject(new Error("async bus exploded"));
     const svc = new WorkspaceService(store, undefined, asyncThrowingPublish);
     const ws = await svc.create({ name: "Test", rootPath: "/tmp/test" });
     expect(ws.name).toBe("Test");
