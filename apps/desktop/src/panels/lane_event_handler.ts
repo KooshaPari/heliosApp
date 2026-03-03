@@ -5,7 +5,7 @@
 
 export interface BusEvent {
   topic: string;
-  payload: Record<string, any>; // biome-ignore lint/suspicious/noExplicitAny: bus event payloads are heterogeneous
+  payload: Record<string, any>; // bus event payloads are heterogeneous
   sequenceNumber?: number;
   timestamp: number;
 }
