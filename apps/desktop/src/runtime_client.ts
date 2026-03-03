@@ -1,5 +1,4 @@
 import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
-import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
 import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
 import type { LocalBus } from "../../runtime/src/protocol/bus";
 import type { RendererEngine } from "./settings";
@@ -45,6 +44,7 @@ function toCommandEnvelope(
     id: correlationId,
     type: "command",
     ts: new Date().toISOString(),
+    correlation_id: correlationId,
     method,
     workspace_id: workspaceId ?? undefined,
     lane_id: laneId ?? undefined,
