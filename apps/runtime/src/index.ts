@@ -1,32 +1,4 @@
-/**
- * @helios/runtime — Core runtime package for heliosApp.
- *
- * Exports foundational types and utilities consumed by all other packages.
- */
-
-/** Semantic version of the runtime package. */
-export const VERSION = "0.0.1" as const;
-
-/** Result of a runtime health check. */
-export interface HealthCheckResult {
-  readonly ok: boolean;
-  readonly timestamp: number;
-  readonly uptimeMs: number;
-}
-
-const startTime = performance.now();
-
-/** Returns the current health status of the runtime. */
-export function healthCheck(): HealthCheckResult {
-  return {
-    ok: true,
-    timestamp: Date.now(),
-    uptimeMs: performance.now() - startTime,
-  };
-}
-
-// Exports from protocol and audit subsystems
-import type { AuditSink } from "./audit/sink";
+import type { AuditBundle, AuditFilter, AuditRecord, AuditSink } from "./audit/sink";
 import {
   buildInputTerminalCommand,
   buildResizeTerminalCommand,
@@ -38,11 +10,14 @@ import { InMemoryLocalBus } from "./protocol/bus";
 import type { LocalBusEnvelope } from "./protocol/types";
 import { InMemorySessionRegistry, SessionRegistryError, type SessionTransport } from "./sessions/registry";
 import { LaneLifecycleError, LaneLifecycleService } from "./sessions/state_machine";
+import type { RecoveryBootstrapResult, RecoveryMetadata, WatchdogScanResult } from "./sessions/types";
 
 type RuntimeOptions = {
   auditSink?: AuditSink;
   harnessProbe?: HarnessProbe;
+  recovery_metadata?: RecoveryMetadata;
   terminalBufferCapBytes?: number;
+  watchdog_interval_ms?: number;
 };
 
 function json(status: number, payload: Record<string, unknown>): Response {
@@ -101,6 +76,18 @@ export function createRuntime(options: RuntimeOptions = {}) {
   const sessionRegistry = new InMemorySessionRegistry();
   const harnessRouter = new HarnessRouteSelector(bus, options.harnessProbe);
   const busRequest = (command: LocalBusEnvelope) => bus.request(command);
+  let watchdogTimer: ReturnType<typeof setInterval> | null = null;
+  let recoveryResult: RecoveryBootstrapResult | null = null;
+
+  if (options.recovery_metadata) {
+    recoveryResult = bus.bootstrapRecovery(options.recovery_metadata);
+  }
+
+  if (options.watchdog_interval_ms && options.watchdog_interval_ms > 0) {
+    watchdogTimer = setInterval(() => {
+      void bus.scanForOrphans();
+    }, options.watchdog_interval_ms);
+  }
 
   const fetch = async (request: Request): Promise<Response> => {
     const url = new URL(request.url);
@@ -340,9 +327,17 @@ export function createRuntime(options: RuntimeOptions = {}) {
     cleanupLane: (workspaceId: string, laneId: string) => laneService.cleanup(workspaceId, laneId),
     getState: () => bus.getState(),
     getEvents: () => bus.getEvents(),
-    getAuditRecords: () => bus.getAuditRecords(),
+    bootstrapRecovery: (metadata: RecoveryMetadata): RecoveryBootstrapResult => {
+      recoveryResult = bus.bootstrapRecovery(metadata);
+      return recoveryResult;
+    },
+    exportAuditBundle: (filter: AuditFilter = {}): AuditBundle => bus.exportAuditBundle(filter),
+    exportRecoveryMetadata: (): RecoveryMetadata => bus.exportRecoveryMetadata(),
+    getAuditRecords: (filter: AuditFilter = {}): Promise<AuditRecord[]> => bus.getAuditRecords(filter),
+    getBootstrapResult: (): RecoveryBootstrapResult | null => recoveryResult,
     getTerminal: (terminalId: string) => bus.getTerminal(terminalId),
     getTerminalBuffer: (terminalId: string) => bus.getTerminalBuffer(terminalId),
+    getOrphanReport: (): WatchdogScanResult => bus.scanForOrphans(),
     spawnTerminal: (input: {
       command_id: string;
       correlation_id: string;
@@ -371,6 +366,11 @@ export function createRuntime(options: RuntimeOptions = {}) {
       rows: number;
     }) => busRequest(buildResizeTerminalCommand(input)),
     getHarnessStatus: () => harnessRouter.getStatus(),
-    getSession: (sessionId: string) => sessionRegistry.get(sessionId)
+    getSession: (sessionId: string) => sessionRegistry.get(sessionId),
+    shutdown: (): void => {
+      if (watchdogTimer) {
+        clearInterval(watchdogTimer);
+      }
+    }
   };
 }
