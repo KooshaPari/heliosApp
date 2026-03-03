@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Context Switch Propagation, Keyboard Shortcuts, and End-to-End Tests
-lane: "done"
+lane: "doing"
 dependencies:
 - WP02
 base_branch: 016-workspace-lane-session-ui-tabs-WP02
@@ -17,8 +17,8 @@ phase: Phase 3 - Integration and Hardening
 assignee: ''
 agent: "claude-haiku"
 shell_pid: "80432"
-review_status: "approved"
-reviewed_by: "Koosha Paridehpour"
+review_status: ''
+reviewed_by: ''
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -201,5 +201,3 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:35:33Z – claude-haiku – shell_pid=80432 – lane=doing – Assigned agent via workflow command
-- 2026-03-01T13:37:09Z – claude-haiku – shell_pid=80432 – lane=done – Implemented WP03
-- 2026-03-01T13:41:12Z – claude-haiku – shell_pid=80432 – lane=done – Merged
