@@ -2,7 +2,7 @@
   "name": "helios-app",
   "version": "0.0.1",
   "private": true,
-  "workspaces": ["apps/runtime"],
+  "workspaces": ["apps/desktop", "apps/runtime"],
   "engines": {
     "bun": ">=1.2.0"
   },

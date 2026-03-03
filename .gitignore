@@ -16,4 +16,3 @@
 !.gemini/config.yaml
 # Excluded via sparse-checkout
 kitty-specs/
-*.tsbuildinfo
