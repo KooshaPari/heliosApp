@@ -3,20 +3,12 @@
   "$id": "https://helios.local/schemas/orchestration-envelope.schema.json",
   "title": "Helios Local Bus Envelope (Feature Parity Overlay)",
   "type": "object",
-  "required": [
-    "id",
-    "type",
-    "ts"
-  ],
+  "required": ["id", "type", "ts"],
   "properties": {
     "id": { "type": "string", "minLength": 1 },
-    "type": {
-      "type": "string",
-      "enum": ["command", "response", "event"]
-    },
+    "type": { "type": "string", "enum": ["command", "response", "event"] },
     "ts": {
       "type": "string",
-      "format": "date-time",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?(?:Z|[+-]\\d{2}:\\d{2})$"
     },
     "workspace_id": { "type": "string", "minLength": 1 },
@@ -109,10 +101,7 @@
       ]
     },
     "payload": { "type": "object" },
-    "status": {
-      "type": ["string", "null"],
-      "enum": ["ok", "error", null]
-    },
+    "status": { "type": ["string", "null"], "enum": ["ok", "error", null] },
     "result": { "type": ["object", "null"] },
     "error": {
       "type": ["object", "null"],
@@ -129,7 +118,6 @@
     "envelope_id": { "type": ["string", "null"] },
     "timestamp": {
       "type": ["string", "null"],
-      "format": "date-time",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?(?:Z|[+-]\\d{2}:\\d{2})$"
     }
   },
@@ -139,86 +127,82 @@
       "then": { "required": ["method", "payload"] }
     },
     {
-      "if": { "properties": { "type": { "const": "response" } }, "required": ["type"] },
-      "then": { "required": ["status"] }
-    },
-    {
       "if": { "properties": { "type": { "const": "event" } }, "required": ["type"] },
       "then": { "required": ["topic", "payload"] }
+    },
+    {
+      "if": { "properties": { "type": { "const": "response" } }, "required": ["type"] },
+      "then": { "required": ["status"] }
     },
     {
       "if": {
         "properties": { "type": { "const": "command" }, "method": { "const": "lane.create" } },
         "required": ["type", "method"]
       },
-      "then": { "required": ["workspace_id", "correlation_id"] }
+      "then": { "required": ["correlation_id", "workspace_id"] }
     },
     {
       "if": {
         "properties": { "type": { "const": "command" }, "method": { "const": "session.attach" } },
         "required": ["type", "method"]
       },
-      "then": {
-        "required": ["workspace_id", "lane_id", "session_id", "correlation_id"]
-      }
+      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
     },
     {
       "if": {
         "properties": { "type": { "const": "command" }, "method": { "const": "terminal.spawn" } },
         "required": ["type", "method"]
       },
-      "then": {
-        "required": ["workspace_id", "lane_id", "session_id", "correlation_id"]
-      }
+      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
     },
     {
       "if": {
         "properties": { "type": { "const": "event" }, "topic": { "const": "lane.create.started" } },
         "required": ["type", "topic"]
       },
-      "then": { "required": ["workspace_id", "lane_id", "correlation_id"] }
+      "then": { "required": ["correlation_id", "workspace_id", "lane_id"] }
     },
     {
       "if": {
         "properties": { "type": { "const": "event" }, "topic": { "const": "lane.created" } },
         "required": ["type", "topic"]
       },
-      "then": { "required": ["workspace_id", "lane_id", "correlation_id"] }
+      "then": { "required": ["correlation_id", "workspace_id", "lane_id"] }
     },
     {
       "if": {
         "properties": { "type": { "const": "event" }, "topic": { "const": "lane.create.failed" } },
         "required": ["type", "topic"]
       },
-      "then": { "required": ["workspace_id", "lane_id", "correlation_id"] }
+      "then": { "required": ["correlation_id", "workspace_id", "lane_id"] }
     },
     {
       "if": {
         "properties": { "type": { "const": "event" }, "topic": { "const": "session.attach.started" } },
         "required": ["type", "topic"]
       },
-      "then": { "required": ["workspace_id", "lane_id", "session_id", "correlation_id"] }
+      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
     },
     {
       "if": {
         "properties": { "type": { "const": "event" }, "topic": { "const": "session.attached" } },
         "required": ["type", "topic"]
       },
-      "then": { "required": ["workspace_id", "lane_id", "session_id", "correlation_id"] }
+      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
     },
     {
       "if": {
         "properties": { "type": { "const": "event" }, "topic": { "const": "session.attach.failed" } },
         "required": ["type", "topic"]
       },
-      "then": { "required": ["workspace_id", "lane_id", "session_id", "correlation_id"] }
+      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
     },
     {
       "if": {
         "properties": { "type": { "const": "event" }, "topic": { "const": "terminal.spawn.started" } },
         "required": ["type", "topic"]
       },
-      "then": { "required": ["workspace_id", "lane_id", "session_id", "correlation_id"] }
+      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
     },
     {
       "if": {
@@ -226,7 +210,7 @@
         "required": ["type", "topic"]
       },
       "then": {
-        "required": ["workspace_id", "lane_id", "session_id", "terminal_id", "correlation_id"]
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id", "terminal_id"]
       }
     },
     {
@@ -234,7 +218,7 @@
         "properties": { "type": { "const": "event" }, "topic": { "const": "terminal.spawn.failed" } },
         "required": ["type", "topic"]
       },
-      "then": { "required": ["workspace_id", "lane_id", "session_id", "correlation_id"] }
+      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
     }
   ],
   "additionalProperties": false
