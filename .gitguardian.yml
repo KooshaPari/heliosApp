@@ -2,31 +2,12 @@
 # Whitelist test fixtures for secrets redaction engine test cases
 # These are intentional test fixtures used to validate redaction functionality
 
-version: 1
+version: 2
 
-# Patterns to skip scanning
-# These paths contain example/placeholder secrets used exclusively for testing
-paths-to-skip:
-  - "apps/runtime/src/secrets/__tests__/__fixtures__/known-secrets.json"
-  - "apps/runtime/src/secrets/__tests__/ci-redaction-verification.test.ts"
-  - "apps/runtime/src/secrets/__tests__/credential-isolation.test.ts"
-  - "apps/runtime/src/secrets/__tests__/credential-lifecycle.test.ts"
-  - "apps/runtime/src/secrets/__tests__/credential-store.test.ts"
-  - "apps/runtime/src/secrets/__tests__/encryption.test.ts"
-  - "apps/runtime/src/secrets/__tests__/integration.test.ts"
-  - "apps/runtime/src/secrets/__tests__/redaction-audit.test.ts"
-  - "apps/runtime/src/secrets/__tests__/redaction-engine.test.ts"
-  - "apps/runtime/src/secrets/__tests__/redaction-rules.test.ts"
-  - "apps/runtime/tests/unit/audit/export.test.ts"
-  - "scripts/tests/compliance-checker.test.ts"
-  - ".github/branch-protection.md"
-
-# Alternative: Use glob patterns for broader matching
-# paths-to-skip-patterns:
-#   - "**/__tests__/**"
-#   - "**/__fixtures__/**"
-#   - "**/*.test.ts"
-
-# Whitelist specific strings if needed (not recommended for real secrets)
-# secrets-to-skip:
-#   - "AKIA_EXAMPLE_KEY"
+secret:
+  ignored_paths:
+    - "apps/runtime/src/secrets/__tests__/__fixtures__/**"
+    - "apps/runtime/src/secrets/__tests__/*.test.ts"
+    - "apps/runtime/tests/unit/audit/export.test.ts"
+    - "scripts/tests/compliance-checker.test.ts"
+    - ".github/branch-protection.md"
