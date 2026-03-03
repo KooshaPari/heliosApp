@@ -59,6 +59,9 @@
         "lane.create",
         "lane.attach",
         "lane.cleanup",
+        "boundary.local.dispatch",
+        "boundary.tool.dispatch",
+        "boundary.a2a.dispatch",
         null
       ]
     },
@@ -96,6 +99,10 @@
         "lane.attached",
         "lane.cleaned",
         "harness.status.changed",
+        "boundary.local.dispatched",
+        "boundary.tool.dispatched",
+        "boundary.a2a.delegated",
+        "boundary.dispatch.failed",
         "audit.recorded",
         "diagnostics.metric",
         null

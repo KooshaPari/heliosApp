@@ -9,10 +9,12 @@
     "lint": "node tools/gates/lint-strict.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "static": "node tools/gates/protocol-parity.mjs",
+    "gate:coverage": "node tools/gates/runtime-coverage.mjs",
+    "gate:traceability": "node tools/gates/requirement-traceability.mjs",
     "security:semgrep": "semgrep --error --config tools/semgrep/rules.yml apps/runtime/src apps/runtime/tests",
     "security:gitleaks": "gitleaks detect --no-banner --redact --source apps/runtime",
     "security": "bun run security:semgrep && bun run security:gitleaks",
-    "quality": "bun run lint && bun run typecheck && bun run static && bun run test && bun run security"
+    "quality": "bun run lint && bun run typecheck && bun run static && bun run test && bun run gate:coverage && bun run gate:traceability && bun run security"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2"

@@ -79,6 +79,14 @@ As an operator, I can open multiple windows, each bound to a workspace, and clos
 - **FR-009**: The system MUST implement graceful shutdown that signals all subsystems and waits for in-flight operations before exit.
 - **FR-010**: The system MUST display a degraded-mode banner when a critical subsystem is unavailable, keeping the shell operable for diagnostics.
 
+#### FR-010 Boundary Contract Mapping
+
+| Boundary | Canonical Commands | Canonical Events | Runtime Adapter |
+|----------|--------------------|------------------|-----------------|
+| local control | `boundary.local.dispatch`, `lane.create`, `session.attach`, `terminal.spawn` | `boundary.local.dispatched`, lifecycle topics | `local_bus` |
+| tool interoperability | `boundary.tool.dispatch`, `approval.request.resolve`, `share.upterm.start`, `zmx.checkpoint` | `boundary.tool.dispatched`, `boundary.dispatch.failed` | `tool_bridge` |
+| agent-to-agent delegation | `boundary.a2a.dispatch`, `agent.run`, `agent.cancel` | `boundary.a2a.delegated`, `boundary.dispatch.failed` | `a2a_bridge` |
+
 ### Non-Functional Requirements
 
 - **NFR-001**: Startup to interactive terminal MUST be < 2 seconds (p95) on reference hardware (8 GB RAM, 4-core CPU).

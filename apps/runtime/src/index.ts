@@ -7,6 +7,8 @@ import {
   type HarnessProbe
 } from "./integrations/exec";
 import { InMemoryLocalBus } from "./protocol/bus";
+import { createBoundaryDispatcher } from "./protocol/boundary_adapter";
+import type { ProtocolMethod } from "./protocol/methods";
 import type { LocalBusEnvelope } from "./protocol/types";
 import { InMemorySessionRegistry, SessionRegistryError, type SessionTransport } from "./sessions/registry";
 import { LaneLifecycleError, LaneLifecycleService } from "./sessions/state_machine";
@@ -80,7 +82,9 @@ export function createRuntime(options: RuntimeOptions = {}) {
   const laneService = new LaneLifecycleService(bus);
   const sessionRegistry = new InMemorySessionRegistry();
   const harnessRouter = new HarnessRouteSelector(bus, options.harnessProbe);
-  const busRequest = (command: LocalBusEnvelope) => bus.request(command);
+  const dispatchBoundaryCommand = createBoundaryDispatcher({
+    dispatchLocal: (command) => bus.request(command)
+  });
 
   const fetch = async (request: Request): Promise<Response> => {
     const url = new URL(request.url);
@@ -194,7 +198,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
         });
 
         const sessionCorrelationId = `session.attach:${ensured.session.session_id}:${Date.now()}`;
-        await bus.request({
+        await dispatchBoundaryCommand({
           id: `session:${ensured.session.session_id}:attach:${Date.now()}`,
           type: "command",
           ts: new Date().toISOString(),
@@ -275,7 +279,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
 
         const terminalId = `term_${crypto.randomUUID()}`;
         const correlationId = `terminal.spawn:${terminalId}:${Date.now()}`;
-        const response = await busRequest(
+        const response = await dispatchBoundaryCommand(
           buildSpawnTerminalCommand({
             command_id: `cmd:terminal.spawn:${terminalId}`,
             correlation_id: correlationId,
@@ -301,6 +305,37 @@ export function createRuntime(options: RuntimeOptions = {}) {
         }
 
         return json(201, response.result as Record<string, unknown>);
+      }
+
+      if (request.method === "POST" && url.pathname === "/v1/protocol/dispatch") {
+        const body = await parseBody(request);
+        const method = asString(body, "method") as ProtocolMethod;
+        const payload = (body.payload as Record<string, unknown> | undefined) ?? {};
+        const response = await dispatchBoundaryCommand({
+          id: `dispatch:${method}:${Date.now()}`,
+          type: "command",
+          ts: new Date().toISOString(),
+          method,
+          payload,
+          correlation_id: asString(body, "correlation_id", false),
+          workspace_id: asString(body, "workspace_id", false),
+          lane_id: asString(body, "lane_id", false),
+          session_id: asString(body, "session_id", false),
+          terminal_id: asString(body, "terminal_id", false)
+        });
+
+        if (response.type !== "response") {
+          return json(500, { error: "invalid_boundary_response" });
+        }
+        if (response.status === "error") {
+          return json(409, {
+            error: response.error?.code ?? "boundary_dispatch_failed",
+            message: response.error?.message ?? "boundary_dispatch_failed",
+            details: response.error?.details ?? null
+          });
+        }
+
+        return json(200, response.result ?? {});
       }
 
       if (request.method === "GET" && url.pathname === "/v1/harness/cliproxy/status") {
@@ -338,7 +373,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
       lane_id: string;
       session_id: string;
       title?: string;
-    }) => busRequest(buildSpawnTerminalCommand(input)),
+    }) => dispatchBoundaryCommand(buildSpawnTerminalCommand(input)),
     inputTerminal: (input: {
       command_id: string;
       correlation_id: string;
@@ -347,7 +382,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
       session_id: string;
       terminal_id: string;
       data: string;
-    }) => busRequest(buildInputTerminalCommand(input)),
+    }) => dispatchBoundaryCommand(buildInputTerminalCommand(input)),
     resizeTerminal: (input: {
       command_id: string;
       correlation_id: string;
@@ -357,7 +392,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
       terminal_id: string;
       cols: number;
       rows: number;
-    }) => busRequest(buildResizeTerminalCommand(input)),
+    }) => dispatchBoundaryCommand(buildResizeTerminalCommand(input)),
     getHarnessStatus: () => harnessRouter.getStatus(),
     getSession: (sessionId: string) => sessionRegistry.get(sessionId)
   };

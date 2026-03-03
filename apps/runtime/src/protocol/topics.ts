@@ -30,6 +30,10 @@ export const TOPICS = [
   "lane.attached",
   "lane.cleaned",
   "harness.status.changed",
+  "boundary.local.dispatched",
+  "boundary.tool.dispatched",
+  "boundary.a2a.delegated",
+  "boundary.dispatch.failed",
   "audit.recorded",
   "diagnostics.metric"
 ] as const;

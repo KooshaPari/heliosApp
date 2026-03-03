@@ -1,4 +1,4 @@
-import type { LocalBusEnvelope } from "./types";
+import type { LocalBusEnvelope, ResponseEnvelope } from "./types";
 
 export type ProtocolBoundary = "local_control" | "tool_interop" | "agent_delegation";
 export type BoundaryAdapterName = "local_bus" | "tool_bridge" | "a2a_bridge";
@@ -32,7 +32,7 @@ const LOCAL_METHODS = new Set([
   "lane.create",
   "lane.attach",
   "lane.cleanup",
-  "boundary.local.dispatch",
+  "boundary.local.dispatch"
 ]);
 
 const TOOL_METHODS = new Set([
@@ -43,7 +43,7 @@ const TOOL_METHODS = new Set([
   "share.tmate.stop",
   "zmx.checkpoint",
   "zmx.restore",
-  "boundary.tool.dispatch",
+  "boundary.tool.dispatch"
 ]);
 
 const A2A_METHODS = new Set(["agent.run", "agent.cancel", "boundary.a2a.dispatch"]);
@@ -52,23 +52,25 @@ function normalizedBoundaryError(
   command: LocalBusEnvelope,
   code: string,
   message: string,
-  details: Record<string, unknown>,
-): LocalBusEnvelope {
+  details: Record<string, unknown>
+): ResponseEnvelope {
   return {
     id: command.id,
     type: "response",
     ts: new Date().toISOString(),
     workspace_id: command.workspace_id,
+    lane_id: command.lane_id,
     session_id: command.session_id,
     terminal_id: command.terminal_id,
+    correlation_id: command.correlation_id,
     method: command.type === "command" ? command.method : undefined,
     status: "error",
     error: {
       code,
       message,
       retryable: false,
-      details,
-    },
+      details
+    }
   };
 }
 
@@ -86,46 +88,37 @@ export function getBoundaryDispatchDecision(method: string): BoundaryDispatchDec
 }
 
 export function createBoundaryDispatcher(input: BoundaryDispatcherInput): CommandDispatch {
-  const dispatchTool =
-    input.dispatchTool ??
-    (async (command) =>
-      normalizedBoundaryError(
-        command,
-        "UNSUPPORTED_BOUNDARY_ADAPTER",
-        "tool_interop adapter unavailable",
-        {
-          boundary: "tool_interop",
-          adapter: "tool_bridge",
-          method: command.type === "command" ? command.method : null,
-        },
-      ));
-  const dispatchA2A =
-    input.dispatchA2A ??
-    (async (command) =>
-      normalizedBoundaryError(
-        command,
-        "UNSUPPORTED_BOUNDARY_ADAPTER",
-        "agent_delegation adapter unavailable",
-        {
-          boundary: "agent_delegation",
-          adapter: "a2a_bridge",
-          method: command.type === "command" ? command.method : null,
-        },
-      ));
+  const dispatchTool = input.dispatchTool ?? (async (command) =>
+    normalizedBoundaryError(
+      command,
+      "UNSUPPORTED_BOUNDARY_ADAPTER",
+      "tool_interop adapter unavailable",
+      {
+        boundary: "tool_interop",
+        adapter: "tool_bridge",
+        method: command.type === "command" ? command.method : null
+      }
+    ));
+  const dispatchA2A = input.dispatchA2A ?? (async (command) =>
+    normalizedBoundaryError(
+      command,
+      "UNSUPPORTED_BOUNDARY_ADAPTER",
+      "agent_delegation adapter unavailable",
+      {
+        boundary: "agent_delegation",
+        adapter: "a2a_bridge",
+        method: command.type === "command" ? command.method : null
+      }
+    ));
 
   return async (command: LocalBusEnvelope): Promise<LocalBusEnvelope> => {
     if (command.type !== "command") {
-      return normalizedBoundaryError(
-        command,
-        "INVALID_ENVELOPE_TYPE",
-        "command envelope required",
-        {
-          type: command.type,
-        },
-      );
+      return normalizedBoundaryError(command, "INVALID_ENVELOPE_TYPE", "command envelope required", {
+        type: command.type
+      });
     }
 
-    const decision = getBoundaryDispatchDecision(command.method ?? "");
+    const decision = getBoundaryDispatchDecision(command.method);
     const response =
       decision.adapter === "local_bus"
         ? await input.dispatchLocal(command)
@@ -143,8 +136,8 @@ export function createBoundaryDispatcher(input: BoundaryDispatcherInput): Comman
       "boundary adapter must return response",
       {
         boundary: decision.boundary,
-        adapter: decision.adapter,
-      },
+        adapter: decision.adapter
+      }
     );
   };
 }
