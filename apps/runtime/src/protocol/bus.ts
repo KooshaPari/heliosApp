@@ -3,6 +3,10 @@ import type { CommandEnvelope, EventEnvelope, ResponseEnvelope } from "./types.j
 import { ProtocolValidationError } from "./types.js";
 import { validateEnvelope } from "./validator.js";
 
+export type { LocalBusEnvelope } from "./types.js";
+
+type LocalBusEnvelopeWithSequence = LocalBusEnvelope & { sequence?: number };
+
 // ---------------------------------------------------------------------------
 // Protocol-level bus interface (used by InMemoryLocalBus for lifecycle commands)
 // ---------------------------------------------------------------------------
@@ -53,7 +57,7 @@ export type MetricsReport = {
 
 export type BusState = {
   session: "attached" | "detached";
-  terminal?: "active" | "inactive";
+  terminal?: "active" | "inactive" | "throttled";
 };
 
 // ---------------------------------------------------------------------------
@@ -84,6 +88,9 @@ const START_TOPICS = new Set([
   "terminal.spawn.started",
 ]);
 
+const hasTopLevelDataField = (envelope: LocalBusEnvelope): boolean =>
+  Object.prototype.hasOwnProperty.call(envelope, "data");
+
 export class InMemoryLocalBus implements ProtocolBus {
   private readonly eventLog: LocalBusEnvelope[] = [];
   private readonly auditLog: AuditRecord[] = [];
@@ -105,8 +112,9 @@ export class InMemoryLocalBus implements ProtocolBus {
    * Used by HTTP routing layer for events that don't follow protocol lifecycle ordering.
    */
   pushEvent(event: LocalBusEnvelope): void {
-    if ((event as any).sequence === undefined) {
-      (event as any).sequence = this.getSequence() + 1;
+    const sequencedEvent = event as LocalBusEnvelopeWithSequence;
+    if (sequencedEvent.sequence === undefined) {
+      sequencedEvent.sequence = this.getSequence() + 1;
     }
     this.auditLog.push({ envelope: event, outcome: "accepted" });
     this.eventLog.push(event);
@@ -290,8 +298,9 @@ export class InMemoryLocalBus implements ProtocolBus {
     }
 
     // Assign sequence if not already set
-    if ((event as any).sequence === undefined) {
-      (event as any).sequence = this.getSequence() + 1;
+    const sequencedEvent = event as LocalBusEnvelopeWithSequence;
+    if (sequencedEvent.sequence === undefined) {
+      sequencedEvent.sequence = this.getSequence() + 1;
     }
     this.auditLog.push({ envelope: event, outcome: "accepted" });
     this.eventLog.push(event);
@@ -464,7 +473,7 @@ export class InMemoryLocalBus implements ProtocolBus {
 
       if (command.method === "terminal.input") {
         // Validate data field
-        if (command.payload?.data === undefined && !("data" in (command as any))) {
+        if (command.payload?.data === undefined && !hasTopLevelDataField(command)) {
           return {
             id: `res-${Date.now()}`,
             type: "response",
