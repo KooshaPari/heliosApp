@@ -30,7 +30,8 @@ describe("protocol validator", () => {
 
   test("returns error response when lifecycle command is missing correlation_id", async () => {
     const bus = new InMemoryLocalBus();
-    const command = createLifecycleCommand({ correlation_id: undefined });
+    const command = createLifecycleCommand();
+    command.correlation_id = undefined;
     const response = await bus.request(command);
     expect(response.type).toBe("response");
     expect(response.status).toBe("error");

@@ -7,6 +7,16 @@
 
 import type { Subprocess } from "bun";
 
+type SpawnResult = Subprocess;
+type SpawnOptions = {
+  stdin?: "pipe" | "inherit" | "ignore";
+  stdout?: "pipe" | "inherit" | "ignore";
+  stderr?: "pipe" | "inherit" | "ignore";
+  env?: NodeJS.ProcessEnv;
+};
+
+const spawn = Bun.spawn as unknown as (command: string[], options: SpawnOptions) => SpawnResult;
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -101,12 +111,12 @@ export class GhosttyProcess {
 
     // Verify binary exists
     try {
-      const which = (Bun as any).spawn(["which", binaryPath], {
+      const which = spawn(["which", binaryPath], {
         stdout: "pipe",
-        stderr: "ignore",
+        stderr: "pipe",
       });
-      await which.exited;
-      if ((which as any).exitCode !== 0) {
+      const whichExitCode = await which.exited;
+      if (whichExitCode !== 0) {
         throw new GhosttyBinaryNotFoundError(binaryPath);
       }
     } catch (e) {
@@ -125,19 +135,20 @@ export class GhosttyProcess {
       args.push(...options.extraArgs);
     }
 
-    const proc = (Bun as any).spawn(args, {
+    const proc = spawn(args, {
+      stdin: "pipe",
       stdout: "pipe",
       stderr: "pipe",
       env: { ...process.env, ...options.env },
-    }) as Subprocess;
+    });
 
     this._proc = proc;
-    this._pid = (proc as any).pid;
+    this._pid = proc.pid;
     this._running = true;
     this._startedAt = Date.now();
 
     // Monitor for unexpected exit (crash detection)
-    void proc.exited.then(exitCode => {
+    proc.exited.then((exitCode: number) => {
       this._running = false;
       if (!this._intentionalStop) {
         const error = new GhosttyProcessError(
@@ -149,7 +160,11 @@ export class GhosttyProcess {
       }
     });
 
-    return { pid: (proc as any).pid };
+    if (this._pid === undefined) {
+      throw new GhosttyProcessError("Ghostty process did not expose a PID");
+    }
+
+    return { pid: this._pid };
   }
 
   /**

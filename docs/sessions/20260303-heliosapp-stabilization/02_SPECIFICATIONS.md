@@ -26,6 +26,9 @@ Finalize Phase 2 stabilization by eliminating blocking runtime quality regressio
   - `bun test apps/runtime/tests/unit/renderer/stream_binding.test.ts`
   - `bun test apps/runtime/tests/integration/diagnostics/slo.test.ts`
 - `task devops:check:ci-summary` completes with no hard failures.
+- `task devops:check:ci-summary` pass artifacts are captured under
+  `docs/sessions/20260303-heliosapp-stabilization/artifacts/ci-summary-20260303-final.txt`.
+- `docs/wiki/devops-cicd.md` documents the check/task surface used by this wave.
 - `03_DAG_WBS.md` and required missing session docs are present in `docs/sessions/20260303-heliosapp-stabilization`.
 
 ## Compatibility Constraint
@@ -34,5 +37,6 @@ Keep externally visible runtime API compatibility, including `SLO*` naming behav
 
 ## Risks and Uncertainties
 
-- Coverage gate remains under threshold on current branch until additional branch tests are added.
+- Full test+coverage confidence now passes in `task quality:strict`, but branch coverage
+  remains a long-running watchlist for warning-level runtime hotspots.
 - Any future changes in integration wrappers may re-open warning-level maintenance debt.

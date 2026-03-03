@@ -20,13 +20,16 @@ function makeMuxSession(sessionName: string, laneId: string): MuxSession {
 
 function makeCli(sessions: ZellijSession[], killResults?: Map<string, CliResult>): ZellijCli {
   return {
-    listSessions: mock(async () => sessions),
-    run: mock(async (args: string[]) => {
+    listSessions: mock(() => Promise.resolve(sessions)),
+    run: mock((args: string[]) => {
       if (args[0] === "kill-session") {
-        const name = args[1]!;
+        const name = args.at(1);
+        if (name === undefined) {
+          return Promise.resolve({ stdout: "", stderr: "", exitCode: 0 });
+        }
         return killResults?.get(name) ?? { stdout: "", stderr: "", exitCode: 0 };
       }
-      return { stdout: "", stderr: "", exitCode: 0 };
+      return Promise.resolve({ stdout: "", stderr: "", exitCode: 0 });
     }),
     checkAvailability: mock(async () => ({ available: true })),
   } as unknown as ZellijCli;

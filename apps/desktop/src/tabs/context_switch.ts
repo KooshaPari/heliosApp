@@ -1,6 +1,31 @@
 import type { ProtocolBus as LocalBus } from "@helios/runtime/protocol/bus";
 import type { LocalBusEnvelope } from "@helios/runtime/protocol/types";
 
+function toProtocolName(value: string): string {
+  return value.replace(/[A-Z]/g, "_$&").toLowerCase();
+}
+
+function toProtocolValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(entry => toProtocolValue(entry));
+  }
+  if (value === null || typeof value !== "object") {
+    return value;
+  }
+  return toProtocolRecord(value as Record<string, unknown>);
+}
+
+function toProtocolRecord(value: Record<string, unknown>): Record<string, unknown> {
+  const protocol: Record<string, unknown> = {};
+  for (const [key, rawValue] of Object.entries(value)) {
+    if (rawValue === undefined) {
+      continue;
+    }
+    protocol[toProtocolName(key)] = toProtocolValue(rawValue);
+  }
+  return protocol;
+}
+
 export interface ActiveContext {
   workspaceId: string;
   laneId: string;
@@ -106,17 +131,16 @@ export class ActiveContextStore {
     }
 
     if (this.bus) {
-      const event = {
+      const event: LocalBusEnvelope = toProtocolRecord({
         id: `context-change-${Date.now()}`,
         type: "event",
         ts: new Date().toISOString(),
         topic: "context.active.changed",
         payload: changeEvent as unknown as Record<string, unknown>,
-      } as LocalBusEnvelope;
-
-      event.workspace_id = contextToSet?.workspaceId;
-      event.lane_id = contextToSet?.laneId;
-      event.session_id = contextToSet?.sessionId;
+        workspaceId: contextToSet?.workspaceId,
+        laneId: contextToSet?.laneId,
+        sessionId: contextToSet?.sessionId,
+      }) as LocalBusEnvelope;
 
       await this.bus.publish(event);
     }

@@ -18,29 +18,29 @@ export class InMemoryWorkspaceStore implements WorkspaceStore {
   private readonly data = new Map<string, Workspace>();
 
   async getAll(): Promise<Workspace[]> {
-    return [...this.data.values()].sort((a, b) => a.createdAt - b.createdAt);
+    return await Promise.resolve([...this.data.values()].sort((a, b) => a.createdAt - b.createdAt));
   }
 
   async getById(id: string): Promise<Workspace | undefined> {
-    return this.data.get(id);
+    return await Promise.resolve(this.data.get(id));
   }
 
   async getByName(name: string): Promise<Workspace | undefined> {
     const lower = name.toLowerCase();
     for (const ws of this.data.values()) {
       if (ws.name.toLowerCase() === lower) {
-        return ws;
+        return await Promise.resolve(ws);
       }
     }
-    return undefined;
+    return await Promise.resolve(undefined);
   }
 
   async save(workspace: Workspace): Promise<void> {
-    this.data.set(workspace.id, workspace);
+    await Promise.resolve(this.data.set(workspace.id, workspace));
   }
 
   async remove(id: string): Promise<void> {
-    this.data.delete(id);
+    await Promise.resolve(this.data.delete(id));
   }
 
   async flush(): Promise<void> {
@@ -165,6 +165,7 @@ export class JsonWorkspaceStore implements WorkspaceStore {
   private async attemptRecovery(): Promise<void> {
     const corruption = await detectCorruption(this.dataDir);
     if (corruption.corrupted) {
+      // Corruption detected during load; recovery path continues.
     }
 
     const recovered = await recoverFromSnapshot(this.dataDir);
@@ -175,25 +176,26 @@ export class JsonWorkspaceStore implements WorkspaceStore {
       // Immediately flush to fix primary file
       await this.flushInternal();
     } else {
+      // Snapshot recovery unavailable; keep current in-memory state and continue.
     }
   }
 
   async getAll(): Promise<Workspace[]> {
-    return [...this.data.values()].sort((a, b) => a.createdAt - b.createdAt);
+    return await Promise.resolve([...this.data.values()].sort((a, b) => a.createdAt - b.createdAt));
   }
 
   async getById(id: string): Promise<Workspace | undefined> {
-    return this.data.get(id);
+    return await Promise.resolve(this.data.get(id));
   }
 
   async getByName(name: string): Promise<Workspace | undefined> {
     const lower = name.toLowerCase();
     for (const ws of this.data.values()) {
       if (ws.name.toLowerCase() === lower) {
-        return ws;
+        return await Promise.resolve(ws);
       }
     }
-    return undefined;
+    return await Promise.resolve(undefined);
   }
 
   async save(workspace: Workspace): Promise<void> {

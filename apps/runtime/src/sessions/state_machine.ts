@@ -176,20 +176,36 @@ export class LaneLifecycleService {
 
     lane.status = nextState;
     lane.updated_at = new Date().toISOString();
-    await this.bus.publish({
+    const event: {
+      id: string;
+      type: "event";
+      ts: string;
+      workspace_id: string;
+      lane_id: string;
+      topic: ProtocolTopic;
+      payload: {
+        runtime_event: RuntimeEvent;
+        lane_id: string;
+        state: LaneState;
+      };
+      correlation_id?: string;
+    } = {
       id: `${laneId}:${runtimeEvent}:${Date.now()}`,
       type: "event",
       ts: new Date().toISOString(),
       workspace_id: lane.workspace_id,
       lane_id: lane.lane_id,
-      correlation_id: correlationId,
       topic,
       payload: {
         runtime_event: runtimeEvent,
         lane_id: lane.lane_id,
         state: lane.status,
       },
-    });
+    };
+    if (correlationId !== undefined) {
+      event.correlation_id = correlationId;
+    }
+    await this.bus.publish(event);
   }
 }
 

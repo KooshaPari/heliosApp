@@ -132,11 +132,11 @@ export class WorkspaceService {
   }
 
   async list(): Promise<Workspace[]> {
-    return this.store.getAll();
+    return await this.store.getAll();
   }
 
   async get(id: string): Promise<Workspace | undefined> {
-    return this.store.getById(id);
+    return await this.store.getById(id);
   }
 
   private async requireById(id: string): Promise<Workspace> {

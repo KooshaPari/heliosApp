@@ -48,12 +48,12 @@ export class ZellijCli {
     const command = `${this.zellijPath} ${args.join(" ")}`;
     const startMs = performance.now();
 
-    let proc: any;
+    let proc: ReturnType<typeof Bun.spawn> & { kill: () => void };
     try {
-      proc = (Bun as any).spawn([this.zellijPath, ...args], {
+      proc = Bun.spawn([this.zellijPath, ...args], {
         stdout: "pipe",
         stderr: "pipe",
-      });
+      }) as ReturnType<typeof Bun.spawn> & { kill: () => void };
     } catch {
       throw new ZellijNotFoundError();
     }

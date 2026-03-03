@@ -1,7 +1,7 @@
 // T006, T007, T010 - Git worktree provisioning, cleanup, and partial failure handling
 
-import * as fs from "node:fs";
-import * as path from "node:path";
+import { type Dirent, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -52,18 +52,35 @@ export class WorktreeCleanupError extends Error {
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 export function computeWorktreePath(workspaceRepoPath: string, laneId: string): string {
-  return path.join(workspaceRepoPath, WORKTREE_DIR, laneId);
+  return join(workspaceRepoPath, WORKTREE_DIR, laneId);
 }
 
 export function computeBranchName(laneId: string): string {
   return `${BRANCH_PREFIX}${laneId}`;
 }
 
+type SpawnResult = {
+  readonly stdout: ReadableStream<Uint8Array> | null;
+  readonly stderr: ReadableStream<Uint8Array> | null;
+  readonly exited: Promise<number>;
+  readonly pid: number;
+};
+
+type SpawnOptions = {
+  cwd?: string;
+  stdout?: "pipe" | "inherit" | "ignore";
+  stderr?: "pipe" | "inherit" | "ignore";
+  stdin?: "pipe" | "inherit" | "ignore";
+  env?: Record<string, string>;
+};
+
+const spawn = Bun.spawn as unknown as (command: string[], options: SpawnOptions) => SpawnResult;
+
 async function runGit(
   args: string[],
   cwd: string
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-  const proc = (Bun as any).spawn(["git", ...args], {
+  const proc = spawn(["git", ...args], {
     cwd,
     stdout: "pipe",
     stderr: "pipe",
@@ -87,14 +104,14 @@ export async function provisionWorktree(options: WorktreeOptions): Promise<Workt
   const start = performance.now();
 
   // If worktree path already exists (stale from previous crash), remove it first
-  if (fs.existsSync(worktreePath)) {
+  if (existsSync(worktreePath)) {
     await forceRemoveWorktreeDir(worktreePath, workspaceRepoPath);
   }
 
   // Ensure parent directory exists
-  const parentDir = path.dirname(worktreePath);
-  if (!fs.existsSync(parentDir)) {
-    fs.mkdirSync(parentDir, { recursive: true });
+  const parentDir = dirname(worktreePath);
+  if (!existsSync(parentDir)) {
+    mkdirSync(parentDir, { recursive: true });
   }
 
   // Create worktree with new branch
@@ -110,7 +127,7 @@ export async function provisionWorktree(options: WorktreeOptions): Promise<Workt
   }
 
   // Verify the worktree directory exists
-  if (!fs.existsSync(worktreePath)) {
+  if (!existsSync(worktreePath)) {
     await cleanupPartialProvision(worktreePath, branchName, workspaceRepoPath);
     throw new WorktreeProvisionError(laneId, "Worktree directory not found after creation");
   }
@@ -134,7 +151,7 @@ export async function removeWorktree(
   const start = performance.now();
 
   // Extract lane ID from path to compute branch name
-  const laneId = path.basename(worktreePath);
+  const laneId = basename(worktreePath);
   const branchName = computeBranchName(laneId);
 
   // Try git worktree remove --force
@@ -144,8 +161,8 @@ export async function removeWorktree(
   );
 
   // Fallback: force-delete directory if still exists
-  if (fs.existsSync(worktreePath)) {
-    fs.rmSync(worktreePath, { recursive: true, force: true });
+  if (existsSync(worktreePath)) {
+    rmSync(worktreePath, { recursive: true, force: true });
   }
 
   // Prune stale references
@@ -158,7 +175,7 @@ export async function removeWorktree(
   }
 
   // Verify cleanup
-  if (fs.existsSync(worktreePath)) {
+  if (existsSync(worktreePath)) {
     throw new WorktreeCleanupError(worktreePath, "Directory still exists after cleanup");
   }
 
@@ -174,9 +191,9 @@ async function cleanupPartialProvision(
   workspaceRepoPath: string
 ): Promise<void> {
   // Remove partially created worktree directory
-  if (fs.existsSync(worktreePath)) {
+  if (existsSync(worktreePath)) {
     try {
-      fs.rmSync(worktreePath, { recursive: true, force: true });
+      rmSync(worktreePath, { recursive: true, force: true });
     } catch {
       // Best effort - log in production
     }
@@ -197,8 +214,8 @@ async function forceRemoveWorktreeDir(
   await runGit(["worktree", "remove", worktreePath, "--force"], workspaceRepoPath);
 
   // Fallback
-  if (fs.existsSync(worktreePath)) {
-    fs.rmSync(worktreePath, { recursive: true, force: true });
+  if (existsSync(worktreePath)) {
+    rmSync(worktreePath, { recursive: true, force: true });
   }
 
   await runGit(["worktree", "prune"], workspaceRepoPath);
@@ -217,7 +234,7 @@ export async function reconcileOrphanedWorktrees(
   knownLaneIds: Set<string>,
   _closeLaneRecord: (laneId: string) => void
 ): Promise<ReconciliationResult> {
-  const worktreeRoot = path.join(workspaceRepoPath, WORKTREE_DIR);
+  const worktreeRoot = join(workspaceRepoPath, WORKTREE_DIR);
   const result: ReconciliationResult = {
     orphanedWorktrees: 0,
     orphanedRecords: 0,
@@ -225,10 +242,10 @@ export async function reconcileOrphanedWorktrees(
   };
 
   // Scan for orphaned worktree directories
-  if (fs.existsSync(worktreeRoot)) {
-    let entries: fs.Dirent[];
+  if (existsSync(worktreeRoot)) {
+    let entries: Dirent[];
     try {
-      entries = fs.readdirSync(worktreeRoot, { withFileTypes: true });
+      entries = readdirSync(worktreeRoot, { withFileTypes: true });
     } catch {
       // Permissions error - return partial
       return result;
@@ -241,7 +258,7 @@ export async function reconcileOrphanedWorktrees(
       const laneId = entry.name;
       if (!knownLaneIds.has(laneId)) {
         result.orphanedWorktrees++;
-        const worktreePath = path.join(worktreeRoot, laneId);
+        const worktreePath = join(worktreeRoot, laneId);
         try {
           await removeWorktree(worktreePath, workspaceRepoPath);
           result.cleaned++;
