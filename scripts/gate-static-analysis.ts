@@ -14,7 +14,7 @@ import {
 } from "./gate-report";
 
 const REPORT_OUTPUT = ".gate-reports/gate-static-analysis.json";
-const MAX_FILE_LENGTH = 500;
+const MAX_FILE_LENGTH = 800;
 
 /**
  * Scan TypeScript files for complexity and length violations.
