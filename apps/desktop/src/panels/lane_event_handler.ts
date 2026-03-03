@@ -5,7 +5,7 @@
 
 export interface BusEvent {
   topic: string;
-  payload: Record<string, unknown>;
+  payload: Record<string, any>;
   sequenceNumber?: number;
   timestamp: number;
 }
@@ -31,21 +31,9 @@ export class LaneEventHandler {
   private pendingUpdates: Map<string, BusEvent> = new Map();
   private lastEventTime: number = Date.now();
   private connectivityTimeoutId?: NodeJS.Timeout;
-  private rafId?: number | undefined;
+  private rafId?: number;
   private lastSequenceNumbers: Map<string, number> = new Map();
-  private isConnected = true;
-
-  private static asString(value: unknown): string | undefined {
-    return typeof value === "string" && value.length > 0 ? value : undefined;
-  }
-
-  private static asStringArray(value: unknown): string[] {
-    if (!Array.isArray(value)) {
-      return [];
-    }
-
-    return value.filter((entry): entry is string => typeof entry === "string" && entry.length > 0);
-  }
+  private isConnected: boolean = true;
 
   constructor(options: LaneEventHandlerOptions) {
     this.options = {
@@ -84,15 +72,15 @@ export class LaneEventHandler {
       this.handleOrphanDetectionCycle(event);
     };
 
-    this.subscriptions.set("lane.state.changed", stateChangedHandler);
-    this.subscriptions.set("lane.created", laneCreatedHandler);
-    this.subscriptions.set("lane.cleaned_up", laneCleanedHandler);
-    this.subscriptions.set("orphan.detection.cycle_completed", orphanCycleHandler);
+    this.subscriptions.set('lane.state.changed', stateChangedHandler);
+    this.subscriptions.set('lane.created', laneCreatedHandler);
+    this.subscriptions.set('lane.cleaned_up', laneCleanedHandler);
+    this.subscriptions.set('orphan.detection.cycle_completed', orphanCycleHandler);
 
-    this.options.bus.subscribe("lane.state.changed", stateChangedHandler);
-    this.options.bus.subscribe("lane.created", laneCreatedHandler);
-    this.options.bus.subscribe("lane.cleaned_up", laneCleanedHandler);
-    this.options.bus.subscribe("orphan.detection.cycle_completed", orphanCycleHandler);
+    this.options.bus.subscribe('lane.state.changed', stateChangedHandler);
+    this.options.bus.subscribe('lane.created', laneCreatedHandler);
+    this.options.bus.subscribe('lane.cleaned_up', laneCleanedHandler);
+    this.options.bus.subscribe('orphan.detection.cycle_completed', orphanCycleHandler);
   }
 
   private unsubscribeFromEvents(): void {
@@ -105,12 +93,10 @@ export class LaneEventHandler {
   private handleStateChanged(event: BusEvent): void {
     this.recordEventReceived();
 
-    const laneId = LaneEventHandler.asString(event.payload.laneId);
-    const newState = LaneEventHandler.asString(event.payload.state);
+    const laneId = event.payload.laneId;
+    const newState = event.payload.state;
 
-    if (!(laneId && newState)) {
-      return;
-    }
+    if (!laneId || !newState) return;
 
     // Check sequence number to prevent out-of-order updates
     const lastSeq = this.lastSequenceNumbers.get(laneId) || -1;
@@ -131,12 +117,10 @@ export class LaneEventHandler {
   private handleLaneCreated(event: BusEvent): void {
     this.recordEventReceived();
 
-    const laneId = LaneEventHandler.asString(event.payload.laneId);
-    const name = LaneEventHandler.asString(event.payload.name) ?? "New Lane";
+    const laneId = event.payload.laneId;
+    const name = event.payload.name || 'New Lane';
 
-    if (!laneId) {
-      return;
-    }
+    if (!laneId) return;
 
     if (this.options.onLaneCreated) {
       this.options.onLaneCreated(laneId, name);
@@ -146,11 +130,9 @@ export class LaneEventHandler {
   private handleLaneCleaned(event: BusEvent): void {
     this.recordEventReceived();
 
-    const laneId = LaneEventHandler.asString(event.payload.laneId);
+    const laneId = event.payload.laneId;
 
-    if (!laneId) {
-      return;
-    }
+    if (!laneId) return;
 
     if (this.options.onLaneCleaned) {
       this.options.onLaneCleaned(laneId);
@@ -160,13 +142,13 @@ export class LaneEventHandler {
   private handleOrphanDetectionCycle(event: BusEvent): void {
     this.recordEventReceived();
 
-    const orphanedLanes = LaneEventHandler.asStringArray(event.payload.orphanedLanes);
+    const orphanedLanes = event.payload.orphanedLanes || [];
 
     // Notify about orphan status changes
     if (this.options.onOrphanStatusChanged) {
-      for (const laneId of orphanedLanes as string[]) {
+      orphanedLanes.forEach((laneId: string) => {
         this.options.onOrphanStatusChanged?.(laneId, true);
-      }
+      });
     }
   }
 
@@ -197,9 +179,7 @@ export class LaneEventHandler {
     this.stopConnectivityMonitoring();
 
     this.connectivityTimeoutId = setTimeout(() => {
-      if (!this.isConnected) {
-        return;
-      }
+      if (!this.isConnected) return;
 
       this.isConnected = false;
       if (this.options.onBusConnectivityIssue) {
@@ -209,9 +189,7 @@ export class LaneEventHandler {
   }
 
   private scheduleRender(): void {
-    if (this.rafId) {
-      return;
-    }
+    if (this.rafId) return;
 
     this.rafId = requestAnimationFrame(() => {
       this.rafId = undefined;
@@ -220,16 +198,12 @@ export class LaneEventHandler {
   }
 
   private processPendingUpdates(): void {
-    for (const [laneId, event] of this.pendingUpdates.entries()) {
-      const newState = LaneEventHandler.asString(event.payload.state);
-      if (!newState) {
-        continue;
-      }
-
+    this.pendingUpdates.forEach((event, laneId) => {
+      const newState = event.payload.state;
       if (this.options.onStateChanged) {
         this.options.onStateChanged(laneId, newState);
       }
-    }
+    });
 
     this.pendingUpdates.clear();
   }

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import {
-  InvalidTransitionError,
-  type PtyEvent,
-  PtyLifecycle,
-  type PtyState,
   transition,
+  PtyLifecycle,
+  InvalidTransitionError,
+  type PtyState,
+  type PtyEvent,
 } from "../../../src/pty/state_machine.js";
 
 // ── All valid transitions ────────────────────────────────────────────────────
@@ -21,7 +21,14 @@ const VALID_TRANSITIONS: [PtyState, PtyEvent, PtyState][] = [
   ["errored", "cleanup", "stopped"],
 ];
 
-const ALL_STATES: PtyState[] = ["idle", "spawning", "active", "throttled", "errored", "stopped"];
+const ALL_STATES: PtyState[] = [
+  "idle",
+  "spawning",
+  "active",
+  "throttled",
+  "errored",
+  "stopped",
+];
 
 const ALL_EVENTS: PtyEvent[] = [
   "spawn_requested",
@@ -36,9 +43,12 @@ const ALL_EVENTS: PtyEvent[] = [
 ];
 
 describe("transition() — every valid transition", () => {
-  it.each(VALID_TRANSITIONS)("%s + %s -> %s", (from, event, expected) => {
-    expect(transition(from, event, "test-pty")).toBe(expected);
-  });
+  it.each(VALID_TRANSITIONS)(
+    "%s + %s -> %s",
+    (from, event, expected) => {
+      expect(transition(from, event, "test-pty")).toBe(expected);
+    },
+  );
 });
 
 describe("transition() — every invalid transition", () => {
@@ -54,9 +64,14 @@ describe("transition() — every invalid transition", () => {
     }
   }
 
-  it.each(invalidCombos)("%s + %s throws InvalidTransitionError", (state, event) => {
-    expect(() => transition(state, event, "pty-invalid")).toThrow(InvalidTransitionError);
-  });
+  it.each(invalidCombos)(
+    "%s + %s throws InvalidTransitionError",
+    (state, event) => {
+      expect(() => transition(state, event, "pty-invalid")).toThrow(
+        InvalidTransitionError,
+      );
+    },
+  );
 });
 
 describe("transition() — error diagnostics", () => {

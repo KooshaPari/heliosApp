@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules } from "../redaction-rules.js";
 
@@ -12,9 +12,7 @@ const ctx = { artifactId: "art-1", artifactType: "log", correlationId: "corr-1" 
 
 describe("RedactionEngine: known patterns redacted", () => {
   let engine: RedactionEngine;
-  beforeEach(() => {
-    engine = makeEngine();
-  });
+  beforeEach(() => { engine = makeEngine(); });
 
   it("redacts AWS Access Key", () => {
     const result = engine.redact("Key is AKIAIOSFODNN7EXAMPLE here", ctx);
@@ -62,9 +60,7 @@ describe("RedactionEngine: known patterns redacted", () => {
 
 describe("RedactionEngine: binary bypass", () => {
   let engine: RedactionEngine;
-  beforeEach(() => {
-    engine = makeEngine();
-  });
+  beforeEach(() => { engine = makeEngine(); });
 
   it("isTextContent returns true for strings", () => {
     expect(engine.isTextContent("hello")).toBe(true);
@@ -85,9 +81,7 @@ describe("RedactionEngine: binary bypass", () => {
 
 describe("RedactionEngine: latency under 5ms", () => {
   let engine: RedactionEngine;
-  beforeEach(() => {
-    engine = makeEngine();
-  });
+  beforeEach(() => { engine = makeEngine(); });
 
   it("redacts a short string in under 5ms", () => {
     const result = engine.redact("hello world this is normal text", ctx);
@@ -103,9 +97,7 @@ describe("RedactionEngine: latency under 5ms", () => {
 
 describe("RedactionEngine: multiple secrets", () => {
   let engine: RedactionEngine;
-  beforeEach(() => {
-    engine = makeEngine();
-  });
+  beforeEach(() => { engine = makeEngine(); });
 
   it("redacts multiple secrets in one pass", () => {
     const input = "aws: AKIAIOSFODNN7EXAMPLE and gcp: AIzaSyDaGmWKa4JsXZ-HjGw7ISLn_3namBGewQe";
@@ -118,9 +110,7 @@ describe("RedactionEngine: multiple secrets", () => {
 
 describe("RedactionEngine: no false positives on normal text", () => {
   let engine: RedactionEngine;
-  beforeEach(() => {
-    engine = makeEngine();
-  });
+  beforeEach(() => { engine = makeEngine(); });
 
   it("does not redact normal log messages", () => {
     const text = "User logged in from IP 192.168.1.1 at 2024-01-01T00:00:00Z";

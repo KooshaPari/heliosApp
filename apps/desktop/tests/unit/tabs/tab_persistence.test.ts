@@ -1,9 +1,9 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { type TabPersistedState, TabPersistence } from "../../../src/tabs/tab_persistence";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { promises as fs } from "fs";
+import * as path from "path";
+import { TabPersistence, type TabPersistedState } from "../../../src/tabs/tab_persistence";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
+import { tmpdir } from "os";
 
 describe("TabPersistence", () => {
   let persistence: TabPersistence;
@@ -11,7 +11,7 @@ describe("TabPersistence", () => {
 
   beforeEach(async () => {
     // Use temp directory for tests
-    tempDir = join(tmpdir(), `tab-test-${Date.now()}`);
+    tempDir = path.join(tmpdir(), `tab-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
     persistence = new TabPersistence(tempDir);
   });
@@ -40,13 +40,13 @@ describe("TabPersistence", () => {
           tab1: {
             tabId: "tab1",
             tabType: "terminal",
-            label: "Terminal",
-          },
+            label: "Terminal"
+          }
         },
-        savedAt: new Date().toISOString(),
+        savedAt: new Date().toISOString()
       };
 
-      const filePath = join(tempDir, "tab_state.json");
+      const filePath = path.join(tempDir, "tab_state.json");
       await fs.writeFile(filePath, JSON.stringify(testState), "utf-8");
 
       const loaded = await persistence.load();
@@ -55,7 +55,7 @@ describe("TabPersistence", () => {
     });
 
     it("should return null for invalid JSON", async () => {
-      const filePath = join(tempDir, "tab_state.json");
+      const filePath = path.join(tempDir, "tab_state.json");
       await fs.writeFile(filePath, "invalid json {", "utf-8");
 
       const state = await persistence.load();
@@ -63,7 +63,7 @@ describe("TabPersistence", () => {
     });
 
     it("should return null for invalid structure", async () => {
-      const filePath = join(tempDir, "tab_state.json");
+      const filePath = path.join(tempDir, "tab_state.json");
       await fs.writeFile(filePath, JSON.stringify({ invalid: "data" }), "utf-8");
 
       const state = await persistence.load();
@@ -77,15 +77,15 @@ describe("TabPersistence", () => {
         tabOrder: Array.from({ length: 50 }, (_, i) => `tab${i}`),
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString(),
+        savedAt: new Date().toISOString()
       };
 
-      const filePath = join(tempDir, "tab_state.json");
+      const filePath = path.join(tempDir, "tab_state.json");
       await fs.writeFile(filePath, JSON.stringify(testState), "utf-8");
 
       const startTime = Date.now();
       await persistence.load();
-      const _duration = Date.now() - startTime;
+      const duration = Date.now() - startTime;
 
       expect(persistence.getLastLoadTime()).toBeLessThan(100);
     });
@@ -99,15 +99,15 @@ describe("TabPersistence", () => {
         tabOrder: ["tab1", "tab2"],
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString(),
+        savedAt: new Date().toISOString()
       };
 
       await persistence.save(testState);
 
       // Wait for debounce
-      await new Promise(resolve => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 600));
 
-      const filePath = join(tempDir, "tab_state.json");
+      const filePath = path.join(tempDir, "tab_state.json");
       const content = await fs.readFile(filePath, "utf-8");
       const loaded = JSON.parse(content);
 
@@ -119,7 +119,7 @@ describe("TabPersistence", () => {
 
       // Mock fs.writeFile to count writes
       const originalWriteFile = fs.writeFile;
-      fs.writeFile = (...args: Parameters<typeof fs.writeFile>) => {
+      fs.writeFile = async (...args: any) => {
         writeCount++;
         return originalWriteFile(...args);
       };
@@ -130,7 +130,7 @@ describe("TabPersistence", () => {
         tabOrder: ["tab1"],
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString(),
+        savedAt: new Date().toISOString()
       };
 
       // Queue multiple rapid saves
@@ -139,7 +139,7 @@ describe("TabPersistence", () => {
       persistence.save(testState);
 
       // Wait for debounce
-      await new Promise(resolve => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 600));
 
       // Should only write once due to debouncing
       expect(writeCount).toBe(1);
@@ -155,16 +155,16 @@ describe("TabPersistence", () => {
         tabOrder: ["tab1"],
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString(),
+        savedAt: new Date().toISOString()
       };
 
-      const nestedDir = join(tempDir, "nested", "path");
+      const nestedDir = path.join(tempDir, "nested", "path");
       persistence = new TabPersistence(nestedDir);
 
       await persistence.save(testState);
-      await new Promise(resolve => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 600));
 
-      const filePath = join(nestedDir, "tab_state.json");
+      const filePath = path.join(nestedDir, "tab_state.json");
       const exists = await fs
         .access(filePath)
         .then(() => true)
@@ -182,7 +182,7 @@ describe("TabPersistence", () => {
         tabOrder: ["tab1"],
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString(),
+        savedAt: new Date().toISOString()
       };
 
       persistence.save(testState);
@@ -190,7 +190,7 @@ describe("TabPersistence", () => {
       // Flush immediately (before debounce would complete)
       await persistence.flush();
 
-      const filePath = join(tempDir, "tab_state.json");
+      const filePath = path.join(tempDir, "tab_state.json");
       const exists = await fs
         .access(filePath)
         .then(() => true)
@@ -209,7 +209,7 @@ describe("TabPersistence", () => {
     it("should create state from tab instances", () => {
       const tabs = [
         createMockTabSurface("tab1", "terminal", "Terminal"),
-        createMockTabSurface("tab2", "agent", "Agent"),
+        createMockTabSurface("tab2", "agent", "Agent")
       ];
 
       const state = persistence.createState("tab1", ["tab1", "tab2"], [], tabs);
@@ -235,7 +235,7 @@ describe("TabPersistence", () => {
     it("should restore state to tab instances", () => {
       const tabs = [
         createMockTabSurface("tab1", "terminal", "Terminal"),
-        createMockTabSurface("tab2", "agent", "Agent"),
+        createMockTabSurface("tab2", "agent", "Agent")
       ];
 
       const testState: TabPersistedState = {
@@ -247,10 +247,10 @@ describe("TabPersistence", () => {
           tab1: {
             tabId: "tab1",
             tabType: "terminal",
-            label: "Terminal-Modified",
-          },
+            label: "Terminal-Modified"
+          }
         },
-        savedAt: new Date().toISOString(),
+        savedAt: new Date().toISOString()
       };
 
       persistence.restoreState(testState, tabs);
@@ -261,7 +261,7 @@ describe("TabPersistence", () => {
     it("should handle tabs not in persisted state", () => {
       const tabs = [
         createMockTabSurface("tab1", "terminal", "Terminal"),
-        createMockTabSurface("tab3", "session", "Session"),
+        createMockTabSurface("tab3", "session", "Session")
       ];
 
       const testState: TabPersistedState = {
@@ -273,10 +273,10 @@ describe("TabPersistence", () => {
           tab1: {
             tabId: "tab1",
             tabType: "terminal",
-            label: "Terminal",
-          },
+            label: "Terminal"
+          }
         },
-        savedAt: new Date().toISOString(),
+        savedAt: new Date().toISOString()
       };
 
       // Should not throw
@@ -295,13 +295,13 @@ describe("TabPersistence", () => {
         tabOrder: ["tab1"],
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString(),
+        savedAt: new Date().toISOString()
       };
 
       await persistence.save(testState);
-      await new Promise(resolve => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 600));
 
-      const filePath = join(tempDir, "tab_state.json");
+      const filePath = path.join(tempDir, "tab_state.json");
       let exists = await fs
         .access(filePath)
         .then(() => true)
@@ -336,14 +336,14 @@ describe("TabPersistence", () => {
           tab1: {
             tabId: "tab1",
             tabType: "terminal",
-            label: "Terminal",
-          },
+            label: "Terminal"
+          }
         },
-        savedAt: new Date().toISOString(),
+        savedAt: new Date().toISOString()
       };
 
       // Will not throw
-      const loadedState = persistence.validateState(testState);
+      const loadedState = persistence["validateState"](testState);
       expect(loadedState).toBe(true);
     });
 
@@ -354,10 +354,10 @@ describe("TabPersistence", () => {
         tabOrder: ["tab1"],
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString(),
+        savedAt: new Date().toISOString()
       };
 
-      const isValid = persistence.validateState(testState);
+      const isValid = persistence["validateState"](testState);
       expect(isValid).toBe(true); // null is allowed
     });
   });

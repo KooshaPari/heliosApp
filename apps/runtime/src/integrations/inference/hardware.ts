@@ -5,18 +5,16 @@ export interface HardwareCapabilities {
   arch: string;
   hasAppleSilicon: boolean;
   hasNvidiaGpu: boolean;
-  gpuName?: string | undefined;
-  gpuMemoryMb?: number | undefined;
+  gpuName?: string;
+  gpuMemoryMB?: number;
   cpuCores: number;
-  ramMb: number;
+  ramMB: number;
 }
 
 let cached: HardwareCapabilities | null = null;
 
 export async function detectHardware(): Promise<HardwareCapabilities> {
-  if (cached) {
-    return cached;
-  }
+  if (cached) return cached;
 
   const platform = process.platform;
   const arch = process.arch;
@@ -24,38 +22,34 @@ export async function detectHardware(): Promise<HardwareCapabilities> {
 
   let hasNvidiaGpu = false;
   let gpuName: string | undefined;
-  let gpuMemoryMb: number | undefined;
+  let gpuMemoryMB: number | undefined;
 
   try {
-    const proc = Bun.spawn(
-      ["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
-      {
-        stdout: "pipe",
-        stderr: "pipe",
-      }
-    );
+    const proc = Bun.spawn(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"], {
+      stdout: "pipe",
+      stderr: "pipe",
+    });
     const output = await new Response(proc.stdout).text();
     const exitCode = await proc.exited;
     if (exitCode === 0 && output.trim()) {
       const [name, memStr] = output.trim().split(", ");
       hasNvidiaGpu = true;
       gpuName = name;
-      gpuMemoryMb = Number.parseInt(memStr, 10);
+      gpuMemoryMB = Number.parseInt(memStr, 10);
     }
   } catch {
     // nvidia-smi not available
   }
 
-  const result: HardwareCapabilities = {
+  cached = {
     platform,
     arch,
     hasAppleSilicon,
     hasNvidiaGpu,
-    ...(gpuName !== undefined && { gpuName }),
-    ...(gpuMemoryMb !== undefined && { gpuMemoryMb }),
+    gpuName,
+    gpuMemoryMB,
     cpuCores: cpus().length,
-    ramMb: Math.round(totalmem() / (1024 * 1024)),
+    ramMB: Math.round(totalmem() / (1024 * 1024)),
   };
-  cached = result;
-  return result;
+  return cached;
 }

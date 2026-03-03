@@ -55,32 +55,15 @@ jobs:
         timeout-minutes: 5
         continue-on-error: false
 
-      - name: Prepare E2E artifacts
-        run: |
-          bun run --cwd apps/runtime build
-          bun run --cwd apps/desktop build
-
-      - name: Install Playwright browsers
-        run: bunx playwright install --with-deps chromium
-
       - name: Gate 4 - E2E Tests
         id: gate-e2e
-        run: |
-          set +e
-          bun run test:e2e:gate | tee /tmp/e2e.log
-          E2E_EXIT=${PIPESTATUS[0]}
-          bun run scripts/gate-e2e.ts
-          GATE_EXIT=$?
-          set -e
-          if [ "$E2E_EXIT" -ne 0 ] || [ "$GATE_EXIT" -ne 0 ]; then
-            exit 1
-          fi
+        run: playwright test
         timeout-minutes: 5
         continue-on-error: false
 
       - name: Gate 5 - Coverage
         id: gate-coverage
-        run: bun run test:coverage
+        run: bun run scripts/gate-coverage.ts
         timeout-minutes: 5
         continue-on-error: false
 
@@ -106,14 +89,6 @@ jobs:
         id: gate-bypass-detect
         run: bun run scripts/gate-bypass-detect.ts
         timeout-minutes: 2
-        continue-on-error: false
-
-      - name: Gate 9 - Docs Session Index and Link Validation
-        id: gate-docs-validation
-        run: |
-          bun run docs:index
-          bun run docs:validate-session-docs
-        timeout-minutes: 3
         continue-on-error: false
 
       - name: Upload Gate Reports

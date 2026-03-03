@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, test } from "bun:test";
+import { describe, test, expect, beforeEach } from "bun:test";
 import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
-import { LaneClosedError, SharedLaneCleanupError } from "../../src/lanes/sharing.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
+import { LaneClosedError, SharedLaneCleanupError } from "../../src/lanes/sharing.js";
 
 describe("LaneManager", () => {
   let bus: InMemoryLocalBus;
@@ -25,9 +25,9 @@ describe("LaneManager", () => {
   test("create emits lane.created event", async () => {
     await mgr.create("ws-1", "main");
     const events = bus.getEvents();
-    const created = events.find(e => e.topic === "lane.created");
+    const created = events.find((e) => e.topic === "lane.created");
     expect(created).toBeDefined();
-    expect(created?.workspace_id).toBe("ws-1");
+    expect(created!.workspace_id).toBe("ws-1");
   });
 
   test("list returns all lanes", async () => {
@@ -73,18 +73,18 @@ describe("LaneManager", () => {
     mgr.getRegistry().update(lane.laneId, { state: "ready" });
     await mgr.cleanup(lane.laneId);
     const events = bus.getEvents();
-    const closed = events.find(e => e.topic === "lane.closed");
+    const closed = events.find((e) => e.topic === "lane.closed");
     expect(closed).toBeDefined();
   });
 
   test("events include from/to state", async () => {
     await mgr.create("ws-1", "main");
     const events = bus.getEvents();
-    const created = events.find(e => e.topic === "lane.created");
+    const created = events.find((e) => e.topic === "lane.created");
     expect(created).toBeDefined();
-    expect(created?.payload).toBeDefined();
-    expect(created?.payload?.fromState).toBeDefined();
-    expect(created?.payload?.toState).toBeDefined();
+    expect(created!.payload).toBeDefined();
+    expect(created!.payload!["fromState"]).toBeDefined();
+    expect(created!.payload!["toState"]).toBeDefined();
   });
 
   test("capacity limit rejects create", async () => {
@@ -101,12 +101,8 @@ describe("LaneManager", () => {
 
   test("bus failure does not block lane ops", async () => {
     const failBus = {
-      async publish(_e: unknown): Promise<void> {
-        throw new Error("bus down");
-      },
-      async request(_c: unknown): Promise<unknown> {
-        return {};
-      },
+      async publish(_e: unknown): Promise<void> { throw new Error("bus down"); },
+      async request(_c: unknown): Promise<unknown> { return {}; },
     };
     const failMgr = new LaneManager({ bus: failBus as any, capacityLimit: 50 });
     // Should not throw despite bus failure
@@ -136,7 +132,7 @@ describe("LaneManager sharing", () => {
     }
     await mgr.share(lane.laneId);
     const updated = reg.get(lane.laneId);
-    expect(updated?.state).toBe("shared");
+    expect(updated!.state).toBe("shared");
   });
 
   test("share emits lane.shared event", async () => {
@@ -145,7 +141,7 @@ describe("LaneManager sharing", () => {
     reg.update(lane.laneId, { state: "ready" });
     await mgr.share(lane.laneId);
     const events = bus.getEvents();
-    const shared = events.find(e => e.topic === "lane.shared");
+    const shared = events.find((e) => e.topic === "lane.shared");
     expect(shared).toBeDefined();
   });
 
@@ -204,6 +200,6 @@ describe("LaneManager sharing", () => {
     const reg = mgr.getRegistry();
     reg.update(lane.laneId, { state: "shared" });
     await mgr.share(lane.laneId); // should not throw
-    expect(reg.get(lane.laneId)?.state).toBe("shared");
+    expect(reg.get(lane.laneId)!.state).toBe("shared");
   });
 });

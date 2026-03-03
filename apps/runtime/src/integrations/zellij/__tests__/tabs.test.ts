@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
-import type { ZellijCli } from "../cli.js";
-import { TabNotFoundError } from "../errors.js";
-import { ZellijPaneManager } from "../panes.js";
+import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { ZellijTabManager } from "../tabs.js";
+import { ZellijPaneManager } from "../panes.js";
 import { TopologyTracker } from "../topology.js";
+import { TabNotFoundError } from "../errors.js";
+import type { ZellijCli } from "../cli.js";
 import type { PtyManagerInterface } from "../types.js";
 
 /**
@@ -21,8 +21,8 @@ function makeMockCli(): ZellijCli {
 function makeMockPtyManager(): PtyManagerInterface {
   return {
     spawn: mock(async () => ({ ptyId: "pty-1", pid: 1001 })),
-    terminate: mock(async () => undefined),
-    resize: mock(() => undefined),
+    terminate: mock(async () => {}),
+    resize: mock(() => {}),
   };
 }
 
@@ -64,7 +64,7 @@ describe("ZellijTabManager", () => {
       await tabManager.createTab("test-session", "work");
 
       const runMock = cli.run as ReturnType<typeof mock>;
-      const callArgs = runMock.mock.calls[0]?.[0] as string[];
+      const callArgs = runMock.mock.calls[0]![0] as string[];
       expect(callArgs).toContain("new-tab");
       expect(callArgs).toContain("--name");
       expect(callArgs).toContain("work");
@@ -86,14 +86,8 @@ describe("ZellijTabManager", () => {
       const record = await tabManager.createTab("test-session", "to-close");
 
       // Bind a PTY to the default pane in the new tab
-      const topo = topology.getTopology("test-session");
-      if (!topo) {
-        expect.unreachable("Expected topology to exist");
-      }
-      const newTab = topo.tabs.find(t => t.tabId === record.index);
-      if (!newTab) {
-        expect.unreachable(`Expected tab ${record.index} to exist`);
-      }
+      const topo = topology.getTopology("test-session")!;
+      const newTab = topo.tabs.find((t) => t.tabId === record.index)!;
       if (newTab.panes[0]) {
         topology.bindPty("test-session", newTab.panes[0].paneId, "pty-tab-1");
       }
@@ -101,21 +95,22 @@ describe("ZellijTabManager", () => {
       await tabManager.closeTab("test-session", record.index);
 
       expect(ptyManager.terminate).toHaveBeenCalledWith("pty-tab-1");
-      const updated = topology.getTopology("test-session");
-      if (!updated) {
-        expect.unreachable("Expected topology to exist after closeTab");
-      }
-      expect(updated.tabs.find(t => t.tabId === record.index)).toBeUndefined();
+      const updated = topology.getTopology("test-session")!;
+      expect(updated.tabs.find((t) => t.tabId === record.index)).toBeUndefined();
     });
 
-    it("throws TabNotFoundError for non-existent tab", () => {
+    it("throws TabNotFoundError for non-existent tab", async () => {
       topology.initializeTopology("test-session");
 
-      expect(tabManager.closeTab("test-session", 999)).rejects.toThrow(TabNotFoundError);
+      expect(tabManager.closeTab("test-session", 999)).rejects.toThrow(
+        TabNotFoundError,
+      );
     });
 
-    it("throws TabNotFoundError for non-existent session", () => {
-      expect(tabManager.closeTab("no-session", 0)).rejects.toThrow(TabNotFoundError);
+    it("throws TabNotFoundError for non-existent session", async () => {
+      expect(tabManager.closeTab("no-session", 0)).rejects.toThrow(
+        TabNotFoundError,
+      );
     });
   });
 
@@ -126,17 +121,16 @@ describe("ZellijTabManager", () => {
 
       await tabManager.switchTab("test-session", record.index);
 
-      const topo = topology.getTopology("test-session");
-      if (!topo) {
-        expect.unreachable("Expected topology to exist");
-      }
+      const topo = topology.getTopology("test-session")!;
       expect(topo.activeTabId).toBe(record.index);
     });
 
-    it("throws TabNotFoundError for non-existent tab", () => {
+    it("throws TabNotFoundError for non-existent tab", async () => {
       topology.initializeTopology("test-session");
 
-      expect(tabManager.switchTab("test-session", 999)).rejects.toThrow(TabNotFoundError);
+      expect(tabManager.switchTab("test-session", 999)).rejects.toThrow(
+        TabNotFoundError,
+      );
     });
   });
 

@@ -1,6 +1,6 @@
-import { SETTINGS_SCHEMA } from "./schema.js";
-import type { SettingsManager } from "./settings.js";
 import type { SettingChangeEvent } from "./types.js";
+import type { SettingsManager } from "./settings.js";
+import { SETTINGS_SCHEMA } from "./schema.js";
 
 // FR-008: Feature flag definition
 /** Typed feature flag descriptor. */
@@ -63,9 +63,11 @@ export class FlagRegistry {
     }
 
     // Listen for future changes.
-    this.unsubscribe = this.settings.onSettingChanged((event: SettingChangeEvent) => {
-      this.handleChange(event);
-    });
+    this.unsubscribe = this.settings.onSettingChanged(
+      (event: SettingChangeEvent) => {
+        this.handleChange(event);
+      },
+    );
   }
 
   dispose(): void {
@@ -158,5 +160,6 @@ export class FlagRegistry {
 export const RENDERER_ENGINE_FLAG: FeatureFlag<"ghostty" | "rio"> = {
   key: "renderer_engine",
   defaultValue: "ghostty",
-  description: "Terminal renderer engine. Changing requires restart (reloadPolicy=restart).",
+  description:
+    "Terminal renderer engine. Changing requires restart (reloadPolicy=restart).",
 };

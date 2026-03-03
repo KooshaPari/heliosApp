@@ -1,15 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import type { ActiveContext } from "../../../src/tabs/context_switch";
-import {
-  ContextPropagator,
-  resetContextPropagator,
-} from "../../../src/tabs/context_switch_propagation";
-import type { TabSurface } from "../../../src/tabs/tab_surface";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { ContextPropagator, resetContextPropagator } from "../../../src/tabs/context_switch_propagation";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
+import type { ActiveContext } from "../../../src/tabs/context_switch";
 
 describe("ContextPropagator", () => {
   let propagator: ContextPropagator;
-  let mockTabs: TabSurface[] = [];
+  let mockTabs = [];
 
   beforeEach(() => {
     resetContextPropagator();
@@ -18,7 +14,7 @@ describe("ContextPropagator", () => {
     mockTabs = [
       createMockTabSurface("tab1", "terminal", "Terminal"),
       createMockTabSurface("tab2", "agent", "Agent"),
-      createMockTabSurface("tab3", "session", "Session"),
+      createMockTabSurface("tab3", "session", "Session")
     ];
 
     for (const tab of mockTabs) {
@@ -51,26 +47,26 @@ describe("ContextPropagator", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1",
+        sessionId: "session1"
       };
 
       const result = await propagator.propagateContext(context);
 
       expect(result.successful.length).toBeGreaterThan(0);
       expect(result.failed.length).toBe(0);
-      expect(result.timedOut.length).toBe(0);
+      expect(result.timed_out.length).toBe(0);
     });
 
     it("should track propagation duration", async () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1",
+        sessionId: "session1"
       };
 
       const result = await propagator.propagateContext(context);
 
-      expect(result.durationMs).toBeGreaterThanOrEqual(0);
+      expect(result.duration_ms).toBeGreaterThan(0);
     });
 
     it("should propagate null context", async () => {
@@ -85,12 +81,14 @@ describe("ContextPropagator", () => {
       const failingTab = mockTabs[0];
 
       // Make the tab's onContextChange throw an error
-      failingTab.onContextChange = () => Promise.reject(new Error("Context change failed"));
+      failingTab.onContextChange = async () => {
+        throw new Error("Context change failed");
+      };
 
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1",
+        sessionId: "session1"
       };
 
       const result = await propagator.propagateContext(context);
@@ -103,48 +101,48 @@ describe("ContextPropagator", () => {
 
       // Make the tab's onContextChange very slow
       slowTab.onContextChange = async () => {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       };
 
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1",
+        sessionId: "session1"
       };
 
       const result = await propagator.propagateContext(context);
 
-      expect(result.timedOut.length).toBeGreaterThan(0);
+      expect(result.timed_out.length).toBeGreaterThan(0);
     });
   });
 
   describe("Propagation Cancellation", () => {
     it("should cancel previous propagation on new context", async () => {
       const slowTab = mockTabs[0];
-      let _callCount = 0;
+      let callCount = 0;
 
       slowTab.onContextChange = async () => {
-        _callCount++;
-        await new Promise(resolve => setTimeout(resolve, 200));
+        callCount++;
+        await new Promise((resolve) => setTimeout(resolve, 200));
       };
 
       const context1: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1",
+        sessionId: "session1"
       };
 
       const context2: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane2",
-        sessionId: "session1",
+        sessionId: "session1"
       };
 
       // Start first propagation
-      const _promise1 = propagator.propagateContext(context1);
+      const promise1 = propagator.propagateContext(context1);
 
       // Immediately start second propagation (should cancel first)
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
       const promise2 = propagator.propagateContext(context2);
 
       // Second propagation should complete
@@ -155,25 +153,29 @@ describe("ContextPropagator", () => {
 
   describe("Mixed Results", () => {
     it("should handle mixed success and failure", async () => {
-      mockTabs[0].onContextChange = () => Promise.reject(new Error("Failed"));
+      mockTabs[0].onContextChange = async () => {
+        throw new Error("Failed");
+      };
 
-      mockTabs[1].onContextChange = () => Promise.resolve();
+      mockTabs[1].onContextChange = async () => {
+        // Success
+      };
 
       mockTabs[2].onContextChange = async () => {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       };
 
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1",
+        sessionId: "session1"
       };
 
       const result = await propagator.propagateContext(context);
 
       expect(result.successful.length).toBe(1);
       expect(result.failed.length).toBe(1);
-      expect(result.timedOut.length).toBe(1);
+      expect(result.timed_out.length).toBe(1);
     });
   });
 
@@ -184,7 +186,7 @@ describe("ContextPropagator", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1",
+        sessionId: "session1"
       };
 
       const result = await propagator.propagateContext(context);

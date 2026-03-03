@@ -1,8 +1,8 @@
-import { describe, expect, it, mock } from "bun:test";
-import type { ZellijCli } from "../cli.js";
+import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { reconcile } from "../reconciliation.js";
 import { MuxRegistry } from "../registry.js";
-import type { CliResult, MuxSession, ZellijSession } from "../types.js";
+import type { ZellijCli } from "../cli.js";
+import type { CliResult, ZellijSession, MuxSession } from "../types.js";
 
 function makeSession(name: string, attached = false): ZellijSession {
   return { name, created: new Date(), attached };
@@ -18,18 +18,18 @@ function makeMuxSession(sessionName: string, laneId: string): MuxSession {
   };
 }
 
-function makeCli(sessions: ZellijSession[], killResults?: Map<string, CliResult>): ZellijCli {
+function makeCli(
+  sessions: ZellijSession[],
+  killResults?: Map<string, CliResult>,
+): ZellijCli {
   return {
-    listSessions: mock(() => Promise.resolve(sessions)),
-    run: mock((args: string[]) => {
+    listSessions: mock(async () => sessions),
+    run: mock(async (args: string[]) => {
       if (args[0] === "kill-session") {
-        const name = args.at(1);
-        if (name === undefined) {
-          return Promise.resolve({ stdout: "", stderr: "", exitCode: 0 });
-        }
+        const name = args[1]!;
         return killResults?.get(name) ?? { stdout: "", stderr: "", exitCode: 0 };
       }
-      return Promise.resolve({ stdout: "", stderr: "", exitCode: 0 });
+      return { stdout: "", stderr: "", exitCode: 0 };
     }),
     checkAvailability: mock(async () => ({ available: true })),
   } as unknown as ZellijCli;
@@ -65,7 +65,10 @@ describe("reconcile", () => {
   });
 
   it("handles mixed orphans and stale bindings", async () => {
-    const cli = makeCli([makeSession("helios-lane-orphan"), makeSession("helios-lane-alive")]);
+    const cli = makeCli([
+      makeSession("helios-lane-orphan"),
+      makeSession("helios-lane-alive"),
+    ]);
     const registry = new MuxRegistry();
     registry.bind("helios-lane-alive", "alive", makeMuxSession("helios-lane-alive", "alive"));
     registry.bind("helios-lane-gone", "gone", makeMuxSession("helios-lane-gone", "gone"));

@@ -8,14 +8,9 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { type TerminalContext, executeHotSwap } from "../../../src/renderer/hot_swap.js";
+import { executeHotSwap, type TerminalContext } from "../../../src/renderer/hot_swap.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
-import {
-  MockGhosttyAdapter,
-  MockRioAdapter,
-  TEST_CONFIG,
-  TEST_SURFACE,
-} from "../../helpers/mock_adapter.js";
+import { MockGhosttyAdapter, MockRioAdapter, TEST_CONFIG, TEST_SURFACE } from "../../helpers/mock_adapter.js";
 
 describe("Hot-swap integration", () => {
   it("successfully hot-swaps single terminal", async () => {
@@ -44,13 +39,13 @@ describe("Hot-swap integration", () => {
       buffer,
       TEST_CONFIG,
       TEST_SURFACE,
-      async () => {}
+      async () => {},
     );
 
     expect(result.success).toBe(true);
     expect(result.phase).toBe("committed");
     expect(result.preservedContexts.length).toBe(1);
-    expect(result.preservedContexts[0]?.ptyId).toBe("pty-1");
+    expect(result.preservedContexts[0]!.ptyId).toBe("pty-1");
   });
 
   it("successfully hot-swaps multiple terminals", async () => {
@@ -101,7 +96,7 @@ describe("Hot-swap integration", () => {
       buffer,
       TEST_CONFIG,
       TEST_SURFACE,
-      async () => {}
+      async () => {},
     );
 
     expect(result.success).toBe(true);
@@ -140,7 +135,7 @@ describe("Hot-swap integration", () => {
       buffer,
       TEST_CONFIG,
       TEST_SURFACE,
-      async () => {}
+      async () => {},
     );
 
     expect(result.success).toBe(true);
@@ -174,7 +169,7 @@ describe("Hot-swap integration", () => {
       buffer,
       TEST_CONFIG,
       TEST_SURFACE,
-      async () => {}
+      async () => {},
     );
 
     expect(result.success).toBe(true);
@@ -218,7 +213,7 @@ describe("Hot-swap integration", () => {
       buffer,
       TEST_CONFIG,
       TEST_SURFACE,
-      async () => {}
+      async () => {},
     );
 
     expect(result.success).toBe(true);
@@ -252,7 +247,7 @@ describe("Hot-swap integration", () => {
       buffer,
       TEST_CONFIG,
       TEST_SURFACE,
-      async () => {}
+      async () => {},
     );
 
     const elapsed = Date.now() - startTime;
@@ -274,7 +269,7 @@ describe("Hot-swap integration", () => {
       buffer,
       TEST_CONFIG,
       TEST_SURFACE,
-      async () => {}
+      async () => {},
     );
 
     expect(result.success).toBe(false);
@@ -311,7 +306,7 @@ describe("Hot-swap integration", () => {
       TEST_SURFACE,
       async () => {
         rollbackCalled = true;
-      }
+      },
     );
 
     expect(result.success).toBe(false);

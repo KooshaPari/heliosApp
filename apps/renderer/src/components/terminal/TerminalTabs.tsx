@@ -13,7 +13,7 @@ export type TerminalTabsProps = {
   onTerminalClose?: (id: string) => void;
 };
 
-export const TerminalTabs: Component<TerminalTabsProps> = props => {
+export const TerminalTabs: Component<TerminalTabsProps> = (props) => {
   const handleAdd = () => {
     const id = createTerminal();
     props.onTerminalCreate?.(id);
@@ -23,17 +23,6 @@ export const TerminalTabs: Component<TerminalTabsProps> = props => {
     e.stopPropagation();
     closeTerminal(id);
     props.onTerminalClose?.(id);
-  };
-
-  const handleActivate = (id: string) => {
-    switchTerminal(id);
-  };
-
-  const handleActivateKeyDown = (event: KeyboardEvent, id: string) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      handleActivate(id);
-    }
   };
 
   return (
@@ -54,10 +43,8 @@ export const TerminalTabs: Component<TerminalTabsProps> = props => {
           return (
             <div
               role="tab"
-              tabIndex={0}
               aria-selected={isActive()}
-              onClick={() => handleActivate(term.id)}
-              onKeyDown={event => handleActivateKeyDown(event, term.id)}
+              onClick={() => switchTerminal(term.id)}
               style={{
                 display: "flex",
                 "align-items": "center",

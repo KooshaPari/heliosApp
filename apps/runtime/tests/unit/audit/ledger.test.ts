@@ -1,32 +1,31 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
-import { AuditLedger } from "../../../src/audit/ledger";
-import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
-import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
+import { describe, it, expect, beforeEach } from 'bun:test';
+import { AuditLedger } from '../../../src/audit/ledger';
+import { AuditRingBuffer } from '../../../src/audit/ring-buffer';
+import { SQLiteAuditStore } from '../../../src/audit/sqlite-store';
+import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from '../../../src/audit/event';
 
-describe("AuditLedger", () => {
+describe('AuditLedger', () => {
   let ledger: AuditLedger;
   let ringBuffer: AuditRingBuffer;
   let store: SQLiteAuditStore;
 
   beforeEach(() => {
     ringBuffer = new AuditRingBuffer(100);
-    store = new SQLiteAuditStore(":memory:");
+    store = new SQLiteAuditStore(':memory:');
     ledger = new AuditLedger(ringBuffer, store);
   });
 
-  describe("search", () => {
+  describe('search', () => {
     beforeEach(() => {
       // Add events to ring buffer
       for (let i = 0; i < 50; i++) {
         const event = createAuditEvent({
-          eventType:
-            i % 2 === 0 ? AUDIT_EVENT_TYPES.COMMAND_EXECUTED : AUDIT_EVENT_TYPES.SESSION_CREATED,
+          eventType: i % 2 === 0 ? AUDIT_EVENT_TYPES.COMMAND_EXECUTED : AUDIT_EVENT_TYPES.SESSION_CREATED,
           actor: `agent-${i % 5}`,
-          action: "test",
+          action: 'test',
           target: `target-${i}`,
           result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: i < 25 ? "ws-1" : "ws-2",
+          workspaceId: i < 25 ? 'ws-1' : 'ws-2',
           laneId: `lane-${i % 10}`,
           sessionId: `session-${i % 3}`,
           correlationId: `corr-${i}`,
@@ -40,11 +39,11 @@ describe("AuditLedger", () => {
       for (let i = 50; i < 100; i++) {
         const event = createAuditEvent({
           eventType: AUDIT_EVENT_TYPES.POLICY_EVALUATION,
-          actor: "system",
-          action: "evaluate",
+          actor: 'system',
+          action: 'evaluate',
           target: `policy-${i}`,
           result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: "ws-1",
+          workspaceId: 'ws-1',
           correlationId: `corr-${i}`,
           metadata: {},
         });
@@ -53,29 +52,29 @@ describe("AuditLedger", () => {
       store.persist(events);
     });
 
-    it("should filter by workspace ID", () => {
-      const results = ledger.search({ workspaceId: "ws-1" });
-      expect(results.every(e => e.workspaceId === "ws-1")).toBe(true);
+    it('should filter by workspace ID', () => {
+      const results = ledger.search({ workspaceId: 'ws-1' });
+      expect(results.every((e) => e.workspaceId === 'ws-1')).toBe(true);
     });
 
-    it("should filter by actor", () => {
-      const results = ledger.search({ actor: "agent-0" });
-      expect(results.every(e => e.actor === "agent-0")).toBe(true);
+    it('should filter by actor', () => {
+      const results = ledger.search({ actor: 'agent-0' });
+      expect(results.every((e) => e.actor === 'agent-0')).toBe(true);
     });
 
-    it("should filter by event type", () => {
+    it('should filter by event type', () => {
       const results = ledger.search({ eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED });
-      expect(results.every(e => e.eventType === AUDIT_EVENT_TYPES.COMMAND_EXECUTED)).toBe(true);
+      expect(results.every((e) => e.eventType === AUDIT_EVENT_TYPES.COMMAND_EXECUTED)).toBe(true);
     });
 
-    it("should merge results from ring buffer and store", () => {
-      const results = ledger.search({ workspaceId: "ws-1", limit: 100 });
+    it('should merge results from ring buffer and store', () => {
+      const results = ledger.search({ workspaceId: 'ws-1', limit: 100 });
       expect(results.length).toBeGreaterThan(0);
       expect(results.length).toBeLessThanOrEqual(100);
     });
 
-    it("should maintain chronological order", () => {
-      const results = ledger.search({ workspaceId: "ws-1", limit: 100 });
+    it('should maintain chronological order', () => {
+      const results = ledger.search({ workspaceId: 'ws-1', limit: 100 });
 
       for (let i = 1; i < results.length; i++) {
         const prevTime = new Date(results[i - 1].timestamp).getTime();
@@ -84,9 +83,9 @@ describe("AuditLedger", () => {
       }
     });
 
-    it("should respect limit and offset", () => {
-      const page1 = ledger.search({ workspaceId: "ws-1", limit: 10, offset: 0 });
-      const page2 = ledger.search({ workspaceId: "ws-1", limit: 10, offset: 10 });
+    it('should respect limit and offset', () => {
+      const page1 = ledger.search({ workspaceId: 'ws-1', limit: 10, offset: 0 });
+      const page2 = ledger.search({ workspaceId: 'ws-1', limit: 10, offset: 10 });
 
       expect(page1.length).toBeLessThanOrEqual(10);
       expect(page2.length).toBeLessThanOrEqual(10);
@@ -97,47 +96,47 @@ describe("AuditLedger", () => {
     });
   });
 
-  describe("count", () => {
-    it("should count events matching filter", () => {
+  describe('count', () => {
+    it('should count events matching filter', () => {
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-        actor: "agent-1",
-        action: "execute",
-        target: "cmd",
+        actor: 'agent-1',
+        action: 'execute',
+        target: 'cmd',
         result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: "ws-1",
-        correlationId: "corr-1",
+        workspaceId: 'ws-1',
+        correlationId: 'corr-1',
         metadata: {},
       });
 
       ringBuffer.push(event);
 
-      const count = ledger.count({ workspaceId: "ws-1" });
+      const count = ledger.count({ workspaceId: 'ws-1' });
       expect(count).toBeGreaterThan(0);
     });
   });
 
-  describe("getCorrelationChain", () => {
-    it("should return all events with same correlation ID", () => {
+  describe('getCorrelationChain', () => {
+    it('should return all events with same correlation ID', () => {
       const event1 = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.POLICY_EVALUATION,
-        actor: "system",
-        action: "evaluate",
-        target: "policy-1",
+        actor: 'system',
+        action: 'evaluate',
+        target: 'policy-1',
         result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: "ws-1",
-        correlationId: "chain-1",
+        workspaceId: 'ws-1',
+        correlationId: 'chain-1',
         metadata: { step: 1 },
       });
 
       const event2 = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.APPROVAL_RESOLVED,
-        actor: "operator-1",
-        action: "approve",
-        target: "approval-1",
+        actor: 'operator-1',
+        action: 'approve',
+        target: 'approval-1',
         result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: "ws-1",
-        correlationId: "chain-1",
+        workspaceId: 'ws-1',
+        correlationId: 'chain-1',
         metadata: { step: 2 },
       });
 
@@ -145,14 +144,14 @@ describe("AuditLedger", () => {
       const events = [event2];
       store.persist(events);
 
-      const chain = ledger.getCorrelationChain("chain-1");
+      const chain = ledger.getCorrelationChain('chain-1');
       expect(chain.length).toBe(2);
       expect(chain[0].metadata.step).toBe(1);
       expect(chain[1].metadata.step).toBe(2);
     });
 
-    it("should be in chronological order", () => {
-      const chain = ledger.getCorrelationChain("chain-1");
+    it('should be in chronological order', () => {
+      const chain = ledger.getCorrelationChain('chain-1');
 
       for (let i = 1; i < chain.length; i++) {
         const prevTime = new Date(chain[i - 1].timestamp).getTime();
@@ -162,24 +161,24 @@ describe("AuditLedger", () => {
     });
   });
 
-  describe("subscribe", () => {
-    it("should deliver matching events to subscriber", done => {
+  describe('subscribe', () => {
+    it('should deliver matching events to subscriber', (done) => {
       let callCount = 0;
 
-      const unsubscribe = ledger.subscribe({ workspaceId: "ws-1" }, event => {
+      const unsubscribe = ledger.subscribe({ workspaceId: 'ws-1' }, (event) => {
         callCount++;
-        expect(event.workspaceId).toBe("ws-1");
+        expect(event.workspaceId).toBe('ws-1');
       });
 
       // Notify with matching event
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-        actor: "agent-1",
-        action: "execute",
-        target: "cmd",
+        actor: 'agent-1',
+        action: 'execute',
+        target: 'cmd',
         result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: "ws-1",
-        correlationId: "corr-1",
+        workspaceId: 'ws-1',
+        correlationId: 'corr-1',
         metadata: {},
       });
 
@@ -193,22 +192,22 @@ describe("AuditLedger", () => {
       }, 150);
     });
 
-    it("should filter non-matching events", done => {
+    it('should filter non-matching events', (done) => {
       let callCount = 0;
 
-      const unsubscribe = ledger.subscribe({ workspaceId: "ws-1" }, () => {
+      const unsubscribe = ledger.subscribe({ workspaceId: 'ws-1' }, () => {
         callCount++;
       });
 
       // Notify with non-matching event
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.SESSION_CREATED,
-        actor: "agent-1",
-        action: "create",
-        target: "session-1",
+        actor: 'agent-1',
+        action: 'create',
+        target: 'session-1',
         result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: "ws-2", // Different workspace
-        correlationId: "corr-1",
+        workspaceId: 'ws-2', // Different workspace
+        correlationId: 'corr-1',
         metadata: {},
       });
 
@@ -222,8 +221,8 @@ describe("AuditLedger", () => {
       }, 150);
     });
 
-    it("should allow unsubscribe", () => {
-      const unsubscribe = ledger.subscribe({ workspaceId: "ws-1" }, () => {});
+    it('should allow unsubscribe', () => {
+      const unsubscribe = ledger.subscribe({ workspaceId: 'ws-1' }, () => {});
       unsubscribe();
 
       // Should not throw when unsubscribing again

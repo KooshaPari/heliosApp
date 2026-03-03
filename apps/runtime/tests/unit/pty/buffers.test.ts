@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { OutputBuffer, RingBuffer } from "../../../src/pty/buffers.js";
+import { RingBuffer, OutputBuffer } from "../../../src/pty/buffers.js";
 import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 import type { PtyEventCorrelation } from "../../../src/pty/events.js";
 
@@ -133,9 +133,9 @@ describe("OutputBuffer", () => {
     ob.write(new Uint8Array(75));
     expect(ob.isBackpressured).toBe(true);
 
-    const onEvents = bus.events.filter(e => e.topic === "pty.backpressure.on");
+    const onEvents = bus.events.filter((e) => e.topic === "pty.backpressure.on");
     expect(onEvents).toHaveLength(1);
-    expect(onEvents[0]?.payload.utilization).toBe(0.75);
+    expect(onEvents[0]!.payload["utilization"]).toBe(0.75);
   });
 
   it("does not re-emit backpressure.on while already active", () => {
@@ -147,7 +147,7 @@ describe("OutputBuffer", () => {
 
     ob.write(new Uint8Array(80));
     ob.write(new Uint8Array(5));
-    const onEvents = bus.events.filter(e => e.topic === "pty.backpressure.on");
+    const onEvents = bus.events.filter((e) => e.topic === "pty.backpressure.on");
     expect(onEvents).toHaveLength(1);
   });
 
@@ -170,7 +170,7 @@ describe("OutputBuffer", () => {
     ob.consume(10);
     expect(ob.isBackpressured).toBe(false);
 
-    const offEvents = bus.events.filter(e => e.topic === "pty.backpressure.off");
+    const offEvents = bus.events.filter((e) => e.topic === "pty.backpressure.off");
     expect(offEvents).toHaveLength(1);
   });
 
@@ -183,9 +183,9 @@ describe("OutputBuffer", () => {
     });
 
     ob.write(new Uint8Array(80));
-    const evt = bus.events.find(e => e.topic === "pty.backpressure.on");
-    expect(evt?.payload.ptyId).toBe(corr.ptyId);
-    expect(evt?.payload.laneId).toBe(corr.laneId);
+    const evt = bus.events.find((e) => e.topic === "pty.backpressure.on");
+    expect(evt?.payload["ptyId"]).toBe(corr.ptyId);
+    expect(evt?.payload["laneId"]).toBe(corr.laneId);
   });
 
   // ── Overflow telemetry ───────────────────────────────────────────
@@ -206,9 +206,9 @@ describe("OutputBuffer", () => {
       expect(warns).toHaveLength(1);
       expect(warns[0]).toContain("overflow");
 
-      const overflowEvts = bus.events.filter(e => e.topic === "pty.buffer.overflow");
+      const overflowEvts = bus.events.filter((e) => e.topic === "pty.buffer.overflow");
       expect(overflowEvts).toHaveLength(1);
-      expect(overflowEvts[0]?.payload.droppedBytes).toBe(5);
+      expect(overflowEvts[0]!.payload["droppedBytes"]).toBe(5);
 
       const stats = ob.getStats();
       expect(stats.totalDropped).toBe(5);
@@ -235,7 +235,7 @@ describe("OutputBuffer", () => {
       ob.consume(10);
       ob.write(new Uint8Array(15));
 
-      const overflowEvts = bus.events.filter(e => e.topic === "pty.buffer.overflow");
+      const overflowEvts = bus.events.filter((e) => e.topic === "pty.buffer.overflow");
       expect(overflowEvts).toHaveLength(1);
     } finally {
       console.warn = origWarn;
@@ -276,7 +276,7 @@ describe("OutputBuffer", () => {
     expect(ob.isBackpressured).toBe(false);
     expect(ob.available).toBe(0);
 
-    const offEvents = bus.events.filter(e => e.topic === "pty.backpressure.off");
+    const offEvents = bus.events.filter((e) => e.topic === "pty.backpressure.off");
     expect(offEvents).toHaveLength(1);
   });
 });

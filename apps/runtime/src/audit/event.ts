@@ -1,51 +1,36 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID } from 'crypto';
 
 /**
  * Audit event type constants to prevent typos and enable type safety.
  * These categorize the event for filtering, searching, and analysis.
  */
 export const AUDIT_EVENT_TYPES = {
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
-  COMMAND_EXECUTED: "command.executed",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
-  POLICY_EVALUATION: "policy.evaluation",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
-  SESSION_CREATED: "session.created",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
-  TERMINAL_OUTPUT: "terminal.output",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
-  APPROVAL_RESOLVED: "approval.resolved",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
-  LANE_LIFECYCLE: "lane.lifecycle",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
-  SESSION_LIFECYCLE: "session.lifecycle",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
-  TERMINAL_LIFECYCLE: "terminal.lifecycle",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
-  POLICY_LIFECYCLE: "policy.lifecycle",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
-  APPROVAL_LIFECYCLE: "approval.lifecycle",
+  COMMAND_EXECUTED: 'command.executed',
+  POLICY_EVALUATION: 'policy.evaluation',
+  SESSION_CREATED: 'session.created',
+  TERMINAL_OUTPUT: 'terminal.output',
+  APPROVAL_RESOLVED: 'approval.resolved',
+  LANE_LIFECYCLE: 'lane.lifecycle',
+  SESSION_LIFECYCLE: 'session.lifecycle',
+  TERMINAL_LIFECYCLE: 'terminal.lifecycle',
+  POLICY_LIFECYCLE: 'policy.lifecycle',
+  APPROVAL_LIFECYCLE: 'approval.lifecycle',
 } as const;
 
-export type AuditEventType = (typeof AUDIT_EVENT_TYPES)[keyof typeof AUDIT_EVENT_TYPES];
+export type AuditEventType = typeof AUDIT_EVENT_TYPES[keyof typeof AUDIT_EVENT_TYPES];
 
 /**
  * Result values for audit events indicating the outcome of an action.
  */
 export const AUDIT_EVENT_RESULTS = {
-  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
-  SUCCESS: "success",
-  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
-  FAILURE: "failure",
-  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
-  DENIED: "denied",
-  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
-  TIMEOUT: "timeout",
-  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
-  PENDING: "pending",
+  SUCCESS: 'success',
+  FAILURE: 'failure',
+  DENIED: 'denied',
+  TIMEOUT: 'timeout',
+  PENDING: 'pending',
 } as const;
 
-export type AuditEventResult = (typeof AUDIT_EVENT_RESULTS)[keyof typeof AUDIT_EVENT_RESULTS];
+export type AuditEventResult = typeof AUDIT_EVENT_RESULTS[keyof typeof AUDIT_EVENT_RESULTS];
 
 /**
  * Immutable audit event record for forensic analysis and compliance.
@@ -96,12 +81,12 @@ export interface AuditEvent {
   /**
    * Optional lane ID for lane-scoped operations.
    */
-  laneId?: string | undefined;
+  laneId?: string;
 
   /**
    * Optional session ID for session tracking.
    */
-  sessionId?: string | undefined;
+  sessionId?: string;
 
   /**
    * Correlation ID linking related events across the system.
@@ -119,7 +104,7 @@ export interface AuditEvent {
 /**
  * Input type for creating audit events, omitting auto-generated fields.
  */
-export type AuditEventInput = Omit<AuditEvent, "id" | "timestamp">;
+export type AuditEventInput = Omit<AuditEvent, 'id' | 'timestamp'>;
 
 /**
  * Factory function to create a valid AuditEvent.
@@ -132,7 +117,7 @@ export function createAuditEvent(input: AuditEventInput): AuditEvent {
   const now = new Date();
 
   return {
-    id: generateUuiDv7(),
+    id: generateUUIDv7(),
     timestamp: now.toISOString(),
     ...input,
   };
@@ -147,49 +132,45 @@ export function createAuditEvent(input: AuditEventInput): AuditEvent {
 export function validateAuditEvent(event: AuditEvent): boolean {
   // Check required string fields
   if (
-    typeof event.id !== "string" ||
+    typeof event.id !== 'string' ||
     !event.id ||
-    typeof event.eventType !== "string" ||
+    typeof event.eventType !== 'string' ||
     !event.eventType ||
-    typeof event.actor !== "string" ||
+    typeof event.actor !== 'string' ||
     !event.actor ||
-    typeof event.action !== "string" ||
+    typeof event.action !== 'string' ||
     !event.action ||
-    typeof event.target !== "string" ||
+    typeof event.target !== 'string' ||
     !event.target ||
-    typeof event.result !== "string" ||
+    typeof event.result !== 'string' ||
     !event.result ||
-    typeof event.timestamp !== "string" ||
+    typeof event.timestamp !== 'string' ||
     !event.timestamp ||
-    typeof event.workspaceId !== "string" ||
+    typeof event.workspaceId !== 'string' ||
     !event.workspaceId ||
-    typeof event.correlationId !== "string" ||
+    typeof event.correlationId !== 'string' ||
     !event.correlationId
   ) {
     return false;
   }
 
   // Check optional fields if present
-  if (event.laneId !== undefined && typeof event.laneId !== "string") {
+  if (event.laneId !== undefined && typeof event.laneId !== 'string') {
     return false;
   }
 
-  if (event.sessionId !== undefined && typeof event.sessionId !== "string") {
+  if (event.sessionId !== undefined && typeof event.sessionId !== 'string') {
     return false;
   }
 
   // Check metadata is a plain object
-  if (
-    typeof event.metadata !== "object" ||
-    event.metadata === null ||
-    Array.isArray(event.metadata)
-  ) {
+  if (typeof event.metadata !== 'object' || event.metadata === null || Array.isArray(event.metadata)) {
     return false;
   }
 
   // Validate timestamp is valid ISO 8601
   const ts = new Date(event.timestamp);
-  if (Number.isNaN(ts.getTime())) {
+  if (isNaN(ts.getTime())) {
     return false;
   }
 
@@ -205,7 +186,7 @@ export function validateAuditEvent(event: AuditEvent): boolean {
  *
  * @returns UUID v7 string
  */
-function generateUuiDv7(): string {
+function generateUUIDv7(): string {
   // For now, use randomUUID as a placeholder.
   // TODO: Replace with proper UUID v7 generation for time-ordered IDs.
   return randomUUID();

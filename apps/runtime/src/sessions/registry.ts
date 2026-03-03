@@ -2,18 +2,18 @@ export type SessionTransport = "cliproxy_harness" | "native_openai";
 export type SessionStatus = "detached" | "attaching" | "attached" | "terminated";
 
 export type SessionRecord = {
-  sessionId: string;
-  laneId: string;
-  codexSessionId: string;
+  session_id: string;
+  lane_id: string;
+  codex_session_id: string;
   transport: SessionTransport;
   status: SessionStatus;
-  lastHeartbeatAt: string;
+  last_heartbeat_at: string;
 };
 
 export type EnsureSessionInput = {
-  laneId: string;
+  lane_id: string;
   transport: SessionTransport;
-  codexSessionId?: string;
+  codex_session_id?: string;
 };
 
 export class SessionRegistryError extends Error {
@@ -30,47 +30,48 @@ export class InMemorySessionRegistry {
 
   ensure(input: EnsureSessionInput): { session: SessionRecord; created: boolean } {
     const nowIso = new Date().toISOString();
-    const activeSessionId = this.activeLaneSessions.get(input.laneId);
+    const activeSessionId = this.activeLaneSessions.get(input.lane_id);
     if (activeSessionId) {
       const active = this.bySessionId.get(activeSessionId);
-      if (active) {
-        if (input.codexSessionId && input.codexSessionId !== active.codexSessionId) {
+      if (!active) {
+        this.activeLaneSessions.delete(input.lane_id);
+      } else {
+        if (input.codex_session_id && input.codex_session_id !== active.codex_session_id) {
           throw new SessionRegistryError(
-            `lane ${input.laneId} already mapped to codex session ${active.codexSessionId}`
+            `lane ${input.lane_id} already mapped to codex session ${active.codex_session_id}`
           );
         }
 
         active.status = "attached";
         active.transport = input.transport;
-        active.lastHeartbeatAt = nowIso;
+        active.last_heartbeat_at = nowIso;
         return { session: { ...active }, created: false };
       }
-      this.activeLaneSessions.delete(input.laneId);
     }
 
-    const codexSessionId = input.codexSessionId ?? this.generateCodexSessionId();
+    const codexSessionId = input.codex_session_id ?? this.generateCodexSessionId();
     const codexCollision = this.activeCodexSessions.get(codexSessionId);
     if (codexCollision) {
       const colliding = this.bySessionId.get(codexCollision);
-      if (colliding && colliding.status !== "terminated" && colliding.laneId !== input.laneId) {
+      if (colliding && colliding.status !== "terminated" && colliding.lane_id !== input.lane_id) {
         throw new SessionRegistryError(
-          `codex session ${codexSessionId} already active on lane ${colliding.laneId}`
+          `codex session ${codexSessionId} already active on lane ${colliding.lane_id}`
         );
       }
     }
 
     const session: SessionRecord = {
-      sessionId: this.generateRuntimeSessionId(),
-      laneId: input.laneId,
-      codexSessionId,
+      session_id: this.generateRuntimeSessionId(),
+      lane_id: input.lane_id,
+      codex_session_id: codexSessionId,
       transport: input.transport,
       status: "attached",
-      lastHeartbeatAt: nowIso,
+      last_heartbeat_at: nowIso
     };
 
-    this.bySessionId.set(session.sessionId, session);
-    this.activeLaneSessions.set(session.laneId, session.sessionId);
-    this.activeCodexSessions.set(session.codexSessionId, session.sessionId);
+    this.bySessionId.set(session.session_id, session);
+    this.activeLaneSessions.set(session.lane_id, session.session_id);
+    this.activeCodexSessions.set(session.codex_session_id, session.session_id);
     return { session: { ...session }, created: true };
   }
 
@@ -82,7 +83,7 @@ export class InMemorySessionRegistry {
   listByLane(laneId: string): SessionRecord[] {
     const sessions: SessionRecord[] = [];
     for (const session of this.bySessionId.values()) {
-      if (session.laneId === laneId) {
+      if (session.lane_id === laneId) {
         sessions.push({ ...session });
       }
     }
@@ -95,7 +96,7 @@ export class InMemorySessionRegistry {
       throw new SessionRegistryError(`session ${sessionId} not found`);
     }
 
-    session.lastHeartbeatAt = new Date().toISOString();
+    session.last_heartbeat_at = new Date().toISOString();
     return { ...session };
   }
 
@@ -106,9 +107,9 @@ export class InMemorySessionRegistry {
     }
 
     session.status = "terminated";
-    session.lastHeartbeatAt = new Date().toISOString();
-    this.activeLaneSessions.delete(session.laneId);
-    this.activeCodexSessions.delete(session.codexSessionId);
+    session.last_heartbeat_at = new Date().toISOString();
+    this.activeLaneSessions.delete(session.lane_id);
+    this.activeCodexSessions.delete(session.codex_session_id);
     return { ...session };
   }
 

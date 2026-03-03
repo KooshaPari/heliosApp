@@ -40,7 +40,7 @@ export class LaneRegistry {
   private readonly workspaceIndex = new Map<string, Set<string>>();
   private readonly capacityLimit: number;
 
-  constructor(capacityLimit = 50) {
+  constructor(capacityLimit: number = 50) {
     this.capacityLimit = capacityLimit;
   }
 
@@ -64,13 +64,11 @@ export class LaneRegistry {
 
   getByWorkspace(workspaceId: string): LaneRecord[] {
     const laneIds = this.workspaceIndex.get(workspaceId);
-    if (!laneIds) {
-      return [];
-    }
+    if (!laneIds) return [];
     return [...laneIds]
-      .map(id => this.lanes.get(id))
+      .map((id) => this.lanes.get(id))
       .filter((r): r is LaneRecord => r !== undefined)
-      .map(r => ({ ...r }));
+      .map((r) => ({ ...r }));
   }
 
   update(laneId: string, patch: Partial<LaneRecord>): void {
@@ -78,12 +76,7 @@ export class LaneRegistry {
     if (!existing) {
       throw new LaneNotFoundError(laneId);
     }
-    const updated: LaneRecord = {
-      ...existing,
-      ...patch,
-      laneId: existing.laneId,
-      updatedAt: new Date().toISOString(),
-    };
+    const updated: LaneRecord = { ...existing, ...patch, laneId: existing.laneId, updatedAt: new Date().toISOString() };
     // If workspaceId changed, update index
     if (patch.workspaceId !== undefined && patch.workspaceId !== existing.workspaceId) {
       this.removeFromWorkspaceIndex(existing.workspaceId, laneId);
@@ -103,7 +96,7 @@ export class LaneRegistry {
   }
 
   list(): LaneRecord[] {
-    return [...this.lanes.values()].map(r => ({ ...r }));
+    return [...this.lanes.values()].map((r) => ({ ...r }));
   }
 
   count(): number {
@@ -111,7 +104,9 @@ export class LaneRegistry {
   }
 
   getActive(): LaneRecord[] {
-    return [...this.lanes.values()].filter(r => r.state !== "closed").map(r => ({ ...r }));
+    return [...this.lanes.values()]
+      .filter((r) => r.state !== "closed")
+      .map((r) => ({ ...r }));
   }
 
   private addToWorkspaceIndex(workspaceId: string, laneId: string): void {

@@ -1,12 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import {
-  KeyboardShortcuts,
-  type ShortcutAction,
-  resetKeyboardShortcuts,
-} from "../../../src/tabs/keyboard_shortcuts";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { KeyboardShortcuts, type ShortcutAction, resetKeyboardShortcuts } from "../../../src/tabs/keyboard_shortcuts";
+import * as path from "path";
+import { promises as fs } from "fs";
+import { tmpdir } from "os";
 
 describe("KeyboardShortcuts", () => {
   let shortcuts: KeyboardShortcuts;
@@ -14,7 +10,7 @@ describe("KeyboardShortcuts", () => {
 
   beforeEach(async () => {
     resetKeyboardShortcuts();
-    tempDir = join(tmpdir(), `keyboard-test-${Date.now()}`);
+    tempDir = path.join(tmpdir(), `keyboard-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
     shortcuts = new KeyboardShortcuts(tempDir);
   });
@@ -29,12 +25,12 @@ describe("KeyboardShortcuts", () => {
 
   describe("Default Shortcuts", () => {
     it("should have default shortcuts", () => {
-      const shortcutsMap = shortcuts.getShortcuts();
-      expect(shortcutsMap["select-terminal"]).toBeDefined();
-      expect(shortcutsMap["select-agent"]).toBeDefined();
-      expect(shortcutsMap["select-session"]).toBeDefined();
-      expect(shortcutsMap["select-chat"]).toBeDefined();
-      expect(shortcutsMap["select-project"]).toBeDefined();
+      const shortcuts_map = shortcuts.getShortcuts();
+      expect(shortcuts_map["select-terminal"]).toBeDefined();
+      expect(shortcuts_map["select-agent"]).toBeDefined();
+      expect(shortcuts_map["select-session"]).toBeDefined();
+      expect(shortcuts_map["select-chat"]).toBeDefined();
+      expect(shortcuts_map["select-project"]).toBeDefined();
     });
 
     it("should get specific shortcut", () => {
@@ -78,32 +74,32 @@ describe("KeyboardShortcuts", () => {
     it("should handle keyboard events", () => {
       let handledAction: ShortcutAction | null = null;
 
-      shortcuts.setHandler(action => {
+      shortcuts.setHandler((action) => {
         handledAction = action;
       });
 
       const event = new KeyboardEvent("keydown", {
         key: "1",
         metaKey: true,
-        bubbles: true,
+        bubbles: true
       });
 
       shortcuts.handleKeyboardEvent(event);
 
-      expect(handledAction === "select-terminal").toBe(true);
+      expect(handledAction).toBe("select-terminal");
     });
 
     it("should support shortcut listeners", () => {
-      const actions: ShortcutAction[] = [];
+      let actions: ShortcutAction[] = [];
 
-      shortcuts.onShortcut(action => {
+      shortcuts.onShortcut((action) => {
         actions.push(action);
       });
 
       const event = new KeyboardEvent("keydown", {
         key: "2",
         metaKey: true,
-        bubbles: true,
+        bubbles: true
       });
 
       shortcuts.handleKeyboardEvent(event);
@@ -121,7 +117,7 @@ describe("KeyboardShortcuts", () => {
       const event = new KeyboardEvent("keydown", {
         key: "1",
         metaKey: true,
-        bubbles: true,
+        bubbles: true
       });
 
       shortcuts.handleKeyboardEvent(event);
@@ -153,7 +149,7 @@ describe("KeyboardShortcuts", () => {
     });
 
     it("should handle invalid JSON gracefully", async () => {
-      const configPath = join(tempDir, "keyboard_shortcuts.json");
+      const configPath = path.join(tempDir, "keyboard_shortcuts.json");
       await fs.writeFile(configPath, "invalid json {", "utf-8");
 
       const newShortcuts = new KeyboardShortcuts(tempDir);

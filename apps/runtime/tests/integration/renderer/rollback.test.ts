@@ -8,10 +8,10 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 import { executeRollback } from "../../../src/renderer/rollback.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
 import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
+import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 
 describe("Rollback integration", () => {
   it("successfully restores single terminal to original renderer", async () => {
@@ -33,12 +33,18 @@ describe("Rollback integration", () => {
       ],
     ]);
 
-    const result = await executeRollback(original, failed, terminals, buffer, "target init failed");
+    const result = await executeRollback(
+      original,
+      failed,
+      terminals,
+      buffer,
+      "target init failed",
+    );
 
     expect(result.success).toBe(true);
     expect(result.terminalStatuses.length).toBe(1);
-    expect(result.terminalStatuses[0]?.restored).toBe(true);
-    expect(result.terminalStatuses[0]?.degraded).toBe(false);
+    expect(result.terminalStatuses[0]!.restored).toBe(true);
+    expect(result.terminalStatuses[0]!.degraded).toBe(false);
   });
 
   it("restores multiple terminals on rollback", async () => {
@@ -57,7 +63,7 @@ describe("Rollback integration", () => {
       failed,
       terminals,
       buffer,
-      "target start failed"
+      "target start failed",
     );
 
     expect(result.success).toBe(true);
@@ -79,7 +85,13 @@ describe("Rollback integration", () => {
 
     const failureReason = "target renderer crash during initialization";
 
-    const result = await executeRollback(original, failed, terminals, buffer, failureReason);
+    const result = await executeRollback(
+      original,
+      failed,
+      terminals,
+      buffer,
+      failureReason,
+    );
 
     expect(result.failureReason).toBe(failureReason);
   });
@@ -102,7 +114,13 @@ describe("Rollback integration", () => {
     }
 
     const startTime = Date.now();
-    const result = await executeRollback(original, failed, terminals, buffer, "test failure");
+    const result = await executeRollback(
+      original,
+      failed,
+      terminals,
+      buffer,
+      "test failure",
+    );
 
     const elapsed = Date.now() - startTime;
     expect(result.success).toBe(true);
@@ -119,11 +137,17 @@ describe("Rollback integration", () => {
       ["pty-2", { ptyId: "pty-2", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
     ]);
 
-    const result = await executeRollback(original, failed, terminals, buffer, "test failure");
+    const result = await executeRollback(
+      original,
+      failed,
+      terminals,
+      buffer,
+      "test failure",
+    );
 
     expect(result.terminalStatuses.length).toBe(2);
     // All should be restored since mock adapters succeed
-    expect(result.terminalStatuses.every(s => s.restored)).toBe(true);
+    expect(result.terminalStatuses.every((s) => s.restored)).toBe(true);
   });
 
   it("preserves terminal context during rollback", async () => {
@@ -152,7 +176,13 @@ describe("Rollback integration", () => {
       ],
     ]);
 
-    const result = await executeRollback(original, failed, terminals, buffer, "target init failed");
+    const result = await executeRollback(
+      original,
+      failed,
+      terminals,
+      buffer,
+      "target init failed",
+    );
 
     expect(result.success).toBe(true);
     // Context should be passed through (in real implementation, would be restored)
@@ -183,7 +213,7 @@ describe("Rollback integration", () => {
       terminals,
       buffer,
       "test failure",
-      mockBus
+      mockBus,
     );
 
     expect(result.success).toBe(true);
@@ -197,7 +227,13 @@ describe("Rollback integration", () => {
 
     const terminals = new Map<string, TerminalContext>();
 
-    const result = await executeRollback(original, failed, terminals, buffer, "test failure");
+    const result = await executeRollback(
+      original,
+      failed,
+      terminals,
+      buffer,
+      "test failure",
+    );
 
     expect(result.success).toBe(true);
     expect(result.terminalStatuses.length).toBe(0);

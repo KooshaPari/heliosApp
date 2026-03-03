@@ -105,9 +105,7 @@ export class RingBuffer {
    */
   peek(count?: number): Uint8Array {
     const n = Math.min(count ?? this._size, this._size);
-    if (n === 0) {
-      return new Uint8Array(0);
-    }
+    if (n === 0) return new Uint8Array(0);
 
     const result = new Uint8Array(n);
     const firstChunk = Math.min(n, this._capacity - this.head);
@@ -201,7 +199,11 @@ export class OutputBuffer {
   /** Whether the first overflow warning has been logged. */
   private firstOverflowLogged = false;
 
-  constructor(bus: BusPublisher, correlation: PtyEventCorrelation, config?: OutputBufferConfig) {
+  constructor(
+    bus: BusPublisher,
+    correlation: PtyEventCorrelation,
+    config?: OutputBufferConfig,
+  ) {
     const capacity = config?.capacityBytes ?? 4 * 1024 * 1024;
     this.ring = new RingBuffer(capacity);
     this.bus = bus;
@@ -311,31 +313,41 @@ export class OutputBuffer {
   }
 
   private emitBackpressureOn(utilization: number): void {
-    emitPtyEvent(this.bus, "pty.backpressure.on", this.correlation, {
-      ptyId: this.correlation.ptyId,
-      laneId: this.correlation.laneId,
-      utilization,
-      threshold: this.backpressureThreshold,
-    });
+    emitPtyEvent(
+      this.bus,
+      "pty.backpressure.on",
+      this.correlation,
+      {
+        ptyId: this.correlation.ptyId,
+        laneId: this.correlation.laneId,
+        utilization,
+        threshold: this.backpressureThreshold,
+      },
+    );
   }
 
   private emitBackpressureOff(): void {
     const utilization = this.ring.utilization;
-    emitPtyEvent(this.bus, "pty.backpressure.off", this.correlation, {
-      ptyId: this.correlation.ptyId,
-      laneId: this.correlation.laneId,
-      utilization,
-      threshold: this.backpressureThreshold,
-    });
+    emitPtyEvent(
+      this.bus,
+      "pty.backpressure.off",
+      this.correlation,
+      {
+        ptyId: this.correlation.ptyId,
+        laneId: this.correlation.laneId,
+        utilization,
+        threshold: this.backpressureThreshold,
+      },
+    );
   }
 
   private handleOverflow(droppedBytes: number): void {
     // Log warning on first overflow.
     if (!this.firstOverflowLogged) {
       this.firstOverflowLogged = true;
-      // biome-ignore lint/suspicious/noConsole: intentional overflow warning
       console.warn(
-        `[OutputBuffer] overflow: ${droppedBytes} bytes dropped for pty ${this.correlation.ptyId}`
+        `[pty:${this.correlation.ptyId}] Output buffer overflow: ${droppedBytes} bytes dropped. ` +
+          `Buffer capacity: ${this.ring.capacity} bytes.`,
       );
     }
 
@@ -345,15 +357,20 @@ export class OutputBuffer {
       this.lastOverflowEventTs = now;
       this._overflowEvents++;
 
-      emitPtyEvent(this.bus, "pty.buffer.overflow", this.correlation, {
-        ptyId: this.correlation.ptyId,
-        laneId: this.correlation.laneId,
-        droppedBytes,
-        totalWritten: this._totalWritten,
-        totalDropped: this._totalDropped,
-        overflowEvents: this._overflowEvents,
-        utilization: this.ring.utilization,
-      });
+      emitPtyEvent(
+        this.bus,
+        "pty.buffer.overflow",
+        this.correlation,
+        {
+          ptyId: this.correlation.ptyId,
+          laneId: this.correlation.laneId,
+          droppedBytes,
+          totalWritten: this._totalWritten,
+          totalDropped: this._totalDropped,
+          overflowEvents: this._overflowEvents,
+          utilization: this.ring.utilization,
+        },
+      );
     }
   }
 }

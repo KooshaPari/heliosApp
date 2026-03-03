@@ -4,9 +4,9 @@
  */
 import { describe, expect, it } from "bun:test";
 import {
+  RendererRegistry,
   DuplicateRendererError,
   RendererNotFoundError,
-  RendererRegistry,
 } from "../../../src/renderer/registry.js";
 import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
 
@@ -32,7 +32,7 @@ describe("RendererRegistry", () => {
     reg.register(r);
     const list = reg.list();
     expect(list.length).toBe(2);
-    expect(list.map(a => a.id).sort()).toEqual(["ghostty", "rio"]);
+    expect(list.map((a) => a.id).sort()).toEqual(["ghostty", "rio"]);
   });
 
   it("returns undefined for unregistered ID", () => {

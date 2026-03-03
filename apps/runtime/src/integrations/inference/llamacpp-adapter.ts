@@ -1,9 +1,5 @@
-import { constants } from "node:fs";
-import { access } from "node:fs/promises";
-import { readdir } from "node:fs/promises";
-import { join, relative } from "node:path";
-import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference.ts";
-import type { InferenceEngine } from "./engine.ts";
+import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
+import type { InferenceEngine } from "./engine";
 
 export class LlamaCppInferenceEngine implements InferenceEngine {
   readonly id = "llamacpp";
@@ -19,8 +15,10 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
 
   async init(): Promise<void> {
     try {
-      await access(this.binaryPath, constants.X_OK);
-      await access(this.modelDir, constants.R_OK);
+      const file = Bun.file(this.binaryPath);
+      if (!(await file.exists())) {
+        throw new Error(`llama.cpp binary not found at ${this.binaryPath}`);
+      }
     } catch (e) {
       throw new Error(`llama.cpp init failed: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -29,9 +27,7 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
     const prompt = request.messages.map(m => `${m.role}: ${m.content}`).join("\n");
     const args = [this.binaryPath, "-m", request.model, "-p", prompt, "--no-display-prompt"];
-    if (request.maxTokens) {
-      args.push("-n", String(request.maxTokens));
-    }
+    if (request.maxTokens) args.push("-n", String(request.maxTokens));
 
     const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
     const output = await new Response(proc.stdout).text();
@@ -56,60 +52,28 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
   }
 
   async listModels(): Promise<ModelInfo[]> {
+    // Scan model directory for .gguf files
     try {
-      const modelPaths = await this.collectModelsFromDirectory(this.modelDir);
-      return modelPaths.map(modelPath => {
-        const name =
-          modelPath
-            .replace(/\.gguf$/, "")
-            .split("/")
-            .pop() ?? modelPath;
-        return {
-          id: `${this.modelDir}/${modelPath}`,
-          name,
-          contextWindow: 4096,
-          providerId: "llamacpp",
-        };
-      });
+      const glob = new Bun.Glob("**/*.gguf");
+      const models: ModelInfo[] = [];
+      for await (const path of glob.scan(this.modelDir)) {
+        const name = path.replace(/\.gguf$/, "").split("/").pop() ?? path;
+        models.push({ id: `${this.modelDir}/${path}`, name, contextWindow: 4096, providerId: "llamacpp" });
+      }
+      return models;
     } catch {
       return [];
     }
   }
 
-  private async collectModelsFromDirectory(
-    baseDir: string,
-    currentDir = baseDir
-  ): Promise<string[]> {
-    const entries = await readdir(currentDir, { withFileTypes: true });
-    const models: string[] = [];
-
-    for (const entry of entries) {
-      const entryPath = join(currentDir, entry.name);
-
-      if (entry.isDirectory()) {
-        const nested = await this.collectModelsFromDirectory(baseDir, entryPath);
-        models.push(...nested);
-        continue;
-      }
-
-      if (entry.isFile() && entry.name.endsWith(".gguf")) {
-        models.push(relative(baseDir, entryPath));
-      }
-    }
-
-    return models;
-  }
-
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
     try {
-      await access(this.binaryPath, constants.X_OK);
-      return "healthy";
+      const file = Bun.file(this.binaryPath);
+      return (await file.exists()) ? "healthy" : "unavailable";
     } catch {
       return "unavailable";
     }
   }
 
-  terminate(): Promise<void> {
-    return Promise.resolve();
-  }
+  async terminate(): Promise<void> {}
 }

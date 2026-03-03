@@ -1,13 +1,10 @@
 // Unit tests for CheckpointManager
 
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import {
-  CheckpointManager,
-  type WatchdogCheckpoint,
-} from "../../../../src/lanes/watchdog/checkpoint.js";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { CheckpointManager, type WatchdogCheckpoint } from "../../../../src/lanes/watchdog/checkpoint.js";
+import { promises as fs } from "fs";
+import path from "path";
+import os from "os";
 
 describe("CheckpointManager", () => {
   let manager: CheckpointManager;
@@ -21,12 +18,6 @@ describe("CheckpointManager", () => {
       await fs.rm(testDir, { recursive: true, force: true });
     } catch {
       // Ignore cleanup errors
-    }
-    // Clean up any real checkpoint file left by other tests
-    try {
-      await manager.delete();
-    } catch {
-      // Ignore if not present
     }
   });
 

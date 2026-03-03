@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
-import { DefaultAuditSink, NoOpAuditStorage } from "../../../src/audit/sink";
+import { describe, it, expect, beforeEach } from 'bun:test';
+import { DefaultAuditSink, NoOpAuditStorage } from '../../../src/audit/sink';
+import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from '../../../src/audit/event';
 
-describe("AuditSink", () => {
+describe('AuditSink', () => {
   let sink: DefaultAuditSink;
   let storage: NoOpAuditStorage;
 
@@ -11,16 +11,16 @@ describe("AuditSink", () => {
     sink = new DefaultAuditSink(storage);
   });
 
-  describe("write", () => {
-    it("should write an event non-blocking", async () => {
+  describe('write', () => {
+    it('should write an event non-blocking', async () => {
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-        actor: "agent-1",
-        action: "execute",
-        target: "cmd",
+        actor: 'agent-1',
+        action: 'execute',
+        target: 'cmd',
         result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: "workspace-1",
-        correlationId: "corr-1",
+        workspaceId: 'workspace-1',
+        correlationId: 'corr-1',
         metadata: {},
       });
 
@@ -33,15 +33,15 @@ describe("AuditSink", () => {
       expect(sink.getBufferedCount()).toBe(1);
     });
 
-    it("should increment total events written", async () => {
+    it('should increment total events written', async () => {
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.SESSION_CREATED,
-        actor: "agent-1",
-        action: "create",
-        target: "session-1",
+        actor: 'agent-1',
+        action: 'create',
+        target: 'session-1',
         result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: "workspace-1",
-        correlationId: "corr-1",
+        workspaceId: 'workspace-1',
+        correlationId: 'corr-1',
         metadata: {},
       });
 
@@ -54,15 +54,15 @@ describe("AuditSink", () => {
       expect(metrics2.totalEventsWritten).toBe(1);
     });
 
-    it("should track buffer high-water mark", async () => {
+    it('should track buffer high-water mark', async () => {
       for (let i = 0; i < 5; i++) {
         const event = createAuditEvent({
           eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-          actor: "agent-1",
-          action: "execute",
+          actor: 'agent-1',
+          action: 'execute',
           target: `cmd-${i}`,
           result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: "workspace-1",
+          workspaceId: 'workspace-1',
           correlationId: `corr-${i}`,
           metadata: {},
         });
@@ -74,27 +74,27 @@ describe("AuditSink", () => {
     });
   });
 
-  describe("flush", () => {
-    it("should flush buffered events", async () => {
+  describe('flush', () => {
+    it('should flush buffered events', async () => {
       const event1 = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-        actor: "agent-1",
-        action: "execute",
-        target: "cmd-1",
+        actor: 'agent-1',
+        action: 'execute',
+        target: 'cmd-1',
         result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: "workspace-1",
-        correlationId: "corr-1",
+        workspaceId: 'workspace-1',
+        correlationId: 'corr-1',
         metadata: {},
       });
 
       const event2 = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.SESSION_CREATED,
-        actor: "agent-1",
-        action: "create",
-        target: "session-1",
+        actor: 'agent-1',
+        action: 'create',
+        target: 'session-1',
         result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: "workspace-1",
-        correlationId: "corr-2",
+        workspaceId: 'workspace-1',
+        correlationId: 'corr-2',
         metadata: {},
       });
 
@@ -110,24 +110,24 @@ describe("AuditSink", () => {
       // but they will have been passed to storage
     });
 
-    it("should not error when flushing empty buffer", async () => {
+    it('should not error when flushing empty buffer', async () => {
       expect(sink.getBufferedCount()).toBe(0);
       await expect(sink.flush()).resolves.toBeUndefined();
     });
   });
 
-  describe("getBufferedCount", () => {
-    it("should return the count of buffered events", async () => {
+  describe('getBufferedCount', () => {
+    it('should return the count of buffered events', async () => {
       expect(sink.getBufferedCount()).toBe(0);
 
       for (let i = 0; i < 3; i++) {
         const event = createAuditEvent({
           eventType: AUDIT_EVENT_TYPES.POLICY_EVALUATION,
-          actor: "system",
-          action: "evaluate",
+          actor: 'system',
+          action: 'evaluate',
           target: `policy-${i}`,
           result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: "workspace-1",
+          workspaceId: 'workspace-1',
           correlationId: `corr-${i}`,
           metadata: {},
         });
@@ -138,16 +138,16 @@ describe("AuditSink", () => {
     });
   });
 
-  describe("getMetrics", () => {
-    it("should return sink metrics", async () => {
+  describe('getMetrics', () => {
+    it('should return sink metrics', async () => {
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.TERMINAL_OUTPUT,
-        actor: "agent-1",
-        action: "output",
-        target: "terminal-1",
+        actor: 'agent-1',
+        action: 'output',
+        target: 'terminal-1',
         result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: "workspace-1",
-        correlationId: "corr-1",
+        workspaceId: 'workspace-1',
+        correlationId: 'corr-1',
         metadata: {},
       });
 

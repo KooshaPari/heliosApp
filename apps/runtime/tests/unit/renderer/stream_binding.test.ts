@@ -2,16 +2,41 @@
  * Unit tests for StreamBindingManager and SwitchBuffer.
  * @see FR-010-005, NFR-010-002
  */
-import { describe, expect, it } from "bun:test";
-import { StreamBindingManager, SwitchBuffer } from "../../../src/renderer/stream_binding.js";
+import { describe, expect, it, afterEach } from "bun:test";
+import {
+  StreamBindingManager,
+  SwitchBuffer,
+} from "../../../src/renderer/stream_binding.js";
 import type { BufferOverflowEvent } from "../../../src/renderer/stream_binding.js";
 import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
+
+// Track all created streams for cleanup to prevent test hanging
+const createdStreams: ReadableStream<Uint8Array>[] = [];
+const createdRenderers: (MockGhosttyAdapter | MockRioAdapter)[] = [];
+
+afterEach(() => {
+  // Cancel all unclosed streams created directly in tests
+  for (const stream of createdStreams) {
+    stream.cancel().catch(() => {});
+  }
+  createdStreams.length = 0;
+
+  // Cancel all streams bound to mock renderers
+  for (const renderer of createdRenderers) {
+    for (const stream of renderer.boundStreams.values()) {
+      stream.cancel().catch(() => {});
+    }
+  }
+  createdRenderers.length = 0;
+});
 
 describe("StreamBindingManager", () => {
   it("binds a stream to a renderer", () => {
     const mgr = new StreamBindingManager();
     const renderer = new MockGhosttyAdapter();
+    createdRenderers.push(renderer);
     const stream = new ReadableStream<Uint8Array>();
+    createdStreams.push(stream);
 
     mgr.bind("pty-1", stream, renderer);
 
@@ -23,7 +48,9 @@ describe("StreamBindingManager", () => {
   it("unbinds a stream without closing it", () => {
     const mgr = new StreamBindingManager();
     const renderer = new MockGhosttyAdapter();
+    createdRenderers.push(renderer);
     const stream = new ReadableStream<Uint8Array>();
+    createdStreams.push(stream);
 
     mgr.bind("pty-1", stream, renderer);
     mgr.unbind("pty-1");
@@ -42,18 +69,16 @@ describe("StreamBindingManager", () => {
   it("replaces existing binding on duplicate bind", () => {
     const mgr = new StreamBindingManager();
     const renderer = new MockGhosttyAdapter();
+    createdRenderers.push(renderer);
     const stream1 = new ReadableStream<Uint8Array>();
     const stream2 = new ReadableStream<Uint8Array>();
+    createdStreams.push(stream1, stream2);
 
     mgr.bind("pty-1", stream1, renderer);
     mgr.bind("pty-1", stream2, renderer);
 
     expect(mgr.count()).toBe(1);
-    const binding = mgr.getBindings().get("pty-1");
-    expect(binding).toBeDefined();
-    if (!binding) {
-      return;
-    }
+    const binding = mgr.getBindings().get("pty-1")!;
     expect(binding.stream).toBe(stream2);
   });
 
@@ -61,9 +86,13 @@ describe("StreamBindingManager", () => {
     const mgr = new StreamBindingManager();
     const oldRenderer = new MockGhosttyAdapter();
     const newRenderer = new MockRioAdapter();
+    createdRenderers.push(oldRenderer, newRenderer);
 
-    mgr.bind("pty-1", new ReadableStream(), oldRenderer);
-    mgr.bind("pty-2", new ReadableStream(), oldRenderer);
+    const stream1 = new ReadableStream();
+    const stream2 = new ReadableStream();
+    createdStreams.push(stream1, stream2);
+    mgr.bind("pty-1", stream1, oldRenderer);
+    mgr.bind("pty-2", stream2, oldRenderer);
 
     mgr.rebindAll(newRenderer);
 
@@ -81,6 +110,7 @@ describe("StreamBindingManager", () => {
   it("rebindAll is no-op with zero bindings", () => {
     const mgr = new StreamBindingManager();
     const newRenderer = new MockRioAdapter();
+    createdRenderers.push(newRenderer);
     mgr.rebindAll(newRenderer); // should not throw
     expect(mgr.count()).toBe(0);
   });
@@ -88,20 +118,23 @@ describe("StreamBindingManager", () => {
   it("measures relay latency (NFR-010-002)", () => {
     const mgr = new StreamBindingManager();
     const renderer = new MockGhosttyAdapter();
-    mgr.bind("pty-1", new ReadableStream(), renderer);
+    createdRenderers.push(renderer);
+    const stream = new ReadableStream();
+    createdStreams.push(stream);
+    mgr.bind("pty-1", stream, renderer);
 
     const latency = mgr.getRelayLatency("pty-1");
     expect(latency).toBeDefined();
-    if (latency === undefined) {
-      return;
-    }
-    expect(latency).toBeLessThan(16.7); // < 1 frame
+    expect(latency!).toBeLessThan(16.7); // < 1 frame
   });
 
   it("getBindings returns a copy", () => {
     const mgr = new StreamBindingManager();
     const renderer = new MockGhosttyAdapter();
-    mgr.bind("pty-1", new ReadableStream(), renderer);
+    createdRenderers.push(renderer);
+    const stream = new ReadableStream();
+    createdStreams.push(stream);
+    mgr.bind("pty-1", stream, renderer);
 
     const bindings = mgr.getBindings();
     bindings.delete("pty-1");
@@ -136,6 +169,7 @@ describe("SwitchBuffer", () => {
   it("flushes buffered data to new renderer on stopBuffering", () => {
     const buf = new SwitchBuffer();
     const renderer = new MockGhosttyAdapter();
+    createdRenderers.push(renderer);
 
     buf.startBuffering();
     buf.write("pty-1", new Uint8Array([1, 2, 3]));
@@ -151,6 +185,7 @@ describe("SwitchBuffer", () => {
   it("stopBuffering is no-op when not buffering", () => {
     const buf = new SwitchBuffer();
     const renderer = new MockGhosttyAdapter();
+    createdRenderers.push(renderer);
     buf.stopBuffering(renderer); // should not throw
     expect(renderer.boundStreams.size).toBe(0);
   });
@@ -158,6 +193,7 @@ describe("SwitchBuffer", () => {
   it("instant switch with no buffered data: flush is no-op", () => {
     const buf = new SwitchBuffer();
     const renderer = new MockGhosttyAdapter();
+    createdRenderers.push(renderer);
     buf.startBuffering();
     buf.stopBuffering(renderer);
     expect(renderer.boundStreams.size).toBe(0);
@@ -174,8 +210,8 @@ describe("SwitchBuffer", () => {
 
     expect(buf.getBufferedBytes()).toBeLessThanOrEqual(10);
     expect(events.length).toBeGreaterThan(0);
-    expect(events[0]?.type).toBe("renderer.switch.buffer_overflow");
-    expect(events[0]?.ptyId).toBe("pty-1");
+    expect(events[0]!.type).toBe("renderer.switch.buffer_overflow");
+    expect(events[0]!.ptyId).toBe("pty-1");
   });
 
   it("buffers independently per PTY", () => {
@@ -197,6 +233,6 @@ describe("SwitchBuffer", () => {
     buf.write("pty-1", new Uint8Array(3));
     buf.write("pty-1", new Uint8Array(4)); // total 7 > 5
 
-    expect(events.some(e => e.droppedBytes > 0)).toBe(true);
+    expect(events.some((e) => e.droppedBytes > 0)).toBe(true);
   });
 });

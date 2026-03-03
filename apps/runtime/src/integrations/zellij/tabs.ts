@@ -6,10 +6,10 @@
  */
 
 import type { ZellijCli } from "./cli.js";
-import { TabNotFoundError, ZellijCliError } from "./errors.js";
-import type { ZellijPaneManager } from "./panes.js";
 import type { TopologyTracker } from "./topology.js";
-import type { PtyManagerInterface, TabRecord } from "./types.js";
+import type { ZellijPaneManager } from "./panes.js";
+import type { TabRecord, PtyManagerInterface } from "./types.js";
+import { TabNotFoundError, ZellijCliError } from "./errors.js";
 
 /**
  * Manages tab lifecycle within zellij sessions.
@@ -36,7 +36,10 @@ export class ZellijTabManager {
   /**
    * Create a new tab in a session.
    */
-  async createTab(sessionName: string, name?: string): Promise<TabRecord> {
+  async createTab(
+    sessionName: string,
+    name?: string,
+  ): Promise<TabRecord> {
     const startMs = performance.now();
     const tabId = ++this.tabCounter;
     const tabName = name ?? `Tab #${tabId}`;
@@ -48,7 +51,11 @@ export class ZellijTabManager {
 
     const result = await this.cli.run(args);
     if (result.exitCode !== 0) {
-      throw new ZellijCliError(`new-tab --session ${sessionName}`, result.exitCode, result.stderr);
+      throw new ZellijCliError(
+        `new-tab --session ${sessionName}`,
+        result.exitCode,
+        result.stderr,
+      );
     }
 
     // Update topology
@@ -61,7 +68,13 @@ export class ZellijTabManager {
       createdAt: new Date(),
     };
 
-    const _durationMs = performance.now() - startMs;
+    const durationMs = performance.now() - startMs;
+    console.debug(
+      `[zellij-tabs] createTab(${sessionName}) tab=${tabId} name="${tabName}" duration=${durationMs.toFixed(1)}ms`,
+    );
+    console.debug(
+      `[zellij-tabs] mux.tab.created: session=${sessionName} tab=${tabId}`,
+    );
 
     return record;
   }
@@ -76,40 +89,29 @@ export class ZellijTabManager {
       throw new TabNotFoundError(sessionName, tabId);
     }
 
-    const tab = topology.tabs.find(t => t.tabId === tabId);
+    const tab = topology.tabs.find((t) => t.tabId === tabId);
     if (!tab) {
       throw new TabNotFoundError(sessionName, tabId);
     }
 
     // Terminate PTYs for all panes in the tab
-    await this.terminateTabPtys(tab);
-
-    // Close the tab via zellij CLI
-    await this.focusTabIfNeeded(sessionName, tabId);
-    await this.closeTabCommand(sessionName, tabId);
-    this.topology.removeTab(sessionName, tabId);
-  }
-
-  /**
-   * Terminate all PTYs bound to tab panes when closing.
-   */
-  private async terminateTabPtys(tab: {
-    panes: Array<{ ptyId?: string | undefined }>;
-  }): Promise<void> {
     if (this.ptyManager) {
       for (const pane of tab.panes) {
         if (pane.ptyId) {
           try {
             await this.ptyManager.terminate(pane.ptyId);
-          } catch (_err: unknown) {
-            // PTY already terminated or not ready; close can proceed idempotently.
+          } catch (err) {
+            console.warn(
+              `[zellij-tabs] PTY terminate for pane ${pane.paneId} in tab ${tabId} failed:`,
+              err,
+            );
           }
         }
       }
     }
-  }
 
-  private async focusTabIfNeeded(sessionName: string, tabId: number): Promise<void> {
+    // Close the tab via zellij CLI
+    // Switch to the tab first, then close it
     const switchResult = await this.cli.run([
       "--session",
       sessionName,
@@ -121,25 +123,38 @@ export class ZellijTabManager {
 
     // Ignore switch errors if tab is already active
     if (switchResult.exitCode !== 0) {
-      // best-effort navigation; close command is idempotent for active tabs.
+      console.warn(
+        `[zellij-tabs] Could not switch to tab ${tabId} before close: ${switchResult.stderr}`,
+      );
     }
-  }
 
-  private async closeTabCommand(sessionName: string, _tabId: number): Promise<void> {
-    const result = await this.cli.run(["--session", sessionName, "action", "close-tab"]);
+    const result = await this.cli.run([
+      "--session",
+      sessionName,
+      "action",
+      "close-tab",
+    ]);
 
     if (result.exitCode !== 0) {
       // If tab doesn't exist, treat as success (idempotent)
-      const isIdempotentFailure =
-        result.stderr.includes("not found") || result.stderr.includes("no tab");
-      if (!isIdempotentFailure) {
+      if (
+        !result.stderr.includes("not found") &&
+        !result.stderr.includes("no tab")
+      ) {
         throw new ZellijCliError(
           `close-tab --session ${sessionName}`,
           result.exitCode,
-          result.stderr
+          result.stderr,
         );
       }
     }
+
+    // Update topology
+    this.topology.removeTab(sessionName, tabId);
+
+    console.debug(
+      `[zellij-tabs] mux.tab.closed: session=${sessionName} tab=${tabId}`,
+    );
   }
 
   /**
@@ -152,7 +167,7 @@ export class ZellijTabManager {
       throw new TabNotFoundError(sessionName, tabId);
     }
 
-    const tab = topology.tabs.find(t => t.tabId === tabId);
+    const tab = topology.tabs.find((t) => t.tabId === tabId);
     if (!tab) {
       throw new TabNotFoundError(sessionName, tabId);
     }
@@ -170,12 +185,16 @@ export class ZellijTabManager {
       throw new ZellijCliError(
         `go-to-tab --session ${sessionName} --tab-position ${tabId}`,
         result.exitCode,
-        result.stderr
+        result.stderr,
       );
     }
 
     // Update topology
     this.topology.switchTab(sessionName, tabId);
+
+    console.debug(
+      `[zellij-tabs] mux.tab.switched: session=${sessionName} tab=${tabId}`,
+    );
   }
 
   /**

@@ -48,31 +48,35 @@ export class ZellijDetector {
         });
       }
     } catch (error) {
-      console.warn(`Zellij session detection failed: ${String(error)}`);
+      console.error("Failed to detect stale zellij sessions:", error);
     }
 
     return orphans;
   }
 
-  private async listZellijSessions(): Promise<Array<{ name: string; created: number }>> {
+  private async listZellijSessions(): Promise<
+    Array<{ name: string; created: number }>
+  > {
     try {
       // Use zellij CLI to list sessions
       const result = await execCommand("zellij", ["list-sessions", "-n"]);
       if (result.code !== 0) {
+        console.warn("zellij list-sessions failed:", result.stderr);
         return [];
       }
 
       const sessions = result.stdout
         .split("\n")
-        .filter(line => line.trim())
-        .map(line => {
+        .filter((line) => line.trim())
+        .map((line) => {
           return {
             name: line.trim(),
             created: Date.now(), // Default: assume recent if we can't determine
           };
         });
       return sessions;
-    } catch (_error) {
+    } catch (error) {
+      console.error("Failed to list zellij sessions:", error);
       return [];
     }
   }

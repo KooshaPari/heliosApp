@@ -19,10 +19,7 @@ export class MlxInferenceEngine implements InferenceEngine {
     }
     // Verify mlx_lm is installed
     try {
-      const proc = Bun.spawn(["python3", "-c", "import mlx_lm"], {
-        stdout: "pipe",
-        stderr: "pipe",
-      });
+      const proc = Bun.spawn(["python3", "-c", "import mlx_lm"], { stdout: "pipe", stderr: "pipe" });
       const exitCode = await proc.exited;
       if (exitCode !== 0) {
         throw new Error("mlx_lm not installed. Run: pip install mlx-lm");
@@ -35,9 +32,7 @@ export class MlxInferenceEngine implements InferenceEngine {
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
     const prompt = request.messages.map(m => `${m.role}: ${m.content}`).join("\n");
     const args = ["python3", "-m", "mlx_lm.generate", "--model", request.model, "--prompt", prompt];
-    if (request.maxTokens) {
-      args.push("--max-tokens", String(request.maxTokens));
-    }
+    if (request.maxTokens) args.push("--max-tokens", String(request.maxTokens));
 
     const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
     const output = await new Response(proc.stdout).text();
@@ -62,33 +57,18 @@ export class MlxInferenceEngine implements InferenceEngine {
     yield response.content;
   }
 
-  listModels(): Promise<ModelInfo[]> {
-    return Promise.resolve([
-      {
-        id: "mlx-community/Llama-3.2-3B-Instruct",
-        name: "Llama 3.2 3B",
-        contextWindow: 8192,
-        providerId: "mlx",
-      },
-      {
-        id: "mlx-community/Mistral-7B-Instruct-v0.3",
-        name: "Mistral 7B",
-        contextWindow: 32768,
-        providerId: "mlx",
-      },
-    ]);
+  async listModels(): Promise<ModelInfo[]> {
+    return [
+      { id: "mlx-community/Llama-3.2-3B-Instruct", name: "Llama 3.2 3B", contextWindow: 8192, providerId: "mlx" },
+      { id: "mlx-community/Mistral-7B-Instruct-v0.3", name: "Mistral 7B", contextWindow: 32768, providerId: "mlx" },
+    ];
   }
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
     const hw = await detectHardware();
-    if (!hw.hasAppleSilicon) {
-      return "unavailable";
-    }
+    if (!hw.hasAppleSilicon) return "unavailable";
     try {
-      const proc = Bun.spawn(["python3", "-c", "import mlx_lm"], {
-        stdout: "pipe",
-        stderr: "pipe",
-      });
+      const proc = Bun.spawn(["python3", "-c", "import mlx_lm"], { stdout: "pipe", stderr: "pipe" });
       const exitCode = await proc.exited;
       return exitCode === 0 ? "healthy" : "unavailable";
     } catch {
@@ -96,7 +76,7 @@ export class MlxInferenceEngine implements InferenceEngine {
     }
   }
 
-  terminate(): Promise<void> {
-    return Promise.resolve();
+  async terminate(): Promise<void> {
+    // No persistent process to terminate
   }
 }

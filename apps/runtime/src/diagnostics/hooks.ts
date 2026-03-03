@@ -17,7 +17,7 @@ export interface MonotonicClock {
 // Fail-fast: ensure performance.now is available at module load.
 if (typeof performance === "undefined" || typeof performance.now !== "function") {
   throw new Error(
-    "performance.now() is required for monotonic timing but is unavailable in this environment."
+    "performance.now() is required for monotonic timing but is unavailable in this environment.",
   );
 }
 
@@ -49,7 +49,10 @@ interface HooksState {
   onSample: ((metric: string, value: number, timestamp: number) => void) | undefined;
 }
 
-function createState(maxConcurrent: number, clock: MonotonicClock): HooksState {
+function createState(
+  maxConcurrent: number,
+  clock: MonotonicClock,
+): HooksState {
   return {
     startTimes: new Float64Array(maxConcurrent),
     metricNames: new Array<string>(maxConcurrent).fill(""),
@@ -105,17 +108,20 @@ export function markEnd(metric: string, handle: number): number {
 
   // Guard: out-of-range handle.
   if (handle < 0 || handle >= s.startTimes.length) {
-    return Number.NaN;
+    console.warn(`[perf] markEnd called with out-of-range handle ${handle}`);
+    return NaN;
   }
 
   // Guard: stale / mismatched handle.
   if (s.metricNames[handle] !== metric) {
-    return Number.NaN;
+    console.warn(
+      `[perf] markEnd handle ${handle} expected metric "${metric}" but found "${s.metricNames[handle]}" (stale?)`,
+    );
+    return NaN;
   }
 
   const end = s.clock.now();
-  const start = s.startTimes[handle];
-  const duration = end - start;
+  const duration = end - s.startTimes[handle]!;
 
   // Clear slot so it can be reused.
   s.metricNames[handle] = "";
@@ -146,10 +152,9 @@ export interface InstrumentationHooks {
  * Create an isolated set of instrumentation hooks — mainly for unit tests
  * that need deterministic clocks or independent overflow counters.
  */
-export function createInstrumentationHooks(opts?: {
-  maxConcurrent?: number;
-  clock?: MonotonicClock;
-}): InstrumentationHooks {
+export function createInstrumentationHooks(
+  opts?: { maxConcurrent?: number; clock?: MonotonicClock },
+): InstrumentationHooks {
   const maxConcurrent = opts?.maxConcurrent ?? DEFAULT_MAX_CONCURRENT_MARKS;
   const clock = opts?.clock ?? defaultClock;
   const state = createState(maxConcurrent, clock);
@@ -169,14 +174,17 @@ export function createInstrumentationHooks(opts?: {
 
     markEnd(metric: string, handle: number): number {
       if (handle < 0 || handle >= state.startTimes.length) {
-        return Number.NaN;
+        console.warn(`[perf] markEnd called with out-of-range handle ${handle}`);
+        return NaN;
       }
       if (state.metricNames[handle] !== metric) {
-        return Number.NaN;
+        console.warn(
+          `[perf] markEnd handle ${handle} expected metric "${metric}" but found "${state.metricNames[handle]}" (stale?)`,
+        );
+        return NaN;
       }
       const end = state.clock.now();
-      const start = state.startTimes[handle];
-      const duration = end - start;
+      const duration = end - state.startTimes[handle]!;
       state.metricNames[handle] = "";
       if (state.onSample !== undefined) {
         state.onSample(metric, duration, end);
@@ -199,7 +207,7 @@ export function createInstrumentationHooks(opts?: {
  * Returns a teardown function.
  */
 export function setGlobalOnSample(
-  cb: (metric: string, value: number, timestamp: number) => void
+  cb: (metric: string, value: number, timestamp: number) => void,
 ): () => void {
   globalState.onSample = cb;
   return () => {
@@ -211,9 +219,11 @@ export function setGlobalOnSample(
  * Replace the global hooks state — mainly for tests that need to reset
  * between runs. Not intended for production use.
  */
-export function _resetGlobalHooks(opts?: { maxConcurrent?: number; clock?: MonotonicClock }): void {
+export function _resetGlobalHooks(
+  opts?: { maxConcurrent?: number; clock?: MonotonicClock },
+): void {
   globalState = createState(
     opts?.maxConcurrent ?? DEFAULT_MAX_CONCURRENT_MARKS,
-    opts?.clock ?? defaultClock
+    opts?.clock ?? defaultClock,
   );
 }

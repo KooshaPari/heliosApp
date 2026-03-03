@@ -2,7 +2,7 @@
  * Unit tests for ghostty registration and exports (T005).
  */
 
-import { describe, expect, test } from "bun:test";
+import { describe, test, expect } from "bun:test";
 import { RendererRegistry } from "../../registry.js";
 import { GhosttyBackend, isGhosttyAvailable } from "../index.js";
 

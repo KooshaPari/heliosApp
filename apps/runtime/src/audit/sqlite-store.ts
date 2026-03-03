@@ -1,31 +1,30 @@
-import { Database } from "bun:sqlite";
-import fs from "node:fs";
-import type { AuditEvent } from "./event.ts";
-import type { AuditFilter } from "./ring-buffer.ts";
+import { Database } from 'bun:sqlite';
+import { AuditEvent } from './event';
+import { AuditFilter } from './ring-buffer';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * SQLite-backed persistent storage for audit events.
  * Supports 30+ days of retention with indexed queries.
  */
-// biome-ignore lint/style/useNamingConvention: Public API class name matches persisted artifact and docs.
 export class SQLiteAuditStore {
   private db: Database;
   private readonly dbPath: string;
   private schemaVersion = 1;
-  private readonly placeholderMetadata: Record<string, unknown> = {};
 
   /**
    * Create or open an SQLite audit store.
    *
    * @param dbPath - Path to SQLite database file
    */
-  constructor(dbPath = ":memory:") {
+  constructor(dbPath: string = ':memory:') {
     this.dbPath = dbPath;
     this.db = new Database(dbPath);
 
     // Enable WAL mode for concurrent reads/writes
-    this.db.exec("PRAGMA journal_mode = WAL");
-    this.db.exec("PRAGMA synchronous = NORMAL");
+    this.db.exec('PRAGMA journal_mode = WAL');
+    this.db.exec('PRAGMA synchronous = NORMAL');
 
     // Initialize schema
     this.initializeSchema();
@@ -64,7 +63,7 @@ export class SQLiteAuditStore {
           event.laneId || null,
           event.sessionId || null,
           event.correlationId,
-          JSON.stringify(event.metadata)
+          JSON.stringify(event.metadata),
         );
       }
     });
@@ -82,51 +81,51 @@ export class SQLiteAuditStore {
   query(filter: AuditFilter, options: { limit?: number; offset?: number } = {}): AuditEvent[] {
     const { limit = 100, offset = 0 } = options;
 
-    let query = "SELECT * FROM audit_events WHERE 1=1";
-    const params: (string | number)[] = [];
+    let query = 'SELECT * FROM audit_events WHERE 1=1';
+    const params: any[] = [];
 
     if (filter.workspaceId) {
-      query += " AND workspace_id = ?";
+      query += ' AND workspace_id = ?';
       params.push(filter.workspaceId);
     }
 
     if (filter.laneId) {
-      query += " AND lane_id = ?";
+      query += ' AND lane_id = ?';
       params.push(filter.laneId);
     }
 
     if (filter.sessionId) {
-      query += " AND session_id = ?";
+      query += ' AND session_id = ?';
       params.push(filter.sessionId);
     }
 
     if (filter.actor) {
-      query += " AND actor = ?";
+      query += ' AND actor = ?';
       params.push(filter.actor);
     }
 
     if (filter.eventType) {
-      query += " AND event_type = ?";
+      query += ' AND event_type = ?';
       params.push(filter.eventType);
     }
 
     if (filter.startTime) {
-      query += " AND timestamp >= ?";
+      query += ' AND timestamp >= ?';
       params.push(filter.startTime.toISOString());
     }
 
     if (filter.endTime) {
-      query += " AND timestamp <= ?";
+      query += ' AND timestamp <= ?';
       params.push(filter.endTime.toISOString());
     }
 
-    query += " ORDER BY timestamp DESC LIMIT ? OFFSET ?";
+    query += ' ORDER BY timestamp DESC LIMIT ? OFFSET ?';
     params.push(limit, offset);
 
     const stmt = this.db.prepare(query);
-    const rows = stmt.all(...params) as Record<string, unknown>[];
+    const rows = stmt.all(...params) as any[];
 
-    return rows.map(row => this.rowToEvent(row));
+    return rows.map((row) => this.rowToEvent(row));
   }
 
   /**
@@ -137,11 +136,11 @@ export class SQLiteAuditStore {
    */
   getByCorrelationChain(correlationId: string): AuditEvent[] {
     const stmt = this.db.prepare(
-      "SELECT * FROM audit_events WHERE correlation_id = ? ORDER BY timestamp ASC"
+      'SELECT * FROM audit_events WHERE correlation_id = ? ORDER BY timestamp ASC',
     );
-    const rows = stmt.all(correlationId) as Record<string, unknown>[];
+    const rows = stmt.all(correlationId) as any[];
 
-    return rows.map(row => this.rowToEvent(row));
+    return rows.map((row) => this.rowToEvent(row));
   }
 
   /**
@@ -153,46 +152,46 @@ export class SQLiteAuditStore {
   count(filter?: AuditFilter): number {
     const { filter: actualFilter = {} } = { filter: filter || {} };
 
-    let query = "SELECT COUNT(*) as count FROM audit_events WHERE 1=1";
-    const params: (string | number)[] = [];
+    let query = 'SELECT COUNT(*) as count FROM audit_events WHERE 1=1';
+    const params: any[] = [];
 
     if (actualFilter.workspaceId) {
-      query += " AND workspace_id = ?";
+      query += ' AND workspace_id = ?';
       params.push(actualFilter.workspaceId);
     }
 
     if (actualFilter.laneId) {
-      query += " AND lane_id = ?";
+      query += ' AND lane_id = ?';
       params.push(actualFilter.laneId);
     }
 
     if (actualFilter.sessionId) {
-      query += " AND session_id = ?";
+      query += ' AND session_id = ?';
       params.push(actualFilter.sessionId);
     }
 
     if (actualFilter.actor) {
-      query += " AND actor = ?";
+      query += ' AND actor = ?';
       params.push(actualFilter.actor);
     }
 
     if (actualFilter.eventType) {
-      query += " AND event_type = ?";
+      query += ' AND event_type = ?';
       params.push(actualFilter.eventType);
     }
 
     if (actualFilter.startTime) {
-      query += " AND timestamp >= ?";
+      query += ' AND timestamp >= ?';
       params.push(actualFilter.startTime.toISOString());
     }
 
     if (actualFilter.endTime) {
-      query += " AND timestamp <= ?";
+      query += ' AND timestamp <= ?';
       params.push(actualFilter.endTime.toISOString());
     }
 
     const stmt = this.db.prepare(query);
-    const result = stmt.get(...params) as { count?: number } | undefined;
+    const result = stmt.get(...params) as any;
 
     return result?.count || 0;
   }
@@ -204,13 +203,14 @@ export class SQLiteAuditStore {
    */
   getStorageSize(): number {
     try {
-      if (this.dbPath === ":memory:") {
+      if (this.dbPath === ':memory:') {
         return 0;
       }
 
       const stats = fs.statSync(this.dbPath);
       return stats.size;
-    } catch (_err) {
+    } catch (err) {
+      console.error('[SQLiteAuditStore] Error getting storage size:', err);
       return 0;
     }
   }
@@ -226,14 +226,17 @@ export class SQLiteAuditStore {
    * Initialize the database schema on first run.
    */
   private initializeSchema(): void {
-    // Check if table exists
-    const tableExists = this.db
-      .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='audit_events'")
-      .get();
+    try {
+      // Check if table exists
+      const tableExists = this.db
+        .prepare(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='audit_events'",
+        )
+        .get();
 
-    if (!tableExists) {
-      // Create table
-      this.db.exec(`
+      if (!tableExists) {
+        // Create table
+        this.db.exec(`
           CREATE TABLE audit_events (
             id TEXT PRIMARY KEY,
             event_type TEXT NOT NULL,
@@ -251,8 +254,8 @@ export class SQLiteAuditStore {
           )
         `);
 
-      // Create indexes for efficient querying
-      this.db.exec(`
+        // Create indexes for efficient querying
+        this.db.exec(`
           CREATE INDEX idx_workspace_id ON audit_events(workspace_id);
           CREATE INDEX idx_lane_id ON audit_events(lane_id);
           CREATE INDEX idx_session_id ON audit_events(session_id);
@@ -262,6 +265,10 @@ export class SQLiteAuditStore {
           CREATE INDEX idx_timestamp ON audit_events(timestamp);
           CREATE INDEX idx_workspace_timestamp ON audit_events(workspace_id, timestamp);
         `);
+      }
+    } catch (err) {
+      console.error('[SQLiteAuditStore] Schema initialization failed:', err);
+      throw err;
     }
   }
 
@@ -271,23 +278,20 @@ export class SQLiteAuditStore {
    * @param row - Database row
    * @returns AuditEvent
    */
-  private rowToEvent(row: Record<string, unknown>): AuditEvent {
-    const metadataRaw =
-      typeof row.metadata === "string" ? row.metadata : JSON.stringify(this.placeholderMetadata);
-
+  private rowToEvent(row: any): AuditEvent {
     return {
-      id: String(row.id),
-      eventType: String(row.event_type),
-      actor: String(row.actor),
-      action: String(row.action),
-      target: String(row.target),
-      result: String(row.result),
-      timestamp: String(row.timestamp),
-      workspaceId: String(row.workspace_id),
-      laneId: row.lane_id ? String(row.lane_id) : undefined,
-      sessionId: row.session_id ? String(row.session_id) : undefined,
-      correlationId: String(row.correlation_id),
-      metadata: JSON.parse(metadataRaw),
+      id: row.id,
+      eventType: row.event_type,
+      actor: row.actor,
+      action: row.action,
+      target: row.target,
+      result: row.result,
+      timestamp: row.timestamp,
+      workspaceId: row.workspace_id,
+      laneId: row.lane_id,
+      sessionId: row.session_id,
+      correlationId: row.correlation_id,
+      metadata: JSON.parse(row.metadata),
     };
   }
 }

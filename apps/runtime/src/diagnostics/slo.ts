@@ -1,8 +1,8 @@
 // FR-004, FR-010: SLO violation detection, rate-limited event emission, and periodic check loop.
 
+import type { SLODefinition, SLOViolationEvent } from "./types.js";
 import type { MetricsRegistry } from "./metrics.js";
 import { computePercentiles } from "./percentiles.js";
-import type { SLODefinition, SLOViolationEvent } from "./types.js";
 
 /** Function signature for publishing events to the bus. */
 export type BusPublishFn = (topic: string, payload: unknown) => void | Promise<void>;
@@ -11,7 +11,7 @@ export type BusPublishFn = (topic: string, payload: unknown) => void | Promise<v
  * Monitors registered metrics against SLO definitions, emitting rate-limited
  * violation events when thresholds are breached.
  */
-class SloMonitor {
+export class SLOMonitor {
   private readonly registry: MetricsRegistry;
   private readonly definitions: SLODefinition[];
   private readonly busPublish: BusPublishFn | undefined;
@@ -22,10 +22,12 @@ class SloMonitor {
 
   private intervalHandle: ReturnType<typeof setInterval> | undefined = undefined;
   private running = false;
-  private publishFailureCount = 0;
-  private slowCheckCount = 0;
 
-  constructor(registry: MetricsRegistry, definitions: SLODefinition[], busPublish?: BusPublishFn) {
+  constructor(
+    registry: MetricsRegistry,
+    definitions: SLODefinition[],
+    busPublish?: BusPublishFn,
+  ) {
     this.registry = registry;
     this.definitions = definitions;
     this.busPublish = busPublish;
@@ -36,84 +38,71 @@ class SloMonitor {
    * Returns violation events (already filtered by rate limiter).
    */
   checkAll(): SLOViolationEvent[] {
-    const now = Date.now();
     const violations: SLOViolationEvent[] = [];
+    const now = Date.now();
 
     for (const def of this.definitions) {
-      const violation = this.evaluateDefinition(def, now);
-      if (violation !== undefined) {
-        violations.push(violation);
+      const metric = this.registry.getMetric(def.metric);
+      if (metric === undefined) {
+        // No data recorded yet — no violation.
+        continue;
       }
+
+      const values = metric.buffer.getValues();
+      if (values.length === 0) {
+        continue;
+      }
+
+      const stats = computePercentiles(values);
+      if (stats === undefined) {
+        continue;
+      }
+
+      const actual = stats[def.percentile];
+      if (actual <= def.threshold) {
+        // Within SLO — no violation.
+        continue;
+      }
+
+      // Rate limit check.
+      const key = `${def.metric}:${def.percentile}`;
+      const lastEmission = this.rateLimitMap.get(key);
+      if (lastEmission !== undefined && now - lastEmission < this.rateLimitWindowMs) {
+        continue;
+      }
+
+      const event: SLOViolationEvent = {
+        metric: def.metric,
+        percentile: def.percentile,
+        threshold: def.threshold,
+        actual,
+        timestamp: now,
+      };
+
+      this.rateLimitMap.set(key, now);
+      violations.push(event);
     }
 
-    this.publishViolations(violations);
-    return violations;
-  }
-
-  private evaluateDefinition(def: SLODefinition, now: number): SLOViolationEvent | undefined {
-    const metric = this.registry.getMetric(def.metric);
-    if (metric === undefined) {
-      return undefined;
-    }
-
-    const values = metric.buffer.getValues();
-    if (values.length === 0) {
-      return undefined;
-    }
-
-    const stats = computePercentiles(values);
-    if (stats === undefined) {
-      return undefined;
-    }
-
-    const actual = stats[def.percentile];
-    if (actual <= def.threshold) {
-      return undefined;
-    }
-
-    if (!this.canEmit(def.metric, def.percentile, now)) {
-      return undefined;
-    }
-
-    return {
-      metric: def.metric,
-      percentile: def.percentile,
-      threshold: def.threshold,
-      actual,
-      timestamp: now,
-    };
-  }
-
-  private canEmit(metric: string, percentile: string, now: number): boolean {
-    const key = `${metric}:${percentile}`;
-    const lastEmission = this.rateLimitMap.get(key);
-    if (lastEmission !== undefined && now - lastEmission < this.rateLimitWindowMs) {
-      return false;
-    }
-    this.rateLimitMap.set(key, now);
-    return true;
-  }
-
-  private publishViolations(violations: SLOViolationEvent[]): void {
-    if (this.busPublish === undefined) {
-      return;
-    }
+    // Publish to bus or log.
     for (const event of violations) {
-      try {
-        const result = this.busPublish("perf.slo_violation", event);
-        if (result && typeof (result as Promise<void>).catch === "function") {
-          (result as Promise<void>).catch((error: unknown) => {
-            this.onPublishFailure(error);
-          });
+      if (this.busPublish !== undefined) {
+        try {
+          const result = this.busPublish("perf.slo_violation", event);
+          // If async, catch errors without blocking.
+          if (result && typeof (result as Promise<void>).catch === "function") {
+            (result as Promise<void>).catch((err) => {
+              console.error("[slo] Bus publish error:", err);
+            });
+          }
+        } catch (err) {
+          console.error("[slo] Bus publish error:", err);
         }
-      } catch (error: unknown) {
-        this.onPublishFailure(error);
+      } else {
+        console.log("[slo] Violation:", event);
       }
     }
-  }
 
-  private onPublishFailure(_error: unknown): void {
-    this.publishFailureCount++;
+    return violations;
   }
 
   /** Reset the rate limiter — useful for testing. */
@@ -130,20 +119,18 @@ class SloMonitor {
    * Start periodic SLO checks.
    * Calling start() again clears the previous interval.
    */
-  start(intervalMs = 5000): void {
+  start(intervalMs: number = 5000): void {
     if (this.intervalHandle !== undefined) {
       clearInterval(this.intervalHandle);
     }
     this.running = true;
     this.intervalHandle = setInterval(() => {
-      if (!this.running) {
-        return;
-      }
-      const start = performance.now();
+      if (!this.running) return;
+      const t0 = performance.now();
       this.checkAll();
-      const elapsed = performance.now() - start;
+      const elapsed = performance.now() - t0;
       if (elapsed > 5) {
-        this.slowCheckCount++;
+        console.warn(`[slo] checkAll took ${elapsed.toFixed(2)}ms (> 5ms budget)`);
       }
     }, intervalMs);
   }
@@ -157,6 +144,3 @@ class SloMonitor {
     }
   }
 }
-
-// biome-ignore lint/style/useNamingConvention: keep backward-compatible public API name.
-export { SloMonitor as SLOMonitor };

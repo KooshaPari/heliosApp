@@ -4,12 +4,12 @@
  */
 
 import {
-  type CommandContext,
+  PolicyRule,
   PolicyClassification,
-  type PolicyEvaluationResult,
   PolicyPatternType,
-  type PolicyRule,
-} from "./types";
+  CommandContext,
+  PolicyEvaluationResult
+} from './types';
 
 /**
  * Pattern matcher for glob and regex patterns.
@@ -27,10 +27,7 @@ class PatternMatcher {
         if (!this.regexCache.has(pattern)) {
           this.regexCache.set(pattern, new RegExp(pattern));
         }
-        const regex = this.regexCache.get(pattern);
-        if (regex === undefined) {
-          return false;
-        }
+        const regex = this.regexCache.get(pattern)!;
         return regex.test(command);
       } catch {
         return false;
@@ -47,8 +44,8 @@ class PatternMatcher {
    */
   private globMatch(text: string, pattern: string): boolean {
     const regexPattern = pattern
-      .replace(/[.+^${}()|[\]\\]/g, "\\$&") // Escape regex chars
-      .replace(/\*/g, ".*"); // * becomes .*
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&') // Escape regex chars
+      .replace(/\*/g, '.*'); // * becomes .*
     const regex = new RegExp(`^${regexPattern}$`);
     return regex.test(text);
   }
@@ -97,9 +94,69 @@ export class PolicyRuleSet {
    */
   evaluate(command: string, context: CommandContext): PolicyEvaluationResult {
     const startTime = performance.now();
-    const matchedRules = this.getMatchingRules(command, context);
-    const classification = this.resolveClassification(matchedRules);
-    const deniedByDefault = matchedRules.length === 0;
+    const matchedRules: PolicyRule[] = [];
+    let hasBlockedRule = false;
+    let hasApprovalRule = false;
+
+    // Iterate rules in priority order
+    for (const rule of this.rules) {
+      // Check if pattern matches
+      const patternMatches = this.patternMatcher.matches(
+        command,
+        rule.pattern,
+        rule.patternType
+      );
+
+      if (!patternMatches) {
+        continue;
+      }
+
+      // Check if file targets match (if specified)
+      if (rule.targets && rule.targets.length > 0) {
+        if (!context.affectedPaths || context.affectedPaths.length === 0) {
+          continue;
+        }
+
+        const hasMatchingPath = context.affectedPaths.some(path => {
+          return rule.targets!.some(target => {
+            return this.patternMatcher.matches(path, target, PolicyPatternType.Glob);
+          });
+        });
+
+        if (!hasMatchingPath) {
+          continue;
+        }
+      }
+
+      // Rule matches
+      matchedRules.push(rule);
+
+      // Track classifications for conflict resolution
+      if (rule.classification === PolicyClassification.Blocked) {
+        hasBlockedRule = true;
+      } else if (rule.classification === PolicyClassification.NeedsApproval) {
+        hasApprovalRule = true;
+      }
+    }
+
+    // Determine final classification
+    let classification: PolicyClassification;
+    let deniedByDefault = false;
+
+    if (matchedRules.length === 0) {
+      // No matching rules: deny-by-default
+      classification = PolicyClassification.Blocked;
+      deniedByDefault = true;
+    } else if (hasBlockedRule) {
+      // Denylist-wins: any blocked rule blocks the command
+      classification = PolicyClassification.Blocked;
+    } else if (hasApprovalRule) {
+      // Most restrictive wins: needs-approval > safe
+      classification = PolicyClassification.NeedsApproval;
+    } else {
+      // All matches are safe
+      classification = PolicyClassification.Safe;
+    }
 
     const evaluationMs = performance.now() - startTime;
 
@@ -107,49 +164,8 @@ export class PolicyRuleSet {
       classification,
       matchedRules,
       evaluationMs,
-      deniedByDefault,
+      deniedByDefault
     };
-  }
-
-  private getMatchingRules(command: string, context: CommandContext): PolicyRule[] {
-    return this.rules.filter(rule => this.matchesRule(command, context, rule));
-  }
-
-  private matchesRule(command: string, context: CommandContext, rule: PolicyRule): boolean {
-    if (!this.patternMatcher.matches(command, rule.pattern, rule.patternType)) {
-      return false;
-    }
-    return this.matchesTargets(context, rule.targets);
-  }
-
-  private matchesTargets(context: CommandContext, targets: string[] | undefined): boolean {
-    if (!targets || targets.length === 0) {
-      return true;
-    }
-    const affectedPaths = context.affectedPaths;
-    if (!affectedPaths || affectedPaths.length === 0) {
-      return false;
-    }
-    return this.hasMatchingTarget(context, targets);
-  }
-
-  private resolveClassification(matchedRules: PolicyRule[]): PolicyClassification {
-    let hasBlockedRule = false;
-    let hasApprovalRule = false;
-    for (const rule of matchedRules) {
-      if (rule.classification === PolicyClassification.Blocked) {
-        hasBlockedRule = true;
-      } else if (rule.classification === PolicyClassification.NeedsApproval) {
-        hasApprovalRule = true;
-      }
-    }
-    if (hasBlockedRule || matchedRules.length === 0) {
-      return PolicyClassification.Blocked;
-    }
-    if (hasApprovalRule) {
-      return PolicyClassification.NeedsApproval;
-    }
-    return PolicyClassification.Safe;
   }
 
   /**
@@ -164,19 +180,5 @@ export class PolicyRuleSet {
    */
   getRules(): PolicyRule[] {
     return [...this.rules];
-  }
-
-  private hasMatchingTarget(context: CommandContext, targets: string[] | undefined): boolean {
-    if (!targets || targets.length === 0) {
-      return false;
-    }
-    const affectedPaths = context.affectedPaths ?? [];
-    return affectedPaths.some(path => this.matchesTarget(path, targets));
-  }
-
-  private matchesTarget(path: string, targets: string[]): boolean {
-    return targets.some(target =>
-      this.patternMatcher.matches(path, target, PolicyPatternType.Glob)
-    );
   }
 }
