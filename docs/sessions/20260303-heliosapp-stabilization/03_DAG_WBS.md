@@ -2,6 +2,7 @@
 
 Status legend:
 - [status:done]
+- [status:in_progress]
 - [status:partial]
 - [status:blocked]
 - [status:pending]
@@ -129,3 +130,41 @@ Status legend:
 - [status:pending] Re-run `task quality:strict` after targeted coverage additions.
 - [status:pending] Confirm coverage/quality artifact stability in next `ci-summary` handoff.
 - [status:pending] Update `docs/sessions/20260303-heliosapp-stabilization/artifacts` with every run.
+
+## Phase 8 — Child-Agent Wave Plan (24 tasks, 6 lanes x 4)
+
+### Lane A (Governance parity)
+- [status:in_progress] Make `.github/required-checks.txt` the explicit canonical source in governance docs.
+- [status:done] Add `.github/scripts/verify-required-check-names.sh` with duplicate + missing checks validation.
+- [status:done] Wire `required-check-names-guard` workflow to run the shared verifier script.
+- [status:done] Add local governance parity commands (`task governance:required-checks`, `just governance-required-checks`).
+
+### Lane B (Publish worker reliability)
+- [status:done] Add dedicated publish worker entrypoint at `scripts/publish-worker.sh` with non-sandbox opt-in gate.
+- [status:done] Add single-worker lock behavior using `.git/publish-worker.lock`.
+- [status:done] Upgrade queue entries to NDJSON and keep TSV backward-read support in drain path.
+- [status:done] Add task/just worker lanes (`devops:publish-worker:once`, `devops:publish-worker:loop`).
+
+### Lane C (Docs and parity cleanup)
+- [status:done] Normalize devops docs to use job-name semantics for required-check manifest.
+- [status:done] Align workflow inventory across `docs/wiki/devops-checkers.md` and `docs/wiki/devops-cicd.md`.
+- [status:done] Add missing just aliases for e2e task lanes.
+- [status:done] Standardize canonical command references (alias-first, raw helper as advanced fallback).
+
+### Lane D (Workflow hardening)
+- [status:done] Harden `compliance-check.yml` with deterministic parse/output and sticky PR comment update.
+- [status:done] Add artifact upload + step summary for compliance outputs.
+- [status:done] Harden `gca.yml` token handling (fork/no-token skip, internal missing-token fail).
+- [status:done] Add gca summary + deduplicated rate-limit PR comment update.
+
+### Lane E (Runtime warning reduction)
+- [status:done] Resolve `apps/runtime/src/registry/binding_events.ts` naming warnings for topics + envelope keys.
+- [status:done] Resolve `apps/runtime/src/registry/persistence.ts` warnings (`noExplicitAny`, empty block, async without await).
+- [status:done] Resolve `apps/runtime/src/registry/binding_middleware.ts` warnings (`noNonNullAssertion`, async without await).
+- [status:pending] Re-run focused registry/sessions/recovery warning scans and close residual warnings.
+
+### Lane F (Validation and evidence)
+- [status:pending] Re-run targeted integration lifecycle tests and capture artifact output.
+- [status:pending] Re-run `task quality:strict` and capture output artifact.
+- [status:pending] Re-run `task devops:check:ci-summary` and capture handoff artifact.
+- [status:pending] Refresh artifact manifest + checksums and link updates in testing strategy.

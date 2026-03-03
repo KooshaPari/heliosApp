@@ -108,7 +108,7 @@ export class BindingMiddleware {
    * @param operation Optional operation name for logging
    * @returns Result of handler or validation error
    */
-  async wrapOperation<T>(
+  wrapOperation<T>(
     terminalId: string,
     handler: (binding: TerminalBinding) => Promise<T>,
     operation?: string
@@ -124,7 +124,11 @@ export class BindingMiddleware {
       throw new Error(`${error.code}: ${error.message}`);
     }
 
-    return handler(validation.binding!);
+    const binding = validation.binding;
+    if (!binding) {
+      throw new Error("VALIDATION_FAILED: Validation succeeded without binding payload");
+    }
+    return handler(binding);
   }
 
   /**
@@ -146,7 +150,11 @@ export class BindingMiddleware {
       throw new Error(`${error.code}: ${error.message}`);
     }
 
-    return handler(validation.binding!);
+    const binding = validation.binding;
+    if (!binding) {
+      throw new Error("VALIDATION_FAILED: Validation succeeded without binding payload");
+    }
+    return handler(binding);
   }
 }
 

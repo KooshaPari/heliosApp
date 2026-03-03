@@ -445,15 +445,85 @@ enqueue_push() {
   fi
 
   mkdir -p "$(dirname "$target_file")"
-  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    "$branch" \
-    "$primary_remote" \
-    "$fallback_remote" \
-    "$skip_primary" \
-    "$dry_run" \
-    "${ORIGIN_OBJECTS_TMP_DIR:-}" >> "$target_file"
+  QUEUE_TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    QUEUE_BRANCH="$branch" \
+    QUEUE_PRIMARY="$primary_remote" \
+    QUEUE_FALLBACK="$fallback_remote" \
+    QUEUE_SKIP_PRIMARY="$skip_primary" \
+    QUEUE_DRY_RUN="$dry_run" \
+    QUEUE_TMP_OVERRIDE="${ORIGIN_OBJECTS_TMP_DIR:-}" \
+    python - <<'PY' >> "$target_file"
+import json
+import os
+
+payload = {
+  "timestamp": os.environ["QUEUE_TIMESTAMP"],
+  "branch": os.environ["QUEUE_BRANCH"],
+  "primary_remote": os.environ["QUEUE_PRIMARY"],
+  "fallback_remote": os.environ["QUEUE_FALLBACK"],
+  "skip_primary": os.environ["QUEUE_SKIP_PRIMARY"] == "1",
+  "dry_run": os.environ["QUEUE_DRY_RUN"] == "1",
+  "tmp_override": os.environ.get("QUEUE_TMP_OVERRIDE", ""),
+}
+print(json.dumps(payload, sort_keys=True))
+PY
   log "Queued push request -> $target_file"
+}
+
+parse_queue_line() {
+  local line="$1"
+
+  if [[ -z "$line" ]]; then
+    return 1
+  fi
+
+  if [[ "$line" == \#* ]]; then
+    return 1
+  fi
+
+  if [[ "$line" == *$'\t'* ]]; then
+    IFS=$'\t' read -r entry_ts branch primary fallback skip_primary dry_run tmp_override <<< "$line"
+    printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+      "${entry_ts:-}" \
+      "${branch:-}" \
+      "${primary:-}" \
+      "${fallback:-}" \
+      "${skip_primary:-0}" \
+      "${dry_run:-0}" \
+      "${tmp_override:-}"
+    return 0
+  fi
+
+  local parsed=""
+  parsed="$(
+    QUEUE_LINE="$line" python - <<'PY'
+import json
+import os
+import sys
+
+line = os.environ.get("QUEUE_LINE", "").strip()
+if not line:
+  sys.exit(1)
+
+try:
+  item = json.loads(line)
+except json.JSONDecodeError:
+  sys.exit(1)
+
+ts = item.get("timestamp", "")
+branch = item.get("branch", "")
+primary = item.get("primary_remote", "")
+fallback = item.get("fallback_remote", "")
+skip_primary = "1" if item.get("skip_primary", False) else "0"
+dry_run = "1" if item.get("dry_run", False) else "0"
+tmp_override = item.get("tmp_override", "")
+
+print("\t".join([ts, branch, primary, fallback, skip_primary, dry_run, tmp_override]))
+PY
+  )" || return 1
+
+  printf '%s\n' "$parsed"
+  return 0
 }
 
 drain_queue() {
@@ -465,7 +535,11 @@ drain_queue() {
 
   if (( DRY_RUN == 1 )); then
     local queue_items=0
-    while IFS=$'\t' read -r entry_ts branch primary fallback skip_primary dry_run tmp_override; do
+    local line parsed entry_ts branch primary fallback skip_primary dry_run tmp_override
+    while IFS= read -r line; do
+      parsed="$(parse_queue_line "$line" || true)"
+      [[ -z "$parsed" ]] && continue
+      IFS=$'\t' read -r entry_ts branch primary fallback skip_primary dry_run tmp_override <<< "$parsed"
       if [[ -z "${branch:-}" ]]; then
         continue
       fi
@@ -480,9 +554,12 @@ drain_queue() {
   local tmp_file
   tmp_file="$(mktemp)"
   local status=0
-  local entry_ts branch primary fallback skip_primary dry_run tmp_override
+  local line parsed entry_ts branch primary fallback skip_primary dry_run tmp_override
 
-  while IFS=$'\t' read -r entry_ts branch primary fallback skip_primary dry_run tmp_override; do
+  while IFS= read -r line; do
+    parsed="$(parse_queue_line "$line" || true)"
+    [[ -z "$parsed" ]] && continue
+    IFS=$'\t' read -r entry_ts branch primary fallback skip_primary dry_run tmp_override <<< "$parsed"
     if [[ -z "${branch:-}" ]]; then
       continue
     fi
@@ -503,14 +580,28 @@ drain_queue() {
       log "Queue item drained: $branch"
     else
       status=1
-      printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-        "$entry_ts" \
-        "$branch" \
-        "$primary" \
-        "$fallback" \
-        "$skip_primary" \
-        "$dry_run" \
-        "${tmp_override:-}" >> "$tmp_file"
+      QUEUE_TIMESTAMP="$entry_ts" \
+        QUEUE_BRANCH="$branch" \
+        QUEUE_PRIMARY="$primary" \
+        QUEUE_FALLBACK="$fallback" \
+        QUEUE_SKIP_PRIMARY="$skip_primary" \
+        QUEUE_DRY_RUN="$dry_run" \
+        QUEUE_TMP_OVERRIDE="${tmp_override:-}" \
+        python - <<'PY' >> "$tmp_file"
+import json
+import os
+
+payload = {
+  "timestamp": os.environ["QUEUE_TIMESTAMP"],
+  "branch": os.environ["QUEUE_BRANCH"],
+  "primary_remote": os.environ["QUEUE_PRIMARY"],
+  "fallback_remote": os.environ["QUEUE_FALLBACK"],
+  "skip_primary": os.environ["QUEUE_SKIP_PRIMARY"] == "1",
+  "dry_run": os.environ["QUEUE_DRY_RUN"] == "1",
+  "tmp_override": os.environ.get("QUEUE_TMP_OVERRIDE", ""),
+}
+print(json.dumps(payload, sort_keys=True))
+PY
     fi
 
     SKIP_PRIMARY="$previous_skip_primary"

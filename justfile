@@ -18,6 +18,15 @@ lint:
 test:
   task test
 
+test-e2e-build:
+  task test:e2e:build
+
+test-e2e-playwright:
+  task test:e2e:playwright
+
+test-e2e:
+  task test:e2e
+
 coverage:
   task coverage
 
@@ -42,6 +51,9 @@ check:
 ci:
   task ci
 
+governance-required-checks:
+  task governance:required-checks
+
 devops-status:
   task devops:status
 
@@ -65,6 +77,12 @@ devops-push-queue *ARGS:
 
 devops-push-drain-queue *ARGS:
   bash scripts/push-heliosapp-with-fallback.sh --drain-queue {{ARGS}}
+
+devops-publish-worker-once *ARGS:
+  bash scripts/publish-worker.sh --once {{ARGS}}
+
+devops-publish-worker-loop *ARGS:
+  bash scripts/publish-worker.sh {{ARGS}}
 
 devops-checker *ARGS:
   bash scripts/devops-checker.sh {{ARGS}}

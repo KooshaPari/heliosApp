@@ -48,16 +48,22 @@ task devops:push
 task devops:push:origin
 task devops:push:queue
 task devops:push:drain-queue
+task devops:publish-worker:once
+task devops:publish-worker:loop
+task governance:required-checks
 
 # Justfile aliases
 just devops-status
 just devops-check
 just devops-check-ci
-just devops-checker --check-ci --emit-summary
+just devops-check-ci-summary
 just devops-push
 just devops-push-origin
 just devops-push-queue
 just devops-push-drain-queue
+just devops-publish-worker-once
+just devops-publish-worker-loop
+just governance-required-checks
 ```
 
 ## Publish Queue Worker
@@ -68,10 +74,14 @@ Use queue mode when direct push is blocked by environment constraints:
 - `./scripts/push-heliosapp-with-fallback.sh --drain-queue`
 
 Queue mode is intended for a separate publish worker process that can run outside a read-only or restricted sandbox.
+Publish worker requires explicit operator opt-in:
+
+- `PHENOTYPE_PUBLISH_WORKER_NON_SANDBOX=1 ./scripts/publish-worker.sh --once`
 
 ## Required Check Governance
 
 Branch protection should use names from `.github/required-checks.txt`.
+The manifest format is `workflow_file|job_name`, and `job_name` must match workflow job `name:`.
 
 When adding/removing CI jobs:
 
