@@ -46,6 +46,8 @@ task devops:check:ci-summary
 # Shared push with primary+fallback remote behavior
 task devops:push
 task devops:push:origin
+task devops:push:queue
+task devops:push:drain-queue
 
 # Justfile aliases
 just devops-status
@@ -54,7 +56,18 @@ just devops-check-ci
 just devops-checker --check-ci --emit-summary
 just devops-push
 just devops-push-origin
+just devops-push-queue
+just devops-push-drain-queue
 ```
+
+## Publish Queue Worker
+
+Use queue mode when direct push is blocked by environment constraints:
+
+- `./scripts/push-heliosapp-with-fallback.sh --queue-only`
+- `./scripts/push-heliosapp-with-fallback.sh --drain-queue`
+
+Queue mode is intended for a separate publish worker process that can run outside a read-only or restricted sandbox.
 
 ## Required Check Governance
 
