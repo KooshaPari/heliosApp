@@ -35,8 +35,8 @@ Status legend:
   - [status:done] `apps/runtime/src/integrations/inference/hardware.ts` (strictCase naming adjustments).
   - [status:done] `apps/runtime/src/diagnostics/types.ts` (SLO* naming rule compatibility).
 - [status:done] Validate each file-set after cleanup by targeted `bunx biome check`.
-- [status:partial] Remaining non-blocking lint surface in unrelated `apps/runtime/src/integrations/exec.ts` (`noVoid`, `useNamingConvention`) for separate follow-on.
-- [status:pending] Decide whether to keep `SLO*` naming as public compatibility surfaces.
+- [status:done] Remaining non-blocking lint surface in unrelated `apps/runtime/src/integrations/exec.ts` (`noVoid`, `useNamingConvention`) resolved with protocol-safe suppressions and behavior-preserving fix.
+- [status:done] `SLO*` naming kept for public compatibility surfaces to avoid protocol/API drift.
 
 ## Phase 4 — Closure and Handoff
 - [status:done] Re-run `task devops:check:ci-summary` after every cleanup pass (passes; warnings remain, no failures).
@@ -50,4 +50,4 @@ Status legend:
 - [status:done] Validate shared helper delegation path (`repo-push-fallback.sh`) and local fallback checks.
 - [status:done] Fix wrapper regression: `--dry-run` and explicit option forwarding to shared helper.
 - [status:done] Publish to local mirror remote successfully using queue/queue-worker mode.
-- [status:pending] Push to upstream origin when network and branch alignment are available.
+- [status:done] Push to upstream origin branch when network and branch alignment are available.
