@@ -99,6 +99,14 @@ jobs:
         timeout-minutes: 2
         continue-on-error: false
 
+      - name: Gate 9 - Docs Session Index and Link Validation
+        id: gate-docs-validation
+        run: |
+          bun run docs:index
+          bun run docs:validate-session-docs
+        timeout-minutes: 3
+        continue-on-error: false
+
       - name: Upload Gate Reports
         if: always()
         uses: actions/upload-artifact@v4

@@ -33,6 +33,9 @@ coverage:
 docs-index:
   task docs:index
 
+docs-validate:
+  task docs:validate
+
 docs-build:
   task docs:build
 

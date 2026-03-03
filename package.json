@@ -13,6 +13,7 @@
     "test:e2e": "playwright test",
     "test:e2e:gate": "playwright test --reporter=line --workers=1",
     "docs:index": "bash docs/scripts/generate-doc-index.sh",
+    "docs:validate-session-docs": "bash docs/scripts/validate-session-docs.sh",
     "docs:dev": "vitepress dev docs",
     "docs:build": "bun run docs:index && vitepress build docs",
     "docs:preview": "vitepress preview docs",
