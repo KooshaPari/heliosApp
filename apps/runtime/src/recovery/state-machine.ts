@@ -4,17 +4,29 @@ import path from "node:path";
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
 
 export enum RecoveryStage {
-  CRASHED = "CRASHED",
-  DETECTING = "DETECTING",
-  INVENTORYING = "INVENTORYING",
-  RESTORING = "RESTORING",
-  RECONCILING = "RECONCILING",
-  LIVE = "LIVE",
-  DETECTION_FAILED = "DETECTION_FAILED",
-  INVENTORY_FAILED = "INVENTORY_FAILED",
-  RESTORATION_FAILED = "RESTORATION_FAILED",
-  RECONCILIATION_FAILED = "RECONCILIATION_FAILED",
+  Crashed = "CRASHED",
+  Detecting = "DETECTING",
+  Inventorying = "INVENTORYING",
+  Restoring = "RESTORING",
+  Reconciling = "RECONCILING",
+  Live = "LIVE",
+  DetectionFailed = "DETECTION_FAILED",
+  InventoryFailed = "INVENTORY_FAILED",
+  RestorationFailed = "RESTORATION_FAILED",
+  ReconciliationFailed = "RECONCILIATION_FAILED",
 }
+
+const recoveryStageEnumCompat = RecoveryStage as Record<string, RecoveryStage>;
+recoveryStageEnumCompat.CRASHED = RecoveryStage.Crashed;
+recoveryStageEnumCompat.DETECTING = RecoveryStage.Detecting;
+recoveryStageEnumCompat.INVENTORYING = RecoveryStage.Inventorying;
+recoveryStageEnumCompat.RESTORING = RecoveryStage.Restoring;
+recoveryStageEnumCompat.RECONCILING = RecoveryStage.Reconciling;
+recoveryStageEnumCompat.LIVE = RecoveryStage.Live;
+recoveryStageEnumCompat.DETECTION_FAILED = RecoveryStage.DetectionFailed;
+recoveryStageEnumCompat.INVENTORY_FAILED = RecoveryStage.InventoryFailed;
+recoveryStageEnumCompat.RESTORATION_FAILED = RecoveryStage.RestorationFailed;
+recoveryStageEnumCompat.RECONCILIATION_FAILED = RecoveryStage.ReconciliationFailed;
 
 export interface RecoveryState {
   stage: RecoveryStage;
@@ -179,7 +191,10 @@ export class RecoveryStateMachine {
       // Atomic write
       await fs.writeFile(tempPath, JSON.stringify(this.currentState, null, 2));
       await fs.rename(tempPath, statePath);
-    } catch (_err) {}
+    } catch (_error) {
+      // Ignore persistence errors to keep recovery state machine bootable
+      // if the file system is temporarily unavailable.
+    }
   }
 
   private async deleteState(): Promise<void> {
@@ -206,7 +221,13 @@ export class RecoveryStateMachine {
         const failureStage = this.getFailureStateFor(this.currentStage);
         if (failureStage) {
           this.currentState.lastError = `Stage timeout after ${STAGE_TIMEOUT_MS}ms`;
-          this.transition(failureStage).catch(_err => {});
+          this.transition(failureStage).catch(error => {
+            // Stage transition failures are expected if the state changed concurrently.
+            this.currentState.lastError =
+              error instanceof Error
+                ? `Recovery stage timeout transition failed: ${error.message}`
+                : "Recovery stage timeout transition failed";
+          });
         }
       }
     }, STAGE_TIMEOUT_MS);

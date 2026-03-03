@@ -19,7 +19,9 @@ describe("RecoveryStateMachine", () => {
   });
 
   afterEach(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {
+      // Best-effort cleanup in test teardown.
+    });
   });
 
   describe("stage progression", () => {

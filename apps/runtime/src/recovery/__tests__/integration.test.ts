@@ -12,13 +12,15 @@ describe("Integration Tests - Crash to Live Recovery", () => {
   let bus: InMemoryLocalBus;
   let pipeline: RestorationPipeline;
   let stateMachine: RecoveryStateMachine;
+  const asEnvironmentVariables = (entries: [string, string][]) =>
+    Object.fromEntries(entries) as Record<string, string>;
 
   const createMockSession = (index: number): CheckpointSession => ({
     sessionId: `sess-${index}`,
     terminalId: `term-${index}`,
     laneId: `lane-${index}`,
     workingDirectory: tempDir,
-    environmentVariables: { TEST: "true" },
+    environmentVariables: asEnvironmentVariables([["TEST", "true"]]),
     scrollbackSnapshot: `output ${index}`,
     zelijjSessionName: `session-${index}`,
     shellCommand: "bash",
@@ -41,7 +43,9 @@ describe("Integration Tests - Crash to Live Recovery", () => {
   });
 
   afterEach(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {
+      // Best-effort cleanup in test teardown.
+    });
   });
 
   describe("Full recovery (SC-027-001)", () => {
@@ -144,9 +148,9 @@ describe("Integration Tests - Crash to Live Recovery", () => {
 
       // Both should have same number of restored sessions
       expect(result2.restored.length).toBe(result1.restored.length);
-      result2.restored.forEach(s => {
+      for (const s of result2.restored) {
         expect(restoredIds.has(s.sessionId)).toBe(true);
-      });
+      }
     });
   });
 

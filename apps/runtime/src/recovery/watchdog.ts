@@ -4,11 +4,17 @@ import path from "node:path";
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
 
 export enum CrashReason {
-  HEARTBEAT_TIMEOUT = "HEARTBEAT_TIMEOUT",
-  UNRESPONSIVE = "UNRESPONSIVE",
-  EXIT_CODE = "EXIT_CODE",
-  SIGNAL = "SIGNAL",
+  HeartbeatTimeout = "HEARTBEAT_TIMEOUT",
+  Unresponsive = "UNRESPONSIVE",
+  ExitCode = "EXIT_CODE",
+  Signal = "SIGNAL",
 }
+
+const crashReasonEnumCompat = CrashReason as Record<string, CrashReason>;
+crashReasonEnumCompat.HEARTBEAT_TIMEOUT = CrashReason.HeartbeatTimeout;
+crashReasonEnumCompat.UNRESPONSIVE = CrashReason.Unresponsive;
+crashReasonEnumCompat.EXIT_CODE = CrashReason.ExitCode;
+crashReasonEnumCompat.SIGNAL = CrashReason.Signal;
 
 export interface CrashEvent {
   name: string;
@@ -90,7 +96,7 @@ export class Watchdog {
 
   private async handleHeartbeatTimeout(monitor: ProcessMonitor): Promise<void> {
     // Check if process is still running
-    const isRunning = await this.isProcessRunning(monitor.pid);
+    const isRunning = this.isProcessRunning(monitor.pid);
 
     let reason = CrashReason.UNRESPONSIVE;
     if (!isRunning) {
@@ -180,10 +186,12 @@ export class Watchdog {
       // Atomic write: write to temp file then rename
       await fs.writeFile(tempPath, JSON.stringify(event, null, 2));
       await fs.rename(tempPath, recordPath);
-    } catch (_err) {}
+    } catch (_error) {
+      // Ignore crash record persistence errors so crash handling remains resilient.
+    }
   }
 
-  private async isProcessRunning(pid: number): Promise<boolean> {
+  private isProcessRunning(pid: number): boolean {
     try {
       // Try to send signal 0 (no-op kill) to check if process exists
       process.kill(pid, 0);
