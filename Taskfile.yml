@@ -137,3 +137,13 @@ tasks:
     desc: Push using fallback remote only (skip primary)
     cmds:
       - bash scripts/push-heliosapp-with-fallback.sh --skip-primary {{.CLI_ARGS}}
+
+  devops:push:queue:
+    desc: Enqueue a push request for later execution
+    cmds:
+      - bash scripts/push-heliosapp-with-fallback.sh --queue-only {{.CLI_ARGS}}
+
+  devops:push:drain-queue:
+    desc: Drain queued push requests
+    cmds:
+      - bash scripts/push-heliosapp-with-fallback.sh --drain-queue {{.CLI_ARGS}}

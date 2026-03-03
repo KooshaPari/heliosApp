@@ -57,5 +57,11 @@ devops-push *ARGS:
 devops-push-origin *ARGS:
   bash scripts/push-heliosapp-with-fallback.sh --skip-primary {{ARGS}}
 
+devops-push-queue *ARGS:
+  bash scripts/push-heliosapp-with-fallback.sh --queue-only {{ARGS}}
+
+devops-push-drain-queue *ARGS:
+  bash scripts/push-heliosapp-with-fallback.sh --drain-queue {{ARGS}}
+
 devops-checker *ARGS:
   bash scripts/devops-checker.sh {{ARGS}}
