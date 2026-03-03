@@ -2,18 +2,12 @@ export const TOPICS = [
   "workspace.opened",
   "project.ready",
   "session.created",
-  "session.restore.started",
-  "session.restore.completed",
   "session.attach.started",
   "session.attached",
   "session.attach.failed",
-  "session.terminate.started",
-  "session.terminate.failed",
+  "session.restore.started",
+  "session.restore.completed",
   "session.terminated",
-  "lane.attach.started",
-  "lane.attach.failed",
-  "lane.cleanup.started",
-  "lane.cleanup.failed",
   "terminal.spawn.started",
   "terminal.spawned",
   "terminal.spawn.failed",
@@ -36,7 +30,8 @@ export const TOPICS = [
   "lane.attached",
   "lane.cleaned",
   "harness.status.changed",
-  "audit.recorded"
+  "audit.recorded",
+  "diagnostics.metric"
 ] as const;
 
 export type ProtocolTopic = (typeof TOPICS)[number];

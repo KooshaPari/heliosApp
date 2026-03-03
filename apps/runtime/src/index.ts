@@ -1,4 +1,4 @@
-import type { AuditBundle, AuditFilter, AuditRecord, AuditSink } from "./audit/sink";
+import type { AuditSink } from "./audit/sink";
 import {
   buildInputTerminalCommand,
   buildResizeTerminalCommand,
@@ -10,14 +10,11 @@ import { InMemoryLocalBus } from "./protocol/bus";
 import type { LocalBusEnvelope } from "./protocol/types";
 import { InMemorySessionRegistry, SessionRegistryError, type SessionTransport } from "./sessions/registry";
 import { LaneLifecycleError, LaneLifecycleService } from "./sessions/state_machine";
-import type { RecoveryBootstrapResult, RecoveryMetadata, WatchdogScanResult } from "./sessions/types";
 
 type RuntimeOptions = {
   auditSink?: AuditSink;
   harnessProbe?: HarnessProbe;
-  recovery_metadata?: RecoveryMetadata;
   terminalBufferCapBytes?: number;
-  watchdog_interval_ms?: number;
 };
 
 function json(status: number, payload: Record<string, unknown>): Response {
@@ -67,6 +64,14 @@ function splitPath(pathname: string): string[] {
   return pathname.split("/").filter(Boolean);
 }
 
+function requiredSegment(segments: string[], index: number, name: string): string {
+  const value = segments[index];
+  if (!value) {
+    throw new Error(`missing_path_${name}`);
+  }
+  return value;
+}
+
 export function createRuntime(options: RuntimeOptions = {}) {
   const bus = new InMemoryLocalBus({
     auditSink: options.auditSink,
@@ -76,18 +81,6 @@ export function createRuntime(options: RuntimeOptions = {}) {
   const sessionRegistry = new InMemorySessionRegistry();
   const harnessRouter = new HarnessRouteSelector(bus, options.harnessProbe);
   const busRequest = (command: LocalBusEnvelope) => bus.request(command);
-  let watchdogTimer: ReturnType<typeof setInterval> | null = null;
-  let recoveryResult: RecoveryBootstrapResult | null = null;
-
-  if (options.recovery_metadata) {
-    recoveryResult = bus.bootstrapRecovery(options.recovery_metadata);
-  }
-
-  if (options.watchdog_interval_ms && options.watchdog_interval_ms > 0) {
-    watchdogTimer = setInterval(() => {
-      void bus.scanForOrphans();
-    }, options.watchdog_interval_ms);
-  }
 
   const fetch = async (request: Request): Promise<Response> => {
     const url = new URL(request.url);
@@ -102,7 +95,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
         segments[3] === "lanes"
       ) {
         const body = await parseBody(request);
-        const workspaceId = segments[2];
+        const workspaceId = requiredSegment(segments, 2, "workspace_id");
         const projectContextId = asString(body, "project_context_id") as string;
         const displayName = asString(body, "display_name") as string;
         const lane = await laneService.create({
@@ -125,7 +118,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
         segments[1] === "workspaces" &&
         segments[3] === "lanes"
       ) {
-        const workspaceId = segments[2];
+        const workspaceId = requiredSegment(segments, 2, "workspace_id");
         const lanes = laneService.list(workspaceId).map((lane) => ({
           lane_id: lane.lane_id,
           workspace_id: lane.workspace_id,
@@ -143,8 +136,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
         segments[3] === "lanes" &&
         segments[5] === "attach"
       ) {
-        const workspaceId = segments[2];
-        const laneId = segments[4];
+        const workspaceId = requiredSegment(segments, 2, "workspace_id");
+        const laneId = requiredSegment(segments, 4, "lane_id");
         const lane = await laneService.attach(workspaceId, laneId);
         return json(200, {
           lane_id: lane.lane_id,
@@ -161,8 +154,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
         segments[3] === "lanes" &&
         segments[5] === "cleanup"
       ) {
-        const workspaceId = segments[2];
-        const laneId = segments[4];
+        const workspaceId = requiredSegment(segments, 2, "workspace_id");
+        const laneId = requiredSegment(segments, 4, "lane_id");
         const lane = await laneService.cleanup(workspaceId, laneId);
         return json(200, {
           lane_id: lane.lane_id,
@@ -180,8 +173,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
         segments[5] === "sessions"
       ) {
         const body = await parseBody(request);
-        const workspaceId = segments[2];
-        const laneId = segments[4];
+        const workspaceId = requiredSegment(segments, 2, "workspace_id");
+        const laneId = requiredSegment(segments, 4, "lane_id");
 
         const provider = asString(body, "provider") as string;
         if (provider !== "codex") {
@@ -256,10 +249,17 @@ export function createRuntime(options: RuntimeOptions = {}) {
         segments[5] === "terminals"
       ) {
         const body = await parseBody(request);
-        const workspaceId = segments[2];
-        const laneId = segments[4];
+        const workspaceId = requiredSegment(segments, 2, "workspace_id");
+        const laneId = requiredSegment(segments, 4, "lane_id");
         const sessionId = asString(body, "session_id") as string;
         const title = asString(body, "title", false);
+        const lane = laneService.getRequired(laneId);
+        if (lane.workspace_id !== workspaceId) {
+          return json(409, { error: `lane ${laneId} does not belong to workspace ${workspaceId}` });
+        }
+        if (lane.status === "closed") {
+          return json(409, { error: "lane_closed", details: { lane_id: laneId } });
+        }
         await laneService.attach(workspaceId, laneId);
 
         const session = sessionRegistry.get(sessionId);
@@ -327,17 +327,10 @@ export function createRuntime(options: RuntimeOptions = {}) {
     cleanupLane: (workspaceId: string, laneId: string) => laneService.cleanup(workspaceId, laneId),
     getState: () => bus.getState(),
     getEvents: () => bus.getEvents(),
-    bootstrapRecovery: (metadata: RecoveryMetadata): RecoveryBootstrapResult => {
-      recoveryResult = bus.bootstrapRecovery(metadata);
-      return recoveryResult;
-    },
-    exportAuditBundle: (filter: AuditFilter = {}): AuditBundle => bus.exportAuditBundle(filter),
-    exportRecoveryMetadata: (): RecoveryMetadata => bus.exportRecoveryMetadata(),
-    getAuditRecords: (filter: AuditFilter = {}): Promise<AuditRecord[]> => bus.getAuditRecords(filter),
-    getBootstrapResult: (): RecoveryBootstrapResult | null => recoveryResult,
+    getAuditRecords: () => bus.getAuditRecords(),
+    getMetricsReport: () => bus.getMetricsReport(),
     getTerminal: (terminalId: string) => bus.getTerminal(terminalId),
     getTerminalBuffer: (terminalId: string) => bus.getTerminalBuffer(terminalId),
-    getOrphanReport: (): WatchdogScanResult => bus.scanForOrphans(),
     spawnTerminal: (input: {
       command_id: string;
       correlation_id: string;
@@ -366,11 +359,6 @@ export function createRuntime(options: RuntimeOptions = {}) {
       rows: number;
     }) => busRequest(buildResizeTerminalCommand(input)),
     getHarnessStatus: () => harnessRouter.getStatus(),
-    getSession: (sessionId: string) => sessionRegistry.get(sessionId),
-    shutdown: (): void => {
-      if (watchdogTimer) {
-        clearInterval(watchdogTimer);
-      }
-    }
+    getSession: (sessionId: string) => sessionRegistry.get(sessionId)
   };
 }

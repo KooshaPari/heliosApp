@@ -3,7 +3,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:runtime": "bun test apps/runtime/tests/integration/sessions"
+    "test": "bun test apps/runtime/tests",
+    "test:runtime": "bun test apps/runtime/tests/integration/sessions",
+    "test:soak": "bun test apps/runtime/tests/soak",
+    "lint": "node tools/gates/lint-strict.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "static": "node tools/gates/protocol-parity.mjs",
+    "security:semgrep": "semgrep --error --config tools/semgrep/rules.yml apps/runtime/src apps/runtime/tests",
+    "security:gitleaks": "gitleaks detect --no-banner --redact --source apps/runtime",
+    "security": "bun run security:semgrep && bun run security:gitleaks",
+    "quality": "bun run lint && bun run typecheck && bun run static && bun run test && bun run security"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2"
