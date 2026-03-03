@@ -45,6 +45,9 @@ jobs:
       - name: Generate docs index
         run: bun run docs:index
 
+      - name: Validate docs session docs and links
+        run: bun run docs:validate-session-docs
+
       - name: Build docs
         run: bun run docs:build
 

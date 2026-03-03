@@ -76,6 +76,11 @@ tasks:
     cmds:
       - bun run docs:index
 
+  docs:validate:
+    desc: Validate docs session completeness and markdown link targets
+    cmds:
+      - bun run docs:validate-session-docs
+
   docs:build:
     desc: Build VitePress docs
     cmds:
@@ -105,6 +110,7 @@ tasks:
     deps: [check]
     cmds:
       - task docs:index
+      - task docs:validate
 
   devops:status:
     desc: Show Git status, remotes, and branch state

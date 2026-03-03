@@ -1,5 +1,9 @@
 # Workspace Rules
 
+## Child Agent Usage
+
+The repo uses child agents for focused audits, multi-file policy sweeps, and parallelized implementation tasks. Use the same protocol for delegated lanes and close with explicit status outputs.
+
 ## Overview
 This document defines the governance and operational guidelines for the heliosApp repository (TypeScript runtime application).
 

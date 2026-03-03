@@ -1,5 +1,9 @@
 # Agent Context
 
+## Child-Agent and Delegation Policy
+
+This repository requires explicit use of child agents for scoped or high-volume work and requires lane-based reporting for complex tasks.
+
 ## Active Technologies
 - Pending update by spec-kitty agent context tooling.
 
@@ -25,4 +29,3 @@
   - Minimum spacing: one retrigger comment every 120 seconds per repo.
   - On rate-limit response, stop sending new triggers in that repo, wait 15 minutes, then resume queue processing.
   - Do not post duplicate trigger comments while a prior trigger is pending.
-
