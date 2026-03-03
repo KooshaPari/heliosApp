@@ -1,35 +1,47 @@
-// FR-002: Rolling percentile computation over ring buffer values.
+// FR-002: Rolling percentile computation over ring buffer contents.
 
 import type { PercentileBucket } from "./types.js";
+import type { RingBuffer } from "./metrics.js";
+
+/** Reusable temp array to avoid allocation per computation. */
+let tempArray: number[] = [];
 
 /**
- * Compute percentile statistics from a Float64Array of values.
- * Uses the nearest-rank method. Returns undefined if values is empty.
+ * Compute p50/p95/p99/min/max/count statistics from a RingBuffer.
  *
- * The input array is **not** mutated — a sorted copy is created internally.
+ * Algorithm: copy valid values, filter NaN, sort, index into sorted array.
+ * Performance: < 1ms for 10k samples (sort-based).
  */
-export function computePercentiles(values: Float64Array): PercentileBucket | undefined {
+export function computePercentiles(buffer: RingBuffer): PercentileBucket {
+  const values = buffer.getValues();
   const count = values.length;
+
   if (count === 0) {
-    return undefined;
+    return { p50: 0, p95: 0, p99: 0, min: 0, max: 0, count: 0 };
   }
 
-  // Sort a copy (Float64Array.prototype.sort is in-place).
-  const sorted = new Float64Array(values);
-  sorted.sort();
+  // Copy to temp array, filtering NaN values.
+  tempArray.length = 0;
+  for (let i = 0; i < count; i++) {
+    const v = values[i]!;
+    if (!Number.isNaN(v)) {
+      tempArray.push(v);
+    }
+  }
+
+  const validCount = tempArray.length;
+  if (validCount === 0) {
+    return { p50: 0, p95: 0, p99: 0, min: 0, max: 0, count: 0 };
+  }
+
+  tempArray.sort((a, b) => a - b);
 
   return {
-    p50: percentileFromSorted(sorted, 0.50),
-    p95: percentileFromSorted(sorted, 0.95),
-    p99: percentileFromSorted(sorted, 0.99),
-    min: sorted[0]!,
-    max: sorted[count - 1]!,
-    count,
+    p50: tempArray[Math.floor(validCount * 0.50)]!,
+    p95: tempArray[Math.floor(validCount * 0.95)]!,
+    p99: tempArray[Math.floor(validCount * 0.99)]!,
+    min: tempArray[0]!,
+    max: tempArray[validCount - 1]!,
+    count: validCount,
   };
-}
-
-/** Nearest-rank percentile on a pre-sorted Float64Array. */
-function percentileFromSorted(sorted: Float64Array, p: number): number {
-  const index = Math.ceil(p * sorted.length) - 1;
-  return sorted[Math.max(0, index)]!;
 }
