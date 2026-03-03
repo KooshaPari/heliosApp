@@ -9,8 +9,8 @@
 - `heliosApp-colab`: `bunx tsc --noEmit`
 
 ## Summary
-- `heliosApp`: pass (0 TypeScript errors).
-- `heliosApp-colab`: fail with large existing debt (4,771 compiler error lines captured).
+- `heliosApp`: fail in pre-existing runtime registry/session tests (20 TypeScript errors in current run).
+- `heliosApp-colab`: fail with large existing debt (3,335 compiler error lines captured in current run).
 
 ## Categorized Findings (`heliosApp-colab`)
 
@@ -54,3 +54,4 @@
 ## Residual Debt
 - All `heliosApp-colab` findings above are pre-existing and remain unresolved in this lane.
 - This run focused on governance and CI/local command alignment, not broad TS debt remediation.
+- `heliosApp` currently has enum casing and context-key drift in runtime registry tests; protocol parity tests still pass.
