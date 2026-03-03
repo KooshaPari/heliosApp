@@ -97,18 +97,13 @@ async function checkTestCoverage(files: string[]): Promise<Finding[]> {
   const sections = await loadConstitution().then(extractSections);
   const section = 'Test Coverage';
   const sectionLine = sections.get(section) || 0;
-
+  
   for (const filePath of files) {
     // Only check source files, not test files
     if (filePath.includes('.test.') || filePath.includes('.spec.')) {
       continue;
     }
-
-    // Skip fixture files (they are test artifacts, not source code)
-    if (filePath.includes('/fixtures/') || filePath.includes('\\fixtures\\')) {
-      continue;
-    }
-
+    
     if (!filePath.includes('node_modules') && filePath.endsWith('.ts')) {
       // Look for corresponding test file
       const testPath = filePath.replace(/\.ts$/, '.test.ts');
@@ -128,7 +123,7 @@ async function checkTestCoverage(files: string[]): Promise<Finding[]> {
       }
     }
   }
-
+  
   return findings;
 }
 
