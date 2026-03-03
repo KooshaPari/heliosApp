@@ -14,5 +14,8 @@
 .kittify/.dashboard
 !.gemini/
 !.gemini/config.yaml
-# Excluded via sparse-checkout
-kitty-specs/
+
+# Build artifacts
+*.tsbuildinfo
+dist/
+node_modules/
