@@ -1,83 +1,24 @@
-/**
- * Canonical envelope types for the Helios local bus protocol.
- *
- * Every bus message conforms to one of three discriminated shapes:
- * CommandEnvelope, ResponseEnvelope, or EventEnvelope.
- */
+export type EnvelopeType = "command" | "response" | "event";
 
-// ---------------------------------------------------------------------------
-// Base
-// ---------------------------------------------------------------------------
+export type ErrorPayload = {
+  code: string;
+  message: string;
+  retryable: boolean;
+  details?: Record<string, unknown> | null;
+};
 
-/** Fields shared by all envelope types. */
-export interface EnvelopeBase {
-  /** Unique message identifier (spec-005 format: {prefix}_{ulid}). */
-  readonly id: string;
-  /** Correlation identifier linking related messages. */
-  readonly correlation_id: string;
-  /** Monotonic timestamp (milliseconds). */
-  readonly timestamp: number;
-  /** Optional ordering sequence; required on events. */
-  readonly sequence?: number;
-}
-
-// ---------------------------------------------------------------------------
-// Command
-// ---------------------------------------------------------------------------
-
-export interface CommandEnvelope extends EnvelopeBase {
-  readonly type: 'command';
-  readonly method: string;
-  readonly payload: unknown;
-}
-
-// ---------------------------------------------------------------------------
-// Response
-// ---------------------------------------------------------------------------
-
-import type { BusError } from './errors.js';
-
-export interface ResponseEnvelope extends EnvelopeBase {
-  readonly type: 'response';
-  readonly method: string;
-  readonly payload: unknown;
-  readonly error?: BusError;
-}
-
-// ---------------------------------------------------------------------------
-// Event
-// ---------------------------------------------------------------------------
-
-export interface EventEnvelope extends EnvelopeBase {
-  readonly type: 'event';
-  readonly topic: string;
-  readonly payload: unknown;
-  /** Sequence is required on events (assigned by topic registry at publish time). */
-  readonly sequence: number;
-}
-
-// ---------------------------------------------------------------------------
-// Discriminated union
-// ---------------------------------------------------------------------------
-
-/** Union of all valid envelope shapes. */
-export type Envelope = CommandEnvelope | ResponseEnvelope | EventEnvelope;
-
-// ---------------------------------------------------------------------------
-// Type guards
-// ---------------------------------------------------------------------------
-
-/** Narrow an envelope to CommandEnvelope. */
-export function isCommand(e: Envelope): e is CommandEnvelope {
-  return e.type === 'command';
-}
-
-/** Narrow an envelope to ResponseEnvelope. */
-export function isResponse(e: Envelope): e is ResponseEnvelope {
-  return e.type === 'response';
-}
-
-/** Narrow an envelope to EventEnvelope. */
-export function isEvent(e: Envelope): e is EventEnvelope {
-  return e.type === 'event';
-}
+export type LocalBusEnvelope = {
+  id: string;
+  type: EnvelopeType;
+  ts: string;
+  workspace_id?: string;
+  session_id?: string;
+  terminal_id?: string;
+  lane_id?: string;
+  method?: string;
+  topic?: string;
+  payload?: Record<string, unknown>;
+  status?: "ok" | "error";
+  result?: Record<string, unknown> | null;
+  error?: ErrorPayload | null;
+};
