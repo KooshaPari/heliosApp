@@ -27,6 +27,10 @@ export {
   clearCapabilityCache,
   detectGpu,
 } from "./capabilities.js";
+export { GhosttyMetrics } from "./metrics.js";
+export type { FrameSample, InputLatencySample, MetricsSnapshot, MetricsConfig, MetricsPublisher } from "./metrics.js";
+export { GhosttyInputRelay, InputRelayError } from "./input.js";
+export type { PtyWriter, GhosttyInputEvent, InputEventListener } from "./input.js";
 
 // ---------------------------------------------------------------------------
 // Binary detection
