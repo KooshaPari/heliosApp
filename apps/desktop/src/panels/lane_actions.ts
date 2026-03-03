@@ -94,7 +94,7 @@ export class LaneActions {
     }
   }
 
-  async cleanupLane(laneId: string, requireConfirmation = true): Promise<boolean> {
+  cleanupLane(laneId: string, requireConfirmation = true): Promise<boolean> {
     if (requireConfirmation) {
       // Confirmation must be handled by caller
       // This method assumes confirmation has been obtained

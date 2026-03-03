@@ -45,9 +45,11 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
         <div class="requests-list">
           <For each={props.requests}>
             {request => (
-              <div
+              <button
+                type="button"
                 class={`request-item ${selectedId() === request.id ? "selected" : ""}`}
-                onclick={() => setSelectedId(request.id)}
+                onClick={() => setSelectedId(request.id)}
+                style={{ width: "100%", "text-align": "left", border: "none", padding: 0 }}
               >
                 <div class="request-header">
                   <code class="command">{request.command}</code>
@@ -57,7 +59,7 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
                   <span>{request.requesterName}</span>
                   <span class="time">{new Date(request.createdAt).toLocaleString()}</span>
                 </div>
-              </div>
+              </button>
             )}
           </For>
         </div>
@@ -97,7 +99,7 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
               <textarea
                 placeholder="Reason for rejection..."
                 value={rejectReason()}
-                oninput={e => setRejectReason(e.currentTarget.value)}
+                onInput={e => setRejectReason(e.currentTarget.value)}
               />
               <div class="reject-actions">
                 <button type="button" onclick={handleReject}>

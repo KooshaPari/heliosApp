@@ -2,6 +2,32 @@ import { describe, expect, test } from "bun:test";
 
 import { TerminalRegistry } from "../../../src/sessions/terminal_registry";
 
+type SpawnInput = Parameters<TerminalRegistry["spawn"]>[0];
+type ExpectedContext = Parameters<TerminalRegistry["isOwnedBy"]>[1];
+
+const CONTEXT_KEYS = {
+  terminalId: "terminal_id",
+  workspaceId: "workspace_id",
+  laneId: "lane_id",
+  sessionId: "session_id",
+} as const;
+
+const buildSpawnInput = (
+  terminalId: string,
+  workspaceId: string,
+  laneId: string,
+  sessionId: string,
+  title = "Terminal"
+): SpawnInput => {
+  return {
+    [CONTEXT_KEYS.terminalId]: terminalId,
+    [CONTEXT_KEYS.workspaceId]: workspaceId,
+    [CONTEXT_KEYS.laneId]: laneId,
+    [CONTEXT_KEYS.sessionId]: sessionId,
+    title,
+  };
+};
+
 describe("TerminalRegistry", () => {
   test("stores and queries terminal context", () => {
     const registry = new TerminalRegistry();
