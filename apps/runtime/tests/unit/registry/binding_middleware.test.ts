@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { BindingMiddleware } from "../../../src/registry/binding_middleware.js";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
-import { BindingState, type BindingTriple } from "../../../src/registry/binding_triple.js";
+import { BindingState, type BindingTriple, type TerminalBinding } from "../../../src/registry/binding_triple.js";
 
 describe("BindingMiddleware", () => {
   let registry: TerminalRegistry;
@@ -150,8 +150,8 @@ describe("BindingMiddleware", () => {
 
       registry.register("terminal-1", triple);
 
-      let receivedBinding = null;
-      const handler = async (binding) => {
+      let receivedBinding: TerminalBinding | null = null;
+      const handler = async (binding: TerminalBinding) => {
         receivedBinding = binding;
         return "success";
       };
@@ -159,7 +159,7 @@ describe("BindingMiddleware", () => {
       await middleware.wrapOperation("terminal-1", handler);
 
       expect(receivedBinding).toBeDefined();
-      expect(receivedBinding?.terminalId).toBe("terminal-1");
+      expect(receivedBinding!.terminalId).toBe("terminal-1");
     });
   });
 

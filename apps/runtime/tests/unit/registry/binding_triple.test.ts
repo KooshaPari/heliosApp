@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import {
   BindingState,
-  BindingTriple,
+  type BindingTriple,
   createBinding,
   validateBindingTriple,
   type RegistryQueryInterface,

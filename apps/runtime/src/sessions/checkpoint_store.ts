@@ -15,15 +15,15 @@ export interface CheckpointStore {
 }
 
 export class Slice1CheckpointStorePlaceholder implements CheckpointStore {
-  async save(): Promise<void> {
+  async save(_checkpoint: SessionCheckpoint): Promise<void> {
     throw new Error("slice_2_durability_not_implemented");
   }
 
-  async latest(): Promise<SessionCheckpoint | null> {
+  async latest(_sessionId: string): Promise<SessionCheckpoint | null> {
     return null;
   }
 
-  async list(): Promise<SessionCheckpoint[]> {
+  async list(_sessionId: string): Promise<SessionCheckpoint[]> {
     return [];
   }
 }
