@@ -311,7 +311,7 @@ export class OutputBuffer {
   }
 
   private emitBackpressureOn(utilization: number): void {
-    emitPtyEvent(this.bus, "pty.backpressure.on", this.correlation, {
+    emitPtyEvent(this.bus, "pty.backpressure.on" as const, this.correlation, {
       ptyId: this.correlation.ptyId,
       laneId: this.correlation.laneId,
       utilization,
@@ -321,7 +321,7 @@ export class OutputBuffer {
 
   private emitBackpressureOff(): void {
     const utilization = this.ring.utilization;
-    emitPtyEvent(this.bus, "pty.backpressure.off", this.correlation, {
+    emitPtyEvent(this.bus, "pty.backpressure.off" as const, this.correlation, {
       ptyId: this.correlation.ptyId,
       laneId: this.correlation.laneId,
       utilization,
@@ -345,7 +345,7 @@ export class OutputBuffer {
       this.lastOverflowEventTs = now;
       this._overflowEvents++;
 
-      emitPtyEvent(this.bus, "pty.buffer.overflow", this.correlation, {
+      emitPtyEvent(this.bus, "pty.buffer.overflow" as const, this.correlation, {
         ptyId: this.correlation.ptyId,
         laneId: this.correlation.laneId,
         droppedBytes,

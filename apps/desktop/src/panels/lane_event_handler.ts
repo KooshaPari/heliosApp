@@ -30,7 +30,7 @@ export class LaneEventHandler {
   private subscriptions: Map<string, (event: BusEvent) => void> = new Map();
   private pendingUpdates: Map<string, BusEvent> = new Map();
   private lastEventTime: number = Date.now();
-  private connectivityTimeoutId?: NodeJS.Timeout;
+  private connectivityTimeoutId?: ReturnType<typeof setTimeout>;
   private rafId?: number | undefined;
   private lastSequenceNumbers: Map<string, number> = new Map();
   private isConnected = true;

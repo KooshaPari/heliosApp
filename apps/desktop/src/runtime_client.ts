@@ -1,8 +1,11 @@
 import type { ProtocolBus as LocalBus } from "../../runtime/src/protocol/bus.ts";
 import type { LocalBusEnvelope } from "../../runtime/src/protocol/types.ts";
+import { METHODS } from "../../runtime/src/protocol/methods.ts";
 import type { RuntimeState } from "../../runtime/src/sessions/state_machine.ts";
 import type { TransportDiagnostics } from "./context_store.ts";
 import type { RendererEngine } from "./settings.ts";
+
+type ProtocolMethod = (typeof METHODS)[number];
 
 type RuntimeResponse<T extends Record<string, unknown>> = {
   ok: boolean;
@@ -59,7 +62,7 @@ function toProtocolRecord(value: Record<string, unknown>): Record<string, unknow
 }
 
 function toCommandEnvelope(
-  method: string,
+  method: ProtocolMethod,
   payload: Record<string, unknown>,
   workspaceId: string | null,
   laneId: string | null,
