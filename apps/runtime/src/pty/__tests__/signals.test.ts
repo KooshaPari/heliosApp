@@ -1,5 +1,3 @@
-/// <reference types="bun" />
-/// <reference types="node" />
 import { afterEach, describe, expect, it } from "bun:test";
 import { InMemoryBusPublisher } from "../events.js";
 import { PtyRegistry } from "../registry.js";

@@ -1,6 +1,6 @@
 import type { ProtocolBus as LocalBus } from "../../runtime/src/protocol/bus.ts";
 import type { LocalBusEnvelope } from "../../runtime/src/protocol/types.ts";
-import { METHODS } from "../../runtime/src/protocol/methods.ts";
+import { METHODS } from "../../runtime/src/protocol/methods.js";
 import type { RuntimeState } from "../../runtime/src/sessions/state_machine.ts";
 import type { TransportDiagnostics } from "./context_store.ts";
 import type { RendererEngine } from "./settings.ts";
