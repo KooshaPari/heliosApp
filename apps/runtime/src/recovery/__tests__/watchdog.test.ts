@@ -101,7 +101,7 @@ describe("Watchdog", () => {
     await watchdog.handleProcessExit("test-proc", 1234, 1);
 
     expect(crashEvents.length).toBe(1);
-    expect(crashEvents[0].reason).toBe(CrashReason.EXIT_CODE);
+    expect(crashEvents[0].reason).toBe(CrashReason.ExitCode);
     expect(crashEvents[0].exitCode).toBe(1);
   });
 
@@ -133,7 +133,7 @@ describe("Watchdog", () => {
     await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGKILL");
 
     expect(crashEvents.length).toBe(1);
-    expect(crashEvents[0].reason).toBe(CrashReason.SIGNAL);
+    expect(crashEvents[0].reason).toBe(CrashReason.Signal);
   });
 
   it("should handle multiple process monitoring", async () => {

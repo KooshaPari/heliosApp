@@ -10,12 +10,6 @@ export enum CrashReason {
   Signal = "SIGNAL",
 }
 
-const crashReasonEnumCompat = CrashReason as Record<string, CrashReason>;
-crashReasonEnumCompat.HEARTBEAT_TIMEOUT = CrashReason.HeartbeatTimeout;
-crashReasonEnumCompat.UNRESPONSIVE = CrashReason.Unresponsive;
-crashReasonEnumCompat.EXIT_CODE = CrashReason.ExitCode;
-crashReasonEnumCompat.SIGNAL = CrashReason.Signal;
-
 export interface CrashEvent {
   name: string;
   pid: number;
@@ -32,7 +26,7 @@ interface ProcessMonitor {
   pid: number;
   heartbeatIntervalMs: number;
   lastHeartbeat: number;
-  timeoutId?: NodeJS.Timeout;
+  timeoutId?: ReturnType<typeof setTimeout>;
 }
 
 export class Watchdog {
@@ -98,9 +92,9 @@ export class Watchdog {
     // Check if process is still running
     const isRunning = this.isProcessRunning(monitor.pid);
 
-    let reason = CrashReason.UNRESPONSIVE;
+    let reason = CrashReason.Unresponsive;
     if (!isRunning) {
-      reason = CrashReason.HEARTBEAT_TIMEOUT;
+      reason = CrashReason.HeartbeatTimeout;
     }
 
     const crashEvent: CrashEvent = {
@@ -122,13 +116,13 @@ export class Watchdog {
     this.unregister(name);
 
     // Classify exit
-    let reason = CrashReason.EXIT_CODE;
+    let reason = CrashReason.ExitCode;
     if (signal) {
       if (signal === "SIGTERM") {
         // Graceful termination - no recovery needed
         return;
       }
-      reason = CrashReason.SIGNAL;
+      reason = CrashReason.Signal;
     } else if (exitCode === 0) {
       // Graceful shutdown - no recovery needed
       return;
