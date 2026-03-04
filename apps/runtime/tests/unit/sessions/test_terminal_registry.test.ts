@@ -32,14 +32,14 @@ describe("TerminalRegistry", () => {
         workspaceId: "ws-1",
         laneId: "lane-1",
         sessionId: "sess-1",
-      }),
+      })
     ).toBe(true);
     expect(
       registry.isOwnedBy("t-2", {
         workspaceId: "ws-1",
         laneId: "lane-2",
         sessionId: "sess-1",
-      }),
+      })
     ).toBe(false);
   });
 
