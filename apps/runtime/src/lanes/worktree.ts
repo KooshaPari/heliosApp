@@ -74,7 +74,12 @@ type SpawnOptions = {
   env?: Record<string, string>;
 };
 
-const spawn = Bun.spawn as unknown as (command: string[], options: SpawnOptions) => SpawnResult;
+const spawn: (command: string[], options: SpawnOptions) => SpawnResult =
+  typeof globalThis["Bun"] !== "undefined"
+    ? (Bun.spawn as unknown as (command: string[], options: SpawnOptions) => SpawnResult)
+    : (() => {
+        throw new Error("worktree module requires Bun runtime");
+      }) as never;
 
 async function runGit(
   args: string[],
