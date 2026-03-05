@@ -28,6 +28,19 @@ function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   };
 }
 
+function spawnShellProcess(): number {
+  const proc = Bun.spawn(["/bin/sh"], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+
+  if (proc.pid === undefined) {
+    throw new Error("Bun.spawn did not return a process ID");
+  }
+
+  return proc.pid;
+}
+
 describe("SignalHistory", () => {
   it("stores and retrieves envelopes", () => {
     const h = new SignalHistory(3);
@@ -63,14 +76,11 @@ describe("resize", () => {
 
   it("updates dimensions and emits events", () => {
     // Spawn a real child so SIGWINCH delivery succeeds.
-    const proc = Bun.spawn(["/bin/sh"], {
-      stdout: "pipe",
-      stderr: "pipe",
-    }) as { pid?: number };
-    pidsToCleanup.push(proc.pid as number);
+    const pid = spawnShellProcess();
+    pidsToCleanup.push(pid);
 
     const registry = new PtyRegistry();
-    const record = makeRecord({ pid: proc.pid as number });
+    const record = makeRecord({ pid });
     registry.register(record);
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
@@ -153,14 +163,11 @@ describe("terminate", () => {
   });
 
   it("terminates with SIGTERM and cleans up", async () => {
-    const proc = Bun.spawn(["/bin/sh"], {
-      stdout: "pipe",
-      stderr: "pipe",
-    }) as { pid?: number };
-    pidsToCleanup.push(proc.pid as number);
+    const pid = spawnShellProcess();
+    pidsToCleanup.push(pid);
 
     const registry = new PtyRegistry();
-    const record = makeRecord({ pid: proc.pid });
+    const record = makeRecord({ pid });
     registry.register(record);
     const lifecycle = new PtyLifecycle(record.ptyId, "active");
     const historyMap: SignalHistoryMap = new Map();
@@ -228,16 +235,10 @@ describe("sendSighup", () => {
 
   it("records successful delivery", () => {
     // Spawn a real child so SIGHUP has a valid target (not the test runner).
-    const proc = Bun.spawn(
-      ["/bin/sh"],
-      {
-        stdout: "pipe",
-        stderr: "pipe",
-      },
-    ) as { pid?: number };
-    pidsToCleanup.push(proc.pid as number);
+    const pid = spawnShellProcess();
+    pidsToCleanup.push(pid);
 
-    const record = makeRecord({ pid: proc.pid as number });
+    const record = makeRecord({ pid });
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
     const envelope = sendSighup(record, historyMap, bus);
