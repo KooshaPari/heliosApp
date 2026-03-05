@@ -27,10 +27,7 @@ function makeMockProc(stdout: string, stderr: string, exitCode: number) {
   };
 }
 
-function makeMockSession(
-  sessionName: string,
-  laneId: string
-): MuxSession {
+function makeMockSession(sessionName: string, laneId: string): MuxSession {
   return {
     sessionName,
     laneId,
@@ -71,9 +68,7 @@ describe("MuxRegistry", () => {
 
     registry.bind("helios-lane-a", "a", session1);
 
-    expect(() =>
-      registry.bind("helios-lane-a", "b", session2)
-    ).toThrow(DuplicateBindingError);
+    expect(() => registry.bind("helios-lane-a", "b", session2)).toThrow(DuplicateBindingError);
   });
 
   it("enforces one-to-one: duplicate lane throws", () => {
@@ -83,9 +78,7 @@ describe("MuxRegistry", () => {
 
     registry.bind("session-1", "lane-1", session1);
 
-    expect(() =>
-      registry.bind("session-2", "lane-1", session2)
-    ).toThrow(DuplicateBindingError);
+    expect(() => registry.bind("session-2", "lane-1", session2)).toThrow(DuplicateBindingError);
   });
 
   it("unbind removes the binding", () => {
@@ -148,9 +141,7 @@ describe("MuxRegistry", () => {
     it("returns bindings for sessions that no longer exist", async () => {
       // Mock CLI to return only one live session
       // @ts-expect-error mock override
-      Bun.spawn = mock(() =>
-        makeMockProc("live-session  2026-02-27 10:00:00", "", 0)
-      );
+      Bun.spawn = mock(() => makeMockProc("live-session  2026-02-27 10:00:00", "", 0));
 
       const cli = new ZellijCli();
       const registry = new MuxRegistry(cli);
@@ -158,11 +149,7 @@ describe("MuxRegistry", () => {
       // Bind multiple sessions
       registry.bind("live-session", "l1", makeMockSession("live-session", "l1"));
       registry.bind("dead-session", "l2", makeMockSession("dead-session", "l2"));
-      registry.bind(
-        "another-dead",
-        "l3",
-        makeMockSession("another-dead", "l3")
-      );
+      registry.bind("another-dead", "l3", makeMockSession("another-dead", "l3"));
 
       const orphaned = await registry.getOrphaned();
 
@@ -178,11 +165,7 @@ describe("MuxRegistry", () => {
     it("returns empty array when all bindings are live", async () => {
       // @ts-expect-error mock override
       Bun.spawn = mock(() =>
-        makeMockProc(
-          "session1  2026-02-27 10:00:00\nsession2  2026-02-27 10:00:00",
-          "",
-          0
-        )
+        makeMockProc("session1  2026-02-27 10:00:00\nsession2  2026-02-27 10:00:00", "", 0),
       );
 
       const cli = new ZellijCli();

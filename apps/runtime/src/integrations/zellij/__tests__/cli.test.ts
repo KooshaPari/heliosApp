@@ -1,10 +1,6 @@
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { ZellijCli } from "../cli.js";
-import {
-  ZellijNotFoundError,
-  ZellijVersionError,
-  ZellijTimeoutError,
-} from "../errors.js";
+import { ZellijNotFoundError, ZellijVersionError, ZellijTimeoutError } from "../errors.js";
 
 /**
  * Unit tests for ZellijCli.
@@ -175,9 +171,7 @@ describe("ZellijCli", () => {
 
     it("returns empty array when no sessions", async () => {
       // @ts-expect-error mock override
-      Bun.spawn = mock(() =>
-        makeMockProc("No active zellij sessions found.", "", 1)
-      );
+      Bun.spawn = mock(() => makeMockProc("No active zellij sessions found.", "", 1));
 
       const cli = new ZellijCli();
       const sessions = await cli.listSessions();
@@ -212,12 +206,7 @@ describe("ZellijCli", () => {
     });
 
     it("handles session names with various formats", async () => {
-      const output = [
-        "simple",
-        "with-dashes",
-        "with_underscores",
-        "MixedCase123",
-      ].join("\n");
+      const output = ["simple", "with-dashes", "with_underscores", "MixedCase123"].join("\n");
 
       // @ts-expect-error mock override
       Bun.spawn = mock(() => makeMockProc(output, "", 0));
@@ -256,13 +245,7 @@ describe("ZellijCli", () => {
     });
 
     it("skips empty lines", async () => {
-      const output = [
-        "session1",
-        "",
-        "session2",
-        "   ",
-        "session3",
-      ].join("\n");
+      const output = ["session1", "", "session2", "   ", "session3"].join("\n");
 
       // @ts-expect-error mock override
       Bun.spawn = mock(() => makeMockProc(output, "", 0));
@@ -298,9 +281,7 @@ describe("ZellijCli", () => {
   describe("checkAvailability edge cases", () => {
     it("handles version with extra text", async () => {
       // @ts-expect-error mock override
-      Bun.spawn = mock(() =>
-        makeMockProc("zellij 0.41.2 (build 12345)\n", "", 0)
-      );
+      Bun.spawn = mock(() => makeMockProc("zellij 0.41.2 (build 12345)\n", "", 0));
 
       const cli = new ZellijCli();
       const result = await cli.checkAvailability();
