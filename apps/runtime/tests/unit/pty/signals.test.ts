@@ -194,9 +194,9 @@ describe("terminate", () => {
     const bus = new InMemoryBusPublisher();
 
     let callCount = 0;
-    const mockWait = async (): Promise<boolean> => {
+    const mockWait = (): Promise<boolean> => {
       callCount++;
-      return callCount > 1;
+      return Promise.resolve(callCount > 1);
     };
 
     await terminate(
@@ -232,12 +232,11 @@ describe("sendSighup", () => {
 
   it("records successful delivery", () => {
     // Spawn a real child so SIGHUP has a valid target (not the test runner).
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const proc = Bun.spawn(["/bin/sh"], {
       stdin: "pipe",
       stdout: "pipe",
       stderr: "pipe",
-    } as any) as any;
+    } as Bun.SpawnOptions<"ignore", "pipe", "pipe">);
     pidsToCleanup.push(proc.pid as number);
 
     const record = makeRecord({ pid: proc.pid as number });
