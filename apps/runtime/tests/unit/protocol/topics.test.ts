@@ -64,18 +64,18 @@ describe("LocalBus — event fan-out", () => {
   // FR-010: snapshot prevents mutation during iteration
   it("uses snapshot: unsubscribe during iteration does not affect delivery", async () => {
     const received: number[] = [];
-    let unsub2: (() => void) | undefined;
+    const unsubscribers: Array<() => void> = [];
 
     bus.subscribe("snapshot.test", () => {
       received.push(1);
       // Subscriber 1 unsubscribes subscriber 2 during iteration
-      if (unsub2) {
-        unsub2();
+      if (unsubscribers[0]) {
+        unsubscribers[0]();
       }
     });
-    unsub2 = bus.subscribe("snapshot.test", () => {
+    unsubscribers.push(bus.subscribe("snapshot.test", () => {
       received.push(2);
-    });
+    }));
     bus.subscribe("snapshot.test", () => {
       received.push(3);
     });
@@ -137,7 +137,7 @@ describe("LocalBus — event fan-out", () => {
   it("silently discards non-event envelope passed to publish", async () => {
     const cmd = {
       id: "cmd_123",
-      correlation_id: "cor_123",
+      "correlation_id": "cor_123",
       timestamp: 1,
       type: "command",
       method: "test",
@@ -154,7 +154,7 @@ describe("LocalBus — event fan-out", () => {
       await new Promise(r => setTimeout(r, 10));
       received.push(1);
     });
-    bus.subscribe("async.order", async () => {
+    bus.subscribe("async.order", () => {
       received.push(2);
     });
 

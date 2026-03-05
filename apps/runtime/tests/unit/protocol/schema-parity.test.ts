@@ -163,7 +163,7 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
 
   it("rejects envelope with missing id", () => {
     const bad = {
-      correlation_id: "cor_123",
+      "correlation_id": "cor_123",
       timestamp: 1,
       type: "command",
       method: "test",
@@ -177,7 +177,7 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   it("rejects envelope with empty id", () => {
     const bad = {
       id: "",
-      correlation_id: "cor_123",
+      "correlation_id": "cor_123",
       timestamp: 1,
       type: "command",
       method: "test",
@@ -190,7 +190,7 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   it("rejects envelope with invalid type", () => {
     const bad = {
       id: "cmd_123",
-      correlation_id: "cor_123",
+      "correlation_id": "cor_123",
       timestamp: 1,
       type: "invalid",
       method: "test",
@@ -203,7 +203,7 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   it("rejects event without sequence", () => {
     const bad = {
       id: "evt_123",
-      correlation_id: "cor_123",
+      "correlation_id": "cor_123",
       timestamp: 1,
       type: "event",
       topic: "test",
@@ -216,7 +216,7 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   it("rejects event without topic", () => {
     const bad = {
       id: "evt_123",
-      correlation_id: "cor_123",
+      "correlation_id": "cor_123",
       timestamp: 1,
       type: "event",
       payload: null,
@@ -234,9 +234,9 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
     expect(schema.required).toContain("type");
 
     // oneOf branches
-    const commandSchema = schema.oneOf?.find((s) => s.title === "CommandEnvelope");
-    const responseSchema = schema.oneOf?.find((s) => s.title === "ResponseEnvelope");
-    const eventSchema = schema.oneOf?.find((s) => s.title === "EventEnvelope");
+    const commandSchema = schema.oneOf?.find(s => s.title === "CommandEnvelope");
+    const responseSchema = schema.oneOf?.find(s => s.title === "ResponseEnvelope");
+    const eventSchema = schema.oneOf?.find(s => s.title === "EventEnvelope");
 
     expect(commandSchema).toBeDefined();
     expect(responseSchema).toBeDefined();
