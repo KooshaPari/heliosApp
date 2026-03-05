@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "packageManager": "bun@1.2.20",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "oxlint -c .oxlintrc.json apps docs/.vitepress playwright.config.ts",
@@ -38,5 +37,6 @@
     "oxlint-tsgolint": "0.16.0",
     "typescript": "5.8.2",
     "vitepress": "1.6.3"
-  }
+  },
+  "packageManager": "bun@1.2.20"
 }

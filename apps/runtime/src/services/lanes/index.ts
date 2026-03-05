@@ -20,10 +20,7 @@ export type { FullReconciliationResult } from "../../lanes/index.js";
 export { NotImplementedError } from "../../lanes/index.js";
 
 // PTY Handle and Manager interfaces
-export type {
-  PtyHandle,
-  PtyManager,
-} from "../../lanes/index.js";
+export type { PtyHandle, PtyManager } from "../../lanes/index.js";
 
 // Lane Bus Event Topic
 export type { LaneBusEventTopic } from "../../lanes/index.js";

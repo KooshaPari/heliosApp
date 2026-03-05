@@ -64,8 +64,14 @@ async function checkFileSizes(files: string[]): Promise<Finding[]> {
   const sections = await loadConstitution().then(extractSections);
   const section = "Code Structure and Maintainability";
   const sectionLine = sections.get(section) || 0;
+  const lockfileNames = new Set(["bun.lock", "package-lock.json", "pnpm-lock.yaml", "yarn.lock"]);
 
   for (const filePath of files) {
+    const baseName = path.basename(filePath);
+    if (lockfileNames.has(baseName)) {
+      // Lockfiles are generated artifacts and can exceed line limits by design.
+      continue;
+    }
     try {
       const content = await fs.readFile(filePath, "utf-8");
       const lines = content.split("\n").length;

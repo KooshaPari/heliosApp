@@ -135,10 +135,7 @@ export class PtyDetector {
     }
   }
 
-  private isSystemProcess(proc: {
-    pid: number;
-    command: string;
-  }): boolean {
+  private isSystemProcess(proc: { pid: number; command: string }): boolean {
     // Filter out common system processes that typically have PTY
     const systemPatterns = [
       /^(kernel_task|launchd|sshd|bash|sh|zsh|tmux|screen)/i,

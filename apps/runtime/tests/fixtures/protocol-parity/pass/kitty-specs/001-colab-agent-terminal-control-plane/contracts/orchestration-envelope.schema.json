@@ -186,7 +186,10 @@
     },
     {
       "if": {
-        "properties": { "type": { "const": "event" }, "topic": { "const": "session.attach.started" } },
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "session.attach.started" }
+        },
         "required": ["type", "topic"]
       },
       "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
@@ -200,14 +203,20 @@
     },
     {
       "if": {
-        "properties": { "type": { "const": "event" }, "topic": { "const": "session.attach.failed" } },
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "session.attach.failed" }
+        },
         "required": ["type", "topic"]
       },
       "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
     },
     {
       "if": {
-        "properties": { "type": { "const": "event" }, "topic": { "const": "terminal.spawn.started" } },
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "terminal.spawn.started" }
+        },
         "required": ["type", "topic"]
       },
       "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
@@ -223,7 +232,10 @@
     },
     {
       "if": {
-        "properties": { "type": { "const": "event" }, "topic": { "const": "terminal.spawn.failed" } },
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "terminal.spawn.failed" }
+        },
         "required": ["type", "topic"]
       },
       "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
