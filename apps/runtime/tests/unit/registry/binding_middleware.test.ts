@@ -151,9 +151,12 @@ describe("BindingMiddleware", () => {
 
       registry.register("terminal-1", triple);
 
-      const receivedBinding = await middleware.wrapOperation("terminal-1", (binding: TerminalBinding) => {
-        return Promise.resolve(binding);
-      });
+      const receivedBinding = await middleware.wrapOperation(
+        "terminal-1",
+        (binding: TerminalBinding) => {
+          return Promise.resolve(binding);
+        }
+      );
 
       expect(receivedBinding.terminalId).toBe("terminal-1");
     });

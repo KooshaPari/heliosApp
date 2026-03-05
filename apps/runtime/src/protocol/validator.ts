@@ -177,10 +177,71 @@ function assertCorrelationId(
       "MISSING_CORRELATION_ID",
       "Envelope field 'correlation_id' is required",
       {
+        // biome-ignore lint/style/useNamingConvention: External protocol field names use snake_case.
         required_by: requiredBy,
         name,
       }
     );
+  }
+}
+
+function validateCommandEnvelope(envelope: Record<string, unknown>): void {
+  const method = assertStringField(envelope, "method");
+  if (!METHOD_SET.has(method)) {
+    throw new ProtocolValidationError("INVALID_METHOD", `Unsupported method '${method}'`, {
+      method,
+    });
+  }
+  assertPayloadObject(envelope);
+
+  const requiredContext = METHOD_CONTEXT_REQUIREMENTS[method];
+  if (requiredContext) {
+    assertContext(envelope, requiredContext);
+  }
+  if (CORRELATION_REQUIRED_METHODS.has(method)) {
+    assertCorrelationId(envelope, "method", method);
+  }
+}
+
+function validateEventEnvelope(envelope: Record<string, unknown>): void {
+  const topic = assertStringField(envelope, "topic");
+  if (!/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/.test(topic)) {
+    throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${topic}'`, {
+      topic,
+    });
+  }
+  assertPayloadObject(envelope);
+
+  const requiredContext = TOPIC_CONTEXT_REQUIREMENTS[topic];
+  if (requiredContext) {
+    assertContext(envelope, requiredContext);
+  }
+  if (CORRELATION_REQUIRED_TOPICS.has(topic)) {
+    assertCorrelationId(envelope, "topic", topic);
+  }
+}
+
+function validateResponseEnvelope(envelope: Record<string, unknown>): void {
+  const status = assertStringField(envelope, "status");
+  if (status !== "ok" && status !== "error") {
+    throw new ProtocolValidationError("INVALID_STATUS", `Unsupported status '${status}'`, {
+      status,
+    });
+  }
+  assertErrorPayload(envelope);
+
+  const method = assertOptionalString(envelope, "method");
+  if (method && !METHOD_SET.has(method)) {
+    throw new ProtocolValidationError("INVALID_METHOD", `Unsupported method '${method}'`, {
+      method,
+    });
+  }
+
+  const topic = assertOptionalString(envelope, "topic");
+  if (topic && !/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/.test(topic)) {
+    throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${topic}'`, {
+      topic,
+    });
   }
 }
 
@@ -212,62 +273,15 @@ export function validateEnvelope(input: unknown): LocalBusEnvelope {
   assertOptionalString(envelope, "correlation_id");
 
   if (type === "command") {
-    const method = assertStringField(envelope, "method");
-    if (!METHOD_SET.has(method)) {
-      throw new ProtocolValidationError("INVALID_METHOD", `Unsupported method '${method}'`, {
-        method,
-      });
-    }
-    assertPayloadObject(envelope);
-
-    const requiredContext = METHOD_CONTEXT_REQUIREMENTS[method];
-    if (requiredContext) {
-      assertContext(envelope, requiredContext);
-    }
-    if (CORRELATION_REQUIRED_METHODS.has(method)) {
-      assertCorrelationId(envelope, "method", method);
-    }
+    validateCommandEnvelope(envelope);
   }
 
   if (type === "event") {
-    const topic = assertStringField(envelope, "topic");
-    // Validate topic format (dotted alphanumeric segments)
-    if (!/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/.test(topic)) {
-      throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${topic}'`, { topic });
-    }
-    assertPayloadObject(envelope);
-
-    const requiredContext = TOPIC_CONTEXT_REQUIREMENTS[topic];
-    if (requiredContext) {
-      assertContext(envelope, requiredContext);
-    }
-    if (CORRELATION_REQUIRED_TOPICS.has(topic)) {
-      assertCorrelationId(envelope, "topic", topic);
-    }
+    validateEventEnvelope(envelope);
   }
 
   if (type === "response") {
-    const status = assertStringField(envelope, "status");
-    if (status !== "ok" && status !== "error") {
-      throw new ProtocolValidationError("INVALID_STATUS", `Unsupported status '${status}'`, {
-        status,
-      });
-    }
-    assertErrorPayload(envelope);
-
-    const method = assertOptionalString(envelope, "method");
-    if (method && !METHOD_SET.has(method)) {
-      throw new ProtocolValidationError("INVALID_METHOD", `Unsupported method '${method}'`, {
-        method,
-      });
-    }
-
-    const topic = assertOptionalString(envelope, "topic");
-    if (topic && !/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/.test(topic)) {
-      throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${topic}'`, {
-        topic,
-      });
-    }
+    validateResponseEnvelope(envelope);
   }
 
   // id is checked for completeness and stable semantics in thrown errors.

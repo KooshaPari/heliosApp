@@ -29,6 +29,7 @@ class MockPolicyGate implements PolicyGate {
     _action: string,
     _context: Record<string, unknown>
   ): Promise<{ allowed: boolean; reason?: string }> {
+    await Promise.resolve();
     if (this.shouldDeny) {
       return {
         allowed: false,
@@ -402,9 +403,9 @@ describe("ACP Client Adapter", () => {
       const events = bus.getEvents();
       const relevantEvents = events.filter(e => e.topic?.startsWith("provider.acp.execute"));
 
-      relevantEvents.forEach(event => {
+      for (const event of relevantEvents) {
         expect(event.payload?.correlationId).toBe(correlationId);
-      });
+      }
     });
 
     it("should preserve correlation ID through error cases", async () => {
