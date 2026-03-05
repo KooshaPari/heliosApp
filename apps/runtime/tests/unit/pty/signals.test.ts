@@ -163,7 +163,7 @@ describe("terminate", () => {
   });
 
   it("terminates with SIGTERM and cleans up", async () => {
-    const pid = spawnShellProcess();
+    const pid = spawnShellProcess() as number;
     pidsToCleanup.push(pid);
 
     const registry = new PtyRegistry();
