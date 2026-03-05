@@ -63,12 +63,10 @@ describe("resize", () => {
 
   it("updates dimensions and emits events", () => {
     // Spawn a real child so SIGWINCH delivery succeeds.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const proc = Bun.spawn(["/bin/sh"], {
-      stdin: "pipe",
       stdout: "pipe",
       stderr: "pipe",
-    } as any) as any;
+    }) as { pid?: number };
     pidsToCleanup.push(proc.pid as number);
 
     const registry = new PtyRegistry();
@@ -155,12 +153,10 @@ describe("terminate", () => {
   });
 
   it("terminates with SIGTERM and cleans up", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const proc = Bun.spawn(["/bin/sh"], {
-      stdin: "pipe",
       stdout: "pipe",
       stderr: "pipe",
-    } as any) as any;
+    }) as { pid?: number };
     pidsToCleanup.push(proc.pid as number);
 
     const registry = new PtyRegistry();
