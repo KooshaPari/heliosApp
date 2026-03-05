@@ -16,7 +16,8 @@ const SUPPRESSION_PATTERNS = [
   { regex: /@ts-expect-error/, name: '@ts-expect-error' },
   { regex: /@ts-nocheck/, name: '@ts-nocheck' },
   { regex: /eslint-disable(-line|-next-line)?/, name: 'eslint-disable' },
-  { regex: /biome-ignore/, name: 'biome-ignore' },
+  { regex: /oxc-ignore/, name: 'oxc-ignore' },
+  { regex: /oxlint-disable(-line|-next-line)?/, name: 'oxlint-disable' },
 ];
 
 const TEST_MARKERS = [

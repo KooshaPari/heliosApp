@@ -43,7 +43,7 @@ jobs:
         timeout-minutes: 3
         continue-on-error: false
 
-      - name: Gate 2 - Biome Lint
+      - name: Gate 2 - OXC Lint
         id: gate-lint
         run: bun run lint
         timeout-minutes: 3

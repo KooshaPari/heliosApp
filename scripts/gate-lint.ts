@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
- * Gate 2: Biome Lint report generator
- * Parses Biome output and generates structured JSON report
+ * Gate 2: OXC Lint report generator
+ * Parses OXC linter output and generates structured JSON report
  */
 
 import { readFileSync, existsSync } from 'fs';
@@ -10,7 +10,7 @@ import { createGateReport, writeGateReport, formatGateReport, type GateFinding }
 const REPORT_OUTPUT = '.gate-reports/gate-lint.json';
 
 /**
- * Parse Biome lint output from log file.
+ * Parse OXC lint output from log file.
  */
 function parseLintLog(): GateFinding[] {
   const findings: GateFinding[] = [];
@@ -23,7 +23,7 @@ function parseLintLog(): GateFinding[] {
   const output = readFileSync(logPath, 'utf-8');
   const lines = output.split('\n');
 
-  // Parse Biome error format: file.ts:line:col - ERROR: message (rule)
+  // Parse OXC error format: file.ts:line:col - error|warning|info: message (rule)
   // or file.ts:line:col - error: message
   const errorPattern = /^(.+?):(\d+):(\d+)\s+-\s+(error|warning|info):\s+(.+?)(?:\s+\((\w+)\))?$/i;
 

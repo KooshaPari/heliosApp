@@ -31,8 +31,8 @@ describe('Bypass Detection Scanner', () => {
     expect(regex.test('// eslint-disable-next-line')).toBe(true);
   });
 
-  test('detects biome-ignore directive', () => {
-    expect(/biome-ignore/.test('// biome-ignore')).toBe(true);
+  test('detects oxc-ignore directive', () => {
+    expect(/oxc-ignore/.test('// oxc-ignore')).toBe(true);
   });
 
   test('detects .skip() in test files', () => {
@@ -83,13 +83,13 @@ describe('Bypass Detection Scanner', () => {
       'const x = 1;',
       '// eslint-disable',
       'const y = 2;',
-      '// biome-ignore',
+      '// oxc-ignore',
     ];
 
     const patterns = [
       { regex: /@ts-ignore/, name: '@ts-ignore' },
       { regex: /eslint-disable(-line|-next-line)?/, name: 'eslint-disable' },
-      { regex: /biome-ignore/, name: 'biome-ignore' },
+      { regex: /oxc-ignore/, name: 'oxc-ignore' },
     ];
 
     let findings = 0;
@@ -131,7 +131,7 @@ describe('Bypass Detection Scanner', () => {
 
   test('valid TypeScript without suppression passes', () => {
     const line = 'const x: number = 42;';
-    const suppressionPattern = /@ts-ignore|@ts-expect-error|@ts-nocheck|eslint-disable|biome-ignore/;
+    const suppressionPattern = /@ts-ignore|@ts-expect-error|@ts-nocheck|eslint-disable|oxc-ignore|oxlint-disable/;
     expect(suppressionPattern.test(line)).toBe(false);
   });
 
