@@ -82,14 +82,14 @@ export class MuxRegistry {
   async getOrphaned(): Promise<MuxBinding[]> {
     if (!this.cli) {
       console.warn(
-        "[zellij-registry] getOrphaned() called without a cli; returning cached bindings only"
+        "[zellij-registry] getOrphaned() called without a cli; returning cached bindings only",
       );
       return [];
     }
 
     const liveSessions = await this.cli.listSessions();
-    const liveNames = new Set(liveSessions.map(s => s.name));
+    const liveNames = new Set(liveSessions.map((s) => s.name));
 
-    return this.list().filter(b => !liveNames.has(b.sessionName));
+    return this.list().filter((b) => !liveNames.has(b.sessionName));
   }
 }

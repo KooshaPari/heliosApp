@@ -163,9 +163,9 @@ export class MuxEventEmitter {
    * Emit an event. Bus failures are caught and logged but never propagated.
    */
   emit(event: MuxEvent): void {
-    this.bus.publish(event).catch(err => {
+    this.bus.publish(event).catch((err) => {
       console.warn(
-        `[mux-events] Bus publish failed for ${event.type}: ${err instanceof Error ? err.message : String(err)}`
+        `[mux-events] Bus publish failed for ${event.type}: ${err instanceof Error ? err.message : String(err)}`,
       );
     });
   }
@@ -174,7 +174,7 @@ export class MuxEventEmitter {
    * Helper to build and emit a typed event with common fields populated.
    */
   emitTyped<T extends MuxEvent>(
-    partial: Omit<T, "timestamp" | "correlationId"> & { correlationId?: string }
+    partial: Omit<T, "timestamp" | "correlationId"> & { correlationId?: string },
   ): void {
     const event = {
       ...partial,

@@ -39,7 +39,7 @@ export class ZellijSessionManager {
       topology?: TopologyTracker;
       ptyManager?: PtyManagerInterface;
       emitter?: MuxEventEmitter;
-    }
+    },
   ) {
     this.cli = cli;
     this.registry = registry;
@@ -57,7 +57,7 @@ export class ZellijSessionManager {
 
     // Check if session already exists
     const existing = await this.cli.listSessions();
-    if (existing.some(s => s.name === sessionName)) {
+    if (existing.some((s) => s.name === sessionName)) {
       throw new SessionAlreadyExistsError(sessionName);
     }
 
@@ -90,11 +90,11 @@ export class ZellijSessionManager {
 
     // Verify session was created
     const postSessions = await this.cli.listSessions();
-    const created = postSessions.find(s => s.name === sessionName);
+    const created = postSessions.find((s) => s.name === sessionName);
 
     const durationMs = performance.now() - startMs;
     console.debug(
-      `[zellij-session] createSession(${laneId}) completed in ${durationMs.toFixed(1)}ms`
+      `[zellij-session] createSession(${laneId}) completed in ${durationMs.toFixed(1)}ms`,
     );
 
     const muxSession: MuxSession = {
@@ -123,7 +123,7 @@ export class ZellijSessionManager {
 
     // Verify the session exists
     const sessions = await this.cli.listSessions();
-    const target = sessions.find(s => s.name === sessionName);
+    const target = sessions.find((s) => s.name === sessionName);
 
     if (!target) {
       throw new SessionNotFoundError(sessionName);
@@ -186,7 +186,7 @@ export class ZellijSessionManager {
 
     const durationMs = performance.now() - startMs;
     console.debug(
-      `[zellij-session] reattachSession(${sessionName}) completed in ${durationMs.toFixed(1)}ms`
+      `[zellij-session] reattachSession(${sessionName}) completed in ${durationMs.toFixed(1)}ms`,
     );
 
     const muxSession: MuxSession = {
@@ -229,7 +229,7 @@ export class ZellijSessionManager {
       !result.stderr.includes("No session")
     ) {
       // Retry once after a delay
-      await new Promise(resolve => setTimeout(resolve, 2_000));
+      await new Promise((resolve) => setTimeout(resolve, 2_000));
       const retry = await this.cli.run(["kill-session", sessionName]);
       if (
         retry.exitCode !== 0 &&
@@ -242,7 +242,7 @@ export class ZellijSessionManager {
 
     // Verify session is gone
     const sessions = await this.cli.listSessions();
-    if (sessions.some(s => s.name === sessionName)) {
+    if (sessions.some((s) => s.name === sessionName)) {
       console.warn(`[zellij-session] Session ${sessionName} still exists after kill attempt`);
     }
 

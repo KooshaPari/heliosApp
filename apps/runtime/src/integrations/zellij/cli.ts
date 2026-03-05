@@ -69,7 +69,7 @@ export class ZellijCli {
 
     // Race between process completion and timeout
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const timeoutPromise = new Promise<"timeout">(resolve => {
+    const timeoutPromise = new Promise<"timeout">((resolve) => {
       timer = setTimeout(() => {
         resolve("timeout");
       }, timeout);
@@ -98,7 +98,7 @@ export class ZellijCli {
 
     // Debug logging for all CLI calls
     console.debug(
-      `[zellij-cli] ${command} -> exit=${exitCode} duration=${durationMs.toFixed(1)}ms`
+      `[zellij-cli] ${command} -> exit=${exitCode} duration=${durationMs.toFixed(1)}ms`,
     );
 
     return { stdout, stderr, exitCode };

@@ -154,7 +154,7 @@ describe("MuxRegistry", () => {
       const orphaned = await registry.getOrphaned();
 
       expect(orphaned).toHaveLength(2);
-      const orphanedNames = orphaned.map(b => b.sessionName);
+      const orphanedNames = orphaned.map((b) => b.sessionName);
       expect(orphanedNames).toContain("dead-session");
       expect(orphanedNames).toContain("another-dead");
       expect(orphanedNames).not.toContain("live-session");
@@ -165,7 +165,7 @@ describe("MuxRegistry", () => {
     it("returns empty array when all bindings are live", async () => {
       // @ts-expect-error mock override
       Bun.spawn = mock(() =>
-        makeMockProc("session1  2026-02-27 10:00:00\nsession2  2026-02-27 10:00:00", "", 0)
+        makeMockProc("session1  2026-02-27 10:00:00\nsession2  2026-02-27 10:00:00", "", 0),
       );
 
       const cli = new ZellijCli();
