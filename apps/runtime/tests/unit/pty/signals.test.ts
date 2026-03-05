@@ -32,7 +32,7 @@ function spawnShellProcess(): number {
   const proc = Bun.spawn(["/bin/sh"], {
     stdout: "pipe",
     stderr: "pipe",
-  });
+  }) as { pid?: number };
 
   if (proc.pid === undefined) {
     throw new Error("Bun.spawn did not return a process ID");
