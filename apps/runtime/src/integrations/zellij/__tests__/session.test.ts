@@ -2,10 +2,7 @@ import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { ZellijCli } from "../cli.js";
 import { MuxRegistry } from "../registry.js";
 import { ZellijSessionManager, sessionNameForLane } from "../session.js";
-import {
-  SessionAlreadyExistsError,
-  SessionNotFoundError,
-} from "../errors.js";
+import { SessionAlreadyExistsError, SessionNotFoundError } from "../errors.js";
 
 // Helper to create a mock spawn result
 function makeMockProc(stdout: string, stderr: string, exitCode: number) {
@@ -76,17 +73,13 @@ describe("ZellijSessionManager", () => {
 
     it("throws SessionAlreadyExistsError if session exists", async () => {
       // @ts-expect-error mock override
-      Bun.spawn = mock(() =>
-        makeMockProc("helios-lane-dup  2026-02-27 10:00:00", "", 0)
-      );
+      Bun.spawn = mock(() => makeMockProc("helios-lane-dup  2026-02-27 10:00:00", "", 0));
 
       const cli = new ZellijCli();
       const registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
-      expect(manager.createSession("dup")).rejects.toThrow(
-        SessionAlreadyExistsError
-      );
+      expect(manager.createSession("dup")).rejects.toThrow(SessionAlreadyExistsError);
 
       Bun.spawn = originalSpawn;
     });
@@ -95,13 +88,7 @@ describe("ZellijSessionManager", () => {
   describe("reattachSession", () => {
     it("reattaches to an existing session", async () => {
       // @ts-expect-error mock override
-      Bun.spawn = mock(() =>
-        makeMockProc(
-          "helios-lane-reattach  2026-02-27 10:00:00",
-          "",
-          0
-        )
-      );
+      Bun.spawn = mock(() => makeMockProc("helios-lane-reattach  2026-02-27 10:00:00", "", 0));
 
       const cli = new ZellijCli();
       const registry = new MuxRegistry();
@@ -124,9 +111,7 @@ describe("ZellijSessionManager", () => {
       const registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
-      expect(
-        manager.reattachSession("helios-lane-missing")
-      ).rejects.toThrow(SessionNotFoundError);
+      expect(manager.reattachSession("helios-lane-missing")).rejects.toThrow(SessionNotFoundError);
 
       Bun.spawn = originalSpawn;
     });
@@ -140,11 +125,7 @@ describe("ZellijSessionManager", () => {
         callCount++;
         if (callCount <= 2) {
           // listSessions for reattach (called twice - panes + tabs query may also call)
-          return makeMockProc(
-            "helios-lane-term  2026-02-27 10:00:00",
-            "",
-            0
-          );
+          return makeMockProc("helios-lane-term  2026-02-27 10:00:00", "", 0);
         }
         if (callCount <= 5) {
           // kill-session or subsequent listSessions (empty)
@@ -170,9 +151,7 @@ describe("ZellijSessionManager", () => {
 
     it("is idempotent for non-existent sessions", async () => {
       // @ts-expect-error mock override
-      Bun.spawn = mock(() =>
-        makeMockProc("", "No session named 'foo' found.", 1)
-      );
+      Bun.spawn = mock(() => makeMockProc("", "No session named 'foo' found.", 1));
 
       const cli = new ZellijCli();
       const registry = new MuxRegistry();
@@ -191,11 +170,7 @@ describe("ZellijSessionManager", () => {
         callCount++;
         if (callCount === 1) {
           // listSessions for reattach
-          return makeMockProc(
-            "helios-lane-fail  2026-02-27 10:00:00",
-            "",
-            0
-          );
+          return makeMockProc("helios-lane-fail  2026-02-27 10:00:00", "", 0);
         }
         if (callCount === 2 || callCount === 3) {
           // dump-layout calls
@@ -227,9 +202,7 @@ describe("ZellijSessionManager", () => {
   describe("edge cases and private methods", () => {
     it("handles non-standard session names in extractLaneId", async () => {
       // @ts-expect-error mock override
-      Bun.spawn = mock(() =>
-        makeMockProc("non-standard-name  2026-02-27 10:00:00", "", 0)
-      );
+      Bun.spawn = mock(() => makeMockProc("non-standard-name  2026-02-27 10:00:00", "", 0));
 
       const cli = new ZellijCli();
       const registry = new MuxRegistry();
@@ -303,9 +276,7 @@ describe("ZellijSessionManager", () => {
 
     it("reattachSession unbinds stale binding before rebinding", async () => {
       // @ts-expect-error mock override
-      Bun.spawn = mock(() =>
-        makeMockProc("helios-lane-rebind  2026-02-27 10:00:00", "", 0)
-      );
+      Bun.spawn = mock(() => makeMockProc("helios-lane-rebind  2026-02-27 10:00:00", "", 0));
 
       const cli = new ZellijCli();
       const registry = new MuxRegistry();
@@ -321,9 +292,7 @@ describe("ZellijSessionManager", () => {
 
       // Should have replaced the binding
       expect(binding2).toBeDefined();
-      expect(binding2?.boundAt.getTime()).toBeGreaterThanOrEqual(
-        binding1!.boundAt.getTime()
-      );
+      expect(binding2?.boundAt.getTime()).toBeGreaterThanOrEqual(binding1!.boundAt.getTime());
 
       Bun.spawn = originalSpawn;
     });
@@ -331,9 +300,7 @@ describe("ZellijSessionManager", () => {
     it("sessionNameForLane handles various lane ID formats", () => {
       expect(sessionNameForLane("simple")).toBe("helios-lane-simple");
       expect(sessionNameForLane("with-dashes")).toBe("helios-lane-with-dashes");
-      expect(sessionNameForLane("with_underscores")).toBe(
-        "helios-lane-with_underscores"
-      );
+      expect(sessionNameForLane("with_underscores")).toBe("helios-lane-with_underscores");
       expect(sessionNameForLane("123")).toBe("helios-lane-123");
     });
 
