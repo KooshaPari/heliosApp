@@ -162,8 +162,9 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   });
 
   it("rejects envelope with missing id", () => {
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
     const bad = {
-      "correlation_id": "cor_123",
+      correlation_id: "cor_123",
       timestamp: 1,
       type: "command",
       method: "test",
@@ -175,9 +176,10 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   });
 
   it("rejects envelope with empty id", () => {
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
     const bad = {
       id: "",
-      "correlation_id": "cor_123",
+      correlation_id: "cor_123",
       timestamp: 1,
       type: "command",
       method: "test",
@@ -188,9 +190,10 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   });
 
   it("rejects envelope with invalid type", () => {
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
     const bad = {
       id: "cmd_123",
-      "correlation_id": "cor_123",
+      correlation_id: "cor_123",
       timestamp: 1,
       type: "invalid",
       method: "test",
@@ -201,9 +204,10 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   });
 
   it("rejects event without sequence", () => {
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
     const bad = {
       id: "evt_123",
-      "correlation_id": "cor_123",
+      correlation_id: "cor_123",
       timestamp: 1,
       type: "event",
       topic: "test",
@@ -214,9 +218,10 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   });
 
   it("rejects event without topic", () => {
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
     const bad = {
       id: "evt_123",
-      "correlation_id": "cor_123",
+      correlation_id: "cor_123",
       timestamp: 1,
       type: "event",
       payload: null,

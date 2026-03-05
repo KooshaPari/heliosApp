@@ -135,9 +135,10 @@ describe("LocalBus — event fan-out", () => {
   });
 
   it("silently discards non-event envelope passed to publish", async () => {
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
     const cmd = {
       id: "cmd_123",
-      "correlation_id": "cor_123",
+      correlation_id: "cor_123",
       timestamp: 1,
       type: "command",
       method: "test",
