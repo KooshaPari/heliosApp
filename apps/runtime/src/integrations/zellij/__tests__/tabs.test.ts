@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
-import type { ZellijCli } from "../cli.js";
-import { TabNotFoundError } from "../errors.js";
-import { ZellijPaneManager } from "../panes.js";
+import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { ZellijTabManager } from "../tabs.js";
+import { ZellijPaneManager } from "../panes.js";
 import { TopologyTracker } from "../topology.js";
+import { TabNotFoundError } from "../errors.js";
+import type { ZellijCli } from "../cli.js";
 import type { PtyManagerInterface } from "../types.js";
 
 /**
@@ -64,7 +64,7 @@ describe("ZellijTabManager", () => {
       await tabManager.createTab("test-session", "work");
 
       const runMock = cli.run as ReturnType<typeof mock>;
-      const callArgs = runMock.mock.calls[0]?.[0] as string[];
+      const callArgs = runMock.mock.calls[0]![0] as string[];
       expect(callArgs).toContain("new-tab");
       expect(callArgs).toContain("--name");
       expect(callArgs).toContain("work");
@@ -87,7 +87,7 @@ describe("ZellijTabManager", () => {
 
       // Bind a PTY to the default pane in the new tab
       const topo = topology.getTopology("test-session")!;
-      const newTab = topo.tabs.find(t => t.tabId === record.index)!;
+      const newTab = topo.tabs.find((t) => t.tabId === record.index)!;
       if (newTab.panes[0]) {
         topology.bindPty("test-session", newTab.panes[0].paneId, "pty-tab-1");
       }
@@ -96,17 +96,21 @@ describe("ZellijTabManager", () => {
 
       expect(ptyManager.terminate).toHaveBeenCalledWith("pty-tab-1");
       const updated = topology.getTopology("test-session")!;
-      expect(updated.tabs.find(t => t.tabId === record.index)).toBeUndefined();
+      expect(updated.tabs.find((t) => t.tabId === record.index)).toBeUndefined();
     });
 
     it("throws TabNotFoundError for non-existent tab", async () => {
       topology.initializeTopology("test-session");
 
-      expect(tabManager.closeTab("test-session", 999)).rejects.toThrow(TabNotFoundError);
+      expect(tabManager.closeTab("test-session", 999)).rejects.toThrow(
+        TabNotFoundError,
+      );
     });
 
     it("throws TabNotFoundError for non-existent session", async () => {
-      expect(tabManager.closeTab("no-session", 0)).rejects.toThrow(TabNotFoundError);
+      expect(tabManager.closeTab("no-session", 0)).rejects.toThrow(
+        TabNotFoundError,
+      );
     });
   });
 
@@ -124,7 +128,9 @@ describe("ZellijTabManager", () => {
     it("throws TabNotFoundError for non-existent tab", async () => {
       topology.initializeTopology("test-session");
 
-      expect(tabManager.switchTab("test-session", 999)).rejects.toThrow(TabNotFoundError);
+      expect(tabManager.switchTab("test-session", 999)).rejects.toThrow(
+        TabNotFoundError,
+      );
     });
   });
 

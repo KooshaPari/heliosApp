@@ -85,7 +85,7 @@ export function emitPtyEvent(
   bus: BusPublisher,
   topic: PtyEventTopic,
   correlation: PtyEventCorrelation,
-  payload: Record<string, unknown> = {}
+  payload: Record<string, unknown> = {},
 ): void {
   const event: PtyBusEvent = {
     id: crypto.randomUUID(),

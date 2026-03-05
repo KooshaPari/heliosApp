@@ -3,9 +3,9 @@
  * Persists renderer settings across sessions
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { dirname, resolve } from "node:path";
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { homedir } from 'os';
 
 export interface RendererPreferences {
   activeRenderer: string;
@@ -13,21 +13,21 @@ export interface RendererPreferences {
 }
 
 const DEFAULT_PREFERENCES: RendererPreferences = {
-  activeRenderer: "ghostty",
+  activeRenderer: 'ghostty',
   hotSwapEnabled: true,
 };
 
 export class RendererPreferencesManager {
   private preferencesPath: string;
   private preferences: RendererPreferences = { ...DEFAULT_PREFERENCES };
-  private isDirty = false;
+  private isDirty: boolean = false;
 
   constructor(preferencesPath?: string) {
     if (preferencesPath) {
       this.preferencesPath = preferencesPath;
     } else {
-      const heliosDataDir = resolve(homedir(), ".helios", "data");
-      this.preferencesPath = resolve(heliosDataDir, "renderer_preferences.json");
+      const heliosDataDir = resolve(homedir(), '.helios', 'data');
+      this.preferencesPath = resolve(heliosDataDir, 'renderer_preferences.json');
     }
   }
 
@@ -36,18 +36,23 @@ export class RendererPreferencesManager {
 
     try {
       if (this.doesFileExist()) {
-        const content = readFileSync(this.preferencesPath, "utf-8");
+        const content = readFileSync(this.preferencesPath, 'utf-8');
         const loaded = JSON.parse(content);
 
         // Validate loaded preferences
         if (this.isValidPreferences(loaded)) {
           this.preferences = loaded;
-          const _loadTime = performance.now() - startTime;
+          const loadTime = performance.now() - startTime;
+          console.log(`Renderer preferences loaded in ${loadTime.toFixed(2)}ms`);
           return { ...this.preferences };
+        } else {
+          console.warn('Invalid preferences file, using defaults');
+          return { ...DEFAULT_PREFERENCES };
         }
-        return { ...DEFAULT_PREFERENCES };
       }
-    } catch (_error) {}
+    } catch (error) {
+      console.warn('Failed to load renderer preferences, using defaults', error);
+    }
 
     this.preferences = { ...DEFAULT_PREFERENCES };
     return { ...this.preferences };
@@ -59,10 +64,13 @@ export class RendererPreferencesManager {
       this.ensureDirectoryExists();
 
       const content = JSON.stringify(this.preferences, null, 2);
-      writeFileSync(this.preferencesPath, content, "utf-8");
+      writeFileSync(this.preferencesPath, content, 'utf-8');
 
       this.isDirty = false;
-    } catch (_error) {}
+      console.log('Renderer preferences saved');
+    } catch (error) {
+      console.error('Failed to save renderer preferences', error);
+    }
   }
 
   getActiveRenderer(): string {
@@ -112,15 +120,17 @@ export class RendererPreferencesManager {
     const dir = dirname(this.preferencesPath);
     try {
       mkdirSync(dir, { recursive: true });
-    } catch (_error) {}
+    } catch (error) {
+      console.error('Failed to create preferences directory', error);
+    }
   }
 
   private isValidPreferences(obj: any): boolean {
     return (
       obj &&
-      typeof obj === "object" &&
-      typeof obj.activeRenderer === "string" &&
-      typeof obj.hotSwapEnabled === "boolean"
+      typeof obj === 'object' &&
+      typeof obj.activeRenderer === 'string' &&
+      typeof obj.hotSwapEnabled === 'boolean'
     );
   }
 }
@@ -134,6 +144,8 @@ export function getRendererPreferencesManager(): RendererPreferencesManager {
   return _instance;
 }
 
-export function createRendererPreferencesManager(path?: string): RendererPreferencesManager {
+export function createRendererPreferencesManager(
+  path?: string
+): RendererPreferencesManager {
   return new RendererPreferencesManager(path);
 }

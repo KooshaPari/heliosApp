@@ -6,11 +6,11 @@
  * Tags: FR-011-004, SC-011-002
  */
 
-import { afterEach, describe, expect, test } from "bun:test";
+import { describe, test, expect, afterEach } from "bun:test";
 import {
-  clearCapabilityCache,
   detectCapabilities,
   getCachedCapabilities,
+  clearCapabilityCache,
 } from "../../../../src/renderer/ghostty/capabilities.js";
 
 afterEach(() => {
@@ -45,7 +45,7 @@ describe("Capability detection", () => {
   });
 
   test("detectCapabilities forceRefresh re-detects", async () => {
-    const _caps1 = await detectCapabilities();
+    const caps1 = await detectCapabilities();
     const caps2 = await detectCapabilities(true);
     // Both valid but may be different objects
     expect(caps2).toBeDefined();

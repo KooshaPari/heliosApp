@@ -1,90 +1,90 @@
-import { describe, expect, test } from "bun:test";
+import { expect, test, describe } from 'bun:test';
 import {
-  type GateFinding,
-  type GateReport,
-  aggregateGateReports,
   createGateReport,
+  aggregateGateReports,
   formatGateReport,
   formatPipelineSummary,
-} from "../gate-report";
+  type GateFinding,
+  type GateReport,
+} from '../gate-report';
 
-describe("Gate Report Generator", () => {
-  test("create pass report with no findings", () => {
-    const report = createGateReport("typecheck", [], 100);
+describe('Gate Report Generator', () => {
+  test('create pass report with no findings', () => {
+    const report = createGateReport('typecheck', [], 100);
 
-    expect(report.gateName).toBe("typecheck");
-    expect(report.status).toBe("pass");
+    expect(report.gateName).toBe('typecheck');
+    expect(report.status).toBe('pass');
     expect(report.findings.length).toBe(0);
     expect(report.duration).toBe(100);
     expect(report.summary?.errors).toBe(0);
   });
 
-  test("create fail report with error findings", () => {
+  test('create fail report with error findings', () => {
     const findings: GateFinding[] = [
       {
-        file: "app.ts",
+        file: 'app.ts',
         line: 10,
         column: 5,
-        message: "Type error",
-        severity: "error",
-        rule: "TS7006",
+        message: 'Type error',
+        severity: 'error',
+        rule: 'TS7006',
       },
     ];
 
-    const report = createGateReport("typecheck", findings, 200);
+    const report = createGateReport('typecheck', findings, 200);
 
-    expect(report.gateName).toBe("typecheck");
-    expect(report.status).toBe("fail");
+    expect(report.gateName).toBe('typecheck');
+    expect(report.status).toBe('fail');
     expect(report.findings.length).toBe(1);
     expect(report.summary?.errors).toBe(1);
   });
 
-  test("count findings by severity", () => {
+  test('count findings by severity', () => {
     const findings: GateFinding[] = [
       {
-        file: "app.ts",
+        file: 'app.ts',
         line: 1,
-        message: "Error 1",
-        severity: "error",
+        message: 'Error 1',
+        severity: 'error',
       },
       {
-        file: "app.ts",
+        file: 'app.ts',
         line: 2,
-        message: "Error 2",
-        severity: "error",
+        message: 'Error 2',
+        severity: 'error',
       },
       {
-        file: "app.ts",
+        file: 'app.ts',
         line: 3,
-        message: "Warning 1",
-        severity: "warning",
+        message: 'Warning 1',
+        severity: 'warning',
       },
       {
-        file: "app.ts",
+        file: 'app.ts',
         line: 4,
-        message: "Info 1",
-        severity: "info",
+        message: 'Info 1',
+        severity: 'info',
       },
     ];
 
-    const report = createGateReport("lint", findings, 150);
+    const report = createGateReport('lint', findings, 150);
 
     expect(report.summary?.errors).toBe(2);
     expect(report.summary?.warnings).toBe(1);
     expect(report.summary?.infos).toBe(1);
   });
 
-  test("aggregate gate reports into pipeline summary", () => {
-    const report1 = createGateReport("typecheck", [], 100);
-    const report2 = createGateReport("lint", [], 150);
+  test('aggregate gate reports into pipeline summary', () => {
+    const report1 = createGateReport('typecheck', [], 100);
+    const report2 = createGateReport('lint', [], 150);
     const report3: GateReport = {
-      gateName: "test",
-      status: "fail",
+      gateName: 'test',
+      status: 'fail',
       findings: [
         {
-          file: "test.ts",
-          message: "Test failed",
-          severity: "error",
+          file: 'test.ts',
+          message: 'Test failed',
+          severity: 'error',
         },
       ],
       duration: 200,
@@ -95,53 +95,53 @@ describe("Gate Report Generator", () => {
     const summary = aggregateGateReports([report1, report2, report3]);
 
     expect(summary.gates.length).toBe(3);
-    expect(summary.status).toBe("fail");
-    expect(summary.failedGates).toEqual(["test"]);
+    expect(summary.status).toBe('fail');
+    expect(summary.failedGates).toEqual(['test']);
     expect(summary.totalDuration).toBe(450);
   });
 
-  test("pipeline summary passes when all gates pass", () => {
-    const report1 = createGateReport("typecheck", [], 100);
-    const report2 = createGateReport("lint", [], 150);
+  test('pipeline summary passes when all gates pass', () => {
+    const report1 = createGateReport('typecheck', [], 100);
+    const report2 = createGateReport('lint', [], 150);
 
     const summary = aggregateGateReports([report1, report2]);
 
-    expect(summary.status).toBe("pass");
+    expect(summary.status).toBe('pass');
     expect(summary.failedGates.length).toBe(0);
   });
 
-  test("gate report includes timestamp", () => {
-    const report = createGateReport("typecheck", [], 100);
+  test('gate report includes timestamp', () => {
+    const report = createGateReport('typecheck', [], 100);
     expect(report.timestamp).toBeDefined();
     expect(new Date(report.timestamp).getTime()).toBeGreaterThan(0);
   });
 
-  test("format gate report for display", () => {
+  test('format gate report for display', () => {
     const findings: GateFinding[] = [
       {
-        file: "app.ts",
+        file: 'app.ts',
         line: 10,
         column: 5,
-        message: "Type error",
-        severity: "error",
-        rule: "TS7006",
+        message: 'Type error',
+        severity: 'error',
+        rule: 'TS7006',
       },
     ];
 
-    const report = createGateReport("typecheck", findings, 100);
+    const report = createGateReport('typecheck', findings, 100);
     const formatted = formatGateReport(report);
 
-    expect(formatted).toContain("Gate: typecheck");
-    expect(formatted).toContain("Status: FAIL");
-    expect(formatted).toContain("app.ts:10");
-    expect(formatted).toContain("Type error");
+    expect(formatted).toContain('Gate: typecheck');
+    expect(formatted).toContain('Status: FAIL');
+    expect(formatted).toContain('app.ts:10');
+    expect(formatted).toContain('Type error');
   });
 
-  test("format pipeline summary for display", () => {
-    const report1 = createGateReport("typecheck", [], 100);
+  test('format pipeline summary for display', () => {
+    const report1 = createGateReport('typecheck', [], 100);
     const report2: GateReport = {
-      gateName: "lint",
-      status: "fail",
+      gateName: 'lint',
+      status: 'fail',
       findings: [],
       duration: 150,
       timestamp: new Date().toISOString(),
@@ -151,63 +151,63 @@ describe("Gate Report Generator", () => {
     const summary = aggregateGateReports([report1, report2]);
     const formatted = formatPipelineSummary(summary);
 
-    expect(formatted).toContain("QUALITY GATES SUMMARY");
-    expect(formatted).toContain("Status: FAIL");
-    expect(formatted).toContain("Gates Executed: 2");
-    expect(formatted).toContain("Failed Gates:");
+    expect(formatted).toContain('QUALITY GATES SUMMARY');
+    expect(formatted).toContain('Status: FAIL');
+    expect(formatted).toContain('Gates Executed: 2');
+    expect(formatted).toContain('Failed Gates:');
   });
 
-  test("gate finding with all optional fields", () => {
+  test('gate finding with all optional fields', () => {
     const finding: GateFinding = {
-      file: "src/app.ts",
+      file: 'src/app.ts',
       line: 42,
       column: 15,
-      message: "Complex error",
-      severity: "error",
-      rule: "custom-rule",
-      remediation: "Fix by doing X",
+      message: 'Complex error',
+      severity: 'error',
+      rule: 'custom-rule',
+      remediation: 'Fix by doing X',
     };
 
-    expect(finding.file).toBe("src/app.ts");
+    expect(finding.file).toBe('src/app.ts');
     expect(finding.line).toBe(42);
     expect(finding.column).toBe(15);
-    expect(finding.rule).toBe("custom-rule");
-    expect(finding.remediation).toBe("Fix by doing X");
+    expect(finding.rule).toBe('custom-rule');
+    expect(finding.remediation).toBe('Fix by doing X');
   });
 
-  test("gate finding without optional fields", () => {
+  test('gate finding without optional fields', () => {
     const finding: GateFinding = {
-      file: "src/app.ts",
-      message: "Simple error",
-      severity: "error",
+      file: 'src/app.ts',
+      message: 'Simple error',
+      severity: 'error',
     };
 
-    expect(finding.file).toBe("src/app.ts");
+    expect(finding.file).toBe('src/app.ts');
     expect(finding.line).toBeUndefined();
     expect(finding.column).toBeUndefined();
     expect(finding.rule).toBeUndefined();
   });
 
-  test("multiple gate reports with mixed pass/fail", () => {
+  test('multiple gate reports with mixed pass/fail', () => {
     const reports: GateReport[] = [
-      createGateReport("typecheck", [], 100),
-      createGateReport("lint", [], 150),
+      createGateReport('typecheck', [], 100),
+      createGateReport('lint', [], 150),
       {
-        gateName: "test",
-        status: "fail",
-        findings: [{ file: "test.ts", message: "Failed", severity: "error" }],
+        gateName: 'test',
+        status: 'fail',
+        findings: [{ file: 'test.ts', message: 'Failed', severity: 'error' }],
         duration: 200,
         timestamp: new Date().toISOString(),
         summary: { errors: 1, warnings: 0, infos: 0 },
       },
-      createGateReport("e2e", [], 300),
+      createGateReport('e2e', [], 300),
     ];
 
     const summary = aggregateGateReports(reports);
 
     expect(summary.gates.length).toBe(4);
-    expect(summary.status).toBe("fail");
-    expect(summary.failedGates).toEqual(["test"]);
+    expect(summary.status).toBe('fail');
+    expect(summary.failedGates).toEqual(['test']);
     expect(summary.totalDuration).toBe(750);
   });
 });

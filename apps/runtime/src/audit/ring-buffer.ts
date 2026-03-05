@@ -1,4 +1,4 @@
-import type { AuditEvent } from "./event.ts";
+import { AuditEvent } from './event';
 
 /**
  * Filter options for ring buffer queries.
@@ -9,7 +9,6 @@ export interface AuditFilter {
   sessionId?: string;
   actor?: string;
   eventType?: string;
-  correlationId?: string;
   startTime?: Date;
   endTime?: Date;
 }
@@ -31,18 +30,18 @@ export interface RingBufferMetrics {
  */
 export class AuditRingBuffer {
   private buffer: (AuditEvent | undefined)[];
-  private head = 0;
-  private tail = 0;
-  private size = 0;
-  private totalEventsProcessed = 0;
-  private totalEventsEvicted = 0;
+  private head: number = 0;
+  private tail: number = 0;
+  private size: number = 0;
+  private totalEventsProcessed: number = 0;
+  private totalEventsEvicted: number = 0;
 
   /**
    * Create a new ring buffer with specified capacity.
    *
    * @param capacity - Maximum number of events to hold (default 10,000)
    */
-  constructor(private capacity = 10_000) {
+  constructor(private capacity: number = 10_000) {
     this.buffer = new Array(capacity);
   }
 
@@ -62,7 +61,6 @@ export class AuditRingBuffer {
       // Buffer is full; evict the oldest event at head
       evicted = this.buffer[this.head];
       this.totalEventsEvicted++;
-      this.head = (this.head + 1) % this.capacity;
     } else {
       this.size++;
     }
@@ -70,6 +68,11 @@ export class AuditRingBuffer {
     // Insert at tail
     this.buffer[this.tail] = event;
     this.tail = (this.tail + 1) % this.capacity;
+
+    // Move head if buffer is full
+    if (this.size === this.capacity) {
+      this.head = (this.head + 1) % this.capacity;
+    }
 
     return evicted;
   }
@@ -113,9 +116,7 @@ export class AuditRingBuffer {
       const index = (this.head + i) % this.capacity;
       const event = this.buffer[index];
 
-      if (!event) {
-        continue;
-      }
+      if (!event) continue;
 
       if (!this.matchesFilter(event, filter)) {
         continue;
@@ -134,7 +135,7 @@ export class AuditRingBuffer {
    * @returns Array of matching events
    */
   getByCorrelationId(correlationId: string): AuditEvent[] {
-    return this.query({ correlationId });
+    return this.query({ correlationId: correlationId as any });
   }
 
   /**
@@ -185,10 +186,6 @@ export class AuditRingBuffer {
     }
 
     if (filter.eventType && event.eventType !== filter.eventType) {
-      return false;
-    }
-
-    if (filter.correlationId && event.correlationId !== filter.correlationId) {
       return false;
     }
 

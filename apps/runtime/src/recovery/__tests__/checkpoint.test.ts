@@ -1,14 +1,15 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
-  type Checkpoint,
-  CheckpointReader,
-  type CheckpointSession,
   CheckpointWriter,
+  CheckpointReader,
+  type Checkpoint,
+  type CheckpointSession,
   estimateCheckpointSize,
+  MAX_SCROLLBACK_SIZE,
 } from "../checkpoint.js";
+import { promises as fs } from "fs";
+import path from "path";
+import os from "os";
 
 describe("CheckpointWriter and CheckpointReader", () => {
   let writer: CheckpointWriter;
@@ -49,10 +50,7 @@ describe("CheckpointWriter and CheckpointReader", () => {
       await writer.write(checkpoint);
 
       const checkpointPath = writer.getCheckpointPath();
-      const exists = await fs
-        .access(checkpointPath)
-        .then(() => true)
-        .catch(() => false);
+      const exists = await fs.access(checkpointPath).then(() => true).catch(() => false);
       expect(exists).toBe(true);
 
       const content = await fs.readFile(checkpointPath, "utf-8");
@@ -84,18 +82,12 @@ describe("CheckpointWriter and CheckpointReader", () => {
 
       // Temp file should not exist after write
       const tempPath = `${writer.getCheckpointPath()}.tmp`;
-      const tempExists = await fs
-        .access(tempPath)
-        .then(() => true)
-        .catch(() => false);
+      const tempExists = await fs.access(tempPath).then(() => true).catch(() => false);
       expect(tempExists).toBe(false);
 
       // Final file should exist
       const checkpointPath = writer.getCheckpointPath();
-      const exists = await fs
-        .access(checkpointPath)
-        .then(() => true)
-        .catch(() => false);
+      const exists = await fs.access(checkpointPath).then(() => true).catch(() => false);
       expect(exists).toBe(true);
     });
 
@@ -131,10 +123,7 @@ describe("CheckpointWriter and CheckpointReader", () => {
       });
 
       const backupPath = `${writer.getCheckpointPath()}.backup`;
-      const backupExists = await fs
-        .access(backupPath)
-        .then(() => true)
-        .catch(() => false);
+      const backupExists = await fs.access(backupPath).then(() => true).catch(() => false);
       expect(backupExists).toBe(true);
 
       const backupContent = await fs.readFile(backupPath, "utf-8");
@@ -198,8 +187,8 @@ describe("CheckpointWriter and CheckpointReader", () => {
 
       // Corrupt the file
       const checkpointPath = writer.getCheckpointPath();
-      const content = await fs.readFile(checkpointPath, "utf-8");
-      const parsed = JSON.parse(content) as Checkpoint;
+      let content = await fs.readFile(checkpointPath, "utf-8");
+      let parsed = JSON.parse(content) as Checkpoint;
       parsed.checksum = "invalid-checksum";
       await fs.writeFile(checkpointPath, JSON.stringify(parsed));
 
@@ -238,8 +227,8 @@ describe("CheckpointWriter and CheckpointReader", () => {
 
       // Corrupt primary
       const checkpointPath = writer.getCheckpointPath();
-      const content = await fs.readFile(checkpointPath, "utf-8");
-      const parsed = JSON.parse(content) as Checkpoint;
+      let content = await fs.readFile(checkpointPath, "utf-8");
+      let parsed = JSON.parse(content) as Checkpoint;
       parsed.checksum = "invalid";
       await fs.writeFile(checkpointPath, JSON.stringify(parsed));
 
@@ -293,10 +282,7 @@ describe("CheckpointWriter and CheckpointReader", () => {
       });
 
       // Stale temp file should be cleaned
-      const stillExists = await fs
-        .access(tempPath)
-        .then(() => true)
-        .catch(() => false);
+      const stillExists = await fs.access(tempPath).then(() => true).catch(() => false);
       expect(stillExists).toBe(false);
     });
   });

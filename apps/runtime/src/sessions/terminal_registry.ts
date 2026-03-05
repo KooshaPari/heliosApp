@@ -47,7 +47,7 @@ export class TerminalRegistry {
       session_id: input.session_id,
       title: input.title ?? "Terminal",
       state: "spawning",
-      last_output_seq: 0,
+      last_output_seq: 0
     };
 
     this.terminals.set(terminal.terminal_id, terminal);
@@ -74,9 +74,9 @@ export class TerminalRegistry {
       return [];
     }
     return Array.from(terminalIds)
-      .map(terminalId => this.terminals.get(terminalId))
+      .map((terminalId) => this.terminals.get(terminalId))
       .filter((terminal): terminal is TerminalContext => terminal !== undefined)
-      .map(terminal => ({ ...terminal }));
+      .map((terminal) => ({ ...terminal }));
   }
 
   setState(terminalId: string, state: TerminalLifecycleState): TerminalContext | undefined {

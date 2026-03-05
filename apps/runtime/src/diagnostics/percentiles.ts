@@ -19,7 +19,7 @@ export function computePercentiles(values: Float64Array): PercentileBucket | und
   sorted.sort();
 
   return {
-    p50: percentileFromSorted(sorted, 0.5),
+    p50: percentileFromSorted(sorted, 0.50),
     p95: percentileFromSorted(sorted, 0.95),
     p99: percentileFromSorted(sorted, 0.99),
     min: sorted[0]!,

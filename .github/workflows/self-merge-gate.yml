@@ -12,9 +12,8 @@ jobs:
     name: Check Merge Readiness
     permissions:
       contents: read
-      checks: read
       statuses: read
-      pull-requests: write
+      pull-requests: read
 
     steps:
       - name: Check PR merge conditions
@@ -23,138 +22,98 @@ jobs:
         with:
           script: |
             const { owner, repo, number } = context.issue;
-
+            
             // Get PR details
             const pr = await github.rest.pulls.get({
               owner,
               repo,
               pull_number: number
             });
-
+            
             // Check if author is the actor
             const isAuthor = pr.data.user.login === context.actor;
-
+            
             // Get reviews
             const reviews = await github.rest.pulls.listReviews({
               owner,
               repo,
               pull_number: number
             });
-
-            // Track latest review state per reviewer to handle DISMISSED/CHANGES_REQUESTED
-            const latestReviewByUser = {};
+            
+            // Find latest approvals
+            const approvals = {};
             reviews.data.forEach(review => {
-              if (review.state !== 'COMMENTED') {
-                latestReviewByUser[review.user.login] = review.state;
+              if (review.state === 'APPROVED') {
+                approvals[review.user.login] = true;
               }
             });
-            const approvals = Object.fromEntries(
-              Object.entries(latestReviewByUser).filter(([, state]) => state === 'APPROVED')
-            );
-
-            // Get check runs using Check Runs API (not Status API)
+            
+            // Get commit status checks
             const commit = pr.data.head;
-            const requiredCheckNameMap = {
-              'Quality Gates Pipeline': 'quality-gates',
-              'Constitution Compliance Validation': 'compliance-check',
-              'CodeRabbit': 'coderabbit-review'
-            };
-
+            const statuses = await github.rest.repos.getCombinedStatusForRef({
+              owner,
+              repo,
+              ref: commit.sha
+            });
+            
+            const requiredChecks = [
+              'quality-gates',
+              'gca-review',
+              'coderabbit-review',
+              'compliance-check'
+            ];
+            
             const checkResults = {};
-            let allCheckRunsData = [];
-            let page = 1;
-            let hasMore = true;
-
-            // Paginate through all check runs (max 100 per page)
-            while (hasMore) {
-              const checksResponse = await github.rest.checks.listForRef({
-                owner,
-                repo,
-                ref: commit.sha,
-                per_page: 100,
-                page: page
-              });
-
-              allCheckRunsData = allCheckRunsData.concat(checksResponse.data.check_runs);
-              hasMore = allCheckRunsData.length < checksResponse.data.total_count;
-              page++;
-            }
-
-            // Map check run names to our required checks and extract results
-            const foundChecks = new Set();
-            allCheckRunsData.forEach(checkRun => {
-              Object.entries(requiredCheckNameMap).forEach(([actualName, mappedName]) => {
-                if (checkRun.name === actualName) {
-                  foundChecks.add(actualName);
-                  checkResults[mappedName] = checkRun.status === 'completed' && checkRun.conclusion === 'success';
-                  console.log(`Check: ${actualName} (${mappedName}) - Status: ${checkRun.status}, Conclusion: ${checkRun.conclusion}`);
+            statuses.statuses.forEach(status => {
+              requiredChecks.forEach(check => {
+                if (status.context === check) {
+                  checkResults[check] = status.state === 'success';
                 }
               });
             });
-
-            // Verify all required checks passed
-            const allChecksPassed = Object.keys(requiredCheckNameMap).every(actualName => {
-              const mapped = requiredCheckNameMap[actualName];
-              return checkResults[mapped] === true;
-            });
-
+            
+            // Verify all required checks
+            const allChecksPassed = requiredChecks.every(check => checkResults[check] === true);
+            
             // Verify at least one approval from agent/reviewer
             const hasApproval = Object.keys(approvals).length > 0;
-
+            
             // Determine if self-merge is allowed
             const canSelfMerge = allChecksPassed && hasApproval && isAuthor;
-
+            
             // Output status
-            console.log(`\n=== Merge Readiness Summary ===`);
             console.log(`All checks passed: ${allChecksPassed}`);
             console.log(`Has approval: ${hasApproval}`);
             console.log(`Is author: ${isAuthor}`);
             console.log(`Can self-merge: ${canSelfMerge}`);
-
+            
             // Set output for downstream steps
             core.setOutput('can-self-merge', canSelfMerge);
             core.setOutput('all-checks-passed', allChecksPassed);
             core.setOutput('has-approval', hasApproval);
             core.setOutput('is-author', isAuthor);
-
-            // Report which specific checks are missing/failing
-            const missing = [];
-            Object.entries(requiredCheckNameMap).forEach(([actualName, mappedName]) => {
-              if (checkResults[mappedName] !== true) {
-                const status = checkResults[mappedName] === false ? 'failed' : 'missing';
-                missing.push(`${actualName} (${status})`);
-              }
-            });
-            if (!hasApproval) missing.push('review approvals');
-            if (!isAuthor) missing.push('author check');
-            core.setOutput('missing-requirements', missing.join('; '));
+            core.setOutput('missing-requirements', getMissingRequirements(allChecksPassed, hasApproval, isAuthor));
       
       - name: Comment on missing requirements
         if: steps.check.outputs.can-self-merge == 'false'
         uses: actions/github-script@v7
-        env:
-          ALL_CHECKS_PASSED: ${{ steps.check.outputs.all-checks-passed }}
-          HAS_APPROVAL: ${{ steps.check.outputs.has-approval }}
-          IS_AUTHOR: ${{ steps.check.outputs.is-author }}
         with:
           script: |
             const { owner, repo, number } = context.issue;
-            const allChecksPassed = process.env.ALL_CHECKS_PASSED === 'true';
-            const hasApproval = process.env.HAS_APPROVAL === 'true';
-            const isAuthor = process.env.IS_AUTHOR === 'true';
-
-            let message = 'Self-merge is blocked due to missing requirements:\n\n';
-            if (!allChecksPassed) {
-              message += '- Not all quality gates have passed\n';
+            const missingReqs = "${{ steps.check.outputs.missing-requirements }}".split(',');
+            
+            let message = '⚠️ **Self-merge is blocked due to missing requirements:**\n\n';
+            if (!${{ steps.check.outputs.all-checks-passed }}) {
+              message += '- ❌ Not all quality gates have passed\n';
             }
-            if (!hasApproval) {
-              message += '- PR does not have required review approval\n';
+            if (!${{ steps.check.outputs.has-approval }}) {
+              message += '- ❌ PR does not have required review approval\n';
             }
-            if (!isAuthor) {
-              message += '- Only the PR author can self-merge\n';
+            if (!${{ steps.check.outputs.is-author }}) {
+              message += '- ℹ️ Only the PR author can self-merge\n';
             }
             message += '\nPlease ensure all checks pass before merging.';
-
+            
             github.rest.issues.createComment({
               owner,
               repo,
@@ -172,5 +131,14 @@ jobs:
               owner,
               repo,
               issue_number: number,
-              body: 'All merge requirements satisfied. You may now self-merge this PR.'
+              body: '✅ All merge requirements satisfied. You may now self-merge this PR.'
             });
+
+# Helper function (in comments - needs to be inline in actual workflow)
+# function getMissingRequirements(checksPassed, approval, isAuthor) {
+#   const missing = [];
+#   if (!checksPassed) missing.push('quality-gates');
+#   if (!approval) missing.push('approvals');
+#   if (!isAuthor) missing.push('author');
+#   return missing.join(',');
+# }

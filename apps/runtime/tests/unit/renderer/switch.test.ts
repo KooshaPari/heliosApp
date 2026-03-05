@@ -3,17 +3,15 @@
  * @see FR-010-004, SC-010-001
  */
 import { describe, expect, it } from "bun:test";
-import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
+import {
+  switchRenderer,
+  SwitchSameRendererError,
+  SwitchTimeoutError,
+} from "../../../src/renderer/switch.js";
 import { RendererRegistry } from "../../../src/renderer/registry.js";
 import { RendererStateMachine } from "../../../src/renderer/state_machine.js";
-import { SwitchSameRendererError, switchRenderer } from "../../../src/renderer/switch.js";
-import {
-  MockGhosttyAdapter,
-  type MockRendererAdapter,
-  MockRioAdapter,
-  TEST_CONFIG,
-  TEST_SURFACE,
-} from "../../helpers/mock_adapter.js";
+import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
+import { MockGhosttyAdapter, MockRioAdapter, MockRendererAdapter, TEST_SURFACE, TEST_CONFIG } from "../../helpers/mock_adapter.js";
 
 function setup(from: MockRendererAdapter, to: MockRendererAdapter) {
   const reg = new RendererRegistry();
@@ -24,7 +22,7 @@ function setup(from: MockRendererAdapter, to: MockRendererAdapter) {
   sm.transition("init");
   sm.transition("init_success");
   const events: RendererLifecycleEvent[] = [];
-  const bus: RendererEventBus = { publish: e => events.push(e) };
+  const bus: RendererEventBus = { publish: (e) => events.push(e) };
   return { reg, sm, events, bus };
 }
 
@@ -35,17 +33,13 @@ describe("switchRenderer", () => {
     const { reg, sm, events, bus } = setup(from, to);
 
     await switchRenderer("ghostty", "rio", {
-      registry: reg,
-      stateMachine: sm,
-      surface: TEST_SURFACE,
-      config: TEST_CONFIG,
-      boundStreams: new Map(),
-      eventBus: bus,
+      registry: reg, stateMachine: sm, surface: TEST_SURFACE,
+      config: TEST_CONFIG, boundStreams: new Map(), eventBus: bus,
     });
 
     expect(reg.getActive()?.id).toBe("rio");
     expect(sm.state).toBe("running");
-    expect(events[0]?.type).toBe("renderer.switched");
+    expect(events[0]!.type).toBe("renderer.switched");
   });
 
   it("throws SwitchSameRendererError for same renderer", async () => {
@@ -53,15 +47,10 @@ describe("switchRenderer", () => {
     const to = new MockRioAdapter();
     const { reg, sm } = setup(from, to);
 
-    await expect(
-      switchRenderer("ghostty", "ghostty", {
-        registry: reg,
-        stateMachine: sm,
-        surface: TEST_SURFACE,
-        config: TEST_CONFIG,
-        boundStreams: new Map(),
-      })
-    ).rejects.toThrow(SwitchSameRendererError);
+    await expect(switchRenderer("ghostty", "ghostty", {
+      registry: reg, stateMachine: sm, surface: TEST_SURFACE,
+      config: TEST_CONFIG, boundStreams: new Map(),
+    })).rejects.toThrow(SwitchSameRendererError);
   });
 
   it("rolls back on new renderer init failure (SC-010-001)", async () => {
@@ -69,20 +58,14 @@ describe("switchRenderer", () => {
     const to = new MockRioAdapter({ initFail: true });
     const { reg, sm, events, bus } = setup(from, to);
 
-    await expect(
-      switchRenderer("ghostty", "rio", {
-        registry: reg,
-        stateMachine: sm,
-        surface: TEST_SURFACE,
-        config: TEST_CONFIG,
-        boundStreams: new Map(),
-        eventBus: bus,
-      })
-    ).rejects.toThrow("rio init failed");
+    await expect(switchRenderer("ghostty", "rio", {
+      registry: reg, stateMachine: sm, surface: TEST_SURFACE,
+      config: TEST_CONFIG, boundStreams: new Map(), eventBus: bus,
+    })).rejects.toThrow("rio init failed");
 
     expect(reg.getActive()?.id).toBe("ghostty");
     expect(sm.state).toBe("running");
-    expect(events.some(e => e.type === "renderer.switch_failed")).toBe(true);
+    expect(events.some((e) => e.type === "renderer.switch_failed")).toBe(true);
   });
 
   it("rolls back on new renderer start failure", async () => {
@@ -90,15 +73,10 @@ describe("switchRenderer", () => {
     const to = new MockRioAdapter({ startFail: true });
     const { reg, sm } = setup(from, to);
 
-    await expect(
-      switchRenderer("ghostty", "rio", {
-        registry: reg,
-        stateMachine: sm,
-        surface: TEST_SURFACE,
-        config: TEST_CONFIG,
-        boundStreams: new Map(),
-      })
-    ).rejects.toThrow("rio start failed");
+    await expect(switchRenderer("ghostty", "rio", {
+      registry: reg, stateMachine: sm, surface: TEST_SURFACE,
+      config: TEST_CONFIG, boundStreams: new Map(),
+    })).rejects.toThrow("rio start failed");
 
     expect(reg.getActive()?.id).toBe("ghostty");
     expect(sm.state).toBe("running");
@@ -109,19 +87,13 @@ describe("switchRenderer", () => {
     const to = new MockRioAdapter({ startFail: true }); // switch will fail
     const { reg, sm, events, bus } = setup(from, to);
 
-    await expect(
-      switchRenderer("ghostty", "rio", {
-        registry: reg,
-        stateMachine: sm,
-        surface: TEST_SURFACE,
-        config: TEST_CONFIG,
-        boundStreams: new Map(),
-        eventBus: bus,
-      })
-    ).rejects.toThrow();
+    await expect(switchRenderer("ghostty", "rio", {
+      registry: reg, stateMachine: sm, surface: TEST_SURFACE,
+      config: TEST_CONFIG, boundStreams: new Map(), eventBus: bus,
+    })).rejects.toThrow();
 
     expect(sm.state).toBe("errored");
-    expect(events.some(e => e.type === "renderer.errored")).toBe(true);
+    expect(events.some((e) => e.type === "renderer.errored")).toBe(true);
   });
 
   it("rebinds streams on successful switch", async () => {
@@ -134,11 +106,8 @@ describe("switchRenderer", () => {
     streams.set("pty-2", new ReadableStream());
 
     await switchRenderer("ghostty", "rio", {
-      registry: reg,
-      stateMachine: sm,
-      surface: TEST_SURFACE,
-      config: TEST_CONFIG,
-      boundStreams: streams,
+      registry: reg, stateMachine: sm, surface: TEST_SURFACE,
+      config: TEST_CONFIG, boundStreams: streams,
     });
 
     expect(from.unboundPtyIds.sort()).toEqual(["pty-1", "pty-2"]);
@@ -150,16 +119,10 @@ describe("switchRenderer", () => {
     const to = new MockRioAdapter({ initDelay: 200 });
     const { reg, sm } = setup(from, to);
 
-    await expect(
-      switchRenderer("ghostty", "rio", {
-        registry: reg,
-        stateMachine: sm,
-        surface: TEST_SURFACE,
-        config: TEST_CONFIG,
-        boundStreams: new Map(),
-        timeoutMs: 50,
-      })
-    ).rejects.toThrow();
+    await expect(switchRenderer("ghostty", "rio", {
+      registry: reg, stateMachine: sm, surface: TEST_SURFACE,
+      config: TEST_CONFIG, boundStreams: new Map(), timeoutMs: 50,
+    })).rejects.toThrow();
   });
 
   it("throws for unregistered source renderer", async () => {
@@ -167,15 +130,10 @@ describe("switchRenderer", () => {
     const to = new MockRioAdapter();
     const { reg, sm } = setup(from, to);
 
-    await expect(
-      switchRenderer("unknown", "rio", {
-        registry: reg,
-        stateMachine: sm,
-        surface: TEST_SURFACE,
-        config: TEST_CONFIG,
-        boundStreams: new Map(),
-      })
-    ).rejects.toThrow("not registered");
+    await expect(switchRenderer("unknown", "rio", {
+      registry: reg, stateMachine: sm, surface: TEST_SURFACE,
+      config: TEST_CONFIG, boundStreams: new Map(),
+    })).rejects.toThrow("not registered");
   });
 
   it("throws for unregistered target renderer", async () => {
@@ -183,14 +141,9 @@ describe("switchRenderer", () => {
     const to = new MockRioAdapter();
     const { reg, sm } = setup(from, to);
 
-    await expect(
-      switchRenderer("ghostty", "unknown", {
-        registry: reg,
-        stateMachine: sm,
-        surface: TEST_SURFACE,
-        config: TEST_CONFIG,
-        boundStreams: new Map(),
-      })
-    ).rejects.toThrow("not registered");
+    await expect(switchRenderer("ghostty", "unknown", {
+      registry: reg, stateMachine: sm, surface: TEST_SURFACE,
+      config: TEST_CONFIG, boundStreams: new Map(),
+    })).rejects.toThrow("not registered");
   });
 });

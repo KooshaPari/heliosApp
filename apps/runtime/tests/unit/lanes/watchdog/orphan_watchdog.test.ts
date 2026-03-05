@@ -1,9 +1,9 @@
 // Unit tests for OrphanWatchdog
 
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
 import { OrphanWatchdog } from "../../../../src/lanes/watchdog/orphan_watchdog.js";
 import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { LaneRegistry } from "../../../../src/lanes/registry.js";
 
 // Mock registries
 const createMockSessionRegistry = () => ({
@@ -45,7 +45,7 @@ describe("OrphanWatchdog", () => {
 
     watchdog.stop();
     // Give time for any pending callbacks
-    await new Promise(r => setTimeout(r, 150));
+    await new Promise((r) => setTimeout(r, 150));
 
     // After stop, detection duration should be set
     expect(watchdog.getLastDetectionDuration()).toBeGreaterThanOrEqual(0);
@@ -64,7 +64,7 @@ describe("OrphanWatchdog", () => {
     await watchdog.start();
 
     // Wait for first cycle to complete
-    await new Promise(r => setTimeout(r, 150));
+    await new Promise((r) => setTimeout(r, 150));
 
     const events = bus.getEvents();
     expect(events.length).toBeGreaterThan(0);
@@ -84,17 +84,19 @@ describe("OrphanWatchdog", () => {
     });
 
     await watchdog.start();
-    await new Promise(r => setTimeout(r, 150));
+    await new Promise((r) => setTimeout(r, 150));
 
     const events = bus.getEvents();
-    const cycleEvent = events.find(e => e.topic === "orphan.detection.cycle_completed");
+    const cycleEvent = events.find(
+      (e) => e.topic === "orphan.detection.cycle_completed"
+    );
 
     expect(cycleEvent).toBeDefined();
-    expect(cycleEvent?.payload?.cycleNumber).toBeGreaterThanOrEqual(1);
+    expect(cycleEvent?.payload?.cycleNumber).toBe(1);
     expect(cycleEvent?.payload?.summary).toBeDefined();
-    expect((cycleEvent?.payload?.summary as any)?.worktrees).toBeGreaterThanOrEqual(0);
-    expect((cycleEvent?.payload?.summary as any)?.zellijSessions).toBeGreaterThanOrEqual(0);
-    expect((cycleEvent?.payload?.summary as any)?.ptyProcesses).toBeGreaterThanOrEqual(0);
+    expect(cycleEvent?.payload?.summary?.worktrees).toBe(0);
+    expect(cycleEvent?.payload?.summary?.zellijSessions).toBe(0);
+    expect(cycleEvent?.payload?.summary?.ptyProcesses).toBe(0);
 
     watchdog.stop();
   });
@@ -129,7 +131,7 @@ describe("OrphanWatchdog", () => {
     });
 
     await watchdog.start();
-    await new Promise(r => setTimeout(r, 150));
+    await new Promise((r) => setTimeout(r, 150));
 
     const duration = watchdog.getLastDetectionDuration();
     expect(duration).toBeGreaterThan(0);

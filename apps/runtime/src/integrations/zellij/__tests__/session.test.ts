@@ -1,8 +1,18 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+} from "bun:test";
 import { ZellijCli } from "../cli.js";
-import { SessionAlreadyExistsError, SessionNotFoundError } from "../errors.js";
 import { MuxRegistry } from "../registry.js";
 import { ZellijSessionManager, sessionNameForLane } from "../session.js";
+import {
+  SessionAlreadyExistsError,
+  SessionNotFoundError,
+} from "../errors.js";
 
 // Helper to create a mock spawn result
 function makeMockProc(stdout: string, stderr: string, exitCode: number) {
@@ -40,9 +50,14 @@ describe("ZellijSessionManager", () => {
     originalSpawn = Bun.spawn;
   });
 
+  afterEach(() => {
+    Bun.spawn = originalSpawn;
+  });
+
   describe("createSession", () => {
     it("creates a session and registers binding", async () => {
       let callCount = 0;
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => {
         callCount++;
         if (callCount === 1) {
@@ -71,21 +86,31 @@ describe("ZellijSessionManager", () => {
     });
 
     it("throws SessionAlreadyExistsError if session exists", async () => {
-      Bun.spawn = mock(() => makeMockProc("helios-lane-dup  2026-02-27 10:00:00", "", 0));
+      // @ts-expect-error mock override
+      Bun.spawn = mock(() =>
+        makeMockProc("helios-lane-dup  2026-02-27 10:00:00", "", 0)
+      );
 
       const cli = new ZellijCli();
       const registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
-      expect(manager.createSession("dup")).rejects.toThrow(SessionAlreadyExistsError);
-
-      Bun.spawn = originalSpawn;
+      await expect(manager.createSession("dup")).rejects.toThrow(
+        SessionAlreadyExistsError
+      );
     });
   });
 
   describe("reattachSession", () => {
     it("reattaches to an existing session", async () => {
-      Bun.spawn = mock(() => makeMockProc("helios-lane-reattach  2026-02-27 10:00:00", "", 0));
+      // @ts-expect-error mock override
+      Bun.spawn = mock(() =>
+        makeMockProc(
+          "helios-lane-reattach  2026-02-27 10:00:00",
+          "",
+          0
+        )
+      );
 
       const cli = new ZellijCli();
       const registry = new MuxRegistry();
@@ -101,26 +126,32 @@ describe("ZellijSessionManager", () => {
     });
 
     it("throws SessionNotFoundError if session does not exist", async () => {
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => makeMockProc("", "", 0));
 
       const cli = new ZellijCli();
       const registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
-      expect(manager.reattachSession("helios-lane-missing")).rejects.toThrow(SessionNotFoundError);
-
-      Bun.spawn = originalSpawn;
+      await expect(
+        manager.reattachSession("helios-lane-missing")
+      ).rejects.toThrow(SessionNotFoundError);
     });
   });
 
   describe("terminateSession", () => {
     it("terminates a session and unbinds", async () => {
       let callCount = 0;
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => {
         callCount++;
         if (callCount <= 2) {
           // listSessions for reattach (called twice - panes + tabs query may also call)
-          return makeMockProc("helios-lane-term  2026-02-27 10:00:00", "", 0);
+          return makeMockProc(
+            "helios-lane-term  2026-02-27 10:00:00",
+            "",
+            0
+          );
         }
         if (callCount <= 5) {
           // kill-session or subsequent listSessions (empty)
@@ -145,7 +176,10 @@ describe("ZellijSessionManager", () => {
     });
 
     it("is idempotent for non-existent sessions", async () => {
-      Bun.spawn = mock(() => makeMockProc("", "No session named 'foo' found.", 1));
+      // @ts-expect-error mock override
+      Bun.spawn = mock(() =>
+        makeMockProc("", "No session named 'foo' found.", 1)
+      );
 
       const cli = new ZellijCli();
       const registry = new MuxRegistry();

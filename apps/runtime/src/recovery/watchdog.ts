@@ -1,7 +1,7 @@
-import { randomUUID } from "node:crypto";
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
+import type { LocalBus } from "../protocol/bus.js";
+import { promises as fs } from "fs";
+import path from "path";
+import { randomUUID } from "crypto";
 
 export enum CrashReason {
   HEARTBEAT_TIMEOUT = "HEARTBEAT_TIMEOUT",
@@ -14,8 +14,8 @@ export interface CrashEvent {
   name: string;
   pid: number;
   reason: CrashReason;
-  exitCode?: number | undefined;
-  signal?: string | undefined;
+  exitCode?: number;
+  signal?: string;
   timestamp: number;
 }
 
@@ -33,14 +33,18 @@ export class Watchdog {
   private monitors = new Map<string, ProcessMonitor>();
   private crashHandlers: CrashHandler[] = [];
   private crashDataDir: string;
-  private bus?: LocalBus | undefined;
+  private bus?: LocalBus;
 
   constructor(crashDataDir: string, bus?: LocalBus) {
     this.crashDataDir = crashDataDir;
     this.bus = bus;
   }
 
-  registerProcess(name: string, pid: number, heartbeatIntervalMs = 2000): void {
+  registerProcess(
+    name: string,
+    pid: number,
+    heartbeatIntervalMs: number = 2000
+  ): void {
     // Clear any existing monitor for this name
     this.unregister(name);
 
@@ -57,21 +61,17 @@ export class Watchdog {
 
   receiveHeartbeat(name: string): void {
     const monitor = this.monitors.get(name);
-    if (!monitor) {
-      return;
-    }
+    if (!monitor) return;
 
     monitor.lastHeartbeat = Date.now();
     // Reset timeout
-    if (monitor.timeoutId) {
-      clearTimeout(monitor.timeoutId);
-    }
+    if (monitor.timeoutId) clearTimeout(monitor.timeoutId);
     this.startHeartbeatTimer(monitor);
   }
 
   unregister(name: string): void {
     const monitor = this.monitors.get(name);
-    if (monitor?.timeoutId) {
+    if (monitor && monitor.timeoutId) {
       clearTimeout(monitor.timeoutId);
     }
     this.monitors.delete(name);
@@ -180,7 +180,10 @@ export class Watchdog {
       // Atomic write: write to temp file then rename
       await fs.writeFile(tempPath, JSON.stringify(event, null, 2));
       await fs.rename(tempPath, recordPath);
-    } catch (_err) {}
+    } catch (err) {
+      // Silently fail - watchdog should not crash due to I/O errors
+      console.error("Failed to write crash record:", err);
+    }
   }
 
   private async isProcessRunning(pid: number): Promise<boolean> {
@@ -197,7 +200,7 @@ export class Watchdog {
 export function startHeartbeat(
   watchdog: Watchdog,
   processName: string,
-  intervalMs = 2000
+  intervalMs: number = 2000
 ): () => void {
   let running = true;
   const interval = setInterval(() => {

@@ -6,7 +6,12 @@
  */
 
 import type { ZellijCli } from "./cli.js";
-import type { LayoutTopology, PaneDimensions, PaneTopology, TabTopology } from "./types.js";
+import type {
+  LayoutTopology,
+  TabTopology,
+  PaneTopology,
+  PaneDimensions,
+} from "./types.js";
 
 /**
  * Manages layout topology for all tracked sessions.
@@ -31,7 +36,7 @@ export class TopologyTracker {
    */
   initializeTopology(
     sessionName: string,
-    initialDimensions: PaneDimensions = { cols: 80, rows: 24 }
+    initialDimensions: PaneDimensions = { cols: 80, rows: 24 },
   ): LayoutTopology {
     const topology: LayoutTopology = {
       sessionName,
@@ -58,16 +63,17 @@ export class TopologyTracker {
   /**
    * Add a pane to the active tab's topology.
    */
-  addPane(sessionName: string, paneId: number, dimensions: PaneDimensions, ptyId?: string): void {
+  addPane(
+    sessionName: string,
+    paneId: number,
+    dimensions: PaneDimensions,
+    ptyId?: string,
+  ): void {
     const topology = this.topologies.get(sessionName);
-    if (!topology) {
-      return;
-    }
+    if (!topology) return;
 
-    const activeTab = topology.tabs.find(t => t.tabId === topology.activeTabId);
-    if (!activeTab) {
-      return;
-    }
+    const activeTab = topology.tabs.find((t) => t.tabId === topology.activeTabId);
+    if (!activeTab) return;
 
     // Unfocus all existing panes
     for (const p of activeTab.panes) {
@@ -87,14 +93,12 @@ export class TopologyTracker {
    */
   removePane(sessionName: string, paneId: number): void {
     const topology = this.topologies.get(sessionName);
-    if (!topology) {
-      return;
-    }
+    if (!topology) return;
 
     for (const tab of topology.tabs) {
-      const idx = tab.panes.findIndex(p => p.paneId === paneId);
+      const idx = tab.panes.findIndex((p) => p.paneId === paneId);
       if (idx !== -1) {
-        const wasFocused = tab.panes[idx]?.focused;
+        const wasFocused = tab.panes[idx]!.focused;
         tab.panes.splice(idx, 1);
         // If removed pane was focused, focus the first remaining pane
         if (wasFocused && tab.panes.length > 0) {
@@ -108,7 +112,11 @@ export class TopologyTracker {
   /**
    * Update pane dimensions in the topology.
    */
-  updatePaneDimensions(sessionName: string, paneId: number, dimensions: PaneDimensions): void {
+  updatePaneDimensions(
+    sessionName: string,
+    paneId: number,
+    dimensions: PaneDimensions,
+  ): void {
     const pane = this.findPane(sessionName, paneId);
     if (pane) {
       pane.dimensions = { ...dimensions };
@@ -132,12 +140,10 @@ export class TopologyTracker {
     sessionName: string,
     tabId: number,
     name: string,
-    defaultPaneDimensions: PaneDimensions = { cols: 80, rows: 24 }
+    defaultPaneDimensions: PaneDimensions = { cols: 80, rows: 24 },
   ): void {
     const topology = this.topologies.get(sessionName);
-    if (!topology) {
-      return;
-    }
+    if (!topology) return;
 
     topology.tabs.push({
       tabId,
@@ -159,16 +165,14 @@ export class TopologyTracker {
    */
   removeTab(sessionName: string, tabId: number): void {
     const topology = this.topologies.get(sessionName);
-    if (!topology) {
-      return;
-    }
+    if (!topology) return;
 
-    const idx = topology.tabs.findIndex(t => t.tabId === tabId);
+    const idx = topology.tabs.findIndex((t) => t.tabId === tabId);
     if (idx !== -1) {
       topology.tabs.splice(idx, 1);
       // Update active tab if needed
       if (topology.activeTabId === tabId && topology.tabs.length > 0) {
-        topology.activeTabId = topology.tabs[0]?.tabId;
+        topology.activeTabId = topology.tabs[0]!.tabId;
       }
     }
   }
@@ -178,9 +182,7 @@ export class TopologyTracker {
    */
   switchTab(sessionName: string, tabId: number): void {
     const topology = this.topologies.get(sessionName);
-    if (!topology) {
-      return;
-    }
+    if (!topology) return;
     topology.activeTabId = tabId;
   }
 
@@ -189,7 +191,12 @@ export class TopologyTracker {
    * Rebuilds the topology from scratch based on zellij's current state.
    */
   async refreshTopology(sessionName: string): Promise<LayoutTopology> {
-    const result = await this.cli.run(["--session", sessionName, "action", "dump-layout"]);
+    const result = await this.cli.run([
+      "--session",
+      sessionName,
+      "action",
+      "dump-layout",
+    ]);
 
     // Preserve existing PTY bindings before refresh
     const existingTopology = this.topologies.get(sessionName);
@@ -250,15 +257,11 @@ export class TopologyTracker {
    */
   findPane(sessionName: string, paneId: number): PaneTopology | undefined {
     const topology = this.topologies.get(sessionName);
-    if (!topology) {
-      return undefined;
-    }
+    if (!topology) return undefined;
 
     for (const tab of topology.tabs) {
-      const pane = tab.panes.find(p => p.paneId === paneId);
-      if (pane) {
-        return pane;
-      }
+      const pane = tab.panes.find((p) => p.paneId === paneId);
+      if (pane) return pane;
     }
     return undefined;
   }
@@ -269,9 +272,7 @@ export class TopologyTracker {
   getPtyBindings(sessionName: string): Map<number, string> {
     const bindings = new Map<number, string>();
     const topology = this.topologies.get(sessionName);
-    if (!topology) {
-      return bindings;
-    }
+    if (!topology) return bindings;
 
     for (const tab of topology.tabs) {
       for (const pane of tab.panes) {
@@ -331,8 +332,8 @@ export class TopologyTracker {
         panes.push({
           paneId: paneCounter++,
           dimensions: {
-            cols: colsMatch ? Number.parseInt(colsMatch[1]!, 10) : 80,
-            rows: rowsMatch ? Number.parseInt(rowsMatch[1]!, 10) : 24,
+            cols: colsMatch ? parseInt(colsMatch[1]!, 10) : 80,
+            rows: rowsMatch ? parseInt(rowsMatch[1]!, 10) : 24,
           },
           focused: focusMatch,
         });

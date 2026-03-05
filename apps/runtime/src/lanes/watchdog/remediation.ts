@@ -1,12 +1,12 @@
 // T007-T009 - Remediation engine with confirmation gates and recovery suppression
 
-import { promises as fs } from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import { promises as fs } from "fs";
 import { execCommand } from "../../integrations/exec.js";
-import type { ProtocolBus as LocalBus } from "../../protocol/bus.js";
+import path from "path";
+import os from "os";
+import { type ClassifiedOrphan, type ResourceType } from "./resource_classifier.js";
+import type { LocalBus } from "../../protocol/bus.js";
 import type { LaneRegistry } from "../registry.js";
-import type { ClassifiedOrphan, ResourceType } from "./resource_classifier.js";
 
 export interface RemediationSuggestion {
   id: string;
@@ -46,7 +46,9 @@ export class RemediationEngine {
     this.loadCooldownMap();
   }
 
-  async generateSuggestions(orphans: ClassifiedOrphan[]): Promise<RemediationSuggestion[]> {
+  async generateSuggestions(
+    orphans: ClassifiedOrphan[]
+  ): Promise<RemediationSuggestion[]> {
     const suggestions: RemediationSuggestion[] = [];
 
     // Expire old cooldown entries
@@ -63,7 +65,7 @@ export class RemediationEngine {
       if (orphan.estimatedOwner !== "unknown") {
         try {
           const lane = this.laneRegistry.get(orphan.estimatedOwner);
-          if (lane && (lane.state as string) === "recovering") {
+          if (lane && lane.state === "recovering") {
             // Suppress suggestion for recovering lanes
             continue;
           }
@@ -84,7 +86,7 @@ export class RemediationEngine {
       this.suggestions.set(suggestion.id, suggestion);
 
       // Emit suggestion event
-      await this.publishEvent({
+      await this.bus.publish({
         id: `remediation-suggested-${suggestion.id}`,
         type: "event",
         ts: new Date().toISOString(),
@@ -98,14 +100,6 @@ export class RemediationEngine {
         },
       });
     }
-
-    // Sort by risk level: high > medium > low
-    const riskOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
-    suggestions.sort((a, b) => {
-      const aOrder = riskOrder[a.resource.riskLevel] ?? 3;
-      const bOrder = riskOrder[b.resource.riskLevel] ?? 3;
-      return aOrder - bOrder;
-    });
 
     return suggestions;
   }
@@ -126,7 +120,7 @@ export class RemediationEngine {
     }
 
     // Emit confirmation event
-    await this.publishEvent({
+    await this.bus.publish({
       id: `remediation-confirmed-${suggestionId}`,
       type: "event",
       ts: new Date().toISOString(),
@@ -145,7 +139,7 @@ export class RemediationEngine {
     this.suggestions.delete(suggestionId);
 
     // Emit completion event
-    await this.publishEvent({
+    await this.bus.publish({
       id: `remediation-completed-${suggestionId}`,
       type: "event",
       ts: new Date().toISOString(),
@@ -179,7 +173,7 @@ export class RemediationEngine {
     this.suggestions.delete(suggestionId);
 
     // Emit declined event
-    this.publishEvent({
+    this.bus.publish({
       id: `remediation-declined-${suggestionId}`,
       type: "event",
       ts: new Date().toISOString(),
@@ -187,7 +181,9 @@ export class RemediationEngine {
       payload: {
         suggestionId,
         resourcePath: suggestion.resource.path || suggestion.resource.pid,
-        cooldownUntil: new Date(Date.now() + this.cooldownDurationMs).toISOString(),
+        cooldownUntil: new Date(
+          Date.now() + this.cooldownDurationMs
+        ).toISOString(),
       },
     });
   }
@@ -243,13 +239,14 @@ export class RemediationEngine {
           message: "Worktree removed successfully",
           resourceType: "worktree",
         };
+      } else {
+        return {
+          resourceId: orphan.path,
+          success: false,
+          message: `git worktree remove failed: ${result.stderr}`,
+          resourceType: "worktree",
+        };
       }
-      return {
-        resourceId: orphan.path,
-        success: false,
-        message: `git worktree remove failed: ${result.stderr}`,
-        resourceType: "worktree",
-      };
     } catch (error) {
       return {
         resourceId: orphan.path,
@@ -261,11 +258,14 @@ export class RemediationEngine {
   }
 
   private async snapshotWorktree(orphan: ClassifiedOrphan): Promise<void> {
-    if (!orphan.path) {
-      return;
-    }
+    if (!orphan.path) return;
 
-    const snapshotDir = path.join(os.homedir(), ".helios", "data", "worktree_snapshots");
+    const snapshotDir = path.join(
+      os.homedir(),
+      ".helios",
+      "data",
+      "worktree_snapshots"
+    );
     await fs.mkdir(snapshotDir, { recursive: true });
 
     const snapshotName = `${Date.now()}-${orphan.estimatedOwner}.json`;
@@ -282,7 +282,9 @@ export class RemediationEngine {
     await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2));
   }
 
-  private async cleanupZellijSession(orphan: ClassifiedOrphan): Promise<CleanupResult> {
+  private async cleanupZellijSession(
+    orphan: ClassifiedOrphan
+  ): Promise<CleanupResult> {
     if (!orphan.path) {
       return {
         resourceId: "unknown",
@@ -293,7 +295,10 @@ export class RemediationEngine {
     }
 
     try {
-      const result = await execCommand("zellij", ["kill-session", orphan.path]);
+      const result = await execCommand("zellij", [
+        "kill-session",
+        orphan.path,
+      ]);
 
       if (result.code === 0) {
         return {
@@ -302,13 +307,14 @@ export class RemediationEngine {
           message: "Zellij session terminated",
           resourceType: "zellij_session",
         };
+      } else {
+        return {
+          resourceId: orphan.path,
+          success: false,
+          message: `zellij kill-session failed: ${result.stderr}`,
+          resourceType: "zellij_session",
+        };
       }
-      return {
-        resourceId: orphan.path,
-        success: false,
-        message: `zellij kill-session failed: ${result.stderr}`,
-        resourceType: "zellij_session",
-      };
     } catch (error) {
       return {
         resourceId: orphan.path,
@@ -360,20 +366,22 @@ export class RemediationEngine {
             message: "Process killed forcefully",
             resourceType: "pty_process",
           };
+        } else {
+          return {
+            resourceId: String(orphan.pid),
+            success: false,
+            message: "Failed to terminate process",
+            resourceType: "pty_process",
+          };
         }
+      } else {
         return {
           resourceId: String(orphan.pid),
           success: false,
-          message: "Failed to terminate process",
+          message: "SIGTERM failed",
           resourceType: "pty_process",
         };
       }
-      return {
-        resourceId: String(orphan.pid),
-        success: false,
-        message: "SIGTERM failed",
-        resourceType: "pty_process",
-      };
     } catch (error) {
       return {
         resourceId: String(orphan.pid),
@@ -400,11 +408,11 @@ export class RemediationEngine {
   private getResourceKey(orphan: ClassifiedOrphan): string {
     if (orphan.path) {
       return `${orphan.type}:${orphan.path}`;
-    }
-    if (orphan.pid) {
+    } else if (orphan.pid) {
       return `${orphan.type}:${orphan.pid}`;
+    } else {
+      return `${orphan.type}:unknown`;
     }
-    return `${orphan.type}:unknown`;
   }
 
   private expireCooldownEntries(): void {
@@ -447,22 +455,12 @@ export class RemediationEngine {
         const entries = Array.from(this.cooldownMap.values());
         fs.writeFile(this.cooldownPath, JSON.stringify(entries, null, 2));
       });
-    } catch (_error) {}
-  }
-
-  private async publishEvent(envelope: any): Promise<void> {
-    try {
-      if ("pushEvent" in this.bus && typeof (this.bus as any).pushEvent === "function") {
-        (this.bus as any).pushEvent(envelope);
-      } else {
-        await this.bus.publish(envelope);
-      }
-    } catch {
-      // Fire-and-forget
+    } catch (error) {
+      console.error("Failed to save cooldown map:", error);
     }
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

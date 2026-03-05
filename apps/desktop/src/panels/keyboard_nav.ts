@@ -22,8 +22,8 @@ export class KeyboardNav {
   private callbacks: KeyboardNavCallbacks;
   private container: HTMLElement | null = null;
   private keydownHandler?: (e: KeyboardEvent) => void;
-  private currentIndex = 0;
-  private itemCount = 0;
+  private currentIndex: number = 0;
+  private itemCount: number = 0;
 
   constructor(callbacks: KeyboardNavCallbacks, options: KeyboardNavOptions = {}) {
     this.callbacks = callbacks;
@@ -63,53 +63,47 @@ export class KeyboardNav {
   }
 
   private updateItemCount(): void {
-    if (!this.container) {
-      return;
-    }
+    if (!this.container) return;
     const items = this.container.querySelectorAll('[role="option"]');
     this.itemCount = items.length;
   }
 
   private attachEventListeners(): void {
-    if (!this.container) {
-      return;
-    }
+    if (!this.container) return;
 
     this.keydownHandler = (e: KeyboardEvent) => {
       this.handleKeydown(e);
     };
 
-    this.container.addEventListener("keydown", this.keydownHandler);
+    this.container.addEventListener('keydown', this.keydownHandler);
   }
 
   private detachEventListeners(): void {
-    if (!(this.container && this.keydownHandler)) {
-      return;
-    }
-    this.container.removeEventListener("keydown", this.keydownHandler);
+    if (!this.container || !this.keydownHandler) return;
+    this.container.removeEventListener('keydown', this.keydownHandler);
   }
 
   private handleKeydown(event: KeyboardEvent): void {
     const key = event.key;
 
     switch (key) {
-      case "ArrowUp":
+      case 'ArrowUp':
         this.handleNavigateUp(event);
         break;
-      case "ArrowDown":
+      case 'ArrowDown':
         this.handleNavigateDown(event);
         break;
-      case "Home":
+      case 'Home':
         this.handleNavigateHome(event);
         break;
-      case "End":
+      case 'End':
         this.handleNavigateEnd(event);
         break;
-      case "Enter":
+      case 'Enter':
         this.handleSelect(event);
         break;
-      case "Delete":
-      case "Backspace":
+      case 'Delete':
+      case 'Backspace':
         this.handleDelete(event);
         break;
       default:
@@ -119,7 +113,7 @@ export class KeyboardNav {
     event.preventDefault();
   }
 
-  private handleNavigateUp(_event: KeyboardEvent): void {
+  private handleNavigateUp(event: KeyboardEvent): void {
     if (this.currentIndex > 0) {
       this.currentIndex--;
       this.callbacks.onNavigateUp();
@@ -129,7 +123,7 @@ export class KeyboardNav {
     }
   }
 
-  private handleNavigateDown(_event: KeyboardEvent): void {
+  private handleNavigateDown(event: KeyboardEvent): void {
     if (this.currentIndex < this.itemCount - 1) {
       this.currentIndex++;
       this.callbacks.onNavigateDown();
@@ -139,21 +133,21 @@ export class KeyboardNav {
     }
   }
 
-  private handleNavigateHome(_event: KeyboardEvent): void {
+  private handleNavigateHome(event: KeyboardEvent): void {
     this.currentIndex = 0;
     this.callbacks.onNavigateHome();
   }
 
-  private handleNavigateEnd(_event: KeyboardEvent): void {
+  private handleNavigateEnd(event: KeyboardEvent): void {
     this.currentIndex = Math.max(0, this.itemCount - 1);
     this.callbacks.onNavigateEnd();
   }
 
-  private handleSelect(_event: KeyboardEvent): void {
+  private handleSelect(event: KeyboardEvent): void {
     this.callbacks.onSelect();
   }
 
-  private async handleDelete(_event: KeyboardEvent): Promise<void> {
+  private async handleDelete(event: KeyboardEvent): Promise<void> {
     if (!this.options.confirmBeforeDelete) {
       this.callbacks.onDelete();
       return;

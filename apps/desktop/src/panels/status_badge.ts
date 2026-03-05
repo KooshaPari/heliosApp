@@ -6,19 +6,19 @@
 export interface StatusBadgeProps {
   state: string;
   isOrphaned?: boolean;
-  theme?: "light" | "dark";
+  theme?: 'light' | 'dark';
 }
 
 export const DEFAULT_COLOR_SCHEME: Record<string, { color: string; bgColor: string }> = {
-  idle: { color: "#999999", bgColor: "#f5f5f5" },
-  running: { color: "#22c55e", bgColor: "#dcfce7" },
-  blocked: { color: "#eab308", bgColor: "#fefce8" },
-  error: { color: "#ef4444", bgColor: "#fee2e2" },
-  shared: { color: "#3b82f6", bgColor: "#dbeafe" },
-  provisioning: { color: "#f59e0b", bgColor: "#fef3c7" },
-  cleaning: { color: "#f59e0b", bgColor: "#fef3c7" },
-  closed: { color: "#6b7280", bgColor: "#f3f4f6" },
-  orphaned: { color: "#ea580c", bgColor: "#fed7aa" },
+  idle: { color: '#999999', bgColor: '#f5f5f5' },
+  running: { color: '#22c55e', bgColor: '#dcfce7' },
+  blocked: { color: '#eab308', bgColor: '#fefce8' },
+  error: { color: '#ef4444', bgColor: '#fee2e2' },
+  shared: { color: '#3b82f6', bgColor: '#dbeafe' },
+  provisioning: { color: '#f59e0b', bgColor: '#fef3c7' },
+  cleaning: { color: '#f59e0b', bgColor: '#fef3c7' },
+  closed: { color: '#6b7280', bgColor: '#f3f4f6' },
+  orphaned: { color: '#ea580c', bgColor: '#fed7aa' },
 };
 
 export interface StatusBadgeContent {
@@ -51,9 +51,7 @@ export class StatusBadge {
   }
 
   private render(): void {
-    if (!this.container) {
-      return;
-    }
+    if (!this.container) return;
 
     // Clear children safely
     while (this.container.firstChild) {
@@ -66,24 +64,24 @@ export class StatusBadge {
 
   private createBadgeElement(): HTMLElement {
     const content = this.getBadgeContent(this.props.state);
-    const container = document.createElement("span");
-    container.className = "status-badge";
-    container.setAttribute("data-state", this.props.state);
-    container.setAttribute("role", "status");
-    container.setAttribute("aria-label", content.label);
+    const container = document.createElement('span');
+    container.className = 'status-badge';
+    container.setAttribute('data-state', this.props.state);
+    container.setAttribute('role', 'status');
+    container.setAttribute('aria-label', content.label);
 
     // Set inline styles
     container.style.color = content.color;
     container.style.backgroundColor = content.bgColor;
 
     // Icon
-    const icon = document.createElement("span");
-    icon.className = "badge-icon";
+    const icon = document.createElement('span');
+    icon.className = 'badge-icon';
     icon.textContent = content.icon;
 
     // Tooltip
-    const tooltip = document.createElement("span");
-    tooltip.className = "badge-tooltip";
+    const tooltip = document.createElement('span');
+    tooltip.className = 'badge-tooltip';
     tooltip.textContent = content.label;
 
     container.appendChild(icon);
@@ -103,20 +101,20 @@ export class StatusBadge {
     };
   }
 
-  private getBaseContent(state: string): Omit<StatusBadgeContent, "color" | "bgColor"> {
-    const stateMap: Record<string, Omit<StatusBadgeContent, "color" | "bgColor">> = {
-      idle: { icon: "●", label: "Idle" },
-      running: { icon: "●", label: "Running" },
-      blocked: { icon: "●", label: "Blocked" },
-      error: { icon: "●", label: "Error" },
-      shared: { icon: "●", label: "Shared" },
-      provisioning: { icon: "◌", label: "Provisioning..." },
-      cleaning: { icon: "◌", label: "Cleaning..." },
-      closed: { icon: "✕", label: "Closed" },
-      orphaned: { icon: "⚠", label: "Orphaned" },
+  private getBaseContent(state: string): Omit<StatusBadgeContent, 'color' | 'bgColor'> {
+    const stateMap: Record<string, Omit<StatusBadgeContent, 'color' | 'bgColor'>> = {
+      idle: { icon: '●', label: 'Idle' },
+      running: { icon: '●', label: 'Running' },
+      blocked: { icon: '●', label: 'Blocked' },
+      error: { icon: '●', label: 'Error' },
+      shared: { icon: '●', label: 'Shared' },
+      provisioning: { icon: '◌', label: 'Provisioning...' },
+      cleaning: { icon: '◌', label: 'Cleaning...' },
+      closed: { icon: '✕', label: 'Closed' },
+      orphaned: { icon: '⚠', label: 'Orphaned' },
     };
 
-    return stateMap[state] || { icon: "?", label: "Unknown state" };
+    return stateMap[state] || { icon: '?', label: 'Unknown state' };
   }
 }
 

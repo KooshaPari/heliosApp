@@ -6,7 +6,7 @@
  * FR-026-004: Tmate backend adapter.
  */
 
-// ChildProcess is not exported from bun directly; using any for process types
+import type { ChildProcess } from "bun";
 
 /**
  * Share backend adapter interface.
@@ -62,13 +62,13 @@ export class UptermAdapter implements ShareBackendAdapter {
   ): Promise<{ link: string; process: any }> {
     try {
       // Validate inputs
-      if (!(terminalId && zellijSessionName)) {
+      if (!terminalId || !zellijSessionName) {
         throw new Error("Missing terminalId or zellijSessionName");
       }
 
       // Generate upterm command
       const attachCommand = `zellij attach ${zellijSessionName}`;
-      const _uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
+      const uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
 
       // Mock implementation: return simulated result
       const link = `https://upterm.io/${terminalId}-${Date.now()}`;
@@ -142,13 +142,13 @@ export class TmateAdapter implements ShareBackendAdapter {
   ): Promise<{ link: string; process: any }> {
     try {
       // Validate inputs
-      if (!(terminalId && zellijSessionName)) {
+      if (!terminalId || !zellijSessionName) {
         throw new Error("Missing terminalId or zellijSessionName");
       }
 
       // Generate tmate command
       const attachCommand = `zellij attach ${zellijSessionName}`;
-      const _tmateCommand = `tmate -F -c "${attachCommand}"`;
+      const tmateCommand = `tmate -F -c "${attachCommand}"`;
 
       // Mock implementation: return simulated result
       // Tmate typically outputs link to stderr
@@ -189,7 +189,10 @@ export class TmateAdapter implements ShareBackendAdapter {
  * @param config Backend-specific configuration
  * @returns Adapter instance
  */
-export function getBackendAdapter(backend: string, config?: any): ShareBackendAdapter {
+export function getBackendAdapter(
+  backend: string,
+  config?: any
+): ShareBackendAdapter {
   switch (backend) {
     case "upterm":
       return new UptermAdapter(config as UptermConfig | undefined);

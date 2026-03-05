@@ -7,10 +7,10 @@
  * @see FR-010-010, SC-010-003
  */
 
-import type { RenderSurface, RendererAdapter, RendererConfig } from "./adapter.js";
-import type { TerminalContext } from "./hot_swap.js";
-import type { RendererEventBus } from "./index.js";
+import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.js";
 import type { SwitchBuffer } from "./stream_binding.js";
+import type { RendererEventBus } from "./index.js";
+import type { TerminalContext } from "./hot_swap.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -44,7 +44,7 @@ export interface RestartRestoreResult {
 export class RestartRestoreError extends Error {
   constructor(
     public readonly phase: string,
-    message: string
+    message: string,
   ) {
     super(`Restart-with-restore failed during ${phase}: ${message}`);
     this.name = "RestartRestoreError";
@@ -133,7 +133,7 @@ export async function executeRestartWithRestore(
   config: RendererConfig,
   surface: RenderSurface,
   onRollback: (error: Error) => Promise<void>,
-  _eventBus?: RendererEventBus
+  eventBus?: RendererEventBus,
 ): Promise<RestartRestoreResult> {
   const startTime = Date.now();
   let currentPhase = "checkpoint";
@@ -154,10 +154,7 @@ export async function executeRestartWithRestore(
     try {
       await sourceAdapter.stop();
     } catch (e: unknown) {
-      throw new RestartRestoreError(
-        currentPhase,
-        `source stop failed: ${e instanceof Error ? e.message : String(e)}`
-      );
+      throw new RestartRestoreError(currentPhase, `source stop failed: ${e instanceof Error ? e.message : String(e)}`);
     }
 
     // ===== Phase 3: Start and restore =====
@@ -168,10 +165,7 @@ export async function executeRestartWithRestore(
       await targetAdapter.init(config);
       await targetAdapter.start(surface);
     } catch (e: unknown) {
-      throw new RestartRestoreError(
-        currentPhase,
-        `target init failed: ${e instanceof Error ? e.message : String(e)}`
-      );
+      throw new RestartRestoreError(currentPhase, `target init failed: ${e instanceof Error ? e.message : String(e)}`);
     }
 
     // Restore terminal state from checkpoints
@@ -180,20 +174,14 @@ export async function executeRestartWithRestore(
         restoreCheckpoint(checkpoint, targetAdapter);
       }
     } catch (e: unknown) {
-      throw new RestartRestoreError(
-        currentPhase,
-        `restore failed: ${e instanceof Error ? e.message : String(e)}`
-      );
+      throw new RestartRestoreError(currentPhase, `restore failed: ${e instanceof Error ? e.message : String(e)}`);
     }
 
     // Replay PTY buffers
     try {
       streamBuffer.stopBuffering(targetAdapter);
     } catch (e: unknown) {
-      throw new RestartRestoreError(
-        currentPhase,
-        `replay failed: ${e instanceof Error ? e.message : String(e)}`
-      );
+      throw new RestartRestoreError(currentPhase, `replay failed: ${e instanceof Error ? e.message : String(e)}`);
     }
 
     // ===== Phase 4: Commit =====
@@ -206,10 +194,7 @@ export async function executeRestartWithRestore(
       checkpoints,
     };
   } catch (error: unknown) {
-    const restartError =
-      error instanceof RestartRestoreError
-        ? error
-        : new RestartRestoreError(currentPhase, String(error));
+    const restartError = error instanceof RestartRestoreError ? error : new RestartRestoreError(currentPhase, String(error));
 
     // Trigger rollback
     try {

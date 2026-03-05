@@ -3,14 +3,15 @@
  * Verifies all constitution violations are correctly detected.
  */
 
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { promises as fs } from "fs";
-import { runComplianceChecks } from "../compliance-checker";
+import { test, expect, describe, beforeAll, afterAll } from 'bun:test';
+import { promises as fs } from 'fs';
+import * as path from 'path';
+import { runComplianceChecks } from '../compliance-checker';
 
 // Fixture directory for test files
-const FIXTURE_DIR = "./scripts/tests/fixtures";
+const FIXTURE_DIR = './scripts/tests/fixtures';
 
-describe("Compliance Checker", () => {
+describe('Compliance Checker', () => {
   beforeAll(async () => {
     // Create fixture directory
     await fs.mkdir(FIXTURE_DIR, { recursive: true });
@@ -25,33 +26,30 @@ describe("Compliance Checker", () => {
     }
   });
 
-  test("detects file size violation (>500 lines)", async () => {
+  test('detects file size violation (>500 lines)', async () => {
     // Create a large file
-    const lines = Array(501)
-      .fill("// line")
-      .map((l, i) => `${l} ${i}`);
+    const lines = Array(501).fill('// line').map((l, i) => `${l} ${i}`);
     const filePath = `${FIXTURE_DIR}/large-file.ts`;
-    await fs.writeFile(filePath, lines.join("\n"));
+    await fs.writeFile(filePath, lines.join('\n'));
 
     const result = await runComplianceChecks([filePath]);
 
     expect(result.passed).toBe(false);
     expect(result.findings.length).toBeGreaterThan(0);
-    expect(result.findings[0].check).toBe("File Size Limit");
+    expect(result.findings[0].check).toBe('File Size Limit');
     expect(result.findings[0].filePath).toBe(filePath);
     expect(result.findings[0].constitutionSection).toBeTruthy();
   });
 
-  test("passes clean file under 500 lines", async () => {
-    const lines = Array(100).fill("// line");
+  test('passes clean file under 500 lines', async () => {
+    const lines = Array(100).fill('// line');
     const filePath = `${FIXTURE_DIR}/small-file.ts`;
-    await fs.writeFile(filePath, lines.join("\n"));
+    await fs.writeFile(filePath, lines.join('\n'));
 
     const result = await runComplianceChecks([filePath]);
 
-    // No file-size or type-safety violations; may have test-coverage finding
-    const nonCoverageFindings = result.findings.filter(f => f.check !== "Test Coverage");
-    expect(nonCoverageFindings.length).toBe(0);
+    expect(result.passed).toBe(true);
+    expect(result.findings.length).toBe(0);
   });
 
   test('detects "any" type usage', async () => {
@@ -65,12 +63,12 @@ export function test(value: any): void {
     const result = await runComplianceChecks([filePath]);
 
     expect(result.passed).toBe(false);
-    const anyTypeFinding = result.findings.find(f => f.check === "Type Safety");
+    const anyTypeFinding = result.findings.find(f => f.check === 'Type Safety');
     expect(anyTypeFinding).toBeTruthy();
     expect(anyTypeFinding?.constitutionSection).toBeTruthy();
   });
 
-  test("detects hardcoded secrets", async () => {
+  test('detects hardcoded secrets', async () => {
     const content = `
 const API_KEY = "sk-1234567890abcdef";
 export const token = API_KEY;`;
@@ -80,12 +78,12 @@ export const token = API_KEY;`;
     const result = await runComplianceChecks([filePath]);
 
     expect(result.passed).toBe(false);
-    const securityFinding = result.findings.find(f => f.check === "Security");
+    const securityFinding = result.findings.find(f => f.check === 'Security');
     expect(securityFinding).toBeTruthy();
-    expect(securityFinding?.description).toContain("secret");
+    expect(securityFinding?.description).toContain('secret');
   });
 
-  test("passes safe code without violations", async () => {
+  test('passes safe code without violations', async () => {
     const content = `
 export function calculateSum(values: number[]): number {
   return values.reduce((sum, val) => sum + val, 0);
@@ -95,15 +93,14 @@ export function calculateSum(values: number[]): number {
 
     const result = await runComplianceChecks([filePath]);
 
-    // No type-safety or security violations; may have test-coverage finding
-    const nonCoverageFindings = result.findings.filter(f => f.check !== "Test Coverage");
-    expect(nonCoverageFindings.length).toBe(0);
+    expect(result.passed).toBe(true);
+    expect(result.findings.length).toBe(0);
   });
 
-  test("includes remediation hints in findings", async () => {
-    const lines = Array(501).fill("// line");
+  test('includes remediation hints in findings', async () => {
+    const lines = Array(501).fill('// line');
     const filePath = `${FIXTURE_DIR}/fixture-size.ts`;
-    await fs.writeFile(filePath, lines.join("\n"));
+    await fs.writeFile(filePath, lines.join('\n'));
 
     const result = await runComplianceChecks([filePath]);
 
@@ -111,9 +108,9 @@ export function calculateSum(values: number[]): number {
     expect(result.findings[0].remediationHint.length).toBeGreaterThan(0);
   });
 
-  test("result includes timestamp", async () => {
+  test('result includes timestamp', async () => {
     const filePath = `${FIXTURE_DIR}/empty.ts`;
-    await fs.writeFile(filePath, "// empty file");
+    await fs.writeFile(filePath, '// empty file');
 
     const result = await runComplianceChecks([filePath]);
 
@@ -121,12 +118,12 @@ export function calculateSum(values: number[]): number {
     expect(new Date(result.timestamp).getTime()).toBeGreaterThan(0);
   });
 
-  test("handles multiple files", async () => {
+  test('handles multiple files', async () => {
     const file1 = `${FIXTURE_DIR}/multi-1.ts`;
     const file2 = `${FIXTURE_DIR}/multi-2.ts`;
-
-    await fs.writeFile(file1, Array(501).fill("// line").join("\n"));
-    await fs.writeFile(file2, "let x: any = 5;");
+    
+    await fs.writeFile(file1, Array(501).fill('// line').join('\n'));
+    await fs.writeFile(file2, 'let x: any = 5;');
 
     const result = await runComplianceChecks([file1, file2]);
 

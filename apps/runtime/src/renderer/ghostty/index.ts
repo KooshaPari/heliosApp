@@ -29,13 +29,7 @@ export {
   detectGpu,
 } from "./capabilities.js";
 export { GhosttyMetrics } from "./metrics.js";
-export type {
-  FrameSample,
-  InputLatencySample,
-  MetricsSnapshot,
-  MetricsConfig,
-  MetricsPublisher,
-} from "./metrics.js";
+export type { FrameSample, InputLatencySample, MetricsSnapshot, MetricsConfig, MetricsPublisher } from "./metrics.js";
 export { GhosttyInputRelay, InputRelayError } from "./input.js";
 export type { PtyWriter, GhosttyInputEvent, InputEventListener } from "./input.js";
 
@@ -51,12 +45,12 @@ export type { PtyWriter, GhosttyInputEvent, InputEventListener } from "./input.j
  */
 export async function isGhosttyAvailable(binaryPath = "ghostty"): Promise<boolean> {
   try {
-    const proc = (Bun as any).spawn(["which", binaryPath], {
+    const proc = Bun.spawn(["which", binaryPath], {
       stdout: "ignore",
       stderr: "ignore",
     });
     await proc.exited;
-    return (proc as any).exitCode === 0;
+    return proc.exitCode === 0;
   } catch {
     return false;
   }
@@ -69,7 +63,7 @@ export async function isGhosttyAvailable(binaryPath = "ghostty"): Promise<boolea
  */
 export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<string> {
   try {
-    const proc = (Bun as any).spawn([binaryPath, "--version"], {
+    const proc = Bun.spawn([binaryPath, "--version"], {
       stdout: "pipe",
       stderr: "ignore",
     });
@@ -97,11 +91,12 @@ export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<stri
  */
 export async function registerGhostty(
   registry: RendererRegistry,
-  binaryPath?: string | undefined
+  binaryPath?: string | undefined,
 ): Promise<void> {
   const available = await isGhosttyAvailable(binaryPath);
 
   if (!available) {
+    console.warn("[ghostty] Ghostty binary not found; skipping registration.");
     return;
   }
 
