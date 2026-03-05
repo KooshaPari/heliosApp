@@ -12,7 +12,9 @@ import { A2ARouterAdapter, HealthMonitoringCoordinator } from "../a2a-router.js"
 import type { ProviderHealthStatus } from "../adapter.js";
 import { NormalizedProviderError } from "../errors.js";
 
-type RouterConfig = Parameters<A2ARouterAdapter["init"]>[0] & {
+type RouterConfig = {
+  endpoints: Array<{ id: string; url: string; priority: number; capabilities: string[] }>;
+  timeout: number;
   failoverEnabled: boolean;
 };
 
@@ -46,7 +48,7 @@ describe("A2A Router Adapter", () => {
         failoverEnabled: true,
       };
 
-      await adapter.init(config);
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
 
       const health = await adapter.health();
       expect(health.state).toBe("healthy");
@@ -59,7 +61,9 @@ describe("A2A Router Adapter", () => {
         failoverEnabled: true,
       };
 
-      await expect(adapter.init(config)).rejects.toThrow(/init failed/i);
+      await expect(
+        adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0])
+      ).rejects.toThrow(/init failed/i);
     });
 
     it("should sort endpoints by priority", async () => {
@@ -88,7 +92,7 @@ describe("A2A Router Adapter", () => {
         failoverEnabled: true,
       };
 
-      await adapter.init(config);
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
 
       const endpoints = adapter.getEndpoints();
       expect(endpoints[0].id).toBe("agent-1");
@@ -110,7 +114,7 @@ describe("A2A Router Adapter", () => {
         failoverEnabled: true,
       };
 
-      await adapter.init(config);
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
 
       const events = bus.getEvents();
       const initEvent = events.find(e => e.topic === "provider.a2a.initialized");
@@ -139,7 +143,7 @@ describe("A2A Router Adapter", () => {
         timeout: 30000,
         failoverEnabled: true,
       };
-      await adapter.init(config);
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
     });
 
     it("should delegate to endpoint with matching capabilities", async () => {
@@ -250,7 +254,7 @@ describe("A2A Router Adapter", () => {
         timeout: 30000,
         failoverEnabled: true,
       };
-      await adapter.init(config);
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
     });
 
     it("should route to healthy endpoint", async () => {
@@ -323,7 +327,7 @@ describe("A2A Router Adapter", () => {
         timeout: 30000,
         failoverEnabled: true,
       };
-      await adapter.init(config);
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
     });
 
     it("should report healthy initially", async () => {
@@ -352,7 +356,7 @@ describe("A2A Router Adapter", () => {
         timeout: 30000,
         failoverEnabled: true,
       };
-      await adapter.init(config);
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
     });
 
     it("should terminate successfully", async () => {
@@ -405,7 +409,7 @@ describe("A2A Router Adapter", () => {
         timeout: 30000,
         failoverEnabled: true,
       };
-      await adapter.init(config);
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
     });
 
     it("should emit error event on delegation failure", async () => {
@@ -567,8 +571,8 @@ describe("Provider Crash Isolation (SC-025-002)", () => {
       failoverEnabled: true,
     };
 
-    await laneAdapterA.init(config);
-    await laneAdapterB.init(config);
+    await laneAdapterA.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
+    await laneAdapterB.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
 
     // Lane A executes successfully
     const resultA = await laneAdapterA.execute(
@@ -618,7 +622,7 @@ describe("Error Taxonomy Completeness (SC-025-004)", () => {
       timeout: 30000,
       failoverEnabled: true,
     };
-    await adapter.init(config);
+    await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
   });
 
   it("should map all delegation errors to normalized error codes", async () => {
