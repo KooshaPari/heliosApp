@@ -324,7 +324,20 @@ export class InMemoryLocalBus implements ProtocolBus {
       const startTime = Date.now();
 
       if (command.method === "lane.create") {
-        const correlationId = command.correlation_id!;
+        const correlationId = command.correlation_id;
+        if (!correlationId) {
+          return {
+            id: `res-${Date.now()}`,
+            type: "response",
+            ts: new Date().toISOString(),
+            status: "error",
+            error: {
+              code: "MISSING_CORRELATION_ID",
+              message: "correlation_id is required for lane.create",
+              retryable: false,
+            },
+          };
+        }
         if (!this.lifecycleProgress.has(correlationId)) {
           this.lifecycleProgress.set(correlationId, new Set());
         }
@@ -360,7 +373,20 @@ export class InMemoryLocalBus implements ProtocolBus {
       }
 
       if (command.method === "session.attach") {
-        const correlationId = command.correlation_id!;
+        const correlationId = command.correlation_id;
+        if (!correlationId) {
+          return {
+            id: `res-${Date.now()}`,
+            type: "response",
+            ts: new Date().toISOString(),
+            status: "error",
+            error: {
+              code: "MISSING_CORRELATION_ID",
+              message: "correlation_id is required for session.attach",
+              retryable: false,
+            },
+          };
+        }
         const forceError = command.payload?.force_error === true;
 
         if (!this.lifecycleProgress.has(correlationId)) {
@@ -413,7 +439,20 @@ export class InMemoryLocalBus implements ProtocolBus {
       }
 
       if (command.method === "terminal.spawn") {
-        const correlationId = command.correlation_id!;
+        const correlationId = command.correlation_id;
+        if (!correlationId) {
+          return {
+            id: `res-${Date.now()}`,
+            type: "response",
+            ts: new Date().toISOString(),
+            status: "error",
+            error: {
+              code: "MISSING_CORRELATION_ID",
+              message: "correlation_id is required for terminal.spawn",
+              retryable: false,
+            },
+          };
+        }
         const forceError = command.payload?.force_error === true;
 
         if (!this.lifecycleProgress.has(correlationId)) {

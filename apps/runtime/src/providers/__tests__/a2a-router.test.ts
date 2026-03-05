@@ -12,6 +12,10 @@ import { A2ARouterAdapter, HealthMonitoringCoordinator } from "../a2a-router.js"
 import type { ProviderHealthStatus } from "../adapter.js";
 import { NormalizedProviderError } from "../errors.js";
 
+type RouterConfig = Parameters<A2ARouterAdapter["init"]>[0] & {
+  failoverEnabled: boolean;
+};
+
 describe("A2A Router Adapter", () => {
   let adapter: A2ARouterAdapter;
   let bus: InMemoryLocalBus;
