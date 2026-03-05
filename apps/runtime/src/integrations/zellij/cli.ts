@@ -44,10 +44,7 @@ export class ZellijCli {
   /**
    * Run a zellij CLI command with optional timeout.
    */
-  async run(
-    args: string[],
-    options?: { timeout?: number }
-  ): Promise<CliResult> {
+  async run(args: string[], options?: { timeout?: number }): Promise<CliResult> {
     const timeout = options?.timeout ?? this.defaultTimeout;
     const command = `${this.zellijPath} ${args.join(" ")}`;
     const startMs = performance.now();
@@ -72,7 +69,7 @@ export class ZellijCli {
 
     // Race between process completion and timeout
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const timeoutPromise = new Promise<"timeout">((resolve) => {
+    const timeoutPromise = new Promise<"timeout">(resolve => {
       timer = setTimeout(() => {
         resolve("timeout");
       }, timeout);
@@ -184,12 +181,8 @@ export class ZellijCli {
     const attached = /\(ATTACHED\)/i.test(trimmed) || trimmed.includes("ATTACHED");
 
     // Try to extract creation date/time if present; otherwise use now
-    const dateMatch = trimmed.match(
-      /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})/
-    );
-    const created = dateMatch
-      ? new Date(`${dateMatch[1]}T${dateMatch[2]}`)
-      : new Date();
+    const dateMatch = trimmed.match(/(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})/);
+    const created = dateMatch ? new Date(`${dateMatch[1]}T${dateMatch[2]}`) : new Date();
 
     return { name, created, attached };
   }
