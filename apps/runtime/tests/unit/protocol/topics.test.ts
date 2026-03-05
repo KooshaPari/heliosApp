@@ -73,9 +73,11 @@ describe("LocalBus — event fan-out", () => {
         unsubscribers[0]();
       }
     });
-    unsubscribers.push(bus.subscribe("snapshot.test", () => {
-      received.push(2);
-    }));
+    unsubscribers.push(
+      bus.subscribe("snapshot.test", () => {
+        received.push(2);
+      })
+    );
     bus.subscribe("snapshot.test", () => {
       received.push(3);
     });
@@ -109,7 +111,9 @@ describe("LocalBus — event fan-out", () => {
   });
 
   it("unsubscribe called twice is a no-op", () => {
-    const unsub = bus.subscribe("double.unsub", () => {});
+    const unsub = bus.subscribe("double.unsub", () => {
+      // Intentionally no-op callback for unsubscribe semantics test.
+    });
     unsub();
     unsub(); // should not throw
   });
@@ -135,9 +139,9 @@ describe("LocalBus — event fan-out", () => {
   });
 
   it("silently discards non-event envelope passed to publish", async () => {
-    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
     const cmd = {
       id: "cmd_123",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixture intentionally uses snake_case.
       correlation_id: "cor_123",
       timestamp: 1,
       type: "command",

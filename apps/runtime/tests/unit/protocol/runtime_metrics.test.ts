@@ -4,12 +4,13 @@ import { InMemoryLocalBus } from "../../../src/protocol/bus";
 test("captures lane create latency metrics", async () => {
   const bus = new InMemoryLocalBus();
 
-  // biome-ignore lint/style/useNamingConvention: Protocol request payload uses snake_case identifiers.
   const response = await bus.request({
     id: "cmd-1",
     type: "command",
     ts: new Date().toISOString(),
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
     workspace_id: "workspace-alpha",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
     correlation_id: "corr-lane-1",
     method: "lane.create",
     payload: { id: "lane-alpha" },
@@ -29,14 +30,17 @@ test("captures lane create latency metrics", async () => {
 test("captures session restore latency metrics", async () => {
   const bus = new InMemoryLocalBus();
 
-  // biome-ignore lint/style/useNamingConvention: Protocol request payload uses snake_case identifiers.
   const response = await bus.request({
     id: "cmd-restore-1",
     type: "command",
     ts: new Date().toISOString(),
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
     workspace_id: "workspace-alpha",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
     lane_id: "lane-alpha",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
     session_id: "session-restore",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
     correlation_id: "corr-restore-1",
     method: "session.attach",
     payload: { id: "session-restore", restore: true },
@@ -55,19 +59,24 @@ test("captures session restore latency metrics", async () => {
 test("captures terminal output backlog depth", async () => {
   const bus = new InMemoryLocalBus();
 
-  // biome-ignore lint/style/useNamingConvention: Protocol event payload uses snake_case identifiers.
   await bus.publish({
     id: "evt-output-1",
     type: "event",
     ts: new Date().toISOString(),
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
     workspace_id: "workspace-alpha",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
     lane_id: "lane-alpha",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
     session_id: "session-1",
     topic: "terminal.output",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
     terminal_id: "terminal-1",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
     correlation_id: "corr-output-1",
     payload: {
       line: "hello",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
       backlog_depth: 17,
     },
   });
