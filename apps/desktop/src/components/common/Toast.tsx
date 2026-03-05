@@ -25,6 +25,11 @@ export const ToastContainer: Component<ToastContainerProps> = (props) => {
         {(toast) => (
           <div
             onClick={() => props.onDismiss(toast.id)}
+            onKeyDown={e => {
+              if (e.key === "Enter" || e.key === " ") {
+                props.onDismiss(toast.id);
+              }
+            }}
             style={{
               padding: "10px 16px", "border-radius": "8px", cursor: "pointer",
               "background-color": "#313244", "border-left": `3px solid ${colors[toast.type]}`,
