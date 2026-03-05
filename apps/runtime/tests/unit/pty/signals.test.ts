@@ -236,7 +236,7 @@ describe("sendSighup", () => {
       stdin: "pipe",
       stdout: "pipe",
       stderr: "pipe",
-    } as Bun.SpawnOptions<"ignore", "pipe", "pipe">);
+    }) as { pid?: number };
     pidsToCleanup.push(proc.pid as number);
 
     const record = makeRecord({ pid: proc.pid as number });
