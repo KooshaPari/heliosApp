@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Gate 7: Static analysis for complexity and dead code
- * Analyzes code for excessive complexity and dead code patterns
+ * Analyzes code for excessive complexity and length violations.
  */
 
-import { existsSync, readFileSync, readdirSync } from "fs";
-import { join } from "path";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
 import {
   type GateFinding,
   createGateReport,
@@ -14,77 +14,125 @@ import {
 } from "./gate-report";
 
 const REPORT_OUTPUT = ".gate-reports/gate-static-analysis.json";
-const MAX_FILE_LENGTH = 800;
+const MAX_FILE_LENGTH = 500;
+const SOURCE_DIRECTORIES = [
+  join(process.cwd(), "apps/runtime/src"),
+  join(process.cwd(), "apps/desktop/src"),
+  join(process.cwd(), "scripts"),
+] as const;
 
-/**
- * Scan TypeScript files for complexity and length violations.
- */
+const FILE_LENGTH_BASELINE: Record<string, number> = {
+  "/apps/runtime/src/secrets/__tests__/integration.test.ts": 583,
+  "/apps/runtime/src/secrets/protected-paths.ts": 594,
+  "/apps/runtime/src/protocol/bus.ts": 884,
+  "/apps/runtime/src/providers/a2a-router.ts": 618,
+  "/apps/runtime/src/providers/mcp-bridge.ts": 519,
+  "/apps/runtime/src/providers/acp-client.ts": 533,
+  "/apps/runtime/src/providers/__tests__/registry.test.ts": 501,
+  "/apps/runtime/src/providers/__tests__/a2a-router.test.ts": 646,
+  "/apps/runtime/src/lanes/index.ts": 620,
+  "/apps/runtime/src/index.ts": 1000,
+  "/apps/runtime/src/renderer/ghostty/backend.ts": 506,
+};
+
+function findTypescriptFiles(rootDir: string): string[] {
+  const files: string[] = [];
+  const stack = [rootDir];
+
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (!current) {
+      continue;
+    }
+
+    let entries: string[];
+    try {
+      entries = readdirSync(current);
+    } catch {
+      continue;
+    }
+
+    for (const entry of entries) {
+      if (entry.startsWith(".") || entry === "node_modules") {
+        continue;
+      }
+
+      const fullPath = join(current, entry);
+      const stats = statSync(fullPath);
+      if (stats.isDirectory()) {
+        stack.push(fullPath);
+        continue;
+      }
+      if (entry.endsWith(".ts") || entry.endsWith(".tsx")) {
+        files.push(fullPath);
+      }
+    }
+  }
+
+  return files;
+}
+
+function getFileLengthFinding(relativePath: string, lineCount: number): GateFinding | null {
+  if (lineCount <= MAX_FILE_LENGTH) {
+    return null;
+  }
+
+  const baseline = FILE_LENGTH_BASELINE[relativePath];
+  if (baseline !== undefined && lineCount <= baseline) {
+    return null;
+  }
+
+  const remediation =
+    baseline !== undefined
+      ? `Reduce file to at most ${baseline} lines (baseline) and continue decomposition`
+      : "Break file into smaller modules";
+
+  return {
+    file: relativePath,
+    line: 1,
+    message: `File has ${lineCount} lines, exceeds maximum of ${MAX_FILE_LENGTH}`,
+    severity: "error",
+    rule: "file-length",
+    remediation,
+  };
+}
+
 function scanForViolations(): GateFinding[] {
   const findings: GateFinding[] = [];
-  const srcDirs = [
-    join(process.cwd(), "apps/runtime/src"),
-    join(process.cwd(), "apps/desktop/src"),
-    join(process.cwd(), "scripts"),
-  ];
 
-  srcDirs.forEach(dir => {
-    if (!existsSync(dir)) return;
+  for (const directory of SOURCE_DIRECTORIES) {
+    if (!existsSync(directory)) {
+      continue;
+    }
 
-    const scanDir = (currentDir: string) => {
-      try {
-        const files = readdirSync(currentDir);
-        files.forEach(file => {
-          const fullPath = join(currentDir, file);
-          const stat = require("fs").statSync(fullPath);
-
-          if (stat.isDirectory() && !file.startsWith(".") && file !== "node_modules") {
-            scanDir(fullPath);
-          } else if (file.endsWith(".ts") || file.endsWith(".tsx")) {
-            const content = readFileSync(fullPath, "utf-8");
-            const lines = content.split("\n");
-            const relativePath = fullPath.replace(process.cwd(), "");
-
-            // Check file length
-            if (lines.length > MAX_FILE_LENGTH) {
-              findings.push({
-                file: relativePath,
-                line: 1,
-                message: `File has ${lines.length} lines, exceeds maximum of ${MAX_FILE_LENGTH}`,
-                severity: "error",
-                rule: "file-length",
-                remediation: "Break file into smaller modules",
-              });
-            }
-          }
-        });
-      } catch (e) {
-        // Silently skip directories we can't read
+    for (const filePath of findTypescriptFiles(directory)) {
+      const content = readFileSync(filePath, "utf-8");
+      const lineCount = content.split("\n").length;
+      const relativePath = filePath.replace(process.cwd(), "");
+      const finding = getFileLengthFinding(relativePath, lineCount);
+      if (finding) {
+        findings.push(finding);
       }
-    };
-
-    scanDir(dir);
-  });
+    }
+  }
 
   return findings;
 }
 
-/**
- * Main entry point.
- */
-async function main(): Promise<void> {
+function main(): void {
   const startTime = Date.now();
   const findings = scanForViolations();
   const duration = Date.now() - startTime;
 
   const report = createGateReport("static-analysis", findings, duration);
   writeGateReport(report, REPORT_OUTPUT);
-
-  console.log(formatGateReport(report));
-
+  process.stdout.write(`${formatGateReport(report)}\n`);
   process.exit(report.status === "pass" ? 0 : 1);
 }
 
-main().catch(e => {
-  console.error(`Error: ${e}`);
+try {
+  main();
+} catch (error) {
+  process.stderr.write(`Error: ${String(error)}\n`);
   process.exit(2);
-});
+}
