@@ -9,10 +9,12 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { A2ARouterAdapter, HealthMonitoringCoordinator } from "../a2a-router.js";
-
-type RouterConfig = Parameters<A2ARouterAdapter["init"]>[0];
 import type { ProviderHealthStatus } from "../adapter.js";
 import { NormalizedProviderError } from "../errors.js";
+
+type RouterConfig = Parameters<A2ARouterAdapter["init"]>[0] & {
+  failoverEnabled: boolean;
+};
 
 describe("A2A Router Adapter", () => {
   let adapter: A2ARouterAdapter;

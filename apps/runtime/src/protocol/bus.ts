@@ -350,17 +350,17 @@ export class InMemoryLocalBus implements ProtocolBus {
       if (command.method === "lane.create") {
         const correlationId = command.correlation_id;
         if (!correlationId) {
-          const err = new ProtocolValidationError(
-            "MISSING_CORRELATION_ID",
-            "correlation_id is required for lane.create"
-          );
-          return makeErrorResponse(
-            command.id,
-            "",
-            command.method,
-            "MISSING_CORRELATION_ID",
-            err.message
-          );
+          return {
+            id: `res-${Date.now()}`,
+            type: "response",
+            ts: new Date().toISOString(),
+            status: "error",
+            error: {
+              code: "MISSING_CORRELATION_ID",
+              message: "correlation_id is required for lane.create",
+              retryable: false,
+            },
+          };
         }
         if (!this.lifecycleProgress.has(correlationId)) {
           this.lifecycleProgress.set(correlationId, new Set());
@@ -404,17 +404,17 @@ export class InMemoryLocalBus implements ProtocolBus {
       if (command.method === "session.attach") {
         const correlationId = command.correlation_id;
         if (!correlationId) {
-          const err = new ProtocolValidationError(
-            "MISSING_CORRELATION_ID",
-            "correlation_id is required for session.attach"
-          );
-          return makeErrorResponse(
-            command.id,
-            "",
-            command.method,
-            "MISSING_CORRELATION_ID",
-            err.message
-          );
+          return {
+            id: `res-${Date.now()}`,
+            type: "response",
+            ts: new Date().toISOString(),
+            status: "error",
+            error: {
+              code: "MISSING_CORRELATION_ID",
+              message: "correlation_id is required for session.attach",
+              retryable: false,
+            },
+          };
         }
         const forceError = command.payload?.force_error === true;
 
@@ -475,17 +475,17 @@ export class InMemoryLocalBus implements ProtocolBus {
       if (command.method === "terminal.spawn") {
         const correlationId = command.correlation_id;
         if (!correlationId) {
-          const err = new ProtocolValidationError(
-            "MISSING_CORRELATION_ID",
-            "correlation_id is required for terminal.spawn"
-          );
-          return makeErrorResponse(
-            command.id,
-            "",
-            command.method,
-            "MISSING_CORRELATION_ID",
-            err.message
-          );
+          return {
+            id: `res-${Date.now()}`,
+            type: "response",
+            ts: new Date().toISOString(),
+            status: "error",
+            error: {
+              code: "MISSING_CORRELATION_ID",
+              message: "correlation_id is required for terminal.spawn",
+              retryable: false,
+            },
+          };
         }
         const forceError = command.payload?.force_error === true;
 
