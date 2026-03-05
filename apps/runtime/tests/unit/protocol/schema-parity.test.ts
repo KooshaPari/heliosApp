@@ -234,14 +234,21 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
     expect(schema.required).toContain("type");
 
     // oneOf branches
-    const commandSchema = schema.oneOf?.find(s => s.title === "CommandEnvelope")!;
+    const commandSchema = schema.oneOf?.find((s) => s.title === "CommandEnvelope");
+    const responseSchema = schema.oneOf?.find((s) => s.title === "ResponseEnvelope");
+    const eventSchema = schema.oneOf?.find((s) => s.title === "EventEnvelope");
+
+    expect(commandSchema).toBeDefined();
+    expect(responseSchema).toBeDefined();
+    expect(eventSchema).toBeDefined();
+
+    if (!commandSchema || !responseSchema || !eventSchema) {
+      throw new Error("expected envelope schemas missing from protocol schema");
+    }
+
     expect(commandSchema.required).toContain("method");
     expect(commandSchema.required).toContain("payload");
-
-    const responseSchema = schema.oneOf?.find(s => s.title === "ResponseEnvelope")!;
     expect(responseSchema.required).toContain("method");
-
-    const eventSchema = schema.oneOf?.find(s => s.title === "EventEnvelope")!;
     expect(eventSchema.required).toContain("topic");
     expect(eventSchema.required).toContain("payload");
     expect(eventSchema.required).toContain("sequence");
