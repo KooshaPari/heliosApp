@@ -75,11 +75,12 @@ type SpawnOptions = {
 };
 
 const spawn: (command: string[], options: SpawnOptions) => SpawnResult =
-  typeof globalThis["Bun"] !== "undefined"
-    ? (Bun.spawn as unknown as (command: string[], options: SpawnOptions) => SpawnResult)
-    : (() => {
-        throw new Error("worktree module requires Bun runtime");
-      }) as never;
+  ((globalThis as unknown as { Bun?: { spawn: typeof Bun.spawn } }).Bun?.spawn as
+    | ((command: string[], options: SpawnOptions) => SpawnResult)
+    | undefined) ??
+  (() => {
+    throw new Error("worktree module requires Bun runtime");
+  }) as (command: string[], options: SpawnOptions) => SpawnResult;
 
 async function runGit(
   args: string[],
