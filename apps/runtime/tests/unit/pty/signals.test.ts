@@ -232,7 +232,13 @@ describe("sendSighup", () => {
 
   it("records successful delivery", () => {
     // Spawn a real child so SIGHUP has a valid target (not the test runner).
-    const proc = Bun.spawn(["/bin/sh"]) as { pid?: number };
+    const proc = Bun.spawn(
+      ["/bin/sh"],
+      {
+        stdout: "pipe",
+        stderr: "pipe",
+      },
+    ) as { pid?: number };
     pidsToCleanup.push(proc.pid as number);
 
     const record = makeRecord({ pid: proc.pid as number });
