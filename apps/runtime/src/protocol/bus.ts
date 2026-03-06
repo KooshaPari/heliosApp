@@ -440,12 +440,16 @@ export class InMemoryLocalBus implements ProtocolBus {
         const isRestore = command.payload?.restore === true;
         if (isRestore) {
           const restoreStart = Date.now();
+          this.publishLifecycleEvent("session.restore.started", command);
           this.recordMetric("session_restore_latency_ms", Date.now() - restoreStart);
           this.emitMetricEvent("session_restore_latency_ms", Date.now() - restoreStart);
         }
 
         this.lifecycleProgress.get(correlationId)?.add("session.attached");
         this.publishLifecycleEvent("session.attached", command);
+        if (isRestore) {
+          this.publishLifecycleEvent("session.restore.completed", command);
+        }
         this.state = { session: "attached" };
         const sessionResultId =
           command.payload?.id ?? command.payload?.session_id ?? `session_${Date.now()}`;

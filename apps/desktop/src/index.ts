@@ -123,6 +123,39 @@ export class EditorlessControlPlane {
     return { ok: true, sessionId: result.id, error: null };
   }
 
+  async restoreSession(input: {
+    workspaceId: string;
+    laneId: string;
+    sessionId?: string;
+    forceError?: boolean;
+  }): Promise<{ ok: boolean; sessionId: string | null; error: string | null }> {
+    this.store.dispatch({ type: "operation.start", operation: "session" });
+    const result = await this.runtimeClient.ensureSession({
+      workspaceId: input.workspaceId,
+      laneId: input.laneId,
+      restore: true,
+      ...(input.sessionId !== undefined ? { sessionId: input.sessionId } : {}),
+      ...(input.forceError !== undefined ? { forceError: input.forceError } : {}),
+    });
+
+    if (!(result.ok && result.id)) {
+      this.store.dispatch({
+        type: "operation.failure",
+        operation: "session",
+        error: result.error ?? "session restore failed",
+      });
+      return { ok: false, sessionId: null, error: result.error ?? "session restore failed" };
+    }
+
+    this.store.dispatch({ type: "lane.set", laneId: input.laneId });
+    this.store.dispatch({ type: "session.set", sessionId: result.id });
+    if (result.runtimeState) {
+      this.store.dispatch({ type: "runtime.state.set", runtimeState: result.runtimeState });
+    }
+    this.store.dispatch({ type: "operation.success", operation: "session" });
+    return { ok: true, sessionId: result.id, error: null };
+  }
+
   async spawnTerminal(input: {
     workspaceId: string;
     laneId: string;
