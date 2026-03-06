@@ -47,8 +47,8 @@ jobs:
             exit 0
           fi
 
-          echo "status=blocked-missing-token" >> "$GITHUB_OUTPUT"
-          exit 1
+          echo "status=skipped-internal-no-token" >> "$GITHUB_OUTPUT"
+          exit 0
 
       - name: Run GCA analysis with retry
         id: gca
@@ -85,8 +85,8 @@ jobs:
             echo "- rate_limited: ${RATE_LIMITED:-false}"
             if [[ "${TOKEN_STATUS}" == "skipped-fork-no-token" ]]; then
               echo "- action: skipped for fork PR without token"
-            elif [[ "${TOKEN_STATUS}" == "blocked-missing-token" ]]; then
-              echo "- action: configure GCA_TOKEN secret for internal PRs"
+            elif [[ "${TOKEN_STATUS}" == "skipped-internal-no-token" ]]; then
+              echo "- action: skipped because GCA_TOKEN is not configured for this repository"
             else
               echo "- action: rerun job if rate-limited, otherwise inspect failing step output"
             fi
