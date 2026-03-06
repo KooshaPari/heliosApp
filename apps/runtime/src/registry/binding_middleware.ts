@@ -61,15 +61,15 @@ export class BindingMiddleware {
     }
 
     // Check binding state
-    if (binding.state !== BindingState.bound && binding.state !== BindingState.rebound) {
+    if (binding.state !== BindingState.Bound && binding.state !== BindingState.Rebound) {
       return {
         valid: false,
         error: {
           code: "INVALID_BINDING_STATE",
           message: `Terminal binding is in ${binding.state} state, expected 'bound' or 'rebound'`,
           fatal:
-            binding.state === BindingState.validation_failed ||
-            binding.state === BindingState.unbound,
+            binding.state === BindingState.ValidationFailed ||
+            binding.state === BindingState.Unbound,
         },
         binding,
       };
@@ -80,7 +80,7 @@ export class BindingMiddleware {
 
     if (!validation.valid) {
       // Mark binding as validation failed
-      binding.state = BindingState.validation_failed;
+      binding.state = BindingState.ValidationFailed;
       binding.updatedAt = Date.now();
 
       return {
@@ -124,7 +124,11 @@ export class BindingMiddleware {
       throw new Error(`${error.code}: ${error.message}`);
     }
 
-    return handler(validation.binding!);
+    const binding = validation.binding;
+    if (!binding) {
+      throw new Error("VALIDATION_FAILED: Validation succeeded without binding payload");
+    }
+    return handler(binding);
   }
 
   /**
@@ -146,7 +150,11 @@ export class BindingMiddleware {
       throw new Error(`${error.code}: ${error.message}`);
     }
 
-    return handler(validation.binding!);
+    const binding = validation.binding;
+    if (!binding) {
+      throw new Error("VALIDATION_FAILED: Validation succeeded without binding payload");
+    }
+    return handler(binding);
   }
 }
 

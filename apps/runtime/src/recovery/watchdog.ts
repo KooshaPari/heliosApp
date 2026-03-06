@@ -4,10 +4,10 @@ import path from "node:path";
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
 
 export enum CrashReason {
-  HEARTBEAT_TIMEOUT = "HEARTBEAT_TIMEOUT",
-  UNRESPONSIVE = "UNRESPONSIVE",
-  EXIT_CODE = "EXIT_CODE",
-  SIGNAL = "SIGNAL",
+  HeartbeatTimeout = "HEARTBEAT_TIMEOUT",
+  Unresponsive = "UNRESPONSIVE",
+  ExitCode = "EXIT_CODE",
+  Signal = "SIGNAL",
 }
 
 export interface CrashEvent {
@@ -26,7 +26,7 @@ interface ProcessMonitor {
   pid: number;
   heartbeatIntervalMs: number;
   lastHeartbeat: number;
-  timeoutId?: NodeJS.Timeout;
+  timeoutId?: ReturnType<typeof setTimeout>;
 }
 
 export class Watchdog {
@@ -90,11 +90,11 @@ export class Watchdog {
 
   private async handleHeartbeatTimeout(monitor: ProcessMonitor): Promise<void> {
     // Check if process is still running
-    const isRunning = await this.isProcessRunning(monitor.pid);
+    const isRunning = this.isProcessRunning(monitor.pid);
 
-    let reason = CrashReason.UNRESPONSIVE;
+    let reason = CrashReason.Unresponsive;
     if (!isRunning) {
-      reason = CrashReason.HEARTBEAT_TIMEOUT;
+      reason = CrashReason.HeartbeatTimeout;
     }
 
     const crashEvent: CrashEvent = {
@@ -116,13 +116,13 @@ export class Watchdog {
     this.unregister(name);
 
     // Classify exit
-    let reason = CrashReason.EXIT_CODE;
+    let reason = CrashReason.ExitCode;
     if (signal) {
       if (signal === "SIGTERM") {
         // Graceful termination - no recovery needed
         return;
       }
-      reason = CrashReason.SIGNAL;
+      reason = CrashReason.Signal;
     } else if (exitCode === 0) {
       // Graceful shutdown - no recovery needed
       return;
@@ -180,10 +180,12 @@ export class Watchdog {
       // Atomic write: write to temp file then rename
       await fs.writeFile(tempPath, JSON.stringify(event, null, 2));
       await fs.rename(tempPath, recordPath);
-    } catch (_err) {}
+    } catch (_error) {
+      // Ignore crash record persistence errors so crash handling remains resilient.
+    }
   }
 
-  private async isProcessRunning(pid: number): Promise<boolean> {
+  private isProcessRunning(pid: number): boolean {
     try {
       // Try to send signal 0 (no-op kill) to check if process exists
       process.kill(pid, 0);

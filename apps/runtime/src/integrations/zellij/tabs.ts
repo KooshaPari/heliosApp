@@ -82,18 +82,34 @@ export class ZellijTabManager {
     }
 
     // Terminate PTYs for all panes in the tab
+    await this.terminateTabPtys(tab);
+
+    // Close the tab via zellij CLI
+    await this.focusTabIfNeeded(sessionName, tabId);
+    await this.closeTabCommand(sessionName, tabId);
+    this.topology.removeTab(sessionName, tabId);
+  }
+
+  /**
+   * Terminate all PTYs bound to tab panes when closing.
+   */
+  private async terminateTabPtys(tab: {
+    panes: Array<{ ptyId?: string | undefined }>;
+  }): Promise<void> {
     if (this.ptyManager) {
       for (const pane of tab.panes) {
         if (pane.ptyId) {
           try {
             await this.ptyManager.terminate(pane.ptyId);
-          } catch (_err) {}
+          } catch (_err: unknown) {
+            // PTY already terminated or not ready; close can proceed idempotently.
+          }
         }
       }
     }
+  }
 
-    // Close the tab via zellij CLI
-    // Switch to the tab first, then close it
+  private async focusTabIfNeeded(sessionName: string, tabId: number): Promise<void> {
     const switchResult = await this.cli.run([
       "--session",
       sessionName,
@@ -105,13 +121,18 @@ export class ZellijTabManager {
 
     // Ignore switch errors if tab is already active
     if (switchResult.exitCode !== 0) {
+      // best-effort navigation; close command is idempotent for active tabs.
     }
+  }
 
+  private async closeTabCommand(sessionName: string, _tabId: number): Promise<void> {
     const result = await this.cli.run(["--session", sessionName, "action", "close-tab"]);
 
     if (result.exitCode !== 0) {
       // If tab doesn't exist, treat as success (idempotent)
-      if (!(result.stderr.includes("not found") || result.stderr.includes("no tab"))) {
+      const isIdempotentFailure =
+        result.stderr.includes("not found") || result.stderr.includes("no tab");
+      if (!isIdempotentFailure) {
         throw new ZellijCliError(
           `close-tab --session ${sessionName}`,
           result.exitCode,
@@ -119,9 +140,6 @@ export class ZellijTabManager {
         );
       }
     }
-
-    // Update topology
-    this.topology.removeTab(sessionName, tabId);
   }
 
   /**

@@ -1,7 +1,7 @@
 // T002 - Orphaned worktree detector
 
 import { promises as fs } from "node:fs";
-import path from "node:path";
+import { join } from "node:path";
 import type { LaneRecord, LaneRegistry } from "../registry.js";
 import type { OrphanedResource } from "./resource_classifier.js";
 
@@ -22,7 +22,7 @@ export class WorktreeDetector {
           continue;
         }
 
-        const worktreePath = path.join(this.baseDir, entry.name);
+        const worktreePath = join(this.baseDir, entry.name);
         const laneId = this.extractLaneId(entry.name);
 
         if (!laneId) {
@@ -51,7 +51,10 @@ export class WorktreeDetector {
           estimatedOwnerId: laneId,
         });
       }
-    } catch (_error) {}
+    } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: Read failures are expected in some environments and should be surfaced for operator visibility.
+      console.warn(`Failed to read worktree directory ${this.baseDir}: ${String(error)}`);
+    }
 
     return orphans;
   }

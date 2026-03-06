@@ -39,4 +39,6 @@ export function getActiveTerminalId() {
 }
 
 // Stub for terminal write - will be wired to PTY bridge later
-export function writeToTerminal(_terminalId: string, _data: string): void {}
+export function writeToTerminal(_terminalId: string, _data: string): void {
+  // TODO: wire to PTY bridge
+}

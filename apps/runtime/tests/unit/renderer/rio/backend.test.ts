@@ -30,6 +30,7 @@ function createMockGhostty(opts?: { failInit?: boolean }): RendererAdapter & {
     _initCalled: false,
 
     async init(_config: RendererConfig): Promise<void> {
+      await Promise.resolve();
       adapter._initCalled = true;
       if (opts?.failInit) {
         throw new Error("ghostty init failed");
@@ -37,15 +38,25 @@ function createMockGhostty(opts?: { failInit?: boolean }): RendererAdapter & {
       adapter._state = "running";
     },
     async start(_surface: RenderSurface): Promise<void> {
+      await Promise.resolve();
       adapter._state = "running";
     },
     async stop(): Promise<void> {
+      await Promise.resolve();
       adapter._state = "stopped";
     },
-    bindStream(_ptyId: string, _stream: ReadableStream<Uint8Array>): void {},
-    unbindStream(_ptyId: string): void {},
-    handleInput(_ptyId: string, _data: Uint8Array): void {},
-    resize(_ptyId: string, _cols: number, _rows: number): void {},
+    bindStream(_ptyId: string, _stream: ReadableStream<Uint8Array>): void {
+      // noop in this test adapter
+    },
+    unbindStream(_ptyId: string): void {
+      // noop in this test adapter
+    },
+    handleInput(_ptyId: string, _data: Uint8Array): void {
+      // noop in this test adapter
+    },
+    resize(_ptyId: string, _cols: number, _rows: number): void {
+      // noop in this test adapter
+    },
     queryCapabilities(): RendererCapabilities {
       return {
         gpuAccelerated: false,
@@ -61,7 +72,9 @@ function createMockGhostty(opts?: { failInit?: boolean }): RendererAdapter & {
     getState(): RendererState {
       return adapter._state;
     },
-    onCrash(_handler: (error: Error) => void): void {},
+    onCrash(_handler: (error: Error) => void): void {
+      // noop in this unit test adapter
+    },
   };
   return adapter;
 }
@@ -163,7 +176,7 @@ describe("RioBackend — crash fallback (T007)", () => {
     expect(backend.getState()).toBe("errored");
   });
 
-  it("increments crash count", async () => {
+  it("increments crash count", () => {
     const backend = new RioBackend();
     expect(backend.getCrashCount()).toBe(0);
     // Crash count is incremented in the onExit handler, not in _attemptFallback.

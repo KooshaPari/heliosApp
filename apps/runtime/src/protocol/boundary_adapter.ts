@@ -54,14 +54,10 @@ function normalizedBoundaryError(
   message: string,
   details: Record<string, unknown>
 ): LocalBusEnvelope {
-  return {
+  const envelope: LocalBusEnvelope = {
     id: command.id,
     type: "response",
     ts: new Date().toISOString(),
-    workspace_id: command.workspace_id,
-    session_id: command.session_id,
-    terminal_id: command.terminal_id,
-    method: command.type === "command" ? command.method : undefined,
     status: "error",
     error: {
       code,
@@ -70,6 +66,22 @@ function normalizedBoundaryError(
       details,
     },
   };
+  if (command.workspace_id !== undefined) {
+    envelope.workspace_id = command.workspace_id;
+  }
+  if (command.lane_id !== undefined) {
+    envelope.lane_id = command.lane_id;
+  }
+  if (command.session_id !== undefined) {
+    envelope.session_id = command.session_id;
+  }
+  if (command.terminal_id !== undefined) {
+    envelope.terminal_id = command.terminal_id;
+  }
+  if (command.type === "command" && command.method !== undefined) {
+    envelope.method = command.method;
+  }
+  return envelope;
 }
 
 export function getBoundaryDispatchDecision(method: string): BoundaryDispatchDecision {

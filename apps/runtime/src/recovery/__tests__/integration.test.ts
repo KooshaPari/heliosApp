@@ -12,13 +12,15 @@ describe("Integration Tests - Crash to Live Recovery", () => {
   let bus: InMemoryLocalBus;
   let pipeline: RestorationPipeline;
   let stateMachine: RecoveryStateMachine;
+  const asEnvironmentVariables = (entries: [string, string][]) =>
+    Object.fromEntries(entries) as Record<string, string>;
 
   const createMockSession = (index: number): CheckpointSession => ({
     sessionId: `sess-${index}`,
     terminalId: `term-${index}`,
     laneId: `lane-${index}`,
     workingDirectory: tempDir,
-    environmentVariables: { TEST: "true" },
+    environmentVariables: asEnvironmentVariables([["TEST", "true"]]),
     scrollbackSnapshot: `output ${index}`,
     zelijjSessionName: `session-${index}`,
     shellCommand: "bash",
@@ -41,7 +43,9 @@ describe("Integration Tests - Crash to Live Recovery", () => {
   });
 
   afterEach(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {
+      // Best-effort cleanup in test teardown.
+    });
   });
 
   describe("Full recovery (SC-027-001)", () => {
@@ -49,9 +53,9 @@ describe("Integration Tests - Crash to Live Recovery", () => {
       const checkpoint = createMockCheckpoint(5);
 
       // Simulate crash detection and state progression
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.INVENTORYING);
-      await stateMachine.transition(RecoveryStage.RESTORING);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.Inventorying);
+      await stateMachine.transition(RecoveryStage.Restoring);
 
       // Run restoration
       const result = await pipeline.restore(checkpoint);
@@ -67,19 +71,19 @@ describe("Integration Tests - Crash to Live Recovery", () => {
         stages.push(to);
       });
 
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.INVENTORYING);
-      await stateMachine.transition(RecoveryStage.RESTORING);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.Inventorying);
+      await stateMachine.transition(RecoveryStage.Restoring);
       const checkpoint = createMockCheckpoint(5);
       await pipeline.restore(checkpoint);
-      await stateMachine.transition(RecoveryStage.RECONCILING);
-      await stateMachine.transition(RecoveryStage.LIVE);
+      await stateMachine.transition(RecoveryStage.Reconciling);
+      await stateMachine.transition(RecoveryStage.Live);
 
-      expect(stages).toContain(RecoveryStage.DETECTING);
-      expect(stages).toContain(RecoveryStage.INVENTORYING);
-      expect(stages).toContain(RecoveryStage.RESTORING);
-      expect(stages).toContain(RecoveryStage.RECONCILING);
-      expect(stages).toContain(RecoveryStage.LIVE);
+      expect(stages).toContain(RecoveryStage.Detecting);
+      expect(stages).toContain(RecoveryStage.Inventorying);
+      expect(stages).toContain(RecoveryStage.Restoring);
+      expect(stages).toContain(RecoveryStage.Reconciling);
+      expect(stages).toContain(RecoveryStage.Live);
     });
   });
 
@@ -112,9 +116,9 @@ describe("Integration Tests - Crash to Live Recovery", () => {
   describe("Crash during recovery resume", () => {
     it("should resume from persisted stage after simulated crash", async () => {
       // First recovery attempt - progress to RESTORING
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.INVENTORYING);
-      await stateMachine.transition(RecoveryStage.RESTORING);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.Inventorying);
+      await stateMachine.transition(RecoveryStage.Restoring);
 
       // Get current stage
       const _checkpoint = createMockCheckpoint(5);
@@ -125,16 +129,16 @@ describe("Integration Tests - Crash to Live Recovery", () => {
       const resumedStage = await stateMachine2.resume();
 
       expect(resumedStage).toBe(beforeCrash);
-      expect(resumedStage).toBe(RecoveryStage.RESTORING);
+      expect(resumedStage).toBe(RecoveryStage.Restoring);
     });
 
     it("should not re-restore previously restored sessions", async () => {
       const checkpoint = createMockCheckpoint(3);
 
       // First restoration
-      await stateMachine.transition(RecoveryStage.DETECTING);
-      await stateMachine.transition(RecoveryStage.INVENTORYING);
-      await stateMachine.transition(RecoveryStage.RESTORING);
+      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.Inventorying);
+      await stateMachine.transition(RecoveryStage.Restoring);
 
       const result1 = await pipeline.restore(checkpoint);
       const restoredIds = new Set(result1.restored.map(s => s.sessionId));
@@ -144,9 +148,9 @@ describe("Integration Tests - Crash to Live Recovery", () => {
 
       // Both should have same number of restored sessions
       expect(result2.restored.length).toBe(result1.restored.length);
-      result2.restored.forEach(s => {
+      for (const s of result2.restored) {
         expect(restoredIds.has(s.sessionId)).toBe(true);
-      });
+      }
     });
   });
 
@@ -207,12 +211,12 @@ describe("Integration Tests - Crash to Live Recovery", () => {
     });
 
     it("should publish stage change events", async () => {
-      await stateMachine.transition(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.Detecting);
 
       const events = bus.getEvents();
       const stageEvent = events.find(e => e.topic === "recovery.stage.changed");
       expect(stageEvent).toBeDefined();
-      expect(stageEvent?.payload?.current).toBe(RecoveryStage.DETECTING);
+      expect(stageEvent?.payload?.current).toBe(RecoveryStage.Detecting);
     });
   });
 

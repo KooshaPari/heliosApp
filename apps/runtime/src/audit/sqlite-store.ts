@@ -7,10 +7,12 @@ import type { AuditFilter } from "./ring-buffer.ts";
  * SQLite-backed persistent storage for audit events.
  * Supports 30+ days of retention with indexed queries.
  */
+// biome-ignore lint/style/useNamingConvention: Public API class name matches persisted artifact and docs.
 export class SQLiteAuditStore {
   private db: Database;
   private readonly dbPath: string;
   private schemaVersion = 1;
+  private readonly placeholderMetadata: Record<string, unknown> = {};
 
   /**
    * Create or open an SQLite audit store.
@@ -81,7 +83,7 @@ export class SQLiteAuditStore {
     const { limit = 100, offset = 0 } = options;
 
     let query = "SELECT * FROM audit_events WHERE 1=1";
-    const params: any[] = [];
+    const params: (string | number)[] = [];
 
     if (filter.workspaceId) {
       query += " AND workspace_id = ?";
@@ -122,7 +124,7 @@ export class SQLiteAuditStore {
     params.push(limit, offset);
 
     const stmt = this.db.prepare(query);
-    const rows = stmt.all(...params) as any[];
+    const rows = stmt.all(...params) as Record<string, unknown>[];
 
     return rows.map(row => this.rowToEvent(row));
   }
@@ -137,7 +139,7 @@ export class SQLiteAuditStore {
     const stmt = this.db.prepare(
       "SELECT * FROM audit_events WHERE correlation_id = ? ORDER BY timestamp ASC"
     );
-    const rows = stmt.all(correlationId) as any[];
+    const rows = stmt.all(correlationId) as Record<string, unknown>[];
 
     return rows.map(row => this.rowToEvent(row));
   }
@@ -152,7 +154,7 @@ export class SQLiteAuditStore {
     const { filter: actualFilter = {} } = { filter: filter || {} };
 
     let query = "SELECT COUNT(*) as count FROM audit_events WHERE 1=1";
-    const params: any[] = [];
+    const params: (string | number)[] = [];
 
     if (actualFilter.workspaceId) {
       query += " AND workspace_id = ?";
@@ -190,7 +192,7 @@ export class SQLiteAuditStore {
     }
 
     const stmt = this.db.prepare(query);
-    const result = stmt.get(...params) as any;
+    const result = stmt.get(...params) as { count?: number } | undefined;
 
     return result?.count || 0;
   }
@@ -269,20 +271,23 @@ export class SQLiteAuditStore {
    * @param row - Database row
    * @returns AuditEvent
    */
-  private rowToEvent(row: any): AuditEvent {
+  private rowToEvent(row: Record<string, unknown>): AuditEvent {
+    const metadataRaw =
+      typeof row.metadata === "string" ? row.metadata : JSON.stringify(this.placeholderMetadata);
+
     return {
-      id: row.id,
-      eventType: row.event_type,
-      actor: row.actor,
-      action: row.action,
-      target: row.target,
-      result: row.result,
-      timestamp: row.timestamp,
-      workspaceId: row.workspace_id,
-      laneId: row.lane_id,
-      sessionId: row.session_id,
-      correlationId: row.correlation_id,
-      metadata: JSON.parse(row.metadata),
+      id: String(row.id),
+      eventType: String(row.event_type),
+      actor: String(row.actor),
+      action: String(row.action),
+      target: String(row.target),
+      result: String(row.result),
+      timestamp: String(row.timestamp),
+      workspaceId: String(row.workspace_id),
+      laneId: row.lane_id ? String(row.lane_id) : undefined,
+      sessionId: row.session_id ? String(row.session_id) : undefined,
+      correlationId: String(row.correlation_id),
+      metadata: JSON.parse(metadataRaw),
     };
   }
 }

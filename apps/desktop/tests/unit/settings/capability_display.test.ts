@@ -37,7 +37,7 @@ describe("CapabilityDisplay", () => {
     expect(content).toBeFalsy();
   });
 
-  it("should expand when toggle clicked", async () => {
+  it("should expand when toggle clicked", () => {
     const onToggle = vi.fn();
     display = new CapabilityDisplay({
       capability: mockCapability,

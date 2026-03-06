@@ -174,6 +174,7 @@ describe("validateEnvelope", () => {
 
   it("rejects missing id", () => {
     const r = validateEnvelope({
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
       correlation_id: "c",
       type: "command",
       timestamp: 1,
@@ -189,6 +190,7 @@ describe("validateEnvelope", () => {
   it("rejects empty id", () => {
     const r = validateEnvelope({
       id: "",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
       correlation_id: "c",
       type: "command",
       timestamp: 1,
@@ -212,6 +214,7 @@ describe("validateEnvelope", () => {
   it("rejects empty correlation_id", () => {
     const r = validateEnvelope({
       id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
       correlation_id: "",
       type: "command",
       timestamp: 1,
@@ -222,7 +225,13 @@ describe("validateEnvelope", () => {
   });
 
   it("rejects unknown type", () => {
-    const r = validateEnvelope({ id: "x", correlation_id: "c", type: "unknown", timestamp: 1 });
+    const r = validateEnvelope({
+      id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "c",
+      type: "unknown",
+      timestamp: 1,
+    });
     expect(r.valid).toBe(false);
     if (!r.valid) {
       expect(r.error.details).toEqual({ type: "unknown" });
@@ -232,6 +241,7 @@ describe("validateEnvelope", () => {
   it("rejects negative timestamp", () => {
     const r = validateEnvelope({
       id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
       correlation_id: "c",
       type: "command",
       timestamp: -1,
@@ -244,6 +254,7 @@ describe("validateEnvelope", () => {
   it("rejects NaN timestamp", () => {
     const r = validateEnvelope({
       id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
       correlation_id: "c",
       type: "command",
       timestamp: Number.NaN,
@@ -256,6 +267,7 @@ describe("validateEnvelope", () => {
   it("rejects zero timestamp", () => {
     const r = validateEnvelope({
       id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
       correlation_id: "c",
       type: "command",
       timestamp: 0,
@@ -269,6 +281,7 @@ describe("validateEnvelope", () => {
   it("rejects command without method", () => {
     const r = validateEnvelope({
       id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
       correlation_id: "c",
       type: "command",
       timestamp: 1,
@@ -280,6 +293,7 @@ describe("validateEnvelope", () => {
   it("rejects command with empty method", () => {
     const r = validateEnvelope({
       id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
       correlation_id: "c",
       type: "command",
       timestamp: 1,
@@ -292,6 +306,7 @@ describe("validateEnvelope", () => {
   it("rejects command without payload", () => {
     const r = validateEnvelope({
       id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
       correlation_id: "c",
       type: "command",
       timestamp: 1,
@@ -303,6 +318,7 @@ describe("validateEnvelope", () => {
   it("rejects event without topic", () => {
     const r = validateEnvelope({
       id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
       correlation_id: "c",
       type: "event",
       timestamp: 1,
@@ -318,6 +334,7 @@ describe("validateEnvelope", () => {
     setMaxPayloadSize(10);
     const r = validateEnvelope({
       id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
       correlation_id: "c",
       type: "command",
       timestamp: 1,
@@ -337,6 +354,7 @@ describe("validateEnvelope", () => {
     obj.self = obj;
     const r = validateEnvelope({
       id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
       correlation_id: "c",
       type: "command",
       timestamp: 1,

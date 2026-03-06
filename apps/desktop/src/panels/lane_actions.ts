@@ -31,7 +31,7 @@ export interface RuntimeApi {
 export class LaneActions {
   private options: LaneActionsOptions;
   private pendingActions: Map<string, ActionCallback> = new Map();
-  private errorTimeouts: Map<string, NodeJS.Timeout> = new Map();
+  private errorTimeouts: Map<string, ReturnType<typeof setTimeout>> = new Map();
 
   constructor(options: LaneActionsOptions) {
     this.options = {

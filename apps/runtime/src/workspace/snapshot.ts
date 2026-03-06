@@ -3,7 +3,7 @@
 // FR-007: Recovery from snapshot
 
 import { createHash } from "node:crypto";
-import { mkdir, readFile, rename } from "node:fs/promises";
+import { mkdir, open, readFile, rename } from "node:fs/promises";
 import { join } from "node:path";
 import type { Workspace } from "./types.js";
 
@@ -24,8 +24,9 @@ function computeChecksum(workspaces: Workspace[]): string {
 /** Atomically write data to a file using temp + fsync + rename */
 async function atomicWrite(filePath: string, data: string): Promise<void> {
   const tmp = `${filePath}.tmp.${Date.now()}`;
-  const fd = (Bun as any).file(tmp);
-  await (Bun as any).write(fd, data);
+  const handle = await open(tmp, "w");
+  await handle.writeFile(data, "utf-8");
+  await handle.close();
   // Bun.write does fsync internally; rename for atomicity
   await rename(tmp, filePath);
 }
@@ -78,49 +79,56 @@ export async function detectCorruption(
   return { corrupted: false };
 }
 
+function hasValidVersion(data: unknown): data is { version: number } {
+  if (typeof data !== "object" || data === null) {
+    return false;
+  }
+  const envelope = data as { version?: unknown };
+  return envelope.version === 1;
+}
+
+function hasValidWorkspaces(data: unknown): data is { workspaces: unknown[] } {
+  if (typeof data !== "object" || data === null) {
+    return false;
+  }
+  const envelope = data as { workspaces?: unknown };
+  return Array.isArray(envelope.workspaces);
+}
+
+function hasValidChecksum(data: unknown): data is { _checksum?: unknown } {
+  if (typeof data !== "object" || data === null) {
+    return false;
+  }
+  const envelope = data as { _checksum?: unknown };
+  return envelope._checksum === undefined || typeof envelope._checksum === "string";
+}
+
+function isWorkspaceRecord(value: unknown): value is Workspace {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const workspace = value as Record<string, unknown>;
+  return (
+    typeof workspace.id === "string" &&
+    typeof workspace.name === "string" &&
+    typeof workspace.rootPath === "string" &&
+    typeof workspace.state === "string" &&
+    typeof workspace.createdAt === "number" &&
+    typeof workspace.updatedAt === "number" &&
+    Array.isArray(workspace.projects)
+  );
+}
+
 function isValidEnvelope(data: unknown): data is SnapshotEnvelope {
   if (typeof data !== "object" || data === null) {
     return false;
   }
-  const obj = data as Record<string, unknown>;
-  if (obj.version !== 1) {
+  const hasEnvelopeShape =
+    hasValidVersion(data) && hasValidWorkspaces(data) && hasValidChecksum(data);
+  if (!hasEnvelopeShape) {
     return false;
   }
-  if (!Array.isArray(obj.workspaces)) {
-    return false;
-  }
-  if (typeof obj._checksum !== "string") {
-    return false;
-  }
-  // Validate each workspace has required fields
-  for (const ws of obj.workspaces as unknown[]) {
-    if (typeof ws !== "object" || ws === null) {
-      return false;
-    }
-    const w = ws as Record<string, unknown>;
-    if (typeof w.id !== "string") {
-      return false;
-    }
-    if (typeof w.name !== "string") {
-      return false;
-    }
-    if (typeof w.rootPath !== "string") {
-      return false;
-    }
-    if (typeof w.state !== "string") {
-      return false;
-    }
-    if (typeof w.createdAt !== "number") {
-      return false;
-    }
-    if (typeof w.updatedAt !== "number") {
-      return false;
-    }
-    if (!Array.isArray(w.projects)) {
-      return false;
-    }
-  }
-  return true;
+  return (data as { workspaces: unknown[] }).workspaces.every(isWorkspaceRecord);
 }
 
 /** Attempt recovery from snapshot file. Returns workspaces or null if snapshot is also corrupted. */

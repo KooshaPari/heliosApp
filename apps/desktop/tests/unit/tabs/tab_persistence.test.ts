@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { promises as fs } from "node:fs";
 import { tmpdir } from "node:os";
-import * as path from "node:path";
+import { join } from "node:path";
 import { type TabPersistedState, TabPersistence } from "../../../src/tabs/tab_persistence";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
 
@@ -11,7 +11,7 @@ describe("TabPersistence", () => {
 
   beforeEach(async () => {
     // Use temp directory for tests
-    tempDir = path.join(tmpdir(), `tab-test-${Date.now()}`);
+    tempDir = join(tmpdir(), `tab-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
     persistence = new TabPersistence(tempDir);
   });
@@ -46,7 +46,7 @@ describe("TabPersistence", () => {
         savedAt: new Date().toISOString(),
       };
 
-      const filePath = path.join(tempDir, "tab_state.json");
+      const filePath = join(tempDir, "tab_state.json");
       await fs.writeFile(filePath, JSON.stringify(testState), "utf-8");
 
       const loaded = await persistence.load();
@@ -55,7 +55,7 @@ describe("TabPersistence", () => {
     });
 
     it("should return null for invalid JSON", async () => {
-      const filePath = path.join(tempDir, "tab_state.json");
+      const filePath = join(tempDir, "tab_state.json");
       await fs.writeFile(filePath, "invalid json {", "utf-8");
 
       const state = await persistence.load();
@@ -63,7 +63,7 @@ describe("TabPersistence", () => {
     });
 
     it("should return null for invalid structure", async () => {
-      const filePath = path.join(tempDir, "tab_state.json");
+      const filePath = join(tempDir, "tab_state.json");
       await fs.writeFile(filePath, JSON.stringify({ invalid: "data" }), "utf-8");
 
       const state = await persistence.load();
@@ -80,7 +80,7 @@ describe("TabPersistence", () => {
         savedAt: new Date().toISOString(),
       };
 
-      const filePath = path.join(tempDir, "tab_state.json");
+      const filePath = join(tempDir, "tab_state.json");
       await fs.writeFile(filePath, JSON.stringify(testState), "utf-8");
 
       const startTime = Date.now();
@@ -107,7 +107,7 @@ describe("TabPersistence", () => {
       // Wait for debounce
       await new Promise(resolve => setTimeout(resolve, 600));
 
-      const filePath = path.join(tempDir, "tab_state.json");
+      const filePath = join(tempDir, "tab_state.json");
       const content = await fs.readFile(filePath, "utf-8");
       const loaded = JSON.parse(content);
 
@@ -119,9 +119,9 @@ describe("TabPersistence", () => {
 
       // Mock fs.writeFile to count writes
       const originalWriteFile = fs.writeFile;
-      fs.writeFile = async (...args: any) => {
+      fs.writeFile = (...args: Parameters<typeof fs.writeFile>) => {
         writeCount++;
-        return (originalWriteFile as any)(...args);
+        return originalWriteFile(...args);
       };
 
       const testState: TabPersistedState = {
@@ -158,13 +158,13 @@ describe("TabPersistence", () => {
         savedAt: new Date().toISOString(),
       };
 
-      const nestedDir = path.join(tempDir, "nested", "path");
+      const nestedDir = join(tempDir, "nested", "path");
       persistence = new TabPersistence(nestedDir);
 
       await persistence.save(testState);
       await new Promise(resolve => setTimeout(resolve, 600));
 
-      const filePath = path.join(nestedDir, "tab_state.json");
+      const filePath = join(nestedDir, "tab_state.json");
       const exists = await fs
         .access(filePath)
         .then(() => true)
@@ -190,7 +190,7 @@ describe("TabPersistence", () => {
       // Flush immediately (before debounce would complete)
       await persistence.flush();
 
-      const filePath = path.join(tempDir, "tab_state.json");
+      const filePath = join(tempDir, "tab_state.json");
       const exists = await fs
         .access(filePath)
         .then(() => true)
@@ -301,7 +301,7 @@ describe("TabPersistence", () => {
       await persistence.save(testState);
       await new Promise(resolve => setTimeout(resolve, 600));
 
-      const filePath = path.join(tempDir, "tab_state.json");
+      const filePath = join(tempDir, "tab_state.json");
       let exists = await fs
         .access(filePath)
         .then(() => true)

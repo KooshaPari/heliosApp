@@ -33,14 +33,14 @@ export class AgentTab extends TabSurface {
     super("agent-tab", "agent", "Agent");
   }
 
-  async onContextChange(context: ActiveContext | null): Promise<void> {
+  onContextChange(context: ActiveContext | null): Promise<void> {
     // When context changes, query agent state for this session
     this.actions = [];
     this.errorMessage = null;
 
     if (!context) {
       this.agentStatus = "idle";
-      return;
+      return Promise.resolve();
     }
 
     // In a real implementation, query agent registry:
@@ -51,6 +51,7 @@ export class AgentTab extends TabSurface {
     // Simulate: generate mock agent activity
     this.agentStatus = "idle";
     this.generateMockAgentActions(context);
+    return Promise.resolve();
   }
 
   render(): HTMLElement {
@@ -164,7 +165,9 @@ export class AgentTab extends TabSurface {
     logBtn.style.borderRadius = "3px";
     logBtn.style.cursor = "pointer";
     logBtn.style.fontSize = "12px";
-    logBtn.addEventListener("click", () => {});
+    logBtn.addEventListener("click", () => {
+      this.errorMessage = "Full log feature is coming soon.";
+    });
 
     const copyBtn = document.createElement("button");
     copyBtn.textContent = "Copy";
@@ -179,7 +182,9 @@ export class AgentTab extends TabSurface {
       const text = this.actions.map(a => `[${a.timestamp}] ${a.action}: ${a.output}`).join("\n");
       try {
         await navigator.clipboard.writeText(text);
-      } catch {}
+      } catch (error) {
+        this.errorMessage = error instanceof Error ? error.message : "Copy to clipboard failed";
+      }
     });
 
     footerEl.appendChild(restartBtn);

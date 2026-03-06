@@ -304,7 +304,11 @@ describe("T006 — RioInputRelay", () => {
   });
 
   it("measures latency samples", () => {
-    relay.setSink({ writeInput() {} });
+    relay.setSink({
+      writeInput() {
+        // no-op: intentionally measuring no sink output path
+      },
+    });
     relay.relay("pty-1", new Uint8Array([0x41]));
     relay.relay("pty-1", new Uint8Array([0x42]));
     expect(relay.getLatencySamples().length).toBe(2);

@@ -206,7 +206,7 @@ describe("Integration: reattach", () => {
 
     // Verify reattach event was emitted
     await new Promise(r => setTimeout(r, 20));
-    const reattachEvents = bus.events.filter(e => e.type === MuxEventType.SESSION_REATTACHED);
+    const reattachEvents = bus.events.filter(e => e.type === MuxEventType.sessionReattached);
     expect(reattachEvents).toHaveLength(1);
 
     // PTYs should have been re-bound (one default pane from refreshTopology)

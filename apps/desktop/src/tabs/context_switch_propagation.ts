@@ -4,8 +4,8 @@ import type { TabSurface } from "./tab_surface.ts";
 export interface PropagationResult {
   successful: string[];
   failed: string[];
-  timed_out: string[];
-  duration_ms: number;
+  timedOut: string[];
+  durationMs: number;
 }
 
 /**
@@ -22,7 +22,7 @@ export class ContextPropagator {
   private registeredTabs: Map<string, TabSurface> = new Map();
   private currentPropagation: Promise<PropagationResult> | null = null;
   private propagationAbortController: AbortController | null = null;
-  private readonly PROPAGATION_TIMEOUT = 500; // ms
+  private readonly propagationTimeoutMs = 500; // ms
 
   /**
    * Register a tab for context propagation.
@@ -54,8 +54,8 @@ export class ContextPropagator {
     const result: PropagationResult = {
       successful: [],
       failed: [],
-      timed_out: [],
-      duration_ms: 0,
+      timedOut: [],
+      durationMs: 0,
     };
 
     const propagationPromises: Promise<void>[] = [];
@@ -78,7 +78,7 @@ export class ContextPropagator {
           }
 
           if (error.message === "TIMEOUT") {
-            result.timed_out.push(tabId);
+            result.timedOut.push(tabId);
           } else {
             result.failed.push(tabId);
           }
@@ -90,7 +90,7 @@ export class ContextPropagator {
     // Wait for all propagations to complete
     await Promise.all(propagationPromises);
 
-    result.duration_ms = Date.now() - startTime;
+    result.durationMs = Date.now() - startTime;
 
     // If propagation was cancelled, throw error
     if (this.propagationAbortController.signal.aborted) {
@@ -113,7 +113,7 @@ export class ContextPropagator {
       new Promise<boolean>((_, reject) => {
         const timeoutId = setTimeout(() => {
           reject(new Error("TIMEOUT"));
-        }, this.PROPAGATION_TIMEOUT);
+        }, this.propagationTimeoutMs);
 
         signal.addEventListener("abort", () => {
           clearTimeout(timeoutId);

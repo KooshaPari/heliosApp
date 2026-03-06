@@ -1,4 +1,6 @@
-import type { AuditFilter, AuditLedger } from "./ledger.ts";
+import type { AuditEvent } from "./event.ts";
+import type { AuditFilter } from "./ledger.ts";
+import type { AuditLedger } from "./ledger.ts";
 
 /**
  * API response wrapper for paginated results.
@@ -18,22 +20,36 @@ export interface ErrorResponse {
   details?: string;
 }
 
+type ScalarOrArray = string | string[];
+type QueryParams = {
+  workspaceId?: ScalarOrArray;
+  laneId?: ScalarOrArray;
+  sessionId?: ScalarOrArray;
+  actor?: ScalarOrArray;
+  eventType?: ScalarOrArray;
+  correlationId?: ScalarOrArray;
+  from?: ScalarOrArray;
+  to?: ScalarOrArray;
+  limit?: ScalarOrArray;
+  offset?: ScalarOrArray;
+};
+
 /**
  * Audit ledger HTTP API handler.
  * Provides endpoints for searching, filtering, and subscribing to audit events.
  */
-export class AuditLedgerAPI {
+export class AuditLedgerApi {
   private requestCounts: Map<string, number> = new Map();
   private requestResetTime: number = Date.now();
-  private readonly RATE_LIMIT = 100; // 100 requests per minute
-  private readonly RATE_LIMIT_WINDOW = 60_000; // 1 minute
+  private readonly rateLimit = 100; // 100 requests per minute
+  private readonly rateLimitWindow = 60_000; // 1 minute
 
   constructor(private ledger: AuditLedger) {
     // Start rate limit reset timer
     setInterval(() => {
       this.requestCounts.clear();
       this.requestResetTime = Date.now();
-    }, this.RATE_LIMIT_WINDOW);
+    }, this.rateLimitWindow);
   }
 
   /**
@@ -42,8 +58,8 @@ export class AuditLedgerAPI {
    */
   searchEvents(
     clientId: string,
-    queryParams: Record<string, any>
-  ): PaginatedResponse<any> | ErrorResponse {
+    queryParams: QueryParams
+  ): PaginatedResponse<AuditEvent> | ErrorResponse {
     if (!this.checkRateLimit(clientId)) {
       return {
         error: "Too many requests",
@@ -54,7 +70,6 @@ export class AuditLedgerAPI {
     try {
       const filter = this.parseAuditFilter(queryParams);
       const results = this.ledger.search(filter);
-
       const total = this.ledger.count(filter);
 
       return {
@@ -78,7 +93,7 @@ export class AuditLedgerAPI {
   getCorrelationChain(
     clientId: string,
     correlationId: string
-  ): PaginatedResponse<any> | ErrorResponse {
+  ): PaginatedResponse<AuditEvent> | ErrorResponse {
     if (!this.checkRateLimit(clientId)) {
       return {
         error: "Too many requests",
@@ -113,10 +128,7 @@ export class AuditLedgerAPI {
    * GET /audit/events/count
    * Count events matching a filter.
    */
-  countEvents(
-    clientId: string,
-    queryParams: Record<string, any>
-  ): { count: number } | ErrorResponse {
+  countEvents(clientId: string, queryParams: QueryParams): { count: number } | ErrorResponse {
     if (!this.checkRateLimit(clientId)) {
       return {
         error: "Too many requests",
@@ -127,7 +139,6 @@ export class AuditLedgerAPI {
     try {
       const filter = this.parseAuditFilter(queryParams);
       const count = this.ledger.count(filter);
-
       return { count };
     } catch (err) {
       return {
@@ -140,64 +151,106 @@ export class AuditLedgerAPI {
   /**
    * Parse query parameters into an AuditFilter.
    */
-  private parseAuditFilter(queryParams: Record<string, any>): AuditFilter {
+  private parseAuditFilter(queryParams: QueryParams): AuditFilter {
     const filter: AuditFilter = {};
 
-    if (queryParams.workspaceId && typeof queryParams.workspaceId === "string") {
-      filter.workspaceId = queryParams.workspaceId;
-    }
-
-    if (queryParams.laneId && typeof queryParams.laneId === "string") {
-      filter.laneId = queryParams.laneId;
-    }
-
-    if (queryParams.sessionId && typeof queryParams.sessionId === "string") {
-      filter.sessionId = queryParams.sessionId;
-    }
-
-    if (queryParams.actor && typeof queryParams.actor === "string") {
-      filter.actor = queryParams.actor;
-    }
+    this.assignSingleValue(queryParams.workspaceId, value => {
+      filter.workspaceId = value;
+    });
+    this.assignSingleValue(queryParams.laneId, value => {
+      filter.laneId = value;
+    });
+    this.assignSingleValue(queryParams.sessionId, value => {
+      filter.sessionId = value;
+    });
+    this.assignSingleValue(queryParams.actor, value => {
+      filter.actor = value;
+    });
+    this.assignSingleValue(queryParams.correlationId, value => {
+      filter.correlationId = value;
+    });
 
     if (queryParams.eventType) {
-      if (Array.isArray(queryParams.eventType)) {
-        filter.eventType = queryParams.eventType;
-      } else if (typeof queryParams.eventType === "string") {
-        filter.eventType = queryParams.eventType;
-      }
+      filter.eventType = Array.isArray(queryParams.eventType)
+        ? queryParams.eventType
+        : [queryParams.eventType];
     }
 
-    if (queryParams.correlationId && typeof queryParams.correlationId === "string") {
-      filter.correlationId = queryParams.correlationId;
-    }
-
-    if (queryParams.from || queryParams.to) {
-      const from = queryParams.from ? new Date(queryParams.from) : new Date(0);
-      const to = queryParams.to ? new Date(queryParams.to) : new Date();
-
+    const fromRaw = this.firstValue(queryParams.from);
+    const toRaw = this.firstValue(queryParams.to);
+    if (fromRaw || toRaw) {
+      const from = fromRaw ? new Date(fromRaw) : new Date(0);
+      const to = toRaw ? new Date(toRaw) : new Date();
       if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
         throw new Error("Invalid time range parameters");
       }
       filter.timeRange = { from, to };
     }
 
-    if (queryParams.limit) {
-      const limit = Number.parseInt(queryParams.limit, 10);
-      if (Number.isNaN(limit) || limit < 1 || limit > 1000) {
-        throw new Error("Limit must be between 1 and 1000");
-      }
+    const limit = this.parsePositiveInt(queryParams.limit, "Limit", 1, 1000);
+    if (limit !== undefined) {
       filter.limit = limit;
     }
 
-    if (queryParams.offset) {
-      const offset = Number.parseInt(queryParams.offset, 10);
-      if (Number.isNaN(offset) || offset < 0) {
-        throw new Error("Offset must be >= 0");
-      }
+    const offset = this.parseIntAtLeastZero(queryParams.offset, "Offset");
+    if (offset !== undefined) {
       filter.offset = offset;
     }
 
     return filter;
+  }
+
+  private assignSingleValue(
+    value: ScalarOrArray | undefined,
+    assign: (value: string) => void
+  ): void {
+    const normalized = this.firstValue(value);
+    if (normalized) {
+      assign(normalized);
+    }
+  }
+
+  private firstValue(value: ScalarOrArray | undefined): string | undefined {
+    if (typeof value === "undefined") {
+      return undefined;
+    }
+    return Array.isArray(value) ? value[0] : value;
+  }
+
+  private parsePositiveInt(
+    rawValue: ScalarOrArray | undefined,
+    label: string,
+    min: number,
+    max: number
+  ): number | undefined {
+    const stringValue = this.firstValue(rawValue);
+    if (!stringValue) {
+      return undefined;
+    }
+
+    const parsed = Number.parseInt(stringValue, 10);
+    if (Number.isNaN(parsed) || parsed < min || parsed > max) {
+      throw new Error(`${label} must be between ${min} and ${max}`);
+    }
+
+    return parsed;
+  }
+
+  private parseIntAtLeastZero(
+    rawValue: ScalarOrArray | undefined,
+    label: string
+  ): number | undefined {
+    const stringValue = this.firstValue(rawValue);
+    if (!stringValue) {
+      return undefined;
+    }
+
+    const parsed = Number.parseInt(stringValue, 10);
+    if (Number.isNaN(parsed) || parsed < 0) {
+      throw new Error(`${label} must be >= 0`);
+    }
+
+    return parsed;
   }
 
   /**
@@ -207,6 +260,6 @@ export class AuditLedgerAPI {
     const count = (this.requestCounts.get(clientId) || 0) + 1;
     this.requestCounts.set(clientId, count);
 
-    return count <= this.RATE_LIMIT;
+    return count <= this.rateLimit;
   }
 }

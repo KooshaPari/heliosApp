@@ -13,6 +13,7 @@ import type { TopologyTracker } from "./topology.js";
 import type {
   MuxSession,
   PaneRecord,
+  PaneTopology,
   PtyManagerInterface,
   SessionOptions,
   TabRecord,
@@ -127,57 +128,7 @@ export class ZellijSessionManager {
     }
 
     const laneId = this.extractLaneId(sessionName);
-
-    let panes: PaneRecord[];
-    let tabs: TabRecord[];
-
-    // T012: If topology tracker is available, use dump-layout for full recovery
-    if (this.topology) {
-      const layout = await this.topology.refreshTopology(sessionName);
-
-      // Rebuild PaneRecord[] and TabRecord[] from the recovered topology
-      panes = [];
-      tabs = [];
-
-      for (const tabTopo of layout.tabs) {
-        const tabPanes: PaneRecord[] = [];
-        for (const paneTopo of tabTopo.panes) {
-          const record: PaneRecord = {
-            id: paneTopo.paneId,
-            title: `pane-${paneTopo.paneId}`,
-            dimensions: { ...paneTopo.dimensions },
-            ptyId: paneTopo.ptyId,
-          };
-          panes.push(record);
-          tabPanes.push(record);
-
-          // Re-bind PTY if ptyManager is available and pane has no pty yet
-          if (this.ptyManager && !paneTopo.ptyId) {
-            try {
-              const ptyResult = await this.ptyManager.spawn({
-                laneId,
-                sessionId: sessionName,
-                terminalId: String(paneTopo.paneId),
-                cols: paneTopo.dimensions.cols,
-                rows: paneTopo.dimensions.rows,
-              });
-              this.topology.bindPty(sessionName, paneTopo.paneId, ptyResult.ptyId);
-              record.ptyId = ptyResult.ptyId;
-            } catch (_err) {}
-          }
-        }
-
-        tabs.push({
-          index: tabTopo.tabId,
-          name: tabTopo.name,
-          panes: tabPanes,
-        });
-      }
-    } else {
-      // Fallback: basic query without topology tracker
-      panes = await this.queryPanes(sessionName);
-      tabs = await this.queryTabs(sessionName);
-    }
+    const { panes, tabs } = await this.recoverTopologyState(sessionName, laneId);
 
     const _durationMs = performance.now() - startMs;
 
@@ -196,7 +147,7 @@ export class ZellijSessionManager {
     // T012: Emit reattach event
     if (this.emitter) {
       this.emitter.emitTyped<SessionReattachedEvent>({
-        type: MuxEventType.SESSION_REATTACHED,
+        type: MuxEventType.sessionReattached,
         sessionName,
         laneId,
         recoveredPaneCount: panes.length,
@@ -205,6 +156,81 @@ export class ZellijSessionManager {
     }
 
     return muxSession;
+  }
+
+  private async recoverTopologyState(
+    sessionName: string,
+    laneId: string
+  ): Promise<{
+    panes: PaneRecord[];
+    tabs: TabRecord[];
+  }> {
+    if (!this.topology) {
+      return {
+        panes: await this.queryPanes(sessionName),
+        tabs: await this.queryTabs(sessionName),
+      };
+    }
+
+    const layout = await this.topology.refreshTopology(sessionName);
+    const panes: PaneRecord[] = [];
+    const tabs: TabRecord[] = [];
+
+    for (const tabTopo of layout.tabs) {
+      const tabPanes: PaneRecord[] = [];
+      for (const paneTopo of tabTopo.panes) {
+        const record: PaneRecord = {
+          id: paneTopo.paneId,
+          title: `pane-${paneTopo.paneId}`,
+          dimensions: { ...paneTopo.dimensions },
+          ptyId: paneTopo.ptyId,
+        };
+        panes.push(record);
+        tabPanes.push(record);
+
+        // Re-bind PTY if ptyManager is available and pane has no pty yet
+        if (this.ptyManager && !paneTopo.ptyId) {
+          const boundPty = await this.ensurePtyBinding(sessionName, laneId, paneTopo, record);
+          if (boundPty) {
+            record.ptyId = boundPty;
+          }
+        }
+      }
+      tabs.push({
+        index: tabTopo.tabId,
+        name: tabTopo.name,
+        panes: tabPanes,
+      });
+    }
+
+    return { panes, tabs };
+  }
+
+  private async ensurePtyBinding(
+    sessionName: string,
+    laneId: string,
+    paneTopo: PaneTopology,
+    record: PaneRecord
+  ): Promise<string | undefined> {
+    if (!(this.topology && this.ptyManager)) {
+      return undefined;
+    }
+
+    try {
+      const ptyResult = await this.ptyManager.spawn({
+        laneId,
+        sessionId: sessionName,
+        terminalId: String(paneTopo.paneId),
+        cols: paneTopo.dimensions.cols,
+        rows: paneTopo.dimensions.rows,
+      });
+      this.topology.bindPty(sessionName, paneTopo.paneId, ptyResult.ptyId);
+      record.ptyId = ptyResult.ptyId;
+      return ptyResult.ptyId;
+    } catch (_err) {
+      // Best-effort PTY bind during reattach; topology still recovers without PTY.
+      return undefined;
+    }
   }
 
   /**
@@ -228,12 +254,14 @@ export class ZellijSessionManager {
         !retry.stderr.includes("not found") &&
         !retry.stderr.includes("No session")
       ) {
+        throw new ZellijCliError(`kill-session ${sessionName}`, retry.exitCode, retry.stderr);
       }
     }
 
     // Verify session is gone
     const sessions = await this.cli.listSessions();
     if (sessions.some(s => s.name === sessionName)) {
+      // Consistency note: process may still be stopping; unbinding registry is still required.
     }
 
     // Remove from binding registry regardless

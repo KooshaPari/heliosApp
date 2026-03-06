@@ -9,6 +9,7 @@ import type { SLODefinition } from "../../../src/diagnostics/types.js";
 
 const WARMUP = 100;
 const CI_FACTOR = 16; // relaxed threshold for CI machines, parallel test runs, and varying hardware
+const BENCH_TIMEOUT_MS = 30_000;
 
 function benchmarkLoop(
   iterations: number,
@@ -32,12 +33,12 @@ function benchmarkLoop(
   const medIndex = Math.ceil(0.5 * iterations) - 1;
   let sum = 0;
   for (let i = 0; i < iterations; i++) {
-    sum += durations[i]!;
+    sum += durations[i];
   }
 
   return {
-    p99: durations[p99Index]!,
-    median: durations[medIndex]!,
+    p99: durations[p99Index],
+    median: durations[medIndex],
     mean: sum / iterations,
   };
 }
@@ -68,37 +69,45 @@ describe("Instrumentation Overhead Benchmarks", () => {
     expect(result.p99).toBeLessThan(0.05 * CI_FACTOR);
   });
 
-  it("computePercentiles on 10k samples < 1ms p99", () => {
-    const values = new Float64Array(10_000);
-    for (let i = 0; i < 10_000; i++) {
-      values[i] = Math.random() * 1000;
-    }
-
-    const result = benchmarkLoop(1_000, WARMUP, () => {
-      computePercentiles(values);
-    });
-    expect(result.p99).toBeLessThan(1 * CI_FACTOR);
-  });
-
-  it("checkAll with 10 SLO definitions < 5ms p99", () => {
-    const registry = new MetricsRegistry();
-    const defs: SLODefinition[] = [];
-
-    for (let i = 0; i < 10; i++) {
-      const name = `bench-slo-${i}`;
-      registry.register({ name, type: "latency", unit: "ms", description: `SLO ${i}` });
-      for (let j = 0; j < 1000; j++) {
-        registry.record(name, Math.random() * 100, j);
+  it(
+    "computePercentiles on 10k samples < 1ms p99",
+    () => {
+      const values = new Float64Array(10_000);
+      for (let i = 0; i < 10_000; i++) {
+        values[i] = Math.random() * 1000;
       }
-      defs.push({ metric: name, percentile: "p95", threshold: 50, unit: "ms" });
-    }
 
-    const monitor = new SLOMonitor(registry, defs);
+      const result = benchmarkLoop(1_000, WARMUP, () => {
+        computePercentiles(values);
+      });
+      expect(result.p99).toBeLessThan(1 * CI_FACTOR);
+    },
+    BENCH_TIMEOUT_MS
+  );
 
-    const result = benchmarkLoop(1_000, WARMUP, () => {
-      monitor.resetRateLimiter(); // allow re-check each iteration
-      monitor.checkAll();
-    });
-    expect(result.p99).toBeLessThan(5 * CI_FACTOR);
-  });
+  it(
+    "checkAll with 10 SLO definitions < 5ms p99",
+    () => {
+      const registry = new MetricsRegistry();
+      const defs: SLODefinition[] = [];
+
+      for (let i = 0; i < 10; i++) {
+        const name = `bench-slo-${i}`;
+        registry.register({ name, type: "latency", unit: "ms", description: `SLO ${i}` });
+        for (let j = 0; j < 1000; j++) {
+          registry.record(name, Math.random() * 100, j);
+        }
+        defs.push({ metric: name, percentile: "p95", threshold: 50, unit: "ms" });
+      }
+
+      const monitor = new SLOMonitor(registry, defs);
+
+      const result = benchmarkLoop(1_000, WARMUP, () => {
+        monitor.resetRateLimiter(); // allow re-check each iteration
+        monitor.checkAll();
+      });
+      expect(result.p99).toBeLessThan(5 * CI_FACTOR);
+    },
+    BENCH_TIMEOUT_MS
+  );
 });

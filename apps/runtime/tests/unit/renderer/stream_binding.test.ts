@@ -49,7 +49,11 @@ describe("StreamBindingManager", () => {
     mgr.bind("pty-1", stream2, renderer);
 
     expect(mgr.count()).toBe(1);
-    const binding = mgr.getBindings().get("pty-1")!;
+    const binding = mgr.getBindings().get("pty-1");
+    expect(binding).toBeDefined();
+    if (!binding) {
+      return;
+    }
     expect(binding.stream).toBe(stream2);
   });
 
@@ -88,7 +92,10 @@ describe("StreamBindingManager", () => {
 
     const latency = mgr.getRelayLatency("pty-1");
     expect(latency).toBeDefined();
-    expect(latency!).toBeLessThan(16.7); // < 1 frame
+    if (latency === undefined) {
+      return;
+    }
+    expect(latency).toBeLessThan(16.7); // < 1 frame
   });
 
   it("getBindings returns a copy", () => {

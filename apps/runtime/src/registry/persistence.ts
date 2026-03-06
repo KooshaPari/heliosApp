@@ -26,6 +26,10 @@ interface PersistenceData {
   checksum: string;
 }
 
+function hasNodeErrorCode(error: unknown, code: string): boolean {
+  return error instanceof Error && "code" in error && (error as { code?: string }).code === code;
+}
+
 /**
  * File-backed JSON persistence for terminal bindings.
  *
@@ -57,7 +61,7 @@ export class JsonFilePersistence implements PersistenceStore {
    *
    * Subsequent calls within the debounce window replace the pending write.
    */
-  async save(bindings: TerminalBinding[]): Promise<void> {
+  save(bindings: TerminalBinding[]): Promise<void> {
     this.pendingBindings = bindings;
 
     // Clear existing timeout
@@ -71,8 +75,11 @@ export class JsonFilePersistence implements PersistenceStore {
         await this.doWrite(bindings);
         this.writeTimeoutId = null;
         this.pendingBindings = null;
-      } catch (_error) {}
+      } catch (_error) {
+        // Persistence errors are intentionally non-fatal for runtime flow.
+      }
     }, this.writeDebounceMs);
+    return Promise.resolve();
   }
 
   /**
@@ -99,7 +106,7 @@ export class JsonFilePersistence implements PersistenceStore {
 
       return data.bindings;
     } catch (error) {
-      if ((error as any).code === "ENOENT") {
+      if (hasNodeErrorCode(error, "ENOENT")) {
         // File doesn't exist; expected on first run
         return [];
       }
@@ -131,7 +138,8 @@ export class JsonFilePersistence implements PersistenceStore {
     try {
       await fs.unlink(this.storePath);
     } catch (error) {
-      if ((error as any).code !== "ENOENT") {
+      if (!hasNodeErrorCode(error, "ENOENT")) {
+        // Non-ENOENT errors are intentionally ignored in clear operation.
       }
     }
   }
@@ -162,7 +170,9 @@ export class JsonFilePersistence implements PersistenceStore {
       // Clean up temp file on error
       try {
         await fs.unlink(tempPath);
-      } catch {}
+      } catch {
+        // Best-effort tmp cleanup only.
+      }
       throw error;
     }
   }
@@ -185,16 +195,18 @@ export class JsonFilePersistence implements PersistenceStore {
 export class InMemoryPersistence implements PersistenceStore {
   private data: TerminalBinding[] = [];
 
-  async save(bindings: TerminalBinding[]): Promise<void> {
+  save(bindings: TerminalBinding[]): Promise<void> {
     this.data = [...bindings];
+    return Promise.resolve();
   }
 
-  async load(): Promise<TerminalBinding[]> {
-    return [...this.data];
+  load(): Promise<TerminalBinding[]> {
+    return Promise.resolve([...this.data]);
   }
 
-  async clear(): Promise<void> {
+  clear(): Promise<void> {
     this.data = [];
+    return Promise.resolve();
   }
 
   async flush(): Promise<void> {

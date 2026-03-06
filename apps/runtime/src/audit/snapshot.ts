@@ -72,7 +72,14 @@ export class SnapshotCapture {
       };
 
       onSnapshot(snapshot);
-    } catch (_err) {}
+    } catch (_err) {
+      // Best-effort snapshot capture; failures are intentionally non-fatal.
+      this.logSnapshotFailure(_err);
+    }
+  }
+
+  private logSnapshotFailure(_error: unknown): void {
+    // Snapshot failures are intentionally ignored to keep capture non-blocking.
   }
 
   /**
