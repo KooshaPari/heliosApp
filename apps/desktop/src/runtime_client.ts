@@ -36,7 +36,7 @@ function toCommandEnvelope(
   payload: Record<string, unknown>,
   workspaceId: string | null,
   sessionId: string | null,
-  terminalId: string | null,
+  terminalId: string | null
 ): LocalBusEnvelope {
   return {
     id: `${method}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
@@ -51,7 +51,7 @@ function toCommandEnvelope(
 }
 
 function toResponse<T extends Record<string, unknown>>(
-  response: LocalBusEnvelope,
+  response: LocalBusEnvelope
 ): RuntimeResponse<T> {
   if (response.status === "error") {
     return {
@@ -104,8 +104,8 @@ export class DesktopRuntimeClient {
         },
         input.workspaceId,
         null,
-        null,
-      ),
+        null
+      )
     );
     const parsed = toResponse<Record<string, unknown>>(response);
     return {
@@ -131,8 +131,8 @@ export class DesktopRuntimeClient {
         },
         input.workspaceId,
         null,
-        null,
-      ),
+        null
+      )
     );
     const parsed = toResponse<Record<string, unknown>>(response);
     return {
@@ -160,8 +160,8 @@ export class DesktopRuntimeClient {
         },
         input.workspaceId,
         input.sessionId,
-        null,
-      ),
+        null
+      )
     );
     const parsed = toResponse<Record<string, unknown>>(response);
     return {
@@ -175,13 +175,13 @@ export class DesktopRuntimeClient {
 
   async getRendererCapabilities(workspaceId: string | null): Promise<RendererCapabilities> {
     const response = await this.bus.request(
-      toCommandEnvelope("renderer.capabilities", {}, workspaceId, null, null),
+      toCommandEnvelope("renderer.capabilities", {}, workspaceId, null, null)
     );
     const parsed = toResponse<Record<string, unknown>>(response);
     const activeEngine = parsed.result?.active_engine === "rio" ? "rio" : "ghostty";
     const available: RendererEngine[] = Array.isArray(parsed.result?.available_engines)
       ? parsed.result.available_engines.filter(
-          (value): value is RendererEngine => value === "ghostty" || value === "rio",
+          (value): value is RendererEngine => value === "ghostty" || value === "rio"
         )
       : ["ghostty", "rio"];
     return {
@@ -205,8 +205,8 @@ export class DesktopRuntimeClient {
         },
         input.workspaceId,
         null,
-        null,
-      ),
+        null
+      )
     );
     const parsed = toResponse<Record<string, unknown>>(response);
     return {

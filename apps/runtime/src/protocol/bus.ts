@@ -96,7 +96,7 @@ export class InMemoryLocalBus implements LocalBus {
 
   private async handleLifecycleCommand(
     command: LocalBusEnvelope,
-    method: HandledMethod,
+    method: HandledMethod
   ): Promise<LocalBusEnvelope> {
     const spec = METHOD_SPECS[method];
     const forcedError = command.payload?.force_error === true;
@@ -235,7 +235,7 @@ export class InMemoryLocalBus implements LocalBus {
   private async emitTransitionEvent(
     command: LocalBusEnvelope,
     runtimeEvent: RuntimeEvent,
-    topic: string,
+    topic: string
   ): Promise<void> {
     this.state = transition(this.state, runtimeEvent);
     await this.publish({

@@ -31,7 +31,7 @@ export type SwitchRendererOutcome = {
 };
 
 export async function switchRendererWithRollback(
-  input: SwitchRendererInput,
+  input: SwitchRendererInput
 ): Promise<SwitchRendererOutcome> {
   const previousEngine = input.settings.rendererEngine;
   const snapshot = selectActiveContext(input.contextStore.getState());

@@ -97,14 +97,14 @@ export const INITIAL_ACTIVE_CONTEXT_STATE: ActiveContextState = {
 function appendTrace(
   trace: ContextActionTrace[],
   action: string,
-  detail?: unknown,
+  detail?: unknown
 ): ContextActionTrace[] {
   return [...trace, { action, at: new Date().toISOString(), detail }];
 }
 
 export function reduceActiveContextState(
   state: ActiveContextState,
-  action: ActiveContextAction,
+  action: ActiveContextAction
 ): ActiveContextState {
   switch (action.type) {
     case "workspace.set":
@@ -312,7 +312,7 @@ export function selectRuntimeDiagnostics(state: ActiveContextState): TransportDi
 }
 
 export function selectRendererSwitchStatus(
-  state: ActiveContextState,
+  state: ActiveContextState
 ): ActiveContextState["rendererSwitch"] {
   return state.rendererSwitch;
 }
