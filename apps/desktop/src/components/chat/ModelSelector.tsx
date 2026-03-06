@@ -102,6 +102,14 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
                           setIsOpen(false);
                         }
                       }}
+                      onKeyDown={e => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          if (model.available) {
+                            props.onSelect(model.id);
+                            setIsOpen(false);
+                          }
+                        }
+                      }}
                       style={{
                         padding: "6px 12px",
                         cursor: model.available ? "pointer" : "default",

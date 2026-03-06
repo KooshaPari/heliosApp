@@ -45,11 +45,9 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
         <div class="requests-list">
           <For each={props.requests}>
             {request => (
-              <button
-                type="button"
+              <div
                 class={`request-item ${selectedId() === request.id ? "selected" : ""}`}
-                onClick={() => setSelectedId(request.id)}
-                style={{ width: "100%", "text-align": "left", border: "none", padding: 0 }}
+                onclick={() => setSelectedId(request.id)}
               >
                 <div class="request-header">
                   <code class="command">{request.command}</code>
@@ -59,7 +57,7 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
                   <span>{request.requesterName}</span>
                   <span class="time">{new Date(request.createdAt).toLocaleString()}</span>
                 </div>
-              </button>
+              </div>
             )}
           </For>
         </div>
@@ -69,15 +67,15 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
         <div class="approval-details">
           <h3>Review Request</h3>
           <div class="detail-group">
-            <span class="detail-label">Command:</span>
+            <span aria-label="Command">Command:</span>
             <code>{selectedRequest()?.command}</code>
           </div>
           <div class="detail-group">
-            <span class="detail-label">Requested by:</span>
+            <span aria-label="Requested by">Requested by:</span>
             <span>{selectedRequest()?.requesterName}</span>
           </div>
           <div class="detail-group">
-            <span class="detail-label">Workspace:</span>
+            <span aria-label="Workspace">Workspace:</span>
             <span>{selectedRequest()?.workspaceId}</span>
           </div>
 
@@ -85,11 +83,11 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
             <button
               type="button"
               class="approve-btn"
-              onClick={() => handleApprove(selectedRequest()?.id ?? "")}
+              onclick={() => handleApprove(selectedRequest()?.id ?? "")}
             >
               Approve
             </button>
-            <button type="button" class="reject-btn" onClick={() => setRejectReason("focused")}>
+            <button type="button" class="reject-btn" onclick={() => setRejectReason("focused")}>
               Reject
             </button>
           </div>
@@ -99,13 +97,13 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
               <textarea
                 placeholder="Reason for rejection..."
                 value={rejectReason()}
-                onInput={e => setRejectReason(e.currentTarget.value)}
+                oninput={e => setRejectReason(e.currentTarget.value)}
               />
               <div class="reject-actions">
-                <button type="button" onClick={handleReject}>
+                <button type="button" onclick={handleReject}>
                   Confirm Reject
                 </button>
-                <button type="button" onClick={() => setRejectReason("")}>
+                <button type="button" onclick={() => setRejectReason("")}>
                   Cancel
                 </button>
               </div>

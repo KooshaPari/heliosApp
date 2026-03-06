@@ -40,10 +40,7 @@ function findTypescriptFiles(rootDir: string): string[] {
   const stack = [rootDir];
 
   while (stack.length > 0) {
-    const current = stack.pop();
-    if (!current) {
-      continue;
-    }
+    const current = stack.pop()!;
 
     let entries: string[];
     try {

@@ -248,7 +248,6 @@ export class ConfirmationDialog {
         buttons[buttons.length - 1].focus();
       }
     } else if (focusedIndex >= buttons.length - 1) {
-      // Tab
       event.preventDefault();
       buttons[0].focus();
     }

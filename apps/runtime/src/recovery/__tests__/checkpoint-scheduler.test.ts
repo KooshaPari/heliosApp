@@ -112,8 +112,8 @@ describe("CheckpointScheduler", () => {
         scheduler.recordActivity();
       }
 
-      // Wait for the async triggerNow to complete
-      await new Promise(r => setTimeout(r, 50));
+      // Wait for the async triggerNow to complete (longer timeout for coverage instrumentation)
+      await new Promise(r => setTimeout(r, 200));
       const count1 = writeCount;
 
       // Record 25 more (not enough to trigger again)
@@ -121,7 +121,7 @@ describe("CheckpointScheduler", () => {
         scheduler.recordActivity();
       }
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => setTimeout(r, 200));
       expect(writeCount).toBe(count1); // No additional checkpoint
     });
   });

@@ -164,7 +164,7 @@ export class LaneEventHandler {
 
     // Notify about orphan status changes
     if (this.options.onOrphanStatusChanged) {
-      for (const laneId of orphanedLanes as string[]) {
+      for (const laneId of orphanedLanes) {
         this.options.onOrphanStatusChanged?.(laneId, true);
       }
     }
