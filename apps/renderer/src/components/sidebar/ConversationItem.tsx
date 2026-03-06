@@ -28,9 +28,22 @@ function relativeTime(date: Date): string {
 }
 
 export const ConversationItem: Component<ConversationItemProps> = props => {
+  const handleActivate = () => {
+    props.onClick(props.id);
+  };
+
+  const handleActivateKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleActivate();
+    }
+  };
+
   return (
-    <div
-      onClick={() => props.onClick(props.id)}
+    <button
+      type="button"
+      onClick={handleActivate}
+      onKeyDown={handleActivateKeyDown}
       style={{
         padding: "10px 14px",
         cursor: "pointer",
@@ -62,6 +75,6 @@ export const ConversationItem: Component<ConversationItemProps> = props => {
       >
         {relativeTime(props.updatedAt)}
       </div>
-    </div>
+    </button>
   );
 };

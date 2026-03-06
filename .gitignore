@@ -11,6 +11,8 @@
 !.kittify/memory/constitution.md
 !.gemini/
 !.gemini/config.yaml
+!.gemini/commands/
+!.gemini/commands/**
 *.tsbuildinfo
 node_modules/
 dist/
@@ -19,6 +21,7 @@ apps/*/tests/**/*.js
 apps/*/tests/**/*.js.map
 apps/*/tests/**/*.d.ts
 apps/*/tests/**/*.d.ts.map
+.gate-reports/
 # Excluded via sparse-checkout
 kitty-specs/
 

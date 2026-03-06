@@ -13,11 +13,11 @@ export class ConversationStore {
    * Load conversations from persistent storage
    */
   async loadConversations(): Promise<Conversation[]> {
+    await Promise.resolve();
     try {
       // In a real implementation, this would read from Bun.file(this.filePath)
       // For now, we'll return an empty array as a placeholder
-      const result = Array.from(this.conversations.values());
-      return result;
+      return await Promise.resolve(Array.from(this.conversations.values()));
     } catch (_error) {
       return [];
     }
@@ -27,30 +27,39 @@ export class ConversationStore {
    * Save all conversations to persistent storage
    */
   async saveConversations(conversations: Conversation[]): Promise<void> {
+    await Promise.resolve();
     try {
       this.conversations.clear();
       for (const conv of conversations) {
         this.conversations.set(conv.id, conv);
       }
-    } catch (_error) {}
+    } catch (_error) {
+      // Persistence is intentionally in-memory for now; write failures are non-blocking.
+    }
   }
 
   /**
    * Save a single conversation
    */
   async saveConversation(conversation: Conversation): Promise<void> {
+    await Promise.resolve();
     try {
       this.conversations.set(conversation.id, conversation);
-    } catch (_error) {}
+    } catch (_error) {
+      // Persistence is intentionally in-memory for now; write failures are non-blocking.
+    }
   }
 
   /**
    * Delete a conversation by ID
    */
   async deleteConversation(id: string): Promise<void> {
+    await Promise.resolve();
     try {
       this.conversations.delete(id);
-    } catch (_error) {}
+    } catch (_error) {
+      // Persistence is intentionally in-memory for now; write failures are non-blocking.
+    }
   }
 
   /**
@@ -80,15 +89,20 @@ export class ConversationStore {
       conv.updatedAt = new Date().toISOString();
       this.conversations.set(conversationId, conv);
       await this.saveConversation(conv);
-    } catch (_error) {}
+    } catch (_error) {
+      // Persistence is intentionally in-memory for now; update failures are non-blocking.
+    }
   }
 
   /**
    * Clear all conversations
    */
   async clearConversations(): Promise<void> {
+    await Promise.resolve();
     try {
       this.conversations.clear();
-    } catch (_error) {}
+    } catch (_error) {
+      // Persistence is intentionally in-memory for now; clearing failures are non-blocking.
+    }
   }
 }

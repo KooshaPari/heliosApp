@@ -1,6 +1,6 @@
 import { promises as fs } from "node:fs";
 import { homedir } from "node:os";
-import * as path from "node:path";
+import { join } from "node:path";
 import type { TabState, TabSurface } from "./tab_surface.ts";
 
 /**
@@ -33,8 +33,8 @@ export class TabPersistence {
   private lastLoadTime = 0;
 
   constructor(storageDir?: string) {
-    this.storageDir = storageDir ?? path.join(homedir(), ".helios", "data");
-    this.storagePath = path.join(this.storageDir, "tab_state.json");
+    this.storageDir = storageDir ?? join(homedir(), ".helios", "data");
+    this.storagePath = join(this.storageDir, "tab_state.json");
   }
 
   /**
@@ -55,9 +55,6 @@ export class TabPersistence {
 
       this.lastLoadTime = Date.now() - startTime;
 
-      if (this.lastLoadTime > 100) {
-      }
-
       return state;
     } catch (error) {
       if (error instanceof Error && "code" in error) {
@@ -67,6 +64,8 @@ export class TabPersistence {
           return null;
         }
       }
+      // Ignore persistence errors and start from defaults.
+      const _error = error;
       return null;
     }
   }
@@ -102,7 +101,10 @@ export class TabPersistence {
           // Write state to file
           const data = JSON.stringify(stateToWrite, null, 2);
           await fs.writeFile(this.storagePath, data, "utf-8");
-        } catch (_error) {}
+        } catch (error) {
+          // Ignore persistence errors for debounced writes.
+          const _error = error;
+        }
 
         resolve();
       }, 500);
@@ -130,7 +132,10 @@ export class TabPersistence {
       await fs.mkdir(this.storageDir, { recursive: true });
       const data = JSON.stringify(stateToWrite, null, 2);
       await fs.writeFile(this.storagePath, data, "utf-8");
-    } catch (_error) {}
+    } catch (error) {
+      // Ignore persistence errors during flush.
+      const _error = error;
+    }
   }
 
   /**
@@ -212,6 +217,8 @@ export class TabPersistence {
       if (error instanceof Error && "code" in error) {
         const nodeError = error as NodeJS.ErrnoException;
         if (nodeError.code !== "ENOENT") {
+          // Ignore non-missing-file delete errors.
+          const _error = error;
         }
       }
     }

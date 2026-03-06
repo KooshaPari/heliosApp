@@ -51,6 +51,9 @@ settings:
     backoff_multiplier: 2
     max_retries: 5
     max_wait_seconds: 900
+  pr_validation:
+    block_on:
+      severity: info
 
   # Failure behavior: block merge
   on_failure:

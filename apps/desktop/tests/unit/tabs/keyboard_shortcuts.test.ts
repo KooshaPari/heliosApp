@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { promises as fs } from "node:fs";
 import { tmpdir } from "node:os";
-import * as path from "node:path";
+import { join } from "node:path";
 import {
   KeyboardShortcuts,
   type ShortcutAction,
@@ -14,7 +14,7 @@ describe("KeyboardShortcuts", () => {
 
   beforeEach(async () => {
     resetKeyboardShortcuts();
-    tempDir = path.join(tmpdir(), `keyboard-test-${Date.now()}`);
+    tempDir = join(tmpdir(), `keyboard-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
     shortcuts = new KeyboardShortcuts(tempDir);
   });
@@ -90,7 +90,7 @@ describe("KeyboardShortcuts", () => {
 
       shortcuts.handleKeyboardEvent(event);
 
-      expect(handledAction).toBe("select-terminal" as any);
+      expect(handledAction === "select-terminal").toBe(true);
     });
 
     it("should support shortcut listeners", () => {
@@ -153,7 +153,7 @@ describe("KeyboardShortcuts", () => {
     });
 
     it("should handle invalid JSON gracefully", async () => {
-      const configPath = path.join(tempDir, "keyboard_shortcuts.json");
+      const configPath = join(tempDir, "keyboard_shortcuts.json");
       await fs.writeFile(configPath, "invalid json {", "utf-8");
 
       const newShortcuts = new KeyboardShortcuts(tempDir);

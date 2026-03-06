@@ -4,16 +4,16 @@ import path from "node:path";
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
 
 export enum RecoveryStage {
-  CRASHED = "CRASHED",
-  DETECTING = "DETECTING",
-  INVENTORYING = "INVENTORYING",
-  RESTORING = "RESTORING",
-  RECONCILING = "RECONCILING",
-  LIVE = "LIVE",
-  DETECTION_FAILED = "DETECTION_FAILED",
-  INVENTORY_FAILED = "INVENTORY_FAILED",
-  RESTORATION_FAILED = "RESTORATION_FAILED",
-  RECONCILIATION_FAILED = "RECONCILIATION_FAILED",
+  Crashed = "CRASHED",
+  Detecting = "DETECTING",
+  Inventorying = "INVENTORYING",
+  Restoring = "RESTORING",
+  Reconciling = "RECONCILING",
+  Live = "LIVE",
+  DetectionFailed = "DETECTION_FAILED",
+  InventoryFailed = "INVENTORY_FAILED",
+  RestorationFailed = "RESTORATION_FAILED",
+  ReconciliationFailed = "RECONCILIATION_FAILED",
 }
 
 export interface RecoveryState {
@@ -30,34 +30,34 @@ type StageChangeListener = (
 ) => void;
 
 const LEGAL_TRANSITIONS: Record<RecoveryStage, RecoveryStage[]> = {
-  [RecoveryStage.CRASHED]: [RecoveryStage.DETECTING],
-  [RecoveryStage.DETECTING]: [RecoveryStage.INVENTORYING, RecoveryStage.DETECTION_FAILED],
-  [RecoveryStage.INVENTORYING]: [RecoveryStage.RESTORING, RecoveryStage.INVENTORY_FAILED],
-  [RecoveryStage.RESTORING]: [RecoveryStage.RECONCILING, RecoveryStage.RESTORATION_FAILED],
-  [RecoveryStage.RECONCILING]: [RecoveryStage.LIVE, RecoveryStage.RECONCILIATION_FAILED],
-  [RecoveryStage.LIVE]: [], // Terminal state
-  [RecoveryStage.DETECTION_FAILED]: [RecoveryStage.DETECTING], // Retry
-  [RecoveryStage.INVENTORY_FAILED]: [RecoveryStage.INVENTORYING],
-  [RecoveryStage.RESTORATION_FAILED]: [RecoveryStage.RESTORING],
-  [RecoveryStage.RECONCILIATION_FAILED]: [RecoveryStage.RECONCILING],
+  [RecoveryStage.Crashed]: [RecoveryStage.Detecting],
+  [RecoveryStage.Detecting]: [RecoveryStage.Inventorying, RecoveryStage.DetectionFailed],
+  [RecoveryStage.Inventorying]: [RecoveryStage.Restoring, RecoveryStage.InventoryFailed],
+  [RecoveryStage.Restoring]: [RecoveryStage.Reconciling, RecoveryStage.RestorationFailed],
+  [RecoveryStage.Reconciling]: [RecoveryStage.Live, RecoveryStage.ReconciliationFailed],
+  [RecoveryStage.Live]: [], // Terminal state
+  [RecoveryStage.DetectionFailed]: [RecoveryStage.Detecting], // Retry
+  [RecoveryStage.InventoryFailed]: [RecoveryStage.Inventorying],
+  [RecoveryStage.RestorationFailed]: [RecoveryStage.Restoring],
+  [RecoveryStage.ReconciliationFailed]: [RecoveryStage.Reconciling],
 };
 
 const MAX_RETRIES_PER_STAGE = 3;
 const STAGE_TIMEOUT_MS = 30000; // 30 seconds
 
 export class RecoveryStateMachine {
-  private currentStage: RecoveryStage = RecoveryStage.CRASHED;
+  private currentStage: RecoveryStage = RecoveryStage.Crashed;
   private currentState: RecoveryState;
   private recoveryDataDir: string;
   private bus?: LocalBus | undefined;
   private listeners: StageChangeListener[] = [];
-  private stageTimeoutId?: NodeJS.Timeout | undefined;
+  private stageTimeoutId?: ReturnType<typeof setTimeout> | undefined;
 
   constructor(recoveryDataDir: string, bus?: LocalBus) {
     this.recoveryDataDir = recoveryDataDir;
     this.bus = bus;
     this.currentState = {
-      stage: RecoveryStage.CRASHED,
+      stage: RecoveryStage.Crashed,
       timestamp: Date.now(),
       attemptCount: 0,
     };
@@ -131,9 +131,9 @@ export class RecoveryStateMachine {
   }
 
   async reset(): Promise<void> {
-    this.currentStage = RecoveryStage.CRASHED;
+    this.currentStage = RecoveryStage.Crashed;
     this.currentState = {
-      stage: RecoveryStage.CRASHED,
+      stage: RecoveryStage.Crashed,
       timestamp: Date.now(),
       attemptCount: 0,
     };
@@ -158,9 +158,9 @@ export class RecoveryStateMachine {
       this.currentState = state;
     } catch {
       // No persisted state - start fresh
-      this.currentStage = RecoveryStage.CRASHED;
+      this.currentStage = RecoveryStage.Crashed;
       this.currentState = {
-        stage: RecoveryStage.CRASHED,
+        stage: RecoveryStage.Crashed,
         timestamp: Date.now(),
         attemptCount: 0,
       };
@@ -179,7 +179,10 @@ export class RecoveryStateMachine {
       // Atomic write
       await fs.writeFile(tempPath, JSON.stringify(this.currentState, null, 2));
       await fs.rename(tempPath, statePath);
-    } catch (_err) {}
+    } catch (_error) {
+      // Ignore persistence errors to keep recovery state machine bootable
+      // if the file system is temporarily unavailable.
+    }
   }
 
   private async deleteState(): Promise<void> {
@@ -206,7 +209,13 @@ export class RecoveryStateMachine {
         const failureStage = this.getFailureStateFor(this.currentStage);
         if (failureStage) {
           this.currentState.lastError = `Stage timeout after ${STAGE_TIMEOUT_MS}ms`;
-          this.transition(failureStage).catch(_err => {});
+          this.transition(failureStage).catch(error => {
+            // Stage transition failures are expected if the state changed concurrently.
+            this.currentState.lastError =
+              error instanceof Error
+                ? `Recovery stage timeout transition failed: ${error.message}`
+                : "Recovery stage timeout transition failed";
+          });
         }
       }
     }, STAGE_TIMEOUT_MS);
@@ -221,16 +230,16 @@ export class RecoveryStateMachine {
 
   private getFailureStateFor(stage: RecoveryStage): RecoveryStage | undefined {
     const failureMap: Record<RecoveryStage, RecoveryStage | undefined> = {
-      [RecoveryStage.DETECTING]: RecoveryStage.DETECTION_FAILED,
-      [RecoveryStage.INVENTORYING]: RecoveryStage.INVENTORY_FAILED,
-      [RecoveryStage.RESTORING]: RecoveryStage.RESTORATION_FAILED,
-      [RecoveryStage.RECONCILING]: RecoveryStage.RECONCILIATION_FAILED,
-      [RecoveryStage.CRASHED]: RecoveryStage.CRASHED,
-      [RecoveryStage.LIVE]: undefined,
-      [RecoveryStage.DETECTION_FAILED]: undefined,
-      [RecoveryStage.INVENTORY_FAILED]: undefined,
-      [RecoveryStage.RESTORATION_FAILED]: undefined,
-      [RecoveryStage.RECONCILIATION_FAILED]: undefined,
+      [RecoveryStage.Detecting]: RecoveryStage.DetectionFailed,
+      [RecoveryStage.Inventorying]: RecoveryStage.InventoryFailed,
+      [RecoveryStage.Restoring]: RecoveryStage.RestorationFailed,
+      [RecoveryStage.Reconciling]: RecoveryStage.ReconciliationFailed,
+      [RecoveryStage.Crashed]: RecoveryStage.Crashed,
+      [RecoveryStage.Live]: undefined,
+      [RecoveryStage.DetectionFailed]: undefined,
+      [RecoveryStage.InventoryFailed]: undefined,
+      [RecoveryStage.RestorationFailed]: undefined,
+      [RecoveryStage.ReconciliationFailed]: undefined,
     };
     return failureMap[stage];
   }

@@ -94,7 +94,8 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
                 </div>
                 <For each={group.models}>
                   {model => (
-                    <div
+                    <button
+                      type="button"
                       onClick={() => {
                         if (model.available) {
                           props.onSelect(model.id);
@@ -113,7 +114,10 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
                         padding: "6px 12px",
                         cursor: model.available ? "pointer" : "default",
                         color: model.available ? "#cdd6f4" : "#585b70",
+                        border: "none",
                         "font-size": "13px",
+                        width: "100%",
+                        "text-align": "left",
                         "background-color":
                           model.id === props.activeModel ? "#45475a" : "transparent",
                       }}
@@ -126,7 +130,7 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
                           (not configured)
                         </span>
                       </Show>
-                    </div>
+                    </button>
                   )}
                 </For>
               </div>

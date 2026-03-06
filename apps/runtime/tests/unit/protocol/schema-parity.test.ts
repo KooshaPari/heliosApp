@@ -35,6 +35,7 @@ interface ValidationError {
   message: string;
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Validator is a compact test helper for protocol parity.
 function validateSchema(data: unknown, schema: JsonSchema, path = ""): ValidationError[] {
   const errors: ValidationError[] = [];
 
@@ -163,6 +164,7 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
 
   it("rejects envelope with missing id", () => {
     const bad = {
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
       correlation_id: "cor_123",
       timestamp: 1,
       type: "command",
@@ -177,6 +179,7 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   it("rejects envelope with empty id", () => {
     const bad = {
       id: "",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
       correlation_id: "cor_123",
       timestamp: 1,
       type: "command",
@@ -190,6 +193,7 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   it("rejects envelope with invalid type", () => {
     const bad = {
       id: "cmd_123",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
       correlation_id: "cor_123",
       timestamp: 1,
       type: "invalid",
@@ -203,6 +207,7 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   it("rejects event without sequence", () => {
     const bad = {
       id: "evt_123",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
       correlation_id: "cor_123",
       timestamp: 1,
       type: "event",
@@ -216,6 +221,7 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   it("rejects event without topic", () => {
     const bad = {
       id: "evt_123",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
       correlation_id: "cor_123",
       timestamp: 1,
       type: "event",
@@ -234,16 +240,23 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
     expect(schema.required).toContain("type");
 
     // oneOf branches
-    const commandSchema = schema.oneOf?.find(s => s.title === "CommandEnvelope")!;
-    expect(commandSchema.required).toContain("method");
-    expect(commandSchema.required).toContain("payload");
+    const commandSchema = schema.oneOf?.find(s => s.title === "CommandEnvelope");
+    const responseSchema = schema.oneOf?.find(s => s.title === "ResponseEnvelope");
+    const eventSchema = schema.oneOf?.find(s => s.title === "EventEnvelope");
 
-    const responseSchema = schema.oneOf?.find(s => s.title === "ResponseEnvelope")!;
-    expect(responseSchema.required).toContain("method");
+    expect(commandSchema).toBeDefined();
+    expect(responseSchema).toBeDefined();
+    expect(eventSchema).toBeDefined();
 
-    const eventSchema = schema.oneOf?.find(s => s.title === "EventEnvelope")!;
-    expect(eventSchema.required).toContain("topic");
-    expect(eventSchema.required).toContain("payload");
-    expect(eventSchema.required).toContain("sequence");
+    const commandSchemaValue = commandSchema as JsonSchema;
+    const responseSchemaValue = responseSchema as JsonSchema;
+    const eventSchemaValue = eventSchema as JsonSchema;
+
+    expect(commandSchemaValue.required).toContain("method");
+    expect(commandSchemaValue.required).toContain("payload");
+    expect(responseSchemaValue.required).toContain("method");
+    expect(eventSchemaValue.required).toContain("topic");
+    expect(eventSchemaValue.required).toContain("payload");
+    expect(eventSchemaValue.required).toContain("sequence");
   });
 });

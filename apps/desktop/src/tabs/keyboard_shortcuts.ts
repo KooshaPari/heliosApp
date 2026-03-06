@@ -1,6 +1,6 @@
 import { promises as fs } from "node:fs";
 import { homedir } from "node:os";
-import * as path from "node:path";
+import { dirname, join } from "node:path";
 
 export interface ShortcutMap {
   [key: string]: string;
@@ -49,10 +49,8 @@ export class KeyboardShortcuts {
     typeof navigator !== "undefined" && /Mac|Darwin/.test(navigator.platform);
 
   constructor(configDir?: string) {
-    this.configPath = path.join(
-      configDir ?? path.join(homedir(), ".helios", "data"),
-      "keyboard_shortcuts.json"
-    );
+    const defaultConfigDir = configDir ?? join(homedir(), ".helios", "data");
+    this.configPath = join(defaultConfigDir, "keyboard_shortcuts.json");
     this.shortcuts = { ...DEFAULT_SHORTCUTS };
     this.buildReverseMap();
   }
@@ -85,11 +83,15 @@ export class KeyboardShortcuts {
    */
   async save(): Promise<void> {
     try {
-      const dir = path.dirname(this.configPath);
+      const dir = dirname(this.configPath);
       await fs.mkdir(dir, { recursive: true });
       const data = JSON.stringify(this.shortcuts, null, 2);
       await fs.writeFile(this.configPath, data, "utf-8");
-    } catch (_error) {}
+    } catch (error) {
+      // Ignore persistence errors for keyboard shortcut configuration.
+      // This operation is best-effort and should never block shortcut usage.
+      const _error = error;
+    }
   }
 
   /**

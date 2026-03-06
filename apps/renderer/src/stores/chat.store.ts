@@ -112,6 +112,13 @@ export async function sendMessage(text: string): Promise<void> {
         .filter(m => m.id !== assistantMsg.id)
         .map(m => ({ role: m.role, content: m.content })) ?? [];
 
+    const requestBody = {
+      model: "claude-sonnet-4-20250514",
+      messages: history,
+      // biome-ignore lint/style/useNamingConvention: Anthropic request body requires snake_case key name.
+      max_tokens: 4096,
+    };
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -119,11 +126,7 @@ export async function sendMessage(text: string): Promise<void> {
         "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
       },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 4096,
-        messages: history,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
@@ -135,7 +138,7 @@ export async function sendMessage(text: string): Promise<void> {
 
     const data = (await response.json()) as {
       content: Array<{ type: string; text: string }>;
-      usage: { input_tokens: number; output_tokens: number };
+      usage: Record<string, number>;
     };
     const content = data.content
       .filter((c: { type: string }) => c.type === "text")

@@ -26,17 +26,17 @@ class MockPolicyGate implements PolicyGate {
     }
   }
 
-  async evaluate(
+  evaluate(
     _action: string,
     _context: Record<string, unknown>
   ): Promise<{ allowed: boolean; reason?: string }> {
     if (this.shouldDeny) {
-      return {
+      return Promise.resolve({
         allowed: false,
         reason: this.denialReason,
-      };
+      });
     }
-    return { allowed: true };
+    return Promise.resolve({ allowed: true });
   }
 }
 
@@ -153,7 +153,18 @@ describe("Share Session Management", () => {
         // Expected
       }
 
-      // If policy denied, no worker should be spawned (no PID in failed session)
+      const events = bus.getEvents();
+      expect(events.find(e => e.topic === "share.session.active")).toBeUndefined();
+      expect(
+        events.find(e => {
+          const reason = e.payload?.reason;
+          return (
+            e.topic === "share.session.failed" &&
+            typeof reason === "string" &&
+            reason.includes("Access denied")
+          );
+        })
+      ).toBeDefined();
     });
 
     it("should allow share creation when policy approves", async () => {
@@ -214,7 +225,7 @@ describe("Share Session Management", () => {
       expect(retrieved?.id).toBe(created.id);
     });
 
-    it("should return undefined for non-existent session", async () => {
+    it("should return undefined for non-existent session", () => {
       const retrieved = manager.get("non-existent");
 
       expect(retrieved).toBeUndefined();
@@ -233,7 +244,7 @@ describe("Share Session Management", () => {
       expect(sessions.map(s => s.id)).toContain(session2.id);
     });
 
-    it("should return empty list for terminal with no sessions", async () => {
+    it("should return empty list for terminal with no sessions", () => {
       const sessions = manager.listByTerminal("non-existent-terminal");
 
       expect(sessions).toHaveLength(0);
@@ -290,7 +301,7 @@ describe("Share Session Management", () => {
     it("should support multiple sessions for same terminal", async () => {
       const terminalId = "terminal-123";
 
-      const promises = [];
+      const promises: ReturnType<typeof manager.create>[] = [];
       for (let i = 0; i < 3; i++) {
         promises.push(manager.create(terminalId, "upterm", 60000, `corr-${i}`));
       }
@@ -348,7 +359,7 @@ describe("Upterm Backend Adapter", () => {
     const result = await adapter.startShare("terminal-123", "main-session");
 
     // Should not throw
-    await adapter.stopShare(result.process);
+    await expect(adapter.stopShare(result.process)).resolves.toBeUndefined();
   });
 
   it("should support custom upterm server", async () => {
@@ -391,7 +402,7 @@ describe("Tmate Backend Adapter", () => {
     const result = await adapter.startShare("terminal-123", "main-session");
 
     // Should not throw
-    await adapter.stopShare(result.process);
+    await expect(adapter.stopShare(result.process)).resolves.toBeUndefined();
   });
 });
 

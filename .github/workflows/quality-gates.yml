@@ -55,6 +55,9 @@ jobs:
         timeout-minutes: 5
         continue-on-error: false
 
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
       - name: Gate 4 - E2E Tests
         id: gate-e2e
         run: |

@@ -1,4 +1,30 @@
 import type { ProtocolBus as LocalBus } from "@helios/runtime/protocol/bus";
+import type { LocalBusEnvelope } from "@helios/runtime/protocol/types";
+
+function toProtocolName(value: string): string {
+  return value.replace(/[A-Z]/g, "_$&").toLowerCase();
+}
+
+function toProtocolValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(entry => toProtocolValue(entry));
+  }
+  if (value === null || typeof value !== "object") {
+    return value;
+  }
+  return toProtocolRecord(value as Record<string, unknown>);
+}
+
+function toProtocolRecord(value: Record<string, unknown>): Record<string, unknown> {
+  const protocol: Record<string, unknown> = {};
+  for (const [key, rawValue] of Object.entries(value)) {
+    if (rawValue === undefined) {
+      continue;
+    }
+    protocol[toProtocolName(key)] = toProtocolValue(rawValue);
+  }
+  return protocol;
+}
 
 export interface ActiveContext {
   workspaceId: string;
@@ -68,64 +94,72 @@ export class ActiveContextStore {
 
     // Debounce: wait 50ms for any additional changes before committing
     return new Promise(resolve => {
-      this.debounceTimer = setTimeout(async () => {
+      this.debounceTimer = setTimeout(() => {
         this.debounceTimer = null;
-
-        const contextToSet = this.pendingContext;
-        this.pendingContext = null;
-
-        // Validate context if validator is set
-        if (contextToSet !== null && this.validator) {
-          const isValid = await this.validator(contextToSet);
-          if (!isValid) {
-            // Emit validation failure event
-            if (this.bus) {
-              await this.bus.publish({
-                id: `validation-${Date.now()}`,
-                type: "event",
-                ts: new Date().toISOString(),
-                topic: "context.validation.failed",
-                payload: { context: contextToSet },
-              });
-            }
+        this.applyContext(this.pendingContext)
+          .then(() => {
             resolve();
-            return;
-          }
-        }
-
-        // Store previous context for comparison
-        const previousContext = this.currentContext;
-
-        // Update context
-        this.currentContext = contextToSet;
-
-        // Emit change event to listeners
-        const changeEvent: ContextChangeEvent = {
-          previous: previousContext,
-          current: this.currentContext,
-        };
-
-        for (const listener of this.listeners) {
-          listener(changeEvent);
-        }
-
-        // Publish to bus
-        if (this.bus) {
-          await this.bus.publish({
-            id: `context-change-${Date.now()}`,
-            type: "event",
-            ts: new Date().toISOString(),
-            topic: "context.active.changed",
-            workspace_id: contextToSet?.workspaceId,
-            lane_id: contextToSet?.laneId,
-            session_id: contextToSet?.sessionId,
-            payload: changeEvent as unknown as Record<string, unknown>,
+          })
+          .catch(() => {
+            resolve();
           });
-        }
-
-        resolve();
       }, 50);
     });
+  }
+
+  private async applyContext(contextToSet: ActiveContext | null): Promise<void> {
+    this.pendingContext = null;
+
+    if (contextToSet !== null && this.validator) {
+      const isValid = await this.validator(contextToSet);
+      if (!isValid) {
+        await this.publishValidationFailure(contextToSet);
+        return;
+      }
+    }
+
+    const previousContext = this.currentContext;
+    this.currentContext = contextToSet;
+
+    const changeEvent: ContextChangeEvent = {
+      previous: previousContext,
+      current: this.currentContext,
+    };
+
+    for (const listener of this.listeners) {
+      listener(changeEvent);
+    }
+
+    if (this.bus) {
+      const event: LocalBusEnvelope = toProtocolRecord({
+        id: `context-change-${Date.now()}`,
+        type: "event",
+        ts: new Date().toISOString(),
+        topic: "context.active.changed",
+        payload: changeEvent as unknown as Record<string, unknown>,
+        workspaceId: contextToSet?.workspaceId,
+        laneId: contextToSet?.laneId,
+        sessionId: contextToSet?.sessionId,
+      }) as LocalBusEnvelope;
+
+      await this.bus.publish(event);
+    }
+  }
+
+  private async publishValidationFailure(contextToSet: ActiveContext): Promise<void> {
+    if (!this.bus) {
+      return;
+    }
+
+    const event = {
+      id: `validation-${Date.now()}`,
+      type: "event",
+      ts: new Date().toISOString(),
+      topic: "context.validation.failed",
+      payload: { context: contextToSet },
+    } as LocalBusEnvelope;
+
+    await this.bus.publish(event);
   }
 
   /**

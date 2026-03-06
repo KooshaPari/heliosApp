@@ -60,7 +60,7 @@ export interface ShareWorkerResult {
  * Spawns and manages the lifecycle of share worker processes.
  */
 export class ShareWorker {
-  private process: any = null;
+  private process: unknown | null = null;
   private hearbeat: NodeJS.Timeout | null = null;
 
   /**
@@ -91,13 +91,14 @@ export class ShareWorker {
   /**
    * Kill the share worker process.
    */
-  async kill(): Promise<void> {
+  kill(): Promise<void> {
     if (this.hearbeat) {
       clearInterval(this.hearbeat);
       this.hearbeat = null;
     }
     // In real implementation, would send SIGTERM/SIGKILL
     this.process = null;
+    return Promise.resolve();
   }
 
   /**
@@ -124,8 +125,8 @@ export interface PolicyGate {
  * Default pass-through policy gate.
  */
 class DefaultPolicyGate implements PolicyGate {
-  async evaluate(): Promise<{ allowed: boolean }> {
-    return { allowed: true };
+  evaluate(): Promise<{ allowed: boolean }> {
+    return Promise.resolve({ allowed: true });
   }
 }
 
@@ -339,6 +340,8 @@ export class ShareSessionManager {
         topic,
         payload,
       });
-    } catch (_error) {}
+    } catch (_error) {
+      // Intentionally ignore bus publish errors for fire-and-forget events.
+    }
   }
 }

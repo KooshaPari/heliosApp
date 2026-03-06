@@ -8,9 +8,13 @@ function createLifecycleCommand(overrides: Partial<LocalBusEnvelope> = {}): Loca
     id: "cmd-1",
     type: "command",
     ts: "2026-02-26T00:00:00.000Z",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
     workspace_id: "ws-1",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
     lane_id: "lane-1",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
     session_id: "session-1",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
     correlation_id: "corr-1",
     method: "session.attach",
     payload: {},
@@ -30,7 +34,8 @@ describe("protocol validator", () => {
 
   test("returns error response when lifecycle command is missing correlation_id", async () => {
     const bus = new InMemoryLocalBus();
-    const command = createLifecycleCommand({ correlation_id: undefined });
+    const command = createLifecycleCommand();
+    command.correlation_id = undefined;
     const response = await bus.request(command);
     expect(response.type).toBe("response");
     expect(response.status).toBe("error");
@@ -112,9 +117,13 @@ describe("protocol sequencing and audit", () => {
         id: "evt-1",
         type: "event",
         ts: "2026-02-26T00:00:00.000Z",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         workspace_id: "ws-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         lane_id: "lane-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         session_id: "session-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         correlation_id: "corr-1",
         topic: "session.attached",
         payload: {},
@@ -131,8 +140,11 @@ describe("protocol sequencing and audit", () => {
       id: "evt-accepted",
       type: "event",
       ts: "2026-02-26T00:00:00.000Z",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
       workspace_id: "ws-1",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
       lane_id: "lane-1",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
       correlation_id: "corr-accepted",
       topic: "lane.create.started",
       payload: {},
@@ -143,8 +155,11 @@ describe("protocol sequencing and audit", () => {
         id: "evt-rejected",
         type: "event",
         ts: "2026-02-26T00:00:00.000Z",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         workspace_id: "ws-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         lane_id: "lane-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         correlation_id: "corr-accepted",
         topic: "lane.create.started",
         payload: {},
@@ -164,6 +179,7 @@ describe("protocol sequencing and audit", () => {
     const bus = new InMemoryLocalBus();
     const response = await bus.request(
       createLifecycleCommand({
+        // biome-ignore lint/style/useNamingConvention: Protocol fixture payload uses snake_case.
         payload: { force_error: true },
       })
     );

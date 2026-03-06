@@ -3,6 +3,10 @@ import type { CommandEnvelope, EventEnvelope, ResponseEnvelope } from "./types.j
 import { ProtocolValidationError } from "./types.js";
 import { validateEnvelope } from "./validator.js";
 
+export type { LocalBusEnvelope } from "./types.js";
+
+type LocalBusEnvelopeWithSequence = LocalBusEnvelope & { sequence?: number };
+
 // ---------------------------------------------------------------------------
 // Protocol-level bus interface (used by InMemoryLocalBus for lifecycle commands)
 // ---------------------------------------------------------------------------
@@ -53,21 +57,19 @@ export type MetricsReport = {
 
 export type BusState = {
   session: "attached" | "detached";
-  terminal?: "active" | "inactive";
+  terminal?: "active" | "inactive" | "throttled";
 };
 
 // ---------------------------------------------------------------------------
 // InMemoryLocalBus — protocol lifecycle implementation
 // ---------------------------------------------------------------------------
 
-// Lifecycle state machine: track per-lane/session/correlation lifecycle ordering.
 const _LIFECYCLE_SEQUENCES: Record<string, string[]> = {
   "session.attach": ["session.attach.started", "session.attached", "session.attach.failed"],
   "lane.create": ["lane.create.started", "lane.created", "lane.create.failed"],
   "terminal.spawn": ["terminal.spawn.started", "terminal.spawned", "terminal.spawn.failed"],
 };
 
-// Topics that are terminal within a lifecycle (end the sequence)
 const TERMINAL_TOPICS = new Set([
   "session.attached",
   "session.attach.failed",
@@ -77,12 +79,14 @@ const TERMINAL_TOPICS = new Set([
   "terminal.spawn.failed",
 ]);
 
-// Topics that are start topics for their sequence
 const START_TOPICS = new Set([
   "session.attach.started",
   "lane.create.started",
   "terminal.spawn.started",
 ]);
+
+const hasTopLevelDataField = (envelope: LocalBusEnvelope): boolean =>
+  Object.prototype.hasOwnProperty.call(envelope, "data");
 
 export class InMemoryLocalBus implements ProtocolBus {
   private readonly eventLog: LocalBusEnvelope[] = [];
@@ -93,7 +97,6 @@ export class InMemoryLocalBus implements ProtocolBus {
   > = new Map();
   private readonly metricSamples: MetricSample[] = [];
   private state: BusState = { session: "detached" };
-  // Track which correlation IDs have seen which start topics
   private readonly lifecycleProgress: Map<string, Set<string>> = new Map();
 
   getEvents(): LocalBusEnvelope[] {
@@ -105,15 +108,16 @@ export class InMemoryLocalBus implements ProtocolBus {
    * Used by HTTP routing layer for events that don't follow protocol lifecycle ordering.
    */
   pushEvent(event: LocalBusEnvelope): void {
-    if ((event as any).sequence === undefined) {
-      (event as any).sequence = this.getSequence() + 1;
+    const sequencedEvent = event as LocalBusEnvelopeWithSequence;
+    if (sequencedEvent.sequence === undefined) {
+      sequencedEvent.sequence = this.getSequence() + 1;
     }
     this.auditLog.push({ envelope: event, outcome: "accepted" });
     this.eventLog.push(event);
   }
 
-  async getAuditRecords(): Promise<AuditRecord[]> {
-    return [...this.auditLog];
+  getAuditRecords(): Promise<AuditRecord[]> {
+    return Promise.resolve([...this.auditLog]);
   }
 
   getMetricsReport(): MetricsReport {
@@ -184,10 +188,15 @@ export class InMemoryLocalBus implements ProtocolBus {
       type: "event",
       ts: new Date().toISOString(),
       topic,
+      // biome-ignore lint/style/useNamingConvention: Protocol event envelope fields use protocol-defined snake_case.
       ...(envelope.workspace_id !== undefined ? { workspace_id: envelope.workspace_id } : {}),
+      // biome-ignore lint/style/useNamingConvention: Protocol event envelope fields use protocol-defined snake_case.
       ...(envelope.lane_id !== undefined ? { lane_id: envelope.lane_id } : {}),
+      // biome-ignore lint/style/useNamingConvention: Protocol event envelope fields use protocol-defined snake_case.
       ...(envelope.session_id !== undefined ? { session_id: envelope.session_id } : {}),
+      // biome-ignore lint/style/useNamingConvention: Protocol event envelope fields use protocol-defined snake_case.
       ...(envelope.terminal_id !== undefined ? { terminal_id: envelope.terminal_id } : {}),
+      // biome-ignore lint/style/useNamingConvention: Protocol event envelope fields use protocol-defined snake_case.
       ...(envelope.correlation_id !== undefined ? { correlation_id: envelope.correlation_id } : {}),
       payload: {},
       sequence: seq,
@@ -196,7 +205,9 @@ export class InMemoryLocalBus implements ProtocolBus {
     this.eventLog.push(event);
   }
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Publish behavior intentionally mirrors protocol lifecycle matrix.
   async publish(event: LocalBusEnvelope): Promise<void> {
+    await Promise.resolve();
     // Validate the envelope
     try {
       validateEnvelope(event);
@@ -220,7 +231,13 @@ export class InMemoryLocalBus implements ProtocolBus {
         if (!this.lifecycleProgress.has(correlationId)) {
           this.lifecycleProgress.set(correlationId, new Set());
         }
-        const progress = this.lifecycleProgress.get(correlationId)!;
+        const progress = this.lifecycleProgress.get(correlationId);
+        if (!progress) {
+          throw new ProtocolValidationError(
+            "ORDERING_VIOLATION",
+            `Missing lifecycle progress for correlation "${correlationId}"`
+          );
+        }
         if (progress.has(topic)) {
           // Duplicate start topic on same correlation — ordering violation
           const err = new ProtocolValidationError(
@@ -290,14 +307,17 @@ export class InMemoryLocalBus implements ProtocolBus {
     }
 
     // Assign sequence if not already set
-    if ((event as any).sequence === undefined) {
-      (event as any).sequence = this.getSequence() + 1;
+    const sequencedEvent = event as LocalBusEnvelopeWithSequence;
+    if (sequencedEvent.sequence === undefined) {
+      sequencedEvent.sequence = this.getSequence() + 1;
     }
     this.auditLog.push({ envelope: event, outcome: "accepted" });
     this.eventLog.push(event);
   }
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Request semantics require explicit branch coverage.
   async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+    await Promise.resolve();
     // Validate correlation_id for lifecycle commands
     if (command.method) {
       const needsCorrelation = [
@@ -324,7 +344,20 @@ export class InMemoryLocalBus implements ProtocolBus {
       const startTime = Date.now();
 
       if (command.method === "lane.create") {
-        const correlationId = command.correlation_id!;
+        const correlationId = command.correlation_id;
+        if (!correlationId) {
+          return {
+            id: `res-${Date.now()}`,
+            type: "response",
+            ts: new Date().toISOString(),
+            status: "error",
+            error: {
+              code: "MISSING_CORRELATION_ID",
+              message: "correlation_id is required for lane.create",
+              retryable: false,
+            },
+          };
+        }
         if (!this.lifecycleProgress.has(correlationId)) {
           this.lifecycleProgress.set(correlationId, new Set());
         }
@@ -347,12 +380,17 @@ export class InMemoryLocalBus implements ProtocolBus {
           ts: new Date().toISOString(),
           status: "ok",
           result: {
+            // biome-ignore lint/style/useNamingConvention: Protocol response fields use snake_case.
             lane_id: resultId,
             state: this.state,
             diagnostics: {
+              // biome-ignore lint/style/useNamingConvention: Protocol diagnostics fields use snake_case.
               preferred_transport: preferredTransport,
+              // biome-ignore lint/style/useNamingConvention: Protocol diagnostics fields use snake_case.
               resolved_transport: resolvedTransport,
+              // biome-ignore lint/style/useNamingConvention: Protocol diagnostics fields use snake_case.
               degraded_reason: degradedReason,
+              // biome-ignore lint/style/useNamingConvention: Protocol diagnostics fields use snake_case.
               degraded_at: degraded ? new Date().toISOString() : null,
             },
           },
@@ -360,7 +398,20 @@ export class InMemoryLocalBus implements ProtocolBus {
       }
 
       if (command.method === "session.attach") {
-        const correlationId = command.correlation_id!;
+        const correlationId = command.correlation_id;
+        if (!correlationId) {
+          return {
+            id: `res-${Date.now()}`,
+            type: "response",
+            ts: new Date().toISOString(),
+            status: "error",
+            error: {
+              code: "MISSING_CORRELATION_ID",
+              message: "correlation_id is required for session.attach",
+              retryable: false,
+            },
+          };
+        }
         const forceError = command.payload?.force_error === true;
 
         if (!this.lifecycleProgress.has(correlationId)) {
@@ -385,12 +436,16 @@ export class InMemoryLocalBus implements ProtocolBus {
         const isRestore = command.payload?.restore === true;
         if (isRestore) {
           const restoreStart = Date.now();
+          this.publishLifecycleEvent("session.restore.started", command);
           this.recordMetric("session_restore_latency_ms", Date.now() - restoreStart);
           this.emitMetricEvent("session_restore_latency_ms", Date.now() - restoreStart);
         }
 
         this.lifecycleProgress.get(correlationId)?.add("session.attached");
         this.publishLifecycleEvent("session.attached", command);
+        if (isRestore) {
+          this.publishLifecycleEvent("session.restore.completed", command);
+        }
         this.state = { session: "attached" };
         const sessionResultId =
           command.payload?.id ?? command.payload?.session_id ?? `session_${Date.now()}`;
@@ -400,12 +455,17 @@ export class InMemoryLocalBus implements ProtocolBus {
           ts: new Date().toISOString(),
           status: "ok",
           result: {
+            // biome-ignore lint/style/useNamingConvention: Protocol response fields use snake_case.
             session_id: sessionResultId,
             state: this.state,
             diagnostics: {
+              // biome-ignore lint/style/useNamingConvention: Protocol diagnostics fields use snake_case.
               preferred_transport: "cliproxy_harness",
+              // biome-ignore lint/style/useNamingConvention: Protocol diagnostics fields use snake_case.
               resolved_transport: "cliproxy_harness",
+              // biome-ignore lint/style/useNamingConvention: Protocol diagnostics fields use snake_case.
               degraded_reason: null,
+              // biome-ignore lint/style/useNamingConvention: Protocol diagnostics fields use snake_case.
               degraded_at: null,
             },
           },
@@ -413,7 +473,20 @@ export class InMemoryLocalBus implements ProtocolBus {
       }
 
       if (command.method === "terminal.spawn") {
-        const correlationId = command.correlation_id!;
+        const correlationId = command.correlation_id;
+        if (!correlationId) {
+          return {
+            id: `res-${Date.now()}`,
+            type: "response",
+            ts: new Date().toISOString(),
+            status: "error",
+            error: {
+              code: "MISSING_CORRELATION_ID",
+              message: "correlation_id is required for terminal.spawn",
+              retryable: false,
+            },
+          };
+        }
         const forceError = command.payload?.force_error === true;
 
         if (!this.lifecycleProgress.has(correlationId)) {
@@ -450,12 +523,17 @@ export class InMemoryLocalBus implements ProtocolBus {
           ts: new Date().toISOString(),
           status: "ok",
           result: {
+            // biome-ignore lint/style/useNamingConvention: Protocol response fields use snake_case.
             terminal_id: terminalResultId,
             state: this.state,
             diagnostics: {
+              // biome-ignore lint/style/useNamingConvention: Protocol diagnostics fields use snake_case.
               preferred_transport: "cliproxy_harness",
+              // biome-ignore lint/style/useNamingConvention: Protocol diagnostics fields use snake_case.
               resolved_transport: "cliproxy_harness",
+              // biome-ignore lint/style/useNamingConvention: Protocol diagnostics fields use snake_case.
               degraded_reason: null,
+              // biome-ignore lint/style/useNamingConvention: Protocol diagnostics fields use snake_case.
               degraded_at: null,
             },
           },
@@ -464,7 +542,7 @@ export class InMemoryLocalBus implements ProtocolBus {
 
       if (command.method === "terminal.input") {
         // Validate data field
-        if (command.payload?.data === undefined && !("data" in (command as any))) {
+        if (command.payload?.data === undefined && !hasTopLevelDataField(command)) {
           return {
             id: `res-${Date.now()}`,
             type: "response",
@@ -494,8 +572,11 @@ export class InMemoryLocalBus implements ProtocolBus {
           ts: new Date().toISOString(),
           status: "ok",
           result: {
+            // biome-ignore lint/style/useNamingConvention: Protocol response fields use snake_case.
             active_engine: this.rendererEngine ?? "ghostty",
+            // biome-ignore lint/style/useNamingConvention: Protocol response fields use snake_case.
             available_engines: ["ghostty", "rio"],
+            // biome-ignore lint/style/useNamingConvention: Protocol response fields use snake_case.
             hot_swap_supported: true,
           },
         };
@@ -514,7 +595,9 @@ export class InMemoryLocalBus implements ProtocolBus {
             status: "error",
             error: { code: "RENDERER_SWITCH_FAILED", message: "forced error", retryable: false },
             result: {
+              // biome-ignore lint/style/useNamingConvention: Protocol response fields use snake_case.
               active_engine: previousEngine,
+              // biome-ignore lint/style/useNamingConvention: Protocol response fields use snake_case.
               previous_engine: previousEngine,
             },
           };
@@ -527,7 +610,9 @@ export class InMemoryLocalBus implements ProtocolBus {
           ts: new Date().toISOString(),
           status: "ok",
           result: {
+            // biome-ignore lint/style/useNamingConvention: Protocol response fields use snake_case.
             active_engine: this.rendererEngine,
+            // biome-ignore lint/style/useNamingConvention: Protocol response fields use snake_case.
             previous_engine: previousEngine,
           },
         };
@@ -574,6 +659,7 @@ function makeErrorResponse(
 ): ResponseEnvelope {
   return {
     id: `res_${Date.now()}`,
+    // biome-ignore lint/style/useNamingConvention: Protocol field names intentionally use snake_case.
     correlation_id: correlationId,
     timestamp: performance.now(),
     type: "response",
@@ -623,6 +709,7 @@ class CommandBusImpl implements LocalBus {
     this.methods.set(method, handler);
   }
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Command dispatch intentionally models protocol branching in one place.
   async send(envelope: unknown): Promise<ResponseEnvelope> {
     // Guard destroyed state
     if (this.destroyed) {

@@ -24,6 +24,17 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = props => {
     }
   };
 
+  const toggleExpanded = () => {
+    setExpanded(!expanded());
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      toggleExpanded();
+    }
+  };
+
   return (
     <div
       style={{
@@ -33,8 +44,11 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = props => {
         overflow: "hidden",
       }}
     >
-      <div
-        onClick={() => setExpanded(!expanded())}
+      <button
+        type="button"
+        aria-expanded={expanded()}
+        onKeyDown={handleKeyDown}
+        onClick={toggleExpanded}
         style={{
           display: "flex",
           "align-items": "center",
@@ -49,7 +63,7 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = props => {
         <span>{statusIcon()}</span>
         <span style={{ flex: "1" }}>{toolName()}</span>
         <span>{expanded() ? "\u25B2" : "\u25BC"}</span>
-      </div>
+      </button>
       <Show when={expanded() && input() !== undefined}>
         <div
           style={{

@@ -35,7 +35,7 @@ export class OrphanReconciler {
     const needsReview: OrphanItem[] = [];
 
     // Scan for orphan PTY processes
-    await this.scanOrphanPTYs(safeToTerminate, needsReview);
+    await this.scanOrphanPtys(safeToTerminate, needsReview);
 
     // Scan for stale zellij sessions
     await this.scanStaleZelijjSessions(safeToTerminate, needsReview);
@@ -58,33 +58,9 @@ export class OrphanReconciler {
 
     // Terminate safe-to-terminate processes
     for (const item of report.safeToTerminate) {
-      try {
-        if (item.type === "pty" || item.type === "zellij_session" || item.type === "share_worker") {
-          if (item.pid) {
-            // Try SIGTERM first
-            try {
-              process.kill(item.pid, "SIGTERM");
-              // Wait 3s for graceful shutdown
-              await new Promise(resolve => setTimeout(resolve, 3000));
-              // Check if process is still alive
-              try {
-                process.kill(item.pid, 0);
-                // Still alive, force SIGKILL
-                process.kill(item.pid, "SIGKILL");
-              } catch {
-                // Process is dead
-              }
-              terminated++;
-            } catch {
-              // Process not found or permission denied
-            }
-          }
-        } else if (item.type === "temp_file" && item.path) {
-          const { promises: fs } = await import("node:fs");
-          await fs.unlink(item.path);
-          removed++;
-        }
-      } catch (_err) {}
+      const cleanupResult = await this.cleanupItem(item);
+      terminated += cleanupResult.terminated;
+      removed += cleanupResult.removed;
     }
 
     const reviewPending = report.needsReview.length;
@@ -111,7 +87,7 @@ export class OrphanReconciler {
     };
   }
 
-  private async scanOrphanPTYs(
+  private async scanOrphanPtys(
     _safeToTerminate: OrphanItem[],
     _needsReview: OrphanItem[]
   ): Promise<void> {
@@ -127,6 +103,55 @@ export class OrphanReconciler {
     // In a real implementation, this would call zellij list-sessions
     // and compare against restored session IDs
     // For now, this is a no-op
+  }
+
+  private async cleanupItem(item: OrphanItem): Promise<{ terminated: number; removed: number }> {
+    if (item.type === "temp_file" && item.path) {
+      try {
+        const { promises: fs } = await import("node:fs");
+        await fs.unlink(item.path);
+        return { terminated: 0, removed: 1 };
+      } catch {
+        return { terminated: 0, removed: 0 };
+      }
+    }
+
+    if (
+      (item.type === "pty" || item.type === "zellij_session" || item.type === "share_worker") &&
+      item.pid
+    ) {
+      return this.cleanupProcess(item.pid);
+    }
+
+    return { terminated: 0, removed: 0 };
+  }
+
+  private cleanupProcess(pid: number): Promise<{ terminated: number; removed: number }> {
+    return new Promise(resolve => {
+      try {
+        // Try SIGTERM first
+        process.kill(pid, "SIGTERM");
+
+        // Wait 3s for graceful shutdown
+        setTimeout(() => {
+          let terminated = 1;
+
+          // Check if process is still alive
+          try {
+            process.kill(pid, 0);
+            // Still alive, force SIGKILL
+            process.kill(pid, "SIGKILL");
+          } catch {
+            // Process is dead
+            terminated = 0;
+          }
+
+          resolve({ terminated, removed: 0 });
+        }, 3000);
+      } catch {
+        resolve({ terminated: 0, removed: 0 });
+      }
+    });
   }
 
   private async scanStaleTempFiles(
@@ -156,6 +181,8 @@ export class OrphanReconciler {
       } catch {
         // Recovery directory doesn't exist
       }
-    } catch (_err) {}
+    } catch (_error) {
+      // Ignore temp file scan failures; they do not block recovery.
+    }
   }
 }

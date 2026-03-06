@@ -38,10 +38,43 @@ tasks:
     cmds:
       - bun run test
 
+  test:e2e:build:
+    desc: Build runtime and desktop artifacts for E2E execution
+    cmds:
+      - bun run --cwd apps/runtime build
+      - bun run --cwd apps/desktop build
+
+  test:e2e:playwright:
+    desc: Run E2E tests with existing report + gate handling
+    cmds:
+      - |
+        set -euo pipefail
+        set +e
+        bun run test:e2e:gate | tee /tmp/e2e.log
+        E2E_EXIT=${PIPESTATUS[0]}
+        bun run scripts/gate-e2e.ts
+        GATE_EXIT=$?
+        set -e
+        if [ "$E2E_EXIT" -ne 0 ] || [ "$GATE_EXIT" -ne 0 ]; then
+          exit 1
+        fi
+
   coverage:
     desc: Run unit tests with coverage
     cmds:
       - bun run test:coverage
+
+  test:e2e:
+    desc: Canonical E2E lane with build + install + gate
+    cmds:
+      - bunx playwright install --with-deps chromium
+      - task test:e2e:build
+      - task test:e2e:playwright
+
+  governance:required-checks:
+    desc: Validate .github/required-checks.txt against workflow job names
+    cmds:
+      - bash .github/scripts/verify-required-check-names.sh
 
   docs:index:
     desc: Generate markdown document index pages
@@ -77,3 +110,55 @@ tasks:
     deps: [check]
     cmds:
       - task docs:index
+
+  devops:status:
+    desc: Show Git status, remotes, and branch state
+    cmds:
+      - git status --short --branch
+      - git remote -v
+      - git log --oneline -n 5
+
+  devops:check:
+    desc: Run shared DevOps checks for this repo (no CI pipeline)
+    cmds:
+      - bash scripts/devops-checker.sh
+
+  devops:check:ci:
+    desc: Run shared DevOps checks including CI lane
+    cmds:
+      - bash scripts/devops-checker.sh --check-ci
+
+  devops:check:ci-summary:
+    desc: Run shared DevOps checks including CI lane and emit JSON summary
+    cmds:
+      - bash scripts/devops-checker.sh --check-ci --emit-summary
+
+  devops:push:
+    desc: Push branch with shared helper and fallback remote behavior
+    cmds:
+      - bash scripts/push-heliosapp-with-fallback.sh {{.CLI_ARGS}}
+
+  devops:push:origin:
+    desc: Push using fallback remote only (skip primary)
+    cmds:
+      - bash scripts/push-heliosapp-with-fallback.sh --skip-primary {{.CLI_ARGS}}
+
+  devops:push:queue:
+    desc: Enqueue a push request for later execution
+    cmds:
+      - bash scripts/push-heliosapp-with-fallback.sh --queue-only {{.CLI_ARGS}}
+
+  devops:push:drain-queue:
+    desc: Drain queued push requests
+    cmds:
+      - bash scripts/push-heliosapp-with-fallback.sh --drain-queue {{.CLI_ARGS}}
+
+  devops:publish-worker:once:
+    desc: Run publish worker once (requires non-sandbox environment opt-in)
+    cmds:
+      - bash scripts/publish-worker.sh --once {{.CLI_ARGS}}
+
+  devops:publish-worker:loop:
+    desc: Run publish worker loop (requires non-sandbox environment opt-in)
+    cmds:
+      - bash scripts/publish-worker.sh {{.CLI_ARGS}}

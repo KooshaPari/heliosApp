@@ -53,6 +53,10 @@ export interface BusEvent {
  * Subscribes to local bus events and automatically captures them as audit events.
  * Enables forensic analysis without requiring manual instrumentation in every producer.
  */
+interface BusLike {
+  subscribe(topic: string, handler: (event: unknown) => Promise<void> | void): () => void;
+}
+
 export class BusAuditSubscriber {
   private unsubscribe: (() => void) | null = null;
 
@@ -63,12 +67,20 @@ export class BusAuditSubscriber {
    * @param bus - The local event bus instance
    * @param sink - The audit sink for persisting events
    */
-  subscribe(bus: any, sink: AuditSink): void {
+  subscribe(bus: BusLike, sink: AuditSink): void {
     // Subscribe to all topics
-    this.unsubscribe = bus.subscribe("*", async (event: BusEvent) => {
+    this.unsubscribe = bus.subscribe("*", async (event: unknown) => {
+      if (!event || typeof event !== "object") {
+        return;
+      }
+
+      const busEvent = event as BusEvent;
       try {
-        await this.handleBusEvent(event, sink);
-      } catch (_err) {}
+        await this.handleBusEvent(busEvent, sink);
+      } catch (error) {
+        // Best-effort auditing: ignore listener failures to avoid impacting bus flow.
+        this.logBusEventError(error);
+      }
     });
   }
 
@@ -156,5 +168,9 @@ export class BusAuditSubscriber {
       default:
         return lastPart || "unknown";
     }
+  }
+
+  private logBusEventError(_error: unknown): void {
+    // Intentionally ignored; failures are best-effort by design.
   }
 }

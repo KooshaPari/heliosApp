@@ -65,7 +65,7 @@ describe("binding_triple", () => {
 
       expect(binding.terminalId).toBe("terminal-1");
       expect(binding.binding).toEqual(triple);
-      expect(binding.state).toBe(BindingState.bound);
+      expect(binding.state).toBe(BindingState.Bound);
       expect(binding.createdAt).toBeGreaterThan(0);
       expect(binding.updatedAt).toBe(binding.createdAt);
     });

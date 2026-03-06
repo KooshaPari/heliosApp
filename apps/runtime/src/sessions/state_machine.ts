@@ -61,13 +61,13 @@ const LANE_TRANSITIONS: Record<LaneState, LaneState[]> = {
 };
 
 export type LaneRecord = {
-  lane_id: string;
-  workspace_id: string;
-  project_context_id: string;
-  display_name: string;
+  laneId: string;
+  workspaceId: string;
+  projectContextId: string;
+  displayName: string;
   status: LaneState;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export class LaneLifecycleError extends Error {
@@ -83,22 +83,22 @@ export class LaneLifecycleService {
   constructor(private readonly bus: LocalBus) {}
 
   async create(input: {
-    workspace_id: string;
-    project_context_id: string;
-    display_name: string;
+    workspaceId: string;
+    projectContextId: string;
+    displayName: string;
   }): Promise<LaneRecord> {
     const nowIso = new Date().toISOString();
     const laneId = `lane_${crypto.randomUUID()}`;
     const correlationId = `lane.create:${laneId}:${Date.now()}`;
 
     const lane: LaneRecord = {
-      lane_id: laneId,
-      workspace_id: input.workspace_id,
-      project_context_id: input.project_context_id,
-      display_name: input.display_name,
+      laneId,
+      workspaceId: input.workspaceId,
+      projectContextId: input.projectContextId,
+      displayName: input.displayName,
       status: "new",
-      created_at: nowIso,
-      updated_at: nowIso,
+      createdAt: nowIso,
+      updatedAt: nowIso,
     };
 
     this.lanes.set(laneId, lane);
@@ -116,7 +116,7 @@ export class LaneLifecycleService {
   list(workspaceId: string): LaneRecord[] {
     const result: LaneRecord[] = [];
     for (const lane of this.lanes.values()) {
-      if (lane.workspace_id === workspaceId) {
+      if (lane.workspaceId === workspaceId) {
         result.push({ ...lane });
       }
     }
@@ -125,7 +125,7 @@ export class LaneLifecycleService {
 
   async attach(workspaceId: string, laneId: string): Promise<LaneRecord> {
     const lane = this.getRequired(laneId);
-    if (lane.workspace_id !== workspaceId) {
+    if (lane.workspaceId !== workspaceId) {
       throw new LaneLifecycleError(`lane ${laneId} does not belong to workspace ${workspaceId}`);
     }
     if (lane.status === "running") {
@@ -138,7 +138,7 @@ export class LaneLifecycleService {
 
   async cleanup(workspaceId: string, laneId: string): Promise<LaneRecord> {
     const lane = this.getRequired(laneId);
-    if (lane.workspace_id !== workspaceId) {
+    if (lane.workspaceId !== workspaceId) {
       throw new LaneLifecycleError(`lane ${laneId} does not belong to workspace ${workspaceId}`);
     }
     if (lane.status === "closed") {
@@ -175,21 +175,37 @@ export class LaneLifecycleService {
     }
 
     lane.status = nextState;
-    lane.updated_at = new Date().toISOString();
-    await this.bus.publish({
+    lane.updatedAt = new Date().toISOString();
+    const event: {
+      id: string;
+      type: "event";
+      ts: string;
+      workspaceId: string;
+      laneId: string;
+      topic: ProtocolTopic;
+      payload: {
+        runtimeEvent: RuntimeEvent;
+        laneId: string;
+        state: LaneState;
+      };
+      correlationId?: string;
+    } = {
       id: `${laneId}:${runtimeEvent}:${Date.now()}`,
       type: "event",
       ts: new Date().toISOString(),
-      workspace_id: lane.workspace_id,
-      lane_id: lane.lane_id,
-      correlation_id: correlationId,
+      workspaceId: lane.workspaceId,
+      laneId: lane.laneId,
       topic,
       payload: {
-        runtime_event: runtimeEvent,
-        lane_id: lane.lane_id,
+        runtimeEvent,
+        laneId: lane.laneId,
         state: lane.status,
       },
-    });
+    };
+    if (correlationId !== undefined) {
+      event.correlationId = correlationId;
+    }
+    await this.bus.publish(event);
   }
 }
 

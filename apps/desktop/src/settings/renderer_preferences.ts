@@ -47,7 +47,9 @@ export class RendererPreferencesManager {
         }
         return { ...DEFAULT_PREFERENCES };
       }
-    } catch (_error) {}
+    } catch (_error) {
+      this.preferences = { ...DEFAULT_PREFERENCES };
+    }
 
     this.preferences = { ...DEFAULT_PREFERENCES };
     return { ...this.preferences };
@@ -62,7 +64,9 @@ export class RendererPreferencesManager {
       writeFileSync(this.preferencesPath, content, "utf-8");
 
       this.isDirty = false;
-    } catch (_error) {}
+    } catch (_error) {
+      this.isDirty = true;
+    }
   }
 
   getActiveRenderer(): string {
@@ -112,16 +116,18 @@ export class RendererPreferencesManager {
     const dir = dirname(this.preferencesPath);
     try {
       mkdirSync(dir, { recursive: true });
-    } catch (_error) {}
+    } catch (_error) {
+      this.isDirty = true;
+    }
   }
 
-  private isValidPreferences(obj: any): boolean {
-    return (
-      obj &&
-      typeof obj === "object" &&
-      typeof obj.activeRenderer === "string" &&
-      typeof obj.hotSwapEnabled === "boolean"
-    );
+  private isValidPreferences(obj: unknown): boolean {
+    if (!obj || typeof obj !== "object") {
+      return false;
+    }
+
+    const value = obj as Partial<RendererPreferences> & { [key: string]: unknown };
+    return typeof value.activeRenderer === "string" && typeof value.hotSwapEnabled === "boolean";
   }
 }
 

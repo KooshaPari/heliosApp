@@ -2,7 +2,23 @@
 
 import { constants, accessSync, existsSync, realpathSync } from "node:fs";
 import { isAbsolute } from "node:path";
+import type { Subprocess } from "bun";
 import type { ProjectBinding, Workspace } from "./types.js";
+
+type SpawnResult = Subprocess;
+type SpawnOptions = {
+  stdout: "pipe" | "inherit" | "ignore";
+  stderr: "pipe" | "inherit" | "ignore";
+};
+
+const spawn = Bun.spawn as unknown as (command: string[], options: SpawnOptions) => SpawnResult;
+
+function readStreamText(stream: SpawnResult["stderr"]): Promise<string> {
+  if (stream === null || typeof stream === "number") {
+    return Promise.resolve("");
+  }
+  return new Response(stream).text();
+}
 
 // Stub ID generator — uses spec 005 format proj_{ulid}
 function generateProjectId(): string {
@@ -147,32 +163,32 @@ export async function detectStaleProjects(workspace: Workspace): Promise<Workspa
 export async function gitClone(url: string, targetDir: string, timeoutMs = 120_000): Promise<void> {
   // Check git availability
   try {
-    const versionProc = (Bun as any).spawn(["git", "--version"], {
+    const versionProc = spawn(["git", "--version"], {
       stdout: "pipe",
       stderr: "pipe",
     });
     await versionProc.exited;
-    if ((versionProc as any).exitCode !== 0) {
+    if (versionProc.exitCode !== 0) {
       throw new Error("git binary not functional");
     }
   } catch {
     throw new Error("git is not available on this system. Install git to clone repositories.");
   }
 
-  const proc = (Bun as any).spawn(["git", "clone", url, targetDir], {
+  const proc = spawn(["git", "clone", url, targetDir], {
     stdout: "pipe",
     stderr: "pipe",
   });
 
   const timer = setTimeout(() => {
-    (proc as any).kill();
+    proc.kill();
   }, timeoutMs);
 
   const exitCode = await proc.exited;
   clearTimeout(timer);
 
   if (exitCode !== 0) {
-    const stderr = await new Response(proc.stderr).text();
+    const stderr = await readStreamText(proc.stderr);
     throw new Error(`git clone failed (exit ${exitCode}): ${stderr.trim()}`);
   }
 

@@ -5,8 +5,24 @@
  * renderer backend.
  */
 
+import type { Subprocess } from "bun";
 import type { RendererRegistry } from "../registry.js";
 import { GhosttyBackend } from "./backend.js";
+
+type SpawnResult = Subprocess;
+type SpawnOptions = {
+  stdout: "pipe" | "inherit" | "ignore";
+  stderr: "pipe" | "inherit" | "ignore";
+};
+
+const spawn = Bun.spawn as unknown as (command: string[], options: SpawnOptions) => SpawnResult;
+
+function readStreamText(stream: SpawnResult["stdout"]): Promise<string> {
+  if (stream === null || typeof stream === "number") {
+    return Promise.resolve("");
+  }
+  return new Response(stream).text();
+}
 
 // ---------------------------------------------------------------------------
 // Re-exports
@@ -51,12 +67,12 @@ export type { PtyWriter, GhosttyInputEvent, InputEventListener } from "./input.j
  */
 export async function isGhosttyAvailable(binaryPath = "ghostty"): Promise<boolean> {
   try {
-    const proc = (Bun as any).spawn(["which", binaryPath], {
-      stdout: "ignore",
-      stderr: "ignore",
+    const proc = spawn(["which", binaryPath], {
+      stdout: "pipe",
+      stderr: "pipe",
     });
-    await proc.exited;
-    return (proc as any).exitCode === 0;
+    const exitCode = await proc.exited;
+    return exitCode === 0;
   } catch {
     return false;
   }
@@ -69,11 +85,11 @@ export async function isGhosttyAvailable(binaryPath = "ghostty"): Promise<boolea
  */
 export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<string> {
   try {
-    const proc = (Bun as any).spawn([binaryPath, "--version"], {
+    const proc = spawn([binaryPath, "--version"], {
       stdout: "pipe",
-      stderr: "ignore",
+      stderr: "pipe",
     });
-    const text = await new Response(proc.stdout).text();
+    const text = await readStreamText(proc.stdout);
     await proc.exited;
     const trimmed = text.trim();
     return trimmed.length > 0 ? trimmed : "unknown";
