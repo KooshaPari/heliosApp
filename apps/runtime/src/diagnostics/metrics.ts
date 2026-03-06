@@ -45,7 +45,7 @@ export class RuntimeMetrics {
   endTimer(
     metric: RuntimeMetricName,
     key: string,
-    tags?: Record<string, string>,
+    tags?: Record<string, string>
   ): RuntimeMetricSample | null {
     const timerId = this.timerKey(metric, key);
     const mark = this.timers.get(timerId);
@@ -61,7 +61,7 @@ export class RuntimeMetrics {
     metric: RuntimeMetricName,
     value: number,
     unit: MetricUnit,
-    tags?: Record<string, string>,
+    tags?: Record<string, string>
   ): RuntimeMetricSample {
     const sample: RuntimeMetricSample = {
       metric,
@@ -87,7 +87,7 @@ export class RuntimeMetrics {
 
     const summaries: RuntimeMetricSummary[] = [];
     for (const [metric, items] of byMetric.entries()) {
-      const sortedValues = items.map((item) => item.value).sort((a, b) => a - b);
+      const sortedValues = items.map(item => item.value).sort((a, b) => a - b);
       const unit = items[0].unit;
       summaries.push({
         metric,

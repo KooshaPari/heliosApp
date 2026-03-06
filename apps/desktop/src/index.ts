@@ -139,7 +139,7 @@ export class EditorlessControlPlane {
     options?: {
       forceError?: boolean;
       forceRollbackError?: boolean;
-    },
+    }
   ): Promise<{
     committed: boolean;
     rolledBack: boolean;
