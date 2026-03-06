@@ -64,14 +64,12 @@ export type BusState = {
 // InMemoryLocalBus — protocol lifecycle implementation
 // ---------------------------------------------------------------------------
 
-// Lifecycle state machine: track per-lane/session/correlation lifecycle ordering.
 const _LIFECYCLE_SEQUENCES: Record<string, string[]> = {
   "session.attach": ["session.attach.started", "session.attached", "session.attach.failed"],
   "lane.create": ["lane.create.started", "lane.created", "lane.create.failed"],
   "terminal.spawn": ["terminal.spawn.started", "terminal.spawned", "terminal.spawn.failed"],
 };
 
-// Topics that are terminal within a lifecycle (end the sequence)
 const TERMINAL_TOPICS = new Set([
   "session.attached",
   "session.attach.failed",
@@ -81,7 +79,6 @@ const TERMINAL_TOPICS = new Set([
   "terminal.spawn.failed",
 ]);
 
-// Topics that are start topics for their sequence
 const START_TOPICS = new Set([
   "session.attach.started",
   "lane.create.started",
@@ -100,7 +97,6 @@ export class InMemoryLocalBus implements ProtocolBus {
   > = new Map();
   private readonly metricSamples: MetricSample[] = [];
   private state: BusState = { session: "detached" };
-  // Track which correlation IDs have seen which start topics
   private readonly lifecycleProgress: Map<string, Set<string>> = new Map();
 
   getEvents(): LocalBusEnvelope[] {
