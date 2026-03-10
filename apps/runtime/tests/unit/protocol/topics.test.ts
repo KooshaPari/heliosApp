@@ -66,11 +66,9 @@ describe('LocalBus — event fan-out', () => {
         received.push(2);
       })
     );
-    bus.subscribe("snapshot.test", () => {
+    bus.subscribe('snapshot.test', () => {
       received.push(3);
     });
-    unsub2 = bus.subscribe('snapshot.test', () => { received.push(2); });
-    bus.subscribe('snapshot.test', () => { received.push(3); });
 
     const evt = createEvent('snapshot.test', null);
     await bus.publish(evt);
