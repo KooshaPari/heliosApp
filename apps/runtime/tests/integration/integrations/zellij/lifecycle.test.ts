@@ -6,7 +6,10 @@
  */
 
 import { describe, expect, it, mock, beforeEach } from "bun:test";
-import { ZellijSessionManager, sessionNameForLane } from "../../../../src/integrations/zellij/session.js";
+import {
+  ZellijSessionManager,
+  sessionNameForLane,
+} from "../../../../src/integrations/zellij/session.js";
 import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
 import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
 import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
@@ -19,7 +22,11 @@ import {
 } from "../../../../src/integrations/zellij/events.js";
 import { reconcile } from "../../../../src/integrations/zellij/reconciliation.js";
 import type { ZellijCli } from "../../../../src/integrations/zellij/cli.js";
-import type { CliResult, ZellijSession, PtyManagerInterface } from "../../../../src/integrations/zellij/types.js";
+import type {
+  CliResult,
+  ZellijSession,
+  PtyManagerInterface,
+} from "../../../../src/integrations/zellij/types.js";
 
 // ---------------------------------------------------------------------------
 // Fake CLI that tracks sessions in memory
@@ -75,7 +82,9 @@ function makeEventBus(): EventBus & { events: MuxEvent[] } {
   const events: MuxEvent[] = [];
   return {
     events,
-    publish: mock(async (e: MuxEvent) => { events.push(e); }),
+    publish: mock(async (e: MuxEvent) => {
+      events.push(e);
+    }),
   };
 }
 
@@ -200,9 +209,7 @@ describe("Integration: reattach", () => {
 
     // Verify reattach event was emitted
     await new Promise((r) => setTimeout(r, 20));
-    const reattachEvents = bus.events.filter(
-      (e) => e.type === MuxEventType.SESSION_REATTACHED,
-    );
+    const reattachEvents = bus.events.filter((e) => e.type === MuxEventType.SESSION_REATTACHED);
     expect(reattachEvents).toHaveLength(1);
 
     // PTYs should have been re-bound (one default pane from refreshTopology)

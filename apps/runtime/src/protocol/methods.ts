@@ -4,7 +4,7 @@
  * Provides single-handler binding per method name with strict validation.
  */
 
-import type { CommandEnvelope, ResponseEnvelope } from './types.js';
+import type { CommandEnvelope, ResponseEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Types

@@ -10,7 +10,7 @@ describe("TerminalRegistry", () => {
       workspace_id: "ws-1",
       lane_id: "lane-1",
       session_id: "sess-1",
-      title: "Alpha"
+      title: "Alpha",
     });
 
     expect(terminal.state).toBe("spawning");
@@ -24,22 +24,22 @@ describe("TerminalRegistry", () => {
       terminal_id: "t-2",
       workspace_id: "ws-1",
       lane_id: "lane-1",
-      session_id: "sess-1"
+      session_id: "sess-1",
     });
 
     expect(
       registry.isOwnedBy("t-2", {
         workspace_id: "ws-1",
         lane_id: "lane-1",
-        session_id: "sess-1"
-      })
+        session_id: "sess-1",
+      }),
     ).toBe(true);
     expect(
       registry.isOwnedBy("t-2", {
         workspace_id: "ws-1",
         lane_id: "lane-2",
-        session_id: "sess-1"
-      })
+        session_id: "sess-1",
+      }),
     ).toBe(false);
   });
 
@@ -49,13 +49,13 @@ describe("TerminalRegistry", () => {
       terminal_id: "t-3",
       workspace_id: "ws-1",
       lane_id: "lane-1",
-      session_id: "sess-1"
+      session_id: "sess-1",
     });
     registry.spawn({
       terminal_id: "t-4",
       workspace_id: "ws-1",
       lane_id: "lane-1",
-      session_id: "sess-1"
+      session_id: "sess-1",
     });
 
     registry.removeBySession("sess-1");
@@ -71,14 +71,14 @@ describe("TerminalRegistry", () => {
       terminal_id: "t-5",
       workspace_id: "ws-1",
       lane_id: "lane-1",
-      session_id: "sess-1"
+      session_id: "sess-1",
     });
 
     registry.spawn({
       terminal_id: "t-5",
       workspace_id: "ws-1",
       lane_id: "lane-2",
-      session_id: "sess-2"
+      session_id: "sess-2",
     });
 
     expect(registry.listBySession("sess-1")).toHaveLength(0);

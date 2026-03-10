@@ -55,7 +55,7 @@ export class ContextPropagator {
       successful: [],
       failed: [],
       timed_out: [],
-      duration_ms: 0
+      duration_ms: 0,
     };
 
     const propagationPromises: Promise<void>[] = [];
@@ -64,7 +64,7 @@ export class ContextPropagator {
       const tabPromise = this.propagateTabWithTimeout(
         tab,
         context,
-        this.propagationAbortController.signal
+        this.propagationAbortController.signal,
       )
         .then((success) => {
           if (success) {
@@ -107,7 +107,7 @@ export class ContextPropagator {
   private async propagateTabWithTimeout(
     tab: TabSurface,
     context: ActiveContext | null,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): Promise<boolean> {
     return Promise.race([
       tab.onContextChange(context).then(() => true),
@@ -120,7 +120,7 @@ export class ContextPropagator {
           clearTimeout(timeoutId);
           reject(new Error("Propagation cancelled"));
         });
-      })
+      }),
     ]);
   }
 

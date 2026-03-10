@@ -76,7 +76,12 @@ export class LaneRegistry {
     if (!existing) {
       throw new LaneNotFoundError(laneId);
     }
-    const updated: LaneRecord = { ...existing, ...patch, laneId: existing.laneId, updatedAt: new Date().toISOString() };
+    const updated: LaneRecord = {
+      ...existing,
+      ...patch,
+      laneId: existing.laneId,
+      updatedAt: new Date().toISOString(),
+    };
     // If workspaceId changed, update index
     if (patch.workspaceId !== undefined && patch.workspaceId !== existing.workspaceId) {
       this.removeFromWorkspaceIndex(existing.workspaceId, laneId);
@@ -104,9 +109,7 @@ export class LaneRegistry {
   }
 
   getActive(): LaneRecord[] {
-    return [...this.lanes.values()]
-      .filter((r) => r.state !== "closed")
-      .map((r) => ({ ...r }));
+    return [...this.lanes.values()].filter((r) => r.state !== "closed").map((r) => ({ ...r }));
   }
 
   private addToWorkspaceIndex(workspaceId: string, laneId: string): void {

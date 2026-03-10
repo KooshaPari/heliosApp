@@ -28,11 +28,14 @@ const CONFIG: RendererConfig = {
   maxDimensions: { cols: 200, rows: 50 },
 };
 
-function createMockAdapter(id: string, opts?: {
-  initFail?: boolean;
-  startFail?: boolean;
-  stopFail?: boolean;
-}): RendererAdapter {
+function createMockAdapter(
+  id: string,
+  opts?: {
+    initFail?: boolean;
+    startFail?: boolean;
+    stopFail?: boolean;
+  },
+): RendererAdapter {
   let state: RendererState = "uninitialized";
   return {
     id,
@@ -171,11 +174,15 @@ describe("switchRenderer", () => {
     const unboundPtys: string[] = [];
     const from = {
       ...createMockAdapter("ghostty"),
-      unbindStream: (ptyId: string) => { unboundPtys.push(ptyId); },
+      unbindStream: (ptyId: string) => {
+        unboundPtys.push(ptyId);
+      },
     };
     const to = {
       ...createMockAdapter("rio"),
-      bindStream: (ptyId: string) => { boundPtys.push(ptyId); },
+      bindStream: (ptyId: string) => {
+        boundPtys.push(ptyId);
+      },
     };
     const { reg, sm } = setupRegistry(from, to);
 

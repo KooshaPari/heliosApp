@@ -3,7 +3,12 @@
  */
 
 import { describe, test, expect, beforeEach } from "bun:test";
-import { GhosttyBackend, GhosttyNotInitializedError, GhosttyNotRunningError, GhosttyAlreadyInitializedError } from "../backend.js";
+import {
+  GhosttyBackend,
+  GhosttyNotInitializedError,
+  GhosttyNotRunningError,
+  GhosttyAlreadyInitializedError,
+} from "../backend.js";
 import type { RendererConfig, RenderSurface } from "../../adapter.js";
 
 const TEST_CONFIG: RendererConfig = {

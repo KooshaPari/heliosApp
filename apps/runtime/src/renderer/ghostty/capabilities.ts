@@ -62,9 +62,7 @@ let cachedCapabilities: RendererCapabilities | undefined;
  *
  * @param forceRefresh - If true, discard the cache and re-detect.
  */
-export async function detectCapabilities(
-  forceRefresh = false,
-): Promise<RendererCapabilities> {
+export async function detectCapabilities(forceRefresh = false): Promise<RendererCapabilities> {
   if (cachedCapabilities !== undefined && !forceRefresh) {
     return cachedCapabilities;
   }

@@ -1,11 +1,4 @@
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  mock,
-} from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import { ZellijCli } from "../cli.js";
 import { ZellijNotFoundError, ZellijVersionError } from "../errors.js";
 
@@ -83,9 +76,7 @@ describe("ZellijCli", () => {
 
       const cli = new ZellijCli();
 
-      await expect(cli.checkAvailability()).rejects.toThrow(
-        ZellijVersionError
-      );
+      await expect(cli.checkAvailability()).rejects.toThrow(ZellijVersionError);
     });
 
     it("returns available=false on non-zero exit code", async () => {
@@ -96,7 +87,6 @@ describe("ZellijCli", () => {
       const result = await cli.checkAvailability();
 
       expect(result.available).toBe(false);
-
     });
   });
 
@@ -140,9 +130,7 @@ describe("ZellijCli", () => {
 
     it("returns empty array when no sessions", async () => {
       // @ts-expect-error mock override
-      Bun.spawn = mock(() =>
-        makeMockProc("No active zellij sessions found.", "", 1)
-      );
+      Bun.spawn = mock(() => makeMockProc("No active zellij sessions found.", "", 1));
 
       const cli = new ZellijCli();
       const sessions = await cli.listSessions();

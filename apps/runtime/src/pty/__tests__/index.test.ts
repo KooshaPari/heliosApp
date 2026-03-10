@@ -91,15 +91,9 @@ describe("PtyManager", () => {
 
     pidsToCleanup.push(record.pid);
 
-    expect(() => mgr.resize(record.ptyId, 0, 24)).toThrow(
-      "Invalid PTY dimensions",
-    );
-    expect(() => mgr.resize(record.ptyId, 80, -1)).toThrow(
-      "Invalid PTY dimensions",
-    );
-    expect(() => mgr.resize(record.ptyId, 10001, 24)).toThrow(
-      "Invalid PTY dimensions",
-    );
+    expect(() => mgr.resize(record.ptyId, 0, 24)).toThrow("Invalid PTY dimensions");
+    expect(() => mgr.resize(record.ptyId, 80, -1)).toThrow("Invalid PTY dimensions");
+    expect(() => mgr.resize(record.ptyId, 10001, 24)).toThrow("Invalid PTY dimensions");
   });
 
   it("resize rejects on stopped PTY", async () => {
@@ -150,9 +144,7 @@ describe("PtyManager", () => {
 
   it("writeInput throws for nonexistent PTY", () => {
     const mgr = new PtyManager();
-    expect(() =>
-      mgr.writeInput("nonexistent", new Uint8Array([65])),
-    ).toThrow("not found");
+    expect(() => mgr.writeInput("nonexistent", new Uint8Array([65]))).toThrow("not found");
   });
 
   it("reconcileOrphans completes without error", async () => {

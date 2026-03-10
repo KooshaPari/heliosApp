@@ -128,9 +128,7 @@ describe("LaneRegistry (FR-008-001)", () => {
     reg.register(makeRecord({ laneId: "cap1", state: "ready" }));
     reg.register(makeRecord({ laneId: "cap2", state: "running" }));
     reg.register(makeRecord({ laneId: "cap3", state: "provisioning" }));
-    expect(() => reg.register(makeRecord({ laneId: "cap4" }))).toThrow(
-      LaneCapacityExceededError,
-    );
+    expect(() => reg.register(makeRecord({ laneId: "cap4" }))).toThrow(LaneCapacityExceededError);
   });
 
   test("closed lanes do not count toward capacity", () => {

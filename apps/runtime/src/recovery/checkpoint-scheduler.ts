@@ -83,10 +83,7 @@ export class CheckpointScheduler {
   private adjustInterval(): void {
     if (this.lastWriteDurationMs > MIN_WRITE_TIME_FOR_BACKOFF) {
       // Backoff: increase interval
-      this.currentInterval = Math.min(
-        this.currentInterval * 2,
-        MAX_INTERVAL_MS
-      );
+      this.currentInterval = Math.min(this.currentInterval * 2, MAX_INTERVAL_MS);
     } else if (this.lastWriteDurationMs < MAX_WRITE_TIME_FOR_RESTORE) {
       // Restore: decrease interval back to default
       this.currentInterval = DEFAULT_CHECKPOINT_INTERVAL_MS;
@@ -112,7 +109,7 @@ export class CheckpointScheduler {
     await Promise.race([
       writePromise,
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Checkpoint timeout")), FINAL_CHECKPOINT_TIMEOUT)
+        setTimeout(() => reject(new Error("Checkpoint timeout")), FINAL_CHECKPOINT_TIMEOUT),
       ),
     ]).catch((err) => {
       console.error("Final checkpoint on shutdown failed:", err);

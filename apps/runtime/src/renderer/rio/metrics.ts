@@ -46,10 +46,7 @@ export class RioMetrics {
   private readonly _windowSize: number;
   private readonly _intervalMs: number;
 
-  constructor(
-    windowSize: number = DEFAULT_WINDOW_SIZE,
-    intervalMs: number = DEFAULT_INTERVAL_MS,
-  ) {
+  constructor(windowSize: number = DEFAULT_WINDOW_SIZE, intervalMs: number = DEFAULT_INTERVAL_MS) {
     this._windowSize = windowSize;
     this._intervalMs = intervalMs;
   }

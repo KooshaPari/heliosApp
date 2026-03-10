@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import {
-  SafeMode,
-  CrashLoopDetector,
-  type SafeModeConfig,
-} from "../safe-mode.js";
+import { SafeMode, CrashLoopDetector, type SafeModeConfig } from "../safe-mode.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { promises as fs } from "fs";
 import path from "path";

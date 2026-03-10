@@ -34,7 +34,7 @@ export class TabBar {
     this.config = {
       onTabSelected: config.onTabSelected ?? (() => {}),
       onTabReordered: config.onTabReordered ?? (() => {}),
-      onTabPinned: config.onTabPinned ?? (() => {})
+      onTabPinned: config.onTabPinned ?? (() => {}),
     };
   }
 
@@ -81,10 +81,7 @@ export class TabBar {
     const tabIds = new Set(this.tabs.map((t) => t.getTabId()));
     const newOrderSet = new Set(newOrder);
 
-    if (
-      newOrder.length !== this.tabs.length ||
-      ![...tabIds].every((id) => newOrderSet.has(id))
-    ) {
+    if (newOrder.length !== this.tabs.length || ![...tabIds].every((id) => newOrderSet.has(id))) {
       console.error("Invalid tab order: missing or extra tab IDs");
       return;
     }
@@ -291,9 +288,7 @@ export class TabBar {
   private focusTab(tabId: string): void {
     if (!this.container) return;
 
-    const tabEl = this.container.querySelector(
-      `[data-tab-id="${tabId}"]`
-    ) as HTMLElement;
+    const tabEl = this.container.querySelector(`[data-tab-id="${tabId}"]`) as HTMLElement;
 
     if (tabEl) {
       tabEl.setAttribute("tabindex", "0");

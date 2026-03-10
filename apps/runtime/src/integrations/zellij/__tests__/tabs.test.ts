@@ -102,15 +102,11 @@ describe("ZellijTabManager", () => {
     it("throws TabNotFoundError for non-existent tab", async () => {
       topology.initializeTopology("test-session");
 
-      expect(tabManager.closeTab("test-session", 999)).rejects.toThrow(
-        TabNotFoundError,
-      );
+      expect(tabManager.closeTab("test-session", 999)).rejects.toThrow(TabNotFoundError);
     });
 
     it("throws TabNotFoundError for non-existent session", async () => {
-      expect(tabManager.closeTab("no-session", 0)).rejects.toThrow(
-        TabNotFoundError,
-      );
+      expect(tabManager.closeTab("no-session", 0)).rejects.toThrow(TabNotFoundError);
     });
   });
 
@@ -128,9 +124,7 @@ describe("ZellijTabManager", () => {
     it("throws TabNotFoundError for non-existent tab", async () => {
       topology.initializeTopology("test-session");
 
-      expect(tabManager.switchTab("test-session", 999)).rejects.toThrow(
-        TabNotFoundError,
-      );
+      expect(tabManager.switchTab("test-session", 999)).rejects.toThrow(TabNotFoundError);
     });
   });
 

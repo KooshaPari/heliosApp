@@ -88,9 +88,7 @@ describe("MCP Bridge Adapter", () => {
       await adapter.init(config);
 
       const events = bus.getEvents();
-      const discoveryEvents = events.filter(
-        (e) => e.topic === "provider.mcp.tool.discovered"
-      );
+      const discoveryEvents = events.filter((e) => e.topic === "provider.mcp.tool.discovered");
       expect(discoveryEvents.length).toBeGreaterThan(0);
     });
   });
@@ -145,7 +143,7 @@ describe("MCP Bridge Adapter", () => {
           toolName: "read_file",
           arguments: { path: "/tmp/test.txt" },
         },
-        "corr-123"
+        "corr-123",
       );
 
       expect(result.isError).toBe(false);
@@ -160,7 +158,7 @@ describe("MCP Bridge Adapter", () => {
           toolName: "read_file",
           arguments: { path: "/tmp/test.txt" },
         },
-        correlationId
+        correlationId,
       );
 
       const events = bus.getEvents();
@@ -176,13 +174,11 @@ describe("MCP Bridge Adapter", () => {
           toolName: "read_file",
           arguments: { path: "/tmp/test.txt" },
         },
-        "corr-123"
+        "corr-123",
       );
 
       const events = bus.getEvents();
-      const completedEvent = events.find(
-        (e) => e.topic === "provider.mcp.tool.executed"
-      );
+      const completedEvent = events.find((e) => e.topic === "provider.mcp.tool.executed");
       expect(completedEvent).toBeDefined();
       expect(completedEvent?.payload?.toolName).toBe("read_file");
       expect(completedEvent?.payload?.duration).toBeGreaterThanOrEqual(0);
@@ -197,8 +193,8 @@ describe("MCP Bridge Adapter", () => {
             toolName: "read_file",
             arguments: { path: "/tmp/test.txt" },
           },
-          "corr-123"
-        )
+          "corr-123",
+        ),
       ).rejects.toThrow(/unavailable/i);
     });
 
@@ -209,8 +205,8 @@ describe("MCP Bridge Adapter", () => {
             toolName: "unknown_tool",
             arguments: {},
           },
-          "corr-123"
-        )
+          "corr-123",
+        ),
       ).rejects.toThrow(/not found/i);
     });
 
@@ -223,8 +219,8 @@ describe("MCP Bridge Adapter", () => {
               toolName: "read_file",
               arguments: { path: `/file${i}.txt` },
             },
-            `corr-${i}`
-          )
+            `corr-${i}`,
+          ),
         );
       }
 
@@ -332,8 +328,8 @@ describe("MCP Bridge Adapter", () => {
             toolName: "read_file",
             arguments: { path: "/tmp/test.txt" },
           },
-          "corr-123"
-        )
+          "corr-123",
+        ),
       ).rejects.toThrow(/unavailable/i);
     });
 
@@ -344,7 +340,7 @@ describe("MCP Bridge Adapter", () => {
           toolName: "read_file",
           arguments: { path: "/tmp/test.txt" },
         },
-        "corr-123"
+        "corr-123",
       );
 
       // Terminate immediately
@@ -373,7 +369,7 @@ describe("MCP Bridge Adapter", () => {
             toolName: "nonexistent_tool",
             arguments: {},
           },
-          "corr-123"
+          "corr-123",
         )
         .catch((e) => e);
 
@@ -389,7 +385,7 @@ describe("MCP Bridge Adapter", () => {
             toolName: "nonexistent_tool",
             arguments: {},
           },
-          "corr-123"
+          "corr-123",
         );
       } catch (e) {
         // Expected
@@ -421,13 +417,11 @@ describe("MCP Bridge Adapter", () => {
           toolName: "read_file",
           arguments: { path: "/tmp/test.txt" },
         },
-        correlationId
+        correlationId,
       );
 
       const events = bus.getEvents();
-      const toolEvents = events.filter((e) =>
-        e.topic?.startsWith("provider.mcp.tool")
-      );
+      const toolEvents = events.filter((e) => e.topic?.startsWith("provider.mcp.tool"));
 
       toolEvents.forEach((event) => {
         expect(event.payload?.correlationId).toBe(correlationId);
@@ -448,18 +442,12 @@ describe("MCP Bridge Adapter", () => {
 
     it("should support concurrent tool executions without interference", async () => {
       const results = await Promise.all([
-        adapter.execute(
-          { toolName: "read_file", arguments: { path: "/file1.txt" } },
-          "corr-1"
-        ),
+        adapter.execute({ toolName: "read_file", arguments: { path: "/file1.txt" } }, "corr-1"),
         adapter.execute(
           { toolName: "write_file", arguments: { path: "/file2.txt", content: "test" } },
-          "corr-2"
+          "corr-2",
         ),
-        adapter.execute(
-          { toolName: "list_directory", arguments: { path: "/tmp" } },
-          "corr-3"
-        ),
+        adapter.execute({ toolName: "list_directory", arguments: { path: "/tmp" } }, "corr-3"),
       ]);
 
       expect(results).toHaveLength(3);
@@ -472,16 +460,13 @@ describe("MCP Bridge Adapter", () => {
       // Execute successful tool
       const success = await adapter.execute(
         { toolName: "read_file", arguments: { path: "/file.txt" } },
-        "corr-1"
+        "corr-1",
       );
       expect(success.isError).toBe(false);
 
       // Execute failing tool
       try {
-        await adapter.execute(
-          { toolName: "unknown_tool", arguments: {} },
-          "corr-2"
-        );
+        await adapter.execute({ toolName: "unknown_tool", arguments: {} }, "corr-2");
       } catch (e) {
         // Expected
       }
@@ -489,7 +474,7 @@ describe("MCP Bridge Adapter", () => {
       // Execute another successful tool
       const success2 = await adapter.execute(
         { toolName: "list_directory", arguments: { path: "/tmp" } },
-        "corr-3"
+        "corr-3",
       );
       expect(success2.isError).toBe(false);
     });

@@ -27,7 +27,7 @@ class MockPolicyGate implements PolicyGate {
 
   async evaluate(
     _action: string,
-    _context: Record<string, unknown>
+    _context: Record<string, unknown>,
   ): Promise<{ allowed: boolean; reason?: string }> {
     if (this.shouldDeny) {
       return {
@@ -206,10 +206,7 @@ describe("ACP Client Adapter", () => {
     it("should propagate correlation ID in response", async () => {
       const correlationId = "unique-corr-id-456";
 
-      const result = await adapter.execute(
-        { prompt: "Test" },
-        correlationId
-      );
+      const result = await adapter.execute({ prompt: "Test" }, correlationId);
 
       expect(result).toBeDefined();
 
@@ -232,9 +229,9 @@ describe("ACP Client Adapter", () => {
     it("should reject execution before init", async () => {
       const freshAdapter = new ACPClientAdapter(bus, policyGate);
 
-      await expect(
-        freshAdapter.execute({ prompt: "Test" }, "corr-123")
-      ).rejects.toThrow(/unavailable/i);
+      await expect(freshAdapter.execute({ prompt: "Test" }, "corr-123")).rejects.toThrow(
+        /unavailable/i,
+      );
     });
 
     it("should include token usage in response", async () => {
@@ -262,9 +259,9 @@ describe("ACP Client Adapter", () => {
     it("should deny execution when policy gate denies", async () => {
       policyGate.setShouldDeny(true, "Access denied");
 
-      await expect(
-        adapter.execute({ prompt: "Test" }, "corr-123")
-      ).rejects.toThrow(/policy denied/i);
+      await expect(adapter.execute({ prompt: "Test" }, "corr-123")).rejects.toThrow(
+        /policy denied/i,
+      );
     });
 
     it("should emit policy denied event", async () => {
@@ -351,9 +348,7 @@ describe("ACP Client Adapter", () => {
     it("should reject cancel before init", async () => {
       const freshAdapter = new ACPClientAdapter(bus, policyGate);
 
-      await expect(freshAdapter.cancel("task-123")).rejects.toThrow(
-        /unavailable/i
-      );
+      await expect(freshAdapter.cancel("task-123")).rejects.toThrow(/unavailable/i);
     });
   });
 
@@ -406,9 +401,7 @@ describe("ACP Client Adapter", () => {
     it("should prevent execution after termination", async () => {
       await adapter.terminate();
 
-      await expect(
-        adapter.execute({ prompt: "Test" }, "corr-123")
-      ).rejects.toThrow(/unavailable/i);
+      await expect(adapter.execute({ prompt: "Test" }, "corr-123")).rejects.toThrow(/unavailable/i);
     });
   });
 
@@ -431,9 +424,7 @@ describe("ACP Client Adapter", () => {
       await adapter.execute({ prompt: "Test" }, correlationId);
 
       const events = bus.getEvents();
-      const relevantEvents = events.filter((e) =>
-        e.topic?.startsWith("provider.acp.execute")
-      );
+      const relevantEvents = events.filter((e) => e.topic?.startsWith("provider.acp.execute"));
 
       relevantEvents.forEach((event) => {
         expect(event.payload?.correlationId).toBe(correlationId);
@@ -475,9 +466,7 @@ describe("ACP Client Adapter", () => {
     it("should throw NormalizedProviderError on policy denial", async () => {
       policyGate.setShouldDeny(true);
 
-      const error = await adapter
-        .execute({ prompt: "Test" }, "corr-123")
-        .catch((e) => e);
+      const error = await adapter.execute({ prompt: "Test" }, "corr-123").catch((e) => e);
 
       expect(error).toBeInstanceOf(NormalizedProviderError);
       expect((error as NormalizedProviderError).code).toBe("PROVIDER_POLICY_DENIED");

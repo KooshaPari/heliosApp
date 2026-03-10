@@ -91,7 +91,10 @@ describe("Watchdog", () => {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     const recordPath = path.join(tempDir, "recovery", "last-crash.json");
-    const exists = await fs.access(recordPath).then(() => true).catch(() => false);
+    const exists = await fs
+      .access(recordPath)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(true);
   });
 

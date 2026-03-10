@@ -11,7 +11,7 @@ const sessions = new Map<string, MuxerSession>();
 let nextId = 0;
 
 export async function handleMuxerCommand(
-  envelope: LocalBusEnvelope
+  envelope: LocalBusEnvelope,
 ): Promise<Record<string, unknown>> {
   const method = envelope.method ?? "";
   const payload = (envelope.payload ?? {}) as Record<string, unknown>;

@@ -73,7 +73,7 @@ export class SnapshotCapture {
 
       onSnapshot(snapshot);
     } catch (err) {
-      console.error('[SnapshotCapture] Failed to capture snapshot:', err);
+      console.error("[SnapshotCapture] Failed to capture snapshot:", err);
     }
   }
 
@@ -82,6 +82,6 @@ export class SnapshotCapture {
    */
   private getTerminalBuffer(_sessionId: string): string {
     // TODO: Integrate with actual session terminal state
-    return '';
+    return "";
   }
 }

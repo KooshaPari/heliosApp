@@ -27,26 +27,33 @@ export const ChatInput: Component<ChatInputProps> = (props) => {
   };
 
   return (
-    <div style={{
-      padding: "12px 16px",
-      "border-top": "1px solid #313244",
-      "background-color": "#1e1e2e",
-    }}>
-      <div style={{
-        display: "flex",
-        "align-items": "flex-end",
-        gap: "8px",
-        "background-color": "#313244",
-        "border-radius": "12px",
-        padding: "8px 12px",
-      }}>
-        <div style={{
-          "font-size": "12px",
-          color: "#6c7086",
-          "padding-bottom": "4px",
-          "white-space": "nowrap",
-        }}>
-          {props.activeModel.split("/").pop()?.split("-").slice(0, 2).join(" ") ?? props.activeModel}
+    <div
+      style={{
+        padding: "12px 16px",
+        "border-top": "1px solid #313244",
+        "background-color": "#1e1e2e",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          "align-items": "flex-end",
+          gap: "8px",
+          "background-color": "#313244",
+          "border-radius": "12px",
+          padding: "8px 12px",
+        }}
+      >
+        <div
+          style={{
+            "font-size": "12px",
+            color: "#6c7086",
+            "padding-bottom": "4px",
+            "white-space": "nowrap",
+          }}
+        >
+          {props.activeModel.split("/").pop()?.split("-").slice(0, 2).join(" ") ??
+            props.activeModel}
         </div>
         <textarea
           value={text()}
@@ -68,24 +75,27 @@ export const ChatInput: Component<ChatInputProps> = (props) => {
             "max-height": "160px",
           }}
         />
-        <Show when={props.isStreaming} fallback={
-          <button
-            onClick={handleSend}
-            disabled={!text().trim()}
-            style={{
-              background: text().trim() ? "#89b4fa" : "#45475a",
-              border: "none",
-              color: text().trim() ? "#1e1e2e" : "#6c7086",
-              "border-radius": "8px",
-              padding: "6px 12px",
-              cursor: text().trim() ? "pointer" : "default",
-              "font-size": "14px",
-              "font-weight": "bold",
-            }}
-          >
-            Send
-          </button>
-        }>
+        <Show
+          when={props.isStreaming}
+          fallback={
+            <button
+              onClick={handleSend}
+              disabled={!text().trim()}
+              style={{
+                background: text().trim() ? "#89b4fa" : "#45475a",
+                border: "none",
+                color: text().trim() ? "#1e1e2e" : "#6c7086",
+                "border-radius": "8px",
+                padding: "6px 12px",
+                cursor: text().trim() ? "pointer" : "default",
+                "font-size": "14px",
+                "font-weight": "bold",
+              }}
+            >
+              Send
+            </button>
+          }
+        >
           <button
             onClick={() => props.onCancel?.()}
             style={{

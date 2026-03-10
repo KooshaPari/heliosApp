@@ -62,11 +62,7 @@ export class PtyDetector {
   > {
     try {
       // Use ps to list processes with PTY
-      const result = await execCommand("ps", [
-        "-ef",
-        "-o",
-        "pid,tty,etime,comm",
-      ]);
+      const result = await execCommand("ps", ["-ef", "-o", "pid,tty,etime,comm"]);
 
       if (result.code !== 0) {
         console.warn("ps command failed:", result.stderr);
@@ -137,10 +133,7 @@ export class PtyDetector {
     }
   }
 
-  private isSystemProcess(proc: {
-    pid: number;
-    command: string;
-  }): boolean {
+  private isSystemProcess(proc: { pid: number; command: string }): boolean {
     // Filter out common system processes that typically have PTY
     const systemPatterns = [
       /^(kernel_task|launchd|sshd|bash|sh|zsh|tmux|screen)/i,

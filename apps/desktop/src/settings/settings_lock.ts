@@ -50,19 +50,19 @@ export class SettingsLock {
       if (element instanceof HTMLInputElement || element instanceof HTMLButtonElement) {
         element.disabled = true;
       } else {
-        element.setAttribute('aria-disabled', 'true');
-        element.style.opacity = '0.6';
-        element.style.pointerEvents = 'none';
-        element.style.cursor = 'not-allowed';
-        element.setAttribute('title', 'Settings locked during renderer switch.');
+        element.setAttribute("aria-disabled", "true");
+        element.style.opacity = "0.6";
+        element.style.pointerEvents = "none";
+        element.style.cursor = "not-allowed";
+        element.setAttribute("title", "Settings locked during renderer switch.");
       }
 
       this.lockedElements.add(element);
     });
 
     // Add visual overlay/grayed-out effect
-    container.style.opacity = '0.7';
-    container.style.pointerEvents = 'none';
+    container.style.opacity = "0.7";
+    container.style.pointerEvents = "none";
   }
 
   private removeLock(container: HTMLElement): void {
@@ -70,22 +70,22 @@ export class SettingsLock {
       if (element instanceof HTMLInputElement || element instanceof HTMLButtonElement) {
         element.disabled = false;
       } else {
-        element.removeAttribute('aria-disabled');
-        element.style.opacity = '';
-        element.style.pointerEvents = '';
-        element.style.cursor = '';
-        element.removeAttribute('title');
+        element.removeAttribute("aria-disabled");
+        element.style.opacity = "";
+        element.style.pointerEvents = "";
+        element.style.cursor = "";
+        element.removeAttribute("title");
       }
     });
 
     this.lockedElements.clear();
-    container.style.opacity = '';
-    container.style.pointerEvents = '';
+    container.style.opacity = "";
+    container.style.pointerEvents = "";
   }
 
   private startAutoUnlockTimer(): void {
     this.lockTimeoutId = setTimeout(() => {
-      console.warn('Settings lock timeout: auto-unlocking settings');
+      console.warn("Settings lock timeout: auto-unlocking settings");
       this.isLocked = false;
       if (this.options.onAutoUnlocked) {
         this.options.onAutoUnlocked();

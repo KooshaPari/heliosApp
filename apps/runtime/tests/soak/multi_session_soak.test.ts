@@ -37,9 +37,9 @@ async function runSoakScenario(): Promise<SoakReport> {
           workspace_id: workspaceId,
           correlation_id: `corr-lane-${id}`,
           method: "lane.create",
-          payload: { id: `lane-${id}` }
+          payload: { id: `lane-${id}` },
         });
-      })
+      }),
     );
   }
 
@@ -59,9 +59,9 @@ async function runSoakScenario(): Promise<SoakReport> {
           session_id: sessionId,
           correlation_id: `corr-restore-${id}`,
           method: "session.attach",
-          payload: { id: sessionId, restore: true }
+          payload: { id: sessionId, restore: true },
         });
-      })
+      }),
     );
   }
 
@@ -72,7 +72,7 @@ async function runSoakScenario(): Promise<SoakReport> {
         const laneId = `lane-${id % ACTIVE_SESSION_COUNT}`;
         const sessionId = `session-${id % ACTIVE_SESSION_COUNT}`;
         const baselineDepth = 24 + ((id * 7) % 34);
-        const spikeDepth = id % 29 === 0 ? 72 + ((id % 4) * 4) : 0;
+        const spikeDepth = id % 29 === 0 ? 72 + (id % 4) * 4 : 0;
         const backlogDepth = baselineDepth + spikeDepth;
 
         return bus.publish({
@@ -87,20 +87,26 @@ async function runSoakScenario(): Promise<SoakReport> {
           topic: "terminal.output",
           payload: {
             backlog_depth: backlogDepth,
-            line: `line-${id}`
-          }
+            line: `line-${id}`,
+          },
         });
-      })
+      }),
     );
   }
 
   const report = bus.getMetricsReport();
   const lane = report.summaries.find((metric) => metric.metric === "lane_create_latency_ms");
   const restore = report.summaries.find((metric) => metric.metric === "session_restore_latency_ms");
-  const backlog = report.summaries.find((metric) => metric.metric === "terminal_output_backlog_depth");
-  const backlogSamples = report.samples.filter((metric) => metric.metric === "terminal_output_backlog_depth");
+  const backlog = report.summaries.find(
+    (metric) => metric.metric === "terminal_output_backlog_depth",
+  );
+  const backlogSamples = report.samples.filter(
+    (metric) => metric.metric === "terminal_output_backlog_depth",
+  );
   const backlogSessionIds = new Set(
-    backlogSamples.map((sample) => sample.tags?.session_id).filter((value): value is string => !!value)
+    backlogSamples
+      .map((sample) => sample.tags?.session_id)
+      .filter((value): value is string => !!value),
   );
   const backlogMax = backlogSamples.reduce((max, sample) => Math.max(max, sample.value), 0);
 
@@ -114,7 +120,7 @@ async function runSoakScenario(): Promise<SoakReport> {
     backlogP95: backlog?.p95 ?? Number.MAX_VALUE,
     backlogMax,
     backlogSessionCount: backlogSessionIds.size,
-    activeSessionCount: activeSessionIds.size
+    activeSessionCount: activeSessionIds.size,
   };
 }
 

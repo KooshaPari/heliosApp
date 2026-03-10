@@ -154,7 +154,10 @@ export async function executeRestartWithRestore(
     try {
       await sourceAdapter.stop();
     } catch (e: unknown) {
-      throw new RestartRestoreError(currentPhase, `source stop failed: ${e instanceof Error ? e.message : String(e)}`);
+      throw new RestartRestoreError(
+        currentPhase,
+        `source stop failed: ${e instanceof Error ? e.message : String(e)}`,
+      );
     }
 
     // ===== Phase 3: Start and restore =====
@@ -165,7 +168,10 @@ export async function executeRestartWithRestore(
       await targetAdapter.init(config);
       await targetAdapter.start(surface);
     } catch (e: unknown) {
-      throw new RestartRestoreError(currentPhase, `target init failed: ${e instanceof Error ? e.message : String(e)}`);
+      throw new RestartRestoreError(
+        currentPhase,
+        `target init failed: ${e instanceof Error ? e.message : String(e)}`,
+      );
     }
 
     // Restore terminal state from checkpoints
@@ -174,14 +180,20 @@ export async function executeRestartWithRestore(
         restoreCheckpoint(checkpoint, targetAdapter);
       }
     } catch (e: unknown) {
-      throw new RestartRestoreError(currentPhase, `restore failed: ${e instanceof Error ? e.message : String(e)}`);
+      throw new RestartRestoreError(
+        currentPhase,
+        `restore failed: ${e instanceof Error ? e.message : String(e)}`,
+      );
     }
 
     // Replay PTY buffers
     try {
       streamBuffer.stopBuffering(targetAdapter);
     } catch (e: unknown) {
-      throw new RestartRestoreError(currentPhase, `replay failed: ${e instanceof Error ? e.message : String(e)}`);
+      throw new RestartRestoreError(
+        currentPhase,
+        `replay failed: ${e instanceof Error ? e.message : String(e)}`,
+      );
     }
 
     // ===== Phase 4: Commit =====
@@ -194,7 +206,10 @@ export async function executeRestartWithRestore(
       checkpoints,
     };
   } catch (error: unknown) {
-    const restartError = error instanceof RestartRestoreError ? error : new RestartRestoreError(currentPhase, String(error));
+    const restartError =
+      error instanceof RestartRestoreError
+        ? error
+        : new RestartRestoreError(currentPhase, String(error));
 
     // Trigger rollback
     try {

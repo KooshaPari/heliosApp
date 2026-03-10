@@ -38,7 +38,11 @@ export class RedactionAuditTrail {
     this.auditSink = opts?.auditSink ?? null;
   }
 
-  record(artifactId: string, result: RedactionResult, context: RedactionContext): RedactionAuditRecord {
+  record(
+    artifactId: string,
+    result: RedactionResult,
+    context: RedactionContext,
+  ): RedactionAuditRecord {
     const rulesApplied = [...new Set(result.matches.map((m) => m.ruleId))];
     const matchesByCategory: Record<string, number> = {};
     for (const match of result.matches) {

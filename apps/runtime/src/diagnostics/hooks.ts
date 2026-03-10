@@ -49,10 +49,7 @@ interface HooksState {
   onSample: ((metric: string, value: number, timestamp: number) => void) | undefined;
 }
 
-function createState(
-  maxConcurrent: number,
-  clock: MonotonicClock,
-): HooksState {
+function createState(maxConcurrent: number, clock: MonotonicClock): HooksState {
   return {
     startTimes: new Float64Array(maxConcurrent),
     metricNames: new Array<string>(maxConcurrent).fill(""),
@@ -152,9 +149,10 @@ export interface InstrumentationHooks {
  * Create an isolated set of instrumentation hooks — mainly for unit tests
  * that need deterministic clocks or independent overflow counters.
  */
-export function createInstrumentationHooks(
-  opts?: { maxConcurrent?: number; clock?: MonotonicClock },
-): InstrumentationHooks {
+export function createInstrumentationHooks(opts?: {
+  maxConcurrent?: number;
+  clock?: MonotonicClock;
+}): InstrumentationHooks {
   const maxConcurrent = opts?.maxConcurrent ?? DEFAULT_MAX_CONCURRENT_MARKS;
   const clock = opts?.clock ?? defaultClock;
   const state = createState(maxConcurrent, clock);
@@ -219,9 +217,7 @@ export function setGlobalOnSample(
  * Replace the global hooks state — mainly for tests that need to reset
  * between runs. Not intended for production use.
  */
-export function _resetGlobalHooks(
-  opts?: { maxConcurrent?: number; clock?: MonotonicClock },
-): void {
+export function _resetGlobalHooks(opts?: { maxConcurrent?: number; clock?: MonotonicClock }): void {
   globalState = createState(
     opts?.maxConcurrent ?? DEFAULT_MAX_CONCURRENT_MARKS,
     opts?.clock ?? defaultClock,

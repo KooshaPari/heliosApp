@@ -1,5 +1,5 @@
-import { AuditEvent } from './event';
-import { SessionSnapshot } from './snapshot';
+import { AuditEvent } from "./event";
+import { SessionSnapshot } from "./snapshot";
 
 /**
  * Timeline entry for significant events.
@@ -86,10 +86,10 @@ export class ReplayEngine {
     const state: SessionSnapshot = baseSnapshot
       ? { ...baseSnapshot }
       : {
-          id: 'virtual',
+          id: "virtual",
           sessionId: stream.sessionId,
           timestamp: timestamp.toISOString(),
-          terminalBuffer: '',
+          terminalBuffer: "",
           cursorPosition: { row: 0, col: 0 },
           dimensions: { rows: 24, cols: 80 },
           scrollbackPosition: 0,
@@ -124,7 +124,7 @@ export class ReplayEngine {
     // Add significant events (commands, errors, approvals)
     for (const event of stream.events) {
       if (
-        ['COMMAND_EXECUTED', 'POLICY_EVALUATION', 'APPROVAL_RESOLVED'].includes(
+        ["COMMAND_EXECUTED", "POLICY_EVALUATION", "APPROVAL_RESOLVED"].includes(
           event.eventType as any,
         )
       ) {

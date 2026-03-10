@@ -238,7 +238,7 @@ export class ChatTab extends TabSurface {
       id: `msg-${Date.now()}`,
       role: "user",
       content: text,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     this.messages.push(userMsg);
 
@@ -248,7 +248,7 @@ export class ChatTab extends TabSurface {
         id: `msg-${Date.now() + 1}`,
         role: "agent",
         content: "I understand. Processing your request...",
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       this.messages.push(agentMsg);
 
@@ -263,7 +263,7 @@ export class ChatTab extends TabSurface {
       ...baseState,
       scrollPosition: this.scrollContainer?.scrollTop,
       draftInput: this.draftInput,
-      messageCount: this.messages.length
+      messageCount: this.messages.length,
     };
   }
 
@@ -288,27 +288,27 @@ export class ChatTab extends TabSurface {
         role: "agent",
         content:
           "Hello! I'm ready to assist you with your work in this lane. What would you like me to help with?",
-        timestamp: new Date(baseTime - 300000).toISOString()
+        timestamp: new Date(baseTime - 300000).toISOString(),
       },
       {
         id: "msg-2",
         role: "user",
         content: "Can you review the recent changes in the codebase?",
-        timestamp: new Date(baseTime - 240000).toISOString()
+        timestamp: new Date(baseTime - 240000).toISOString(),
       },
       {
         id: "msg-3",
         role: "agent",
         content:
           "I'll analyze the recent commits and provide a summary of changes. Give me a moment...",
-        timestamp: new Date(baseTime - 230000).toISOString()
+        timestamp: new Date(baseTime - 230000).toISOString(),
       },
       {
         id: "msg-4",
         role: "agent",
         content: `Summary of recent changes:\n\n1. Tab UI framework implementation\n2. Context store integration\n3. Terminal rendering updates\n\nAll changes look good and follow the project patterns.`,
-        timestamp: new Date(baseTime - 200000).toISOString()
-      }
+        timestamp: new Date(baseTime - 200000).toISOString(),
+      },
     ];
   }
 }

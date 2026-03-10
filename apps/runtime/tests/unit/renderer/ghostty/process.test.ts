@@ -30,7 +30,9 @@ describe("GhosttyProcess", () => {
 
   test("onCrash registers a handler", () => {
     let err: Error | undefined;
-    proc.onCrash((e) => { err = e; });
+    proc.onCrash((e) => {
+      err = e;
+    });
     expect(err).toBeUndefined();
   });
 

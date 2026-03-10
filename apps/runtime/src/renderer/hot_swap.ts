@@ -27,7 +27,9 @@ export class HotSwapError extends Error {
 
 export class HotSwapCapabilityError extends Error {
   constructor(sourceId: string, targetId: string) {
-    super(`Cannot hot-swap from "${sourceId}" to "${targetId}": renderer does not support hot-swap`);
+    super(
+      `Cannot hot-swap from "${sourceId}" to "${targetId}": renderer does not support hot-swap`,
+    );
     this.name = "HotSwapCapabilityError";
   }
 }
@@ -118,20 +120,29 @@ export async function executeHotSwap(
     try {
       await targetAdapter.init(config);
     } catch (e: unknown) {
-      throw new HotSwapError(currentPhase, `target init failed: ${e instanceof Error ? e.message : String(e)}`);
+      throw new HotSwapError(
+        currentPhase,
+        `target init failed: ${e instanceof Error ? e.message : String(e)}`,
+      );
     }
 
     try {
       await targetAdapter.start(surface);
     } catch (e: unknown) {
-      throw new HotSwapError(currentPhase, `target start failed: ${e instanceof Error ? e.message : String(e)}`);
+      throw new HotSwapError(
+        currentPhase,
+        `target start failed: ${e instanceof Error ? e.message : String(e)}`,
+      );
     }
 
     // Stop source renderer
     try {
       await sourceAdapter.stop();
     } catch (e: unknown) {
-      throw new HotSwapError(currentPhase, `source stop failed: ${e instanceof Error ? e.message : String(e)}`);
+      throw new HotSwapError(
+        currentPhase,
+        `source stop failed: ${e instanceof Error ? e.message : String(e)}`,
+      );
     }
 
     // ===== Phase 4: Replay and commit =====
@@ -145,7 +156,10 @@ export async function executeHotSwap(
       try {
         targetAdapter.bindStream(ptyId, new ReadableStream());
       } catch (e: unknown) {
-        throw new HotSwapError(currentPhase, `replay for ${ptyId} failed: ${e instanceof Error ? e.message : String(e)}`);
+        throw new HotSwapError(
+          currentPhase,
+          `replay for ${ptyId} failed: ${e instanceof Error ? e.message : String(e)}`,
+        );
       }
     }
 
@@ -158,7 +172,8 @@ export async function executeHotSwap(
       preservedContexts: Array.from(terminals.values()),
     };
   } catch (error: unknown) {
-    const hotSwapError = error instanceof HotSwapError ? error : new HotSwapError(currentPhase, String(error));
+    const hotSwapError =
+      error instanceof HotSwapError ? error : new HotSwapError(currentPhase, String(error));
 
     // Trigger rollback
     try {

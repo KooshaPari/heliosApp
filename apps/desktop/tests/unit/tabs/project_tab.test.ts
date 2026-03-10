@@ -22,7 +22,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -42,7 +42,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -54,7 +54,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -66,7 +66,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -80,7 +80,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -92,7 +92,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -104,7 +104,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -118,7 +118,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -132,7 +132,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -144,13 +144,13 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
       const el = tab.render();
       const button = Array.from(el.querySelectorAll("button")).find((b) =>
-        b.textContent?.includes("Create New Lane")
+        b.textContent?.includes("Create New Lane"),
       );
 
       expect(button).toBeDefined();
@@ -160,13 +160,13 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
       const el = tab.render();
       const button = Array.from(el.querySelectorAll("button")).find((b) =>
-        b.textContent?.includes("Open in File Manager")
+        b.textContent?.includes("Open in File Manager"),
       );
 
       expect(button).toBeDefined();
@@ -195,7 +195,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -211,7 +211,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -225,7 +225,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);

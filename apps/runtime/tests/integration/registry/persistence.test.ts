@@ -1,9 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
-import {
-  JsonFilePersistence,
-  InMemoryPersistence,
-} from "../../../src/registry/persistence.js";
+import { JsonFilePersistence, InMemoryPersistence } from "../../../src/registry/persistence.js";
 import { promises as fs } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -27,9 +24,7 @@ describe("Persistence Integration", () => {
 
   describe("JsonFilePersistence", () => {
     it("should save and reload bindings", async () => {
-      const persistence = new JsonFilePersistence(
-        join(tempDir, "bindings.json"),
-      );
+      const persistence = new JsonFilePersistence(join(tempDir, "bindings.json"));
 
       // Register bindings
       const bindings: BindingTriple[] = Array.from({ length: 10 }, (_, i) => ({

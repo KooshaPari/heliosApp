@@ -1,6 +1,6 @@
-import { AuditEvent } from './event';
-import { AuditRingBuffer, AuditFilter as RingBufferFilter } from './ring-buffer';
-import { SQLiteAuditStore } from './sqlite-store';
+import { AuditEvent } from "./event";
+import { AuditRingBuffer, AuditFilter as RingBufferFilter } from "./ring-buffer";
+import { SQLiteAuditStore } from "./sqlite-store";
 
 /**
  * Enhanced filter interface for ledger queries.
@@ -91,8 +91,8 @@ export class AuditLedger {
     });
 
     // Convert to array, sort chronologically, apply pagination
-    const combined = Array.from(merged.values()).sort((a, b) =>
-      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+    const combined = Array.from(merged.values()).sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
     );
 
     return combined.slice(offset, offset + limit);
@@ -196,7 +196,7 @@ export class AuditLedger {
           try {
             callback(event);
           } catch (err) {
-            console.error('[AuditLedger] Subscription callback error:', err);
+            console.error("[AuditLedger] Subscription callback error:", err);
           }
         });
       });
@@ -215,7 +215,9 @@ export class AuditLedger {
     chain: AuditEvent[],
   ): void {
     if (visited.has(correlationId)) {
-      console.warn(`[AuditLedger] Circular reference detected for correlation ID: ${correlationId}`);
+      console.warn(
+        `[AuditLedger] Circular reference detected for correlation ID: ${correlationId}`,
+      );
       return;
     }
 
@@ -236,7 +238,7 @@ export class AuditLedger {
 
       // Check for parent correlation ID in metadata
       const parentCorrelationId = event.metadata?.parentCorrelationId;
-      if (parentCorrelationId && typeof parentCorrelationId === 'string') {
+      if (parentCorrelationId && typeof parentCorrelationId === "string") {
         this.traverseCorrelationChain(parentCorrelationId, visited, chain);
       }
     });

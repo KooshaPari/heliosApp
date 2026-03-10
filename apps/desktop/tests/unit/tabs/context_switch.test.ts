@@ -3,7 +3,7 @@ import {
   ActiveContextStore,
   type ActiveContext,
   resetActiveContextStore,
-  getActiveContextStore
+  getActiveContextStore,
 } from "../../../src/tabs/context_switch";
 
 describe("ActiveContextStore", () => {
@@ -27,7 +27,7 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await store.setContext(context);
@@ -39,7 +39,7 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await store.setContext(context);
@@ -55,7 +55,7 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       let emittedEvent: any = null;
@@ -75,13 +75,13 @@ describe("ActiveContextStore", () => {
       const context1: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const context2: ActiveContext = {
         workspaceId: "ws2",
         laneId: "lane2",
-        sessionId: "session2"
+        sessionId: "session2",
       };
 
       let emittedEvent: any = null;
@@ -102,7 +102,7 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const calls: any[] = [];
@@ -125,7 +125,7 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       let callCount = 0;
@@ -149,19 +149,19 @@ describe("ActiveContextStore", () => {
       const context1: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const context2: ActiveContext = {
         workspaceId: "ws2",
         laneId: "lane2",
-        sessionId: "session2"
+        sessionId: "session2",
       };
 
       const context3: ActiveContext = {
         workspaceId: "ws3",
         laneId: "lane3",
-        sessionId: "session3"
+        sessionId: "session3",
       };
 
       let emittedContexts: ActiveContext[] = [];
@@ -189,7 +189,7 @@ describe("ActiveContextStore", () => {
       const contexts: ActiveContext[] = [
         { workspaceId: "ws1", laneId: "lane1", sessionId: "session1" },
         { workspaceId: "ws2", laneId: "lane2", sessionId: "session2" },
-        { workspaceId: "ws3", laneId: "lane3", sessionId: "session3" }
+        { workspaceId: "ws3", laneId: "lane3", sessionId: "session3" },
       ];
 
       let finalContext: ActiveContext | null = null;
@@ -218,7 +218,7 @@ describe("ActiveContextStore", () => {
       const validContext: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       let validated = false;
@@ -241,7 +241,7 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       store.setValidator(async () => false);
@@ -258,7 +258,7 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       store.setValidator(async () => false);
@@ -274,7 +274,7 @@ describe("ActiveContextStore", () => {
         },
         async request() {
           return { id: "", type: "response", ts: "", status: "ok" as const };
-        }
+        },
       };
 
       const storeWithBus = new ActiveContextStore(mockBus as any);

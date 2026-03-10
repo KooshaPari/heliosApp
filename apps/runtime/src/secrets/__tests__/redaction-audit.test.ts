@@ -59,8 +59,16 @@ describe("RedactionAuditTrail: listRecords filtering", () => {
     const trail = new RedactionAuditTrail();
     const engine = makeEngine();
 
-    const r1 = engine.redact("text1", { artifactId: "a1", artifactType: "log", correlationId: "c1" });
-    const r2 = engine.redact("text2", { artifactId: "a2", artifactType: "artifact", correlationId: "c2" });
+    const r1 = engine.redact("text1", {
+      artifactId: "a1",
+      artifactType: "log",
+      correlationId: "c1",
+    });
+    const r2 = engine.redact("text2", {
+      artifactId: "a2",
+      artifactType: "artifact",
+      correlationId: "c2",
+    });
     trail.record("a1", r1, { artifactId: "a1", artifactType: "log", correlationId: "c1" });
     trail.record("a2", r2, { artifactId: "a2", artifactType: "artifact", correlationId: "c2" });
 
@@ -74,7 +82,7 @@ describe("RedactionAuditTrail: listRecords filtering", () => {
     const engine = makeEngine();
 
     const before = new Date();
-    await new Promise(r => setTimeout(r, 5));
+    await new Promise((r) => setTimeout(r, 5));
 
     const r = engine.redact("text", ctx);
     trail.record("art-1", r, ctx);
@@ -96,9 +104,9 @@ describe("RedactionAuditTrail: bus events", () => {
     const engine = makeEngine();
     const result = engine.redact("AKIAIOSFODNN7EXAMPLE", ctx);
     trail.record("art-1", result, ctx);
-    await new Promise(r => setTimeout(r, 10));
+    await new Promise((r) => setTimeout(r, 10));
     const events = bus.getEvents();
-    expect(events.some(e => e.topic === "secrets.redaction.applied")).toBe(true);
+    expect(events.some((e) => e.topic === "secrets.redaction.applied")).toBe(true);
   });
 
   it("emitted event does not contain the secret value", async () => {
@@ -108,7 +116,7 @@ describe("RedactionAuditTrail: bus events", () => {
     const secret = "AKIAIOSFODNN7EXAMPLE";
     const result = engine.redact(secret, ctx);
     trail.record("art-1", result, ctx);
-    await new Promise(r => setTimeout(r, 10));
+    await new Promise((r) => setTimeout(r, 10));
     const events = bus.getEvents();
     const eventsStr = JSON.stringify(events);
     expect(eventsStr).not.toContain(secret);

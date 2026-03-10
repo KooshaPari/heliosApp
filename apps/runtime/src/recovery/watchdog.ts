@@ -40,11 +40,7 @@ export class Watchdog {
     this.bus = bus;
   }
 
-  registerProcess(
-    name: string,
-    pid: number,
-    heartbeatIntervalMs: number = 2000
-  ): void {
+  registerProcess(name: string, pid: number, heartbeatIntervalMs: number = 2000): void {
     // Clear any existing monitor for this name
     this.unregister(name);
 
@@ -111,7 +107,7 @@ export class Watchdog {
     name: string,
     pid: number,
     exitCode?: number,
-    signal?: string
+    signal?: string,
   ): Promise<void> {
     this.unregister(name);
 
@@ -200,7 +196,7 @@ export class Watchdog {
 export function startHeartbeat(
   watchdog: Watchdog,
   processName: string,
-  intervalMs: number = 2000
+  intervalMs: number = 2000,
 ): () => void {
   let running = true;
   const interval = setInterval(() => {

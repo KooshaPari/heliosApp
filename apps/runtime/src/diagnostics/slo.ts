@@ -23,11 +23,7 @@ export class SLOMonitor {
   private intervalHandle: ReturnType<typeof setInterval> | undefined = undefined;
   private running = false;
 
-  constructor(
-    registry: MetricsRegistry,
-    definitions: SLODefinition[],
-    busPublish?: BusPublishFn,
-  ) {
+  constructor(registry: MetricsRegistry, definitions: SLODefinition[], busPublish?: BusPublishFn) {
     this.registry = registry;
     this.definitions = definitions;
     this.busPublish = busPublish;

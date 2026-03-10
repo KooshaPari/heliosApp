@@ -54,9 +54,7 @@ export class ZellijDetector {
     return orphans;
   }
 
-  private async listZellijSessions(): Promise<
-    Array<{ name: string; created: number }>
-  > {
+  private async listZellijSessions(): Promise<Array<{ name: string; created: number }>> {
     try {
       // Use zellij CLI to list sessions
       const result = await execCommand("zellij", ["list-sessions", "-n"]);

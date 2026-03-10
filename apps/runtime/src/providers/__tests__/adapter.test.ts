@@ -5,11 +5,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
-  ProviderRegistration,
-} from "../adapter.js";
+import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
 import { BaseProviderAdapter, ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 
 /**
@@ -147,10 +143,7 @@ describe("ProviderAdapter Interface", () => {
 
       await provider.init(config);
 
-      const result = await provider.execute(
-        { prompt: "Hello, world!" },
-        "correlation-123"
-      );
+      const result = await provider.execute({ prompt: "Hello, world!" }, "correlation-123");
 
       expect(result.content).toContain("Mock response");
       expect(result.stopReason).toBe("end_turn");
@@ -217,17 +210,17 @@ describe("ProviderAdapter Interface", () => {
 
       await provider.init(config);
 
-      await expect(
-        provider.execute({ prompt: "Hello" }, "correlation-123")
-      ).rejects.toThrow("Execute failed");
+      await expect(provider.execute({ prompt: "Hello" }, "correlation-123")).rejects.toThrow(
+        "Execute failed",
+      );
     });
 
     it("should prevent execute before init", async () => {
       const provider = new MockProvider();
 
-      await expect(
-        provider.execute({ prompt: "Hello" }, "correlation-123")
-      ).rejects.toThrow("not initialized");
+      await expect(provider.execute({ prompt: "Hello" }, "correlation-123")).rejects.toThrow(
+        "not initialized",
+      );
     });
   });
 
@@ -251,11 +244,7 @@ describe("ProviderAdapter Interface", () => {
         metadata: { score: number };
       }
 
-      class CustomProvider extends BaseProviderAdapter<
-        CustomConfig,
-        CustomInput,
-        CustomOutput
-      > {
+      class CustomProvider extends BaseProviderAdapter<CustomConfig, CustomInput, CustomOutput> {
         async init(config: CustomConfig): Promise<void> {
           expect(config.customField).toBeDefined();
         }
@@ -268,10 +257,7 @@ describe("ProviderAdapter Interface", () => {
           };
         }
 
-        async execute(
-          input: CustomInput,
-          correlationId: string
-        ): Promise<CustomOutput> {
+        async execute(input: CustomInput, correlationId: string): Promise<CustomOutput> {
           expect(input.options.timeout).toBeGreaterThan(0);
           return {
             answer: "Custom answer",
@@ -293,7 +279,7 @@ describe("ProviderAdapter Interface", () => {
 
       const output = await provider.execute(
         { query: "test", options: { timeout: 5000 } },
-        "correlation-123"
+        "correlation-123",
       );
 
       expect(output.answer).toBe("Custom answer");
@@ -359,10 +345,7 @@ describe("ProviderAdapter Interface", () => {
       const correlationId = "unique-correlation-id-12345";
 
       // Should not throw when accepting correlation ID
-      const result = await provider.execute(
-        { prompt: "Test" },
-        correlationId
-      );
+      const result = await provider.execute({ prompt: "Test" }, correlationId);
 
       expect(result).toBeDefined();
     });

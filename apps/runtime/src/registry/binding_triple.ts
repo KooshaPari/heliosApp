@@ -103,14 +103,10 @@ export function validateBindingTriple(
 
   // Validate cross-references
   if (!queryInterface.laneInWorkspace(triple.laneId, triple.workspaceId)) {
-    errors.push(
-      `Lane ${triple.laneId} does not belong to workspace ${triple.workspaceId}`,
-    );
+    errors.push(`Lane ${triple.laneId} does not belong to workspace ${triple.workspaceId}`);
   }
   if (!queryInterface.sessionInLane(triple.sessionId, triple.laneId)) {
-    errors.push(
-      `Session ${triple.sessionId} does not belong to lane ${triple.laneId}`,
-    );
+    errors.push(`Session ${triple.sessionId} does not belong to lane ${triple.laneId}`);
   }
 
   return {
@@ -123,10 +119,7 @@ export function validateBindingTriple(
  * Creates a new terminal binding with the given terminal ID and binding triple.
  * Factory function that initializes all required fields.
  */
-export function createBinding(
-  terminalId: string,
-  triple: BindingTriple,
-): TerminalBinding {
+export function createBinding(terminalId: string, triple: BindingTriple): TerminalBinding {
   const now = Date.now();
   return {
     terminalId,

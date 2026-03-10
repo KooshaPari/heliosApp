@@ -121,9 +121,7 @@ describe("Remediation Workflow", () => {
     await engine.generateSuggestions(orphans);
     const events = bus.getEvents();
 
-    const suggestionEvent = events.find(
-      (e) => e.topic === "orphan.remediation.suggested"
-    );
+    const suggestionEvent = events.find((e) => e.topic === "orphan.remediation.suggested");
     expect(suggestionEvent).toBeDefined();
     expect(suggestionEvent?.payload?.resourceType).toBe("pty_process");
   });

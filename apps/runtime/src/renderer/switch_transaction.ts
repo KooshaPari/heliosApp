@@ -21,7 +21,15 @@ import type { SwitchBuffer } from "./stream_binding.js";
 // State and error types
 // ---------------------------------------------------------------------------
 
-export type SwitchTransactionState = "pending" | "hot-swapping" | "restarting" | "committing" | "rolled-back" | "committed" | "degraded" | "failed";
+export type SwitchTransactionState =
+  | "pending"
+  | "hot-swapping"
+  | "restarting"
+  | "committing"
+  | "rolled-back"
+  | "committed"
+  | "degraded"
+  | "failed";
 
 export class ConcurrentSwitchError extends Error {
   constructor(activeTransactionId: string) {
@@ -68,14 +76,14 @@ export interface SwitchTransactionRequest {
 // ---------------------------------------------------------------------------
 
 const VALID_TRANSITIONS: Record<SwitchTransactionState, SwitchTransactionState[]> = {
-  "pending": ["hot-swapping", "restarting"],
+  pending: ["hot-swapping", "restarting"],
   "hot-swapping": ["committing", "rolled-back", "degraded"],
-  "restarting": ["committing", "rolled-back", "degraded"],
-  "committing": ["committed", "degraded"],
-  "committed": [],
+  restarting: ["committing", "rolled-back", "degraded"],
+  committing: ["committed", "degraded"],
+  committed: [],
   "rolled-back": [],
-  "degraded": ["committed", "rolled-back", "failed"],
-  "failed": [],
+  degraded: ["committed", "rolled-back", "failed"],
+  failed: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -113,7 +121,13 @@ export class SwitchTransactionOrchestrator {
    */
   async startSwitch(request: SwitchTransactionRequest): Promise<SwitchTransaction> {
     // Check concurrent transaction guard
-    if (this._activeTransaction !== undefined && this._activeTransaction.state !== "committed" && this._activeTransaction.state !== "rolled-back" && this._activeTransaction.state !== "failed" && this._activeTransaction.state !== "degraded") {
+    if (
+      this._activeTransaction !== undefined &&
+      this._activeTransaction.state !== "committed" &&
+      this._activeTransaction.state !== "rolled-back" &&
+      this._activeTransaction.state !== "failed" &&
+      this._activeTransaction.state !== "degraded"
+    ) {
       throw new ConcurrentSwitchError(this._activeTransaction.id);
     }
 
@@ -143,7 +157,11 @@ export class SwitchTransactionOrchestrator {
       }
 
       // Drain terminal creation queue after transaction completes
-      if (result.state === "committed" || result.state === "rolled-back" || result.state === "degraded") {
+      if (
+        result.state === "committed" ||
+        result.state === "rolled-back" ||
+        result.state === "degraded"
+      ) {
         this._drainTerminalCreationQueue();
       }
 
@@ -310,7 +328,9 @@ export class SwitchTransactionOrchestrator {
       return false;
     }
     const { state } = this._activeTransaction;
-    return state !== "committed" && state !== "rolled-back" && state !== "failed" && state !== "degraded";
+    return (
+      state !== "committed" && state !== "rolled-back" && state !== "failed" && state !== "degraded"
+    );
   }
 
   /**
@@ -345,7 +365,11 @@ export class SwitchTransactionOrchestrator {
         const index = this._terminalCreationQueue.indexOf(queued);
         if (index >= 0) {
           this._terminalCreationQueue.splice(index, 1);
-          reject(new Error(`Terminal creation request timed out after ${this._queueTimeoutMs}ms during active switch transaction`));
+          reject(
+            new Error(
+              `Terminal creation request timed out after ${this._queueTimeoutMs}ms during active switch transaction`,
+            ),
+          );
         }
       }, this._queueTimeoutMs);
 
@@ -382,6 +406,8 @@ export class SwitchTransactionOrchestrator {
 /**
  * Create a new switch transaction orchestrator instance.
  */
-export function createSwitchOrchestrator(eventBus?: RendererEventBus): SwitchTransactionOrchestrator {
+export function createSwitchOrchestrator(
+  eventBus?: RendererEventBus,
+): SwitchTransactionOrchestrator {
   return new SwitchTransactionOrchestrator(eventBus);
 }

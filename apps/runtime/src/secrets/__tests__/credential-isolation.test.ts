@@ -4,10 +4,7 @@ import { randomBytes } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { EncryptionService } from "../encryption.js";
-import {
-  CredentialStore,
-  CredentialAccessDeniedError,
-} from "../credential-store.js";
+import { CredentialStore, CredentialAccessDeniedError } from "../credential-store.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 
 function makeStore(dataDir: string, bus: InMemoryLocalBus): CredentialStore {
@@ -36,10 +33,14 @@ describe("CredentialStore: cross-provider isolation", () => {
   it("allows access when requestingProviderId matches targetProviderId", async () => {
     await store.create("providerA", "ws1", "myKey", "secret", "corr-001");
     const value = await store.retrieveWithContext(
-      { requestingProviderId: "providerA", requestingWorkspaceId: "ws1", correlationId: "corr-002" },
+      {
+        requestingProviderId: "providerA",
+        requestingWorkspaceId: "ws1",
+        correlationId: "corr-002",
+      },
       "providerA",
       "ws1",
-      "myKey"
+      "myKey",
     );
     expect(value).toBe("secret");
   });
@@ -48,11 +49,15 @@ describe("CredentialStore: cross-provider isolation", () => {
     await store.create("providerA", "ws1", "myKey", "secret", "corr-001");
     await expect(
       store.retrieveWithContext(
-        { requestingProviderId: "providerB", requestingWorkspaceId: "ws1", correlationId: "corr-002" },
+        {
+          requestingProviderId: "providerB",
+          requestingWorkspaceId: "ws1",
+          correlationId: "corr-002",
+        },
         "providerA",
         "ws1",
-        "myKey"
-      )
+        "myKey",
+      ),
     ).rejects.toBeInstanceOf(CredentialAccessDeniedError);
   });
 
@@ -60,10 +65,14 @@ describe("CredentialStore: cross-provider isolation", () => {
     await store.create("providerA", "ws1", "myKey", "secret", "corr-001");
     try {
       await store.retrieveWithContext(
-        { requestingProviderId: "evil-provider", requestingWorkspaceId: "ws1", correlationId: "corr-002" },
+        {
+          requestingProviderId: "evil-provider",
+          requestingWorkspaceId: "ws1",
+          correlationId: "corr-002",
+        },
         "providerA",
         "ws1",
-        "myKey"
+        "myKey",
       );
     } catch {
       // expected
@@ -84,7 +93,7 @@ describe("CredentialStore: cross-provider isolation", () => {
         { requestingProviderId: "evil", requestingWorkspaceId: "ws1", correlationId: "corr-002" },
         "providerA",
         "ws1",
-        "myKey"
+        "myKey",
       );
     } catch {
       // expected
@@ -99,11 +108,15 @@ describe("CredentialStore: cross-provider isolation", () => {
     await store.create("providerA", "ws1", "myKey", "secret", "corr-001");
     await expect(
       store.retrieveWithContext(
-        { requestingProviderId: "providerA", requestingWorkspaceId: "ws2", correlationId: "corr-002" },
+        {
+          requestingProviderId: "providerA",
+          requestingWorkspaceId: "ws2",
+          correlationId: "corr-002",
+        },
         "providerA",
         "ws1",
-        "myKey"
-      )
+        "myKey",
+      ),
     ).rejects.toBeInstanceOf(CredentialAccessDeniedError);
   });
 
@@ -116,8 +129,8 @@ describe("CredentialStore: cross-provider isolation", () => {
         { requestingProviderId: "../evil", requestingWorkspaceId: "ws1", correlationId: "c" },
         "providerA",
         "ws1",
-        "myKey"
-      )
+        "myKey",
+      ),
     ).rejects.toThrow();
   });
 
@@ -127,21 +140,17 @@ describe("CredentialStore: cross-provider isolation", () => {
         { requestingProviderId: "p", requestingWorkspaceId: "/etc/passwd", correlationId: "c" },
         "providerA",
         "ws1",
-        "myKey"
-      )
+        "myKey",
+      ),
     ).rejects.toThrow();
   });
 
   it("rejects null byte in targetProviderId during store", async () => {
-    await expect(
-      store.store("provider\0A", "ws1", "key", "val")
-    ).rejects.toThrow();
+    await expect(store.store("provider\0A", "ws1", "key", "val")).rejects.toThrow();
   });
 
   it("rejects backslash in workspaceId during store", async () => {
-    await expect(
-      store.store("providerA", "ws\\evil", "key", "val")
-    ).rejects.toThrow();
+    await expect(store.store("providerA", "ws\\evil", "key", "val")).rejects.toThrow();
   });
 
   it("CredentialAccessDeniedError has correct code", async () => {
@@ -151,7 +160,7 @@ describe("CredentialStore: cross-provider isolation", () => {
         { requestingProviderId: "other", requestingWorkspaceId: "ws1", correlationId: "c" },
         "providerA",
         "ws1",
-        "myKey"
+        "myKey",
       );
       expect(true).toBe(false); // should not reach here
     } catch (err) {

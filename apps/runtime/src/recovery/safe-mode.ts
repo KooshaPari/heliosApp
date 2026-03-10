@@ -13,11 +13,7 @@ export class CrashLoopDetector {
   private thresholdCount: number;
   private windowMs: number;
 
-  constructor(
-    crashDataDir: string,
-    thresholdCount: number = 3,
-    windowMs: number = 60000
-  ) {
+  constructor(crashDataDir: string, thresholdCount: number = 3, windowMs: number = 60000) {
     this.crashDataDir = crashDataDir;
     this.thresholdCount = thresholdCount;
     this.windowMs = windowMs;
@@ -40,9 +36,7 @@ export class CrashLoopDetector {
 
   private cleanOldCrashes(): void {
     const now = Date.now();
-    this.crashHistory = this.crashHistory.filter(
-      (ts) => now - ts < this.windowMs
-    );
+    this.crashHistory = this.crashHistory.filter((ts) => now - ts < this.windowMs);
   }
 
   private async loadCrashHistory(): Promise<void> {

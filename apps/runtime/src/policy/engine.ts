@@ -3,9 +3,9 @@
  * Evaluates commands against stored policy rules and determines approval requirements.
  */
 
-import { PolicyStorage } from './storage';
-import { PolicyRuleSet } from './rules';
-import { CommandContext, PolicyEvaluationResult, PolicyClassification } from './types';
+import { PolicyStorage } from "./storage";
+import { PolicyRuleSet } from "./rules";
+import { CommandContext, PolicyEvaluationResult, PolicyClassification } from "./types";
 
 /**
  * Policy evaluation engine for commands.

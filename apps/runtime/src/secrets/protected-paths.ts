@@ -320,7 +320,11 @@ export class ProtectedPathConfig {
       isDefault: false,
     };
     this.patterns.set(id, entry);
-    void this._emit("secrets.protected_paths.config.changed", { action: "add", patternId: id, pattern });
+    void this._emit("secrets.protected_paths.config.changed", {
+      action: "add",
+      patternId: id,
+      pattern,
+    });
     return entry;
   }
 
@@ -357,7 +361,10 @@ export class ProtectedPathConfig {
       if (!p.id || !p.pattern) continue;
       this.patterns.set(p.id, { ...p });
     }
-    void this._emit("secrets.protected_paths.config.changed", { action: "import", count: parsed.length });
+    void this._emit("secrets.protected_paths.config.changed", {
+      action: "import",
+      count: parsed.length,
+    });
   }
 
   async exportPatterns(path: string): Promise<void> {
@@ -420,7 +427,10 @@ export class ProtectedPathDetector {
    * Scans a terminal command for protected path references.
    * Returns all matches and fires warning callbacks + bus events.
    */
-  check(command: string, opts?: { terminalId?: string; correlationId?: string }): ProtectedPathMatch[] {
+  check(
+    command: string,
+    opts?: { terminalId?: string; correlationId?: string },
+  ): ProtectedPathMatch[] {
     const filePaths = extractFilePaths(command);
     if (filePaths.length === 0) return [];
 
@@ -536,6 +546,6 @@ function redactCommandForAudit(command: string): string {
     .replace(/(?:Bearer [A-Za-z0-9\-._~+/]+=*)/g, "Bearer [REDACTED:TOKEN]")
     .replace(
       /(?:(?:api_key|apikey|API_KEY)\s*[=:]\s*["']?)([A-Za-z0-9\-_]{16,})["']?/gi,
-      (_, _k) => "[REDACTED:API_KEY]"
+      (_, _k) => "[REDACTED:API_KEY]",
     );
 }

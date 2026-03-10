@@ -49,25 +49,31 @@ describe("Zero-cost — switch rejection", () => {
     const backend = new RioBackend();
     backend.setDisabled();
 
-    await expect(backend.init({
-      gpuAcceleration: false,
-      colorDepth: 24,
-      maxDimensions: { cols: 200, rows: 50 },
-    })).rejects.toThrow(FeatureFlagDisabledError);
+    await expect(
+      backend.init({
+        gpuAcceleration: false,
+        colorDepth: 24,
+        maxDimensions: { cols: 200, rows: 50 },
+      }),
+    ).rejects.toThrow(FeatureFlagDisabledError);
   });
 
   it("handleInput throws FeatureFlagDisabledError when disabled", () => {
     const backend = new RioBackend();
     backend.setDisabled();
 
-    expect(() => backend.handleInput("pty-1", new Uint8Array([0x41]))).toThrow(FeatureFlagDisabledError);
+    expect(() => backend.handleInput("pty-1", new Uint8Array([0x41]))).toThrow(
+      FeatureFlagDisabledError,
+    );
   });
 
   it("bindStream throws FeatureFlagDisabledError when disabled", () => {
     const backend = new RioBackend();
     backend.setDisabled();
 
-    expect(() => backend.bindStream("pty-1", new ReadableStream())).toThrow(FeatureFlagDisabledError);
+    expect(() => backend.bindStream("pty-1", new ReadableStream())).toThrow(
+      FeatureFlagDisabledError,
+    );
   });
 
   it("resize throws FeatureFlagDisabledError when disabled", () => {

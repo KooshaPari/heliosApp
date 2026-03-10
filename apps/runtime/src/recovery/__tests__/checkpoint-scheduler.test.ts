@@ -1,10 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { CheckpointScheduler } from "../checkpoint-scheduler.js";
-import {
-  CheckpointWriter,
-  type Checkpoint,
-  type CheckpointSession,
-} from "../checkpoint.js";
+import { CheckpointWriter, type Checkpoint, type CheckpointSession } from "../checkpoint.js";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
@@ -158,7 +154,7 @@ describe("CheckpointScheduler", () => {
         await fs.mkdir(path.join(tempDir, "recovery"), { recursive: true });
         await fs.writeFile(
           path.join(tempDir, "recovery", "checkpoint.json"),
-          JSON.stringify(checkpoint)
+          JSON.stringify(checkpoint),
         );
       };
 

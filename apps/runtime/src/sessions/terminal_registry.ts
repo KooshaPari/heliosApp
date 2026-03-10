@@ -47,7 +47,7 @@ export class TerminalRegistry {
       session_id: input.session_id,
       title: input.title ?? "Terminal",
       state: "spawning",
-      last_output_seq: 0
+      last_output_seq: 0,
     };
 
     this.terminals.set(terminal.terminal_id, terminal);

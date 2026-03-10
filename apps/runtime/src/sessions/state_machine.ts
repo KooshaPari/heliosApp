@@ -45,7 +45,7 @@ export type RuntimeEvent =
 export const INITIAL_RUNTIME_STATE: RuntimeState = {
   lane: "new",
   session: "detached",
-  terminal: "idle"
+  terminal: "idle",
 };
 
 const LANE_TRANSITIONS: Record<LaneState, LaneState[]> = {
@@ -57,7 +57,7 @@ const LANE_TRANSITIONS: Record<LaneState, LaneState[]> = {
   shared: ["running", "failed", "cleaning", "closed"],
   failed: ["provisioning", "closed"],
   cleaning: ["closed"],
-  closed: []
+  closed: [],
 };
 
 export type LaneRecord = {
@@ -98,11 +98,17 @@ export class LaneLifecycleService {
       display_name: input.display_name,
       status: "new",
       created_at: nowIso,
-      updated_at: nowIso
+      updated_at: nowIso,
     };
 
     this.lanes.set(laneId, lane);
-    await this.transition(laneId, "provisioning", "lane.create.started", "lane.create.requested", correlationId);
+    await this.transition(
+      laneId,
+      "provisioning",
+      "lane.create.started",
+      "lane.create.requested",
+      correlationId,
+    );
     await this.transition(laneId, "ready", "lane.created", "lane.create.succeeded", correlationId);
     return this.getRequired(laneId);
   }
@@ -157,7 +163,7 @@ export class LaneLifecycleService {
     nextState: LaneState,
     topic: ProtocolTopic,
     runtimeEvent: RuntimeEvent,
-    correlationId?: string
+    correlationId?: string,
   ): Promise<void> {
     const lane = this.lanes.get(laneId);
     if (!lane) {
@@ -181,8 +187,8 @@ export class LaneLifecycleService {
       payload: {
         runtime_event: runtimeEvent,
         lane_id: lane.lane_id,
-        state: lane.status
-      }
+        state: lane.status,
+      },
     });
   }
 }

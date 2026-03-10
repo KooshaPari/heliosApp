@@ -46,11 +46,7 @@ describe("JsonSettingsStore", () => {
 
   // FR-005: Unknown key preservation
   it("preserves unknown keys through save/load", async () => {
-    await writeFile(
-      filePath,
-      JSON.stringify({ theme: "dark", "future.setting": 42 }),
-      "utf-8",
-    );
+    await writeFile(filePath, JSON.stringify({ theme: "dark", "future.setting": 42 }), "utf-8");
     const store = new JsonSettingsStore(filePath, SETTINGS_SCHEMA);
     const loaded = await store.load();
     // Unknown keys should NOT appear in loaded (known-only).

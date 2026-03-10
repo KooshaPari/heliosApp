@@ -210,7 +210,9 @@ describe("GhosttyMetrics - publisher", () => {
   test("clearPublisher stops publishing", () => {
     const metrics = new GhosttyMetrics({ publishIntervalMs: 50 });
     const published: MetricsSnapshot[] = [];
-    metrics.setPublisher((_topic, payload) => { published.push(payload); });
+    metrics.setPublisher((_topic, payload) => {
+      published.push(payload);
+    });
     metrics.enable();
     metrics.clearPublisher();
     metrics.disable();

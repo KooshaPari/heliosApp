@@ -101,8 +101,12 @@ describe("LaneManager", () => {
 
   test("bus failure does not block lane ops", async () => {
     const failBus = {
-      async publish(_e: unknown): Promise<void> { throw new Error("bus down"); },
-      async request(_c: unknown): Promise<unknown> { return {}; },
+      async publish(_e: unknown): Promise<void> {
+        throw new Error("bus down");
+      },
+      async request(_c: unknown): Promise<unknown> {
+        return {};
+      },
     };
     const failMgr = new LaneManager({ bus: failBus as any, capacityLimit: 50 });
     // Should not throw despite bus failure

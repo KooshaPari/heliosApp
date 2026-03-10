@@ -5,16 +5,8 @@
  * Maintains fast lookups by terminal_id, lane_id, session_id, or workspace_id.
  */
 
-import type {
-  BindingTriple,
-  RegistryQueryInterface,
-  TerminalBinding,
-} from "./binding_triple.js";
-import {
-  BindingState,
-  createBinding,
-  validateBindingTriple,
-} from "./binding_triple.js";
+import type { BindingTriple, RegistryQueryInterface, TerminalBinding } from "./binding_triple.js";
+import { BindingState, createBinding, validateBindingTriple } from "./binding_triple.js";
 
 export class RegistryError extends Error {
   constructor(
@@ -127,11 +119,7 @@ export class TerminalRegistry implements RegistryQueryInterface {
     this.removeFromIndex(this.laneIndex, oldTriple.laneId, terminalId);
     this.removeFromIndex(this.sessionIndex, oldTriple.sessionId, terminalId);
     this.removeFromIndex(this.workspaceIndex, oldTriple.workspaceId, terminalId);
-    this.removeFromIndex(
-      this.sessionPerLaneIndex,
-      oldTriple.laneId,
-      oldTriple.sessionId,
-    );
+    this.removeFromIndex(this.sessionPerLaneIndex, oldTriple.laneId, oldTriple.sessionId);
 
     // Update binding
     binding.binding = newTriple;
@@ -253,22 +241,14 @@ export class TerminalRegistry implements RegistryQueryInterface {
   }
 
   // Helpers for index management
-  private addToIndex(
-    index: Map<string, Set<string>>,
-    key: string,
-    value: string,
-  ): void {
+  private addToIndex(index: Map<string, Set<string>>, key: string, value: string): void {
     if (!index.has(key)) {
       index.set(key, new Set());
     }
     index.get(key)!.add(value);
   }
 
-  private removeFromIndex(
-    index: Map<string, Set<string>>,
-    key: string,
-    value: string,
-  ): void {
+  private removeFromIndex(index: Map<string, Set<string>>, key: string, value: string): void {
     const set = index.get(key);
     if (set) {
       set.delete(value);

@@ -24,18 +24,12 @@ export class MuxRegistry {
   bind(sessionName: string, laneId: string, session: MuxSession): void {
     const existingBySession = this.bySession.get(sessionName);
     if (existingBySession) {
-      throw new DuplicateBindingError(
-        `session=${sessionName}`,
-        `lane=${existingBySession.laneId}`
-      );
+      throw new DuplicateBindingError(`session=${sessionName}`, `lane=${existingBySession.laneId}`);
     }
 
     const existingByLane = this.byLane.get(laneId);
     if (existingByLane) {
-      throw new DuplicateBindingError(
-        `lane=${laneId}`,
-        `session=${existingByLane.sessionName}`
-      );
+      throw new DuplicateBindingError(`lane=${laneId}`, `session=${existingByLane.sessionName}`);
     }
 
     const binding: MuxBinding = {
@@ -88,7 +82,7 @@ export class MuxRegistry {
   async getOrphaned(): Promise<MuxBinding[]> {
     if (!this.cli) {
       console.warn(
-        "[zellij-registry] getOrphaned() called without a cli; returning cached bindings only"
+        "[zellij-registry] getOrphaned() called without a cli; returning cached bindings only",
       );
       return [];
     }

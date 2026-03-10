@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { ContextPropagator, resetContextPropagator } from "../../../src/tabs/context_switch_propagation";
+import {
+  ContextPropagator,
+  resetContextPropagator,
+} from "../../../src/tabs/context_switch_propagation";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
 
@@ -14,7 +17,7 @@ describe("ContextPropagator", () => {
     mockTabs = [
       createMockTabSurface("tab1", "terminal", "Terminal"),
       createMockTabSurface("tab2", "agent", "Agent"),
-      createMockTabSurface("tab3", "session", "Session")
+      createMockTabSurface("tab3", "session", "Session"),
     ];
 
     for (const tab of mockTabs) {
@@ -47,7 +50,7 @@ describe("ContextPropagator", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const result = await propagator.propagateContext(context);
@@ -61,7 +64,7 @@ describe("ContextPropagator", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const result = await propagator.propagateContext(context);
@@ -88,7 +91,7 @@ describe("ContextPropagator", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const result = await propagator.propagateContext(context);
@@ -107,7 +110,7 @@ describe("ContextPropagator", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const result = await propagator.propagateContext(context);
@@ -129,13 +132,13 @@ describe("ContextPropagator", () => {
       const context1: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const context2: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane2",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       // Start first propagation
@@ -168,7 +171,7 @@ describe("ContextPropagator", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const result = await propagator.propagateContext(context);
@@ -186,7 +189,7 @@ describe("ContextPropagator", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const result = await propagator.propagateContext(context);

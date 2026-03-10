@@ -7,14 +7,21 @@
 import { describe, it, expect, beforeEach } from "bun:test";
 import { RioBackend, FeatureFlagDisabledError } from "../../../../src/renderer/rio/backend.js";
 import { RendererRegistry } from "../../../../src/renderer/registry.js";
-import type { RendererAdapter, RendererConfig, RenderSurface, RendererState } from "../../../../src/renderer/adapter.js";
+import type {
+  RendererAdapter,
+  RendererConfig,
+  RenderSurface,
+  RendererState,
+} from "../../../../src/renderer/adapter.js";
 import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
 
 // ---------------------------------------------------------------------------
 // Mock ghostty adapter
 // ---------------------------------------------------------------------------
 
-function createMockGhostty(opts?: { failInit?: boolean }): RendererAdapter & { _state: RendererState; _initCalled: boolean } {
+function createMockGhostty(opts?: {
+  failInit?: boolean;
+}): RendererAdapter & { _state: RendererState; _initCalled: boolean } {
   const adapter = {
     id: "ghostty" as const,
     version: "0.1.0",
@@ -73,21 +80,27 @@ describe("RioBackend — lifecycle with mocked process", () => {
 
   it("rejects init when disabled", async () => {
     backend.setDisabled();
-    await expect(backend.init({
-      gpuAcceleration: false,
-      colorDepth: 24,
-      maxDimensions: { cols: 200, rows: 50 },
-    })).rejects.toThrow(FeatureFlagDisabledError);
+    await expect(
+      backend.init({
+        gpuAcceleration: false,
+        colorDepth: 24,
+        maxDimensions: { cols: 200, rows: 50 },
+      }),
+    ).rejects.toThrow(FeatureFlagDisabledError);
   });
 
   it("rejects handleInput when disabled", () => {
     backend.setDisabled();
-    expect(() => backend.handleInput("pty-1", new Uint8Array([0x41]))).toThrow(FeatureFlagDisabledError);
+    expect(() => backend.handleInput("pty-1", new Uint8Array([0x41]))).toThrow(
+      FeatureFlagDisabledError,
+    );
   });
 
   it("rejects bindStream when disabled", () => {
     backend.setDisabled();
-    expect(() => backend.bindStream("pty-1", new ReadableStream())).toThrow(FeatureFlagDisabledError);
+    expect(() => backend.bindStream("pty-1", new ReadableStream())).toThrow(
+      FeatureFlagDisabledError,
+    );
   });
 
   it("rejects resize when disabled", () => {

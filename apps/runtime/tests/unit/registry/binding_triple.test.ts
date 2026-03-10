@@ -175,9 +175,7 @@ describe("binding_triple", () => {
       const result = validateBindingTriple(triple, query);
 
       expect(result.valid).toBe(false);
-      expect(
-        result.errors.some((e) => e.includes("does not belong to workspace")),
-      ).toBe(true);
+      expect(result.errors.some((e) => e.includes("does not belong to workspace"))).toBe(true);
     });
 
     it("should reject when session does not belong to lane", () => {

@@ -111,7 +111,9 @@ describe("Ghostty integration - lifecycle (T013)", () => {
 
     for (let i = 0; i < 10; i++) {
       const stream = new ReadableStream<Uint8Array>({
-        start(c) { c.close(); },
+        start(c) {
+          c.close();
+        },
       });
       backend.bindStream(`pty-${i}`, stream);
     }

@@ -152,10 +152,7 @@ export async function removeWorktree(
   await runGit(["worktree", "prune"], workspaceRepoPath);
 
   // Delete the lane branch (best-effort)
-  const branchResult = await runGit(
-    ["branch", "-D", branchName],
-    workspaceRepoPath,
-  );
+  const branchResult = await runGit(["branch", "-D", branchName], workspaceRepoPath);
   if (branchResult.exitCode !== 0 && !branchResult.stderr.includes("not found")) {
     // Log warning but continue - branch may have been manually deleted
   }

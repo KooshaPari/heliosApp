@@ -6,12 +6,7 @@
  */
 
 import type { ZellijCli } from "./cli.js";
-import type {
-  LayoutTopology,
-  TabTopology,
-  PaneTopology,
-  PaneDimensions,
-} from "./types.js";
+import type { LayoutTopology, TabTopology, PaneTopology, PaneDimensions } from "./types.js";
 
 /**
  * Manages layout topology for all tracked sessions.
@@ -63,12 +58,7 @@ export class TopologyTracker {
   /**
    * Add a pane to the active tab's topology.
    */
-  addPane(
-    sessionName: string,
-    paneId: number,
-    dimensions: PaneDimensions,
-    ptyId?: string,
-  ): void {
+  addPane(sessionName: string, paneId: number, dimensions: PaneDimensions, ptyId?: string): void {
     const topology = this.topologies.get(sessionName);
     if (!topology) return;
 
@@ -112,11 +102,7 @@ export class TopologyTracker {
   /**
    * Update pane dimensions in the topology.
    */
-  updatePaneDimensions(
-    sessionName: string,
-    paneId: number,
-    dimensions: PaneDimensions,
-  ): void {
+  updatePaneDimensions(sessionName: string, paneId: number, dimensions: PaneDimensions): void {
     const pane = this.findPane(sessionName, paneId);
     if (pane) {
       pane.dimensions = { ...dimensions };
@@ -191,12 +177,7 @@ export class TopologyTracker {
    * Rebuilds the topology from scratch based on zellij's current state.
    */
   async refreshTopology(sessionName: string): Promise<LayoutTopology> {
-    const result = await this.cli.run([
-      "--session",
-      sessionName,
-      "action",
-      "dump-layout",
-    ]);
+    const result = await this.cli.run(["--session", sessionName, "action", "dump-layout"]);
 
     // Preserve existing PTY bindings before refresh
     const existingTopology = this.topologies.get(sessionName);

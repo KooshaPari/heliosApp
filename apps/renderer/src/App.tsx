@@ -1,7 +1,12 @@
 import { type Component, For, onMount } from "solid-js";
 import { TerminalPanel } from "./components/terminal/TerminalPanel";
 import { TerminalTabs } from "./components/terminal/TerminalTabs";
-import { createTerminal, getActiveTerminalId, getTerminals, writeToTerminal } from "./stores/terminal.store";
+import {
+  createTerminal,
+  getActiveTerminalId,
+  getTerminals,
+  writeToTerminal,
+} from "./stores/terminal.store";
 
 export const App: Component = () => {
   onMount(() => {
@@ -21,7 +26,14 @@ export const App: Component = () => {
         "flex-direction": "column",
       }}
     >
-      <h1 style={{ padding: "8px 16px", margin: "0", "font-size": "16px", "border-bottom": "1px solid #313244" }}>
+      <h1
+        style={{
+          padding: "8px 16px",
+          margin: "0",
+          "font-size": "16px",
+          "border-bottom": "1px solid #313244",
+        }}
+      >
         Helios IDE
       </h1>
       <div style={{ flex: "1", display: "flex", "flex-direction": "column", overflow: "hidden" }}>

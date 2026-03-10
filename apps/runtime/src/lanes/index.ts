@@ -273,7 +273,13 @@ export class LaneManager {
           const cleaningState = transition(midState, "request_cleanup", laneId);
           recordTransition(laneId, midState, "request_cleanup", cleaningState);
           this.registry.update(laneId, { state: cleaningState });
-          await this.emitEvent("lane.cleaning", laneId, lane.workspaceId, lane.state, cleaningState);
+          await this.emitEvent(
+            "lane.cleaning",
+            laneId,
+            lane.workspaceId,
+            lane.state,
+            cleaningState,
+          );
         } else {
           throw new SharedLaneCleanupError(laneId, lane.attachedAgents.length);
         }
@@ -430,9 +436,7 @@ export class LaneManager {
 
       // Phase 3: Orphaned PTYs - delegate to ptyManager if available
       if (!isTimedOut() && this.ptyManager) {
-        const closedLanes = this.registry
-          .list()
-          .filter((l) => l.state === "closed");
+        const closedLanes = this.registry.list().filter((l) => l.state === "closed");
         for (const lane of closedLanes) {
           if (isTimedOut()) break;
           try {
@@ -528,7 +532,12 @@ export class LaneManager {
 // Re-export public types
 export { LaneRegistry, type LaneRecord, LaneNotFoundError } from "./registry.js";
 export type { LaneState, LaneEvent } from "./state_machine.js";
-export { InvalidLaneTransitionError, transition, withLaneLock, getTransitionHistory } from "./state_machine.js";
+export {
+  InvalidLaneTransitionError,
+  transition,
+  withLaneLock,
+  getTransitionHistory,
+} from "./state_machine.js";
 export { LaneClosedError, SharedLaneCleanupError } from "./sharing.js";
 export {
   provisionWorktree,

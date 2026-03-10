@@ -37,7 +37,10 @@ export class GhosttyBinaryNotFoundError extends Error {
 }
 
 export class GhosttyProcessError extends Error {
-  constructor(message: string, public readonly exitCode?: number | undefined) {
+  constructor(
+    message: string,
+    public readonly exitCode?: number | undefined,
+  ) {
     super(message);
     this.name = "GhosttyProcessError";
   }

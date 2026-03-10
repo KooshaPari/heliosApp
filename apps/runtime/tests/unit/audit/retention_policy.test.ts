@@ -5,7 +5,7 @@ import { InMemoryAuditSink } from "../../../src/audit/sink";
 describe("retention policy", () => {
   test("enforces minimum retention days", () => {
     expect(() => createRetentionPolicyConfig({ retention_days: 7 })).toThrow(
-      "retention_days must be an integer >= 30"
+      "retention_days must be an integer >= 30",
     );
   });
 
@@ -21,8 +21,8 @@ describe("retention policy", () => {
         type: "event",
         ts: "2026-01-01T00:00:00.000Z",
         topic: "session.attached",
-        payload: {}
-      }
+        payload: {},
+      },
     });
     await sink.append({
       recorded_at: "2026-02-20T00:00:00.000Z",
@@ -34,8 +34,8 @@ describe("retention policy", () => {
         type: "event",
         ts: "2026-02-20T00:00:00.000Z",
         topic: "session.attached",
-        payload: {}
-      }
+        payload: {},
+      },
     });
 
     const result = await sink.enforceRetention(new Date("2026-02-27T00:00:00.000Z"));
@@ -50,4 +50,3 @@ describe("retention policy", () => {
     expect(proof).toBeDefined();
   });
 });
-

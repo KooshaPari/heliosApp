@@ -16,10 +16,7 @@ import {
 
 describe("NormalizedProviderError", () => {
   it("should create error with required fields", () => {
-    const error = new NormalizedProviderError(
-      "PROVIDER_INIT_FAILED",
-      "Initialization failed"
-    );
+    const error = new NormalizedProviderError("PROVIDER_INIT_FAILED", "Initialization failed");
 
     expect(error.code).toBe("PROVIDER_INIT_FAILED");
     expect(error.message).toBe("Initialization failed");
@@ -35,7 +32,7 @@ describe("NormalizedProviderError", () => {
       "acp",
       true,
       undefined,
-      original
+      original,
     );
 
     expect(error.originalError).toBe(original);
@@ -48,17 +45,14 @@ describe("NormalizedProviderError", () => {
       "Execution failed",
       "mcp",
       true,
-      correlationId
+      correlationId,
     );
 
     expect(error.correlationId).toBe(correlationId);
   });
 
   it("should be instanceof Error", () => {
-    const error = new NormalizedProviderError(
-      "PROVIDER_INIT_FAILED",
-      "Init failed"
-    );
+    const error = new NormalizedProviderError("PROVIDER_INIT_FAILED", "Init failed");
 
     expect(error).toBeInstanceOf(Error);
     expect(error).toBeInstanceOf(NormalizedProviderError);
@@ -146,11 +140,7 @@ describe("normalizeError", () => {
 
   it("should preserve correlation ID", () => {
     const correlationId = "corr-123";
-    const error = normalizeError(
-      new Error("Test error"),
-      "acp",
-      correlationId
-    );
+    const error = normalizeError(new Error("Test error"), "acp", correlationId);
 
     expect(error.correlationId).toBe(correlationId);
   });
@@ -164,27 +154,17 @@ describe("normalizeError", () => {
 
 describe("isRetryable", () => {
   it("should return true for retryable errors", () => {
-    const timeoutError = new NormalizedProviderError(
-      "PROVIDER_TIMEOUT",
-      "Timeout",
-      "acp",
-      true
-    );
+    const timeoutError = new NormalizedProviderError("PROVIDER_TIMEOUT", "Timeout", "acp", true);
     expect(isRetryable(timeoutError)).toBe(true);
 
-    const crashError = new NormalizedProviderError(
-      "PROVIDER_CRASHED",
-      "Crashed",
-      "mcp",
-      true
-    );
+    const crashError = new NormalizedProviderError("PROVIDER_CRASHED", "Crashed", "mcp", true);
     expect(isRetryable(crashError)).toBe(true);
 
     const unavailableError = new NormalizedProviderError(
       "PROVIDER_UNAVAILABLE",
       "Unavailable",
       "a2a",
-      true
+      true,
     );
     expect(isRetryable(unavailableError)).toBe(true);
   });
@@ -194,7 +174,7 @@ describe("isRetryable", () => {
       "PROVIDER_INIT_FAILED",
       "Init failed",
       "acp",
-      false
+      false,
     );
     expect(isRetryable(initError)).toBe(false);
 
@@ -202,7 +182,7 @@ describe("isRetryable", () => {
       "PROVIDER_POLICY_DENIED",
       "Policy denied",
       "internal",
-      false
+      false,
     );
     expect(isRetryable(policyError)).toBe(false);
   });
@@ -242,104 +222,67 @@ describe("getErrorMessage", () => {
 
 describe("Error Code Retryability", () => {
   it("PROVIDER_INIT_FAILED should not be retryable", () => {
-    const error = new NormalizedProviderError(
-      "PROVIDER_INIT_FAILED",
-      "Init failed"
-    );
+    const error = new NormalizedProviderError("PROVIDER_INIT_FAILED", "Init failed");
     expect(isRetryable(error)).toBe(false);
   });
 
   it("PROVIDER_TIMEOUT should be retryable", () => {
-    const error = new NormalizedProviderError(
-      "PROVIDER_TIMEOUT",
-      "Timeout"
-    );
+    const error = new NormalizedProviderError("PROVIDER_TIMEOUT", "Timeout");
     expect(isRetryable(error)).toBe(true);
   });
 
   it("PROVIDER_CRASHED should be retryable", () => {
-    const error = new NormalizedProviderError(
-      "PROVIDER_CRASHED",
-      "Crashed"
-    );
+    const error = new NormalizedProviderError("PROVIDER_CRASHED", "Crashed");
     expect(isRetryable(error)).toBe(true);
   });
 
   it("PROVIDER_POLICY_DENIED should not be retryable", () => {
-    const error = new NormalizedProviderError(
-      "PROVIDER_POLICY_DENIED",
-      "Policy denied"
-    );
+    const error = new NormalizedProviderError("PROVIDER_POLICY_DENIED", "Policy denied");
     expect(isRetryable(error)).toBe(false);
   });
 
   it("PROVIDER_CONCURRENCY_EXCEEDED should be retryable", () => {
     const error = new NormalizedProviderError(
       "PROVIDER_CONCURRENCY_EXCEEDED",
-      "Concurrency exceeded"
+      "Concurrency exceeded",
     );
     expect(isRetryable(error)).toBe(true);
   });
 
   it("PROVIDER_UNAVAILABLE should be retryable", () => {
-    const error = new NormalizedProviderError(
-      "PROVIDER_UNAVAILABLE",
-      "Unavailable"
-    );
+    const error = new NormalizedProviderError("PROVIDER_UNAVAILABLE", "Unavailable");
     expect(isRetryable(error)).toBe(true);
   });
 
   it("PROVIDER_EXECUTE_FAILED should be retryable", () => {
-    const error = new NormalizedProviderError(
-      "PROVIDER_EXECUTE_FAILED",
-      "Execute failed"
-    );
+    const error = new NormalizedProviderError("PROVIDER_EXECUTE_FAILED", "Execute failed");
     expect(isRetryable(error)).toBe(true);
   });
 
   it("PROVIDER_UNKNOWN should be retryable", () => {
-    const error = new NormalizedProviderError(
-      "PROVIDER_UNKNOWN",
-      "Unknown error"
-    );
+    const error = new NormalizedProviderError("PROVIDER_UNKNOWN", "Unknown error");
     expect(isRetryable(error)).toBe(true);
   });
 });
 
 describe("Error Source Tracking", () => {
   it("should track ACP source", () => {
-    const error = new NormalizedProviderError(
-      "PROVIDER_TIMEOUT",
-      "Timeout",
-      "acp"
-    );
+    const error = new NormalizedProviderError("PROVIDER_TIMEOUT", "Timeout", "acp");
     expect(error.providerSource).toBe("acp");
   });
 
   it("should track MCP source", () => {
-    const error = new NormalizedProviderError(
-      "PROVIDER_TIMEOUT",
-      "Timeout",
-      "mcp"
-    );
+    const error = new NormalizedProviderError("PROVIDER_TIMEOUT", "Timeout", "mcp");
     expect(error.providerSource).toBe("mcp");
   });
 
   it("should track A2A source", () => {
-    const error = new NormalizedProviderError(
-      "PROVIDER_TIMEOUT",
-      "Timeout",
-      "a2a"
-    );
+    const error = new NormalizedProviderError("PROVIDER_TIMEOUT", "Timeout", "a2a");
     expect(error.providerSource).toBe("a2a");
   });
 
   it("should track internal source", () => {
-    const error = new NormalizedProviderError(
-      "PROVIDER_TIMEOUT",
-      "Timeout",
-      "internal"
-    );
+    const error = new NormalizedProviderError("PROVIDER_TIMEOUT", "Timeout", "internal");
     expect(error.providerSource).toBe("internal");
   });
 });

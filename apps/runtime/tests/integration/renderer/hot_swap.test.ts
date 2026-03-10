@@ -10,7 +10,12 @@
 import { describe, expect, it } from "bun:test";
 import { executeHotSwap, type TerminalContext } from "../../../src/renderer/hot_swap.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
-import { MockGhosttyAdapter, MockRioAdapter, TEST_CONFIG, TEST_SURFACE } from "../../helpers/mock_adapter.js";
+import {
+  MockGhosttyAdapter,
+  MockRioAdapter,
+  TEST_CONFIG,
+  TEST_SURFACE,
+} from "../../helpers/mock_adapter.js";
 
 describe("Hot-swap integration", () => {
   it("successfully hot-swaps single terminal", async () => {

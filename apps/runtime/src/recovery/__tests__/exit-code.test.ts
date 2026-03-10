@@ -106,7 +106,10 @@ describe("Exit Code Monitoring", () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const recordPath = path.join(tempDir, "recovery", "last-crash.json");
-      const exists = await fs.access(recordPath).then(() => true).catch(() => false);
+      const exists = await fs
+        .access(recordPath)
+        .then(() => true)
+        .catch(() => false);
       expect(exists).toBe(true);
 
       const content = await fs.readFile(recordPath, "utf-8");
@@ -143,7 +146,10 @@ describe("Exit Code Monitoring", () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const recoveryDir = path.join(tempDir, "recovery");
-      const exists = await fs.access(recoveryDir).then(() => true).catch(() => false);
+      const exists = await fs
+        .access(recoveryDir)
+        .then(() => true)
+        .catch(() => false);
       expect(exists).toBe(true);
     });
   });
@@ -186,7 +192,10 @@ describe("Exit Code Monitoring", () => {
       // Should still write to filesystem
       await new Promise((resolve) => setTimeout(resolve, 100));
       const recordPath = path.join(tempDir, "recovery", "last-crash.json");
-      const exists = await fs.access(recordPath).then(() => true).catch(() => false);
+      const exists = await fs
+        .access(recordPath)
+        .then(() => true)
+        .catch(() => false);
       expect(exists).toBe(true);
     });
   });

@@ -48,12 +48,7 @@ export {
   emitPtyEvent,
 } from "./events.js";
 
-export {
-  InvalidStateError,
-  type WriteResult,
-  type ProcessMap,
-  writeInput,
-} from "./io.js";
+export { InvalidStateError, type WriteResult, type ProcessMap, writeInput } from "./io.js";
 
 export { IdleMonitor, type IdleMonitorConfig } from "./idle_monitor.js";
 
@@ -81,8 +76,15 @@ import {
   type TerminateOptions as _TerminateOptions,
 } from "./signals.js";
 import { writeInput as _writeInput, type ProcessMap as _ProcessMap } from "./io.js";
-import { IdleMonitor as _IdleMonitor, type IdleMonitorConfig as _IdleMonitorConfig } from "./idle_monitor.js";
-import { OutputBuffer as _OutputBuffer, type OutputBufferConfig as _OutputBufferConfig, type BufferStats as _BufferStats } from "./buffers.js";
+import {
+  IdleMonitor as _IdleMonitor,
+  type IdleMonitorConfig as _IdleMonitorConfig,
+} from "./idle_monitor.js";
+import {
+  OutputBuffer as _OutputBuffer,
+  type OutputBufferConfig as _OutputBufferConfig,
+  type BufferStats as _BufferStats,
+} from "./buffers.js";
 
 /**
  * High-level facade for PTY operations.
@@ -129,12 +131,7 @@ export class PtyManager {
     this.bufferConfig = bufferConfig;
     this.registry = new _PtyRegistry(maxCapacity);
     this.bus = bus ?? new _NoOpBusPublisher();
-    this.idleMonitor = new _IdleMonitor(
-      this.registry,
-      this.bus,
-      this.lifecycles,
-      idleConfig,
-    );
+    this.idleMonitor = new _IdleMonitor(this.registry, this.bus, this.lifecycles, idleConfig);
   }
 
   /**
@@ -283,14 +280,7 @@ export class PtyManager {
 
     const lc = this.lifecycles.get(ptyId)!;
 
-    await _terminate(
-      record,
-      lc,
-      this.registry,
-      this.signalHistories,
-      this.bus,
-      options,
-    );
+    await _terminate(record, lc, this.registry, this.signalHistories, this.bus, options);
 
     // Clean up internal maps.
     this.lifecycles.delete(ptyId);

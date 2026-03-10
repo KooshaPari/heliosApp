@@ -25,7 +25,7 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
   }
 
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
-    const prompt = request.messages.map(m => `${m.role}: ${m.content}`).join("\n");
+    const prompt = request.messages.map((m) => `${m.role}: ${m.content}`).join("\n");
     const args = [this.binaryPath, "-m", request.model, "-p", prompt, "--no-display-prompt"];
     if (request.maxTokens) args.push("-n", String(request.maxTokens));
 
@@ -57,8 +57,17 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
       const glob = new Bun.Glob("**/*.gguf");
       const models: ModelInfo[] = [];
       for await (const path of glob.scan(this.modelDir)) {
-        const name = path.replace(/\.gguf$/, "").split("/").pop() ?? path;
-        models.push({ id: `${this.modelDir}/${path}`, name, contextWindow: 4096, providerId: "llamacpp" });
+        const name =
+          path
+            .replace(/\.gguf$/, "")
+            .split("/")
+            .pop() ?? path;
+        models.push({
+          id: `${this.modelDir}/${path}`,
+          name,
+          contextWindow: 4096,
+          providerId: "llamacpp",
+        });
       }
       return models;
     } catch {

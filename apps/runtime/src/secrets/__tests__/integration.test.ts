@@ -250,10 +250,14 @@ describe("Integration Tests (T015)", () => {
       for (let i = 0; i < attempts; i++) {
         try {
           await store.retrieveWithContext(
-            { requestingProviderId: "providerB", requestingWorkspaceId: "ws1", correlationId: `corr-${i}` },
+            {
+              requestingProviderId: "providerB",
+              requestingWorkspaceId: "ws1",
+              correlationId: `corr-${i}`,
+            },
             "providerA",
             "ws1",
-            "apiKey"
+            "apiKey",
           );
           // Should never reach here
         } catch (err) {
@@ -274,12 +278,18 @@ describe("Integration Tests (T015)", () => {
 
       try {
         await store.retrieveWithContext(
-          { requestingProviderId: "providerB", requestingWorkspaceId: "ws1", correlationId: "corr-deny" },
+          {
+            requestingProviderId: "providerB",
+            requestingWorkspaceId: "ws1",
+            correlationId: "corr-deny",
+          },
           "providerA",
           "ws1",
-          "key"
+          "key",
         );
-      } catch (_) { /* expected */ }
+      } catch (_) {
+        /* expected */
+      }
 
       await new Promise((r) => setTimeout(r, 10));
 
@@ -296,10 +306,14 @@ describe("Integration Tests (T015)", () => {
       await store.create("providerA", "ws1", "key", "secret-value", "corr-1");
 
       const value = await store.retrieveWithContext(
-        { requestingProviderId: "providerA", requestingWorkspaceId: "ws1", correlationId: "corr-ok" },
+        {
+          requestingProviderId: "providerA",
+          requestingWorkspaceId: "ws1",
+          correlationId: "corr-ok",
+        },
         "providerA",
         "ws1",
-        "key"
+        "key",
       );
       expect(value).toBe("secret-value");
     });
@@ -320,7 +334,9 @@ describe("Integration Tests (T015)", () => {
       await storeWithAudit.create("prov", "ws", "key", "val", "corr-create");
       await storeWithAudit.retrieveWithContext(
         { requestingProviderId: "prov", requestingWorkspaceId: "ws", correlationId: "corr-access" },
-        "prov", "ws", "key"
+        "prov",
+        "ws",
+        "key",
       );
       await storeWithAudit.rotate("prov", "ws", "key", "newval", "corr-rotate");
       await storeWithAudit.revoke("prov", "ws", "key", "corr-revoke");
@@ -549,10 +565,10 @@ describe("Integration Tests (T015)", () => {
 
       const detector = new ProtectedPathDetector({ bus: wrappedBus });
       // Command that includes an AWS key inline (should be stripped in redactedCommand)
-      detector.check(
-        "cat .env AKIAIOSFODNN7EXAMPLE",
-        { terminalId: "term-1", correlationId: "corr-sensitive" }
-      );
+      detector.check("cat .env AKIAIOSFODNN7EXAMPLE", {
+        terminalId: "term-1",
+        correlationId: "corr-sensitive",
+      });
 
       await new Promise((r) => setTimeout(r, 5));
 

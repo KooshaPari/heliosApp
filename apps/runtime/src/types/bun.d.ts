@@ -4,7 +4,7 @@ declare const Bun: {
     options: {
       stdout: "pipe";
       stderr: "pipe";
-    }
+    },
   ): {
     stdout: ReadableStream<Uint8Array> | null;
     stderr: ReadableStream<Uint8Array> | null;

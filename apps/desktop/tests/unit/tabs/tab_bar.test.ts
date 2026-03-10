@@ -12,7 +12,7 @@ describe("TabBar", () => {
       createMockTabSurface("tab2", "agent", "Agent"),
       createMockTabSurface("tab3", "session", "Session"),
       createMockTabSurface("tab4", "chat", "Chat"),
-      createMockTabSurface("tab5", "project", "Project")
+      createMockTabSurface("tab5", "project", "Project"),
     ];
 
     tabBar = new TabBar(mockTabs);
@@ -58,7 +58,7 @@ describe("TabBar", () => {
       tabBar = new TabBar(mockTabs, {
         onTabSelected: (id) => {
           selectedTabId = id;
-        }
+        },
       });
 
       tabBar.selectTab("tab3");
@@ -89,7 +89,7 @@ describe("TabBar", () => {
       tabBar = new TabBar(mockTabs, {
         onTabReordered: (ids) => {
           reorderedTabs = ids;
-        }
+        },
       });
 
       const newOrder = ["tab3", "tab1", "tab2", "tab4", "tab5"];
@@ -134,7 +134,7 @@ describe("TabBar", () => {
         onTabPinned: (id, pinned) => {
           pinnedTab = id;
           pinState = pinned;
-        }
+        },
       });
 
       tabBar.pinTab("tab2", true);
@@ -157,9 +157,7 @@ describe("TabBar", () => {
       const unpinned = order.filter((id) => !tabBar.isTabPinned(id));
 
       // Pinned tabs should come before unpinned in the order
-      const lastPinnedIndex = Math.max(
-        ...pinned.map((id) => order.indexOf(id))
-      );
+      const lastPinnedIndex = Math.max(...pinned.map((id) => order.indexOf(id)));
       const firstUnpinnedIndex = unpinned.length > 0 ? order.indexOf(unpinned[0]) : Infinity;
 
       expect(lastPinnedIndex).toBeLessThan(firstUnpinnedIndex);
@@ -212,7 +210,7 @@ describe("TabBar", () => {
     it("should update tab list", () => {
       const newTabs = [
         createMockTabSurface("tab1", "terminal", "Terminal"),
-        createMockTabSurface("tab2", "agent", "Agent")
+        createMockTabSurface("tab2", "agent", "Agent"),
       ];
 
       tabBar.updateTabs(newTabs);
@@ -228,7 +226,7 @@ describe("TabBar", () => {
       const newTabs = [
         createMockTabSurface("tab1", "terminal", "Terminal"),
         createMockTabSurface("tab2", "agent", "Agent"),
-        createMockTabSurface("tab3", "session", "Session")
+        createMockTabSurface("tab3", "session", "Session"),
       ];
 
       tabBar.updateTabs(newTabs);
@@ -241,7 +239,7 @@ describe("TabBar", () => {
 
       const newTabs = [
         createMockTabSurface("tab1", "terminal", "Terminal"),
-        createMockTabSurface("tab2", "agent", "Agent")
+        createMockTabSurface("tab2", "agent", "Agent"),
       ];
 
       tabBar.updateTabs(newTabs);
@@ -253,7 +251,7 @@ describe("TabBar", () => {
       const newTabs = [
         createMockTabSurface("tab1", "terminal", "Terminal"),
         createMockTabSurface("tab2", "agent", "Agent"),
-        createMockTabSurface("tab6", "project", "NewProject")
+        createMockTabSurface("tab6", "project", "NewProject"),
       ];
 
       tabBar.updateTabs(newTabs);

@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import {
-  RecoveryStateMachine,
-  RecoveryStage,
-  type RecoveryState,
-} from "../state-machine.js";
+import { RecoveryStateMachine, RecoveryStage, type RecoveryState } from "../state-machine.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { promises as fs } from "fs";
 import path from "path";
@@ -59,9 +55,9 @@ describe("RecoveryStateMachine", () => {
     it("should reject illegal transitions", async () => {
       await stateMachine.transition(RecoveryStage.DETECTING);
 
-      await expect(
-        stateMachine.transition(RecoveryStage.RESTORING)
-      ).rejects.toThrow("Illegal transition");
+      await expect(stateMachine.transition(RecoveryStage.RESTORING)).rejects.toThrow(
+        "Illegal transition",
+      );
     });
 
     it("should allow transition to failure state", async () => {
@@ -86,7 +82,10 @@ describe("RecoveryStateMachine", () => {
       await stateMachine.transition(RecoveryStage.INVENTORYING);
 
       const statePath = path.join(tempDir, "recovery", "recovery-state.json");
-      const exists = await fs.access(statePath).then(() => true).catch(() => false);
+      const exists = await fs
+        .access(statePath)
+        .then(() => true)
+        .catch(() => false);
       expect(exists).toBe(true);
 
       const content = await fs.readFile(statePath, "utf-8");
@@ -151,9 +150,7 @@ describe("RecoveryStateMachine", () => {
 
       // Fourth attempt should fail
       await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
-      await expect(
-        stateMachine.transition(RecoveryStage.DETECTING)
-      ).rejects.toThrow("Max retries");
+      await expect(stateMachine.transition(RecoveryStage.DETECTING)).rejects.toThrow("Max retries");
     });
 
     it("should reset attempt count when moving to next stage", async () => {
@@ -212,9 +209,7 @@ describe("RecoveryStateMachine", () => {
       await stateMachineNoBus.initialize();
 
       // Should not throw
-      await expect(
-        stateMachineNoBus.transition(RecoveryStage.DETECTING)
-      ).resolves.toBeUndefined();
+      await expect(stateMachineNoBus.transition(RecoveryStage.DETECTING)).resolves.toBeUndefined();
     });
   });
 

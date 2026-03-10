@@ -69,7 +69,10 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       await writer.write(checkpoint);
 
       const tempPath = `${writer.getCheckpointPath()}.tmp`;
-      const tempExists = await fs.access(tempPath).then(() => true).catch(() => false);
+      const tempExists = await fs
+        .access(tempPath)
+        .then(() => true)
+        .catch(() => false);
       expect(tempExists).toBe(false);
     });
   });
@@ -124,9 +127,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const result = await reconciler.cleanup(report);
 
       expect(result).toBeDefined();
-      expect(result.terminated + result.removed).toBeLessThanOrEqual(
-        report.safeToTerminate.length
-      );
+      expect(result.terminated + result.removed).toBeLessThanOrEqual(report.safeToTerminate.length);
     });
 
     it("should flag needs-review orphans without terminating them", async () => {
@@ -168,7 +169,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
       const reconciler = new OrphanReconciler(
         result.restored.map((s) => s.sessionId),
-        bus
+        bus,
       );
       const report = await reconciler.scan();
       await reconciler.cleanup(report);
@@ -201,15 +202,12 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
               // Simulate user activity
               resolve(undefined);
             }, Math.random() * 1000);
-          })
+          }),
         );
       }
 
       await stateMachine.transition(RecoveryStage.INVENTORYING);
-      const result = await Promise.all([
-        pipeline.restore(checkpoint),
-        ...activityPromises,
-      ]);
+      const result = await Promise.all([pipeline.restore(checkpoint), ...activityPromises]);
 
       expect(result[0].restored.length).toBeGreaterThan(0);
     });
@@ -265,9 +263,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
       // Fourth attempt should fail
       await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
-      await expect(stateMachine.transition(RecoveryStage.DETECTING)).rejects.toThrow(
-        "Max retries"
-      );
+      await expect(stateMachine.transition(RecoveryStage.DETECTING)).rejects.toThrow("Max retries");
     });
   });
 });

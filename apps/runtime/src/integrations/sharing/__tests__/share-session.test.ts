@@ -8,11 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import {
-  ShareSessionManager,
-  type PolicyGate,
-  type ShareSession,
-} from "../share-session.js";
+import { ShareSessionManager, type PolicyGate, type ShareSession } from "../share-session.js";
 import { UptermAdapter, TmateAdapter, getBackendAdapter } from "../adapters.js";
 import { InMemoryLocalBus } from "../../../protocol/bus.js";
 
@@ -32,7 +28,7 @@ class MockPolicyGate implements PolicyGate {
 
   async evaluate(
     _action: string,
-    _context: Record<string, unknown>
+    _context: Record<string, unknown>,
   ): Promise<{ allowed: boolean; reason?: string }> {
     if (this.shouldDeny) {
       return {
@@ -57,12 +53,7 @@ describe("Share Session Management", () => {
 
   describe("Share Session Creation", () => {
     it("should create a share session with upterm backend", async () => {
-      const session = await manager.create(
-        "terminal-123",
-        "upterm",
-        60000,
-        "corr-001"
-      );
+      const session = await manager.create("terminal-123", "upterm", 60000, "corr-001");
 
       expect(session.id).toBeTruthy();
       expect(session.terminalId).toBe("terminal-123");
@@ -73,12 +64,7 @@ describe("Share Session Management", () => {
     });
 
     it("should create a share session with tmate backend", async () => {
-      const session = await manager.create(
-        "terminal-456",
-        "tmate",
-        60000,
-        "corr-002"
-      );
+      const session = await manager.create("terminal-456", "tmate", 60000, "corr-002");
 
       expect(session.id).toBeTruthy();
       expect(session.backend).toBe("tmate");
@@ -89,12 +75,7 @@ describe("Share Session Management", () => {
     it("should include correlation ID in session", async () => {
       const correlationId = "unique-trace-id";
 
-      const session = await manager.create(
-        "terminal-123",
-        "upterm",
-        60000,
-        correlationId
-      );
+      const session = await manager.create("terminal-123", "upterm", 60000, correlationId);
 
       expect(session.correlationId).toBe(correlationId);
     });
@@ -142,9 +123,9 @@ describe("Share Session Management", () => {
     it("should deny share creation when policy gate denies", async () => {
       policyGate.setShouldDeny(true, "Access denied");
 
-      await expect(
-        manager.create("terminal-123", "upterm", 60000, "corr-001")
-      ).rejects.toThrow(/policy denied|access denied/i);
+      await expect(manager.create("terminal-123", "upterm", 60000, "corr-001")).rejects.toThrow(
+        /policy denied|access denied/i,
+      );
     });
 
     it("should emit failure event when policy denies", async () => {
@@ -203,16 +184,12 @@ describe("Share Session Management", () => {
       await manager.terminate(session.id);
 
       const events = bus.getEvents();
-      const terminatedEvent = events.find(
-        (e) => e.topic === "share.session.terminated"
-      );
+      const terminatedEvent = events.find((e) => e.topic === "share.session.terminated");
       expect(terminatedEvent).toBeDefined();
     });
 
     it("should throw when terminating non-existent session", async () => {
-      await expect(manager.terminate("non-existent")).rejects.toThrow(
-        /not found/i
-      );
+      await expect(manager.terminate("non-existent")).rejects.toThrow(/not found/i);
     });
 
     it("should cleanup worker on termination", async () => {
@@ -315,9 +292,7 @@ describe("Share Session Management", () => {
 
       const promises = [];
       for (let i = 0; i < 3; i++) {
-        promises.push(
-          manager.create(terminalId, "upterm", 60000, `corr-${i}`)
-        );
+        promises.push(manager.create(terminalId, "upterm", 60000, `corr-${i}`));
       }
 
       const sessions = await Promise.all(promises);
@@ -364,13 +339,9 @@ describe("Upterm Backend Adapter", () => {
   });
 
   it("should validate inputs before starting share", async () => {
-    await expect(
-      adapter.startShare("", "main-session")
-    ).rejects.toThrow(/missing/i);
+    await expect(adapter.startShare("", "main-session")).rejects.toThrow(/missing/i);
 
-    await expect(
-      adapter.startShare("terminal-123", "")
-    ).rejects.toThrow(/missing/i);
+    await expect(adapter.startShare("terminal-123", "")).rejects.toThrow(/missing/i);
   });
 
   it("should stop share gracefully", async () => {
@@ -413,9 +384,7 @@ describe("Tmate Backend Adapter", () => {
   });
 
   it("should validate inputs before starting share", async () => {
-    await expect(
-      adapter.startShare("", "main-session")
-    ).rejects.toThrow(/missing/i);
+    await expect(adapter.startShare("", "main-session")).rejects.toThrow(/missing/i);
   });
 
   it("should stop share gracefully", async () => {

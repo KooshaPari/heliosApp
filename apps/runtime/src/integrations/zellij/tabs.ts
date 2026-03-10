@@ -36,10 +36,7 @@ export class ZellijTabManager {
   /**
    * Create a new tab in a session.
    */
-  async createTab(
-    sessionName: string,
-    name?: string,
-  ): Promise<TabRecord> {
+  async createTab(sessionName: string, name?: string): Promise<TabRecord> {
     const startMs = performance.now();
     const tabId = ++this.tabCounter;
     const tabName = name ?? `Tab #${tabId}`;
@@ -51,11 +48,7 @@ export class ZellijTabManager {
 
     const result = await this.cli.run(args);
     if (result.exitCode !== 0) {
-      throw new ZellijCliError(
-        `new-tab --session ${sessionName}`,
-        result.exitCode,
-        result.stderr,
-      );
+      throw new ZellijCliError(`new-tab --session ${sessionName}`, result.exitCode, result.stderr);
     }
 
     // Update topology
@@ -72,9 +65,7 @@ export class ZellijTabManager {
     console.debug(
       `[zellij-tabs] createTab(${sessionName}) tab=${tabId} name="${tabName}" duration=${durationMs.toFixed(1)}ms`,
     );
-    console.debug(
-      `[zellij-tabs] mux.tab.created: session=${sessionName} tab=${tabId}`,
-    );
+    console.debug(`[zellij-tabs] mux.tab.created: session=${sessionName} tab=${tabId}`);
 
     return record;
   }
@@ -128,19 +119,11 @@ export class ZellijTabManager {
       );
     }
 
-    const result = await this.cli.run([
-      "--session",
-      sessionName,
-      "action",
-      "close-tab",
-    ]);
+    const result = await this.cli.run(["--session", sessionName, "action", "close-tab"]);
 
     if (result.exitCode !== 0) {
       // If tab doesn't exist, treat as success (idempotent)
-      if (
-        !result.stderr.includes("not found") &&
-        !result.stderr.includes("no tab")
-      ) {
+      if (!result.stderr.includes("not found") && !result.stderr.includes("no tab")) {
         throw new ZellijCliError(
           `close-tab --session ${sessionName}`,
           result.exitCode,
@@ -152,9 +135,7 @@ export class ZellijTabManager {
     // Update topology
     this.topology.removeTab(sessionName, tabId);
 
-    console.debug(
-      `[zellij-tabs] mux.tab.closed: session=${sessionName} tab=${tabId}`,
-    );
+    console.debug(`[zellij-tabs] mux.tab.closed: session=${sessionName} tab=${tabId}`);
   }
 
   /**
@@ -192,9 +173,7 @@ export class ZellijTabManager {
     // Update topology
     this.topology.switchTab(sessionName, tabId);
 
-    console.debug(
-      `[zellij-tabs] mux.tab.switched: session=${sessionName} tab=${tabId}`,
-    );
+    console.debug(`[zellij-tabs] mux.tab.switched: session=${sessionName} tab=${tabId}`);
   }
 
   /**

@@ -87,9 +87,7 @@ describe("OrphanWatchdog", () => {
     await new Promise((r) => setTimeout(r, 150));
 
     const events = bus.getEvents();
-    const cycleEvent = events.find(
-      (e) => e.topic === "orphan.detection.cycle_completed"
-    );
+    const cycleEvent = events.find((e) => e.topic === "orphan.detection.cycle_completed");
 
     expect(cycleEvent).toBeDefined();
     expect(cycleEvent?.payload?.cycleNumber).toBe(1);

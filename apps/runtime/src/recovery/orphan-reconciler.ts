@@ -92,7 +92,9 @@ export class OrphanReconciler {
     const reviewPending = report.needsReview.length;
 
     // Log cleanup result
-    console.log(`Orphan cleanup: ${terminated} terminated, ${removed} removed, ${reviewPending} pending review`);
+    console.log(
+      `Orphan cleanup: ${terminated} terminated, ${removed} removed, ${reviewPending} pending review`,
+    );
 
     // Publish cleanup event
     if (this.bus) {
@@ -118,7 +120,7 @@ export class OrphanReconciler {
 
   private async scanOrphanPTYs(
     safeToTerminate: OrphanItem[],
-    needsReview: OrphanItem[]
+    needsReview: OrphanItem[],
   ): Promise<void> {
     // In a real implementation, this would scan /proc or use Bun/Node APIs
     // to find PTY processes owned by heliosApp but not associated with restored sessions
@@ -127,7 +129,7 @@ export class OrphanReconciler {
 
   private async scanStaleZelijjSessions(
     safeToTerminate: OrphanItem[],
-    needsReview: OrphanItem[]
+    needsReview: OrphanItem[],
   ): Promise<void> {
     // In a real implementation, this would call zellij list-sessions
     // and compare against restored session IDs
@@ -136,7 +138,7 @@ export class OrphanReconciler {
 
   private async scanStaleTempFiles(
     safeToTerminate: OrphanItem[],
-    needsReview: OrphanItem[]
+    needsReview: OrphanItem[],
   ): Promise<void> {
     try {
       const { promises: fs } = await import("fs");

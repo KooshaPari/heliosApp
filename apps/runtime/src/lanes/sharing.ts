@@ -28,10 +28,7 @@ export interface ShareResult {
  * Transition a lane to shared state.
  * Idempotent: if already shared, returns current state without error.
  */
-export async function shareLane(
-  registry: LaneRegistry,
-  laneId: string,
-): Promise<ShareResult> {
+export async function shareLane(registry: LaneRegistry, laneId: string): Promise<ShareResult> {
   return withLaneLock(laneId, async () => {
     const lane = registry.get(laneId);
     if (!lane) {
@@ -120,7 +117,12 @@ export async function detachAgent(
 export async function forceDetachAll(
   registry: LaneRegistry,
   laneId: string,
-): Promise<{ detachedAgents: string[]; transitioned: boolean; fromState?: LaneState; toState?: LaneState }> {
+): Promise<{
+  detachedAgents: string[];
+  transitioned: boolean;
+  fromState?: LaneState;
+  toState?: LaneState;
+}> {
   return withLaneLock(laneId, async () => {
     const lane = registry.get(laneId);
     if (!lane) {

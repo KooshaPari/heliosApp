@@ -519,8 +519,12 @@ describe("ParManager - T015: Event completeness", () => {
   test("bus failure does not block par operations", async () => {
     createLaneInRegistry(registry);
     const failBus = {
-      async publish(): Promise<void> { throw new Error("bus down"); },
-      async request(): Promise<any> { return {}; },
+      async publish(): Promise<void> {
+        throw new Error("bus down");
+      },
+      async request(): Promise<any> {
+        return {};
+      },
     };
     const { spawnFn } = createMockSpawn({ pid: 42, exitDelay: 60000 });
     const mgr = new ParManager({ registry, bus: failBus as any, spawnFn });

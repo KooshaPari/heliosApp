@@ -11,11 +11,7 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type { ProviderAdapter, ProviderRegistration, ProviderHealthStatus } from "./adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-  PROVIDER_ERROR_CODES,
-} from "./errors.js";
+import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
 
 /**
  * Registered provider instance with metadata.
@@ -68,7 +64,7 @@ export class ProviderRegistry {
    */
   async register<TConfig, TInput, TOutput>(
     registration: ProviderRegistration<TConfig>,
-    adapter: ProviderAdapter<TConfig, TInput, TOutput>
+    adapter: ProviderAdapter<TConfig, TInput, TOutput>,
   ): Promise<void> {
     // Validate registration configuration
     this.validateRegistration(registration);
@@ -120,7 +116,7 @@ export class ProviderRegistry {
         "internal",
         false,
         undefined,
-        normalized instanceof Error ? normalized : undefined
+        normalized instanceof Error ? normalized : undefined,
       );
     }
   }
@@ -140,7 +136,7 @@ export class ProviderRegistry {
       throw new NormalizedProviderError(
         "PROVIDER_UNKNOWN",
         `Provider ${providerId} not found in registry`,
-        "internal"
+        "internal",
       );
     }
 
@@ -167,7 +163,7 @@ export class ProviderRegistry {
         "PROVIDER_INIT_FAILED",
         `Failed to unregister provider ${providerId}: ${normalized.message}`,
         "internal",
-        false
+        false,
       );
     }
   }
@@ -234,7 +230,7 @@ export class ProviderRegistry {
       throw new NormalizedProviderError(
         "PROVIDER_UNKNOWN",
         `Provider ${providerId} not found in registry`,
-        "internal"
+        "internal",
       );
     }
 
@@ -288,7 +284,7 @@ export class ProviderRegistry {
       throw new NormalizedProviderError(
         "PROVIDER_UNKNOWN",
         `Provider ${providerId} not found`,
-        "internal"
+        "internal",
       );
     }
 
@@ -296,7 +292,7 @@ export class ProviderRegistry {
       throw new NormalizedProviderError(
         "PROVIDER_CONCURRENCY_EXCEEDED",
         `Provider ${providerId} concurrency limit (${provider.registration.concurrencyLimit}) exceeded`,
-        "internal"
+        "internal",
       );
     }
   }
@@ -366,7 +362,7 @@ export class ProviderRegistry {
       throw new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
         "Registration missing required field: id",
-        "internal"
+        "internal",
       );
     }
 
@@ -374,7 +370,7 @@ export class ProviderRegistry {
       throw new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
         "Registration missing or invalid required field: type",
-        "internal"
+        "internal",
       );
     }
 
@@ -382,7 +378,7 @@ export class ProviderRegistry {
       throw new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
         "Registration missing required field: workspaceId",
-        "internal"
+        "internal",
       );
     }
 
@@ -395,7 +391,7 @@ export class ProviderRegistry {
       throw new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
         `Invalid concurrency limit: ${registration.concurrencyLimit} (must be 1-100)`,
-        "internal"
+        "internal",
       );
     }
 
@@ -407,7 +403,7 @@ export class ProviderRegistry {
       throw new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
         `Invalid health check interval: ${registration.healthCheckIntervalMs} (minimum 5000ms)`,
-        "internal"
+        "internal",
       );
     }
   }

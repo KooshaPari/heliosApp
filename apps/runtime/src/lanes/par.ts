@@ -160,15 +160,13 @@ export class ParManager {
     let proc: SpawnResult;
 
     try {
-      proc = this.spawnFn(
-        ["par", "task", "create", "--cwd", worktreePath],
-        { cwd: worktreePath, stdout: "pipe", stderr: "pipe" },
-      );
+      proc = this.spawnFn(["par", "task", "create", "--cwd", worktreePath], {
+        cwd: worktreePath,
+        stdout: "pipe",
+        stderr: "pipe",
+      });
     } catch (err) {
-      throw new ParSpawnError(
-        laneId,
-        err instanceof Error ? err.message : String(err),
-      );
+      throw new ParSpawnError(laneId, err instanceof Error ? err.message : String(err));
     }
 
     const pid = proc.pid;
@@ -194,22 +192,24 @@ export class ParManager {
     this.registry.update(laneId, { parTaskPid: pid });
 
     // Monitor for unexpected exit
-    proc.exited.then((exitCode) => {
-      const current = this.bindings.get(laneId);
-      if (current && current.status === "active") {
-        current.status = "terminated";
-        this.registry.update(laneId, { parTaskPid: null });
-        this.processHandles.delete(laneId);
-        this.emitParEvent("lane.par_task.terminated", laneId, lane.workspaceId, {
-          parTaskId,
-          pid,
-          exitCode,
-          reason: "unexpected_exit",
-        });
-      }
-    }).catch(() => {
-      // Process monitoring failed - will be caught by health check
-    });
+    proc.exited
+      .then((exitCode) => {
+        const current = this.bindings.get(laneId);
+        if (current && current.status === "active") {
+          current.status = "terminated";
+          this.registry.update(laneId, { parTaskPid: null });
+          this.processHandles.delete(laneId);
+          this.emitParEvent("lane.par_task.terminated", laneId, lane.workspaceId, {
+            parTaskId,
+            pid,
+            exitCode,
+            reason: "unexpected_exit",
+          });
+        }
+      })
+      .catch(() => {
+        // Process monitoring failed - will be caught by health check
+      });
 
     await this.emitParEvent("lane.par_task.bound", laneId, lane.workspaceId, {
       parTaskId,
@@ -251,9 +251,7 @@ export class ParManager {
       // Wait for graceful exit or force kill
       const exited = await Promise.race([
         proc.exited.then(() => true).catch(() => true),
-        new Promise<false>((resolve) =>
-          setTimeout(() => resolve(false), this.forceKillTimeoutMs),
-        ),
+        new Promise<false>((resolve) => setTimeout(() => resolve(false), this.forceKillTimeoutMs)),
       ]);
 
       if (!exited) {
@@ -314,10 +312,11 @@ export class ParManager {
       const start = performance.now();
 
       try {
-        const proc = this.spawnFn(
-          ["par", "exec", "--task", binding.parTaskId, "--", ...command],
-          { cwd: binding.worktreePath, stdout: "pipe", stderr: "pipe" },
-        );
+        const proc = this.spawnFn(["par", "exec", "--task", binding.parTaskId, "--", ...command], {
+          cwd: binding.worktreePath,
+          stdout: "pipe",
+          stderr: "pipe",
+        });
 
         // Race execution against timeout
         const timeoutPromise = new Promise<"timeout">((resolve) =>

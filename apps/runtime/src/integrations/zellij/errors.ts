@@ -6,7 +6,7 @@ export class ZellijNotFoundError extends Error {
   constructor() {
     super(
       "zellij binary not found in PATH. " +
-        "Install zellij: https://zellij.dev/documentation/installation"
+        "Install zellij: https://zellij.dev/documentation/installation",
     );
     this.name = "ZellijNotFoundError";
   }
@@ -16,7 +16,7 @@ export class ZellijVersionError extends Error {
   constructor(actual: string, required: string) {
     super(
       `zellij version ${actual} is below the minimum required ${required}. ` +
-        "Please upgrade: https://zellij.dev/documentation/installation"
+        "Please upgrade: https://zellij.dev/documentation/installation",
     );
     this.name = "ZellijVersionError";
   }
@@ -36,9 +36,7 @@ export class ZellijCliError extends Error {
 
 export class ZellijTimeoutError extends Error {
   constructor(command: string, timeoutMs: number) {
-    super(
-      `zellij command timed out after ${timeoutMs}ms: ${command}`
-    );
+    super(`zellij command timed out after ${timeoutMs}ms: ${command}`);
     this.name = "ZellijTimeoutError";
   }
 }
@@ -70,15 +68,10 @@ export class PaneTooSmallError extends Error {
   public readonly minCols: number;
   public readonly minRows: number;
 
-  constructor(
-    requestedCols: number,
-    requestedRows: number,
-    minCols: number,
-    minRows: number,
-  ) {
+  constructor(requestedCols: number, requestedRows: number, minCols: number, minRows: number) {
     super(
       `Pane dimensions ${requestedCols}x${requestedRows} violate minimum ` +
-        `${minCols}x${minRows}`
+        `${minCols}x${minRows}`,
     );
     this.name = "PaneTooSmallError";
     this.requestedCols = requestedCols;

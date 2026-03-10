@@ -1,9 +1,4 @@
-import {
-  createCipheriv,
-  createDecipheriv,
-  randomBytes,
-  hkdfSync,
-} from "node:crypto";
+import { createCipheriv, createDecipheriv, randomBytes, hkdfSync } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from "node:fs";
 import { homedir } from "node:os";
@@ -11,9 +6,9 @@ import { join } from "node:path";
 
 export interface EncryptedPayload {
   ciphertext: string; // hex
-  iv: string;         // hex, 12 bytes
-  authTag: string;    // hex, 16 bytes
-  version: number;    // always 1
+  iv: string; // hex, 12 bytes
+  authTag: string; // hex, 16 bytes
+  version: number; // always 1
 }
 
 const ALGORITHM = "aes-256-gcm";
@@ -46,10 +41,7 @@ export class EncryptionService {
     const iv = randomBytes(IV_BYTES);
     const cipher = createCipheriv(ALGORITHM, encKey, iv);
 
-    const ciphertext = Buffer.concat([
-      cipher.update(plaintext, "utf8"),
-      cipher.final(),
-    ]);
+    const ciphertext = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
     const authTag = cipher.getAuthTag();
 
     return {
@@ -153,7 +145,7 @@ export class EncryptionService {
       const hex = execFileSync(
         "security",
         ["find-generic-password", "-s", KEYCHAIN_SERVICE, "-a", KEYCHAIN_ACCOUNT, "-w"],
-        { stdio: ["pipe", "pipe", "pipe"] }
+        { stdio: ["pipe", "pipe", "pipe"] },
       )
         .toString()
         .trim();
@@ -173,12 +165,15 @@ export class EncryptionService {
         "security",
         [
           "add-generic-password",
-          "-s", KEYCHAIN_SERVICE,
-          "-a", KEYCHAIN_ACCOUNT,
-          "-w", key.toString("hex"),
+          "-s",
+          KEYCHAIN_SERVICE,
+          "-a",
+          KEYCHAIN_ACCOUNT,
+          "-w",
+          key.toString("hex"),
           "-U",
         ],
-        { stdio: ["pipe", "pipe", "pipe"] }
+        { stdio: ["pipe", "pipe", "pipe"] },
       );
       return true;
     } catch {

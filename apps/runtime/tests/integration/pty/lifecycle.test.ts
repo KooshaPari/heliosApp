@@ -12,7 +12,11 @@ const pidsToCleanup: number[] = [];
 
 afterEach(() => {
   for (const pid of pidsToCleanup) {
-    try { process.kill(pid, "SIGKILL"); } catch { /* already exited */ }
+    try {
+      process.kill(pid, "SIGKILL");
+    } catch {
+      /* already exited */
+    }
   }
   pidsToCleanup.length = 0;
 });

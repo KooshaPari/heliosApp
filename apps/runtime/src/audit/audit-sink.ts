@@ -65,7 +65,7 @@ export class AuditSink {
         "secrets.protected_path.acknowledged",
         "secrets.redaction.rules.changed",
         "secrets.protected_paths.config.changed",
-      ]
+      ],
     );
     if (opts?.persistRecord) {
       this._persistRecord = opts.persistRecord;
@@ -82,8 +82,7 @@ export class AuditSink {
     if (!this.watchedTopics.has(topic)) return null;
 
     const correlationId: string =
-      (envelope.payload?.correlationId as string | undefined) ??
-      randomBytes(8).toString("hex");
+      (envelope.payload?.correlationId as string | undefined) ?? randomBytes(8).toString("hex");
 
     // Serialize payload, apply redaction, re-parse
     const rawPayload = JSON.stringify(envelope.payload ?? {});
@@ -144,11 +143,7 @@ export class AuditSink {
   /**
    * Query stored audit records.
    */
-  query(filter?: {
-    topic?: string;
-    correlationId?: string;
-    since?: Date;
-  }): AuditRecord[] {
+  query(filter?: { topic?: string; correlationId?: string; since?: Date }): AuditRecord[] {
     let results = [...this.records];
 
     if (filter?.topic) {

@@ -36,10 +36,7 @@ export class OrphanWatchdog {
     this.detectionInterval = config.detectionInterval || 60000;
     this.bus = config.bus;
 
-    this.worktreeDetector = new WorktreeDetector(
-      config.worktreeBaseDir,
-      config.laneRegistry
-    );
+    this.worktreeDetector = new WorktreeDetector(config.worktreeBaseDir, config.laneRegistry);
     this.zellijDetector = new ZellijDetector(config.sessionRegistry);
     this.ptyDetector = new PtyDetector(config.terminalRegistry);
   }
@@ -57,15 +54,13 @@ export class OrphanWatchdog {
     if (checkpoint) {
       this.cycleNumber = checkpoint.cycleNumber;
       console.log(
-        `[Watchdog] Resumed from checkpoint: cycle ${this.cycleNumber}, last run: ${checkpoint.lastCycleTimestamp}`
+        `[Watchdog] Resumed from checkpoint: cycle ${this.cycleNumber}, last run: ${checkpoint.lastCycleTimestamp}`,
       );
     } else {
       console.log("[Watchdog] Starting fresh with no checkpoint");
     }
 
-    console.log(
-      `[Watchdog] Started with ${this.detectionInterval}ms interval`
-    );
+    console.log(`[Watchdog] Started with ${this.detectionInterval}ms interval`);
 
     // Run first cycle immediately
     this.scheduleNextCycle();
@@ -116,15 +111,10 @@ export class OrphanWatchdog {
         this.ptyDetector.detect(),
       ]);
 
-      const allOrphans = [
-        ...worktreeOrphans,
-        ...zellijOrphans,
-        ...ptyOrphans,
-      ];
+      const allOrphans = [...worktreeOrphans, ...zellijOrphans, ...ptyOrphans];
 
       // Classify all orphans
-      this.lastClassifiedOrphans =
-        this.resourceClassifier.classifyAll(allOrphans);
+      this.lastClassifiedOrphans = this.resourceClassifier.classifyAll(allOrphans);
 
       // Record detection duration
       this.lastDetectionDuration = Date.now() - startTime;
@@ -132,7 +122,7 @@ export class OrphanWatchdog {
       // Warn if cycle took too long
       if (this.lastDetectionDuration > 2000) {
         console.warn(
-          `[Watchdog] Detection cycle took ${this.lastDetectionDuration}ms (exceeds 2s target)`
+          `[Watchdog] Detection cycle took ${this.lastDetectionDuration}ms (exceeds 2s target)`,
         );
       }
 
@@ -182,7 +172,7 @@ export class OrphanWatchdog {
       await this.checkpointManager.save(checkpoint);
 
       console.log(
-        `[Watchdog] Cycle ${this.cycleNumber} completed: ${this.lastDetectionDuration}ms, ${this.lastClassifiedOrphans.length} orphans found`
+        `[Watchdog] Cycle ${this.cycleNumber} completed: ${this.lastDetectionDuration}ms, ${this.lastClassifiedOrphans.length} orphans found`,
       );
     } catch (error) {
       console.error(`[Watchdog] Detection cycle failed:`, error);

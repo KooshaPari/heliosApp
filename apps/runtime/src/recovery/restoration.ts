@@ -45,7 +45,7 @@ export class RestorationPipeline {
       for (const session of checkpoint.sessions) {
         const matching = this.findMatchingZelijjSession(
           session.zelijjSessionName,
-          survivingZelijjSessions
+          survivingZelijjSessions,
         );
 
         if (matching) {
@@ -88,7 +88,7 @@ export class RestorationPipeline {
             .filter(
               (s) =>
                 !restored.some((r) => r.sessionId === s.sessionId) &&
-                !failed.some((f) => f.sessionId === s.sessionId)
+                !failed.some((f) => f.sessionId === s.sessionId),
             )
             .map((s) => ({
               sessionId: s.sessionId,
@@ -118,14 +118,14 @@ export class RestorationPipeline {
 
   private findMatchingZelijjSession(
     sessionName: string,
-    survivingSessions: string[]
+    survivingSessions: string[],
   ): string | undefined {
     return survivingSessions.find((s) => s === sessionName);
   }
 
   private async reattachZelijjSession(
     session: CheckpointSession,
-    zellijSessionName: string
+    zellijSessionName: string,
   ): Promise<void> {
     // In a real implementation, this would use zellij IPC to reattach
     // For now, we just verify the session exists
@@ -137,7 +137,7 @@ export class RestorationPipeline {
   private async attemptRespawn(
     session: CheckpointSession,
     restored: RestoredSession[],
-    failed: FailedSession[]
+    failed: FailedSession[],
   ): Promise<void> {
     try {
       // Verify working directory exists

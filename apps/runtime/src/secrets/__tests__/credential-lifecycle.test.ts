@@ -56,7 +56,7 @@ describe("CredentialStore: lifecycle operations", () => {
   it("create rejects duplicate credential", async () => {
     await store.create("providerA", "ws1", "myKey", "v1", "corr-001");
     await expect(
-      store.create("providerA", "ws1", "myKey", "v2", "corr-002")
+      store.create("providerA", "ws1", "myKey", "v2", "corr-002"),
     ).rejects.toBeInstanceOf(CredentialAlreadyExistsError);
   });
 
@@ -99,7 +99,7 @@ describe("CredentialStore: lifecycle operations", () => {
 
   it("rotate throws on non-existent credential", async () => {
     await expect(
-      store.rotate("providerA", "ws1", "noSuchKey", "new", "corr-001")
+      store.rotate("providerA", "ws1", "noSuchKey", "new", "corr-001"),
     ).rejects.toBeInstanceOf(CredentialNotFoundError);
   });
 
@@ -109,9 +109,9 @@ describe("CredentialStore: lifecycle operations", () => {
   it("revoke removes the credential", async () => {
     await store.create("providerA", "ws1", "myKey", "secret", "corr-001");
     await store.revoke("providerA", "ws1", "myKey", "corr-002");
-    await expect(
-      store.retrieve("providerA", "ws1", "myKey")
-    ).rejects.toBeInstanceOf(CredentialNotFoundError);
+    await expect(store.retrieve("providerA", "ws1", "myKey")).rejects.toBeInstanceOf(
+      CredentialNotFoundError,
+    );
   });
 
   it("revoke emits secrets.credential.revoked event", async () => {
@@ -133,9 +133,9 @@ describe("CredentialStore: lifecycle operations", () => {
   });
 
   it("revoke throws on non-existent credential", async () => {
-    await expect(
-      store.revoke("providerA", "ws1", "noSuchKey", "corr-001")
-    ).rejects.toBeInstanceOf(CredentialNotFoundError);
+    await expect(store.revoke("providerA", "ws1", "noSuchKey", "corr-001")).rejects.toBeInstanceOf(
+      CredentialNotFoundError,
+    );
   });
 
   // -------------------------------------------------------------------------
@@ -144,10 +144,14 @@ describe("CredentialStore: lifecycle operations", () => {
   it("retrieveWithContext emits secrets.credential.accessed", async () => {
     await store.create("providerA", "ws1", "myKey", "secret", "corr-001");
     await store.retrieveWithContext(
-      { requestingProviderId: "providerA", requestingWorkspaceId: "ws1", correlationId: "corr-002" },
+      {
+        requestingProviderId: "providerA",
+        requestingWorkspaceId: "ws1",
+        correlationId: "corr-002",
+      },
       "providerA",
       "ws1",
-      "myKey"
+      "myKey",
     );
     const events = bus.getEvents();
     const accessed = events.find((e) => e.topic === "secrets.credential.accessed");
@@ -158,10 +162,14 @@ describe("CredentialStore: lifecycle operations", () => {
   it("accessed event does NOT include credential value", async () => {
     await store.create("providerA", "ws1", "myKey", "ultra-secret", "corr-001");
     await store.retrieveWithContext(
-      { requestingProviderId: "providerA", requestingWorkspaceId: "ws1", correlationId: "corr-002" },
+      {
+        requestingProviderId: "providerA",
+        requestingWorkspaceId: "ws1",
+        correlationId: "corr-002",
+      },
       "providerA",
       "ws1",
-      "myKey"
+      "myKey",
     );
     const events = bus.getEvents();
     const raw = JSON.stringify(events);

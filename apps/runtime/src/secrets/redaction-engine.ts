@@ -55,7 +55,10 @@ export class RedactionEngine {
       .map((r) => ({
         rule: r,
         // Ensure global flag for exec-loop scanning
-        regex: new RegExp(r.pattern.source, r.pattern.flags.includes("g") ? r.pattern.flags : r.pattern.flags + "g"),
+        regex: new RegExp(
+          r.pattern.source,
+          r.pattern.flags.includes("g") ? r.pattern.flags : r.pattern.flags + "g",
+        ),
       }));
   }
 

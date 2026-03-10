@@ -221,7 +221,9 @@ describe("T008 - PTY termination during cleanup", () => {
   test("cleanup proceeds when ptyManager.getByLane throws", async () => {
     _resetIdCounter();
     const mockPtyManager: PtyManager = {
-      getByLane: () => { throw new Error("PTY manager down"); },
+      getByLane: () => {
+        throw new Error("PTY manager down");
+      },
       terminate: async () => {},
     };
 
@@ -288,9 +290,7 @@ describe("T010 - Partial provisioning failure", () => {
     const lane = await mgr.create("ws-1", "main");
 
     // Try to provision with a non-existent repo path
-    await expect(
-      mgr.provision(lane.laneId, "/nonexistent/repo/path"),
-    ).rejects.toThrow();
+    await expect(mgr.provision(lane.laneId, "/nonexistent/repo/path")).rejects.toThrow();
 
     const updated = mgr.getRegistry().get(lane.laneId);
     expect(updated?.state).toBe("closed");

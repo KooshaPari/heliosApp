@@ -14,17 +14,17 @@ function createLifecycleCommand(overrides: Partial<LocalBusEnvelope> = {}): Loca
     correlation_id: "corr-1",
     method: "session.attach",
     payload: {},
-    ...overrides
+    ...overrides,
   };
 }
 
 describe("protocol validator", () => {
   test("rejects malformed envelope with stable error semantics", () => {
     expect(() => validateEnvelope({ id: "evt-1", ts: "2026-02-26T00:00:00.000Z" })).toThrow(
-      ProtocolValidationError
+      ProtocolValidationError,
     );
     expect(() => validateEnvelope({ id: "evt-1", ts: "2026-02-26T00:00:00.000Z" })).toThrow(
-      "Envelope field 'type' is required"
+      "Envelope field 'type' is required",
     );
   });
 
@@ -35,7 +35,7 @@ describe("protocol validator", () => {
     await expect(bus.request(command)).resolves.toMatchObject({
       type: "response",
       status: "error",
-      error: { code: "MISSING_CORRELATION_ID" }
+      error: { code: "MISSING_CORRELATION_ID" },
     });
   });
 
@@ -46,8 +46,8 @@ describe("protocol validator", () => {
         type: "event",
         ts: "2026-02-26T00:00:00",
         topic: "workspace.opened",
-        payload: {}
-      })
+        payload: {},
+      }),
     ).toThrow("Envelope field 'ts' must be an RFC3339 timestamp with timezone");
   });
 
@@ -57,7 +57,7 @@ describe("protocol validator", () => {
       type: "event",
       ts: "2026-02-26T00:00:00+00:00",
       topic: "workspace.opened",
-      payload: {}
+      payload: {},
     });
 
     expect(envelope.ts).toBe("2026-02-26T00:00:00+00:00");
@@ -71,8 +71,8 @@ describe("protocol validator", () => {
         ts: "2026-02-26T00:00:00.000Z",
         timestamp: "2026-02-26T00:00:00",
         topic: "workspace.opened",
-        payload: {}
-      })
+        payload: {},
+      }),
     ).toThrow("Envelope field 'timestamp' must be an RFC3339 timestamp with timezone");
   });
 
@@ -83,7 +83,7 @@ describe("protocol validator", () => {
       ts: "2026-02-26T00:00:00.000Z",
       timestamp: "2026-02-26T00:00:00+00:00",
       topic: "workspace.opened",
-      payload: {}
+      payload: {},
     });
 
     expect(envelope.timestamp).toBe("2026-02-26T00:00:00+00:00");
@@ -119,11 +119,11 @@ describe("protocol sequencing and audit", () => {
         session_id: "session-1",
         correlation_id: "corr-1",
         topic: "session.attached",
-        payload: {}
-      })
+        payload: {},
+      }),
     ).rejects.toMatchObject({
       name: "ProtocolValidationError",
-      code: "ORDERING_VIOLATION"
+      code: "ORDERING_VIOLATION",
     });
   });
 
@@ -137,7 +137,7 @@ describe("protocol sequencing and audit", () => {
       lane_id: "lane-1",
       correlation_id: "corr-accepted",
       topic: "lane.create.started",
-      payload: {}
+      payload: {},
     });
 
     await expect(
@@ -149,11 +149,11 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-accepted",
         topic: "lane.create.started",
-        payload: {}
-      })
+        payload: {},
+      }),
     ).rejects.toMatchObject({
       name: "ProtocolValidationError",
-      code: "ORDERING_VIOLATION"
+      code: "ORDERING_VIOLATION",
     });
 
     const records = await bus.getAuditRecords();
@@ -174,8 +174,8 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-lane-attach",
         topic: "lane.attach.started",
-        payload: {}
-      })
+        payload: {},
+      }),
     ).resolves.toBeUndefined();
 
     await expect(
@@ -187,8 +187,8 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-lane-attach",
         topic: "lane.attached",
-        payload: {}
-      })
+        payload: {},
+      }),
     ).resolves.toBeUndefined();
 
     await expect(
@@ -200,8 +200,8 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-lane-attach",
         topic: "lane.attach.started",
-        payload: {}
-      })
+        payload: {},
+      }),
     ).resolves.toBeUndefined();
 
     await expect(
@@ -213,8 +213,8 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-lane-cleanup",
         topic: "lane.cleanup.started",
-        payload: {}
-      })
+        payload: {},
+      }),
     ).resolves.toBeUndefined();
 
     await expect(
@@ -226,8 +226,8 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-lane-cleanup",
         topic: "lane.cleaned",
-        payload: {}
-      })
+        payload: {},
+      }),
     ).resolves.toBeUndefined();
 
     await expect(
@@ -239,8 +239,8 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-lane-cleanup",
         topic: "lane.cleanup.started",
-        payload: {}
-      })
+        payload: {},
+      }),
     ).resolves.toBeUndefined();
   });
 
@@ -254,8 +254,8 @@ describe("protocol sequencing and audit", () => {
         method: "lane.attach",
         lane_id: laneId,
         correlation_id: "corr-lane-authoritative",
-        payload: {}
-      })
+        payload: {},
+      }),
     );
 
     expect(laneAttach.type).toBe("response");
@@ -267,8 +267,8 @@ describe("protocol sequencing and audit", () => {
         method: "session.attach",
         session_id: sessionId,
         correlation_id: "corr-session-authoritative",
-        payload: {}
-      })
+        payload: {},
+      }),
     );
 
     expect(sessionAttach.type).toBe("response");
@@ -280,8 +280,8 @@ describe("protocol sequencing and audit", () => {
     const bus = new InMemoryLocalBus();
     const response = await bus.request(
       createLifecycleCommand({
-        payload: { force_error: true }
-      })
+        payload: { force_error: true },
+      }),
     );
 
     expect(response.type).toBe("response");

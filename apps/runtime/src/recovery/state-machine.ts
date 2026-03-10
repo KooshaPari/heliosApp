@@ -26,27 +26,15 @@ export interface RecoveryState {
 type StageChangeListener = (
   previous: RecoveryStage,
   current: RecoveryStage,
-  attemptCount: number
+  attemptCount: number,
 ) => void;
 
 const LEGAL_TRANSITIONS: Record<RecoveryStage, RecoveryStage[]> = {
   [RecoveryStage.CRASHED]: [RecoveryStage.DETECTING],
-  [RecoveryStage.DETECTING]: [
-    RecoveryStage.INVENTORYING,
-    RecoveryStage.DETECTION_FAILED,
-  ],
-  [RecoveryStage.INVENTORYING]: [
-    RecoveryStage.RESTORING,
-    RecoveryStage.INVENTORY_FAILED,
-  ],
-  [RecoveryStage.RESTORING]: [
-    RecoveryStage.RECONCILING,
-    RecoveryStage.RESTORATION_FAILED,
-  ],
-  [RecoveryStage.RECONCILING]: [
-    RecoveryStage.LIVE,
-    RecoveryStage.RECONCILIATION_FAILED,
-  ],
+  [RecoveryStage.DETECTING]: [RecoveryStage.INVENTORYING, RecoveryStage.DETECTION_FAILED],
+  [RecoveryStage.INVENTORYING]: [RecoveryStage.RESTORING, RecoveryStage.INVENTORY_FAILED],
+  [RecoveryStage.RESTORING]: [RecoveryStage.RECONCILING, RecoveryStage.RESTORATION_FAILED],
+  [RecoveryStage.RECONCILING]: [RecoveryStage.LIVE, RecoveryStage.RECONCILIATION_FAILED],
   [RecoveryStage.LIVE]: [], // Terminal state
   [RecoveryStage.DETECTION_FAILED]: [RecoveryStage.DETECTING], // Retry
   [RecoveryStage.INVENTORY_FAILED]: [RecoveryStage.INVENTORYING],
@@ -90,7 +78,7 @@ export class RecoveryStateMachine {
     const legalTransitions = LEGAL_TRANSITIONS[from] || [];
     if (!legalTransitions.includes(to)) {
       throw new Error(
-        `Illegal transition from ${from} to ${to}. Legal: ${legalTransitions.join(", ")}`
+        `Illegal transition from ${from} to ${to}. Legal: ${legalTransitions.join(", ")}`,
       );
     }
 
@@ -100,9 +88,7 @@ export class RecoveryStateMachine {
       // Retrying - increment attempt count
       this.currentState.attemptCount++;
       if (this.currentState.attemptCount > MAX_RETRIES_PER_STAGE) {
-        throw new Error(
-          `Max retries (${MAX_RETRIES_PER_STAGE}) exceeded for stage ${from}`
-        );
+        throw new Error(`Max retries (${MAX_RETRIES_PER_STAGE}) exceeded for stage ${from}`);
       }
     } else if (from !== to) {
       // New stage - reset attempt count
@@ -207,11 +193,7 @@ export class RecoveryStateMachine {
     }
   }
 
-  private notifyListeners(
-    from: RecoveryStage,
-    to: RecoveryStage,
-    attemptCount: number
-  ): void {
+  private notifyListeners(from: RecoveryStage, to: RecoveryStage, attemptCount: number): void {
     for (const listener of this.listeners) {
       listener(from, to, attemptCount);
     }

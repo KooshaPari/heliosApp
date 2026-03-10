@@ -36,19 +36,17 @@ export class RemediationEngine {
     os.homedir(),
     ".helios",
     "data",
-    "remediation_cooldown.json"
+    "remediation_cooldown.json",
   );
 
   constructor(
     private readonly laneRegistry: LaneRegistry,
-    private readonly bus: LocalBus
+    private readonly bus: LocalBus,
   ) {
     this.loadCooldownMap();
   }
 
-  async generateSuggestions(
-    orphans: ClassifiedOrphan[]
-  ): Promise<RemediationSuggestion[]> {
+  async generateSuggestions(orphans: ClassifiedOrphan[]): Promise<RemediationSuggestion[]> {
     const suggestions: RemediationSuggestion[] = [];
 
     // Expire old cooldown entries
@@ -181,9 +179,7 @@ export class RemediationEngine {
       payload: {
         suggestionId,
         resourcePath: suggestion.resource.path || suggestion.resource.pid,
-        cooldownUntil: new Date(
-          Date.now() + this.cooldownDurationMs
-        ).toISOString(),
+        cooldownUntil: new Date(Date.now() + this.cooldownDurationMs).toISOString(),
       },
     });
   }
@@ -260,12 +256,7 @@ export class RemediationEngine {
   private async snapshotWorktree(orphan: ClassifiedOrphan): Promise<void> {
     if (!orphan.path) return;
 
-    const snapshotDir = path.join(
-      os.homedir(),
-      ".helios",
-      "data",
-      "worktree_snapshots"
-    );
+    const snapshotDir = path.join(os.homedir(), ".helios", "data", "worktree_snapshots");
     await fs.mkdir(snapshotDir, { recursive: true });
 
     const snapshotName = `${Date.now()}-${orphan.estimatedOwner}.json`;
@@ -282,9 +273,7 @@ export class RemediationEngine {
     await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2));
   }
 
-  private async cleanupZellijSession(
-    orphan: ClassifiedOrphan
-  ): Promise<CleanupResult> {
+  private async cleanupZellijSession(orphan: ClassifiedOrphan): Promise<CleanupResult> {
     if (!orphan.path) {
       return {
         resourceId: "unknown",
@@ -295,10 +284,7 @@ export class RemediationEngine {
     }
 
     try {
-      const result = await execCommand("zellij", [
-        "kill-session",
-        orphan.path,
-      ]);
+      const result = await execCommand("zellij", ["kill-session", orphan.path]);
 
       if (result.code === 0) {
         return {

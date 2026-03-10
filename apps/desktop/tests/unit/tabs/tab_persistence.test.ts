@@ -40,10 +40,10 @@ describe("TabPersistence", () => {
           tab1: {
             tabId: "tab1",
             tabType: "terminal",
-            label: "Terminal"
-          }
+            label: "Terminal",
+          },
         },
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
       };
 
       const filePath = path.join(tempDir, "tab_state.json");
@@ -77,7 +77,7 @@ describe("TabPersistence", () => {
         tabOrder: Array.from({ length: 50 }, (_, i) => `tab${i}`),
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
       };
 
       const filePath = path.join(tempDir, "tab_state.json");
@@ -99,7 +99,7 @@ describe("TabPersistence", () => {
         tabOrder: ["tab1", "tab2"],
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
       };
 
       await persistence.save(testState);
@@ -130,7 +130,7 @@ describe("TabPersistence", () => {
         tabOrder: ["tab1"],
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
       };
 
       // Queue multiple rapid saves
@@ -155,7 +155,7 @@ describe("TabPersistence", () => {
         tabOrder: ["tab1"],
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
       };
 
       const nestedDir = path.join(tempDir, "nested", "path");
@@ -182,7 +182,7 @@ describe("TabPersistence", () => {
         tabOrder: ["tab1"],
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
       };
 
       persistence.save(testState);
@@ -209,7 +209,7 @@ describe("TabPersistence", () => {
     it("should create state from tab instances", () => {
       const tabs = [
         createMockTabSurface("tab1", "terminal", "Terminal"),
-        createMockTabSurface("tab2", "agent", "Agent")
+        createMockTabSurface("tab2", "agent", "Agent"),
       ];
 
       const state = persistence.createState("tab1", ["tab1", "tab2"], [], tabs);
@@ -235,7 +235,7 @@ describe("TabPersistence", () => {
     it("should restore state to tab instances", () => {
       const tabs = [
         createMockTabSurface("tab1", "terminal", "Terminal"),
-        createMockTabSurface("tab2", "agent", "Agent")
+        createMockTabSurface("tab2", "agent", "Agent"),
       ];
 
       const testState: TabPersistedState = {
@@ -247,10 +247,10 @@ describe("TabPersistence", () => {
           tab1: {
             tabId: "tab1",
             tabType: "terminal",
-            label: "Terminal-Modified"
-          }
+            label: "Terminal-Modified",
+          },
         },
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
       };
 
       persistence.restoreState(testState, tabs);
@@ -261,7 +261,7 @@ describe("TabPersistence", () => {
     it("should handle tabs not in persisted state", () => {
       const tabs = [
         createMockTabSurface("tab1", "terminal", "Terminal"),
-        createMockTabSurface("tab3", "session", "Session")
+        createMockTabSurface("tab3", "session", "Session"),
       ];
 
       const testState: TabPersistedState = {
@@ -273,10 +273,10 @@ describe("TabPersistence", () => {
           tab1: {
             tabId: "tab1",
             tabType: "terminal",
-            label: "Terminal"
-          }
+            label: "Terminal",
+          },
         },
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
       };
 
       // Should not throw
@@ -295,7 +295,7 @@ describe("TabPersistence", () => {
         tabOrder: ["tab1"],
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
       };
 
       await persistence.save(testState);
@@ -336,10 +336,10 @@ describe("TabPersistence", () => {
           tab1: {
             tabId: "tab1",
             tabType: "terminal",
-            label: "Terminal"
-          }
+            label: "Terminal",
+          },
         },
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
       };
 
       // Will not throw
@@ -354,7 +354,7 @@ describe("TabPersistence", () => {
         tabOrder: ["tab1"],
         pinnedTabIds: [],
         perTabState: {},
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
       };
 
       const isValid = persistence["validateState"](testState);

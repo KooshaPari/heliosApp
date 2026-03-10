@@ -8,7 +8,7 @@ import type { OrphanedResource } from "./resource_classifier.js";
 export class WorktreeDetector {
   constructor(
     private readonly baseDir: string,
-    private readonly laneRegistry: LaneRegistry
+    private readonly laneRegistry: LaneRegistry,
   ) {}
 
   async detect(): Promise<OrphanedResource[]> {

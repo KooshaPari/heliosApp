@@ -1,5 +1,5 @@
-import { AuditEvent } from './event';
-import { AuditRingBuffer } from './ring-buffer';
+import { AuditEvent } from "./event";
+import { AuditRingBuffer } from "./ring-buffer";
 
 /**
  * Extended metrics including ring buffer and overflow tracking.
@@ -105,7 +105,7 @@ export class DefaultAuditSink implements AuditSink {
 
       // Try to persist overflow immediately
       this.persistOverflow().catch((err) => {
-        console.error('[AuditSink] Overflow persistence failed:', err);
+        console.error("[AuditSink] Overflow persistence failed:", err);
       });
     }
 
@@ -122,7 +122,7 @@ export class DefaultAuditSink implements AuditSink {
       // Trigger immediate persistence without awaiting
       this.persistWithRetry().catch((err) => {
         // Log error but do not throw; event stays in buffer
-        console.error('[AuditSink] Persistence failed, events retained in buffer:', err);
+        console.error("[AuditSink] Persistence failed, events retained in buffer:", err);
       });
     }
   }
@@ -135,7 +135,10 @@ export class DefaultAuditSink implements AuditSink {
 
     // Keep trying until all events are persisted
     let retries = 0;
-    while ((this.buffer.length > 0 || this.overflowQueue.length > 0) && retries < this.MAX_RETRIES) {
+    while (
+      (this.buffer.length > 0 || this.overflowQueue.length > 0) &&
+      retries < this.MAX_RETRIES
+    ) {
       try {
         // First flush overflow queue
         if (this.overflowQueue.length > 0) {
@@ -208,7 +211,9 @@ export class DefaultAuditSink implements AuditSink {
 
       if (this.buffer.length > 0) {
         // Events still in buffer after retries; they will be retried on next write
-        console.warn('[AuditSink] Events retained in buffer after retries; will retry on next write');
+        console.warn(
+          "[AuditSink] Events retained in buffer after retries; will retry on next write",
+        );
       }
     } finally {
       this.persistenceInProgress = false;
@@ -255,7 +260,7 @@ export class DefaultAuditSink implements AuditSink {
     this.flushTimer = setInterval(() => {
       if (this.buffer.length > 0 || this.overflowQueue.length > 0) {
         this.persistWithRetry().catch((err) => {
-          console.error('[AuditSink] Periodic flush failed:', err);
+          console.error("[AuditSink] Periodic flush failed:", err);
         });
       }
     }, this.FLUSH_INTERVAL_MS) as unknown as number;

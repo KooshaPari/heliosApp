@@ -115,7 +115,7 @@ export class ShareWorker {
 export interface PolicyGate {
   evaluate(
     action: string,
-    context: Record<string, unknown>
+    context: Record<string, unknown>,
   ): Promise<{ allowed: boolean; reason?: string }>;
 }
 
@@ -165,13 +165,14 @@ export class ShareSessionManager {
     terminalId: string,
     backend: ShareBackend,
     ttlMs: number,
-    correlationId: string
+    correlationId: string,
   ): Promise<ShareSession> {
     // Check policy gate
-    const policyDecision = await this.policyGate.evaluate(
-      "share.session.create",
-      { terminalId, backend, correlationId }
-    );
+    const policyDecision = await this.policyGate.evaluate("share.session.create", {
+      terminalId,
+      backend,
+      correlationId,
+    });
 
     if (!policyDecision.allowed) {
       const session: ShareSession = {

@@ -85,7 +85,7 @@ export class ActiveContextStore {
                 type: "event",
                 ts: new Date().toISOString(),
                 topic: "context.validation.failed",
-                payload: { context: contextToSet }
+                payload: { context: contextToSet },
               });
             }
             resolve();
@@ -102,7 +102,7 @@ export class ActiveContextStore {
         // Emit change event to listeners
         const changeEvent: ContextChangeEvent = {
           previous: previousContext,
-          current: this.currentContext
+          current: this.currentContext,
         };
 
         for (const listener of this.listeners) {
@@ -119,7 +119,7 @@ export class ActiveContextStore {
             workspace_id: contextToSet?.workspaceId,
             lane_id: contextToSet?.laneId,
             session_id: contextToSet?.sessionId,
-            payload: changeEvent
+            payload: changeEvent,
           });
         }
 

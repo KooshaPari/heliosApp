@@ -15,7 +15,7 @@ export interface ShareBackendAdapter {
   checkAvailability(): Promise<boolean>;
   startShare(
     terminalId: string,
-    zellijSessionName: string
+    zellijSessionName: string,
   ): Promise<{ link: string; process: any }>;
   stopShare(process: any): Promise<void>;
 }
@@ -58,7 +58,7 @@ export class UptermAdapter implements ShareBackendAdapter {
    */
   async startShare(
     terminalId: string,
-    zellijSessionName: string
+    zellijSessionName: string,
   ): Promise<{ link: string; process: any }> {
     try {
       // Validate inputs
@@ -80,7 +80,7 @@ export class UptermAdapter implements ShareBackendAdapter {
     } catch (error) {
       if (String(error).includes("not found")) {
         throw new Error(
-          "upterm binary not found. Install with: curl https://upterm.dev/install.sh | bash"
+          "upterm binary not found. Install with: curl https://upterm.dev/install.sh | bash",
         );
       }
       throw error;
@@ -138,7 +138,7 @@ export class TmateAdapter implements ShareBackendAdapter {
    */
   async startShare(
     terminalId: string,
-    zellijSessionName: string
+    zellijSessionName: string,
   ): Promise<{ link: string; process: any }> {
     try {
       // Validate inputs
@@ -161,7 +161,7 @@ export class TmateAdapter implements ShareBackendAdapter {
     } catch (error) {
       if (String(error).includes("not found")) {
         throw new Error(
-          "tmate binary not found. Install with: brew install tmate (macOS) or apt install tmate (Linux)"
+          "tmate binary not found. Install with: brew install tmate (macOS) or apt install tmate (Linux)",
         );
       }
       throw error;
@@ -189,10 +189,7 @@ export class TmateAdapter implements ShareBackendAdapter {
  * @param config Backend-specific configuration
  * @returns Adapter instance
  */
-export function getBackendAdapter(
-  backend: string,
-  config?: any
-): ShareBackendAdapter {
+export function getBackendAdapter(backend: string, config?: any): ShareBackendAdapter {
   switch (backend) {
     case "upterm":
       return new UptermAdapter(config as UptermConfig | undefined);

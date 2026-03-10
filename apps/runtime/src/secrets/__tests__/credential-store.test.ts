@@ -4,7 +4,11 @@ import { randomBytes } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { EncryptionService } from "../encryption.js";
-import { CredentialStore, CredentialNotFoundError, CredentialAlreadyExistsError } from "../credential-store.js";
+import {
+  CredentialStore,
+  CredentialNotFoundError,
+  CredentialAlreadyExistsError,
+} from "../credential-store.js";
 
 function makeStore(dataDir: string): CredentialStore {
   const fixedKey = randomBytes(32);
@@ -68,7 +72,7 @@ describe("CredentialStore: store and retrieve", () => {
 
   it("throws CredentialNotFoundError on missing retrieve", async () => {
     await expect(store.retrieve("providerA", "ws1", "missing")).rejects.toBeInstanceOf(
-      CredentialNotFoundError
+      CredentialNotFoundError,
     );
   });
 
@@ -81,7 +85,7 @@ describe("CredentialStore: store and retrieve", () => {
 
   it("throws CredentialNotFoundError when deleting missing credential", async () => {
     await expect(store.delete("providerA", "ws1", "missing")).rejects.toBeInstanceOf(
-      CredentialNotFoundError
+      CredentialNotFoundError,
     );
   });
 
@@ -107,33 +111,23 @@ describe("CredentialStore: store and retrieve", () => {
   });
 
   it("rejects path traversal in providerId", async () => {
-    await expect(
-      store.store("../evil", "ws1", "key", "val")
-    ).rejects.toThrow();
+    await expect(store.store("../evil", "ws1", "key", "val")).rejects.toThrow();
   });
 
   it("rejects path traversal in workspaceId", async () => {
-    await expect(
-      store.store("providerA", "../../etc", "key", "val")
-    ).rejects.toThrow();
+    await expect(store.store("providerA", "../../etc", "key", "val")).rejects.toThrow();
   });
 
   it("rejects null bytes in name", async () => {
-    await expect(
-      store.store("providerA", "ws1", "key\0evil", "val")
-    ).rejects.toThrow();
+    await expect(store.store("providerA", "ws1", "key\0evil", "val")).rejects.toThrow();
   });
 
   it("rejects slash in name", async () => {
-    await expect(
-      store.store("providerA", "ws1", "key/evil", "val")
-    ).rejects.toThrow();
+    await expect(store.store("providerA", "ws1", "key/evil", "val")).rejects.toThrow();
   });
 
   it("rejects backslash in name", async () => {
-    await expect(
-      store.store("providerA", "ws1", "key\\evil", "val")
-    ).rejects.toThrow();
+    await expect(store.store("providerA", "ws1", "key\\evil", "val")).rejects.toThrow();
   });
 });
 

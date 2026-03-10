@@ -33,8 +33,7 @@ export class TabPersistence {
   private lastLoadTime: number = 0;
 
   constructor(storageDir?: string) {
-    this.storageDir =
-      storageDir ?? path.join(homedir(), ".helios", "data");
+    this.storageDir = storageDir ?? path.join(homedir(), ".helios", "data");
     this.storagePath = path.join(this.storageDir, "tab_state.json");
   }
 
@@ -58,9 +57,7 @@ export class TabPersistence {
       this.lastLoadTime = Date.now() - startTime;
 
       if (this.lastLoadTime > 100) {
-        console.warn(
-          `Tab state load took ${this.lastLoadTime}ms (target: <100ms)`
-        );
+        console.warn(`Tab state load took ${this.lastLoadTime}ms (target: <100ms)`);
       }
 
       return state;
@@ -150,7 +147,7 @@ export class TabPersistence {
     selectedTabId: string | null,
     tabOrder: string[],
     pinnedTabIds: string[],
-    tabs: TabSurface[]
+    tabs: TabSurface[],
   ): TabPersistedState {
     const perTabState: Record<string, TabState> = {};
 
@@ -164,7 +161,7 @@ export class TabPersistence {
       tabOrder,
       pinnedTabIds,
       perTabState,
-      savedAt: new Date().toISOString()
+      savedAt: new Date().toISOString(),
     };
   }
 

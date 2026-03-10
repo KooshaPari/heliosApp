@@ -5,12 +5,7 @@
  * ghostty terminal emulator backend.
  */
 
-import type {
-  RendererAdapter,
-  RendererConfig,
-  RendererState,
-  RenderSurface,
-} from "../adapter.js";
+import type { RendererAdapter, RendererConfig, RendererState, RenderSurface } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
 import { GhosttyProcess } from "./process.js";
 import { GhosttySurface } from "./surface.js";

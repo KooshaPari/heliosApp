@@ -64,8 +64,19 @@ async function checkFileSizes(files: string[]): Promise<Finding[]> {
   const sections = await loadConstitution().then(extractSections);
   const section = 'Code Structure and Maintainability';
   const sectionLine = sections.get(section) || 0;
+
+  // Generated/lock files are exempt from the line-count limit
+  const GENERATED_FILE_PATTERNS = [
+    /\.lock$/,
+    /\.lockb$/,
+    /lock\.json$/,
+    /lock\.yaml$/,
+  ];
   
   for (const filePath of files) {
+    if (GENERATED_FILE_PATTERNS.some(p => p.test(filePath))) {
+      continue;
+    }
     try {
       const content = await fs.readFile(filePath, 'utf-8');
       const lines = content.split('\n').length;
@@ -97,8 +108,19 @@ async function checkTestCoverage(files: string[]): Promise<Finding[]> {
   const sections = await loadConstitution().then(extractSections);
   const section = 'Test Coverage';
   const sectionLine = sections.get(section) || 0;
+
+  // Generated/lock files are exempt from the line-count limit
+  const GENERATED_FILE_PATTERNS = [
+    /\.lock$/,
+    /\.lockb$/,
+    /lock\.json$/,
+    /lock\.yaml$/,
+  ];
   
   for (const filePath of files) {
+    if (GENERATED_FILE_PATTERNS.some(p => p.test(filePath))) {
+      continue;
+    }
     // Only check source files, not test files
     if (filePath.includes('.test.') || filePath.includes('.spec.')) {
       continue;
@@ -135,6 +157,9 @@ async function checkUnsafePatterns(files: string[]): Promise<Finding[]> {
   const sections = await loadConstitution().then(extractSections);
   
   for (const filePath of files) {
+    if (GENERATED_FILE_PATTERNS.some(p => p.test(filePath))) {
+      continue;
+    }
     try {
       const content = await fs.readFile(filePath, 'utf-8');
       const lines = content.split('\n');

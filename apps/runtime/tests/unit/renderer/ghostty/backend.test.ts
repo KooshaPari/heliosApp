@@ -60,7 +60,12 @@ function makeInfiniteStream(): { stream: ReadableStream<Uint8Array>; cancel: () 
       cancelled = true;
     },
   });
-  return { stream, cancel: () => { cancelled = true; } };
+  return {
+    stream,
+    cancel: () => {
+      cancelled = true;
+    },
+  };
 }
 
 describe("GhosttyBackend - lifecycle (T012)", () => {
@@ -341,7 +346,9 @@ describe("GhosttyBackend - render loop (T012)", () => {
 
   test("onRenderEvent registers handler", () => {
     let called = false;
-    backend.onRenderEvent(() => { called = true; });
+    backend.onRenderEvent(() => {
+      called = true;
+    });
     expect(called).toBe(false);
   });
 
@@ -355,7 +362,9 @@ describe("GhosttyBackend - render loop (T012)", () => {
 
   test("onCrash registers handler", () => {
     let called = false;
-    backend.onCrash(() => { called = true; });
+    backend.onCrash(() => {
+      called = true;
+    });
     expect(called).toBe(false);
   });
 });

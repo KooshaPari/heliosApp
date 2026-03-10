@@ -119,9 +119,7 @@ function deliverSignal(
 /** Error thrown when resize dimensions are invalid. */
 export class InvalidDimensionsError extends Error {
   constructor(cols: number, rows: number) {
-    super(
-      `Invalid PTY dimensions: cols=${cols}, rows=${rows} (must be 1..10000)`,
-    );
+    super(`Invalid PTY dimensions: cols=${cols}, rows=${rows} (must be 1..10000)`);
     this.name = "InvalidDimensionsError";
   }
 }
@@ -148,9 +146,7 @@ export function resize(
 ): void {
   // Reject resize on errored/stopped PTYs.
   if (record.state === "errored" || record.state === "stopped") {
-    throw new Error(
-      `Cannot resize PTY '${record.ptyId}' in state '${record.state}'`,
-    );
+    throw new Error(`Cannot resize PTY '${record.ptyId}' in state '${record.state}'`);
   }
 
   // Validate dimensions.
@@ -175,14 +171,7 @@ export function resize(
   };
 
   // Deliver SIGWINCH to child process.
-  deliverSignal(
-    record.pid,
-    "SIGWINCH",
-    record.ptyId,
-    historyMap,
-    bus,
-    correlation,
-  );
+  deliverSignal(record.pid, "SIGWINCH", record.ptyId, historyMap, bus, correlation);
 
   // Publish resize event.
   emitPtyEvent(bus, "pty.resized", correlation, {
@@ -256,10 +245,7 @@ export async function terminate(
       }
     });
 
-  const defaultWaitForExit = async (
-    pid: number,
-    timeoutMs: number,
-  ): Promise<boolean> => {
+  const defaultWaitForExit = async (pid: number, timeoutMs: number): Promise<boolean> => {
     const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
       if (!checkAlive(pid)) {
@@ -301,14 +287,7 @@ export async function terminate(
     };
     recordSignal(killEnvelope, historyMap, bus, correlation);
 
-    deliverSignal(
-      record.pid,
-      "SIGKILL",
-      record.ptyId,
-      historyMap,
-      bus,
-      correlation,
-    );
+    deliverSignal(record.pid, "SIGKILL", record.ptyId, historyMap, bus, correlation);
 
     emitPtyEvent(bus, "pty.force_killed", correlation, {
       reason: "grace_period_expired",
@@ -364,12 +343,5 @@ export function sendSighup(
     correlationId: crypto.randomUUID(),
   };
 
-  return deliverSignal(
-    record.pid,
-    "SIGHUP",
-    record.ptyId,
-    historyMap,
-    bus,
-    correlation,
-  );
+  return deliverSignal(record.pid, "SIGHUP", record.ptyId, historyMap, bus, correlation);
 }
