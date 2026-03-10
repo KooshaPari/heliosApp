@@ -27,7 +27,7 @@ describe("TerminalRegistry", () => {
 
       expect(binding.terminalId).toBe("terminal-1");
       expect(binding.binding).toEqual(triple);
-      expect(binding.state).toBe(BindingState.bound);
+      expect(binding.state).toBe(BindingState.Bound);
     });
 
     it("should reject duplicate terminal_id", () => {
@@ -134,7 +134,7 @@ describe("TerminalRegistry", () => {
       const rebound = registry.rebind("terminal-1", newTriple);
 
       expect(rebound.binding).toEqual(newTriple);
-      expect(rebound.state).toBe(BindingState.rebound);
+      expect(rebound.state).toBe(BindingState.Rebound);
     });
 
     it("should update indexes after rebind", () => {

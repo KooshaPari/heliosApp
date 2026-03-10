@@ -172,14 +172,29 @@ describe('validateEnvelope', () => {
     expect(r.valid).toBe(false);
   });
 
-  it('rejects missing id', () => {
-    const r = validateEnvelope({ correlation_id: 'c', type: 'command', timestamp: 1, method: 'm', payload: null });
+  it("rejects missing id", () => {
+    const r = validateEnvelope({
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "c",
+      type: "command",
+      timestamp: 1,
+      method: "m",
+      payload: null,
+    });
     expect(r.valid).toBe(false);
     if (!r.valid) expect(r.error.code).toBe('VALIDATION_ERROR');
   });
 
-  it('rejects empty id', () => {
-    const r = validateEnvelope({ id: '', correlation_id: 'c', type: 'command', timestamp: 1, method: 'm', payload: null });
+  it("rejects empty id", () => {
+    const r = validateEnvelope({
+      id: "",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "c",
+      type: "command",
+      timestamp: 1,
+      method: "m",
+      payload: null,
+    });
     expect(r.valid).toBe(false);
   });
 
@@ -188,50 +203,118 @@ describe('validateEnvelope', () => {
     expect(r.valid).toBe(false);
   });
 
-  it('rejects empty correlation_id', () => {
-    const r = validateEnvelope({ id: 'x', correlation_id: '', type: 'command', timestamp: 1, method: 'm', payload: null });
+  it("rejects empty correlation_id", () => {
+    const r = validateEnvelope({
+      id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "",
+      type: "command",
+      timestamp: 1,
+      method: "m",
+      payload: null,
+    });
     expect(r.valid).toBe(false);
   });
 
-  it('rejects unknown type', () => {
-    const r = validateEnvelope({ id: 'x', correlation_id: 'c', type: 'unknown', timestamp: 1 });
+  it("rejects unknown type", () => {
+    const r = validateEnvelope({
+      id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "c",
+      type: "unknown",
+      timestamp: 1,
+    });
     expect(r.valid).toBe(false);
     if (!r.valid) expect(r.error.details).toEqual({ type: 'unknown' });
   });
 
-  it('rejects negative timestamp', () => {
-    const r = validateEnvelope({ id: 'x', correlation_id: 'c', type: 'command', timestamp: -1, method: 'm', payload: null });
+  it("rejects negative timestamp", () => {
+    const r = validateEnvelope({
+      id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "c",
+      type: "command",
+      timestamp: -1,
+      method: "m",
+      payload: null,
+    });
     expect(r.valid).toBe(false);
   });
 
-  it('rejects NaN timestamp', () => {
-    const r = validateEnvelope({ id: 'x', correlation_id: 'c', type: 'command', timestamp: NaN, method: 'm', payload: null });
+  it("rejects NaN timestamp", () => {
+    const r = validateEnvelope({
+      id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "c",
+      type: "command",
+      timestamp: Number.NaN,
+      method: "m",
+      payload: null,
+    });
     expect(r.valid).toBe(false);
   });
 
-  it('rejects zero timestamp', () => {
-    const r = validateEnvelope({ id: 'x', correlation_id: 'c', type: 'command', timestamp: 0, method: 'm', payload: null });
+  it("rejects zero timestamp", () => {
+    const r = validateEnvelope({
+      id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "c",
+      type: "command",
+      timestamp: 0,
+      method: "m",
+      payload: null,
+    });
     expect(r.valid).toBe(false);
   });
 
   // --- Negative: type-specific fields ---
-  it('rejects command without method', () => {
-    const r = validateEnvelope({ id: 'x', correlation_id: 'c', type: 'command', timestamp: 1, payload: null });
+  it("rejects command without method", () => {
+    const r = validateEnvelope({
+      id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "c",
+      type: "command",
+      timestamp: 1,
+      payload: null,
+    });
     expect(r.valid).toBe(false);
   });
 
-  it('rejects command with empty method', () => {
-    const r = validateEnvelope({ id: 'x', correlation_id: 'c', type: 'command', timestamp: 1, method: '', payload: null });
+  it("rejects command with empty method", () => {
+    const r = validateEnvelope({
+      id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "c",
+      type: "command",
+      timestamp: 1,
+      method: "",
+      payload: null,
+    });
     expect(r.valid).toBe(false);
   });
 
-  it('rejects command without payload', () => {
-    const r = validateEnvelope({ id: 'x', correlation_id: 'c', type: 'command', timestamp: 1, method: 'm' });
+  it("rejects command without payload", () => {
+    const r = validateEnvelope({
+      id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "c",
+      type: "command",
+      timestamp: 1,
+      method: "m",
+    });
     expect(r.valid).toBe(false);
   });
 
-  it('rejects event without topic', () => {
-    const r = validateEnvelope({ id: 'x', correlation_id: 'c', type: 'event', timestamp: 1, payload: null, sequence: 0 });
+  it("rejects event without topic", () => {
+    const r = validateEnvelope({
+      id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "c",
+      type: "event",
+      timestamp: 1,
+      payload: null,
+      sequence: 0,
+    });
     expect(r.valid).toBe(false);
   });
 
@@ -240,8 +323,13 @@ describe('validateEnvelope', () => {
     const saved = MAX_PAYLOAD_SIZE;
     setMaxPayloadSize(10);
     const r = validateEnvelope({
-      id: 'x', correlation_id: 'c', type: 'command', timestamp: 1,
-      method: 'm', payload: 'a'.repeat(100),
+      id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "c",
+      type: "command",
+      timestamp: 1,
+      method: "m",
+      payload: "a".repeat(100),
     });
     setMaxPayloadSize(saved);
     expect(r.valid).toBe(false);
@@ -255,8 +343,13 @@ describe('validateEnvelope', () => {
     const obj: Record<string, unknown> = {};
     obj['self'] = obj;
     const r = validateEnvelope({
-      id: 'x', correlation_id: 'c', type: 'command', timestamp: 1,
-      method: 'm', payload: obj,
+      id: "x",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.
+      correlation_id: "c",
+      type: "command",
+      timestamp: 1,
+      method: "m",
+      payload: obj,
     });
     expect(r.valid).toBe(false);
     if (!r.valid) {

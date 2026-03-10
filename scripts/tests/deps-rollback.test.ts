@@ -1,5 +1,5 @@
 import { expect, test, describe, beforeEach, afterEach } from 'bun:test';
-import { readFileSync, writeFileSync, rmSync } from 'fs';
+import { readFileSync, writeFileSync, rmSync, existsSync } from 'fs';
 import { join } from 'path';
 import type { DepsRegistry, DepsChangelog } from '../deps-types';
 
@@ -9,6 +9,10 @@ const CHANGELOG_PATH = join(REPO_ROOT, 'deps-changelog.json');
 
 describe('Dependency Rollback Integration', () => {
   beforeEach(() => {
+    // Ensure changelog exists (create if missing)
+    if (!existsSync(CHANGELOG_PATH)) {
+      writeFileSync(CHANGELOG_PATH, JSON.stringify({ entries: [] }, null, 2));
+    }
     // Ensure clean state
     try {
       rmSync(join(REPO_ROOT, '.deps-rollback-backup'), { recursive: true, force: true });

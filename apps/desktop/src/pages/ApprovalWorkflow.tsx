@@ -23,13 +23,11 @@ export function ApprovalWorkflowPage() {
     setLoading(false);
   });
 
-  const handleApprove = async (id: string) => {
-    setRequests(
-      requests().map(r => r.id === id ? { ...r, status: 'approved' as const } : r)
-    );
+  const handleApprove = (id: string) => {
+    setRequests(requests().map(r => (r.id === id ? { ...r, status: ApprovalStatus.Approved } : r)));
   };
 
-  const handleReject = async (id: string, reason: string) => {
+  const handleReject = (id: string, reason: string) => {
     setRequests(
       requests().map(r =>
         r.id === id ? { ...r, status: 'rejected' as const, rejectedReason: reason } : r

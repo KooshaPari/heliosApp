@@ -48,7 +48,8 @@ export class ZellijDetector {
         });
       }
     } catch (error) {
-      console.error("Failed to detect stale zellij sessions:", error);
+      // biome-ignore lint/suspicious/noConsole: Zellij CLI failure should remain observable for operators.
+      console.warn(`Zellij session detection failed: ${String(error)}`);
     }
 
     return orphans;

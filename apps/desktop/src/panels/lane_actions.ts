@@ -31,7 +31,7 @@ export interface RuntimeAPI {
 export class LaneActions {
   private options: LaneActionsOptions;
   private pendingActions: Map<string, ActionCallback> = new Map();
-  private errorTimeouts: Map<string, NodeJS.Timeout> = new Map();
+  private errorTimeouts: Map<string, ReturnType<typeof setTimeout>> = new Map();
 
   constructor(options: LaneActionsOptions) {
     this.options = {
@@ -98,10 +98,10 @@ export class LaneActions {
     if (requireConfirmation) {
       // Confirmation must be handled by caller
       // This method assumes confirmation has been obtained
-      return this.executeCleanup(laneId);
+      return await this.executeCleanup(laneId);
     }
 
-    return this.executeCleanup(laneId);
+    return await this.executeCleanup(laneId);
   }
 
   private async executeCleanup(laneId: string): Promise<boolean> {

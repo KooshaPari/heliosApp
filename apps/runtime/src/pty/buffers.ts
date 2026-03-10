@@ -313,32 +313,22 @@ export class OutputBuffer {
   }
 
   private emitBackpressureOn(utilization: number): void {
-    emitPtyEvent(
-      this.bus,
-      "pty.backpressure.on",
-      this.correlation,
-      {
-        ptyId: this.correlation.ptyId,
-        laneId: this.correlation.laneId,
-        utilization,
-        threshold: this.backpressureThreshold,
-      },
-    );
+    emitPtyEvent(this.bus, "pty.backpressure.on" as const, this.correlation, {
+      ptyId: this.correlation.ptyId,
+      laneId: this.correlation.laneId,
+      utilization,
+      threshold: this.backpressureThreshold,
+    });
   }
 
   private emitBackpressureOff(): void {
     const utilization = this.ring.utilization;
-    emitPtyEvent(
-      this.bus,
-      "pty.backpressure.off",
-      this.correlation,
-      {
-        ptyId: this.correlation.ptyId,
-        laneId: this.correlation.laneId,
-        utilization,
-        threshold: this.backpressureThreshold,
-      },
-    );
+    emitPtyEvent(this.bus, "pty.backpressure.off" as const, this.correlation, {
+      ptyId: this.correlation.ptyId,
+      laneId: this.correlation.laneId,
+      utilization,
+      threshold: this.backpressureThreshold,
+    });
   }
 
   private handleOverflow(droppedBytes: number): void {
@@ -346,8 +336,8 @@ export class OutputBuffer {
     if (!this.firstOverflowLogged) {
       this.firstOverflowLogged = true;
       console.warn(
-        `[pty:${this.correlation.ptyId}] Output buffer overflow: ${droppedBytes} bytes dropped. ` +
-          `Buffer capacity: ${this.ring.capacity} bytes.`,
+        // intentional overflow warning
+        `[OutputBuffer] overflow: ${droppedBytes} bytes dropped for pty ${this.correlation.ptyId}`
       );
     }
 
@@ -357,20 +347,15 @@ export class OutputBuffer {
       this.lastOverflowEventTs = now;
       this._overflowEvents++;
 
-      emitPtyEvent(
-        this.bus,
-        "pty.buffer.overflow",
-        this.correlation,
-        {
-          ptyId: this.correlation.ptyId,
-          laneId: this.correlation.laneId,
-          droppedBytes,
-          totalWritten: this._totalWritten,
-          totalDropped: this._totalDropped,
-          overflowEvents: this._overflowEvents,
-          utilization: this.ring.utilization,
-        },
-      );
+      emitPtyEvent(this.bus, "pty.buffer.overflow" as const, this.correlation, {
+        ptyId: this.correlation.ptyId,
+        laneId: this.correlation.laneId,
+        droppedBytes,
+        totalWritten: this._totalWritten,
+        totalDropped: this._totalDropped,
+        overflowEvents: this._overflowEvents,
+        utilization: this.ring.utilization,
+      });
     }
   }
 }

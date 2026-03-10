@@ -131,7 +131,7 @@ export function createBinding(
   return {
     terminalId,
     binding: triple,
-    state: BindingState.bound,
+    state: BindingState.Bound,
     createdAt: now,
     updatedAt: now,
   };

@@ -30,8 +30,8 @@ export class LaneEventHandler {
   private subscriptions: Map<string, (event: BusEvent) => void> = new Map();
   private pendingUpdates: Map<string, BusEvent> = new Map();
   private lastEventTime: number = Date.now();
-  private connectivityTimeoutId?: NodeJS.Timeout;
-  private rafId?: number;
+  private connectivityTimeoutId?: ReturnType<typeof setTimeout>;
+  private rafId?: number | undefined;
   private lastSequenceNumbers: Map<string, number> = new Map();
   private isConnected: boolean = true;
 
@@ -146,7 +146,7 @@ export class LaneEventHandler {
 
     // Notify about orphan status changes
     if (this.options.onOrphanStatusChanged) {
-      orphanedLanes.forEach((laneId: string) => {
+      for (const laneId of orphanedLanes) {
         this.options.onOrphanStatusChanged?.(laneId, true);
       });
     }

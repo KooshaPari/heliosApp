@@ -1,4 +1,5 @@
 import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
+import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
 import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
 import type { LocalBus } from "../../runtime/src/protocol/bus";
 import type { RendererEngine } from "./settings";
@@ -123,17 +124,20 @@ export class DesktopRuntimeClient {
   async ensureSession(input: {
     workspaceId: string;
     laneId: string;
+    sessionId?: string;
+    restore?: boolean;
     forceError?: boolean;
   }): Promise<LifecycleResult> {
-    const requestedSessionId = `${input.laneId}:session`;
+    const requestedSessionId = input.sessionId ?? `${input.laneId}:session`;
     const response = await this.bus.request(
       toCommandEnvelope(
         "session.attach",
         {
           id: requestedSessionId,
-          lane_id: input.laneId,
-          session_id: requestedSessionId,
-          force_error: input.forceError === true
+          laneId: input.laneId,
+          sessionId: requestedSessionId,
+          restore: input.restore === true,
+          forceError: input.forceError === true,
         },
         input.workspaceId,
         input.laneId,

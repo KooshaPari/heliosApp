@@ -73,9 +73,23 @@ export const ModelSelector: Component<ModelSelectorProps> = (props) => {
                   {group.provider}
                 </div>
                 <For each={group.models}>
-                  {(model) => (
-                    <div
-                      onClick={() => { if (model.available) { props.onSelect(model.id); setIsOpen(false); } }}
+                  {model => (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (model.available) {
+                          props.onSelect(model.id);
+                          setIsOpen(false);
+                        }
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          if (model.available) {
+                            props.onSelect(model.id);
+                            setIsOpen(false);
+                          }
+                        }
+                      }}
                       style={{
                         padding: "6px 12px", cursor: model.available ? "pointer" : "default",
                         color: model.available ? "#cdd6f4" : "#585b70",

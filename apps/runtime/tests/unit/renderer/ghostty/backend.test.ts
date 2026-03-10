@@ -39,30 +39,6 @@ function makeStream(chunks: Uint8Array[]): ReadableStream<Uint8Array> {
   });
 }
 
-function makeInfiniteStream(): { stream: ReadableStream<Uint8Array>; cancel: () => void } {
-  let cancelled = false;
-  const stream = new ReadableStream<Uint8Array>({
-    async pull(controller) {
-      // Wait indefinitely unless cancelled
-      await new Promise<void>((resolve) => {
-        const id = setInterval(() => {
-          if (cancelled) {
-            clearInterval(id);
-            resolve();
-          }
-        }, 10);
-      });
-      if (!cancelled) {
-        controller.enqueue(new Uint8Array([0x41]));
-      }
-    },
-    cancel() {
-      cancelled = true;
-    },
-  });
-  return { stream, cancel: () => { cancelled = true; } };
-}
-
 describe("GhosttyBackend - lifecycle (T012)", () => {
   let backend: GhosttyBackend;
 
@@ -302,7 +278,9 @@ describe("GhosttyBackend - metrics (T012)", () => {
 describe("GhosttyBackend - input relay (T012)", () => {
   let backend: GhosttyBackend;
   const mockWriter: PtyWriter = {
-    writeInput: () => {},
+    writeInput: () => {
+      // no-op: adapter contract requires writer callback
+    },
   };
 
   beforeEach(async () => {

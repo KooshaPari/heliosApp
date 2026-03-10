@@ -263,6 +263,7 @@ spec-kitty implement WP04 --base WP01
 - Ensure fallback strategy covers all deployment targets
 - Constitution should NOT contain implementation details — only decisions and principles
 
+
 ## Activity Log
 
 - 2026-02-28T12:35:25Z – unknown – lane=done – Implemented, PR #6 created

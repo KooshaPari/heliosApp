@@ -51,7 +51,8 @@ export class PtyDetector {
         });
       }
     } catch (error) {
-      console.error("Failed to detect leaked PTY processes:", error);
+      // biome-ignore lint/suspicious/noConsole: PTY detection failures are intentionally logged for operational diagnostics.
+      console.warn(`PTY leak detection failed: ${String(error)}`);
     }
 
     return orphans;
@@ -107,7 +108,8 @@ export class PtyDetector {
 
       return processes;
     } catch (error) {
-      console.error("Failed to list PTY processes:", error);
+      // biome-ignore lint/suspicious/noConsole: PTY process enumeration is best-effort and should remain observable.
+      console.warn(`Failed to list PTY processes: ${String(error)}`);
       return [];
     }
   }

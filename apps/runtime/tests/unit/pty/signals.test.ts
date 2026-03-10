@@ -1,4 +1,4 @@
-import { describe, expect, it, afterEach } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import {
   resize,
   terminate,
@@ -28,6 +28,19 @@ function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   };
 }
 
+function spawnShellProcess(): number {
+  const proc = Bun.spawn(["/bin/sh"], {
+    stdout: "pipe",
+    stderr: "pipe",
+  }) as { pid?: number };
+
+  if (proc.pid === undefined) {
+    throw new Error("Bun.spawn did not return a process ID");
+  }
+
+  return proc.pid;
+}
+
 describe("SignalHistory", () => {
   it("stores and retrieves envelopes", () => {
     const h = new SignalHistory(3);
@@ -49,8 +62,12 @@ describe("SignalHistory", () => {
 
 describe("resize", () => {
   it("updates dimensions and emits events", () => {
+    // Spawn a real child so SIGWINCH delivery succeeds.
+    const pid = spawnShellProcess();
+    pidsToCleanup.push(pid);
+
     const registry = new PtyRegistry();
-    const record = makeRecord();
+    const record = makeRecord({ pid });
     registry.register(record);
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
@@ -107,27 +124,20 @@ describe("resize", () => {
 });
 
 describe("terminate", () => {
-  const pidsToCleanup: number[] = [];
-
-  afterEach(() => {
-    for (const pid of pidsToCleanup) {
-      try { process.kill(pid, "SIGKILL"); } catch { /* already exited */ }
-    }
-    pidsToCleanup.length = 0;
-  });
-
   it("terminates with SIGTERM and cleans up", async () => {
-    const proc = Bun.spawn(["/bin/sh"], { stdin: "pipe", stdout: "pipe", stderr: "pipe" });
-    pidsToCleanup.push(proc.pid);
+    const pid = spawnShellProcess() as number;
+    pidsToCleanup.push(pid);
 
     const registry = new PtyRegistry();
-    const record = makeRecord({ pid: proc.pid });
+    const record = makeRecord({ pid });
     registry.register(record);
     const lifecycle = new PtyLifecycle(record.ptyId, "active");
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
 
-    await terminate(record, lifecycle, registry, historyMap, bus, { gracePeriodMs: 500 });
+    const mockIsAlive = () => false;
+    const mockWait = async () => true;
+    await terminate(record, lifecycle, registry, historyMap, bus, { gracePeriodMs: 50 }, mockIsAlive, mockWait);
 
     expect(registry.get(record.ptyId)).toBeUndefined();
     const topics = bus.events.map((e) => e.topic);
@@ -151,9 +161,9 @@ describe("terminate", () => {
     const bus = new InMemoryBusPublisher();
 
     let callCount = 0;
-    const mockWait = async (): Promise<boolean> => {
+    const mockWait = (): Promise<boolean> => {
       callCount++;
-      return callCount > 1;
+      return Promise.resolve(callCount > 1);
     };
 
     await terminate(record, lifecycle, registry, new Map(), bus, { gracePeriodMs: 50 }, () => true, mockWait);
@@ -166,7 +176,11 @@ describe("terminate", () => {
 
 describe("sendSighup", () => {
   it("records successful delivery", () => {
-    const record = makeRecord();
+    // Spawn a real child so SIGHUP has a valid target (not the test runner).
+    const pid = spawnShellProcess();
+    pidsToCleanup.push(pid);
+
+    const record = makeRecord({ pid });
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
     const envelope = sendSighup(record, historyMap, bus);
@@ -180,7 +194,9 @@ describe("sendSighup", () => {
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
     const envelope = sendSighup(record, historyMap, bus);
+    expect(envelope.signal).toBe("SIGHUP");
     expect(envelope.outcome).toBe("failed");
     expect(envelope.error).toBeDefined();
+    expect(historyMap.get(record.ptyId)?.length).toBe(1);
   });
 });

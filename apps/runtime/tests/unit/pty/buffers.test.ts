@@ -221,7 +221,7 @@ describe("OutputBuffer", () => {
   it("debounces overflow events (max 1/sec)", () => {
     const bus = new InMemoryBusPublisher();
     const origWarn = console.warn;
-    console.warn = () => {};
+    console.warn = () => undefined;
 
     try {
       const ob = new OutputBuffer(bus, makeCorrelation(), {
@@ -245,7 +245,7 @@ describe("OutputBuffer", () => {
   it("tracks cumulative stats across multiple writes", () => {
     const bus = new InMemoryBusPublisher();
     const origWarn = console.warn;
-    console.warn = () => {};
+    console.warn = () => undefined;
 
     try {
       const ob = new OutputBuffer(bus, makeCorrelation(), { capacityBytes: 10 });

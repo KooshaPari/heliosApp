@@ -1,5 +1,6 @@
 // T003 - Lane lifecycle commands + T004 - Event publishing to local bus
 // T006-T010 - Worktree provisioning, cleanup, PTY termination, orphan reconciliation
+// T011-T015 - Par task binding, termination, execution, stale detection, lifecycle events
 
 import * as path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
@@ -63,7 +64,9 @@ export interface PtyManager {
 
 // ── Event Types ──────────────────────────────────────────────────────────────
 
+// T015: Comprehensive lane lifecycle event catalog
 export type LaneBusEventTopic =
+  // Core lane lifecycle
   | "lane.created"
   | "lane.state.changed"
   | "lane.shared"
@@ -174,6 +177,7 @@ export class LaneManager {
           worktreePath: result.worktreePath,
         });
 
+        await this.emitEvent("lane.worktree.provisioned", laneId, lane.workspaceId, fromState, toState);
         await this.emitEvent("lane.state.changed", laneId, lane.workspaceId, fromState, toState);
         return this.registry.get(laneId)!;
       } catch (err) {
@@ -298,6 +302,7 @@ export class LaneManager {
           const worktreeParent = path.dirname(currentLane.worktreePath);
           const workspaceRepoPath = path.dirname(worktreeParent);
           await removeWorktree(currentLane.worktreePath, workspaceRepoPath);
+          await this.emitEvent("lane.worktree.removed", laneId, lane.workspaceId, "cleaning", "cleaning");
         } catch {
           // Best-effort: worktree may already be removed
         }
@@ -542,3 +547,16 @@ export {
   type WorktreeResult,
   type ReconciliationResult,
 } from "./worktree.js";
+export {
+  ParManager,
+  ParNotFoundError,
+  ParSpawnError,
+  LaneNotReadyError,
+  ExecTimeoutError,
+  _resetParIdCounter,
+  type ParBinding,
+  type ExecResult,
+  type ParManagerOptions,
+  type SpawnFn,
+  type SpawnResult,
+} from "./par.js";

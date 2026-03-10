@@ -59,6 +59,33 @@ export function computeBranchName(laneId: string): string {
   return `${BRANCH_PREFIX}${laneId}`;
 }
 
+type SpawnResult = {
+  readonly stdout: ReadableStream<Uint8Array> | null;
+  readonly stderr: ReadableStream<Uint8Array> | null;
+  readonly exited: Promise<number>;
+  readonly pid: number;
+};
+
+type SpawnOptions = {
+  cwd?: string;
+  stdout?: "pipe" | "inherit" | "ignore";
+  stderr?: "pipe" | "inherit" | "ignore";
+  stdin?: "pipe" | "inherit" | "ignore";
+  env?: Record<string, string>;
+};
+
+const spawn: (command: string[], options: SpawnOptions) => SpawnResult =
+  (
+    (globalThis as Record<string, unknown>).Bun as
+      | {
+          spawn: (command: string[], options: SpawnOptions) => SpawnResult;
+        }
+      | undefined
+  )?.spawn ??
+  ((() => {
+    throw new Error("worktree module requires Bun runtime");
+  }) as (command: string[], options: SpawnOptions) => SpawnResult);
+
 async function runGit(
   args: string[],
   cwd: string,

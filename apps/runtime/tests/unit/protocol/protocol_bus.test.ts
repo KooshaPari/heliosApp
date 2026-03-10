@@ -8,9 +8,13 @@ function createLifecycleCommand(overrides: Partial<LocalBusEnvelope> = {}): Loca
     id: "cmd-1",
     type: "command",
     ts: "2026-02-26T00:00:00.000Z",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
     workspace_id: "ws-1",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
     lane_id: "lane-1",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
     session_id: "session-1",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
     correlation_id: "corr-1",
     method: "session.attach",
     payload: {},
@@ -88,6 +92,56 @@ describe("protocol validator", () => {
 
     expect(envelope.timestamp).toBe("2026-02-26T00:00:00+00:00");
   });
+
+  test("rejects timestamps without RFC3339 timezone", () => {
+    expect(() =>
+      validateEnvelope({
+        id: "evt-1",
+        type: "event",
+        ts: "2026-02-26T00:00:00",
+        topic: "workspace.opened",
+        payload: {}
+      })
+    ).toThrow("Envelope field 'ts' must be an RFC3339 timestamp with timezone");
+  });
+
+  test("accepts RFC3339 timestamps with explicit timezone offset", () => {
+    const envelope = validateEnvelope({
+      id: "evt-1",
+      type: "event",
+      ts: "2026-02-26T00:00:00+00:00",
+      topic: "workspace.opened",
+      payload: {}
+    });
+
+    expect(envelope.ts).toBe("2026-02-26T00:00:00+00:00");
+  });
+
+  test("rejects optional timestamp without RFC3339 timezone", () => {
+    expect(() =>
+      validateEnvelope({
+        id: "evt-1",
+        type: "event",
+        ts: "2026-02-26T00:00:00.000Z",
+        timestamp: "2026-02-26T00:00:00",
+        topic: "workspace.opened",
+        payload: {}
+      })
+    ).toThrow("Envelope field 'timestamp' must be an RFC3339 timestamp with timezone");
+  });
+
+  test("accepts optional timestamp with RFC3339 timezone", () => {
+    const envelope = validateEnvelope({
+      id: "evt-1",
+      type: "event",
+      ts: "2026-02-26T00:00:00.000Z",
+      timestamp: "2026-02-26T00:00:00+00:00",
+      topic: "workspace.opened",
+      payload: {}
+    });
+
+    expect(envelope.timestamp).toBe("2026-02-26T00:00:00+00:00");
+  });
 });
 
 describe("protocol sequencing and audit", () => {
@@ -114,9 +168,13 @@ describe("protocol sequencing and audit", () => {
         id: "evt-1",
         type: "event",
         ts: "2026-02-26T00:00:00.000Z",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         workspace_id: "ws-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         lane_id: "lane-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         session_id: "session-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         correlation_id: "corr-1",
         topic: "session.attached",
         payload: {}
@@ -133,8 +191,11 @@ describe("protocol sequencing and audit", () => {
       id: "evt-accepted",
       type: "event",
       ts: "2026-02-26T00:00:00.000Z",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
       workspace_id: "ws-1",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
       lane_id: "lane-1",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
       correlation_id: "corr-accepted",
       topic: "lane.create.started",
       payload: {}
@@ -145,8 +206,11 @@ describe("protocol sequencing and audit", () => {
         id: "evt-rejected",
         type: "event",
         ts: "2026-02-26T00:00:00.000Z",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         workspace_id: "ws-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         lane_id: "lane-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         correlation_id: "corr-accepted",
         topic: "lane.create.started",
         payload: {}
@@ -280,7 +344,8 @@ describe("protocol sequencing and audit", () => {
     const bus = new InMemoryLocalBus();
     const response = await bus.request(
       createLifecycleCommand({
-        payload: { force_error: true }
+        // biome-ignore lint/style/useNamingConvention: Protocol fixture payload uses snake_case.
+        payload: { force_error: true },
       })
     );
 

@@ -30,9 +30,9 @@ class MockProvider extends BaseProviderAdapter<ACPConfig, ACPExecuteInput, ACPEx
     this.failExecute = options?.failExecute ?? false;
   }
 
-  async init(config: ACPConfig): Promise<void> {
+  init(config: ACPConfig): Promise<void> {
     if (this.failInit) {
-      throw new Error("Init failed");
+      return Promise.reject(new Error("Init failed"));
     }
 
     this.config = config;
@@ -43,54 +43,55 @@ class MockProvider extends BaseProviderAdapter<ACPConfig, ACPExecuteInput, ACPEx
       lastCheck: new Date(),
       failureCount: 0,
     });
+    return Promise.resolve();
   }
 
-  async health(): Promise<ProviderHealthStatus> {
+  health(): Promise<ProviderHealthStatus> {
     if (this.failHealth) {
-      return {
+      return Promise.resolve({
         state: "unavailable",
         lastCheck: new Date(),
         failureCount: 3,
         message: "Health check failed",
-      };
+      });
     }
 
     if (!this.isInitialized) {
-      return {
+      return Promise.resolve({
         state: "unavailable",
         lastCheck: new Date(),
         failureCount: 0,
         message: "Not initialized",
-      };
+      });
     }
 
-    return {
+    return Promise.resolve({
       state: this.isHealthy ? "healthy" : "degraded",
       lastCheck: new Date(),
       failureCount: 0,
-    };
+    });
   }
 
-  async execute(input: ACPExecuteInput, correlationId: string): Promise<ACPExecuteOutput> {
+  execute(input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
     if (this.failExecute) {
-      throw new Error("Execute failed");
+      return Promise.reject(new Error("Execute failed"));
     }
 
     if (!this.isInitialized) {
-      throw new Error("Provider not initialized");
+      return Promise.reject(new Error("Provider not initialized"));
     }
 
-    return {
+    return Promise.resolve({
       content: `Mock response to: ${input.prompt}`,
       stopReason: "end_turn",
       usage: {
         inputTokens: 10,
         outputTokens: 20,
       },
-    };
+    });
   }
 
-  async terminate(): Promise<void> {
+  terminate(): Promise<void> {
     this.isInitialized = false;
     this.isHealthy = false;
     this.updateHealthStatus({
@@ -99,6 +100,7 @@ class MockProvider extends BaseProviderAdapter<ACPConfig, ACPExecuteInput, ACPEx
       failureCount: 0,
       message: "Terminated",
     });
+    return Promise.resolve();
   }
 
   // Test helpers
@@ -251,35 +253,31 @@ describe("ProviderAdapter Interface", () => {
         metadata: { score: number };
       }
 
-      class CustomProvider extends BaseProviderAdapter<
-        CustomConfig,
-        CustomInput,
-        CustomOutput
-      > {
-        async init(config: CustomConfig): Promise<void> {
+      class CustomProvider extends BaseProviderAdapter<CustomConfig, CustomInput, CustomOutput> {
+        init(config: CustomConfig): Promise<void> {
           expect(config.customField).toBeDefined();
+          return Promise.resolve();
         }
 
-        async health(): Promise<ProviderHealthStatus> {
-          return {
+        health(): Promise<ProviderHealthStatus> {
+          return Promise.resolve({
             state: "healthy",
             lastCheck: new Date(),
             failureCount: 0,
-          };
+          });
         }
 
-        async execute(
-          input: CustomInput,
-          correlationId: string
-        ): Promise<CustomOutput> {
+        execute(input: CustomInput, _correlationId: string): Promise<CustomOutput> {
           expect(input.options.timeout).toBeGreaterThan(0);
-          return {
+          return Promise.resolve({
             answer: "Custom answer",
             metadata: { score: 0.95 },
-          };
+          });
         }
 
-        async terminate(): Promise<void> {}
+        terminate(): Promise<void> {
+          return Promise.resolve();
+        }
       }
 
       const provider = new CustomProvider();

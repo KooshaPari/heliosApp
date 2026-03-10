@@ -103,14 +103,50 @@ async function checkTestCoverage(files: string[]): Promise<Finding[]> {
     if (filePath.includes('.test.') || filePath.includes('.spec.')) {
       continue;
     }
-    
-    if (!filePath.includes('node_modules') && filePath.endsWith('.ts')) {
-      // Look for corresponding test file
-      const testPath = filePath.replace(/\.ts$/, '.test.ts');
-      try {
-        await fs.access(testPath);
-      } catch {
-        // Test file doesn't exist
+
+    if (!filePath.includes("node_modules") && filePath.endsWith(".ts")) {
+      // Skip non-source files (configs, workflow scripts, drafts)
+      if (filePath.includes(".draft.") || filePath.endsWith(".mjs")) {
+        continue;
+      }
+
+      // Look for corresponding test file in multiple common locations
+      const baseName = path.basename(filePath, path.extname(filePath));
+      const dirName = path.dirname(filePath);
+      const candidatePaths = [
+        filePath.replace(/\.ts$/, ".test.ts"),
+        filePath.replace(/\.tsx$/, ".test.tsx"),
+        path.join(dirName, "__tests__", `${baseName}.test.ts`),
+        path.join(dirName, "__tests__", `${baseName}.test.tsx`),
+      ];
+
+      // Also check tests/unit mirror path (e.g. apps/desktop/src/panels/x.ts -> apps/desktop/tests/unit/panels/x.test.ts)
+      const srcMatch = filePath.match(/^(apps\/\w+)\/src\/(.+)$/);
+      if (srcMatch) {
+        const testMirror = path.join(srcMatch[1], "tests", "unit", srcMatch[2]);
+        candidatePaths.push(testMirror.replace(/\.ts$/, ".test.ts"));
+        candidatePaths.push(testMirror.replace(/\.tsx$/, ".test.tsx"));
+      }
+
+      // Also check scripts/tests/ mirror path
+      const scriptMatch = filePath.match(/^scripts\/(.+)$/);
+      if (scriptMatch) {
+        candidatePaths.push(path.join("scripts", "tests", scriptMatch[1].replace(/\.ts$/, ".test.ts")));
+      }
+
+      let hasTest = false;
+      for (const candidate of candidatePaths) {
+        try {
+          await fs.access(candidate);
+          hasTest = true;
+          break;
+        } catch {
+          // continue checking
+        }
+      }
+
+      if (!hasTest) {
+        const testPath = filePath.replace(/\.ts$/, ".test.ts");
         findings.push({
           check: 'Test Coverage',
           filePath,

@@ -53,9 +53,9 @@ describe('LocalBus — command dispatch', () => {
   });
 
   // FR-003: HANDLER_ERROR when async handler rejects
-  it('returns HANDLER_ERROR when handler returns a rejected promise', async () => {
-    bus.registerMethod('fail.async', async () => {
-      throw new Error('async boom');
+  it("returns HANDLER_ERROR when handler returns a rejected promise", async () => {
+    bus.registerMethod("fail.async", () => {
+      return Promise.reject(new Error("async boom"));
     });
 
     const cmd = createCommand('fail.async', null);
@@ -76,8 +76,9 @@ describe('LocalBus — command dispatch', () => {
   // FR-003: VALIDATION_ERROR for non-command envelope
   it('returns VALIDATION_ERROR when sending a non-command envelope', async () => {
     const event = {
-      id: 'evt_123',
-      correlation_id: 'cor_123',
+      id: "evt_123",
+      // biome-ignore lint/style/useNamingConvention: Protocol event fixtures follow wire-schema naming.
+      correlation_id: "cor_123",
       timestamp: 1,
       type: 'event',
       topic: 'test',

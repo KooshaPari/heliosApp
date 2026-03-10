@@ -1,4 +1,4 @@
-import type { LocalBusEnvelope, ResponseEnvelope } from "./types";
+import type { LocalBusEnvelope } from "./types";
 
 export type ProtocolBoundary = "local_control" | "tool_interop" | "agent_delegation";
 export type BoundaryAdapterName = "local_bus" | "tool_bridge" | "a2a_bridge";
@@ -52,8 +52,8 @@ function normalizedBoundaryError(
   command: LocalBusEnvelope,
   code: string,
   message: string,
-  details: Record<string, unknown>
-): ResponseEnvelope {
+  details: Record<string, unknown>,
+): LocalBusEnvelope {
   return {
     id: command.id,
     type: "response",
@@ -88,34 +88,43 @@ export function getBoundaryDispatchDecision(method: string): BoundaryDispatchDec
 }
 
 export function createBoundaryDispatcher(input: BoundaryDispatcherInput): CommandDispatch {
-  const dispatchTool = input.dispatchTool ?? (async (command) =>
-    normalizedBoundaryError(
-      command,
-      "UNSUPPORTED_BOUNDARY_ADAPTER",
-      "tool_interop adapter unavailable",
-      {
-        boundary: "tool_interop",
-        adapter: "tool_bridge",
-        method: command.type === "command" ? command.method : null
-      }
-    ));
-  const dispatchA2A = input.dispatchA2A ?? (async (command) =>
-    normalizedBoundaryError(
-      command,
-      "UNSUPPORTED_BOUNDARY_ADAPTER",
-      "agent_delegation adapter unavailable",
-      {
-        boundary: "agent_delegation",
-        adapter: "a2a_bridge",
-        method: command.type === "command" ? command.method : null
-      }
-    ));
+  const dispatchTool =
+    input.dispatchTool ??
+    (async (command) =>
+      normalizedBoundaryError(
+        command,
+        "UNSUPPORTED_BOUNDARY_ADAPTER",
+        "tool_interop adapter unavailable",
+        {
+          boundary: "tool_interop",
+          adapter: "tool_bridge",
+          method: command.type === "command" ? command.method : null,
+        },
+      ));
+  const dispatchA2A =
+    input.dispatchA2A ??
+    (async (command) =>
+      normalizedBoundaryError(
+        command,
+        "UNSUPPORTED_BOUNDARY_ADAPTER",
+        "agent_delegation adapter unavailable",
+        {
+          boundary: "agent_delegation",
+          adapter: "a2a_bridge",
+          method: command.type === "command" ? command.method : null,
+        },
+      ));
 
   return async (command: LocalBusEnvelope): Promise<LocalBusEnvelope> => {
     if (command.type !== "command") {
-      return normalizedBoundaryError(command, "INVALID_ENVELOPE_TYPE", "command envelope required", {
-        type: command.type
-      });
+      return normalizedBoundaryError(
+        command,
+        "INVALID_ENVELOPE_TYPE",
+        "command envelope required",
+        {
+          type: command.type,
+        },
+      );
     }
 
     const decision = getBoundaryDispatchDecision(command.method);
@@ -136,8 +145,8 @@ export function createBoundaryDispatcher(input: BoundaryDispatcherInput): Comman
       "boundary adapter must return response",
       {
         boundary: decision.boundary,
-        adapter: decision.adapter
-      }
+        adapter: decision.adapter,
+      },
     );
   };
 }

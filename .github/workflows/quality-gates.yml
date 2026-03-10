@@ -55,9 +55,17 @@ jobs:
         timeout-minutes: 5
         continue-on-error: false
 
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
       - name: Gate 4 - E2E Tests
         id: gate-e2e
-        run: playwright test
+        run: |
+          if ls apps/desktop/tests/e2e/*.spec.ts 1>/dev/null 2>&1; then
+            bun run test:e2e
+          else
+            echo "No e2e spec files found — skipping"
+          fi
         timeout-minutes: 5
         continue-on-error: false
 

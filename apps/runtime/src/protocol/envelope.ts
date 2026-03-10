@@ -19,6 +19,7 @@ import type { BusError } from './errors.js';
 // ---------------------------------------------------------------------------
 
 /** Maximum serialised payload size in bytes (default 1 MB). */
+// biome-ignore lint/style/useNamingConvention: Protocol payload field must remain snake_case for external schema compatibility.
 export let MAX_PAYLOAD_SIZE = 1_048_576;
 
 /** Override the maximum payload size (for testing or configuration). */
@@ -66,8 +67,9 @@ export function createCommand(
     throw new Error('createCommand: method must be a non-empty string');
   }
   return {
-    id: generateId('cmd'),
-    correlation_id: correlationId ?? generateId('cor'),
+    id: generateId("cmd"),
+    // biome-ignore lint/style/useNamingConvention: Protocol schema requires correlation_id.
+    correlation_id: correlationId ?? generateId("cor"),
     timestamp: monotonicNow(),
     type: 'command',
     method,
@@ -88,7 +90,8 @@ export function createResponse(
   error?: BusError,
 ): ResponseEnvelope {
   const base: ResponseEnvelope = {
-    id: generateId('res'),
+    id: generateId("res"),
+    // biome-ignore lint/style/useNamingConvention: Protocol schema requires correlation_id.
     correlation_id: command.correlation_id,
     timestamp: monotonicNow(),
     type: 'response',
@@ -120,8 +123,9 @@ export function createEvent(
     throw new Error('createEvent: topic must be a non-empty string');
   }
   return {
-    id: generateId('evt'),
-    correlation_id: correlationId ?? generateId('cor'),
+    id: generateId("evt"),
+    // biome-ignore lint/style/useNamingConvention: Protocol schema requires correlation_id.
+    correlation_id: correlationId ?? generateId("cor"),
     timestamp: monotonicNow(),
     type: 'event',
     topic,

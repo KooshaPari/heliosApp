@@ -35,36 +35,38 @@ class MockIsolatedProvider
     this.laneId = laneId;
   }
 
-  async init(config: ACPConfig): Promise<void> {
+  init(_config: ACPConfig): Promise<void> {
     this.initialized = true;
+    return Promise.resolve();
   }
 
-  async health(): Promise<ProviderHealthStatus> {
-    return {
+  health(): Promise<ProviderHealthStatus> {
+    return Promise.resolve({
       state: this.initialized && !this.shouldCrash ? "healthy" : "unavailable",
       lastCheck: new Date(),
       failureCount: this.crashCount,
-    };
+    });
   }
 
-  async execute(input: ACPExecuteInput, correlationId: string): Promise<ACPExecuteOutput> {
+  execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
     if (!this.initialized) {
-      throw new Error("Not initialized");
+      return Promise.reject(new Error("Not initialized"));
     }
 
     if (this.shouldCrash) {
       this.crashCount++;
-      throw new Error(`Provider crashed (lane ${this.laneId})`);
+      return Promise.reject(new Error(`Provider crashed (lane ${this.laneId})`));
     }
 
-    return {
+    return Promise.resolve({
       content: `Response from lane ${this.laneId}`,
       stopReason: "end_turn",
-    };
+    });
   }
 
-  async terminate(): Promise<void> {
+  terminate(): Promise<void> {
     this.initialized = false;
+    return Promise.resolve();
   }
 
   // Test helpers
@@ -80,54 +82,49 @@ class MockIsolatedProvider
 describe("Process-Level Isolation", () => {
   describe("Lane-Scoped Isolation", () => {
     it("should isolate provider crashes to specific lanes", async () => {
-      const laneAProvider = new MockIsolatedProvider("lane-a");
-      const laneBProvider = new MockIsolatedProvider("lane-b");
+      const laneProviderA = new MockIsolatedProvider("lane-a");
+      const laneProviderB = new MockIsolatedProvider("lane-b");
 
       // Initialize both providers
-      await laneAProvider.init({ apiKey: "test", model: "claude-3-sonnet" });
-      await laneBProvider.init({ apiKey: "test", model: "claude-3-sonnet" });
+      await laneProviderA.init({ apiKey: "test", model: "claude-3-sonnet" });
+      await laneProviderB.init({ apiKey: "test", model: "claude-3-sonnet" });
 
       // Lane A provider crashes
-      laneAProvider.setCrash(true);
+      laneProviderA.setCrash(true);
 
       // Lane A should fail
-      await expect(
-        laneAProvider.execute({ prompt: "test" }, "corr-123")
-      ).rejects.toThrow();
+      await expect(laneProviderA.execute({ prompt: "test" }, "corr-123")).rejects.toThrow();
 
       // Lane B should still work (unaffected)
-      const laneBAResult = await laneBProvider.execute(
-        { prompt: "test" },
-        "corr-123"
-      );
-      expect(laneBAResult.content).toContain("lane-b");
+      const laneBaResult = await laneProviderB.execute({ prompt: "test" }, "corr-123");
+      expect(laneBaResult.content).toContain("lane-b");
     });
 
     it("should track crashes per lane", async () => {
-      const laneAProvider = new MockIsolatedProvider("lane-a");
-      const laneBProvider = new MockIsolatedProvider("lane-b");
+      const laneProviderA = new MockIsolatedProvider("lane-a");
+      const laneProviderB = new MockIsolatedProvider("lane-b");
 
-      await laneAProvider.init({ apiKey: "test", model: "claude-3-sonnet" });
-      await laneBProvider.init({ apiKey: "test", model: "claude-3-sonnet" });
+      await laneProviderA.init({ apiKey: "test", model: "claude-3-sonnet" });
+      await laneProviderB.init({ apiKey: "test", model: "claude-3-sonnet" });
 
       // Crash lane A provider multiple times
-      laneAProvider.setCrash(true);
+      laneProviderA.setCrash(true);
       for (let i = 0; i < 3; i++) {
         try {
-          await laneAProvider.execute({ prompt: "test" }, "corr-123");
-        } catch (e) {
+          await laneProviderA.execute({ prompt: "test" }, "corr-123");
+        } catch (_e) {
           // Expected
         }
       }
 
       // Check lane A health
-      const laneAHealth = await laneAProvider.health();
-      expect(laneAHealth.failureCount).toBe(3);
+      const laneHealthA = await laneProviderA.health();
+      expect(laneHealthA.failureCount).toBe(3);
 
       // Check lane B health (should be unaffected)
-      const laneBHealth = await laneBProvider.health();
-      expect(laneBHealth.failureCount).toBe(0);
-      expect(laneBHealth.state).toBe("healthy");
+      const laneHealthB = await laneProviderB.health();
+      expect(laneHealthB.failureCount).toBe(0);
+      expect(laneHealthB.state).toBe("healthy");
     });
   });
 
@@ -219,9 +216,9 @@ describe("Process-Level Isolation", () => {
 
       // All should succeed
       expect(results).toHaveLength(laneCount);
-      results.forEach((result) => {
+      for (const result of results) {
         expect(result.content).toBeTruthy();
-      });
+      }
     });
 
     it("should handle selective lane failures", async () => {
