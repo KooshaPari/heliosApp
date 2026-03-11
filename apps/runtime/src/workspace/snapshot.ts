@@ -24,9 +24,7 @@ function computeChecksum(workspaces: Workspace[]): string {
 /** Atomically write data to a file using temp + fsync + rename */
 async function atomicWrite(filePath: string, data: string): Promise<void> {
   const tmp = `${filePath}.tmp.${Date.now()}`;
-  const fd = Bun.file(tmp);
-  await Bun.write(fd, data);
-  // Bun.write does fsync internally; rename for atomicity
+  await writeFile(tmp, data, 'utf-8');
   await rename(tmp, filePath);
 }
 
