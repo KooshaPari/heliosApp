@@ -36,7 +36,7 @@ const DEFAULT_LINE_LIMIT = 500;
 
 const CONSTITUTION_PATH = path.join(
   path.dirname(path.dirname(import.meta.url)).replace('file://', ''),
-  '.kittify/memory/constitution.md'
+  'docs/reference/constitution.md'
 );
 
 /**

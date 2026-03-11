@@ -45,7 +45,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/023-command-policy-engine-and-approval-workflows/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/023-command-policy-engine-and-approval-workflows/spec.md`
 - WP01 output: PolicyRule, PolicyRuleSet, PolicyStorage.
