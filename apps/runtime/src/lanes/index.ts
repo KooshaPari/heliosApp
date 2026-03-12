@@ -74,6 +74,8 @@ export type LaneBusEventTopic =
   | "lane.closed"
   | "lane.ptys_terminated"
   | "lane.provision_failed"
+  | "lane.worktree.provisioned"
+  | "lane.worktree.removed"
   | "reconciliation.completed";
 
 // ── ID Generation ────────────────────────────────────────────────────────────

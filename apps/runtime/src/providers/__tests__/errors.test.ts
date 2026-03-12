@@ -5,7 +5,7 @@
  * SC-025-004: All provider errors map to normalized taxonomy.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import {
   NormalizedProviderError,
   normalizeError,

@@ -109,8 +109,8 @@ function defaultSpawn(
 ): SpawnResult {
   const proc = Bun.spawn(cmd, {
     cwd: opts.cwd,
-    stdout: opts.stdout ?? "pipe",
-    stderr: opts.stderr ?? "pipe",
+    stdout: "pipe",
+    stderr: "pipe",
   });
   return {
     pid: proc.pid,

@@ -5,6 +5,8 @@ export type LaneState =
   | "provisioning"
   | "ready"
   | "running"
+  | "active"
+  | "recovering"
   | "blocked"
   | "shared"
   | "cleaning"

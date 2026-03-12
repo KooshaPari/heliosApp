@@ -92,9 +92,9 @@ export class Watchdog {
     // Check if process is still running
     const isRunning = await this.isProcessRunning(monitor.pid);
 
-    let reason = CrashReason.Unresponsive;
+    let reason = CrashReason.UNRESPONSIVE;
     if (!isRunning) {
-      reason = CrashReason.HeartbeatTimeout;
+      reason = CrashReason.HEARTBEAT_TIMEOUT;
     }
 
     const crashEvent: CrashEvent = {
@@ -116,13 +116,13 @@ export class Watchdog {
     this.unregister(name);
 
     // Classify exit
-    let reason = CrashReason.ExitCode;
+    let reason = CrashReason.EXIT_CODE;
     if (signal) {
       if (signal === "SIGTERM") {
         // Graceful termination - no recovery needed
         return;
       }
-      reason = CrashReason.Signal;
+      reason = CrashReason.SIGNAL;
     } else if (exitCode === 0) {
       // Graceful shutdown - no recovery needed
       return;

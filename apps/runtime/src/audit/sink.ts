@@ -1,5 +1,57 @@
-import { AuditEvent } from './event';
+import type { AuditEvent } from './event';
 import { AuditRingBuffer } from './ring-buffer';
+import type { AuditFilter } from './ring-buffer';
+import type { LocalBusEnvelope } from '../protocol/types.js';
+
+export type AuditOutcome = "accepted" | "rejected";
+
+export interface AuditRecord {
+  id?: string;
+  recorded_at: string;
+  sequence: number | null;
+  outcome: AuditOutcome;
+  reason: string | null;
+  envelope: LocalBusEnvelope | Record<string, unknown>;
+  action?: string;
+  type?: "command" | "response" | "event" | "system";
+  status?: "ok" | "error";
+  workspace_id?: string | null;
+  lane_id?: string | null;
+  session_id?: string | null;
+  terminal_id?: string | null;
+  correlation_id?: string | null;
+  error_code?: string | null;
+  payload?: unknown;
+}
+
+export interface AuditExportRecord {
+  recorded_at: string;
+  sequence: number | null;
+  outcome: AuditOutcome;
+  reason: string | null;
+  envelope_id: string;
+  envelope_type: string;
+  correlation_id: string | null;
+  workspace_id: string | null;
+  lane_id: string | null;
+  session_id: string | null;
+  terminal_id: string | null;
+  method_or_topic: string | null;
+  envelope: LocalBusEnvelope | Record<string, unknown>;
+}
+
+export interface RetentionPolicyConfig {
+  retention_days: number;
+  redacted_fields: string[];
+  exempt_topics: string[];
+}
+
+export interface AuditBundle {
+  generated_at: string;
+  filters: Record<string, unknown>;
+  count: number;
+  records: AuditRecord[];
+}
 
 /**
  * Extended metrics including ring buffer and overflow tracking.
@@ -66,6 +118,13 @@ export interface AuditSink {
 export class DefaultAuditSink implements AuditSink {
   private buffer: AuditEvent[] = [];
   private ringBuffer: AuditRingBuffer;
+  private storage: AuditStorage;
+  readonly records: AuditRecord[] = [];
+  retentionPolicy: RetentionPolicyConfig = {
+    retention_days: 90,
+    redacted_fields: [],
+    exempt_topics: [],
+  };
   private readonly MAX_BUFFER_SIZE = 10_000;
   private readonly RETRY_BACKOFF_MS = 100;
   private readonly MAX_RETRIES = 5;
@@ -86,11 +145,32 @@ export class DefaultAuditSink implements AuditSink {
   private overflowQueue: AuditEvent[] = [];
 
   constructor(
-    private storage: AuditStorage,
+    storageOrConfig?: AuditStorage | Record<string, unknown>,
     ringBufferCapacity: number = 10_000,
   ) {
+    if (storageOrConfig && typeof (storageOrConfig as AuditStorage).persist === "function") {
+      this.storage = storageOrConfig as AuditStorage;
+    } else {
+      this.storage = new NoOpAuditStorage();
+      if (storageOrConfig && typeof storageOrConfig === "object" && "retention_days" in storageOrConfig) {
+        this.retentionPolicy = {
+          ...this.retentionPolicy,
+          retention_days: storageOrConfig.retention_days as number,
+        };
+      }
+    }
     this.ringBuffer = new AuditRingBuffer(ringBufferCapacity);
     this.startPeriodicFlush();
+  }
+
+  /** Append an audit record directly (test/compat API). */
+  async append(record: AuditRecord): Promise<void> {
+    this.records.push(record);
+  }
+
+  /** Alias for records (test/compat API). */
+  getRecords(): AuditRecord[] {
+    return this.records;
   }
 
   async write(event: AuditEvent): Promise<void> {
@@ -408,22 +488,24 @@ function readString(input: unknown): string | null {
  * Events are buffered but never persisted.
  */
 export class NoOpAuditStorage implements AuditStorage {
+  readonly records: AuditRecord[] = [];
+
   async persist(_events: AuditEvent[]): Promise<void> {
     // Do nothing; events are discarded
   }
 
   query(filter: AuditFilter = {}): AuditRecord[] {
     return this.records.filter((record) => {
-      if (filter.workspace_id && record.workspace_id !== filter.workspace_id) {
+      if (filter.workspaceId && record.workspace_id !== filter.workspaceId) {
         return false;
       }
-      if (filter.lane_id && record.lane_id !== filter.lane_id) {
+      if (filter.laneId && record.lane_id !== filter.laneId) {
         return false;
       }
-      if (filter.session_id && record.session_id !== filter.session_id) {
+      if (filter.sessionId && record.session_id !== filter.sessionId) {
         return false;
       }
-      if (filter.correlation_id && record.correlation_id !== filter.correlation_id) {
+      if (filter.correlationId && record.correlation_id !== filter.correlationId) {
         return false;
       }
       return true;
@@ -447,7 +529,7 @@ export class NoOpAuditStorage implements AuditStorage {
     reason: string | null;
     envelope: LocalBusEnvelope | Record<string, unknown>;
   }): AuditRecord {
-    const envelope = sanitizeEnvelope(record.envelope);
+    const envelope = sanitizeEnvelopeSimple(record.envelope);
     const payload = sanitize(getRecordPayload(envelope));
 
     return {
@@ -485,7 +567,7 @@ function getRecordPayload(envelope: Record<string, unknown>): unknown {
   return envelope.payload ?? envelope.result ?? envelope.error ?? {};
 }
 
-function sanitizeEnvelope(envelope: LocalBusEnvelope | Record<string, unknown>): Record<string, unknown> {
+function sanitizeEnvelopeSimple(envelope: LocalBusEnvelope | Record<string, unknown>): Record<string, unknown> {
   return sanitize(envelope) as Record<string, unknown>;
 }
 
@@ -513,3 +595,6 @@ function isSensitiveKey(key: string): boolean {
 function getString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
+
+/** @deprecated Use DefaultAuditSink. Alias retained for backward compatibility. */
+export { DefaultAuditSink as InMemoryAuditSink };

@@ -10,8 +10,8 @@ import type {
   LocalBusEnvelopeWithSequence,
 } from "./types.js";
 import type { MethodHandler } from "../methods.js";
-import { ProtocolValidationError, validateEnvelope } from "../validation.js";
-import { createProtocolError, type ErrorCode } from "../errors.js";
+import { ProtocolValidationError } from "../types.js";
+import { validateEnvelope } from "../validator.js";
 import {
   TERMINAL_TOPICS,
   START_TOPICS,
@@ -74,7 +74,7 @@ export class InMemoryLocalBus implements LocalBus {
     // Validate the envelope
     try {
       validateEnvelope(event);
-    } catch (err) {
+    } catch (err: unknown) {
       const auditErr = err instanceof ProtocolValidationError ? err.message : String(err);
       this.auditLog.push({ envelope: event, outcome: "rejected", error: auditErr });
       throw err;
@@ -565,8 +565,9 @@ function makeErrorResponse(
     id: `res_${Date.now()}`,
     // biome-ignore lint/style/useNamingConvention: Protocol field names intentionally use snake_case.
     correlation_id: correlationId,
-    timestamp: performance.now(),
+    ts: new Date().toISOString(),
     type: "response",
+    status: "error",
     method,
     payload: null,
     error: { code, message },
@@ -655,12 +656,12 @@ export class CommandBusImpl implements LocalBus {
     this.currentDepth++;
 
     try {
-      const result = await handler(cmd);
+      const result = await handler(cmd as unknown as import("../types.js").CommandEnvelope);
       // Validate result is a response envelope
       if (
         !result ||
         typeof result !== "object" ||
-        (result as Record<string, unknown>).type !== "response"
+        (result as unknown as Record<string, unknown>)["type"] !== "response"
       ) {
         return makeErrorResponse(
           cmd.id,
@@ -724,7 +725,7 @@ export class CommandBusImpl implements LocalBus {
 
     // Inject active correlation_id from command context (FR-008)
     if (this.activeCorrelationId) {
-      (event as Record<string, unknown>).correlation_id = this.activeCorrelationId;
+      (event as unknown as Record<string, unknown>)['correlation_id'] = this.activeCorrelationId;
     }
 
     const topic = event.topic;
@@ -733,7 +734,7 @@ export class CommandBusImpl implements LocalBus {
     const currentSeq = this.topicSequenceCounters.get(topic) ?? 0;
     const nextSeq = currentSeq + 1;
     this.topicSequenceCounters.set(topic, nextSeq);
-    (event as Record<string, unknown>).sequence = nextSeq;
+    (event as unknown as Record<string, unknown>)['sequence'] = nextSeq;
     const list = this.subscribers.get(topic);
     if (!list) {
       return;
@@ -749,6 +750,11 @@ export class CommandBusImpl implements LocalBus {
         // FR-009: subscriber isolation — errors are silently swallowed
       }
     }
+  }
+
+  async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+    const response = await this.send(command);
+    return response as unknown as LocalBusEnvelope;
   }
 
   destroy(): void {

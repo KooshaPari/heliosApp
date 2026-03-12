@@ -65,7 +65,7 @@ export class RemediationEngine {
       if (orphan.estimatedOwner !== "unknown") {
         try {
           const lane = this.laneRegistry.get(orphan.estimatedOwner);
-          if (lane && lane.state === "recovering") {
+          if (lane && (lane.state as string) === "recovering") {
             // Suppress suggestion for recovering lanes
             continue;
           }

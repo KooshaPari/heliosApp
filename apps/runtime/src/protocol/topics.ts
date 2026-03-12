@@ -32,6 +32,38 @@ function assertValidTopicName(topic: string): void {
 // Registry
 // ---------------------------------------------------------------------------
 
+/** Canonical list of known topic names for validation. */
+export const TOPICS: readonly string[] = [
+  "lane.create.started",
+  "lane.created",
+  "lane.create.failed",
+  "lane.attach.started",
+  "lane.attach.failed",
+  "lane.cleanup.started",
+  "lane.cleanup.failed",
+  "session.attach.started",
+  "session.attached",
+  "session.attach.failed",
+  "session.terminate.started",
+  "session.terminate.failed",
+  "session.terminated",
+  "session.restore.started",
+  "session.restore.completed",
+  "terminal.spawn.started",
+  "terminal.spawned",
+  "terminal.spawn.failed",
+  "terminal.output",
+  "terminal.state.changed",
+  "lane.state.changed",
+  "lane.cleaned_up",
+  "orphan.detection.cycle_completed",
+  "recovery.stage.changed",
+  "metric.event",
+] as const;
+
+/** Type for valid protocol topics. */
+export type ProtocolTopic = (typeof TOPICS)[number];
+
 export class TopicRegistry {
   private readonly subs = new Map<string, TopicSubscriber[]>();
   private readonly sequenceCounters = new Map<string, number>();

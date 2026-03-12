@@ -1,4 +1,7 @@
-import type { LocalBus } from "../../runtime/src/protocol/bus";
+/** Minimal subset of runtime LocalBus used for context events. */
+interface LocalBus {
+  publish(event: Record<string, unknown>): Promise<void>;
+}
 
 export interface ActiveContext {
   workspaceId: string;

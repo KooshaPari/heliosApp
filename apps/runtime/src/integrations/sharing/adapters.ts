@@ -6,7 +6,6 @@
  * FR-026-004: Tmate backend adapter.
  */
 
-import type { ChildProcess } from "bun";
 
 /**
  * Share backend adapter interface.

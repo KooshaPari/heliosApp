@@ -1,5 +1,4 @@
 import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
-import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
 import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
 import type { LocalBus } from "../../runtime/src/protocol/bus";
 import type { RendererEngine } from "./settings";
@@ -66,7 +65,7 @@ function toResponse<T extends Record<string, unknown>>(response: LocalBusEnvelop
 
   return {
     ok: true,
-    result: (response.result as T | null) ?? {},
+    result: (response.result as T | null) ?? null,
     error: null
   };
 }
@@ -198,7 +197,7 @@ export class DesktopRuntimeClient {
       ? (parsed.result.available_engines.filter(
         (value): value is RendererEngine => value === "ghostty" || value === "rio"
       ))
-      : ["ghostty", "rio"];
+      : ["ghostty", "rio"] as RendererEngine[];
     return {
       activeEngine,
       availableEngines: available,

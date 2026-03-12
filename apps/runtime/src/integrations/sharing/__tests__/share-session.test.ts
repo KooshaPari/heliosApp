@@ -7,7 +7,7 @@
  * FR-026-004: Tmate backend adapter.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import {
   ShareSessionManager,
   type PolicyGate,

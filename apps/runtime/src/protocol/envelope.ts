@@ -60,7 +60,7 @@ function monotonicNow(): number {
  */
 export function createCommand(
   method: string,
-  payload: unknown,
+  payload: Record<string, unknown>,
   correlationId?: string,
 ): CommandEnvelope {
   if (!method) {
@@ -86,7 +86,7 @@ export function createCommand(
  */
 export function createResponse(
   command: CommandEnvelope,
-  payload: unknown,
+  payload: Record<string, unknown> | null | undefined,
   error?: BusError,
 ): ResponseEnvelope {
   const base: ResponseEnvelope = {
@@ -116,7 +116,7 @@ export function createResponse(
  */
 export function createEvent(
   topic: string,
-  payload: unknown,
+  payload: Record<string, unknown> | undefined,
   correlationId?: string,
 ): EventEnvelope {
   if (!topic) {

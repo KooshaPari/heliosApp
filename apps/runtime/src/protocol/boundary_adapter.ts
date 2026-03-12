@@ -127,7 +127,7 @@ export function createBoundaryDispatcher(input: BoundaryDispatcherInput): Comman
       );
     }
 
-    const decision = getBoundaryDispatchDecision(command.method);
+    const decision = getBoundaryDispatchDecision(command.method ?? "");
     const response =
       decision.adapter === "local_bus"
         ? await input.dispatchLocal(command)

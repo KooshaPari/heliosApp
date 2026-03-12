@@ -240,7 +240,7 @@ export class A2ARouterAdapter
 
       // Create abort controller for timeout
       const abortController = new AbortController();
-      const timeoutMs = this.config.timeoutMs || 30000;
+      const timeoutMs = this.config.timeout || 30000;
       const timeoutHandle = setTimeout(() => abortController.abort(), timeoutMs);
       this.inFlightDelegations.set(correlationId, abortController);
 
@@ -279,7 +279,7 @@ export class A2ARouterAdapter
       if (error instanceof Error && error.name === "AbortError") {
         const normalized = new NormalizedProviderError(
           "PROVIDER_TIMEOUT",
-          `A2A delegation timeout after ${this.config?.timeoutMs || 30000}ms`,
+          `A2A delegation timeout after ${this.config?.timeout || 30000}ms`,
           "a2a",
           true,
           correlationId

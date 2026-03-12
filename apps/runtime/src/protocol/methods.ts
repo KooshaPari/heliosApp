@@ -34,6 +34,20 @@ function assertValidMethodName(method: string): void {
 // Registry
 // ---------------------------------------------------------------------------
 
+/** Canonical list of known method names for validation. */
+export const METHODS: readonly string[] = [
+  "lane.create",
+  "lane.attach",
+  "lane.cleanup",
+  "session.attach",
+  "session.terminate",
+  "terminal.spawn",
+  "terminal.input",
+  "terminal.resize",
+  "renderer.capabilities",
+  "renderer.switch",
+] as const;
+
 export class MethodRegistry {
   private readonly handlers = new Map<string, MethodHandler>();
 

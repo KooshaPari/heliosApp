@@ -115,11 +115,11 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
 
     try {
       // Validate config
-      if (!config.endpoint || typeof config.endpoint !== "string") {
+      if (!config.baseUrl || typeof config.baseUrl !== "string") {
         throw new Error("Missing or invalid endpoint");
       }
 
-      if (!config.apiKeyRef || typeof config.apiKeyRef !== "string") {
+      if (!config.apiKey || typeof config.apiKey !== "string") {
         throw new Error("Missing or invalid apiKeyRef");
       }
 
@@ -128,14 +128,14 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
       }
 
       // Validate timeout
-      if (config.timeoutMs && config.timeoutMs < 1000) {
+      if (config.timeout && config.timeout < 1000) {
         throw new Error("timeout must be >= 1000ms");
       }
 
       // Simulate endpoint reachability check with timeout
-      const probeTimeout = config.timeoutMs || 10000;
+      const probeTimeout = config.timeout || 10000;
       const probeResult = await Promise.race([
-        this.probeEndpoint(config.endpoint),
+        this.probeEndpoint(config.baseUrl),
         new Promise<boolean>((_, reject) =>
           setTimeout(() => reject(new Error("Probe timeout")), 2000)
         ),
@@ -146,7 +146,7 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
       }
 
       this.config = config;
-      this.healthCheckInterval = config.healthCheckIntervalMs || 30000;
+      this.healthCheckInterval = 30000;
 
       this.healthStatus = {
         state: "healthy",
@@ -160,7 +160,7 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
       }
 
       await this.publishEvent("provider.acp.initialized", {
-        endpoint: config.endpoint,
+        endpoint: config.baseUrl,
         model: config.model,
       });
     } catch (error) {
@@ -195,7 +195,7 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
     try {
       // Perform lightweight health check
       const probeSuccess = await Promise.race([
-        this.probeEndpoint(this.config.endpoint),
+        this.probeEndpoint(this.config.baseUrl ?? ""),
         new Promise<boolean>((_, reject) =>
           setTimeout(() => reject(new Error("Health check timeout")), 5000)
         ),
@@ -301,7 +301,7 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
 
       // Create abort controller for timeout
       const abortController = new AbortController();
-      const timeoutMs = this.config.timeoutMs || 30000;
+      const timeoutMs = this.config.timeout || 30000;
       const timeoutHandle = setTimeout(() => abortController.abort(), timeoutMs);
       this.inFlightTasks.set(correlationId, abortController);
 
@@ -349,7 +349,7 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
       if (error instanceof Error && error.name === "AbortError") {
         const normalized = new NormalizedProviderError(
           "PROVIDER_TIMEOUT",
-          `ACP execution timeout after ${this.config.timeoutMs || 30000}ms`,
+          `ACP execution timeout after ${this.config.timeout || 30000}ms`,
           "acp",
           true,
           correlationId

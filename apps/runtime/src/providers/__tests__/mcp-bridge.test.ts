@@ -5,7 +5,7 @@
  * FR-025-007: Process-level isolation for tool execution.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { MCPBridgeAdapter } from "../mcp-bridge.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { NormalizedProviderError } from "../errors.js";

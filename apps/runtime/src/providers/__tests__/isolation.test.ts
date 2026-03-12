@@ -6,7 +6,7 @@
  * SC-025-002: Provider crash in lane A must produce zero effect on lane B.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import type {
   ProviderAdapter,
   ProviderHealthStatus,
@@ -16,7 +16,7 @@ import {
   NormalizedProviderError,
   normalizeError,
 } from "../errors.js";
-import { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 
 /**
  * Mock isolated provider for testing lane isolation behavior.

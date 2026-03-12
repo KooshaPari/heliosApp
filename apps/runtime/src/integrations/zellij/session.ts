@@ -208,7 +208,7 @@ export class ZellijSessionManager {
 
     // T012: Emit reattach event
     if (this.emitter) {
-      this.emitter.emitTyped({
+      this.emitter.emitTyped<import("./events.js").SessionReattachedEvent>({
         type: MuxEventType.SESSION_REATTACHED,
         sessionName,
         laneId,
@@ -295,6 +295,18 @@ export class ZellijSessionManager {
   /** Parse tab records from zellij layout output. */
   private parseTabsFromLayout(_layout: string): TabRecord[] {
     return [{ index: 0, name: "Tab #1", panes: [{ id: 0, title: "default" }] }];
+  }
+
+  /** Query panes for a session by dumping layout and parsing. */
+  private async queryPanes(sessionName: string): Promise<PaneRecord[]> {
+    const layout = await this.queryLayout(sessionName);
+    return this.parsePanesFromLayout(layout);
+  }
+
+  /** Query tabs for a session by dumping layout and parsing. */
+  private async queryTabs(sessionName: string): Promise<TabRecord[]> {
+    const layout = await this.queryLayout(sessionName);
+    return this.parseTabsFromLayout(layout);
   }
 
   /**
