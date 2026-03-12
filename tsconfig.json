@@ -11,7 +11,14 @@
     "resolveJsonModule": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["bun-types", "node", "@playwright/test"]
+    "types": ["bun-types", "node", "@playwright/test"],
+    "baseUrl": ".",
+    "paths": {
+      "@helios/runtime": ["apps/runtime/src/index.ts"],
+      "@helios/runtime/*": ["apps/runtime/src/*"],
+      "@helios/desktop": ["apps/desktop/src/index.ts"],
+      "@helios/desktop/*": ["apps/desktop/src/*"]
+    }
   },
   "include": [
     "apps/**/*.ts",
