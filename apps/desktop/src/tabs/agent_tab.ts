@@ -26,7 +26,7 @@ export interface AgentTabState extends TabState {
 export class AgentTab extends TabSurface {
   private agentStatus: "idle" | "running" | "error" = "idle";
   private actions: AgentAction[] = [];
-  private errorMessage: string | null = null;
+  protected override errorMessage: string | null = null;
   private contentEl: HTMLElement | null = null;
 
   constructor() {

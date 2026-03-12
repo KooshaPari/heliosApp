@@ -8,7 +8,7 @@ import type { ActiveContext } from "../../../src/tabs/context_switch";
 
 describe("ContextPropagator", () => {
   let propagator: ContextPropagator;
-  let mockTabs = [];
+  let mockTabs: ReturnType<typeof createMockTabSurface>[] = [];
 
   beforeEach(() => {
     resetContextPropagator();

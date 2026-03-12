@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { RendererSettings, Renderer } from "../../../src/settings/renderer_settings";
+import { RendererSettings, type Renderer } from "../../../src/settings/renderer_settings";
 
 describe("RendererSettings", () => {
   let container: HTMLDivElement;

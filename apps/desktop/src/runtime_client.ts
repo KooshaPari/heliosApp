@@ -67,7 +67,7 @@ function toResponse<T extends Record<string, unknown>>(
 
   return {
     ok: true,
-    result: (response.result as T | null) ?? {},
+    result: (response.result as T | null) ?? null,
     error: null,
   };
 }
@@ -199,7 +199,7 @@ export class DesktopRuntimeClient {
       ? parsed.result.available_engines.filter(
           (value): value is RendererEngine => value === "ghostty" || value === "rio",
         )
-      : ["ghostty", "rio"];
+      : (["ghostty", "rio"] as RendererEngine[]);
     return {
       activeEngine,
       availableEngines: available,

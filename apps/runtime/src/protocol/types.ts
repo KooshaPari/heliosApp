@@ -11,6 +11,7 @@ export type LocalBusEnvelope = {
   id: string;
   type: EnvelopeType;
   ts: string;
+  correlation_id?: string;
   workspace_id?: string;
   session_id?: string;
   terminal_id?: string;

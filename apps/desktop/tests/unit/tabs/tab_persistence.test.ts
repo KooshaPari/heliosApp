@@ -119,10 +119,11 @@ describe("TabPersistence", () => {
 
       // Mock fs.writeFile to count writes
       const originalWriteFile = fs.writeFile;
-      fs.writeFile = async (...args: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- test mock override
+      fs.writeFile = (async (...args: unknown[]) => {
         writeCount++;
-        return originalWriteFile(...args);
-      };
+        return (originalWriteFile as (...a: unknown[]) => Promise<void>)(...args);
+      }) as typeof fs.writeFile;
 
       const testState: TabPersistedState = {
         version: 1,

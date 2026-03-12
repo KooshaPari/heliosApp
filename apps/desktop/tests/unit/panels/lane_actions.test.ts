@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { LaneActions, RuntimeAPI } from "../../../src/panels/lane_actions";
+import { LaneActions, type RuntimeAPI } from "../../../src/panels/lane_actions";
 
 describe("LaneActions", () => {
   let actions: LaneActions;

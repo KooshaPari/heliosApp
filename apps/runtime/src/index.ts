@@ -24,3 +24,25 @@ export function healthCheck(): HealthCheckResult {
     uptimeMs: performance.now() - startTime,
   };
 }
+
+// Re-export protocol types for consumer convenience
+export { InMemoryLocalBus } from "./protocol/bus";
+export type { LocalBus } from "./protocol/bus";
+export type { LocalBusEnvelope } from "./protocol/types";
+
+import { InMemoryLocalBus } from "./protocol/bus";
+import type { LocalBus } from "./protocol/bus";
+
+/** Runtime instance returned by createRuntime(). */
+export interface RuntimeInstance {
+  readonly bus: LocalBus;
+  readonly version: string;
+}
+
+/** Create a new runtime instance with an in-memory bus. */
+export function createRuntime(): RuntimeInstance {
+  return {
+    bus: new InMemoryLocalBus(),
+    version: VERSION,
+  };
+}

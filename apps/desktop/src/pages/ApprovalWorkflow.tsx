@@ -4,7 +4,7 @@
 
 import { createSignal, onMount } from "solid-js";
 import { ApprovalPanel } from "../components/approval/ApprovalPanel";
-import type { ApprovalRequest, ApprovalWorkflow } from "../types/approval";
+import { ApprovalStatus, type ApprovalRequest, type ApprovalWorkflow } from "../types/approval";
 
 export function ApprovalWorkflowPage() {
   const [requests, setRequests] = createSignal<ApprovalRequest[]>([]);
@@ -24,13 +24,13 @@ export function ApprovalWorkflowPage() {
   });
 
   const handleApprove = async (id: string) => {
-    setRequests(requests().map((r) => (r.id === id ? { ...r, status: "approved" as const } : r)));
+    setRequests(requests().map((r) => (r.id === id ? { ...r, status: ApprovalStatus.Approved } : r)));
   };
 
   const handleReject = async (id: string, reason: string) => {
     setRequests(
       requests().map((r) =>
-        r.id === id ? { ...r, status: "rejected" as const, rejectedReason: reason } : r,
+        r.id === id ? { ...r, status: ApprovalStatus.Rejected, rejectedReason: reason } : r,
       ),
     );
   };

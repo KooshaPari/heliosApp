@@ -1,4 +1,4 @@
-import type { LocalBus } from "../../runtime/src/protocol/bus";
+import type { LocalBus } from "../../../runtime/src/protocol/bus";
 
 export interface ActiveContext {
   workspaceId: string;
@@ -119,7 +119,7 @@ export class ActiveContextStore {
             workspace_id: contextToSet?.workspaceId,
             lane_id: contextToSet?.laneId,
             session_id: contextToSet?.sessionId,
-            payload: changeEvent,
+            payload: changeEvent as unknown as Record<string, unknown>,
           });
         }
 
