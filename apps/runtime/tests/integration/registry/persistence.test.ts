@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import {
   JsonFilePersistence,

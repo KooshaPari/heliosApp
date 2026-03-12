@@ -117,7 +117,7 @@ async function benchEventFanout50(): Promise<BenchResult> {
   }
 
   const timings = await runAsync(async () => {
-    const evt = createEvent('bench.fanout', { data: 'test' });
+    const evt = createEvent('bench.fanout', { data: 'test' }) as import('../../../src/protocol/types.js').LocalBusEnvelope;
     await bus.publish(evt);
   }, ITERATIONS, WARMUP);
 
@@ -150,10 +150,10 @@ async function benchSustainedThroughput(): Promise<BenchResult & { total_message
 
   bus.subscribe('bench.sustained', (e) => {
     received++;
-    if (e.sequence <= lastSeq) {
+    if ((e.sequence ?? 0) <= lastSeq) {
       violations++;
     }
-    lastSeq = e.sequence;
+    lastSeq = e.sequence ?? 0;
   });
 
   const TARGET_RATE = 10_000; // msg/s
@@ -163,7 +163,7 @@ async function benchSustainedThroughput(): Promise<BenchResult & { total_message
   const start = performance.now();
   const promises: Promise<void>[] = [];
   for (let i = 0; i < TOTAL; i++) {
-    promises.push(bus.publish(createEvent('bench.sustained', { i })));
+    promises.push(bus.publish(createEvent('bench.sustained', { i }) as import('../../../src/protocol/types.js').LocalBusEnvelope));
   }
   await Promise.all(promises);
   const elapsed = performance.now() - start;

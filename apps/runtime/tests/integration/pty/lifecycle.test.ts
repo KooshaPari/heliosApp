@@ -74,7 +74,7 @@ describe("PTY lifecycle integration", () => {
     pidsToCleanup.push(record.pid);
 
     // Register the external process for write operations.
-    mgr.registerProcess(record.ptyId, proc);
+    mgr.registerProcess(record.ptyId, proc as unknown as { readonly stdin: { write(data: Uint8Array | string): number } });
 
     // Write input.
     const input = new TextEncoder().encode("echo hello\n");

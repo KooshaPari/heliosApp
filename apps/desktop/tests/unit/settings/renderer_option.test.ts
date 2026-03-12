@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'bun:test';
 import { RendererOption } from '../../../src/settings/renderer_option';
 
 describe('RendererOption', () => {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'bun:test';
 import {
-  AuditEvent,
+  type AuditEvent,
+
   createAuditEvent,
   validateAuditEvent,
   AUDIT_EVENT_TYPES,
@@ -113,7 +114,7 @@ describe('AuditEvent Schema', () => {
 
       expect(event.metadata.exitCode).toBe(0);
       expect(event.metadata.duration).toBe(250);
-      expect(event.metadata.custom.nested.value).toBe(42);
+      expect((event.metadata.custom as Record<string, unknown> & { nested: { value: number } }).nested.value).toBe(42);
     });
   });
 

@@ -41,6 +41,8 @@ function spawnShellProcess(): number {
   return proc.pid;
 }
 
+const pidsToCleanup: number[] = [];
+
 describe("SignalHistory", () => {
   it("stores and retrieves envelopes", () => {
     const h = new SignalHistory(3);

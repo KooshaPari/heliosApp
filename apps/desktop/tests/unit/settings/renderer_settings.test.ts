@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { RendererSettings, Renderer } from '../../../src/settings/renderer_settings';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'bun:test';
+import { RendererSettings } from '../../../src/settings/renderer_settings';
+import type { Renderer } from '../../../src/settings/renderer_settings';
 
 describe('RendererSettings', () => {
   let container: HTMLDivElement;

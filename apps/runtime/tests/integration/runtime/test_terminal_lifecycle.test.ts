@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
 import { createRuntime } from "../../../src";
+import type { LocalBusEnvelope } from "../../../src/protocol/types.js";
+
 
 describe("terminal lifecycle and streaming data plane", () => {
   test("rejects lifecycle commands without correlation_id", async () => {
@@ -237,7 +239,7 @@ describe("terminal lifecycle and streaming data plane", () => {
     });
     expect(firstInput.status).toBe("ok");
     expect(firstInput.result?.output_seq).toBe(1);
-    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry) => entry.seq)).toEqual([1]);
+    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry: { seq: number }) => entry.seq)).toEqual([1]);
 
     const secondSpawn = await runtime.bus.request({
       id: "cmd-spawn-reuse-2",
@@ -267,7 +269,7 @@ describe("terminal lifecycle and streaming data plane", () => {
     });
     expect(secondInput.status).toBe("ok");
     expect(secondInput.result?.output_seq).toBe(1);
-    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry) => entry.seq)).toEqual([1]);
+    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry: { seq: number }) => entry.seq)).toEqual([1]);
   });
 
   test("rejects terminal input when payload.data is missing", async () => {

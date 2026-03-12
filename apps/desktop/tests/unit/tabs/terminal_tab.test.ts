@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { TerminalTab } from "../../../src/tabs/terminal_tab";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
 

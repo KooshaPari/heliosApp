@@ -281,7 +281,7 @@ describe("Periodic Check Loop", () => {
     ];
 
     const events: unknown[] = [];
-    const m = new SLOMonitor(registry, defs, (_, p) => events.push(p));
+    const m = new SLOMonitor(registry, defs, (_: string, p: unknown) => { events.push(p); });
 
     for (let i = 0; i < 100; i++) {
       registry.record("m1", 100, i);

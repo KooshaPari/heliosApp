@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import {
   TerminalRegistry,
   DuplicateTerminalId,
@@ -27,7 +27,7 @@ describe("TerminalRegistry", () => {
 
       expect(binding.terminalId).toBe("terminal-1");
       expect(binding.binding).toEqual(triple);
-      expect(binding.state).toBe(BindingState.Bound);
+      expect(binding.state).toBe(BindingState.bound);
     });
 
     it("should reject duplicate terminal_id", () => {
@@ -134,7 +134,7 @@ describe("TerminalRegistry", () => {
       const rebound = registry.rebind("terminal-1", newTriple);
 
       expect(rebound.binding).toEqual(newTriple);
-      expect(rebound.state).toBe(BindingState.Rebound);
+      expect(rebound.state).toBe(BindingState.rebound);
     });
 
     it("should update indexes after rebind", () => {

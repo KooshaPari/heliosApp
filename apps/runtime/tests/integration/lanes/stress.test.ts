@@ -141,4 +141,4 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
     const newLane = await mgr.create("ws-free", "main");
     expect(newLane.laneId).toBeTruthy();
   });
-}, { timeout: 120_000 });
+});

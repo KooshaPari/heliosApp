@@ -94,9 +94,10 @@ describe("OrphanWatchdog", () => {
     expect(cycleEvent).toBeDefined();
     expect(cycleEvent?.payload?.cycleNumber).toBe(1);
     expect(cycleEvent?.payload?.summary).toBeDefined();
-    expect(cycleEvent?.payload?.summary?.worktrees).toBe(0);
-    expect(cycleEvent?.payload?.summary?.zellijSessions).toBe(0);
-    expect(cycleEvent?.payload?.summary?.ptyProcesses).toBe(0);
+    const summary = (cycleEvent?.payload as Record<string, unknown>)?.summary as Record<string, unknown> | undefined;
+    expect(summary?.worktrees).toBe(0);
+    expect(summary?.zellijSessions).toBe(0);
+    expect(summary?.ptyProcesses).toBe(0);
 
     watchdog.stop();
   });

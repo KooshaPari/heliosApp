@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import {
   ActiveContextStore,
   type ActiveContext,
@@ -209,7 +209,7 @@ describe("ActiveContextStore", () => {
       // Wait for debounce
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      expect(finalContext).toEqual(contexts[2]);
+      expect(finalContext!).toEqual(contexts[2]!);
     });
   });
 

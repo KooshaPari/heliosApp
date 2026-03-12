@@ -156,4 +156,4 @@ describe("Lane Lifecycle Integration (FR-008-001, FR-008-002)", () => {
     await mgr.cleanup(lane.laneId);
     expect(mgr.getRegistry().get(lane.laneId)!.state).toBe("closed");
   });
-}, { timeout: 60_000 });
+});

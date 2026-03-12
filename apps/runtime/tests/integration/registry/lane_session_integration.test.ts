@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import type { BindingTriple } from "../../../src/registry/binding_triple.js";
 

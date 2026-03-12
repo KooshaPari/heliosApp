@@ -1,7 +1,8 @@
 import { describe, expect, it, beforeEach } from 'bun:test';
-import { createBus, LocalBus } from '../../../src/protocol/bus.js';
+import { createBus } from '../../../src/protocol/bus.js';
+import type { LocalBus } from '../../../src/protocol/bus.js';
 import { createEvent } from '../../../src/protocol/envelope.js';
-import type { EventEnvelope } from '../../../src/protocol/types.js';
+import type { LocalBusEnvelope } from '../../../src/protocol/types.js';
 
 // FR-004: Event fan-out with deterministic delivery
 // FR-009: Subscriber isolation (one throwing does not block others)
@@ -22,7 +23,7 @@ describe('LocalBus — event fan-out', () => {
     bus.subscribe('order.test', () => { received.push(2); });
     bus.subscribe('order.test', () => { received.push(3); });
 
-    const evt = createEvent('order.test', 'data');
+    const evt = createEvent('order.test', { data: 'data' }) as LocalBusEnvelope;
     await bus.publish(evt);
 
     expect(received).toEqual([1, 2, 3]);
@@ -36,7 +37,7 @@ describe('LocalBus — event fan-out', () => {
     bus.subscribe('isolation.test', () => { throw new Error('sub 2 explodes'); });
     bus.subscribe('isolation.test', () => { received.push(3); });
 
-    const evt = createEvent('isolation.test', null);
+    const evt = createEvent('isolation.test', undefined) as LocalBusEnvelope;
     await bus.publish(evt);
 
     expect(received).toEqual([1, 3]);
@@ -44,7 +45,7 @@ describe('LocalBus — event fan-out', () => {
 
   // FR-004: no subscribers — no error
   it('publishes to topic with no subscribers without error', async () => {
-    const evt = createEvent('empty.topic', null);
+    const evt = createEvent('empty.topic', undefined) as LocalBusEnvelope;
     // Should not throw
     await bus.publish(evt);
   });
@@ -70,7 +71,7 @@ describe('LocalBus — event fan-out', () => {
       received.push(3);
     });
 
-    const evt = createEvent('snapshot.test', null);
+    const evt = createEvent('snapshot.test', undefined) as LocalBusEnvelope;
     await bus.publish(evt);
 
     // All 3 should receive because snapshot was taken before iteration
@@ -86,7 +87,7 @@ describe('LocalBus — event fan-out', () => {
 
     unsub();
 
-    const evt = createEvent('unsub.test', null);
+    const evt = createEvent('unsub.test', undefined) as LocalBusEnvelope;
     await bus.publish(evt);
 
     expect(received).toEqual([1, 3]);
@@ -107,7 +108,7 @@ describe('LocalBus — event fan-out', () => {
     bus.subscribe('dupe.test', handler);
     bus.subscribe('dupe.test', handler);
 
-    const evt = createEvent('dupe.test', null);
+    const evt = createEvent('dupe.test', undefined) as LocalBusEnvelope;
     await bus.publish(evt);
 
     expect(received).toEqual([1, 1]);
@@ -115,7 +116,7 @@ describe('LocalBus — event fan-out', () => {
 
   it('silently discards invalid event envelope', async () => {
     // Should not throw, just log
-    await bus.publish({ garbage: true });
+    await bus.publish({ garbage: true } as unknown as LocalBusEnvelope);
   });
 
   it('silently discards non-event envelope passed to publish', async () => {
@@ -124,10 +125,10 @@ describe('LocalBus — event fan-out', () => {
       // biome-ignore lint/style/useNamingConvention: Protocol fixture intentionally uses snake_case.
       correlation_id: "cor_123",
       timestamp: 1,
-      type: 'command',
+      type: 'command' as const,
       method: 'test',
-      payload: null,
-    };
+      payload: {},
+    } satisfies LocalBusEnvelope;
     await bus.publish(cmd);
   });
 
@@ -143,7 +144,7 @@ describe('LocalBus — event fan-out', () => {
       received.push(2);
     });
 
-    const evt = createEvent('async.order', null);
+    const evt = createEvent('async.order', undefined) as LocalBusEnvelope;
     await bus.publish(evt);
 
     // 1 should come before 2 because subscribers are awaited sequentially
@@ -153,11 +154,11 @@ describe('LocalBus — event fan-out', () => {
   it('assigns incrementing sequence numbers to events', async () => {
     const sequences: number[] = [];
 
-    bus.subscribe('seq.test', (evt) => { sequences.push(evt.sequence); });
+    bus.subscribe('seq.test', (evt) => { sequences.push(evt.sequence!); });
 
-    await bus.publish(createEvent('seq.test', null));
-    await bus.publish(createEvent('seq.test', null));
-    await bus.publish(createEvent('seq.test', null));
+    await bus.publish(createEvent('seq.test', undefined) as LocalBusEnvelope);
+    await bus.publish(createEvent('seq.test', undefined) as LocalBusEnvelope);
+    await bus.publish(createEvent('seq.test', undefined) as LocalBusEnvelope);
 
     expect(sequences).toEqual([1, 2, 3]);
   });
@@ -167,7 +168,7 @@ describe('LocalBus — event fan-out', () => {
     bus.subscribe('destroy.test', () => { received.push(1); });
     bus.destroy();
 
-    const evt = createEvent('destroy.test', null);
+    const evt = createEvent('destroy.test', undefined) as LocalBusEnvelope;
     await bus.publish(evt);
 
     expect(received).toEqual([]);

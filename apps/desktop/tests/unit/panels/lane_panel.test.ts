@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { LanePanel, Lane } from '../../../src/panels/lane_panel';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'bun:test';
+import { LanePanel } from '../../../src/panels/lane_panel';
+import type { Lane } from '../../../src/panels/lane_panel';
 
 describe('LanePanel', () => {
   let container: HTMLDivElement;

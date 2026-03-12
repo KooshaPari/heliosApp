@@ -120,14 +120,14 @@ describe('JSON Schema parity — runtime envelopes match canonical schema', () =
   });
 
   it('createResponse produces a schema-valid envelope', () => {
-    const cmd = createCommand('test.method', null);
+    const cmd = createCommand('test.method', {});
     const res = createResponse(cmd, { result: 42 });
     const errors = validateSchema(res, schema);
     expect(errors).toEqual([]);
   });
 
   it('createResponse with error produces a schema-valid envelope', () => {
-    const cmd = createCommand('test.method', null);
+    const cmd = createCommand('test.method', {});
     const res = createResponse(cmd, null, {
       code: 'HANDLER_ERROR',
       message: 'Something went wrong',

@@ -56,7 +56,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     const unrecoverableCheckpoint = {
       ...checkpoint,
       sessions: [
-        ...checkpoint.sessions,
+        ...(checkpoint.sessions as Array<Record<string, unknown>>),
         {
           session_id: "session-orphan",
           workspace_id: "ws-1",
@@ -68,7 +68,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     const runtimeC = createRuntime({ recovery_metadata: unrecoverableCheckpoint });
     const brokenBootstrap = runtimeC.getBootstrapResult();
 
-    expect(brokenBootstrap?.issues.some((issue) => issue.state === "unrecoverable")).toBe(true);
+    expect(brokenBootstrap?.issues.some((issue: { state: string; remediation?: string; [key: string]: unknown }) => issue.state === "unrecoverable")).toBe(true);
 
     runtimeA.shutdown();
     runtimeB.shutdown();
@@ -84,14 +84,14 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     });
 
     const report = runtime.getOrphanReport();
-    const recoverable = report.issues.filter((issue) => issue.state === "recoverable");
-    const unrecoverable = report.issues.filter((issue) => issue.state === "unrecoverable");
+    const recoverable = report.issues.filter((issue: { state: string; remediation?: string; [key: string]: unknown }) => issue.state === "recoverable");
+    const unrecoverable = report.issues.filter((issue: { state: string; remediation?: string; [key: string]: unknown }) => issue.state === "unrecoverable");
 
     expect(report.issues.length).toBeGreaterThan(0);
     expect(recoverable.length).toBeGreaterThan(0);
     expect(unrecoverable.length).toBeGreaterThan(0);
-    expect(report.issues.some((issue) => issue.remediation === "cleanup")).toBe(true);
-    expect(report.issues.some((issue) => issue.remediation === "reconcile")).toBe(true);
+    expect(report.issues.some((issue: { state: string; remediation?: string; [key: string]: unknown }) => issue.remediation === "cleanup")).toBe(true);
+    expect(report.issues.some((issue: { state: string; remediation?: string; [key: string]: unknown }) => issue.remediation === "reconcile")).toBe(true);
 
     runtime.shutdown();
   });
@@ -154,12 +154,12 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
 
     const auditBundle = runtime.exportAuditBundle({ correlation_id: "corr-harness" });
     expect(auditBundle.count).toBeGreaterThan(0);
-    const redactedRecord = auditBundle.records.find((record) => record.type === "command");
+    const redactedRecord = auditBundle.records.find((record: { type?: string; payload?: Record<string, unknown>; [key: string]: unknown }) => record.type === "command");
     expect(redactedRecord?.payload?.api_key).toBe("[REDACTED]");
 
     const allRecords = await runtime.getAuditRecords();
     for (let i = 1; i < allRecords.length; i += 1) {
-      expect(allRecords[i]?.recorded_at >= allRecords[i - 1]?.recorded_at).toBe(true);
+      expect((allRecords[i]?.recorded_at as string) >= (allRecords[i - 1]?.recorded_at as string)).toBe(true);
     }
 
     runtime.shutdown();
