@@ -53,7 +53,7 @@ jobs:
     if: contains(needs.detect-stage.outputs.gates, 'format')
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
@@ -68,7 +68,7 @@ jobs:
     if: contains(needs.detect-stage.outputs.gates, 'lint')
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
@@ -83,7 +83,7 @@ jobs:
     if: contains(needs.detect-stage.outputs.gates, 'unit')
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
@@ -98,7 +98,7 @@ jobs:
     if: contains(needs.detect-stage.outputs.gates, 'coverage')
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
@@ -113,7 +113,7 @@ jobs:
     if: contains(needs.detect-stage.outputs.gates, 'secrets')
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Run gitleaks
@@ -128,7 +128,7 @@ jobs:
     if: contains(needs.detect-stage.outputs.gates, 'e2e-smoke')
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
