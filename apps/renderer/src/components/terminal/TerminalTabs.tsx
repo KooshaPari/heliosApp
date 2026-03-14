@@ -13,7 +13,7 @@ export type TerminalTabsProps = {
   onTerminalClose?: (id: string) => void;
 };
 
-export const TerminalTabs: Component<TerminalTabsProps> = (props) => {
+export const TerminalTabs: Component<TerminalTabsProps> = props => {
   const handleAdd = () => {
     const id = createTerminal();
     props.onTerminalCreate?.(id);
