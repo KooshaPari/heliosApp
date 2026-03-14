@@ -151,7 +151,7 @@ describe("Detection Accuracy", () => {
     expect(suggestions.length).toBe(3);
 
     // Verify high-risk appears first (if sorting is applied)
-    const riskLevels = suggestions.map((s) => s.resource.riskLevel);
+    const riskLevels = suggestions.map(s => s.resource.riskLevel);
     expect(riskLevels[0]).toBe("high");
   });
 

@@ -88,9 +88,7 @@ export class RecoveryStateMachine {
       // Retrying - increment attempt count
       this.currentState.attemptCount++;
       if (this.currentState.attemptCount > MAX_RETRIES_PER_STAGE) {
-        throw new Error(
-          `Max retries (${MAX_RETRIES_PER_STAGE}) exceeded for stage ${from}`
-        );
+        throw new Error(`Max retries (${MAX_RETRIES_PER_STAGE}) exceeded for stage ${from}`);
       }
     } else if (from !== to) {
       // New stage - reset attempt count
@@ -195,11 +193,7 @@ export class RecoveryStateMachine {
     }
   }
 
-  private notifyListeners(
-    from: RecoveryStage,
-    to: RecoveryStage,
-    attemptCount: number
-  ): void {
+  private notifyListeners(from: RecoveryStage, to: RecoveryStage, attemptCount: number): void {
     for (const listener of this.listeners) {
       listener(from, to, attemptCount);
     }
@@ -214,7 +208,7 @@ export class RecoveryStateMachine {
         const failureStage = this.getFailureStateFor(this.currentStage);
         if (failureStage) {
           this.currentState.lastError = `Stage timeout after ${STAGE_TIMEOUT_MS}ms`;
-          this.transition(failureStage).catch((err) => {
+          this.transition(failureStage).catch(err => {
             console.error("Failed to transition to failure state:", err);
           });
         }

@@ -73,7 +73,7 @@ describe("markStart / markEnd (global)", () => {
 
   it("markEnd with real delay produces plausible duration", async () => {
     const handle = markStart("test_metric");
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise(resolve => setTimeout(resolve, 10));
     const duration = markEnd("test_metric", handle);
     // Allow 5-50ms range for CI variability.
     expect(duration).toBeGreaterThan(5);

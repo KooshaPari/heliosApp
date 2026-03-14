@@ -27,7 +27,7 @@ describe("spawnPty()", () => {
         sessionId: "session-1",
         terminalId: "term-1",
       },
-      registry,
+      registry
     );
 
     pidsToCleanup.push(result.record.pid);
@@ -54,7 +54,7 @@ describe("spawnPty()", () => {
         sessionId: "session-1",
         terminalId: "term-1",
       },
-      registry,
+      registry
     );
 
     pidsToCleanup.push(result.record.pid);
@@ -72,8 +72,8 @@ describe("spawnPty()", () => {
           sessionId: "session-1",
           terminalId: "term-1",
         },
-        registry,
-      ),
+        registry
+      )
     ).rejects.toThrow();
 
     // Should NOT have registered an incomplete record
@@ -89,7 +89,7 @@ describe("spawnPty()", () => {
         sessionId: "session-1",
         terminalId: "term-1",
       },
-      registry,
+      registry
     );
 
     pidsToCleanup.push(result.record.pid);

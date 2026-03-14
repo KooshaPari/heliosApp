@@ -48,12 +48,7 @@ export {
   emitPtyEvent,
 } from "./events.js";
 
-export {
-  InvalidStateError,
-  type WriteResult,
-  type ProcessMap,
-  writeInput,
-} from "./io.js";
+export { InvalidStateError, type WriteResult, type ProcessMap, writeInput } from "./io.js";
 
 export { IdleMonitor, type IdleMonitorConfig } from "./idle_monitor.js";
 
@@ -81,8 +76,15 @@ import {
   type TerminateOptions as _TerminateOptions,
 } from "./signals.js";
 import { writeInput as _writeInput, type ProcessMap as _ProcessMap } from "./io.js";
-import { IdleMonitor as _IdleMonitor, type IdleMonitorConfig as _IdleMonitorConfig } from "./idle_monitor.js";
-import { OutputBuffer as _OutputBuffer, type OutputBufferConfig as _OutputBufferConfig, type BufferStats as _BufferStats } from "./buffers.js";
+import {
+  IdleMonitor as _IdleMonitor,
+  type IdleMonitorConfig as _IdleMonitorConfig,
+} from "./idle_monitor.js";
+import {
+  OutputBuffer as _OutputBuffer,
+  type OutputBufferConfig as _OutputBufferConfig,
+  type BufferStats as _BufferStats,
+} from "./buffers.js";
 
 /**
  * High-level facade for PTY operations.
@@ -124,17 +126,12 @@ export class PtyManager {
     maxCapacity = 300,
     bus?: _BusPublisher,
     idleConfig?: _IdleMonitorConfig,
-    bufferConfig?: _OutputBufferConfig,
+    bufferConfig?: _OutputBufferConfig
   ) {
     this.bufferConfig = bufferConfig;
     this.registry = new _PtyRegistry(maxCapacity);
     this.bus = bus ?? new _NoOpBusPublisher();
-    this.idleMonitor = new _IdleMonitor(
-      this.registry,
-      this.bus,
-      this.lifecycles,
-      idleConfig,
-    );
+    this.idleMonitor = new _IdleMonitor(this.registry, this.bus, this.lifecycles, idleConfig);
   }
 
   /**
@@ -193,7 +190,7 @@ export class PtyManager {
    */
   registerProcess(
     ptyId: string,
-    proc: { readonly stdin: { write(data: Uint8Array | string): number } },
+    proc: { readonly stdin: { write(data: Uint8Array | string): number } }
   ): void {
     this.processes.set(ptyId, proc);
   }
@@ -231,7 +228,7 @@ export class PtyManager {
       throw new Error(`PTY '${ptyId}' not found`);
     }
 
-    _writeInput(record, data, this.processes, this.bus, (id) => {
+    _writeInput(record, data, this.processes, this.bus, id => {
       const lifecycle = this.lifecycles.get(id);
       if (lifecycle && lifecycle.state === "active") {
         try {
@@ -283,14 +280,7 @@ export class PtyManager {
 
     const lc = this.lifecycles.get(ptyId)!;
 
-    await _terminate(
-      record,
-      lc,
-      this.registry,
-      this.signalHistories,
-      this.bus,
-      options,
-    );
+    await _terminate(record, lc, this.registry, this.signalHistories, this.bus, options);
 
     // Clean up internal maps.
     this.lifecycles.delete(ptyId);

@@ -87,7 +87,7 @@ describe("ZellijTabManager", () => {
 
       // Bind a PTY to the default pane in the new tab
       const topo = topology.getTopology("test-session")!;
-      const newTab = topo.tabs.find((t) => t.tabId === record.index)!;
+      const newTab = topo.tabs.find(t => t.tabId === record.index)!;
       if (newTab.panes[0]) {
         topology.bindPty("test-session", newTab.panes[0].paneId, "pty-tab-1");
       }
@@ -96,21 +96,17 @@ describe("ZellijTabManager", () => {
 
       expect(ptyManager.terminate).toHaveBeenCalledWith("pty-tab-1");
       const updated = topology.getTopology("test-session")!;
-      expect(updated.tabs.find((t) => t.tabId === record.index)).toBeUndefined();
+      expect(updated.tabs.find(t => t.tabId === record.index)).toBeUndefined();
     });
 
     it("throws TabNotFoundError for non-existent tab", async () => {
       topology.initializeTopology("test-session");
 
-      expect(tabManager.closeTab("test-session", 999)).rejects.toThrow(
-        TabNotFoundError,
-      );
+      expect(tabManager.closeTab("test-session", 999)).rejects.toThrow(TabNotFoundError);
     });
 
     it("throws TabNotFoundError for non-existent session", async () => {
-      expect(tabManager.closeTab("no-session", 0)).rejects.toThrow(
-        TabNotFoundError,
-      );
+      expect(tabManager.closeTab("no-session", 0)).rejects.toThrow(TabNotFoundError);
     });
   });
 
@@ -128,9 +124,7 @@ describe("ZellijTabManager", () => {
     it("throws TabNotFoundError for non-existent tab", async () => {
       topology.initializeTopology("test-session");
 
-      expect(tabManager.switchTab("test-session", 999)).rejects.toThrow(
-        TabNotFoundError,
-      );
+      expect(tabManager.switchTab("test-session", 999)).rejects.toThrow(TabNotFoundError);
     });
   });
 

@@ -36,7 +36,7 @@ function createMockSpawn(opts?: {
     spawned.push(cmd);
 
     let resolveExit: (code: number) => void;
-    const exitedPromise = new Promise<number>((resolve) => {
+    const exitedPromise = new Promise<number>(resolve => {
       resolveExit = resolve;
     });
 
@@ -84,7 +84,7 @@ function createLaneInRegistry(
     state: string;
     workspaceId: string;
     worktreePath: string;
-  }>,
+  }>
 ) {
   const laneId = overrides?.laneId ?? "test-lane-1";
   const record = {
@@ -147,7 +147,7 @@ describe("ParManager - T011: Par task binding", () => {
     await mgr.bindParTask("test-lane-1", "/tmp/worktree");
 
     const events = bus.getEvents();
-    const bound = events.find((e) => e.topic === "lane.par_task.bound");
+    const bound = events.find(e => e.topic === "lane.par_task.bound");
     expect(bound).toBeDefined();
     expect(bound!.payload!["pid"]).toBe(42);
   });
@@ -222,7 +222,7 @@ describe("ParManager - T012: Par task termination", () => {
     await mgr.terminateParTask("test-lane-1");
 
     const events = bus.getEvents();
-    const terminated = events.find((e) => e.topic === "lane.par_task.terminated");
+    const terminated = events.find(e => e.topic === "lane.par_task.terminated");
     expect(terminated).toBeDefined();
   });
 
@@ -321,8 +321,8 @@ describe("ParManager - T013: Command execution", () => {
     await mgr.executeInLane("test-lane-1", ["ls"]);
 
     const events = bus.getEvents();
-    expect(events.some((e) => e.topic === "lane.command.started")).toBe(true);
-    expect(events.some((e) => e.topic === "lane.command.completed")).toBe(true);
+    expect(events.some(e => e.topic === "lane.command.started")).toBe(true);
+    expect(events.some(e => e.topic === "lane.command.completed")).toBe(true);
   });
 
   test("executeInLane rejects on closed lane", async () => {
@@ -415,7 +415,7 @@ describe("ParManager - T014: Stale detection", () => {
     expect(mgr.getBinding("test-lane-1")).toBeUndefined();
 
     const events = bus.getEvents();
-    expect(events.some((e) => e.topic === "lane.par_task.terminated")).toBe(true);
+    expect(events.some(e => e.topic === "lane.par_task.terminated")).toBe(true);
   });
 
   test("runHealthCheck detects stale bindings with alive process", async () => {
@@ -434,7 +434,7 @@ describe("ParManager - T014: Stale detection", () => {
     await mgr.bindParTask("test-lane-1", "/tmp/worktree");
 
     // Wait for heartbeat to go stale
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise(r => setTimeout(r, 100));
 
     await mgr.runHealthCheck();
 
@@ -442,7 +442,7 @@ describe("ParManager - T014: Stale detection", () => {
     expect(mgr.getBinding("test-lane-1")).toBeUndefined();
 
     const events = bus.getEvents();
-    expect(events.some((e) => e.topic === "lane.par_task.stale")).toBe(true);
+    expect(events.some(e => e.topic === "lane.par_task.stale")).toBe(true);
   });
 
   test("updateHeartbeat prevents stale detection", async () => {
@@ -460,7 +460,7 @@ describe("ParManager - T014: Stale detection", () => {
     await mgr.bindParTask("test-lane-1", "/tmp/worktree");
 
     // Update heartbeat before stale timeout
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise(r => setTimeout(r, 50));
     mgr.updateHeartbeat("test-lane-1");
 
     await mgr.runHealthCheck();
@@ -519,8 +519,12 @@ describe("ParManager - T015: Event completeness", () => {
   test("bus failure does not block par operations", async () => {
     createLaneInRegistry(registry);
     const failBus = {
-      async publish(): Promise<void> { throw new Error("bus down"); },
-      async request(): Promise<any> { return {}; },
+      async publish(): Promise<void> {
+        throw new Error("bus down");
+      },
+      async request(): Promise<any> {
+        return {};
+      },
     };
     const { spawnFn } = createMockSpawn({ pid: 42, exitDelay: 60000 });
     const mgr = new ParManager({ registry, bus: failBus as any, spawnFn });

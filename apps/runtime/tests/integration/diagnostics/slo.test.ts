@@ -214,7 +214,7 @@ describe("Periodic Check Loop", () => {
     }
 
     monitor.start(50); // 50ms interval
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 150));
     monitor.stop();
 
     expect(events.length).toBeGreaterThanOrEqual(1);
@@ -235,10 +235,10 @@ describe("Periodic Check Loop", () => {
     }
 
     monitor.start(50);
-    await new Promise((r) => setTimeout(r, 80));
+    await new Promise(r => setTimeout(r, 80));
     monitor.stop();
     const countAfterStop = events.length;
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 150));
     // No more events after stop
     expect(events.length).toBe(countAfterStop);
   });
@@ -259,7 +259,7 @@ describe("Periodic Check Loop", () => {
 
     monitor.start(50);
     monitor.start(50); // should not create second interval
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 150));
     monitor.stop();
 
     // With rate limiting, only 1 event should fire regardless
@@ -281,7 +281,9 @@ describe("Periodic Check Loop", () => {
     ];
 
     const events: unknown[] = [];
-    const m = new SLOMonitor(registry, defs, (_: string, p: unknown) => { events.push(p); });
+    const m = new SLOMonitor(registry, defs, (_: string, p: unknown) => {
+      events.push(p);
+    });
 
     for (let i = 0; i < 100; i++) {
       registry.record("m1", 100, i);

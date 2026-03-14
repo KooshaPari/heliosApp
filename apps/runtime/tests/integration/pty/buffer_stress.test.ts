@@ -93,7 +93,7 @@ describe("Buffer stress test — 50MB into 4MB buffer", () => {
       expect(stats.capacity).toBe(CAPACITY);
 
       // 5. Overflow events were emitted.
-      const overflowEvts = bus.events.filter((e) => e.topic === "pty.buffer.overflow");
+      const overflowEvts = bus.events.filter(e => e.topic === "pty.buffer.overflow");
       expect(overflowEvts.length).toBeGreaterThan(0);
       expect(stats.overflowEvents).toBeGreaterThan(0);
 
@@ -105,7 +105,7 @@ describe("Buffer stress test — 50MB into 4MB buffer", () => {
 
       console.log(
         `Stress test complete: ${(TOTAL_DATA / 1024 / 1024).toFixed(0)}MB processed in ${elapsedMs.toFixed(0)}ms, ` +
-          `${totalDropped} bytes dropped, ${overflowEvts.length} overflow events`,
+          `${totalDropped} bytes dropped, ${overflowEvts.length} overflow events`
       );
     } finally {
       console.warn = origWarn;

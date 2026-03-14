@@ -57,8 +57,8 @@ describe("MCP Bridge Adapter", () => {
 
       const tools = adapter.getTools();
       expect(tools.length).toBeGreaterThan(0);
-      expect(tools.some((t) => t.name === "read_file")).toBe(true);
-      expect(tools.some((t) => t.name === "write_file")).toBe(true);
+      expect(tools.some(t => t.name === "read_file")).toBe(true);
+      expect(tools.some(t => t.name === "write_file")).toBe(true);
     });
 
     it("should emit initialization event", async () => {
@@ -72,7 +72,7 @@ describe("MCP Bridge Adapter", () => {
       await adapter.init(config);
 
       const events = bus.getEvents();
-      const initEvent = events.find((e) => e.topic === "provider.mcp.initialized");
+      const initEvent = events.find(e => e.topic === "provider.mcp.initialized");
       expect(initEvent).toBeDefined();
       expect(initEvent?.payload?.serverPath).toBe("stdio");
     });
@@ -88,9 +88,7 @@ describe("MCP Bridge Adapter", () => {
       await adapter.init(config);
 
       const events = bus.getEvents();
-      const discoveryEvents = events.filter(
-        (e) => e.topic === "provider.mcp.tool.discovered"
-      );
+      const discoveryEvents = events.filter(e => e.topic === "provider.mcp.tool.discovered");
       expect(discoveryEvents.length).toBeGreaterThan(0);
     });
   });
@@ -110,7 +108,7 @@ describe("MCP Bridge Adapter", () => {
       const tools = adapter.getTools();
 
       expect(tools).toHaveLength(3); // read_file, write_file, list_directory
-      tools.forEach((tool) => {
+      tools.forEach(tool => {
         expect(tool.name).toBeTruthy();
         expect(tool.description).toBeTruthy();
         expect(tool.inputSchema).toBeDefined();
@@ -120,7 +118,7 @@ describe("MCP Bridge Adapter", () => {
     it("should provide valid JSON schemas", async () => {
       const tools = adapter.getTools();
 
-      const readFileTool = tools.find((t) => t.name === "read_file");
+      const readFileTool = tools.find(t => t.name === "read_file");
       expect(readFileTool).toBeDefined();
       expect(readFileTool?.inputSchema.type).toBe("object");
       expect(readFileTool?.inputSchema.properties).toBeDefined();
@@ -164,7 +162,7 @@ describe("MCP Bridge Adapter", () => {
       );
 
       const events = bus.getEvents();
-      const executeEvent = events.find((e) => e.topic === "provider.mcp.tool.executed");
+      const executeEvent = events.find(e => e.topic === "provider.mcp.tool.executed");
       expect(executeEvent?.payload?.correlationId).toBe(correlationId);
     });
 
@@ -180,9 +178,7 @@ describe("MCP Bridge Adapter", () => {
       );
 
       const events = bus.getEvents();
-      const completedEvent = events.find(
-        (e) => e.topic === "provider.mcp.tool.executed"
-      );
+      const completedEvent = events.find(e => e.topic === "provider.mcp.tool.executed");
       expect(completedEvent).toBeDefined();
       expect(completedEvent?.payload?.toolName).toBe("read_file");
       expect(completedEvent?.payload?.duration).toBeGreaterThanOrEqual(0);
@@ -231,7 +227,7 @@ describe("MCP Bridge Adapter", () => {
       const results = await Promise.all(promises);
 
       expect(results).toHaveLength(5);
-      results.forEach((result) => {
+      results.forEach(result => {
         expect(result.isError).toBe(false);
         expect(result.result).toBeDefined();
       });
@@ -319,7 +315,7 @@ describe("MCP Bridge Adapter", () => {
       await adapter.terminate();
 
       const events = bus.getEvents();
-      const terminatedEvent = events.find((e) => e.topic === "provider.mcp.terminated");
+      const terminatedEvent = events.find(e => e.topic === "provider.mcp.terminated");
       expect(terminatedEvent).toBeDefined();
     });
 
@@ -375,7 +371,7 @@ describe("MCP Bridge Adapter", () => {
           },
           "corr-123"
         )
-        .catch((e) => e);
+        .catch(e => e);
 
       expect(error).toBeInstanceOf(NormalizedProviderError);
     });
@@ -396,7 +392,7 @@ describe("MCP Bridge Adapter", () => {
       }
 
       const events = bus.getEvents();
-      const errorEvent = events.find((e) => e.topic === "provider.mcp.tool.failed");
+      const errorEvent = events.find(e => e.topic === "provider.mcp.tool.failed");
       expect(errorEvent).toBeDefined();
       expect(errorEvent?.payload?.toolName).toBe("nonexistent_tool");
     });
@@ -425,11 +421,9 @@ describe("MCP Bridge Adapter", () => {
       );
 
       const events = bus.getEvents();
-      const toolEvents = events.filter((e) =>
-        e.topic?.startsWith("provider.mcp.tool")
-      );
+      const toolEvents = events.filter(e => e.topic?.startsWith("provider.mcp.tool"));
 
-      toolEvents.forEach((event) => {
+      toolEvents.forEach(event => {
         expect(event.payload?.correlationId).toBe(correlationId);
       });
     });
@@ -448,22 +442,16 @@ describe("MCP Bridge Adapter", () => {
 
     it("should support concurrent tool executions without interference", async () => {
       const results = await Promise.all([
-        adapter.execute(
-          { toolName: "read_file", arguments: { path: "/file1.txt" } },
-          "corr-1"
-        ),
+        adapter.execute({ toolName: "read_file", arguments: { path: "/file1.txt" } }, "corr-1"),
         adapter.execute(
           { toolName: "write_file", arguments: { path: "/file2.txt", content: "test" } },
           "corr-2"
         ),
-        adapter.execute(
-          { toolName: "list_directory", arguments: { path: "/tmp" } },
-          "corr-3"
-        ),
+        adapter.execute({ toolName: "list_directory", arguments: { path: "/tmp" } }, "corr-3"),
       ]);
 
       expect(results).toHaveLength(3);
-      results.forEach((result) => {
+      results.forEach(result => {
         expect(result.isError).toBe(false);
       });
     });
@@ -478,10 +466,7 @@ describe("MCP Bridge Adapter", () => {
 
       // Execute failing tool
       try {
-        await adapter.execute(
-          { toolName: "unknown_tool", arguments: {} },
-          "corr-2"
-        );
+        await adapter.execute({ toolName: "unknown_tool", arguments: {} }, "corr-2");
       } catch (e) {
         // Expected
       }

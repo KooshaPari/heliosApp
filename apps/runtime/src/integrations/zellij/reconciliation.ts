@@ -31,10 +31,10 @@ export interface ReconciliationResult {
  */
 export async function reconcile(
   cli: ZellijCli,
-  registry: MuxRegistry,
+  registry: MuxRegistry
 ): Promise<ReconciliationResult> {
   const liveSessions = await cli.listSessions();
-  const liveNames = new Set(liveSessions.map((s) => s.name));
+  const liveNames = new Set(liveSessions.map(s => s.name));
   const bindings = registry.list();
 
   const result: ReconciliationResult = {

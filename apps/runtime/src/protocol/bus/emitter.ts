@@ -725,7 +725,7 @@ export class CommandBusImpl implements LocalBus {
 
     // Inject active correlation_id from command context (FR-008)
     if (this.activeCorrelationId) {
-      (event as unknown as Record<string, unknown>)['correlation_id'] = this.activeCorrelationId;
+      (event as unknown as Record<string, unknown>)["correlation_id"] = this.activeCorrelationId;
     }
 
     const topic = event.topic;
@@ -734,7 +734,7 @@ export class CommandBusImpl implements LocalBus {
     const currentSeq = this.topicSequenceCounters.get(topic) ?? 0;
     const nextSeq = currentSeq + 1;
     this.topicSequenceCounters.set(topic, nextSeq);
-    (event as unknown as Record<string, unknown>)['sequence'] = nextSeq;
+    (event as unknown as Record<string, unknown>)["sequence"] = nextSeq;
     const list = this.subscribers.get(topic);
     if (!list) {
       return;

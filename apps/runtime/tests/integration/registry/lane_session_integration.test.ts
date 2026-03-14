@@ -100,7 +100,7 @@ describe("Lane/Session Lifecycle Integration", () => {
 
       const remaining = registry.getAll();
       expect(remaining).toHaveLength(3);
-      expect(remaining.every((b) => b.binding.laneId === "lane-2")).toBe(true);
+      expect(remaining.every(b => b.binding.laneId === "lane-2")).toBe(true);
     });
   });
 

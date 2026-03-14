@@ -252,8 +252,8 @@ describe("TerminalRegistry", () => {
       const results = registry.getByLane("lane-1");
 
       expect(results).toHaveLength(2);
-      expect(results.map((b) => b.terminalId)).toContain("terminal-1");
-      expect(results.map((b) => b.terminalId)).toContain("terminal-2");
+      expect(results.map(b => b.terminalId)).toContain("terminal-1");
+      expect(results.map(b => b.terminalId)).toContain("terminal-2");
     });
 
     it("should query by session", () => {

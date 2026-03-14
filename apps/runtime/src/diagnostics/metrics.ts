@@ -126,9 +126,7 @@ export class MetricsRegistry {
   }
 
   /** Retrieve a metric's definition and buffer (if any samples recorded). */
-  getMetric(
-    name: string,
-  ): { definition: MetricDefinition; buffer: RingBuffer } | undefined {
+  getMetric(name: string): { definition: MetricDefinition; buffer: RingBuffer } | undefined {
     const entry = this.metrics.get(name);
     if (entry === undefined) {
       return undefined;

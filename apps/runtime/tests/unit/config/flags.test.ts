@@ -5,11 +5,7 @@ import { join } from "node:path";
 import { JsonSettingsStore } from "../../../src/config/store.js";
 import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
 import { SettingsManager } from "../../../src/config/settings.js";
-import {
-  FlagRegistry,
-  RENDERER_ENGINE_FLAG,
-  type FeatureFlag,
-} from "../../../src/config/flags.js";
+import { FlagRegistry, RENDERER_ENGINE_FLAG, type FeatureFlag } from "../../../src/config/flags.js";
 
 let tempDir: string;
 let filePath: string;
@@ -221,9 +217,7 @@ describe("FlagRegistry — registration", () => {
     const { settings, flags } = createStack();
     await settings.init();
     flags.register(RENDERER_ENGINE_FLAG);
-    expect(() => flags.register(RENDERER_ENGINE_FLAG)).toThrow(
-      "Flag already registered",
-    );
+    expect(() => flags.register(RENDERER_ENGINE_FLAG)).toThrow("Flag already registered");
     flags.dispose();
     settings.dispose();
   });
@@ -254,9 +248,7 @@ describe("FlagRegistry — concurrency", () => {
     flags.register(RENDERER_ENGINE_FLAG);
     flags.init();
     const results = await Promise.all(
-      Array.from({ length: 1000 }, () =>
-        Promise.resolve(flags.get("renderer_engine")),
-      ),
+      Array.from({ length: 1000 }, () => Promise.resolve(flags.get("renderer_engine")))
     );
     expect(new Set(results).size).toBe(1);
     expect(results[0]).toBe("ghostty");

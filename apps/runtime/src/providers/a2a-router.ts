@@ -9,11 +9,14 @@
  */
 
 import type { LocalBus } from "../protocol/bus.js";
-import type { ProviderAdapter, ProviderHealthStatus, A2AConfig, A2AExecuteInput, A2AExecuteOutput } from "./adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-} from "./errors.js";
+import type {
+  ProviderAdapter,
+  ProviderHealthStatus,
+  A2AConfig,
+  A2AExecuteInput,
+  A2AExecuteOutput,
+} from "./adapter.js";
+import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * A2A endpoint configuration.
@@ -68,13 +71,11 @@ export interface A2ARouterConfig extends A2AConfig {
  * FR-025-005: A2A federation with external agent delegation.
  */
 // biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
-export class A2ARouterAdapter
-  implements
-    ProviderAdapter<
-      A2ARouterConfig,
-      A2ADelegation & { correlationId?: string },
-      A2AResult
-    > {
+export class A2ARouterAdapter implements ProviderAdapter<
+  A2ARouterConfig,
+  A2ADelegation & { correlationId?: string },
+  A2AResult
+> {
   private config: A2ARouterConfig | null = null;
   private bus: LocalBus | null = null;
   private endpoints: A2AEndpoint[] = [];
@@ -108,7 +109,7 @@ export class A2ARouterAdapter
 
       // Initialize endpoints sorted by priority
       this.endpoints = config.endpoints
-        .map((ep) => ({
+        .map(ep => ({
           id: ep.id,
           url: ep.url,
           priority: ep.priority,
@@ -173,7 +174,7 @@ export class A2ARouterAdapter
 
     try {
       // Check if any endpoint is healthy
-      const healthyEndpoints = this.endpoints.filter((ep) => ep.healthStatus?.state === "healthy");
+      const healthyEndpoints = this.endpoints.filter(ep => ep.healthStatus?.state === "healthy");
 
       if (healthyEndpoints.length > 0) {
         this.healthStatus = {
@@ -183,8 +184,7 @@ export class A2ARouterAdapter
         };
       } else {
         this.healthStatus.failureCount++;
-        const newState =
-          this.healthStatus.failureCount >= 5 ? "unavailable" : "degraded";
+        const newState = this.healthStatus.failureCount >= 5 ? "unavailable" : "degraded";
         this.healthStatus = {
           state: newState,
           lastCheck: new Date(),
@@ -358,7 +358,7 @@ export class A2ARouterAdapter
    * @param status New health status
    */
   updateEndpointHealth(endpointId: string, status: ProviderHealthStatus): void {
-    const endpoint = this.endpoints.find((ep) => ep.id === endpointId);
+    const endpoint = this.endpoints.find(ep => ep.id === endpointId);
     if (endpoint) {
       endpoint.healthStatus = status;
     }
@@ -378,25 +378,20 @@ export class A2ARouterAdapter
   private selectEndpoint(requiredCapabilities: string[]): A2AEndpoint | undefined {
     // First pass: look for healthy endpoint with matching capabilities
     let selected = this.endpoints.find(
-      (ep) =>
-        ep.healthStatus?.state === "healthy" &&
-        this.hasCapabilities(ep, requiredCapabilities)
+      ep => ep.healthStatus?.state === "healthy" && this.hasCapabilities(ep, requiredCapabilities)
     );
 
     // Second pass: look for degraded endpoint (for failover)
     if (!selected) {
       selected = this.endpoints.find(
-        (ep) =>
-          ep.healthStatus?.state === "degraded" &&
-          this.hasCapabilities(ep, requiredCapabilities)
+        ep =>
+          ep.healthStatus?.state === "degraded" && this.hasCapabilities(ep, requiredCapabilities)
       );
     }
 
     // Final fallback: any endpoint with matching capabilities
     if (!selected) {
-      selected = this.endpoints.find((ep) =>
-        this.hasCapabilities(ep, requiredCapabilities)
-      );
+      selected = this.endpoints.find(ep => this.hasCapabilities(ep, requiredCapabilities));
     }
 
     return selected;
@@ -409,16 +404,13 @@ export class A2ARouterAdapter
    * @param requiredCapabilities Required capabilities
    * @returns true if endpoint has all required capabilities
    */
-  private hasCapabilities(
-    endpoint: A2AEndpoint,
-    requiredCapabilities: string[]
-  ): boolean {
+  private hasCapabilities(endpoint: A2AEndpoint, requiredCapabilities: string[]): boolean {
     if (requiredCapabilities.length === 0) {
       return true;
     }
 
     const endpointCaps = new Set(endpoint.capabilities);
-    return requiredCapabilities.every((cap) => endpointCaps.has(cap));
+    return requiredCapabilities.every(cap => endpointCaps.has(cap));
   }
 
   /**

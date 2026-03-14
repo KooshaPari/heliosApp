@@ -18,7 +18,7 @@ async function runGit(args: string[], cwd: string): Promise<string> {
 async function createTempRepo(): Promise<string> {
   const tmpDir = path.join(
     (await import("node:os")).tmpdir(),
-    `helios-stress-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    `helios-stress-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
   );
   fs.mkdirSync(tmpDir, { recursive: true });
   await runGit(["init"], tmpDir);
@@ -58,7 +58,7 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
 
     // Step 1: Create 50 lanes concurrently
     const createPromises = Array.from({ length: LANE_COUNT }, (_, i) =>
-      mgr.create(`ws-stress`, "main"),
+      mgr.create(`ws-stress`, "main")
     );
     const lanes = await Promise.all(createPromises);
     expect(lanes.length).toBe(LANE_COUNT);
@@ -80,10 +80,7 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
 
     // Step 4: Execute a simple operation in each lane
     for (const lane of provisionedLanes) {
-      fs.writeFileSync(
-        path.join(lane.worktreePath!, "stress-output.txt"),
-        `lane-${lane.laneId}\n`,
-      );
+      fs.writeFileSync(path.join(lane.worktreePath!, "stress-output.txt"), `lane-${lane.laneId}\n`);
     }
 
     // Step 5: Cleanup all 50 lanes (sequentially to avoid git lock contention)

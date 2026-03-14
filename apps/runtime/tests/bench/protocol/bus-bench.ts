@@ -10,8 +10,13 @@
  * Output: JSON for CI gate consumption.
  */
 
-import { createBus } from '../../../src/protocol/bus.js';
-import { createCommand, createEvent, createResponse, validateEnvelope } from '../../../src/protocol/envelope.js';
+import { createBus } from "../../../src/protocol/bus.js";
+import {
+  createCommand,
+  createEvent,
+  createResponse,
+  validateEnvelope,
+} from "../../../src/protocol/envelope.js";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -48,7 +53,11 @@ function runSync(fn: () => void, iterations: number, warmup: number): number[] {
   return timings.sort((a, b) => a - b);
 }
 
-async function runAsync(fn: () => Promise<void>, iterations: number, warmup: number): Promise<number[]> {
+async function runAsync(
+  fn: () => Promise<void>,
+  iterations: number,
+  warmup: number
+): Promise<number[]> {
   // Warmup
   for (let i = 0; i < warmup; i++) {
     await fn();
@@ -67,7 +76,7 @@ function summarize(
   name: string,
   sorted: number[],
   threshold_p95_ms: number,
-  warmup: number,
+  warmup: number
 ): BenchResult {
   const p50 = percentile(sorted, 50);
   const p95 = percentile(sorted, 95);
@@ -91,64 +100,80 @@ function summarize(
 const WARMUP = 100;
 const ITERATIONS = 1_000;
 // CI slowdown: 2x the stated SLO thresholds
-const DISPATCH_P95_THRESHOLD = 2.0;   // SLO: 1ms, CI: 2ms
-const FANOUT_P95_THRESHOLD = 10.0;    // SLO: 5ms, CI: 10ms
-const VALIDATE_P95_THRESHOLD = 0.2;   // SLO: 0.1ms, CI: 0.2ms
+const DISPATCH_P95_THRESHOLD = 2.0; // SLO: 1ms, CI: 2ms
+const FANOUT_P95_THRESHOLD = 10.0; // SLO: 5ms, CI: 10ms
+const VALIDATE_P95_THRESHOLD = 0.2; // SLO: 0.1ms, CI: 0.2ms
 
 async function benchCommandDispatch(): Promise<BenchResult> {
   const bus = createBus();
-  bus.registerMethod('bench.echo', (cmd) => createResponse(cmd, cmd.payload));
+  bus.registerMethod("bench.echo", cmd => createResponse(cmd, cmd.payload));
 
-  const timings = await runAsync(async () => {
-    const cmd = createCommand('bench.echo', { data: 'hello' });
-    await bus.send(cmd);
-  }, ITERATIONS, WARMUP);
+  const timings = await runAsync(
+    async () => {
+      const cmd = createCommand("bench.echo", { data: "hello" });
+      await bus.send(cmd);
+    },
+    ITERATIONS,
+    WARMUP
+  );
 
   bus.destroy();
-  return summarize('command_dispatch', timings, DISPATCH_P95_THRESHOLD, WARMUP);
+  return summarize("command_dispatch", timings, DISPATCH_P95_THRESHOLD, WARMUP);
 }
 
 async function benchEventFanout50(): Promise<BenchResult> {
   const bus = createBus();
   for (let i = 0; i < 50; i++) {
-    bus.subscribe('bench.fanout', () => {
+    bus.subscribe("bench.fanout", () => {
       // no-op subscriber
     });
   }
 
-  const timings = await runAsync(async () => {
-    const evt = createEvent('bench.fanout', { data: 'test' }) as import('../../../src/protocol/types.js').LocalBusEnvelope;
-    await bus.publish(evt);
-  }, ITERATIONS, WARMUP);
+  const timings = await runAsync(
+    async () => {
+      const evt = createEvent("bench.fanout", {
+        data: "test",
+      }) as import("../../../src/protocol/types.js").LocalBusEnvelope;
+      await bus.publish(evt);
+    },
+    ITERATIONS,
+    WARMUP
+  );
 
   bus.destroy();
-  return summarize('event_fanout_50', timings, FANOUT_P95_THRESHOLD, WARMUP);
+  return summarize("event_fanout_50", timings, FANOUT_P95_THRESHOLD, WARMUP);
 }
 
 function benchEnvelopeValidation(): BenchResult {
   const envelope = {
-    id: 'cmd_test123',
-    correlation_id: 'cor_test123',
+    id: "cmd_test123",
+    correlation_id: "cor_test123",
     timestamp: 1,
-    type: 'command' as const,
-    method: 'test.method',
-    payload: { key: 'value' },
+    type: "command" as const,
+    method: "test.method",
+    payload: { key: "value" },
   };
 
-  const timings = runSync(() => {
-    validateEnvelope(envelope);
-  }, ITERATIONS, WARMUP);
+  const timings = runSync(
+    () => {
+      validateEnvelope(envelope);
+    },
+    ITERATIONS,
+    WARMUP
+  );
 
-  return summarize('envelope_validation', timings, VALIDATE_P95_THRESHOLD, WARMUP);
+  return summarize("envelope_validation", timings, VALIDATE_P95_THRESHOLD, WARMUP);
 }
 
-async function benchSustainedThroughput(): Promise<BenchResult & { total_messages: number; duration_s: number; ordering_violations: number }> {
+async function benchSustainedThroughput(): Promise<
+  BenchResult & { total_messages: number; duration_s: number; ordering_violations: number }
+> {
   const bus = createBus();
   let received = 0;
   let lastSeq = 0;
   let violations = 0;
 
-  bus.subscribe('bench.sustained', (e) => {
+  bus.subscribe("bench.sustained", e => {
     received++;
     if ((e.sequence ?? 0) <= lastSeq) {
       violations++;
@@ -163,7 +188,13 @@ async function benchSustainedThroughput(): Promise<BenchResult & { total_message
   const start = performance.now();
   const promises: Promise<void>[] = [];
   for (let i = 0; i < TOTAL; i++) {
-    promises.push(bus.publish(createEvent('bench.sustained', { i }) as import('../../../src/protocol/types.js').LocalBusEnvelope));
+    promises.push(
+      bus.publish(
+        createEvent("bench.sustained", {
+          i,
+        }) as import("../../../src/protocol/types.js").LocalBusEnvelope
+      )
+    );
   }
   await Promise.all(promises);
   const elapsed = performance.now() - start;
@@ -172,7 +203,7 @@ async function benchSustainedThroughput(): Promise<BenchResult & { total_message
 
   const passed = received === TOTAL && violations === 0;
   return {
-    name: 'sustained_throughput',
+    name: "sustained_throughput",
     iterations: TOTAL,
     warmup: 0,
     p50_ms: elapsed / TOTAL,
@@ -203,16 +234,18 @@ async function main(): Promise<void> {
   console.log(output);
 
   // Assert all passed
-  const failures = results.filter((r) => !r.passed);
+  const failures = results.filter(r => !r.passed);
   if (failures.length > 0) {
-    console.error('\nSLO BREACHES:');
+    console.error("\nSLO BREACHES:");
     for (const f of failures) {
-      console.error(`  ${f.name}: p95=${String(f.p95_ms.toFixed(3))}ms > threshold=${String(f.threshold_p95_ms)}ms`);
+      console.error(
+        `  ${f.name}: p95=${String(f.p95_ms.toFixed(3))}ms > threshold=${String(f.threshold_p95_ms)}ms`
+      );
     }
     process.exit(1);
   }
 
-  console.log('\nAll benchmarks passed SLO thresholds.');
+  console.log("\nAll benchmarks passed SLO thresholds.");
 }
 
 await main();

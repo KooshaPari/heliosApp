@@ -25,7 +25,7 @@ describe("LaneManager", () => {
   test("create emits lane.created event", async () => {
     await mgr.create("ws-1", "main");
     const events = bus.getEvents();
-    const created = events.find((e) => e.topic === "lane.created");
+    const created = events.find(e => e.topic === "lane.created");
     expect(created).toBeDefined();
     expect(created!.workspace_id).toBe("ws-1");
   });
@@ -73,14 +73,14 @@ describe("LaneManager", () => {
     mgr.getRegistry().update(lane.laneId, { state: "ready" });
     await mgr.cleanup(lane.laneId);
     const events = bus.getEvents();
-    const closed = events.find((e) => e.topic === "lane.closed");
+    const closed = events.find(e => e.topic === "lane.closed");
     expect(closed).toBeDefined();
   });
 
   test("events include from/to state", async () => {
     await mgr.create("ws-1", "main");
     const events = bus.getEvents();
-    const created = events.find((e) => e.topic === "lane.created");
+    const created = events.find(e => e.topic === "lane.created");
     expect(created).toBeDefined();
     expect(created!.payload).toBeDefined();
     expect(created!.payload!["fromState"]).toBeDefined();
@@ -101,8 +101,12 @@ describe("LaneManager", () => {
 
   test("bus failure does not block lane ops", async () => {
     const failBus = {
-      async publish(_e: unknown): Promise<void> { throw new Error("bus down"); },
-      async request(_c: unknown): Promise<unknown> { return {}; },
+      async publish(_e: unknown): Promise<void> {
+        throw new Error("bus down");
+      },
+      async request(_c: unknown): Promise<unknown> {
+        return {};
+      },
     };
     const failMgr = new LaneManager({ bus: failBus as any, capacityLimit: 50 });
     // Should not throw despite bus failure
@@ -141,7 +145,7 @@ describe("LaneManager sharing", () => {
     reg.update(lane.laneId, { state: "ready" });
     await mgr.share(lane.laneId);
     const events = bus.getEvents();
-    const shared = events.find((e) => e.topic === "lane.shared");
+    const shared = events.find(e => e.topic === "lane.shared");
     expect(shared).toBeDefined();
   });
 

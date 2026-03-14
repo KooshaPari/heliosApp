@@ -1,24 +1,24 @@
-import { describe, it, expect, beforeEach } from 'bun:test';
-import { AuditRingBuffer } from '../../../src/audit/ring-buffer';
-import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from '../../../src/audit/event';
+import { describe, it, expect, beforeEach } from "bun:test";
+import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
+import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 
-describe('AuditRingBuffer', () => {
+describe("AuditRingBuffer", () => {
   let buffer: AuditRingBuffer;
 
   beforeEach(() => {
     buffer = new AuditRingBuffer(10);
   });
 
-  describe('push', () => {
-    it('should append events to buffer', () => {
+  describe("push", () => {
+    it("should append events to buffer", () => {
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-        actor: 'agent-1',
-        action: 'execute',
-        target: 'cmd',
+        actor: "agent-1",
+        action: "execute",
+        target: "cmd",
         result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: 'ws-1',
-        correlationId: 'corr-1',
+        workspaceId: "ws-1",
+        correlationId: "corr-1",
         metadata: {},
       });
 
@@ -27,18 +27,18 @@ describe('AuditRingBuffer', () => {
       expect(buffer.getSize()).toBe(1);
     });
 
-    it('should evict oldest event when full', () => {
+    it("should evict oldest event when full", () => {
       const events = [];
 
       // Fill buffer to capacity
       for (let i = 0; i < 10; i++) {
         const event = createAuditEvent({
           eventType: AUDIT_EVENT_TYPES.SESSION_CREATED,
-          actor: 'agent-1',
-          action: 'create',
+          actor: "agent-1",
+          action: "create",
           target: `session-${i}`,
           result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: 'ws-1',
+          workspaceId: "ws-1",
           correlationId: `corr-${i}`,
           metadata: { index: i },
         });
@@ -50,12 +50,12 @@ describe('AuditRingBuffer', () => {
       // Push one more; should evict the first
       const event11 = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.SESSION_CREATED,
-        actor: 'agent-1',
-        action: 'create',
-        target: 'session-10',
+        actor: "agent-1",
+        action: "create",
+        target: "session-10",
         result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: 'ws-1',
-        correlationId: 'corr-10',
+        workspaceId: "ws-1",
+        correlationId: "corr-10",
         metadata: { index: 10 },
       });
 
@@ -66,16 +66,16 @@ describe('AuditRingBuffer', () => {
     });
   });
 
-  describe('getRecent', () => {
-    it('should return N most recent events', () => {
+  describe("getRecent", () => {
+    it("should return N most recent events", () => {
       for (let i = 0; i < 5; i++) {
         const event = createAuditEvent({
           eventType: AUDIT_EVENT_TYPES.POLICY_EVALUATION,
-          actor: 'system',
-          action: 'evaluate',
+          actor: "system",
+          action: "evaluate",
           target: `policy-${i}`,
           result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: 'ws-1',
+          workspaceId: "ws-1",
           correlationId: `corr-${i}`,
           metadata: { index: i },
         });
@@ -89,15 +89,15 @@ describe('AuditRingBuffer', () => {
       expect(recent[2].metadata.index).toBe(4);
     });
 
-    it('should return all events if count exceeds size', () => {
+    it("should return all events if count exceeds size", () => {
       for (let i = 0; i < 3; i++) {
         const event = createAuditEvent({
           eventType: AUDIT_EVENT_TYPES.TERMINAL_OUTPUT,
-          actor: 'agent-1',
-          action: 'output',
-          target: 'terminal-1',
+          actor: "agent-1",
+          action: "output",
+          target: "terminal-1",
           result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: 'ws-1',
+          workspaceId: "ws-1",
           correlationId: `corr-${i}`,
           metadata: { index: i },
         });
@@ -109,48 +109,48 @@ describe('AuditRingBuffer', () => {
     });
   });
 
-  describe('query', () => {
-    it('should filter by workspace ID', () => {
+  describe("query", () => {
+    it("should filter by workspace ID", () => {
       for (let i = 0; i < 5; i++) {
         const event = createAuditEvent({
           eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-          actor: 'agent-1',
-          action: 'execute',
+          actor: "agent-1",
+          action: "execute",
           target: `cmd-${i}`,
           result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: i % 2 === 0 ? 'ws-1' : 'ws-2',
+          workspaceId: i % 2 === 0 ? "ws-1" : "ws-2",
           correlationId: `corr-${i}`,
           metadata: {},
         });
         buffer.push(event);
       }
 
-      const results = buffer.query({ workspaceId: 'ws-1' });
+      const results = buffer.query({ workspaceId: "ws-1" });
       expect(results.length).toBe(3);
-      expect(results.every((e) => e.workspaceId === 'ws-1')).toBe(true);
+      expect(results.every(e => e.workspaceId === "ws-1")).toBe(true);
     });
 
-    it('should filter by actor', () => {
+    it("should filter by actor", () => {
       for (let i = 0; i < 5; i++) {
         const event = createAuditEvent({
           eventType: AUDIT_EVENT_TYPES.SESSION_CREATED,
-          actor: i % 2 === 0 ? 'agent-1' : 'agent-2',
-          action: 'create',
+          actor: i % 2 === 0 ? "agent-1" : "agent-2",
+          action: "create",
           target: `session-${i}`,
           result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: 'ws-1',
+          workspaceId: "ws-1",
           correlationId: `corr-${i}`,
           metadata: {},
         });
         buffer.push(event);
       }
 
-      const results = buffer.query({ actor: 'agent-1' });
+      const results = buffer.query({ actor: "agent-1" });
       expect(results.length).toBe(3);
-      expect(results.every((e) => e.actor === 'agent-1')).toBe(true);
+      expect(results.every(e => e.actor === "agent-1")).toBe(true);
     });
 
-    it('should filter by event type', () => {
+    it("should filter by event type", () => {
       const eventTypes = [
         AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
         AUDIT_EVENT_TYPES.SESSION_CREATED,
@@ -160,11 +160,11 @@ describe('AuditRingBuffer', () => {
       for (let i = 0; i < 6; i++) {
         const event = createAuditEvent({
           eventType: eventTypes[i % 3],
-          actor: 'agent-1',
-          action: 'test',
+          actor: "agent-1",
+          action: "test",
           target: `target-${i}`,
           result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: 'ws-1',
+          workspaceId: "ws-1",
           correlationId: `corr-${i}`,
           metadata: {},
         });
@@ -176,40 +176,40 @@ describe('AuditRingBuffer', () => {
     });
   });
 
-  describe('getByCorrelationId', () => {
-    it('should return events with matching correlation ID', () => {
+  describe("getByCorrelationId", () => {
+    it("should return events with matching correlation ID", () => {
       for (let i = 0; i < 5; i++) {
         const event = createAuditEvent({
           eventType: AUDIT_EVENT_TYPES.APPROVAL_RESOLVED,
-          actor: 'operator-1',
-          action: 'resolve',
+          actor: "operator-1",
+          action: "resolve",
           target: `approval-${i}`,
           result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: 'ws-1',
-          correlationId: i < 3 ? 'corr-chain-1' : 'corr-other',
+          workspaceId: "ws-1",
+          correlationId: i < 3 ? "corr-chain-1" : "corr-other",
           metadata: {},
         });
         buffer.push(event);
       }
 
-      const results = buffer.getByCorrelationId('corr-chain-1');
+      const results = buffer.getByCorrelationId("corr-chain-1");
       expect(results.length).toBe(3);
-      expect(results.every((e) => e.correlationId === 'corr-chain-1')).toBe(true);
+      expect(results.every(e => e.correlationId === "corr-chain-1")).toBe(true);
     });
   });
 
-  describe('getMetrics', () => {
-    it('should track metrics correctly', () => {
+  describe("getMetrics", () => {
+    it("should track metrics correctly", () => {
       let evictedCount = 0;
 
       for (let i = 0; i < 15; i++) {
         const event = createAuditEvent({
           eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-          actor: 'agent-1',
-          action: 'execute',
+          actor: "agent-1",
+          action: "execute",
           target: `cmd-${i}`,
           result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: 'ws-1',
+          workspaceId: "ws-1",
           correlationId: `corr-${i}`,
           metadata: {},
         });

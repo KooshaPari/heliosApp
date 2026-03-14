@@ -115,7 +115,7 @@ describe("Binding Lifecycle Integration", () => {
 
       const events = bus.getEvents();
       expect(events).toHaveLength(10);
-      expect(events.every((e) => e.topic === "terminal.binding.bound")).toBe(true);
+      expect(events.every(e => e.topic === "terminal.binding.bound")).toBe(true);
     });
 
     it("should maintain consistency with rapid rebinds", async () => {
@@ -144,7 +144,7 @@ describe("Binding Lifecycle Integration", () => {
       const events = bus.getEvents();
       expect(events).toHaveLength(6); // 1 bound + 5 rebound
       expect(events[0].topic).toBe("terminal.binding.bound");
-      expect(events.slice(1).every((e) => e.topic === "terminal.binding.rebound")).toBe(true);
+      expect(events.slice(1).every(e => e.topic === "terminal.binding.rebound")).toBe(true);
 
       const finalBinding = registry.get(terminal);
       expect(finalBinding?.binding.laneId).toBe("lane-6");

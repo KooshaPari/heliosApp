@@ -7,15 +7,8 @@
 
 import { describe, it, expect, beforeEach } from "bun:test";
 import { ProviderRegistry } from "../registry.js";
-import {
-  NormalizedProviderError,
-  PROVIDER_ERROR_CODES,
-} from "../errors.js";
-import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
-  ProviderRegistration,
-} from "../adapter.js";
+import { NormalizedProviderError, PROVIDER_ERROR_CODES } from "../errors.js";
+import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
 import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 
@@ -163,23 +156,24 @@ describe("ProviderRegistry", () => {
       await registry.register(registration, adapter);
 
       const events = bus.getEvents();
-      const registeredEvent = events.find((e) => e.topic === "provider.registered");
+      const registeredEvent = events.find(e => e.topic === "provider.registered");
       expect(registeredEvent).toBeDefined();
       expect(registeredEvent?.payload?.providerId).toBe("test-provider");
     });
 
     it("should emit provider.init.failed event on init failure", async () => {
-      class FailingProvider implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput> {
+      class FailingProvider implements ProviderAdapter<
+        ACPConfig,
+        ACPExecuteInput,
+        ACPExecuteOutput
+      > {
         async init(_config: ACPConfig): Promise<void> {
           throw new Error("Init failed");
         }
         async health(): Promise<ProviderHealthStatus> {
           return { state: "unavailable", lastCheck: new Date(), failureCount: 0 };
         }
-        async execute(
-          _input: ACPExecuteInput,
-          _correlationId: string
-        ): Promise<ACPExecuteOutput> {
+        async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
           return { content: "", stopReason: "" };
         }
         async terminate(): Promise<void> {}
@@ -198,7 +192,7 @@ describe("ProviderRegistry", () => {
       await expect(registry.register(registration, adapter)).rejects.toThrow();
 
       const events = bus.getEvents();
-      const failedEvent = events.find((e) => e.topic === "provider.init.failed");
+      const failedEvent = events.find(e => e.topic === "provider.init.failed");
       expect(failedEvent).toBeDefined();
     });
   });
@@ -239,14 +233,12 @@ describe("ProviderRegistry", () => {
       await registry.unregister("test-provider");
 
       const events = bus.getEvents();
-      const unregisteredEvent = events.find((e) => e.topic === "provider.unregistered");
+      const unregisteredEvent = events.find(e => e.topic === "provider.unregistered");
       expect(unregisteredEvent).toBeDefined();
     });
 
     it("should throw error when unregistering non-existent provider", async () => {
-      await expect(registry.unregister("non-existent")).rejects.toThrow(
-        /not found/i
-      );
+      await expect(registry.unregister("non-existent")).rejects.toThrow(/not found/i);
     });
   });
 
@@ -275,9 +267,7 @@ describe("ProviderRegistry", () => {
       registry.incrementInFlight("test-provider");
 
       // Now at limit
-      expect(() => registry.checkConcurrencyLimit("test-provider")).toThrow(
-        /concurrency limit/i
-      );
+      expect(() => registry.checkConcurrencyLimit("test-provider")).toThrow(/concurrency limit/i);
     });
 
     it("should reject execution exceeding concurrency limit", async () => {

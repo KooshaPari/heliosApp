@@ -27,10 +27,7 @@ export class CheckpointManager {
     try {
       const dir = path.dirname(this.checkpointPath);
       await fs.mkdir(dir, { recursive: true });
-      await fs.writeFile(
-        this.checkpointPath,
-        JSON.stringify(checkpoint, null, 2)
-      );
+      await fs.writeFile(this.checkpointPath, JSON.stringify(checkpoint, null, 2));
     } catch (error) {
       console.error("Failed to save checkpoint:", error);
       throw error;

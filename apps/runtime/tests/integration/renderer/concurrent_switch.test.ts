@@ -8,9 +8,17 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { createSwitchOrchestrator, ConcurrentSwitchError } from "../../../src/renderer/switch_transaction.js";
+import {
+  createSwitchOrchestrator,
+  ConcurrentSwitchError,
+} from "../../../src/renderer/switch_transaction.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
-import { MockGhosttyAdapter, MockRioAdapter, TEST_CONFIG, TEST_SURFACE } from "../../helpers/mock_adapter.js";
+import {
+  MockGhosttyAdapter,
+  MockRioAdapter,
+  TEST_CONFIG,
+  TEST_SURFACE,
+} from "../../helpers/mock_adapter.js";
 import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 
 describe("Concurrent switch rejection", () => {

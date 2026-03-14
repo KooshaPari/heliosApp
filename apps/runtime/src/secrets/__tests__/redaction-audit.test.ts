@@ -59,8 +59,16 @@ describe("RedactionAuditTrail: listRecords filtering", () => {
     const trail = new RedactionAuditTrail();
     const engine = makeEngine();
 
-    const r1 = engine.redact("text1", { artifactId: "a1", artifactType: "log", correlationId: "c1" });
-    const r2 = engine.redact("text2", { artifactId: "a2", artifactType: "artifact", correlationId: "c2" });
+    const r1 = engine.redact("text1", {
+      artifactId: "a1",
+      artifactType: "log",
+      correlationId: "c1",
+    });
+    const r2 = engine.redact("text2", {
+      artifactId: "a2",
+      artifactType: "artifact",
+      correlationId: "c2",
+    });
     trail.record("a1", r1, { artifactId: "a1", artifactType: "log", correlationId: "c1" });
     trail.record("a2", r2, { artifactId: "a2", artifactType: "artifact", correlationId: "c2" });
 

@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import {
-  RecoveryStateMachine,
-  RecoveryStage,
-  type RecoveryState,
-} from "../state-machine.js";
+import { RecoveryStateMachine, RecoveryStage, type RecoveryState } from "../state-machine.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { promises as fs } from "fs";
 import path from "path";
@@ -86,7 +82,10 @@ describe("RecoveryStateMachine", () => {
       await stateMachine.transition(RecoveryStage.INVENTORYING);
 
       const statePath = path.join(tempDir, "recovery", "recovery-state.json");
-      const exists = await fs.access(statePath).then(() => true).catch(() => false);
+      const exists = await fs
+        .access(statePath)
+        .then(() => true)
+        .catch(() => false);
       expect(exists).toBe(true);
 
       const content = await fs.readFile(statePath, "utf-8");

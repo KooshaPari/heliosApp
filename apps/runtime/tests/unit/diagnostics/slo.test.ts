@@ -40,7 +40,12 @@ describe("getSLOsForMetric", () => {
 describe("checkSLO", () => {
   // FR-003: Latency pass
   it("passes when latency is under threshold", () => {
-    const slo: SLODefinition = { metric: "input-to-echo", percentile: "p50", threshold: 30, unit: "ms" };
+    const slo: SLODefinition = {
+      metric: "input-to-echo",
+      percentile: "p50",
+      threshold: 30,
+      unit: "ms",
+    };
     const result = checkSLO(slo, makeBucket({ p50: 25 }));
     expect(result.passed).toBe(true);
     expect(result.actual).toBe(25);
@@ -48,7 +53,12 @@ describe("checkSLO", () => {
 
   // FR-003: Latency fail
   it("fails when latency exceeds threshold", () => {
-    const slo: SLODefinition = { metric: "input-to-echo", percentile: "p50", threshold: 30, unit: "ms" };
+    const slo: SLODefinition = {
+      metric: "input-to-echo",
+      percentile: "p50",
+      threshold: 30,
+      unit: "ms",
+    };
     const result = checkSLO(slo, makeBucket({ p50: 35 }));
     expect(result.passed).toBe(false);
   });
@@ -68,7 +78,12 @@ describe("checkSLO", () => {
 
   // FR-003: Zero-count bucket passes
   it("passes with zero-count bucket (no data = no violation)", () => {
-    const slo: SLODefinition = { metric: "input-to-echo", percentile: "p50", threshold: 30, unit: "ms" };
+    const slo: SLODefinition = {
+      metric: "input-to-echo",
+      percentile: "p50",
+      threshold: 30,
+      unit: "ms",
+    };
     const result = checkSLO(slo, makeBucket({ count: 0 }));
     expect(result.passed).toBe(true);
     expect(result.actual).toBe(0);

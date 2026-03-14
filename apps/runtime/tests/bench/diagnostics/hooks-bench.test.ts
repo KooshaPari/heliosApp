@@ -13,7 +13,7 @@ const CI_FACTOR = 2; // relaxed threshold for CI machines
 function benchmarkLoop(
   iterations: number,
   warmup: number,
-  fn: () => void,
+  fn: () => void
 ): { p99: number; median: number; mean: number } {
   // Warm up
   for (let i = 0; i < warmup; i++) {

@@ -30,14 +30,17 @@ export class GhosttyBinaryNotFoundError extends Error {
   constructor(path: string) {
     super(
       `Ghostty binary not found at "${path}". ` +
-        "Ensure ghostty is installed and the path is correct.",
+        "Ensure ghostty is installed and the path is correct."
     );
     this.name = "GhosttyBinaryNotFoundError";
   }
 }
 
 export class GhosttyProcessError extends Error {
-  constructor(message: string, public readonly exitCode?: number | undefined) {
+  constructor(
+    message: string,
+    public readonly exitCode?: number | undefined
+  ) {
     super(message);
     this.name = "GhosttyProcessError";
   }
@@ -131,12 +134,12 @@ export class GhosttyProcess {
     this._startedAt = Date.now();
 
     // Monitor for unexpected exit (crash detection)
-    void proc.exited.then((exitCode) => {
+    void proc.exited.then(exitCode => {
       this._running = false;
       if (!this._intentionalStop) {
         const error = new GhosttyProcessError(
           `Ghostty process exited unexpectedly with code ${exitCode}`,
-          exitCode,
+          exitCode
         );
         // Fire crash handler within 500ms budget (this is near-immediate)
         this._crashHandler?.(error);
@@ -164,8 +167,8 @@ export class GhosttyProcess {
 
     // Wait for graceful exit or timeout
     const exitPromise = this._proc.exited;
-    const timeoutPromise = new Promise<"timeout">((resolve) =>
-      setTimeout(() => resolve("timeout"), SIGTERM_TIMEOUT_MS),
+    const timeoutPromise = new Promise<"timeout">(resolve =>
+      setTimeout(() => resolve("timeout"), SIGTERM_TIMEOUT_MS)
     );
 
     const result = await Promise.race([exitPromise, timeoutPromise]);

@@ -12,7 +12,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
       workspace_id: "ws-1",
       correlation_id: "corr-lane-create",
       method: "lane.create",
-      payload: { id: "lane-1" }
+      payload: { id: "lane-1" },
     });
     await runtimeA.bus.request({
       id: "cmd-session-attach",
@@ -26,8 +26,8 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
       payload: {
         id: "session-1",
         lane_id: "lane-1",
-        codex_session_id: "codex-1"
-      }
+        codex_session_id: "codex-1",
+      },
     });
     await runtimeA.bus.request({
       id: "cmd-terminal-spawn",
@@ -41,8 +41,8 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
       payload: {
         id: "terminal-1",
         lane_id: "lane-1",
-        session_id: "session-1"
-      }
+        session_id: "session-1",
+      },
     });
 
     const checkpoint = runtimeA.exportRecoveryMetadata();
@@ -61,14 +61,19 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
           session_id: "session-orphan",
           workspace_id: "ws-1",
           lane_id: "lane-1",
-          status: "detached" as const
-        }
-      ]
+          status: "detached" as const,
+        },
+      ],
     };
     const runtimeC = createRuntime({ recovery_metadata: unrecoverableCheckpoint });
     const brokenBootstrap = runtimeC.getBootstrapResult();
 
-    expect(brokenBootstrap?.issues.some((issue: { state: string; remediation?: string; [key: string]: unknown }) => issue.state === "unrecoverable")).toBe(true);
+    expect(
+      brokenBootstrap?.issues.some(
+        (issue: { state: string; remediation?: string; [key: string]: unknown }) =>
+          issue.state === "unrecoverable"
+      )
+    ).toBe(true);
 
     runtimeA.shutdown();
     runtimeB.shutdown();
@@ -79,19 +84,49 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     const runtime = createRuntime();
     runtime.bootstrapRecovery({
       lanes: [{ lane_id: "lane-drift", workspace_id: "ws-2", session_id: "missing-session" }],
-      sessions: [{ session_id: "session-drift", workspace_id: "ws-2", status: "detached", codex_session_id: "c2" }],
-      terminals: [{ terminal_id: "terminal-drift", workspace_id: "ws-2", status: "active", session_id: "missing-session" }]
+      sessions: [
+        {
+          session_id: "session-drift",
+          workspace_id: "ws-2",
+          status: "detached",
+          codex_session_id: "c2",
+        },
+      ],
+      terminals: [
+        {
+          terminal_id: "terminal-drift",
+          workspace_id: "ws-2",
+          status: "active",
+          session_id: "missing-session",
+        },
+      ],
     });
 
     const report = runtime.getOrphanReport();
-    const recoverable = report.issues.filter((issue: { state: string; remediation?: string; [key: string]: unknown }) => issue.state === "recoverable");
-    const unrecoverable = report.issues.filter((issue: { state: string; remediation?: string; [key: string]: unknown }) => issue.state === "unrecoverable");
+    const recoverable = report.issues.filter(
+      (issue: { state: string; remediation?: string; [key: string]: unknown }) =>
+        issue.state === "recoverable"
+    );
+    const unrecoverable = report.issues.filter(
+      (issue: { state: string; remediation?: string; [key: string]: unknown }) =>
+        issue.state === "unrecoverable"
+    );
 
     expect(report.issues.length).toBeGreaterThan(0);
     expect(recoverable.length).toBeGreaterThan(0);
     expect(unrecoverable.length).toBeGreaterThan(0);
-    expect(report.issues.some((issue: { state: string; remediation?: string; [key: string]: unknown }) => issue.remediation === "cleanup")).toBe(true);
-    expect(report.issues.some((issue: { state: string; remediation?: string; [key: string]: unknown }) => issue.remediation === "reconcile")).toBe(true);
+    expect(
+      report.issues.some(
+        (issue: { state: string; remediation?: string; [key: string]: unknown }) =>
+          issue.remediation === "cleanup"
+      )
+    ).toBe(true);
+    expect(
+      report.issues.some(
+        (issue: { state: string; remediation?: string; [key: string]: unknown }) =>
+          issue.remediation === "reconcile"
+      )
+    ).toBe(true);
 
     runtime.shutdown();
   });
@@ -106,7 +141,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
       workspace_id: "ws-3",
       correlation_id: "corr-ok",
       method: "lane.create",
-      payload: { id: "lane-3" }
+      payload: { id: "lane-3" },
     });
 
     const failure = await runtime.bus.request({
@@ -122,8 +157,8 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
         id: "session-3",
         lane_id: "lane-3",
         boundary_failure: "harness",
-        api_key: "super-secret-value"
-      }
+        api_key: "super-secret-value",
+      },
     });
 
     expect(failure.status).toBe("error");
@@ -136,7 +171,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
       workspace_id: "ws-3",
       correlation_id: "corr-unknown",
       method: "harness.do.thing",
-      payload: {}
+      payload: {},
     });
     expect(unknown.status).toBe("error");
     expect(unknown.error?.code).toBe("METHOD_NOT_SUPPORTED");
@@ -148,18 +183,23 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
       workspace_id: "ws-3",
       correlation_id: "corr-after-failure",
       method: "lane.create",
-      payload: { id: "lane-4" }
+      payload: { id: "lane-4" },
     });
     expect(stillHealthy.status).toBe("ok");
 
     const auditBundle = runtime.exportAuditBundle({ correlation_id: "corr-harness" });
     expect(auditBundle.count).toBeGreaterThan(0);
-    const redactedRecord = auditBundle.records.find((record: { type?: string; payload?: Record<string, unknown>; [key: string]: unknown }) => record.type === "command");
+    const redactedRecord = auditBundle.records.find(
+      (record: { type?: string; payload?: Record<string, unknown>; [key: string]: unknown }) =>
+        record.type === "command"
+    );
     expect(redactedRecord?.payload?.api_key).toBe("[REDACTED]");
 
     const allRecords = await runtime.getAuditRecords();
     for (let i = 1; i < allRecords.length; i += 1) {
-      expect((allRecords[i]?.recorded_at as string) >= (allRecords[i - 1]?.recorded_at as string)).toBe(true);
+      expect(
+        (allRecords[i]?.recorded_at as string) >= (allRecords[i - 1]?.recorded_at as string)
+      ).toBe(true);
     }
 
     runtime.shutdown();

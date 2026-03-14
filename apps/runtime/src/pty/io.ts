@@ -19,7 +19,7 @@ export class InvalidStateError extends Error {
 
   constructor(ptyId: string, currentState: PtyState) {
     super(
-      `Cannot write to PTY '${ptyId}' in state '${currentState}' (must be active or throttled)`,
+      `Cannot write to PTY '${ptyId}' in state '${currentState}' (must be active or throttled)`
     );
     this.name = "InvalidStateError";
     this.ptyId = ptyId;
@@ -31,7 +31,10 @@ export class InvalidStateError extends Error {
 const WRITABLE_STATES: ReadonlySet<PtyState> = new Set(["active", "throttled"]);
 
 /** Map of ptyId -> Subprocess for tracking live processes. */
-export type ProcessMap = Map<string, { readonly stdin: { write(data: Uint8Array | string): number } }>;
+export type ProcessMap = Map<
+  string,
+  { readonly stdin: { write(data: Uint8Array | string): number } }
+>;
 
 /** Result of a write operation including latency. */
 export interface WriteResult {
@@ -55,7 +58,7 @@ export function writeInput(
   data: Uint8Array,
   processMap: ProcessMap,
   bus: BusPublisher,
-  onError?: (ptyId: string) => void,
+  onError?: (ptyId: string) => void
 ): WriteResult {
   const start = performance.now();
 

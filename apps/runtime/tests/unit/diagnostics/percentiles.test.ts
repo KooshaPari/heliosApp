@@ -69,7 +69,7 @@ describe("computePercentiles", () => {
     buf.push(NaN, 2);
     buf.push(20, 3);
     const values = buf.getValues();
-    const filtered = new Float64Array(Array.from(values).filter((v) => !Number.isNaN(v)));
+    const filtered = new Float64Array(Array.from(values).filter(v => !Number.isNaN(v)));
     const result = computePercentiles(filtered);
     expect(result!.count).toBe(2);
     expect(result!.min).toBe(10);
@@ -82,7 +82,7 @@ describe("computePercentiles", () => {
     buf.push(NaN, 1);
     buf.push(NaN, 2);
     const values = buf.getValues();
-    const filtered = new Float64Array(Array.from(values).filter((v) => !Number.isNaN(v)));
+    const filtered = new Float64Array(Array.from(values).filter(v => !Number.isNaN(v)));
     const result = computePercentiles(filtered);
     expect(result).toBeUndefined();
   });

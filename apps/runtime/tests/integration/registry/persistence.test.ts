@@ -1,9 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
-import {
-  JsonFilePersistence,
-  InMemoryPersistence,
-} from "../../../src/registry/persistence.js";
+import { JsonFilePersistence, InMemoryPersistence } from "../../../src/registry/persistence.js";
 import { promises as fs } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -27,9 +24,7 @@ describe("Persistence Integration", () => {
 
   describe("JsonFilePersistence", () => {
     it("should save and reload bindings", async () => {
-      const persistence = new JsonFilePersistence(
-        join(tempDir, "bindings.json"),
-      );
+      const persistence = new JsonFilePersistence(join(tempDir, "bindings.json"));
 
       // Register bindings
       const bindings: BindingTriple[] = Array.from({ length: 10 }, (_, i) => ({
@@ -59,14 +54,14 @@ describe("Persistence Integration", () => {
       const loaded = await persistence.load();
       expect(loaded).toHaveLength(10);
 
-      loaded.forEach((binding) => {
+      loaded.forEach(binding => {
         newRegistry.register(binding.terminalId, binding.binding);
       });
 
       const restored = newRegistry.getAll();
       expect(restored).toHaveLength(10);
-      expect(restored.map((b) => b.terminalId).sort()).toEqual(
-        allBindings.map((b) => b.terminalId).sort(),
+      expect(restored.map(b => b.terminalId).sort()).toEqual(
+        allBindings.map(b => b.terminalId).sort()
       );
     });
 

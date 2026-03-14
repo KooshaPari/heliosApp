@@ -17,7 +17,7 @@ export interface MonotonicClock {
 // Fail-fast: ensure performance.now is available at module load.
 if (typeof performance === "undefined" || typeof performance.now !== "function") {
   throw new Error(
-    "performance.now() is required for monotonic timing but is unavailable in this environment.",
+    "performance.now() is required for monotonic timing but is unavailable in this environment."
   );
 }
 
@@ -49,10 +49,7 @@ interface HooksState {
   onSample: ((metric: string, value: number, timestamp: number) => void) | undefined;
 }
 
-function createState(
-  maxConcurrent: number,
-  clock: MonotonicClock,
-): HooksState {
+function createState(maxConcurrent: number, clock: MonotonicClock): HooksState {
   return {
     startTimes: new Float64Array(maxConcurrent),
     metricNames: new Array<string>(maxConcurrent).fill(""),
@@ -115,7 +112,7 @@ export function markEnd(metric: string, handle: number): number {
   // Guard: stale / mismatched handle.
   if (s.metricNames[handle] !== metric) {
     console.warn(
-      `[perf] markEnd handle ${handle} expected metric "${metric}" but found "${s.metricNames[handle]}" (stale?)`,
+      `[perf] markEnd handle ${handle} expected metric "${metric}" but found "${s.metricNames[handle]}" (stale?)`
     );
     return NaN;
   }
@@ -152,9 +149,10 @@ export interface InstrumentationHooks {
  * Create an isolated set of instrumentation hooks — mainly for unit tests
  * that need deterministic clocks or independent overflow counters.
  */
-export function createInstrumentationHooks(
-  opts?: { maxConcurrent?: number; clock?: MonotonicClock },
-): InstrumentationHooks {
+export function createInstrumentationHooks(opts?: {
+  maxConcurrent?: number;
+  clock?: MonotonicClock;
+}): InstrumentationHooks {
   const maxConcurrent = opts?.maxConcurrent ?? DEFAULT_MAX_CONCURRENT_MARKS;
   const clock = opts?.clock ?? defaultClock;
   const state = createState(maxConcurrent, clock);
@@ -179,7 +177,7 @@ export function createInstrumentationHooks(
       }
       if (state.metricNames[handle] !== metric) {
         console.warn(
-          `[perf] markEnd handle ${handle} expected metric "${metric}" but found "${state.metricNames[handle]}" (stale?)`,
+          `[perf] markEnd handle ${handle} expected metric "${metric}" but found "${state.metricNames[handle]}" (stale?)`
         );
         return NaN;
       }
@@ -207,7 +205,7 @@ export function createInstrumentationHooks(
  * Returns a teardown function.
  */
 export function setGlobalOnSample(
-  cb: (metric: string, value: number, timestamp: number) => void,
+  cb: (metric: string, value: number, timestamp: number) => void
 ): () => void {
   globalState.onSample = cb;
   return () => {
@@ -219,11 +217,9 @@ export function setGlobalOnSample(
  * Replace the global hooks state — mainly for tests that need to reset
  * between runs. Not intended for production use.
  */
-export function _resetGlobalHooks(
-  opts?: { maxConcurrent?: number; clock?: MonotonicClock },
-): void {
+export function _resetGlobalHooks(opts?: { maxConcurrent?: number; clock?: MonotonicClock }): void {
   globalState = createState(
     opts?.maxConcurrent ?? DEFAULT_MAX_CONCURRENT_MARKS,
-    opts?.clock ?? defaultClock,
+    opts?.clock ?? defaultClock
   );
 }

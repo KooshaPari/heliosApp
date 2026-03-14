@@ -6,7 +6,6 @@
  * FR-026-004: Tmate backend adapter.
  */
 
-
 /**
  * Share backend adapter interface.
  */
@@ -188,10 +187,7 @@ export class TmateAdapter implements ShareBackendAdapter {
  * @param config Backend-specific configuration
  * @returns Adapter instance
  */
-export function getBackendAdapter(
-  backend: string,
-  config?: any
-): ShareBackendAdapter {
+export function getBackendAdapter(backend: string, config?: any): ShareBackendAdapter {
   switch (backend) {
     case "upterm":
       return new UptermAdapter(config as UptermConfig | undefined);

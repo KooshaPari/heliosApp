@@ -34,7 +34,7 @@ describe("ZellijDetector", () => {
 
   it("should handle registry with active sessions", async () => {
     const registryWithSessions: SessionRegistry = {
-      getSession: (id) => (id === "session-active" ? { laneId: "lane-1" } : null),
+      getSession: id => (id === "session-active" ? { laneId: "lane-1" } : null),
       getSessions: () => [{ id: "session-active", laneId: "lane-1" }],
     };
 
@@ -47,7 +47,9 @@ describe("ZellijDetector", () => {
     const orphans = await detector.detect();
     for (const orphan of orphans) {
       expect(orphan.createdAt).toBeDefined();
-      expect(orphan.metadata === undefined || orphan.metadata?.sessionName !== undefined).toBe(true);
+      expect(orphan.metadata === undefined || orphan.metadata?.sessionName !== undefined).toBe(
+        true
+      );
     }
   });
 });

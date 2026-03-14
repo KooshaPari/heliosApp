@@ -11,7 +11,12 @@ import { executeHotSwap } from "../../../src/renderer/hot_swap.js";
 import { executeRollback } from "../../../src/renderer/rollback.js";
 import { executeRestartWithRestore } from "../../../src/renderer/restart_restore.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
-import { MockGhosttyAdapter, MockRioAdapter, TEST_CONFIG, TEST_SURFACE } from "../../helpers/mock_adapter.js";
+import {
+  MockGhosttyAdapter,
+  MockRioAdapter,
+  TEST_CONFIG,
+  TEST_SURFACE,
+} from "../../helpers/mock_adapter.js";
 import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 
 describe("Fault injection - hot-swap failures", () => {
@@ -34,7 +39,7 @@ describe("Fault injection - hot-swap failures", () => {
       TEST_SURFACE,
       async () => {
         rollbackCalled = true;
-      },
+      }
     );
 
     expect(result.success).toBe(false);
@@ -60,7 +65,7 @@ describe("Fault injection - hot-swap failures", () => {
       TEST_SURFACE,
       async () => {
         rollbackCalled = true;
-      },
+      }
     );
 
     expect(result.success).toBe(false);
@@ -75,7 +80,17 @@ describe("Fault injection - restart-with-restore failures", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [new Uint8Array([1, 2])], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [new Uint8Array([1, 2])],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const result = await executeRestartWithRestore(
@@ -85,7 +100,7 @@ describe("Fault injection - restart-with-restore failures", () => {
       buffer,
       TEST_CONFIG,
       TEST_SURFACE,
-      async () => {},
+      async () => {}
     );
 
     expect(result.success).toBe(true);
@@ -112,7 +127,7 @@ describe("Fault injection - restart-with-restore failures", () => {
       TEST_SURFACE,
       async () => {
         rollbackCalled = true;
-      },
+      }
     );
 
     expect(result.success).toBe(false);
@@ -137,7 +152,7 @@ describe("Fault injection - restart-with-restore failures", () => {
       buffer,
       TEST_CONFIG,
       TEST_SURFACE,
-      async () => {},
+      async () => {}
     );
 
     expect(result.success).toBe(true);
@@ -156,13 +171,7 @@ describe("Fault injection - rollback handling", () => {
       ["pty-2", { ptyId: "pty-2", scrollback: [], cursorX: 5, cursorY: 10, env: {}, cwd: "/" }],
     ]);
 
-    const result = await executeRollback(
-      original,
-      failed,
-      terminals,
-      buffer,
-      "test failure",
-    );
+    const result = await executeRollback(original, failed, terminals, buffer, "test failure");
 
     expect(result.success).toBe(true);
     expect(result.terminalStatuses.length).toBe(2);
@@ -183,13 +192,7 @@ describe("Fault injection - rollback handling", () => {
 
     const failureReason = "target renderer GPU allocation failed";
 
-    const result = await executeRollback(
-      original,
-      failed,
-      terminals,
-      buffer,
-      failureReason,
-    );
+    const result = await executeRollback(original, failed, terminals, buffer, failureReason);
 
     expect(result.failureReason).toBe(failureReason);
   });

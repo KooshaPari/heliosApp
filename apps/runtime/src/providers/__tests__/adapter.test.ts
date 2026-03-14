@@ -5,11 +5,7 @@
  */
 
 import { describe, it, expect } from "bun:test";
-import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
-  ProviderRegistration,
-} from "../adapter.js";
+import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
 import { BaseProviderAdapter } from "../adapter.js";
 import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 
@@ -150,10 +146,7 @@ describe("ProviderAdapter Interface", () => {
 
       await provider.init(config);
 
-      const result = await provider.execute(
-        { prompt: "Hello, world!" },
-        "correlation-123"
-      );
+      const result = await provider.execute({ prompt: "Hello, world!" }, "correlation-123");
 
       expect(result.content).toContain("Mock response");
       expect(result.stopReason).toBe("end_turn");
@@ -220,17 +213,17 @@ describe("ProviderAdapter Interface", () => {
 
       await provider.init(config);
 
-      await expect(
-        provider.execute({ prompt: "Hello" }, "correlation-123")
-      ).rejects.toThrow("Execute failed");
+      await expect(provider.execute({ prompt: "Hello" }, "correlation-123")).rejects.toThrow(
+        "Execute failed"
+      );
     });
 
     it("should prevent execute before init", async () => {
       const provider = new MockProvider();
 
-      await expect(
-        provider.execute({ prompt: "Hello" }, "correlation-123")
-      ).rejects.toThrow("not initialized");
+      await expect(provider.execute({ prompt: "Hello" }, "correlation-123")).rejects.toThrow(
+        "not initialized"
+      );
     });
   });
 
@@ -358,10 +351,7 @@ describe("ProviderAdapter Interface", () => {
       const correlationId = "unique-correlation-id-12345";
 
       // Should not throw when accepting correlation ID
-      const result = await provider.execute(
-        { prompt: "Test" },
-        correlationId
-      );
+      const result = await provider.execute({ prompt: "Test" }, correlationId);
 
       expect(result).toBeDefined();
     });

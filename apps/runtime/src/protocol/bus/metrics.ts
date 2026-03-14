@@ -5,10 +5,7 @@ import type { LocalBusEnvelope } from "../types.js";
 // Metrics Accumulator and Recorder
 // ---------------------------------------------------------------------------
 
-export type MetricsAccumulator = Map<
-  string,
-  { count: number; latest?: number; values: number[] }
->;
+export type MetricsAccumulator = Map<string, { count: number; latest?: number; values: number[] }>;
 
 export class MetricsRecorder {
   private metricsAccumulator: MetricsAccumulator = new Map();
@@ -35,7 +32,11 @@ export class MetricsRecorder {
     metric: string,
     value: number | undefined,
     eventLog: LocalBusEnvelope[],
-    auditLog: Array<{ envelope: LocalBusEnvelope; outcome: "accepted" | "rejected"; error?: string }>
+    auditLog: Array<{
+      envelope: LocalBusEnvelope;
+      outcome: "accepted" | "rejected";
+      error?: string;
+    }>
   ): void {
     const seq = eventLog.filter(e => e.type === "event").length + 1;
     const event: LocalBusEnvelope = {
