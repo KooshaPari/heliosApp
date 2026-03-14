@@ -9,8 +9,8 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "lint": "biome check apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
-    "format": "biome format --write apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
+    "lint": "oxlint --config .oxlintrc.json apps docs/.vitepress playwright.config.ts tsconfig.json",
+    "format": "oxfmt --config .oxfmtrc.json --write apps docs/.vitepress playwright.config.ts tsconfig.json",
     "test": "bun test apps/runtime apps/desktop/tests/unit scripts/tests/",
     "test:coverage": "bun test --coverage apps/runtime apps/desktop/tests/unit",
     "test:e2e": "playwright test",
@@ -31,7 +31,7 @@
     "solid-js": "^1.9.11"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
+    "oxlint": "latest",
     "@playwright/test": "1.51.1",
     "@types/node": "22.13.10",
     "bun-types": "1.3.10",

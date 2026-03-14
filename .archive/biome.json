@@ -20,20 +20,19 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "suspicious": {
-        "all": true
-      },
       "correctness": {
-        "all": true
+        "noUnusedImports": "error",
+        "useImportExtensions": "off"
       },
       "style": {
-        "all": true
+        "useNamingConvention": "off",
+        "noDefaultExport": "off",
+        "useFilenamingConvention": "off",
+        "useBlockStatements": "off"
       },
-      "complexity": {
-        "all": true
-      },
-      "security": {
-        "all": true
+      "suspicious": {
+        "noConsole": "off",
+        "noConsoleLog": "off"
       }
     }
   },
