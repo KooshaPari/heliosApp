@@ -3,7 +3,7 @@ import {
   ActiveContextStore,
   type ActiveContext,
   resetActiveContextStore,
-  getActiveContextStore
+  getActiveContextStore,
 } from "../../../src/tabs/context_switch";
 
 describe("ActiveContextStore", () => {
@@ -27,7 +27,7 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await store.setContext(context);
@@ -39,7 +39,7 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await store.setContext(context);
@@ -55,12 +55,12 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       let emittedEvent: any = null;
 
-      store.onContextChange((event) => {
+      store.onContextChange(event => {
         emittedEvent = event;
       });
 
@@ -75,20 +75,20 @@ describe("ActiveContextStore", () => {
       const context1: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const context2: ActiveContext = {
         workspaceId: "ws2",
         laneId: "lane2",
-        sessionId: "session2"
+        sessionId: "session2",
       };
 
       let emittedEvent: any = null;
 
       await store.setContext(context1);
 
-      store.onContextChange((event) => {
+      store.onContextChange(event => {
         emittedEvent = event;
       });
 
@@ -102,16 +102,16 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const calls: any[] = [];
 
-      store.onContextChange((event) => {
+      store.onContextChange(event => {
         calls.push("listener1");
       });
 
-      store.onContextChange((event) => {
+      store.onContextChange(event => {
         calls.push("listener2");
       });
 
@@ -125,12 +125,12 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       let callCount = 0;
 
-      const unsubscribe = store.onContextChange((event) => {
+      const unsubscribe = store.onContextChange(event => {
         callCount++;
       });
 
@@ -149,24 +149,24 @@ describe("ActiveContextStore", () => {
       const context1: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const context2: ActiveContext = {
         workspaceId: "ws2",
         laneId: "lane2",
-        sessionId: "session2"
+        sessionId: "session2",
       };
 
       const context3: ActiveContext = {
         workspaceId: "ws3",
         laneId: "lane3",
-        sessionId: "session3"
+        sessionId: "session3",
       };
 
       let emittedContexts: ActiveContext[] = [];
 
-      store.onContextChange((event) => {
+      store.onContextChange(event => {
         if (event.current) {
           emittedContexts.push(event.current);
         }
@@ -178,7 +178,7 @@ describe("ActiveContextStore", () => {
       await store.setContext(context3);
 
       // Wait for debounce to complete
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Only the final context should be emitted
       expect(emittedContexts).toHaveLength(1);
@@ -189,12 +189,12 @@ describe("ActiveContextStore", () => {
       const contexts: ActiveContext[] = [
         { workspaceId: "ws1", laneId: "lane1", sessionId: "session1" },
         { workspaceId: "ws2", laneId: "lane2", sessionId: "session2" },
-        { workspaceId: "ws3", laneId: "lane3", sessionId: "session3" }
+        { workspaceId: "ws3", laneId: "lane3", sessionId: "session3" },
       ];
 
       let finalContext: ActiveContext | null = null;
 
-      store.onContextChange((event) => {
+      store.onContextChange(event => {
         finalContext = event.current;
       });
 
@@ -207,7 +207,7 @@ describe("ActiveContextStore", () => {
       await store.setContext(contexts[2]);
 
       // Wait for debounce
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(finalContext!).toEqual(contexts[2]!);
     });
@@ -218,12 +218,12 @@ describe("ActiveContextStore", () => {
       const validContext: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       let validated = false;
 
-      store.setValidator(async (ctx) => {
+      store.setValidator(async ctx => {
         validated = true;
         return true;
       });
@@ -231,7 +231,7 @@ describe("ActiveContextStore", () => {
       await store.setContext(validContext);
 
       // Wait for debounce and validation
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(validated).toBe(true);
       expect(store.getContext()).toEqual(validContext);
@@ -241,7 +241,7 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       store.setValidator(async () => false);
@@ -249,7 +249,7 @@ describe("ActiveContextStore", () => {
       await store.setContext(context);
 
       // Wait for debounce and validation
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(store.getContext()).toBeNull();
     });
@@ -258,7 +258,7 @@ describe("ActiveContextStore", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       store.setValidator(async () => false);
@@ -274,7 +274,7 @@ describe("ActiveContextStore", () => {
         },
         async request() {
           return { id: "", type: "response", ts: "", status: "ok" as const };
-        }
+        },
       };
 
       const storeWithBus = new ActiveContextStore(mockBus as any);
@@ -283,7 +283,7 @@ describe("ActiveContextStore", () => {
       await storeWithBus.setContext(context);
 
       // Wait for debounce and validation
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(validationFailed).toBe(true);
     });

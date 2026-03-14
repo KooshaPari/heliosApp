@@ -179,7 +179,7 @@ export class AgentTab extends TabSurface {
     copyBtn.style.cursor = "pointer";
     copyBtn.style.fontSize = "12px";
     copyBtn.addEventListener("click", async () => {
-      const text = this.actions.map((a) => `[${a.timestamp}] ${a.action}: ${a.output}`).join("\n");
+      const text = this.actions.map(a => `[${a.timestamp}] ${a.action}: ${a.output}`).join("\n");
       try {
         await navigator.clipboard.writeText(text);
       } catch {
@@ -260,7 +260,7 @@ export class AgentTab extends TabSurface {
       ...baseState,
       agentStatus: this.agentStatus,
       scrollPosition: this.contentEl?.scrollTop,
-      actionCount: this.actions.length
+      actionCount: this.actions.length,
     };
   }
 
@@ -284,19 +284,19 @@ export class AgentTab extends TabSurface {
         timestamp: new Date(now.getTime() - 10000).toISOString(),
         action: "Initialize session",
         status: "success",
-        output: `Session ${context.sessionId} initialized`
+        output: `Session ${context.sessionId} initialized`,
       },
       {
         timestamp: new Date(now.getTime() - 5000).toISOString(),
         action: "Analyze context",
         status: "success",
-        output: `Analyzed workspace ${context.workspaceId}`
+        output: `Analyzed workspace ${context.workspaceId}`,
       },
       {
         timestamp: now.toISOString(),
         action: "Waiting for commands",
-        status: "pending"
-      }
+        status: "pending",
+      },
     ];
   }
 }

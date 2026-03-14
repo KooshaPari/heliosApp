@@ -27,7 +27,7 @@ describe("TerminalTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -41,7 +41,7 @@ describe("TerminalTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -55,13 +55,13 @@ describe("TerminalTab", () => {
       const context1: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const context2: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane2",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context1);
@@ -97,7 +97,7 @@ describe("TerminalTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -110,7 +110,7 @@ describe("TerminalTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -127,7 +127,7 @@ describe("TerminalTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -141,7 +141,7 @@ describe("TerminalTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -158,7 +158,7 @@ describe("TerminalTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -173,7 +173,7 @@ describe("TerminalTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -191,7 +191,7 @@ describe("TerminalTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);

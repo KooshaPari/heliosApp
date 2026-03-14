@@ -2,10 +2,10 @@
  * Approval Workflow Management Page
  */
 
-import { createSignal, onMount } from 'solid-js';
-import { ApprovalPanel } from '../components/approval/ApprovalPanel';
-import { ApprovalStatus } from '../types/approval';
-import type { ApprovalRequest, ApprovalWorkflow } from '../types/approval';
+import { createSignal, onMount } from "solid-js";
+import { ApprovalPanel } from "../components/approval/ApprovalPanel";
+import { ApprovalStatus } from "../types/approval";
+import type { ApprovalRequest, ApprovalWorkflow } from "../types/approval";
 
 export function ApprovalWorkflowPage() {
   const [requests, setRequests] = createSignal<ApprovalRequest[]>([]);
@@ -15,11 +15,11 @@ export function ApprovalWorkflowPage() {
   onMount(async () => {
     setRequests([]);
     setWorkflow({
-      userId: 'current-user',
+      userId: "current-user",
       totalRequests: 0,
       pendingRequests: 0,
       approvedRequests: 0,
-      rejectedRequests: 0
+      rejectedRequests: 0,
     });
     setLoading(false);
   });
@@ -68,11 +68,7 @@ export function ApprovalWorkflowPage() {
             </div>
           )}
 
-          <ApprovalPanel
-            requests={requests()}
-            onApprove={handleApprove}
-            onReject={handleReject}
-          />
+          <ApprovalPanel requests={requests()} onApprove={handleApprove} onReject={handleReject} />
         </div>
       )}
 

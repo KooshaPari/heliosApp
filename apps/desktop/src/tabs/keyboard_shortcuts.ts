@@ -14,7 +14,7 @@ export const DEFAULT_SHORTCUTS: ShortcutMap = {
   "select-project": "Cmd+5",
   "previous-tab": "Cmd+[",
   "next-tab": "Cmd+]",
-  "focus-tabbar": "Cmd+Shift+T"
+  "focus-tabbar": "Cmd+Shift+T",
 };
 
 export type ShortcutAction =
@@ -122,9 +122,7 @@ export class KeyboardShortcuts {
         existingAction !== action &&
         this.normalizeShortcut(existingShortcut) === this.normalizeShortcut(shortcut)
       ) {
-        console.error(
-          `Shortcut conflict: "${shortcut}" is already mapped to "${existingAction}"`
-        );
+        console.error(`Shortcut conflict: "${shortcut}" is already mapped to "${existingAction}"`);
         return false;
       }
     }
@@ -239,7 +237,7 @@ export class KeyboardShortcuts {
       "select-project",
       "previous-tab",
       "next-tab",
-      "focus-tabbar"
+      "focus-tabbar",
     ].includes(action);
   }
 }

@@ -55,7 +55,7 @@ export class ContextPropagator {
       successful: [],
       failed: [],
       timed_out: [],
-      duration_ms: 0
+      duration_ms: 0,
     };
 
     const propagationPromises: Promise<void>[] = [];
@@ -66,12 +66,12 @@ export class ContextPropagator {
         context,
         this.propagationAbortController.signal
       )
-        .then((success) => {
+        .then(success => {
           if (success) {
             result.successful.push(tabId);
           }
         })
-        .catch((error) => {
+        .catch(error => {
           if (error.name === "AbortError") {
             // Propagation was cancelled
             return;
@@ -120,7 +120,7 @@ export class ContextPropagator {
           clearTimeout(timeoutId);
           reject(new Error("Propagation cancelled"));
         });
-      })
+      }),
     ]);
   }
 
