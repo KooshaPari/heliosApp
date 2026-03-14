@@ -76,10 +76,6 @@ export function scanBypassDirectives(options: ScannerOptions = {}): GateFinding[
     const isTestFile = /\.(test|spec)\.(ts|tsx|js|jsx)$/.test(fileName);
     const relativePath = filePath.replace(process.cwd(), '');
 
-    const content = readFileSync(filePath, 'utf-8');
-    const lines = content.split('\n');
-    const relativePath = filePath.replace(process.cwd(), '');
-
     lines.forEach((line, index) => {
       const lineNum = index + 1;
 
