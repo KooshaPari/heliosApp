@@ -9,7 +9,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { ProviderRegistry } from "../registry.js";
 import { NormalizedProviderError, PROVIDER_ERROR_CODES } from "../errors.js";
 import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
-import { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 
 /**

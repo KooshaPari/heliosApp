@@ -169,10 +169,11 @@ export class HarnessRouteSelector {
 }
 
 export async function execCommand(command: string, args: string[]): Promise<ExecResult> {
-  const proc = Bun.spawn([command, ...args], {
-    stdout: "pipe",
-    stderr: "pipe",
-  });
+  const execOpts = {
+    stdout: "pipe" as const,
+    stderr: "pipe" as const,
+  };
+  const proc = Bun.spawn([command, ...args], execOpts);
 
   const [stdoutBuf, stderrBuf, code] = await Promise.all([
     new Response(proc.stdout).arrayBuffer(),

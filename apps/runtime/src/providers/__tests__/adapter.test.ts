@@ -6,7 +6,7 @@
 
 import { describe, it, expect } from "vitest";
 import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
-import { BaseProviderAdapter, ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import { BaseProviderAdapter, type ACPConfig, type ACPExecuteInput, type ACPExecuteOutput } from "../adapter.js";
 
 /**
  * Mock provider implementation for testing.

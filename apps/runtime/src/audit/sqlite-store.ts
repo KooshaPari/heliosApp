@@ -1,6 +1,6 @@
 import { Database } from "bun:sqlite";
-import { AuditEvent } from "./event";
-import { AuditFilter } from "./ring-buffer";
+import type { AuditEvent } from "./event";
+import type { AuditFilter } from "./ring-buffer";
 import fs from "fs";
 import path from "path";
 

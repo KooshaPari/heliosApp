@@ -224,17 +224,12 @@ export class RecoveryStateMachine {
   }
 
   private getFailureStateFor(stage: RecoveryStage): RecoveryStage | undefined {
-    const failureMap: Record<RecoveryStage, RecoveryStage> = {
+    const failureMap: Partial<Record<RecoveryStage, RecoveryStage>> = {
       [RecoveryStage.DETECTING]: RecoveryStage.DETECTION_FAILED,
       [RecoveryStage.INVENTORYING]: RecoveryStage.INVENTORY_FAILED,
       [RecoveryStage.RESTORING]: RecoveryStage.RESTORATION_FAILED,
       [RecoveryStage.RECONCILING]: RecoveryStage.RECONCILIATION_FAILED,
       [RecoveryStage.CRASHED]: RecoveryStage.CRASHED,
-      [RecoveryStage.LIVE]: undefined,
-      [RecoveryStage.DETECTION_FAILED]: undefined,
-      [RecoveryStage.INVENTORY_FAILED]: undefined,
-      [RecoveryStage.RESTORATION_FAILED]: undefined,
-      [RecoveryStage.RECONCILIATION_FAILED]: undefined,
     };
     return failureMap[stage];
   }

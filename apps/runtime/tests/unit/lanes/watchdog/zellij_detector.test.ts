@@ -47,7 +47,7 @@ describe("ZellijDetector", () => {
     const orphans = await detector.detect();
     for (const orphan of orphans) {
       expect(orphan.createdAt).toBeDefined();
-      expect(orphan.metadata?.sessionName).toBeDefined() || orphan.metadata === undefined;
+      expect(orphan.metadata?.sessionName !== undefined || orphan.metadata === undefined).toBe(true);
     }
   });
 });

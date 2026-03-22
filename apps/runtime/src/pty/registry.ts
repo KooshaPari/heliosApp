@@ -269,10 +269,11 @@ export class PtyRegistry {
   private async scanForOrphans(shellPatterns: string[]): Promise<number[]> {
     const currentPid = process.pid;
     try {
-      const proc = Bun.spawn(["ps", "-eo", "pid,ppid,comm"], {
-        stdout: "pipe",
-        stderr: "pipe",
-      });
+      const psOpts = {
+        stdout: "pipe" as const,
+        stderr: "pipe" as const,
+      };
+      const proc = Bun.spawn(["ps", "-eo", "pid,ppid,comm"], psOpts);
 
       const output = await new Response(proc.stdout).text();
       await proc.exited;

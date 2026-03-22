@@ -1,5 +1,6 @@
-import { AuditEvent } from "./event";
+import type { AuditEvent } from "./event";
 import { AuditRingBuffer } from "./ring-buffer";
+import type { LocalBusEnvelope } from "../protocol/types.js";
 
 /**
  * Extended metrics including ring buffer and overflow tracking.
@@ -291,5 +292,129 @@ export class DefaultAuditSink implements AuditSink {
 export class NoOpAuditStorage implements AuditStorage {
   async persist(_events: AuditEvent[]): Promise<void> {
     // Do nothing; events are discarded
+  }
+}
+
+// ---------------------------------------------------------------------------
+// AuditRecord — flat record type for the durable audit log
+// ---------------------------------------------------------------------------
+
+export interface AuditRecord {
+  recorded_at: string;
+  sequence: number;
+  outcome: string;
+  reason: string | null;
+  envelope: LocalBusEnvelope | Record<string, unknown>;
+}
+
+/** Flattened export row for compliance exports. */
+export interface AuditExportRow {
+  envelope_id: string;
+  workspace_id?: string;
+  lane_id?: string;
+  session_id?: string;
+  terminal_id?: string;
+  correlation_id?: string;
+  method_or_topic?: string;
+  envelope: Record<string, unknown>;
+}
+
+const SENSITIVE_KEYS = new Set(["authorization", "token", "secret", "password", "api_key", "apiKey"]);
+
+function redactSensitive(obj: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (SENSITIVE_KEYS.has(key.toLowerCase())) {
+      result[key] = "[REDACTED]";
+    } else if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+      result[key] = redactSensitive(value as Record<string, unknown>);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// InMemoryAuditSink — in-memory sink for testing
+// ---------------------------------------------------------------------------
+
+export interface InMemoryAuditSinkOptions {
+  retention_days?: number;
+}
+
+export class InMemoryAuditSink {
+  private records: AuditRecord[] = [];
+  private readonly retentionDays: number | undefined;
+
+  constructor(options?: InMemoryAuditSinkOptions) {
+    this.retentionDays = options?.retention_days;
+  }
+
+  async append(record: AuditRecord): Promise<void> {
+    this.records.push(record);
+  }
+
+  getRecords(): AuditRecord[] {
+    return [...this.records];
+  }
+
+  async exportRecords(): Promise<AuditExportRow[]> {
+    return this.records.map((record) => {
+      const env = record.envelope as Record<string, unknown>;
+      const payload = env.payload as Record<string, unknown> | undefined;
+      const redactedEnvelope = payload
+        ? { ...env, payload: redactSensitive(payload) }
+        : env;
+
+      return {
+        envelope_id: env.id as string,
+        workspace_id: env.workspace_id as string | undefined,
+        lane_id: env.lane_id as string | undefined,
+        session_id: env.session_id as string | undefined,
+        terminal_id: env.terminal_id as string | undefined,
+        correlation_id: env.correlation_id as string | undefined,
+        method_or_topic: (env.method ?? env.topic) as string | undefined,
+        envelope: redactedEnvelope,
+      };
+    });
+  }
+
+  async enforceRetention(
+    asOf: Date,
+  ): Promise<{ deleted_count: number }> {
+    if (this.retentionDays === undefined) {
+      return { deleted_count: 0 };
+    }
+
+    const cutoff = new Date(asOf.getTime() - this.retentionDays * 24 * 60 * 60 * 1000);
+    const before = this.records.length;
+    const expired = this.records.filter(
+      (r) => new Date(r.recorded_at) < cutoff,
+    );
+    this.records = this.records.filter(
+      (r) => new Date(r.recorded_at) >= cutoff,
+    );
+
+    const deletedCount = before - this.records.length;
+
+    if (deletedCount > 0) {
+      // Emit a deletion proof record
+      this.records.push({
+        recorded_at: asOf.toISOString(),
+        sequence: 0,
+        outcome: "accepted",
+        reason: null,
+        envelope: {
+          id: `audit-retention-${Date.now()}`,
+          type: "event" as const,
+          ts: asOf.toISOString(),
+          topic: "audit.retention.deleted",
+          payload: { deleted_count: deletedCount, cutoff: cutoff.toISOString() },
+        },
+      });
+    }
+
+    return { deleted_count: deletedCount };
   }
 }

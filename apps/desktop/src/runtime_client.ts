@@ -99,7 +99,7 @@ export class DesktopRuntimeClient {
     forceError?: boolean;
   }): Promise<LifecycleResult> {
     const requestedLaneId = `${input.workspaceId}:lane`;
-    const response = await this.bus.request(
+    const response = await this.bus.request!(
       toCommandEnvelope(
         "lane.create",
         {
@@ -131,7 +131,7 @@ export class DesktopRuntimeClient {
     forceError?: boolean;
   }): Promise<LifecycleResult> {
     const requestedSessionId = `${input.laneId}:session`;
-    const response = await this.bus.request(
+    const response = await this.bus.request!(
       toCommandEnvelope(
         "session.attach",
         {
@@ -163,7 +163,7 @@ export class DesktopRuntimeClient {
     forceError?: boolean;
   }): Promise<LifecycleResult> {
     const requestedTerminalId = `${input.sessionId}:terminal`;
-    const response = await this.bus.request(
+    const response = await this.bus.request!(
       toCommandEnvelope(
         "terminal.spawn",
         {
@@ -190,7 +190,7 @@ export class DesktopRuntimeClient {
   }
 
   async getRendererCapabilities(workspaceId: string | null): Promise<RendererCapabilities> {
-    const response = await this.bus.request(
+    const response = await this.bus.request!(
       toCommandEnvelope("renderer.capabilities", {}, workspaceId, null, null, null),
     );
     const parsed = toResponse<Record<string, unknown>>(response);
@@ -212,7 +212,7 @@ export class DesktopRuntimeClient {
     targetEngine: RendererEngine;
     forceError?: boolean;
   }): Promise<RendererSwitchResult> {
-    const response = await this.bus.request(
+    const response = await this.bus.request!(
       toCommandEnvelope(
         "renderer.switch",
         {

@@ -45,10 +45,11 @@ export function isRioEnabled(config: RioFeatureFlagConfig): boolean {
  */
 export async function detectRioBinary(): Promise<boolean> {
   try {
-    const proc = Bun.spawn(["which", "rio"], {
-      stdout: "pipe",
-      stderr: "pipe",
-    });
+    const whichOpts = {
+      stdout: "pipe" as const,
+      stderr: "pipe" as const,
+    };
+    const proc = Bun.spawn(["which", "rio"], whichOpts);
     const code = await proc.exited;
     return code === 0;
   } catch {

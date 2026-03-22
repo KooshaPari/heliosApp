@@ -107,11 +107,12 @@ function defaultSpawn(
   cmd: string[],
   opts: { cwd?: string; stdout?: "pipe"; stderr?: "pipe" },
 ): SpawnResult {
-  const proc = Bun.spawn(cmd, {
+  const spawnOpts = {
     cwd: opts.cwd,
-    stdout: opts.stdout ?? "pipe",
-    stderr: opts.stderr ?? "pipe",
-  });
+    stdout: "pipe" as const,
+    stderr: "pipe" as const,
+  };
+  const proc = Bun.spawn(cmd, spawnOpts);
   return {
     pid: proc.pid,
     stdout: proc.stdout as ReadableStream<Uint8Array> | null,

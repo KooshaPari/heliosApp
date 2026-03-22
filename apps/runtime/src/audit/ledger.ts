@@ -1,5 +1,5 @@
-import { AuditEvent } from "./event";
-import { AuditRingBuffer, AuditFilter as RingBufferFilter } from "./ring-buffer";
+import type { AuditEvent } from "./event";
+import { AuditRingBuffer, type AuditFilter as RingBufferFilter } from "./ring-buffer";
 import { SQLiteAuditStore } from "./sqlite-store";
 
 /**

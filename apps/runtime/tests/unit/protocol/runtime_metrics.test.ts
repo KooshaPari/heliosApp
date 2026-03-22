@@ -16,8 +16,8 @@ test("captures lane create latency metrics", async () => {
 
   expect(response.status).toBe("ok");
 
-  const report = bus.getMetricsReport();
-  const laneSummary = report.summaries.find((metric) => metric.metric === "lane_create_latency_ms");
+  const report = (bus as any).getMetricsReport();
+  const laneSummary = report.summaries.find((metric: any) => metric.metric === "lane_create_latency_ms");
   expect(laneSummary).toBeDefined();
   expect((laneSummary?.count ?? 0) >= 1).toBe(true);
 
@@ -44,9 +44,9 @@ test("captures session restore latency metrics", async () => {
 
   expect(response.status).toBe("ok");
 
-  const report = bus.getMetricsReport();
+  const report = (bus as any).getMetricsReport();
   const restoreSummary = report.summaries.find(
-    (metric) => metric.metric === "session_restore_latency_ms",
+    (metric: any) => metric.metric === "session_restore_latency_ms",
   );
   expect(restoreSummary).toBeDefined();
   expect((restoreSummary?.count ?? 0) >= 1).toBe(true);
@@ -71,9 +71,9 @@ test("captures terminal output backlog depth", async () => {
     },
   });
 
-  const report = bus.getMetricsReport();
+  const report = (bus as any).getMetricsReport();
   const backlogSummary = report.summaries.find(
-    (metric) => metric.metric === "terminal_output_backlog_depth",
+    (metric: any) => metric.metric === "terminal_output_backlog_depth",
   );
 
   expect(backlogSummary).toBeDefined();

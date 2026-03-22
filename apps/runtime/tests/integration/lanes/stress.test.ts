@@ -144,5 +144,4 @@ describe(
       expect(newLane.laneId).toBeTruthy();
     });
   },
-  { timeout: 120_000 },
 );

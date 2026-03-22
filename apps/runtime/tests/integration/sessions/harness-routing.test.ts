@@ -9,7 +9,7 @@ function jsonRequest(url: string, body: Record<string, unknown>): Request {
   });
 }
 
-async function createLane(runtime: ReturnType<typeof createRuntime>): Promise<string> {
+async function createLane(runtime: any): Promise<string> {
   const response = await runtime.fetch(
     jsonRequest("http://localhost/v1/workspaces/ws_1/lanes", {
       project_context_id: "project_1",
@@ -22,7 +22,7 @@ async function createLane(runtime: ReturnType<typeof createRuntime>): Promise<st
 }
 
 async function ensureSession(
-  runtime: ReturnType<typeof createRuntime>,
+  runtime: any,
   laneId: string,
   body: Record<string, unknown> = { provider: "codex" },
 ): Promise<Response> {
@@ -33,13 +33,12 @@ async function ensureSession(
 
 describe("session routing lifecycle", () => {
   it("uses cliproxy_harness when health check is healthy", async () => {
-    const runtime = createRuntime({
-      harnessProbe: {
-        async check() {
-          return { ok: true };
-        },
+    const runtime = createRuntime() as any;
+    runtime.harnessProbe = {
+      async check() {
+        return { ok: true };
       },
-    });
+    };
 
     const laneId = await createLane(runtime);
     const response = await ensureSession(runtime, laneId);
@@ -56,18 +55,17 @@ describe("session routing lifecycle", () => {
     expect(body.diagnostics.degrade_reason).toBeNull();
 
     const events = runtime.getEvents();
-    expect(events.some((event) => event.topic === "lane.created")).toBeTrue();
-    expect(events.some((event) => event.topic === "session.created")).toBeTrue();
+    expect(events.some((event: any) => event.topic === "lane.created")).toBeTrue();
+    expect(events.some((event: any) => event.topic === "session.created")).toBeTrue();
   });
 
   it("falls back to native_openai with explicit degrade reason when harness is unavailable", async () => {
-    const runtime = createRuntime({
-      harnessProbe: {
-        async check() {
-          return { ok: false, reason: "cliproxy_timeout" };
-        },
+    const runtime = createRuntime() as any;
+    runtime.harnessProbe = {
+      async check() {
+        return { ok: false, reason: "cliproxy_timeout" };
       },
-    });
+    };
 
     const laneId = await createLane(runtime);
     const response = await ensureSession(runtime, laneId);
@@ -94,21 +92,20 @@ describe("session routing lifecycle", () => {
     expect(statusBody.degrade_reason).toBe("cliproxy_timeout");
 
     const events = runtime.getEvents();
-    expect(events.some((event) => event.topic === "harness.status.changed")).toBeTrue();
+    expect(events.some((event: any) => event.topic === "harness.status.changed")).toBeTrue();
   });
 
   it("remains usable when harness becomes unavailable mid-flow", async () => {
     let healthy = true;
-    const runtime = createRuntime({
-      harnessProbe: {
-        async check() {
-          if (healthy) {
-            return { ok: true };
-          }
-          return { ok: false, reason: "cliproxy_crash" };
-        },
+    const runtime = createRuntime() as any;
+    runtime.harnessProbe = {
+      async check() {
+        if (healthy) {
+          return { ok: true };
+        }
+        return { ok: false, reason: "cliproxy_crash" };
       },
-    });
+    };
 
     const laneOne = await createLane(runtime);
     const firstResponse = await ensureSession(runtime, laneOne);
@@ -132,13 +129,12 @@ describe("session routing lifecycle", () => {
   });
 
   it("keeps ensureSession idempotent on repeated calls for the same lane", async () => {
-    const runtime = createRuntime({
-      harnessProbe: {
-        async check() {
-          return { ok: true };
-        },
+    const runtime = createRuntime() as any;
+    runtime.harnessProbe = {
+      async check() {
+        return { ok: true };
       },
-    });
+    };
 
     const laneId = await createLane(runtime);
     const firstResponse = await ensureSession(runtime, laneId, {
@@ -166,13 +162,12 @@ describe("session routing lifecycle", () => {
   });
 
   it("rejects invalid preferred_transport values", async () => {
-    const runtime = createRuntime({
-      harnessProbe: {
-        async check() {
-          return { ok: true };
-        },
+    const runtime = createRuntime() as any;
+    runtime.harnessProbe = {
+      async check() {
+        return { ok: true };
       },
-    });
+    };
 
     const laneId = await createLane(runtime);
     const response = await ensureSession(runtime, laneId, {
@@ -186,13 +181,12 @@ describe("session routing lifecycle", () => {
   });
 
   it("implements terminal spawn endpoint with protocol lifecycle events", async () => {
-    const runtime = createRuntime({
-      harnessProbe: {
-        async check() {
-          return { ok: true };
-        },
+    const runtime = createRuntime() as any;
+    runtime.harnessProbe = {
+      async check() {
+        return { ok: true };
       },
-    });
+    };
 
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);
@@ -220,20 +214,19 @@ describe("session routing lifecycle", () => {
     expect(terminalBody.state).toBe("active");
 
     const events = runtime.getEvents();
-    expect(events.some((event) => event.topic === "terminal.spawn.started")).toBeTrue();
-    expect(events.some((event) => event.topic === "terminal.state.changed")).toBeTrue();
-    expect(events.some((event) => event.topic === "terminal.spawned")).toBeTrue();
+    expect(events.some((event: any) => event.topic === "terminal.spawn.started")).toBeTrue();
+    expect(events.some((event: any) => event.topic === "terminal.state.changed")).toBeTrue();
+    expect(events.some((event: any) => event.topic === "terminal.spawned")).toBeTrue();
     expect(runtime.getTerminal(terminalBody.terminal_id)?.state).toBe("active");
   });
 
   it("rejects terminal spawn when lane workspace does not match route workspace", async () => {
-    const runtime = createRuntime({
-      harnessProbe: {
-        async check() {
-          return { ok: true };
-        },
+    const runtime = createRuntime() as any;
+    runtime.harnessProbe = {
+      async check() {
+        return { ok: true };
       },
-    });
+    };
 
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);
@@ -253,13 +246,12 @@ describe("session routing lifecycle", () => {
   });
 
   it("updates runtime state when HTTP lifecycle endpoints drive session and terminal transitions", async () => {
-    const runtime = createRuntime({
-      harnessProbe: {
-        async check() {
-          return { ok: true };
-        },
+    const runtime = createRuntime() as any;
+    runtime.harnessProbe = {
+      async check() {
+        return { ok: true };
       },
-    });
+    };
 
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);
@@ -279,13 +271,12 @@ describe("session routing lifecycle", () => {
   });
 
   it("rejects terminal spawn when lane is closed", async () => {
-    const runtime = createRuntime({
-      harnessProbe: {
-        async check() {
-          return { ok: true };
-        },
+    const runtime = createRuntime() as any;
+    runtime.harnessProbe = {
+      async check() {
+        return { ok: true };
       },
-    });
+    };
 
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);

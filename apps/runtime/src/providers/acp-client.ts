@@ -195,7 +195,7 @@ export class ACPClientAdapter implements ProviderAdapter<
     try {
       // Perform lightweight health check
       const probeSuccess = await Promise.race([
-        this.probeEndpoint(this.config.endpoint),
+        this.probeEndpoint(this.config.endpoint ?? ""),
         new Promise<boolean>((_, reject) =>
           setTimeout(() => reject(new Error("Health check timeout")), 5000),
         ),

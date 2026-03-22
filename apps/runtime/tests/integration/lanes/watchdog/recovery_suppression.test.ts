@@ -132,7 +132,7 @@ describe("Recovery Suppression", () => {
     laneRegistry.register({
       laneId: "lane-active",
       workspaceId: "ws1",
-      state: "active",
+      state: "running",
       worktreePath: "/tmp/lane-active",
       parTaskPid: null,
       attachedAgents: [],

@@ -8,6 +8,7 @@ export type LaneState =
   | "blocked"
   | "shared"
   | "cleaning"
+  | "recovering"
   | "closed";
 
 export type LaneEvent =

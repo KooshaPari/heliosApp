@@ -1,4 +1,4 @@
-import { AuditEvent } from "./event";
+import type { AuditEvent } from "./event";
 
 /**
  * Filter options for ring buffer queries.
@@ -9,6 +9,7 @@ export interface AuditFilter {
   sessionId?: string;
   actor?: string;
   eventType?: string;
+  correlationId?: string;
   startTime?: Date;
   endTime?: Date;
 }

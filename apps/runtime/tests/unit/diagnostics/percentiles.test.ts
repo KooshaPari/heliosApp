@@ -11,7 +11,7 @@ describe("computePercentiles", () => {
     for (let i = 1; i <= 100; i++) {
       buf.push(i, i);
     }
-    const result = computePercentiles(buf);
+    const result = computePercentiles(buf.getValues())!;
     expect(result.p50).toBe(51);
     expect(result.p95).toBe(96);
     expect(result.p99).toBe(100);
@@ -23,15 +23,15 @@ describe("computePercentiles", () => {
   // FR-002: Empty buffer
   it("returns zeroed bucket for empty buffer", () => {
     const buf = new RingBuffer(10);
-    const result = computePercentiles(buf);
-    expect(result).toEqual({ p50: 0, p95: 0, p99: 0, min: 0, max: 0, count: 0 });
+    const result = computePercentiles(buf.getValues());
+    expect(result).toBeUndefined();
   });
 
   // FR-002: Single sample
   it("returns that value for all percentiles with single sample", () => {
     const buf = new RingBuffer(10);
     buf.push(42, 1);
-    const result = computePercentiles(buf);
+    const result = computePercentiles(buf.getValues())!;
     expect(result.p50).toBe(42);
     expect(result.p95).toBe(42);
     expect(result.p99).toBe(42);
@@ -45,7 +45,7 @@ describe("computePercentiles", () => {
     const buf = new RingBuffer(10);
     buf.push(10, 1);
     buf.push(20, 2);
-    const result = computePercentiles(buf);
+    const result = computePercentiles(buf.getValues())!;
     expect(result.min).toBe(10);
     expect(result.max).toBe(20);
     expect(result.p99).toBe(20);
@@ -56,7 +56,7 @@ describe("computePercentiles", () => {
   it("returns same value for all percentiles when values are identical", () => {
     const buf = new RingBuffer(10);
     for (let i = 0; i < 5; i++) buf.push(7, i);
-    const result = computePercentiles(buf);
+    const result = computePercentiles(buf.getValues())!;
     expect(result.p50).toBe(7);
     expect(result.p95).toBe(7);
     expect(result.p99).toBe(7);
@@ -68,7 +68,7 @@ describe("computePercentiles", () => {
     buf.push(10, 1);
     buf.push(NaN, 2);
     buf.push(20, 3);
-    const result = computePercentiles(buf);
+    const result = computePercentiles(buf.getValues())!;
     expect(result.count).toBe(2);
     expect(result.min).toBe(10);
     expect(result.max).toBe(20);
@@ -79,7 +79,7 @@ describe("computePercentiles", () => {
     const buf = new RingBuffer(10);
     buf.push(NaN, 1);
     buf.push(NaN, 2);
-    const result = computePercentiles(buf);
+    const result = computePercentiles(buf.getValues())!;
     expect(result.count).toBe(0);
   });
 
@@ -90,7 +90,7 @@ describe("computePercentiles", () => {
     buf.push(10, 2);
     buf.push(20, 3);
     const before = Array.from(buf.getValues());
-    computePercentiles(buf);
+    computePercentiles(buf.getValues());
     const after = Array.from(buf.getValues());
     expect(after).toEqual(before);
   });
@@ -100,7 +100,7 @@ describe("computePercentiles", () => {
     const buf = new RingBuffer(200);
     for (let i = 0; i < 99; i++) buf.push(1, i);
     buf.push(1000, 99);
-    const result = computePercentiles(buf);
+    const result = computePercentiles(buf.getValues())!;
     expect(result.p50).toBe(1);
     expect(result.max).toBe(1000);
     expect(result.count).toBe(100);

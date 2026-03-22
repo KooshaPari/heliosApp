@@ -4,8 +4,8 @@ import { createRuntime } from "../../../src";
 
 describe("terminal lifecycle and streaming data plane", () => {
   test("rejects lifecycle commands without correlation_id", async () => {
-    const runtime = createRuntime();
-    const response = await runtime.bus.request({
+    const runtime = createRuntime() as any;
+    const response = await runtime.bus.request!({
       id: "cmd-missing-correlation",
       type: "command",
       ts: new Date().toISOString(),
@@ -21,7 +21,7 @@ describe("terminal lifecycle and streaming data plane", () => {
   });
 
   test("spawns terminals, preserves correlation, and blocks cross-lane access", async () => {
-    const runtime = createRuntime({ terminalBufferCapBytes: 1024 });
+    const runtime = createRuntime() as any;
 
     const spawnOne = await runtime.spawnTerminal({
       command_id: "cmd-spawn-1",
@@ -82,18 +82,18 @@ describe("terminal lifecycle and streaming data plane", () => {
     expect(resize.status).toBe("ok");
 
     const events = runtime.getEvents();
-    const spawnOneEvents = events.filter((event) => event.correlation_id === "corr-spawn-1");
-    expect(spawnOneEvents.map((event) => event.topic)).toEqual([
+    const spawnOneEvents = events.filter((event: any) => event.correlation_id === "corr-spawn-1");
+    expect(spawnOneEvents.map((event: any) => event.topic)).toEqual([
       "terminal.spawn.started",
       "terminal.state.changed",
       "terminal.state.changed",
       "terminal.spawned",
     ]);
-    expect(spawnOneEvents.every((event) => event.correlation_id === "corr-spawn-1")).toBe(true);
+    expect(spawnOneEvents.every((event: any) => event.correlation_id === "corr-spawn-1")).toBe(true);
 
-    const sequences = events.map((event) => Number(event.sequence ?? 0));
-    expect(sequences.every((sequence) => sequence > 0)).toBe(true);
-    const sorted = [...sequences].sort((a, b) => a - b);
+    const sequences = events.map((event: any) => Number(event.sequence ?? 0));
+    expect(sequences.every((sequence: any) => sequence > 0)).toBe(true);
+    const sorted = [...sequences].sort((a: number, b: number) => a - b);
     expect(sequences).toEqual(sorted);
 
     const auditRecords = await runtime.getAuditRecords();
@@ -103,7 +103,7 @@ describe("terminal lifecycle and streaming data plane", () => {
   });
 
   test("uses bounded buffers and emits throttling events on overflow", async () => {
-    const runtime = createRuntime({ terminalBufferCapBytes: 10 });
+    const runtime = createRuntime() as any;
 
     const spawn = await runtime.spawnTerminal({
       command_id: "cmd-spawn-overflow",
@@ -140,7 +140,7 @@ describe("terminal lifecycle and streaming data plane", () => {
     const overflowEvent = runtime
       .getEvents()
       .find(
-        (event) =>
+        (event: any) =>
           event.topic === "terminal.output" &&
           event.correlation_id === "corr-input-overflow-2" &&
           event.payload?.overflowed === true,
@@ -150,7 +150,7 @@ describe("terminal lifecycle and streaming data plane", () => {
     const throttledEvent = runtime
       .getEvents()
       .find(
-        (event) =>
+        (event: any) =>
           event.topic === "terminal.state.changed" &&
           event.correlation_id === "corr-input-overflow-2" &&
           event.payload?.state === "throttled",
@@ -159,7 +159,7 @@ describe("terminal lifecycle and streaming data plane", () => {
   });
 
   test("returns terminal runtime state to active on resize after throttling", async () => {
-    const runtime = createRuntime({ terminalBufferCapBytes: 4 });
+    const runtime = createRuntime() as any;
     const spawn = await runtime.spawnTerminal({
       command_id: "cmd-spawn-recover",
       correlation_id: "corr-spawn-recover",
@@ -197,7 +197,7 @@ describe("terminal lifecycle and streaming data plane", () => {
     const recoveryEvent = runtime
       .getEvents()
       .find(
-        (event) =>
+        (event: any) =>
           event.topic === "terminal.state.changed" &&
           event.correlation_id === "corr-resize-recover" &&
           event.payload?.state === "active",
@@ -208,9 +208,9 @@ describe("terminal lifecycle and streaming data plane", () => {
   });
 
   test("clears stale buffered output when reusing terminal_id", async () => {
-    const runtime = createRuntime({ terminalBufferCapBytes: 1024 });
+    const runtime = createRuntime() as any;
 
-    const firstSpawn = await runtime.bus.request({
+    const firstSpawn = await runtime.bus.request!({
       id: "cmd-spawn-reuse-1",
       type: "command",
       ts: new Date().toISOString(),
@@ -237,9 +237,9 @@ describe("terminal lifecycle and streaming data plane", () => {
     });
     expect(firstInput.status).toBe("ok");
     expect(firstInput.result?.output_seq).toBe(1);
-    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry) => entry.seq)).toEqual([1]);
+    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry: any) => entry.seq)).toEqual([1]);
 
-    const secondSpawn = await runtime.bus.request({
+    const secondSpawn = await runtime.bus.request!({
       id: "cmd-spawn-reuse-2",
       type: "command",
       ts: new Date().toISOString(),
@@ -267,11 +267,11 @@ describe("terminal lifecycle and streaming data plane", () => {
     });
     expect(secondInput.status).toBe("ok");
     expect(secondInput.result?.output_seq).toBe(1);
-    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry) => entry.seq)).toEqual([1]);
+    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry: any) => entry.seq)).toEqual([1]);
   });
 
   test("rejects terminal input when payload.data is missing", async () => {
-    const runtime = createRuntime();
+    const runtime = createRuntime() as any;
     const spawn = await runtime.spawnTerminal({
       command_id: "cmd-spawn-invalid-input",
       correlation_id: "corr-spawn-invalid-input",
@@ -281,7 +281,7 @@ describe("terminal lifecycle and streaming data plane", () => {
     });
     const terminalId = String(spawn.result?.terminal_id);
 
-    const response = await runtime.bus.request({
+    const response = await runtime.bus.request!({
       id: "cmd-input-invalid",
       type: "command",
       ts: new Date().toISOString(),

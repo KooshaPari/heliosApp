@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from "bun:test";
-import { createBus, LocalBus } from "../../../src/protocol/bus.js";
+import { createBus, type LocalBus } from "../../../src/protocol/bus.js";
 import { createCommand, createResponse } from "../../../src/protocol/envelope.js";
 import type { CommandEnvelope, ResponseEnvelope } from "../../../src/protocol/types.js";
 

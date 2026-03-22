@@ -159,5 +159,4 @@ describe(
       expect(mgr.getRegistry().get(lane.laneId)!.state).toBe("closed");
     });
   },
-  { timeout: 60_000 },
 );

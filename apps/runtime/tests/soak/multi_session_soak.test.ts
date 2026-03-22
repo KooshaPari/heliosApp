@@ -94,21 +94,21 @@ async function runSoakScenario(): Promise<SoakReport> {
     );
   }
 
-  const report = bus.getMetricsReport();
-  const lane = report.summaries.find((metric) => metric.metric === "lane_create_latency_ms");
-  const restore = report.summaries.find((metric) => metric.metric === "session_restore_latency_ms");
+  const report = (bus as any).getMetricsReport();
+  const lane = report.summaries.find((metric: any) => metric.metric === "lane_create_latency_ms");
+  const restore = report.summaries.find((metric: any) => metric.metric === "session_restore_latency_ms");
   const backlog = report.summaries.find(
-    (metric) => metric.metric === "terminal_output_backlog_depth",
+    (metric: any) => metric.metric === "terminal_output_backlog_depth",
   );
   const backlogSamples = report.samples.filter(
-    (metric) => metric.metric === "terminal_output_backlog_depth",
+    (metric: any) => metric.metric === "terminal_output_backlog_depth",
   );
   const backlogSessionIds = new Set(
     backlogSamples
-      .map((sample) => sample.tags?.session_id)
-      .filter((value): value is string => !!value),
+      .map((sample: any) => sample.tags?.session_id)
+      .filter((value: any): value is string => !!value),
   );
-  const backlogMax = backlogSamples.reduce((max, sample) => Math.max(max, sample.value), 0);
+  const backlogMax = backlogSamples.reduce((max: any, sample: any) => Math.max(max, sample.value), 0);
 
   expect(lane).toBeDefined();
   expect(restore).toBeDefined();

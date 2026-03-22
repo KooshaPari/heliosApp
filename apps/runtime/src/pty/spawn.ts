@@ -68,7 +68,7 @@ export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Pr
   lifecycle.apply("spawn_requested");
 
   try {
-    const proc = Bun.spawn([shell], {
+    const spawnOpts = {
       cwd,
       env: {
         ...env,
@@ -76,10 +76,11 @@ export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Pr
         COLUMNS: String(cols),
         LINES: String(rows),
       },
-      stdin: "pipe",
-      stdout: "pipe",
-      stderr: "pipe",
-    });
+      stdin: "pipe" as const,
+      stdout: "pipe" as const,
+      stderr: "pipe" as const,
+    };
+    const proc = Bun.spawn([shell], spawnOpts);
 
     const pid = proc.pid;
 

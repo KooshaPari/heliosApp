@@ -130,12 +130,13 @@ export class AuditSink {
   wrapBus(bus: LocalBus): LocalBus {
     const sink = this;
     return {
+      ...bus,
       async publish(event: LocalBusEnvelope): Promise<void> {
         await sink.ingest(event);
         await bus.publish(event);
       },
       async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
-        return bus.request(command);
+        return bus.request!(command);
       },
     };
   }

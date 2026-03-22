@@ -209,7 +209,7 @@ export class ZellijSessionManager {
         laneId,
         recoveredPaneCount: panes.length,
         recoveredTabCount: tabs.length,
-      });
+      } as any);
     }
 
     return muxSession;

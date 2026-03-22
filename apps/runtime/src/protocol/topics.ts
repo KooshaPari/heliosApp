@@ -7,6 +7,58 @@
 import type { EventEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
+// Canonical topic list (single source of truth)
+// ---------------------------------------------------------------------------
+
+export const TOPICS = [
+  "workspace.opened",
+  "project.ready",
+  "session.created",
+  "session.attach.started",
+  "session.attached",
+  "session.attach.failed",
+  "session.restore.started",
+  "session.restore.completed",
+  "session.terminated",
+  "session.terminate.started",
+  "session.terminate.failed",
+  "terminal.spawn.started",
+  "terminal.spawned",
+  "terminal.spawn.failed",
+  "terminal.output",
+  "terminal.state.changed",
+  "renderer.switch.started",
+  "renderer.switch.succeeded",
+  "renderer.switch.failed",
+  "agent.run.started",
+  "agent.run.progress",
+  "agent.run.completed",
+  "agent.run.failed",
+  "approval.requested",
+  "approval.resolved",
+  "share.session.started",
+  "share.session.stopped",
+  "lane.create.started",
+  "lane.created",
+  "lane.create.failed",
+  "lane.attached",
+  "lane.cleaned",
+  "lane.attach.started",
+  "lane.attach.failed",
+  "lane.cleanup.started",
+  "lane.cleanup.failed",
+  "harness.status.changed",
+  "boundary.local.dispatched",
+  "boundary.tool.dispatched",
+  "boundary.a2a.delegated",
+  "boundary.dispatch.failed",
+  "audit.recorded",
+  "diagnostics.metric",
+] as const;
+
+export type ProtocolTopic = (typeof TOPICS)[number];
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 

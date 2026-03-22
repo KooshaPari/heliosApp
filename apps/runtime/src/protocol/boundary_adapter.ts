@@ -1,4 +1,4 @@
-import type { LocalBusEnvelope, ResponseEnvelope } from "./types";
+import type { LocalBusEnvelope } from "./types";
 
 export type ProtocolBoundary = "local_control" | "tool_interop" | "agent_delegation";
 export type BoundaryAdapterName = "local_bus" | "tool_bridge" | "a2a_bridge";
@@ -53,7 +53,7 @@ function normalizedBoundaryError(
   code: string,
   message: string,
   details: Record<string, unknown>,
-): ResponseEnvelope {
+): LocalBusEnvelope {
   return {
     id: command.id,
     type: "response",
@@ -127,7 +127,7 @@ export function createBoundaryDispatcher(input: BoundaryDispatcherInput): Comman
       );
     }
 
-    const decision = getBoundaryDispatchDecision(command.method);
+    const decision = getBoundaryDispatchDecision(command.method ?? "");
     const response =
       decision.adapter === "local_bus"
         ? await input.dispatchLocal(command)

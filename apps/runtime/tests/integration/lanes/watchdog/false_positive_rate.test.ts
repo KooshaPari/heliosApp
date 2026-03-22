@@ -27,7 +27,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: `ws-${i}`,
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -56,7 +56,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: "ws1",
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -91,7 +91,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: `ws-${i}`,
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -123,7 +123,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: "ws1",
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],

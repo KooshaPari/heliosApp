@@ -54,7 +54,7 @@ describe("PtyDetector", () => {
     const orphans = await detector.detect();
     for (const orphan of orphans) {
       expect(orphan.createdAt).toBeDefined();
-      expect(typeof orphan.pid).toBe("number") || orphan.pid === undefined;
+      expect(typeof orphan.pid === "number" || orphan.pid === undefined).toBe(true);
     }
   });
 

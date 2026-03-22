@@ -100,10 +100,11 @@ export class GhosttyProcess {
 
     // Verify binary exists
     try {
-      const which = Bun.spawn(["which", binaryPath], {
-        stdout: "pipe",
-        stderr: "ignore",
-      });
+      const whichOpts = {
+        stdout: "pipe" as const,
+        stderr: "ignore" as const,
+      };
+      const which = Bun.spawn(["which", binaryPath], whichOpts);
       await which.exited;
       if (which.exitCode !== 0) {
         throw new GhosttyBinaryNotFoundError(binaryPath);
@@ -122,11 +123,12 @@ export class GhosttyProcess {
       args.push(...options.extraArgs);
     }
 
-    const proc = Bun.spawn(args, {
-      stdout: "pipe",
-      stderr: "pipe",
+    const procOpts = {
+      stdout: "pipe" as const,
+      stderr: "pipe" as const,
       env: { ...process.env, ...options.env },
-    });
+    };
+    const proc = Bun.spawn(args, procOpts);
 
     this._proc = proc;
     this._pid = proc.pid;

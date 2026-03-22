@@ -47,18 +47,19 @@ export class RioProcess {
         args.push("--no-gpu");
       }
 
-      this._proc = Bun.spawn(args, {
-        stdin: "pipe",
-        stdout: "pipe",
-        stderr: "pipe",
-      });
+      const spawnOpts = {
+        stdin: "pipe" as const,
+        stdout: "pipe" as const,
+        stderr: "pipe" as const,
+      };
+      this._proc = Bun.spawn(args, spawnOpts) as any;
 
-      this._pid = this._proc.pid;
+      this._pid = this._proc!.pid;
       this._running = true;
       this._startedAt = Date.now();
 
       // Monitor for unexpected exit.
-      this._proc.exited.then((code) => {
+      this._proc!.exited.then((code) => {
         this._running = false;
         for (const handler of this._exitHandlers) {
           try {

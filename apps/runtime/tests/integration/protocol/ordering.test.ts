@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it, beforeEach } from "bun:test";
-import { createBus, LocalBus, getActiveCorrelationId } from "../../../src/protocol/bus.js";
+import { createBus, type LocalBus } from "../../../src/protocol/bus.js";
 import { createCommand, createEvent, createResponse } from "../../../src/protocol/envelope.js";
 import type { EventEnvelope } from "../../../src/protocol/types.js";
 
@@ -175,7 +175,7 @@ describe("Correlation ID propagation", () => {
 
     bus.registerMethod("inner.cmd", async (cmd) => {
       // Check that active correlation is the inner command's
-      expect(getActiveCorrelationId()).toBe(cmd.correlation_id);
+      expect(bus.getActiveCorrelationId()).toBe(cmd.correlation_id);
       await bus.publish(createEvent("inner.event", {}));
       return createResponse(cmd, "inner-done");
     });
@@ -189,7 +189,7 @@ describe("Correlation ID propagation", () => {
       await bus.send(innerCmd);
 
       // After inner returns, active correlation should be outer again
-      expect(getActiveCorrelationId()).toBe(cmd.correlation_id);
+      expect(bus.getActiveCorrelationId()).toBe(cmd.correlation_id);
 
       // Publish another outer event
       await bus.publish(createEvent("outer.event", {}));
@@ -211,6 +211,6 @@ describe("Correlation ID propagation", () => {
 
   // FR-008: getActiveCorrelationId returns undefined outside dispatch
   it("getActiveCorrelationId returns undefined outside dispatch", () => {
-    expect(getActiveCorrelationId()).toBeUndefined();
+    expect(bus.getActiveCorrelationId()).toBeUndefined();
   });
 });

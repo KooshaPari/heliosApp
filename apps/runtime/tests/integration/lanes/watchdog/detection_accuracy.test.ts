@@ -24,7 +24,7 @@ describe("Detection Accuracy", () => {
       laneRegistry.register({
         laneId,
         workspaceId: "ws1",
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -162,7 +162,7 @@ describe("Detection Accuracy", () => {
       laneRegistry.register({
         laneId,
         workspaceId: "prod-ws",
-        state: "active",
+        state: "running",
         worktreePath: `/prod/${laneId}`,
         parTaskPid: 1000 + Math.random() * 1000,
         attachedAgents: ["agent-1"],

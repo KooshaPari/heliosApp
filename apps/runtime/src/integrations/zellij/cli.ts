@@ -51,10 +51,11 @@ export class ZellijCli {
 
     let proc: ReturnType<typeof Bun.spawn>;
     try {
-      proc = Bun.spawn([this.zellijPath, ...args], {
-        stdout: "pipe",
-        stderr: "pipe",
-      });
+      const spawnOpts = {
+        stdout: "pipe" as const,
+        stderr: "pipe" as const,
+      };
+      proc = Bun.spawn([this.zellijPath, ...args], spawnOpts) as any;
     } catch (error) {
       const caught = error as { code?: string; message?: string };
       if (caught?.code === "ENOENT" || caught?.message?.includes("spawn ENOENT")) {
@@ -83,8 +84,8 @@ export class ZellijCli {
     }
 
     const [stdoutBuf, stderrBuf, exitCode] = await Promise.all([
-      new Response(proc.stdout as ReadableStream).arrayBuffer(),
-      new Response(proc.stderr as ReadableStream).arrayBuffer(),
+      new Response(proc.stdout as unknown as ReadableStream).arrayBuffer(),
+      new Response(proc.stderr as unknown as ReadableStream).arrayBuffer(),
       proc.exited,
     ]);
 

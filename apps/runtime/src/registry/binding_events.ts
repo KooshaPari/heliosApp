@@ -6,7 +6,7 @@
  */
 
 import type { LocalBus } from "../protocol/bus.js";
-import { v4 as uuidv4 } from "crypto";
+import { randomUUID as uuidv4 } from "crypto";
 import type { BindingTriple, TerminalBinding } from "./binding_triple.js";
 
 // Event topics

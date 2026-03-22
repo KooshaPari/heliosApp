@@ -57,7 +57,6 @@ describe("ZellijCli", () => {
     });
 
     it("returns available=false when zellij binary not found", async () => {
-      // @ts-expect-error mock override
       Bun.spawn = mock(() => {
         throw new Error("spawn ENOENT");
       });

@@ -3,7 +3,7 @@ import { createRuntime } from "../../../src/index";
 
 describe("WP05 recovery watchdog and audit fidelity", () => {
   test("reattaches recoverable sessions on restart and flags unrecoverable artifacts", async () => {
-    const runtimeA = createRuntime();
+    const runtimeA = createRuntime() as any;
 
     await runtimeA.bus.request({
       id: "cmd-lane-create",
@@ -46,7 +46,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     });
 
     const checkpoint = runtimeA.exportRecoveryMetadata();
-    const runtimeB = createRuntime({ recovery_metadata: checkpoint });
+    const runtimeB = (createRuntime as any)(checkpoint) as any;
     const bootstrap = runtimeB.getBootstrapResult();
 
     expect(bootstrap).not.toBeNull();
@@ -65,10 +65,10 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
         },
       ],
     };
-    const runtimeC = createRuntime({ recovery_metadata: unrecoverableCheckpoint });
+    const runtimeC = (createRuntime as any)(unrecoverableCheckpoint) as any;
     const brokenBootstrap = runtimeC.getBootstrapResult();
 
-    expect(brokenBootstrap?.issues.some((issue) => issue.state === "unrecoverable")).toBe(true);
+    expect(brokenBootstrap?.issues.some((issue: any) => issue.state === "unrecoverable")).toBe(true);
 
     runtimeA.shutdown();
     runtimeB.shutdown();
@@ -76,7 +76,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
   });
 
   test("watchdog classifies drift and exposes remediation-safe guidance", async () => {
-    const runtime = createRuntime();
+    const runtime = createRuntime() as any;
     runtime.bootstrapRecovery({
       lanes: [{ lane_id: "lane-drift", workspace_id: "ws-2", session_id: "missing-session" }],
       sessions: [
@@ -98,20 +98,20 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     });
 
     const report = runtime.getOrphanReport();
-    const recoverable = report.issues.filter((issue) => issue.state === "recoverable");
-    const unrecoverable = report.issues.filter((issue) => issue.state === "unrecoverable");
+    const recoverable = report.issues.filter((issue: any) => issue.state === "recoverable");
+    const unrecoverable = report.issues.filter((issue: any) => issue.state === "unrecoverable");
 
     expect(report.issues.length).toBeGreaterThan(0);
     expect(recoverable.length).toBeGreaterThan(0);
     expect(unrecoverable.length).toBeGreaterThan(0);
-    expect(report.issues.some((issue) => issue.remediation === "cleanup")).toBe(true);
-    expect(report.issues.some((issue) => issue.remediation === "reconcile")).toBe(true);
+    expect(report.issues.some((issue: any) => issue.remediation === "cleanup")).toBe(true);
+    expect(report.issues.some((issue: any) => issue.remediation === "reconcile")).toBe(true);
 
     runtime.shutdown();
   });
 
   test("normalizes boundary failures and exports redacted correlated audit bundles", async () => {
-    const runtime = createRuntime();
+    const runtime = createRuntime() as any;
 
     await runtime.bus.request({
       id: "cmd-lane-create-ws3",
@@ -168,7 +168,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
 
     const auditBundle = runtime.exportAuditBundle({ correlation_id: "corr-harness" });
     expect(auditBundle.count).toBeGreaterThan(0);
-    const redactedRecord = auditBundle.records.find((record) => record.type === "command");
+    const redactedRecord = auditBundle.records.find((record: any) => record.type === "command");
     expect(redactedRecord?.payload?.api_key).toBe("[REDACTED]");
 
     const allRecords = await runtime.getAuditRecords();

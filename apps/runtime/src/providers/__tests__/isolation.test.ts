@@ -9,7 +9,7 @@
 import { describe, it, expect } from "vitest";
 import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
 import { NormalizedProviderError, normalizeError } from "../errors.js";
-import { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 
 /**
  * Mock isolated provider for testing lane isolation behavior.

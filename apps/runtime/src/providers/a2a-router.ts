@@ -53,6 +53,7 @@ export interface A2AResult {
  */
 export interface A2ARouterConfig extends A2AConfig {
   endpoints?: Array<{ id: string; url: string; priority: number; capabilities: string[] }>;
+  failoverEnabled?: boolean;
 }
 
 /**

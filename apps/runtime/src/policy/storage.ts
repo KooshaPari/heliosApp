@@ -5,7 +5,7 @@
 
 import { promises as fs } from "fs";
 import * as path from "path";
-import { PolicyRule, PolicyRuleInput } from "./types";
+import type { PolicyRule, PolicyRuleInput } from "./types";
 import { PolicyRuleSet } from "./rules";
 
 export type RulesChangedCallback = (workspaceId: string, rules: PolicyRule[]) => void;

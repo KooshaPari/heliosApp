@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { DefaultAuditSink } from "../../../src/audit/sink";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
-import { AuditStorage } from "../../../src/audit/sink";
+import type { AuditStorage } from "../../../src/audit/sink";
 import fs from "fs";
 import path from "path";
 

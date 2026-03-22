@@ -7,6 +7,40 @@
 import type { CommandEnvelope, ResponseEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
+// Canonical method list (single source of truth)
+// ---------------------------------------------------------------------------
+
+export const METHODS: readonly string[] = Object.freeze([
+  "workspace.create",
+  "workspace.open",
+  "project.clone",
+  "project.init",
+  "session.create",
+  "session.attach",
+  "session.terminate",
+  "terminal.spawn",
+  "terminal.resize",
+  "terminal.input",
+  "renderer.switch",
+  "renderer.capabilities",
+  "agent.run",
+  "agent.cancel",
+  "approval.request.resolve",
+  "share.upterm.start",
+  "share.upterm.stop",
+  "share.tmate.start",
+  "share.tmate.stop",
+  "zmx.checkpoint",
+  "zmx.restore",
+  "lane.create",
+  "lane.attach",
+  "lane.cleanup",
+  "boundary.local.dispatch",
+  "boundary.tool.dispatch",
+  "boundary.a2a.dispatch",
+]);
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-import { AuditSink } from "./sink";
+import type { AuditSink } from "./sink";
 import { createAuditEvent, AUDIT_EVENT_TYPES } from "./event";
 
 /**

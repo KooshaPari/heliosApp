@@ -147,10 +147,11 @@ export async function gitClone(
 ): Promise<void> {
   // Check git availability
   try {
-    const versionProc = Bun.spawn(["git", "--version"], {
-      stdout: "pipe",
-      stderr: "pipe",
-    });
+    const gitOpts = {
+      stdout: "pipe" as const,
+      stderr: "pipe" as const,
+    };
+    const versionProc = Bun.spawn(["git", "--version"], gitOpts);
     await versionProc.exited;
     if (versionProc.exitCode !== 0) {
       throw new Error("git binary not functional");
@@ -159,10 +160,11 @@ export async function gitClone(
     throw new Error("git is not available on this system. Install git to clone repositories.");
   }
 
-  const proc = Bun.spawn(["git", "clone", url, targetDir], {
-    stdout: "pipe",
-    stderr: "pipe",
-  });
+  const cloneOpts = {
+    stdout: "pipe" as const,
+    stderr: "pipe" as const,
+  };
+  const proc = Bun.spawn(["git", "clone", url, targetDir], cloneOpts);
 
   const timer = setTimeout(() => {
     proc.kill();

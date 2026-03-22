@@ -63,11 +63,12 @@ async function runGit(
   args: string[],
   cwd: string,
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-  const proc = Bun.spawn(["git", ...args], {
+  const spawnOpts = {
     cwd,
-    stdout: "pipe",
-    stderr: "pipe",
-  });
+    stdout: "pipe" as const,
+    stderr: "pipe" as const,
+  };
+  const proc = Bun.spawn(["git", ...args], spawnOpts);
 
   const [stdout, stderr] = await Promise.all([
     new Response(proc.stdout).text(),

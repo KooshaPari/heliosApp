@@ -216,7 +216,7 @@ describe("Concurrent switch rejection", () => {
       });
     } catch (error: unknown) {
       const activeTransaction2 = orchestrator.getActiveTransaction();
-      expect(activeTransaction2?.id).toBe(activeTransaction1?.id);
+      expect(activeTransaction2?.id).toBe(activeTransaction1?.id!);
     }
 
     await firstSwitch;

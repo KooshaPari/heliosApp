@@ -6,7 +6,8 @@
  * FR-026-004: Tmate backend adapter.
  */
 
-import type { ChildProcess } from "bun";
+/** Local type alias for child process handles. */
+type ChildProcess = { pid: number; kill?: (signal?: string) => void };
 
 /**
  * Share backend adapter interface.
