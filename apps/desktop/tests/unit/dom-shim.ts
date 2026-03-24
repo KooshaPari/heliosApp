@@ -6,6 +6,14 @@ import { Window } from "happy-dom";
 
 const window = new Window();
 
+// Install error constructors onto happy-dom window (required for internal querySelector)
+for (const name of ["Error", "SyntaxError", "TypeError", "ReferenceError", "RangeError"]) {
+  const ctor = (globalThis as Record<string, unknown>)[name];
+  if (ctor && typeof ctor === "function") {
+    Object.defineProperty(window, name, { value: ctor, writable: true, configurable: true });
+  }
+}
+
 // Install browser globals onto globalThis
 const globals = [
   "document",
@@ -27,10 +35,6 @@ const globals = [
   "HTMLButtonElement",
   "HTMLInputElement",
   "getComputedStyle",
-  "SyntaxError",
-  "TypeError",
-  "ReferenceError",
-  "Error",
   "DOMException",
   "DocumentFragment",
   "Text",
