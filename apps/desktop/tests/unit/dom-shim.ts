@@ -44,7 +44,7 @@ const globals = [
 for (const key of globals) {
   if (key in window && !(key in globalThis)) {
     Object.defineProperty(globalThis, key, {
-      value: (window as Record<string, unknown>)[key],
+      value: (window as unknown as Record<string, unknown>)[key],
       writable: true,
       configurable: true,
     });
