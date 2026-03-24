@@ -5,7 +5,7 @@ This document defines the governance and operational guidelines for the heliosAp
 
 ## Key Principles
 - Canonical folders track `main` exclusively
-- Feature work uses dedicated worktree directories
+- Feature work uses dedicated `.worktrees` directories
 - All quality gates and integration checks happen in worktrees before canonical merge
 - Explicit approval gates prevent unreviewed code from reaching canonical `main`
 
@@ -31,7 +31,7 @@ This document defines the governance and operational guidelines for the heliosAp
 - If branch is not `main`, switch back after completing integration tasks
 
 ## Integration Workflow
-1. Feature work: Use `repo-wtrees/<topic>/` directory
+1. Feature work: Use `.worktrees/<topic>/` directory
 2. Pull into canonical `main`: Only after approval and passing all checks
 3. Integration methods: Explicit merge or cherry-pick operations
 4. Return to canonical: Canonical folder returns to `main` after integration
@@ -46,7 +46,7 @@ Worktrees isolate feature work, testing, and experimentation from canonical `mai
 ## Directory Structure
 ```
 repo/                          # Canonical folder (main-anchored)
-repo-wtrees/
+.worktrees/
   ├── topic-1/               # Feature branch workspace
   │   ├── .git -> ../repo/.git
   │   └── [feature content]
@@ -58,8 +58,8 @@ repo-wtrees/
 
 ### Create a Worktree
 ```bash
-git worktree add ../repo-wtrees/<topic> -b <topic>
-cd ../repo-wtrees/<topic>
+git worktree add ../.worktrees/<topic> -b <topic>
+cd ../.worktrees/<topic>
 git push -u origin <topic>
 ```
 
@@ -143,8 +143,8 @@ Standard workflows:
 
 1. **Start**: Create worktree from canonical `main`
    ```bash
-   git worktree add ../repo-wtrees/feature-xyz -b feature/xyz
-   cd ../repo-wtrees/feature-xyz
+   git worktree add ../.worktrees/feature-xyz -b feature/xyz
+   cd ../.worktrees/feature-xyz
    ```
 
 2. **Develop**: Make commits, push to feature branch
@@ -187,14 +187,14 @@ Standard workflows:
 
 7. **Cleanup**: Remove worktree
    ```bash
-   git worktree remove ../repo-wtrees/feature-xyz
+   git worktree remove ../.worktrees/feature-xyz
    ```
 
 ## Reverting Work
 If work in a worktree needs to be discarded:
 ```bash
 # Back in canonical folder
-git worktree remove ../repo-wtrees/feature-xyz
+git worktree remove ../.worktrees/feature-xyz
 ```
 
 **WARNING**: Never run `git reset --hard`, `git restore .`, or `git clean -f` in canonical folders.
@@ -316,8 +316,8 @@ Document required environment variables:
 
 ### "Worktree already exists"
 ```bash
-git worktree remove ../repo-wtrees/<topic>
-git worktree add ../repo-wtrees/<topic> -b <topic>
+git worktree remove ../.worktrees/<topic>
+git worktree add ../.worktrees/<topic> -b <topic>
 ```
 
 ### "Branch already exists on origin"
@@ -327,11 +327,11 @@ git push -u origin <topic> --force  # Only if you control the branch
 
 ### "Cannot delete worktree, it's dirty"
 ```bash
-cd ../repo-wtrees/<topic>
+cd ../.worktrees/<topic>
 git restore .
 git clean -fd
 cd ../../repo
-git worktree remove ../repo-wtrees/<topic>
+git worktree remove ../.worktrees/<topic>
 ```
 
 ## Bun / TypeScript Issues
@@ -386,4 +386,3 @@ git worktree remove ../repo-wtrees/<topic>
 - Delegate broad scans, decomposition, and implementation waves to subagents before final parent-agent integration.
 - Keep the parent lane focused on deterministic integration and finalization.
 - Preserve explicit handoffs and cross-agent context in session notes and audits.
-
