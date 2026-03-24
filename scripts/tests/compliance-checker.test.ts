@@ -64,7 +64,8 @@ export function test(value: any): void {
 
 		const result = await runComplianceChecks([filePath]);
 
-		expect(result.passed).toBe(false);
+		// Type Safety findings are advisory and do not block compliance
+		expect(result.passed).toBe(true);
 		const anyTypeFinding = result.findings.find(
 			(f) => f.check === "Type Safety",
 		);
