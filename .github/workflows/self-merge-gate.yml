@@ -4,7 +4,6 @@ on:
   pull_request:
     types: [synchronize, opened, reopened]
     branches: [main]
-  status: {}
 
 jobs:
   check-merge-readiness:
@@ -45,7 +44,7 @@ jobs:
             const latestReviewByUser = {};
             reviews.data.forEach(review => {
               if (review.state === 'APPROVED') {
-                approvals[review.user.login] = true;
+                latestReviewByUser[review.user.login] = true;
               }
             });
             const approvals = Object.fromEntries(
