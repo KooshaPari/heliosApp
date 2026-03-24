@@ -79,7 +79,13 @@ describe("OrphanWatchdog", () => {
     await watchdog.start();
 
     // Wait for first cycle to complete
-    await new Promise(r => setTimeout(r, 300));
+    // Poll until detection runs (CI may be slow)
+    let duration = 0;
+    for (let attempt = 0; attempt < 20; attempt++) {
+      await new Promise(r => setTimeout(r, 100));
+      duration = watchdog.getLastDetectionDuration();
+      if (duration > 0) break;
+    }
 
     const events = bus.getEvents();
     expect(events.length).toBeGreaterThan(0);
@@ -100,7 +106,13 @@ describe("OrphanWatchdog", () => {
     });
 
     await watchdog.start();
-    await new Promise(r => setTimeout(r, 300));
+    // Poll until detection runs (CI may be slow)
+    let duration = 0;
+    for (let attempt = 0; attempt < 20; attempt++) {
+      await new Promise(r => setTimeout(r, 100));
+      duration = watchdog.getLastDetectionDuration();
+      if (duration > 0) break;
+    }
 
     const events = bus.getEvents();
     const cycleEvent = events.find(e => e.topic === "orphan.detection.cycle_completed");
@@ -150,9 +162,15 @@ describe("OrphanWatchdog", () => {
     });
 
     await watchdog.start();
-    await new Promise(r => setTimeout(r, 300));
+    // Poll until detection runs (CI may be slow)
+    let duration = 0;
+    for (let attempt = 0; attempt < 20; attempt++) {
+      await new Promise(r => setTimeout(r, 100));
+      duration = watchdog.getLastDetectionDuration();
+      if (duration > 0) break;
+    }
 
-    const duration = watchdog.getLastDetectionDuration();
+    
     expect(duration).toBeGreaterThan(0);
     expect(duration).toBeLessThan(1000); // Should be fast
 
