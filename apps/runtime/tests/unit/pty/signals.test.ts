@@ -18,7 +18,7 @@ function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
     laneId: "lane-1",
     sessionId: "session-1",
     terminalId: "term-1",
-    pid: process.pid,
+    pid: 99999,
     state: "active",
     dimensions: { cols: 80, rows: 24 },
     createdAt: Date.now(),
@@ -40,6 +40,8 @@ function spawnShellProcess(): number {
 
   return proc.pid;
 }
+
+const pidsToCleanup: number[] = [];
 
 describe("SignalHistory", () => {
   it("stores and retrieves envelopes", () => {
