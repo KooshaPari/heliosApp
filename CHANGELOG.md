@@ -13,9 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created `KILL_SWITCH.md` documenting emergency shutdown procedures for PTY/secrets/bus.
 - Added `anchore/sbom-action` to CI for Syft-based SBOM generation.
 - Exported `ActiveContext` type from `tab_surface.ts` for module compatibility.
+- Added `turbo.json` for task orchestration and caching.
+- Added `Quick Start` section to `README.md`.
+- Added `lint-staged` hook to `.pre-commit-config.yaml`.
 
 ### Fixed
 
 - Fixed syntax error in `ModelSelector.tsx` (unclosed button tag).
 - Fixed syntax error in `lane_event_handler.ts` (unclosed loop).
 - Installed missing type definitions (@types/node, bun-types, @playwright/test) and `vitest`.
+- Deduplicated `dependencies` and pinned `engines` in `package.json`.
