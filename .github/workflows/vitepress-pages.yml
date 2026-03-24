@@ -51,6 +51,10 @@ jobs:
         working-directory: heliosApp
         run: bun install
 
+      - name: Install phenodocs dependencies
+        working-directory: phenodocs
+        run: bun install
+
       - name: Generate docs index
         working-directory: heliosApp
         run: bun run docs:index
