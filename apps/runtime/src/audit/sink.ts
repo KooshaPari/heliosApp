@@ -277,239 +277,40 @@ export class DefaultAuditSink implements AuditSink {
   destroy(): void {
     this.stopPeriodicFlush();
   }
-
-  async enforceRetention(now: Date = new Date()): Promise<{ deleted_count: number }> {
-    const keep: AuditRecord[] = [];
-    const expired: AuditRecord[] = [];
-    for (const record of this.records) {
-      if (shouldRetainRecord(record, this.retentionPolicy, now)) {
-        keep.push(record);
-      } else {
-        expired.push(record);
-      }
-    }
-
-    this.records.length = 0;
-    this.records.push(...keep);
-
-    if (expired.length > 0) {
-      this.records.push(buildDeletionProofRecord(expired.length, now));
-    }
-
-    return { deleted_count: expired.length };
-  }
-
-  async exportRecords(): Promise<AuditExportRecord[]> {
-    return this.records.map((record) => toExportRecord(record, this.retentionPolicy));
-  }
-}
-
-function toExportRecord(record: AuditRecord, policy: RetentionPolicyConfig): AuditExportRecord {
-  const envelope = sanitizeEnvelope(record.envelope, policy.redacted_fields);
-  const envelopeObject = envelope as Record<string, unknown>;
-  const methodOrTopic =
-    readString(envelopeObject.method) ?? readString(envelopeObject.topic) ?? null;
-
-  return {
-    recorded_at: record.recorded_at,
-    sequence: record.sequence,
-    outcome: record.outcome,
-    reason: record.reason,
-    envelope_id: readString(envelopeObject.envelope_id) ?? readString(envelopeObject.id) ?? "unknown",
-    envelope_type: readString(envelopeObject.type) ?? "unknown",
-    correlation_id: readString(envelopeObject.correlation_id) ?? null,
-    workspace_id: readString(envelopeObject.workspace_id) ?? null,
-    lane_id: readString(envelopeObject.lane_id) ?? null,
-    session_id: readString(envelopeObject.session_id) ?? null,
-    terminal_id: readString(envelopeObject.terminal_id) ?? null,
-    method_or_topic: methodOrTopic,
-    envelope
-  };
-}
-
-function sanitizeEnvelope(
-  envelope: LocalBusEnvelope | Record<string, unknown>,
-  redactedFields: string[]
-): LocalBusEnvelope | Record<string, unknown> {
-  const redactionSet = new Set(redactedFields.map((field) => field.toLowerCase()));
-  return deepRedact(envelope, redactionSet) as LocalBusEnvelope | Record<string, unknown>;
-}
-
-function deepRedact(value: unknown, redactionSet: ReadonlySet<string>): unknown {
-  if (Array.isArray(value)) {
-    return value.map((item) => deepRedact(item, redactionSet));
-  }
-  if (value && typeof value === "object") {
-    const input = value as Record<string, unknown>;
-    const output: Record<string, unknown> = {};
-    for (const [key, nested] of Object.entries(input)) {
-      if (redactionSet.has(key.toLowerCase())) {
-        output[key] = "[REDACTED]";
-      } else {
-        output[key] = deepRedact(nested, redactionSet);
-      }
-    }
-    return output;
-  }
-  return value;
-}
-
-function shouldRetainRecord(
-  record: AuditRecord,
-  policy: RetentionPolicyConfig,
-  now: Date
-): boolean {
-  const topic = readEnvelopeTopic(record.envelope);
-  if (topic && policy.exempt_topics.includes(topic)) {
-    return true;
-  }
-
-  const recordedAtMs = Date.parse(record.recorded_at);
-  if (Number.isNaN(recordedAtMs)) {
-    return true;
-  }
-
-  const ttlMs = policy.retention_days * 24 * 60 * 60 * 1000;
-  return now.getTime() - recordedAtMs <= ttlMs;
-}
-
-function readEnvelopeTopic(envelope: LocalBusEnvelope | Record<string, unknown>): string | null {
-  if (!envelope || typeof envelope !== "object") {
-    return null;
-  }
-  const value = (envelope as Record<string, unknown>).topic;
-  return typeof value === "string" && value.length > 0 ? value : null;
-}
-
-function buildDeletionProofRecord(expiredCount: number, now: Date): AuditRecord {
-  return {
-    recorded_at: now.toISOString(),
-    sequence: null,
-    outcome: "accepted",
-    reason: "retention_enforced",
-    envelope: {
-      id: `audit.retention.deleted:${now.getTime()}`,
-      type: "event",
-      ts: now.toISOString(),
-      topic: "audit.retention.deleted",
-      payload: {
-        deleted_count: expiredCount
-      }
-    }
-  };
-}
-
-function readString(input: unknown): string | null {
-  return typeof input === "string" && input.length > 0 ? input : null;
 }
 
 /**
- * No-op storage for testing and development.
- * Events are buffered but never persisted.
+ * In-memory sink for testing.
  */
-export class NoOpAuditStorage implements AuditStorage {
-  async persist(_events: AuditEvent[]): Promise<void> {
-    // Do nothing; events are discarded
+export class InMemoryAuditSink implements AuditSink {
+  private records: AuditEvent[] = [];
+  private metrics: AuditSinkMetrics = {
+    totalEventsWritten: 0,
+    bufferHighWaterMark: 0,
+    persistenceFailures: 0,
+    retryCount: 0
+  };
+
+  async write(event: AuditEvent): Promise<void> {
+    this.records.push(event);
+    this.metrics.totalEventsWritten++;
+    if (this.records.length > this.metrics.bufferHighWaterMark) {
+      this.metrics.bufferHighWaterMark = this.records.length;
+    }
   }
 
-  query(filter: AuditFilter = {}): AuditRecord[] {
-    return this.records.filter((record) => {
-      if (filter.workspace_id && record.workspace_id !== filter.workspace_id) {
-        return false;
-      }
-      if (filter.lane_id && record.lane_id !== filter.lane_id) {
-        return false;
-      }
-      if (filter.session_id && record.session_id !== filter.session_id) {
-        return false;
-      }
-      if (filter.correlation_id && record.correlation_id !== filter.correlation_id) {
-        return false;
-      }
-      return true;
-    });
+  async flush(): Promise<void> {}
+
+  getBufferedCount(): number {
+    return 0;
   }
 
-  exportBundle(filter: AuditFilter = {}): AuditBundle {
-    const records = this.query(filter);
-    return {
-      generated_at: new Date().toISOString(),
-      filters: { ...filter },
-      count: records.length,
-      records
-    };
+  getMetrics(): AuditSinkMetrics {
+    return { ...this.metrics };
   }
 
-  private enrichRecord(record: {
-    recorded_at: string;
-    sequence: number | null;
-    outcome: AuditOutcome;
-    reason: string | null;
-    envelope: LocalBusEnvelope | Record<string, unknown>;
-  }): AuditRecord {
-    const envelope = sanitizeEnvelope(record.envelope);
-    const payload = sanitize(getRecordPayload(envelope));
-
-    return {
-      id: `${record.recorded_at}:${this.records.length + 1}`,
-      recorded_at: record.recorded_at,
-      sequence: record.sequence,
-      outcome: record.outcome,
-      reason: record.reason,
-      envelope,
-      action: getString(envelope.topic) ?? getString(envelope.method) ?? "audit.recorded",
-      type: inferType(envelope),
-      status: record.outcome === "accepted" ? "ok" : "error",
-      workspace_id: getString(envelope.workspace_id),
-      lane_id: getString(envelope.lane_id) ?? getString((envelope.payload as Record<string, unknown>)?.lane_id),
-      session_id:
-        getString(envelope.session_id) ?? getString((envelope.payload as Record<string, unknown>)?.session_id),
-      terminal_id:
-        getString(envelope.terminal_id) ?? getString((envelope.payload as Record<string, unknown>)?.terminal_id),
-      correlation_id: getString(envelope.correlation_id),
-      error_code: getString((envelope.error as Record<string, unknown>)?.code),
-      payload
-    };
+  getRecords(): AuditEvent[] {
+    return [...this.records];
   }
 }
 
-function inferType(envelope: Record<string, unknown>): AuditRecord["type"] {
-  const value = envelope.type;
-  if (value === "command" || value === "response" || value === "event") {
-    return value;
-  }
-  return "system";
-}
-
-function getRecordPayload(envelope: Record<string, unknown>): unknown {
-  return envelope.payload ?? envelope.result ?? envelope.error ?? {};
-}
-
-function sanitizeEnvelope(envelope: LocalBusEnvelope | Record<string, unknown>): Record<string, unknown> {
-  return sanitize(envelope) as Record<string, unknown>;
-}
-
-function sanitize(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map((entry) => sanitize(entry));
-  }
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => {
-        if (isSensitiveKey(key)) {
-          return [key, "[REDACTED]"];
-        }
-        return [key, sanitize(item)];
-      })
-    );
-  }
-  return value;
-}
-
-function isSensitiveKey(key: string): boolean {
-  return /(token|secret|password|api[_-]?key|authorization|bearer)/i.test(key);
-}
-
-function getString(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}

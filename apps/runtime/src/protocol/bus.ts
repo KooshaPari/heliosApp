@@ -81,6 +81,10 @@ const START_TOPICS = new Set([
 const hasTopLevelDataField = (envelope: LocalBusEnvelope): boolean =>
   Object.prototype.hasOwnProperty.call(envelope, "data");
 
+export function getActiveCorrelationId(): string | undefined {
+  return undefined; // TODO: Implement using AsyncLocalStorage if needed
+}
+
 export class InMemoryLocalBus implements LocalBus {
   private readonly eventLog: LocalBusEnvelope[] = [];
   private readonly auditLog: AuditRecord[] = [];

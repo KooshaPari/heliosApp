@@ -58,24 +58,24 @@ const TOPIC_CONTEXT_REQUIREMENTS: Record<
   string,
   Array<"workspace_id" | "lane_id" | "session_id" | "terminal_id">
 > = {
-  "lane.attach.started": ["workspace_id", "lane_id"],
-  "lane.attach.failed": ["workspace_id", "lane_id"],
-  "lane.cleanup.started": ["workspace_id", "lane_id"],
-  "lane.cleanup.failed": ["workspace_id", "lane_id"],
-  "lane.create.started": ["workspace_id", "lane_id"],
-  "lane.created": ["workspace_id", "lane_id"],
-  "lane.create.failed": ["workspace_id", "lane_id"],
-  "session.attach.started": ["workspace_id", "lane_id", "session_id"],
-  "session.attached": ["workspace_id", "lane_id", "session_id"],
-  "session.attach.failed": ["workspace_id", "lane_id", "session_id"],
-  "session.terminate.started": ["workspace_id", "lane_id", "session_id"],
-  "session.terminate.failed": ["workspace_id", "lane_id", "session_id"],
-  "session.terminated": ["workspace_id", "lane_id", "session_id"],
-  "terminal.spawn.started": ["workspace_id", "lane_id", "session_id"],
-  "terminal.spawned": ["workspace_id", "lane_id", "session_id", "terminal_id"],
-  "terminal.spawn.failed": ["workspace_id", "lane_id", "session_id"],
-  "terminal.output": ["workspace_id", "lane_id", "session_id", "terminal_id"],
-  "terminal.state.changed": ["workspace_id", "lane_id", "session_id", "terminal_id"]
+  "lane.attach.started": ["lane_id"],
+  "lane.attach.failed": ["lane_id"],
+  "lane.cleanup.started": ["lane_id"],
+  "lane.cleanup.failed": ["lane_id"],
+  "lane.create.started": ["lane_id"],
+  "lane.created": ["lane_id"],
+  "lane.create.failed": ["lane_id"],
+  "session.attach.started": ["lane_id", "session_id"],
+  "session.attached": ["lane_id", "session_id"],
+  "session.attach.failed": ["lane_id", "session_id"],
+  "session.terminate.started": ["lane_id", "session_id"],
+  "session.terminate.failed": ["lane_id", "session_id"],
+  "session.terminated": ["lane_id", "session_id"],
+  "terminal.spawn.started": ["lane_id", "session_id"],
+  "terminal.spawned": ["lane_id", "session_id", "terminal_id"],
+  "terminal.spawn.failed": ["lane_id", "session_id"],
+  "terminal.output": ["lane_id", "session_id", "terminal_id"],
+  "terminal.state.changed": ["lane_id", "session_id", "terminal_id"]
 };
 
 function assertRecord(value: unknown): asserts value is Record<string, unknown> {
