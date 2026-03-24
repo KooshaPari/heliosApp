@@ -27,6 +27,14 @@ const globals = [
   "HTMLButtonElement",
   "HTMLInputElement",
   "getComputedStyle",
+  "SyntaxError",
+  "TypeError",
+  "ReferenceError",
+  "Error",
+  "DOMException",
+  "DocumentFragment",
+  "Text",
+  "Comment",
 ] as const;
 
 for (const key of globals) {
