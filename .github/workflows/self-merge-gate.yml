@@ -24,6 +24,17 @@ jobs:
           script: |
             const { owner, repo, number } = context.issue;
 
+            // Skip if no PR number (e.g., status events not tied to a PR)
+            if (!number) {
+              console.log('No PR number available (status event without PR). Skipping.');
+              core.setOutput('can-self-merge', 'true');
+              core.setOutput('all-checks-passed', 'true');
+              core.setOutput('has-approval', 'true');
+              core.setOutput('is-author', 'true');
+              core.setOutput('missing-requirements', '');
+              return;
+            }
+
             // Get PR details
             const pr = await github.rest.pulls.get({
               owner,
@@ -44,9 +55,7 @@ jobs:
             // Track latest review state per reviewer to handle DISMISSED/CHANGES_REQUESTED
             const latestReviewByUser = {};
             reviews.data.forEach(review => {
-              if (review.state === 'APPROVED') {
-                approvals[review.user.login] = true;
-              }
+              latestReviewByUser[review.user.login] = review.state;
             });
             const approvals = Object.fromEntries(
               Object.entries(latestReviewByUser).filter(([, state]) => state === 'APPROVED')
@@ -65,7 +74,6 @@ jobs:
             let page = 1;
             let hasMore = true;
 
-            // Paginate through all check runs (max 100 per page)
             while (hasMore) {
               const checksResponse = await github.rest.checks.listForRef({
                 owner,
@@ -80,44 +88,34 @@ jobs:
               page++;
             }
 
-            // Map check run names to our required checks and extract results
-            const foundChecks = new Set();
             allCheckRunsData.forEach(checkRun => {
               Object.entries(requiredCheckNameMap).forEach(([actualName, mappedName]) => {
                 if (checkRun.name === actualName) {
-                  foundChecks.add(actualName);
                   checkResults[mappedName] = checkRun.status === 'completed' && checkRun.conclusion === 'success';
                   console.log(`Check: ${actualName} (${mappedName}) - Status: ${checkRun.status}, Conclusion: ${checkRun.conclusion}`);
                 }
               });
             });
 
-            // Verify all required checks passed
             const allChecksPassed = Object.keys(requiredCheckNameMap).every(actualName => {
               const mapped = requiredCheckNameMap[actualName];
               return checkResults[mapped] === true;
             });
 
-            // Verify at least one approval from agent/reviewer
             const hasApproval = Object.keys(approvals).length > 0;
-
-            // Determine if self-merge is allowed
             const canSelfMerge = allChecksPassed && hasApproval && isAuthor;
 
-            // Output status
             console.log(`\n=== Merge Readiness Summary ===`);
             console.log(`All checks passed: ${allChecksPassed}`);
             console.log(`Has approval: ${hasApproval}`);
             console.log(`Is author: ${isAuthor}`);
             console.log(`Can self-merge: ${canSelfMerge}`);
 
-            // Set output for downstream steps
             core.setOutput('can-self-merge', canSelfMerge);
             core.setOutput('all-checks-passed', allChecksPassed);
             core.setOutput('has-approval', hasApproval);
             core.setOutput('is-author', isAuthor);
 
-            // Report which specific checks are missing/failing
             const missing = [];
             Object.entries(requiredCheckNameMap).forEach(([actualName, mappedName]) => {
               if (checkResults[mappedName] !== true) {
@@ -135,17 +133,17 @@ jobs:
         with:
           script: |
             const { owner, repo, number } = context.issue;
-            const missingReqs = "${{ steps.check.outputs.missing-requirements }}".split(',');
+            if (!number) return;
             
-            let message = '⚠️ **Self-merge is blocked due to missing requirements:**\n\n';
+            let message = 'Self-merge is blocked due to missing requirements:\n\n';
             if (!${{ steps.check.outputs.all-checks-passed }}) {
-              message += '- ❌ Not all quality gates have passed\n';
+              message += '- Not all quality gates have passed\n';
             }
             if (!${{ steps.check.outputs.has-approval }}) {
-              message += '- ❌ PR does not have required review approval\n';
+              message += '- PR does not have required review approval\n';
             }
             if (!${{ steps.check.outputs.is-author }}) {
-              message += '- ℹ️ Only the PR author can self-merge\n';
+              message += '- Only the PR author can self-merge\n';
             }
             message += '\nPlease ensure all checks pass before merging.';
             
@@ -162,18 +160,10 @@ jobs:
         with:
           script: |
             const { owner, repo, number } = context.issue;
+            if (!number) return;
             github.rest.issues.createComment({
               owner,
               repo,
               issue_number: number,
-              body: '✅ All merge requirements satisfied. You may now self-merge this PR.'
+              body: 'All merge requirements satisfied. You may now self-merge this PR.'
             });
-
-# Helper function (in comments - needs to be inline in actual workflow)
-# function getMissingRequirements(checksPassed, approval, isAuthor) {
-#   const missing = [];
-#   if (!checksPassed) missing.push('quality-gates');
-#   if (!approval) missing.push('approvals');
-#   if (!isAuthor) missing.push('author');
-#   return missing.join(',');
-# }
