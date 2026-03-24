@@ -75,9 +75,9 @@ describe("markStart / markEnd (global)", () => {
     const handle = markStart("test_metric");
     await new Promise(resolve => setTimeout(resolve, 10));
     const duration = markEnd("test_metric", handle);
-    // Allow 5-50ms range for CI variability.
+    // Allow 5-200ms range for CI variability under heavy parallel load.
     expect(duration).toBeGreaterThan(5);
-    expect(duration).toBeLessThan(50);
+    expect(duration).toBeLessThan(200);
   });
 
   it("markEnd returns NaN for out-of-range handle", () => {

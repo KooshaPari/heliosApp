@@ -7,7 +7,7 @@
  * Tags: FR-011-001, FR-011-003, FR-011-004
  */
 
-import { describe, test, expect, beforeEach } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach, mock } from "bun:test";
 import {
   GhosttyBackend,
   GhosttyNotInitializedError,
@@ -16,6 +16,27 @@ import {
 } from "../../../../src/renderer/ghostty/backend.js";
 import type { RendererConfig, RenderSurface } from "../../../../src/renderer/adapter.js";
 import type { PtyWriter } from "../../../../src/renderer/ghostty/input.js";
+
+
+// Mock Bun.spawn to avoid slow system_profiler calls during detectCapabilities
+const originalSpawn = Bun.spawn;
+beforeEach(() => {
+  (Bun as any).spawn = mock((..._args: unknown[]) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode("Metal: Supported");
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(data);
+        controller.close();
+      },
+    });
+    return { stdout: stream, stderr: null, exitCode: Promise.resolve(0) };
+  });
+});
+
+afterEach(() => {
+  (Bun as any).spawn = originalSpawn;
+});
 
 const TEST_CONFIG: RendererConfig = {
   gpuAcceleration: true,
