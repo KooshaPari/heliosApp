@@ -106,13 +106,16 @@ export class OrphanWatchdog {
     this.cycleNumber++;
 
     try {
-      // Run all three detectors in parallel
-      const [worktreeOrphans, zellijOrphans, ptyOrphans] = await Promise.all([
+      // Run all three detectors in parallel (allSettled tolerates individual failures)
+      const results = await Promise.allSettled([
         this.worktreeDetector.detect(),
         this.zellijDetector.detect(),
         this.ptyDetector.detect(),
       ]);
 
+      const worktreeOrphans = results[0].status === "fulfilled" ? results[0].value : [];
+      const zellijOrphans = results[1].status === "fulfilled" ? results[1].value : [];
+      const ptyOrphans = results[2].status === "fulfilled" ? results[2].value : [];
       const allOrphans = [...worktreeOrphans, ...zellijOrphans, ...ptyOrphans];
 
       // Classify all orphans

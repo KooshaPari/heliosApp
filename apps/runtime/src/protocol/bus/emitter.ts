@@ -128,10 +128,10 @@ export class InMemoryLocalBus implements LocalBus {
           );
           this.auditLog.push({ envelope: event, outcome: "rejected", error: err.message });
           throw err;
-        
+        }
+
         // Clear lifecycle progress after successful terminal topic to allow re-use
         this.lifecycleProgress.delete(correlationId);
-      }
       }
 
       // Handle terminal.output metrics

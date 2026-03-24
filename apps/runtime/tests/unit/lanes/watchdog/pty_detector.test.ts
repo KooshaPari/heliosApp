@@ -1,6 +1,7 @@
 // Unit tests for PtyDetector
 
-import { describe, it, expect, beforeEach } from "bun:test";
+import { describe, it, expect, beforeEach, mock } from "bun:test";
+import * as execModule from "../../../../src/integrations/exec.js";
 import { PtyDetector } from "../../../../src/lanes/watchdog/pty_detector.js";
 import type { TerminalRegistry } from "../../../../src/lanes/watchdog/pty_detector.js";
 
@@ -14,6 +15,9 @@ describe("PtyDetector", () => {
       getTerminals: () => [],
     };
     detector = new PtyDetector(terminalRegistry);
+  });
+  beforeEach(() => {
+    mock.module("../../../../src/integrations/exec.js", () => ({ execCommand: () => Promise.resolve({ code: 0, stdout: "", stderr: "" }) }));
   });
 
   it("should initialize without error", () => {

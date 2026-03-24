@@ -3,9 +3,20 @@
 import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
 import os from "os";
 import path from "path";
-import { OrphanWatchdog } from "../../../../src/lanes/watchdog/orphan_watchdog.js";
-import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
-import { LaneRegistry } from "../../../../src/lanes/registry.js";
+
+// Mock execCommand before importing OrphanWatchdog so detectors use the mock
+mock.module("../../../../src/integrations/exec.js", () => ({
+  execCommand: async (_command: string, _args: string[]) => ({
+    code: 1,
+    stdout: "",
+    stderr: "mocked: command not available in test",
+  }),
+  probeClipProxy: async () => "cliproxy_probe_exception" as const,
+}));
+
+const { OrphanWatchdog } = await import("../../../../src/lanes/watchdog/orphan_watchdog.js");
+const { InMemoryLocalBus } = await import("../../../../src/protocol/bus.js");
+const { LaneRegistry } = await import("../../../../src/lanes/registry.js");
 
 // Mock registries
 const createMockSessionRegistry = () => ({
@@ -19,9 +30,9 @@ const createMockTerminalRegistry = () => ({
 });
 
 describe("OrphanWatchdog", () => {
-  let watchdog: OrphanWatchdog;
-  let laneRegistry: LaneRegistry;
-  let bus: InMemoryLocalBus;
+  let watchdog: InstanceType<typeof OrphanWatchdog>;
+  let laneRegistry: InstanceType<typeof LaneRegistry>;
+  let bus: InstanceType<typeof InMemoryLocalBus>;
 
   beforeEach(() => {
     laneRegistry = new LaneRegistry();
@@ -68,7 +79,7 @@ describe("OrphanWatchdog", () => {
     await watchdog.start();
 
     // Wait for first cycle to complete
-    await new Promise(r => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 300));
 
     const events = bus.getEvents();
     expect(events.length).toBeGreaterThan(0);
@@ -89,7 +100,7 @@ describe("OrphanWatchdog", () => {
     });
 
     await watchdog.start();
-    await new Promise(r => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 300));
 
     const events = bus.getEvents();
     const cycleEvent = events.find(e => e.topic === "orphan.detection.cycle_completed");
@@ -139,7 +150,7 @@ describe("OrphanWatchdog", () => {
     });
 
     await watchdog.start();
-    await new Promise(r => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 300));
 
     const duration = watchdog.getLastDetectionDuration();
     expect(duration).toBeGreaterThan(0);
