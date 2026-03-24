@@ -45,7 +45,7 @@ describe("BindingMiddleware", () => {
       };
 
       const binding = registry.register("terminal-1", triple);
-      binding.state = BindingState.Unbound;
+      binding.state = BindingState.unbound;
 
       const result = middleware.validateBeforeOperation("terminal-1", "write");
 
@@ -62,7 +62,7 @@ describe("BindingMiddleware", () => {
       };
 
       const binding = registry.register("terminal-1", triple);
-      binding.state = BindingState.ValidationFailed;
+      binding.state = BindingState.validation_failed;
 
       const result = middleware.validateBeforeOperation("terminal-1", "write");
 
@@ -79,7 +79,7 @@ describe("BindingMiddleware", () => {
       };
 
       const binding = registry.register("terminal-1", triple);
-      binding.state = BindingState.Rebound;
+      binding.state = BindingState.rebound;
 
       const result = middleware.validateBeforeOperation("terminal-1", "write");
 
@@ -107,7 +107,7 @@ describe("BindingMiddleware", () => {
 
       expect(result.valid).toBe(false);
       expect(result.error?.code).toBe("STALE_BINDING");
-      expect(result.binding?.state).toBe(BindingState.ValidationFailed);
+      expect(result.binding?.state).toBe(BindingState.validation_failed);
     });
   });
 
@@ -231,7 +231,7 @@ describe("BindingMiddleware", () => {
       };
 
       const binding = registry.register("terminal-1", triple);
-      expect(binding.state).toBe(BindingState.Bound);
+      expect(binding.state).toBe(BindingState.bound);
 
       registry.rebind("terminal-1", {
         workspaceId: "ws-1",
@@ -240,7 +240,7 @@ describe("BindingMiddleware", () => {
       });
 
       const rebound = registry.get("terminal-1");
-      expect(rebound?.state).toBe(BindingState.Rebound);
+      expect(rebound?.state).toBe(BindingState.rebound);
     });
 
     it("should validate middleware rejects stale bindings", () => {
@@ -262,7 +262,7 @@ describe("BindingMiddleware", () => {
       const result = middleware.validateBeforeOperation("terminal-1");
 
       expect(result.valid).toBe(false);
-      expect(result.binding?.state).toBe(BindingState.ValidationFailed);
+      expect(result.binding?.state).toBe(BindingState.validation_failed);
     });
   });
 });

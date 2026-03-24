@@ -34,13 +34,13 @@ export class RecoveryBanner {
   show(stage: RecoveryStage): void {
     this.isVisible = true;
     this.currentStage = stage;
-    this.isActive = stage !== RecoveryStage.Live && stage !== RecoveryStage.Crashed;
+    this.isActive = stage !== RecoveryStage.LIVE && stage !== RecoveryStage.CRASHED;
     this.renderBanner();
   }
 
   updateProgress(stage: RecoveryStage, detail: string): void {
     this.currentStage = stage;
-    this.isActive = stage !== RecoveryStage.Live && stage !== RecoveryStage.Crashed;
+    this.isActive = stage !== RecoveryStage.LIVE && stage !== RecoveryStage.CRASHED;
     this.renderBanner(detail);
   }
 
@@ -70,16 +70,16 @@ export class RecoveryBanner {
 
   private getStageMessage(stage: RecoveryStage): string {
     const messages: Record<RecoveryStage, string> = {
-      [RecoveryStage.Crashed]: "Detecting crash...",
-      [RecoveryStage.Detecting]: "Detecting crash... checking processes.",
-      [RecoveryStage.Inventorying]: "Inventorying recoverable state...",
-      [RecoveryStage.Restoring]: "Restoring sessions...",
-      [RecoveryStage.Reconciling]: "Cleaning up orphaned processes...",
-      [RecoveryStage.Live]: "Recovery complete!",
-      [RecoveryStage.DetectionFailed]: "Crash detection failed. Manual recovery may be needed.",
-      [RecoveryStage.InventoryFailed]: "Failed to inventory state. Some sessions may be lost.",
-      [RecoveryStage.RestorationFailed]: "Session restoration encountered errors.",
-      [RecoveryStage.ReconciliationFailed]: "Orphan reconciliation encountered errors.",
+      [RecoveryStage.CRASHED]: "Detecting crash...",
+      [RecoveryStage.DETECTING]: "Detecting crash... checking processes.",
+      [RecoveryStage.INVENTORYING]: "Inventorying recoverable state...",
+      [RecoveryStage.RESTORING]: "Restoring sessions...",
+      [RecoveryStage.RECONCILING]: "Cleaning up orphaned processes...",
+      [RecoveryStage.LIVE]: "Recovery complete!",
+      [RecoveryStage.DETECTION_FAILED]: "Crash detection failed. Manual recovery may be needed.",
+      [RecoveryStage.INVENTORY_FAILED]: "Failed to inventory state. Some sessions may be lost.",
+      [RecoveryStage.RESTORATION_FAILED]: "Session restoration encountered errors.",
+      [RecoveryStage.RECONCILIATION_FAILED]: "Orphan reconciliation encountered errors.",
     };
     return messages[stage] || "Recovering...";
   }

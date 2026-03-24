@@ -21,25 +21,19 @@ import {
   NormalizedProviderError,
   normalizeError,
 } from "./errors.js";
-
-/**
- * MCP server connection state.
- */
-interface MCPConnection {
-  connected: boolean;
-  lastConnectionAttempt: Date;
-  reconnectAttempts: number;
-  reconnectBackoffMs: number;
-}
-
-/**
- * Tool catalog entry.
- */
-interface ToolEntry {
-  name: string;
-  description: string;
-  inputSchema: Record<string, unknown>;
-}
+import {
+  connectToServer,
+  createHealthyStatus,
+  createInitialMcpConnection,
+  createUnavailableStatus,
+  discoverTools,
+  invokeTool,
+  normalizeMcpError,
+  publishEvent,
+  reconnectToServer,
+  type MCPConnection,
+  type ToolEntry,
+} from "./mcp-bridge-support.js";
 
 /**
  * MCP Bridge Adapter
@@ -69,6 +63,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
 
   constructor(bus?: LocalBus) {
     this.bus = bus || null;
+    this.connection = createInitialMcpConnection();
   }
 
   /**
@@ -90,18 +85,16 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
       this.terminated = false;
 
       // Connect to MCP server
-      await this.connectToServer();
+      await connectToServer(this.config, this.connection);
 
       // Discover and register tools
-      await this.discoverTools();
+      await discoverTools(this.connection, this.toolCatalog, (topic, payload) =>
+        publishEvent(this.bus, topic, payload)
+      );
 
-      this.healthStatus = {
-        state: "healthy",
-        lastCheck: new Date(),
-        failureCount: 0,
-      };
+      this.healthStatus = createHealthyStatus();
 
-      await this.publishEvent("provider.mcp.initialized", {
+      await publishEvent(this.bus, "provider.mcp.initialized", {
         serverPath: config.serverPath,
         toolCount: this.toolCatalog.size,
       });
@@ -145,15 +138,11 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
       // Check connection
       if (!this.connection.connected) {
         // Attempt reconnection with exponential backoff
-        await this.reconnectToServer();
+        await reconnectToServer(this.config, this.connection);
       }
 
       if (this.connection.connected) {
-        this.healthStatus = {
-          state: "healthy",
-          lastCheck: new Date(),
-          failureCount: 0,
-        };
+        this.healthStatus = createHealthyStatus();
       } else {
         this.healthStatus.failureCount++;
         const newState =
@@ -216,7 +205,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
         const startTime = Date.now();
 
         // Execute tool (mock implementation)
-        const result = await this.invokeTool(
+        const result = await invokeTool(
           input.toolName,
           input.arguments,
           abortController.signal
@@ -229,7 +218,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
         }
 
         // Publish success event
-        await this.publishEvent("provider.mcp.tool.executed", {
+        await publishEvent(this.bus, "provider.mcp.tool.executed", {
           correlationId,
           toolName: input.toolName,
           duration,
@@ -254,7 +243,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
           correlationId
         );
 
-        await this.publishEvent("provider.mcp.tool.failed", {
+        await publishEvent(this.bus, "provider.mcp.tool.failed", {
           correlationId,
           toolName: input.toolName,
           code: normalized.code,
@@ -276,7 +265,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
           correlationId
         );
 
-        await this.publishEvent("provider.mcp.tool.failed", {
+        await publishEvent(this.bus, "provider.mcp.tool.failed", {
           correlationId,
           toolName: input.toolName,
           code: normalized.code,
@@ -287,9 +276,9 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
       }
 
       // Handle other errors
-      const normalized = normalizeError(error, "mcp", correlationId);
+      const normalized = normalizeMcpError(error, correlationId);
 
-      await this.publishEvent("provider.mcp.tool.failed", {
+      await publishEvent(this.bus, "provider.mcp.tool.failed", {
         correlationId,
         toolName: input.toolName,
         code: normalized.code,
@@ -320,14 +309,9 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
       this.config = null;
       this.terminated = true;
 
-      this.healthStatus = {
-        state: "unavailable",
-        lastCheck: new Date(),
-        failureCount: 0,
-        message: "Terminated",
-      };
+      this.healthStatus = createUnavailableStatus("Terminated");
 
-      await this.publishEvent("provider.mcp.terminated", {});
+      await publishEvent(this.bus, "provider.mcp.terminated", {});
     } catch (error) {
       const normalized = normalizeError(error, "mcp");
 
@@ -355,207 +339,5 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
       });
     }
     return tools;
-  }
-
-  /**
-   * Connect to MCP server.
-   *
-   * @throws Error if connection fails
-   */
-  private async connectToServer(): Promise<void> {
-    if (!this.config) {
-      throw new Error("Config not set");
-    }
-
-    try {
-      // Mock implementation: always succeeds for localhost
-      if (
-        this.config.serverPath.includes("localhost") ||
-        this.config.serverPath.includes("127.0.0.1")
-      ) {
-        this.connection.connected = true;
-        this.connection.reconnectAttempts = 0;
-        return;
-      }
-
-      this.connection.connected = true;
-    } catch (error) {
-      this.connection.lastConnectionAttempt = new Date();
-      this.connection.reconnectAttempts++;
-      throw error;
-    }
-  }
-
-  /**
-   * Reconnect to MCP server with exponential backoff.
-   *
-   * @throws Error if reconnection fails
-   */
-  private async reconnectToServer(): Promise<void> {
-    if (!this.config) {
-      throw new Error("Config not set");
-    }
-
-    const timeSinceLastAttempt = Date.now() - this.connection.lastConnectionAttempt.getTime();
-    if (timeSinceLastAttempt < this.connection.reconnectBackoffMs) {
-      throw new Error("Reconnection backoff active");
-    }
-
-    try {
-      await this.connectToServer();
-    } catch (error) {
-      // Exponential backoff: 1s, 2s, 4s, 8s, etc. (max 30s)
-      this.connection.reconnectBackoffMs = Math.min(
-        this.connection.reconnectBackoffMs * 2,
-        30000
-      );
-      throw error;
-    }
-  }
-
-  /**
-   * Discover tools from MCP server.
-   *
-   * @throws Error if discovery fails
-   */
-  private async discoverTools(): Promise<void> {
-    if (!this.connection.connected) {
-      throw new Error("Not connected");
-    }
-
-    // Mock implementation: discover some standard tools
-    const mockTools = [
-      {
-        name: "read_file",
-        description: "Read contents of a file",
-        inputSchema: {
-          type: "object",
-          properties: {
-            path: { type: "string", description: "File path" },
-          },
-          required: ["path"],
-        },
-      },
-      {
-        name: "write_file",
-        description: "Write contents to a file",
-        inputSchema: {
-          type: "object",
-          properties: {
-            path: { type: "string", description: "File path" },
-            content: { type: "string", description: "File content" },
-          },
-          required: ["path", "content"],
-        },
-      },
-      {
-        name: "list_directory",
-        description: "List contents of a directory",
-        inputSchema: {
-          type: "object",
-          properties: {
-            path: { type: "string", description: "Directory path" },
-          },
-          required: ["path"],
-        },
-      },
-    ];
-
-    // Register all discovered tools
-    for (const tool of mockTools) {
-      this.toolCatalog.set(tool.name, {
-        name: tool.name,
-        description: tool.description,
-        inputSchema: tool.inputSchema,
-      });
-
-      await this.publishEvent("provider.mcp.tool.discovered", {
-        toolName: tool.name,
-        description: tool.description,
-        correlationId: null,
-      });
-    }
-  }
-
-  /**
-   * Invoke a tool.
-   *
-   * @param toolName Tool name
-   * @param arguments Tool arguments
-   * @param signal Abort signal
-   * @returns Tool result
-   */
-  private async invokeTool(
-    toolName: string,
-    toolArguments: Record<string, unknown>,
-    signal: AbortSignal
-  ): Promise<unknown> {
-    return new Promise((resolve, reject) => {
-      if (signal.aborted) {
-        reject(new DOMException("Tool invocation cancelled", "AbortError"));
-        return;
-      }
-
-      const results: Record<string, unknown> = {
-        read_file: { content: "File contents go here" },
-        write_file: { success: true, bytesWritten: 100 },
-        list_directory: { entries: ["file1.txt", "file2.txt", "subdir/"] },
-      };
-
-      const timeout = setTimeout(() => {
-        resolve(results[toolName] || { message: `Mock result for ${toolName}` });
-      }, 10);
-
-      signal.addEventListener(
-        "abort",
-        () => {
-          clearTimeout(timeout);
-          reject(new DOMException("Tool invocation cancelled", "AbortError"));
-        },
-        { once: true }
-      );
-    });
-  }
-
-  /**
-   * Publish event on the protocol bus.
-   *
-   * @param topic Event topic
-   * @param payload Event payload
-   */
-  private async publishEvent(topic: string, payload: Record<string, unknown>): Promise<void> {
-    if (!this.bus) {
-      return;
-    }
-
-    try {
-      if (topic.startsWith("provider.mcp.tool") && payload.correlationId !== undefined) {
-        const eventBus = this.bus as typeof this.bus & {
-          getEvents?: () => Array<{ topic?: string; payload?: Record<string, unknown> }>;
-        };
-        const priorEvents = eventBus.getEvents?.() ?? [];
-        for (const event of priorEvents) {
-          if (
-            event.topic?.startsWith("provider.mcp.tool") &&
-            event.payload &&
-            event.payload.correlationId === null
-          ) {
-            event.payload.correlationId = payload.correlationId;
-          }
-        }
-      }
-      if (topic.startsWith("provider.mcp.tool") && payload.correlationId === undefined) {
-        payload = { ...payload, correlationId: null };
-      }
-      await this.bus.publish({
-        id: `mcp-${Date.now()}-${Math.random()}`,
-        type: "event",
-        ts: new Date().toISOString(),
-        topic,
-        payload,
-      });
-    } catch (error) {
-      console.warn(`Failed to publish MCP event ${topic}:`, error);
-    }
   }
 }
