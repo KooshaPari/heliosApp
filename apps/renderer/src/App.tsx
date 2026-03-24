@@ -36,7 +36,14 @@ export const App: Component = () => {
       >
         Helios IDE
       </h1>
-      <div style={{ flex: "1", display: "flex", "flex-direction": "column", overflow: "hidden" }}>
+      <div
+        style={{
+          flex: "1",
+          display: "flex",
+          "flex-direction": "column",
+          overflow: "hidden",
+        }}
+      >
         <TerminalTabs />
         <div style={{ flex: "1", position: "relative", overflow: "hidden" }}>
           <For each={getTerminals()}>

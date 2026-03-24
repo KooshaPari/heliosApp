@@ -47,13 +47,19 @@ function validateSchema(data: unknown, schema: JsonSchema, path = ""): Validatio
         return errors;
       }
     } else if (actualType !== schema.type) {
-      errors.push({ path, message: `Expected ${schema.type}, got ${actualType}` });
+      errors.push({
+        path,
+        message: `Expected ${schema.type}, got ${actualType}`,
+      });
       return errors;
     }
   }
 
   if (schema.const !== undefined && data !== schema.const) {
-    errors.push({ path, message: `Expected const ${String(schema.const)}, got ${String(data)}` });
+    errors.push({
+      path,
+      message: `Expected const ${String(schema.const)}, got ${String(data)}`,
+    });
   }
 
   if (schema.enum !== undefined && !schema.enum.includes(data)) {
@@ -89,7 +95,10 @@ function validateSchema(data: unknown, schema: JsonSchema, path = ""): Validatio
     const obj = data as Record<string, unknown>;
     for (const key of schema.required) {
       if (!(key in obj)) {
-        errors.push({ path: `${path}.${key}`, message: `Missing required field "${key}"` });
+        errors.push({
+          path: `${path}.${key}`,
+          message: `Missing required field "${key}"`,
+        });
       }
     }
   }

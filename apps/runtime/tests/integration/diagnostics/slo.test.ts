@@ -112,8 +112,18 @@ describe("Rate Limiting", () => {
   // FR-010: independent rate limiting per metric
   it("rate limits each metric independently", () => {
     const registry = new MetricsRegistry();
-    registry.register({ name: "metric-a", type: "latency", unit: "ms", description: "A" });
-    registry.register({ name: "metric-b", type: "latency", unit: "ms", description: "B" });
+    registry.register({
+      name: "metric-a",
+      type: "latency",
+      unit: "ms",
+      description: "A",
+    });
+    registry.register({
+      name: "metric-b",
+      type: "latency",
+      unit: "ms",
+      description: "B",
+    });
 
     const defs: SLODefinition[] = [
       { metric: "metric-a", percentile: "p95", threshold: 50, unit: "ms" },
@@ -270,9 +280,24 @@ describe("Periodic Check Loop", () => {
   // FR-010: multiple metrics violating simultaneously
   it("handles multiple simultaneous violations", () => {
     const registry = new MetricsRegistry();
-    registry.register({ name: "m1", type: "latency", unit: "ms", description: "M1" });
-    registry.register({ name: "m2", type: "latency", unit: "ms", description: "M2" });
-    registry.register({ name: "m3", type: "latency", unit: "ms", description: "M3" });
+    registry.register({
+      name: "m1",
+      type: "latency",
+      unit: "ms",
+      description: "M1",
+    });
+    registry.register({
+      name: "m2",
+      type: "latency",
+      unit: "ms",
+      description: "M2",
+    });
+    registry.register({
+      name: "m3",
+      type: "latency",
+      unit: "ms",
+      description: "M3",
+    });
 
     const defs: SLODefinition[] = [
       { metric: "m1", percentile: "p95", threshold: 50, unit: "ms" },

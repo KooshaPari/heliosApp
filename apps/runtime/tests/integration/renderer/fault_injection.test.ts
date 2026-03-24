@@ -27,7 +27,17 @@ describe("Fault injection - hot-swap failures", () => {
     let rollbackCalled = false;
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const result = await executeHotSwap(
@@ -53,7 +63,17 @@ describe("Fault injection - hot-swap failures", () => {
     let rollbackCalled = false;
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const result = await executeHotSwap(
@@ -115,7 +135,17 @@ describe("Fault injection - restart-with-restore failures", () => {
     let rollbackCalled = false;
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const result = await executeRestartWithRestore(
@@ -140,9 +170,39 @@ describe("Fault injection - restart-with-restore failures", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
-      ["pty-2", { ptyId: "pty-2", scrollback: [], cursorX: 5, cursorY: 10, env: {}, cwd: "/" }],
-      ["pty-3", { ptyId: "pty-3", scrollback: [], cursorX: 15, cursorY: 20, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+      [
+        "pty-2",
+        {
+          ptyId: "pty-2",
+          scrollback: [],
+          cursorX: 5,
+          cursorY: 10,
+          env: {},
+          cwd: "/",
+        },
+      ],
+      [
+        "pty-3",
+        {
+          ptyId: "pty-3",
+          scrollback: [],
+          cursorX: 15,
+          cursorY: 20,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const result = await executeRestartWithRestore(
@@ -167,8 +227,28 @@ describe("Fault injection - rollback handling", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
-      ["pty-2", { ptyId: "pty-2", scrollback: [], cursorX: 5, cursorY: 10, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+      [
+        "pty-2",
+        {
+          ptyId: "pty-2",
+          scrollback: [],
+          cursorX: 5,
+          cursorY: 10,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const result = await executeRollback(original, failed, terminals, buffer, "test failure");
@@ -187,7 +267,17 @@ describe("Fault injection - rollback handling", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const failureReason = "target renderer GPU allocation failed";

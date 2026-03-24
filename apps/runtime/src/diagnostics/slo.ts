@@ -9,13 +9,38 @@ import { computePercentiles } from "./percentiles.js";
 // ---------------------------------------------------------------------------
 
 export const SLO_DEFINITIONS: readonly SLODefinition[] = Object.freeze([
-  { metric: "input-to-echo", percentile: "p50" as const, threshold: 30, unit: "ms" },
-  { metric: "input-to-echo", percentile: "p95" as const, threshold: 100, unit: "ms" },
-  { metric: "render-frame", percentile: "p95" as const, threshold: 16, unit: "ms" },
-  { metric: "render-frame", percentile: "p99" as const, threshold: 33, unit: "ms" },
+  {
+    metric: "input-to-echo",
+    percentile: "p50" as const,
+    threshold: 30,
+    unit: "ms",
+  },
+  {
+    metric: "input-to-echo",
+    percentile: "p95" as const,
+    threshold: 100,
+    unit: "ms",
+  },
+  {
+    metric: "render-frame",
+    percentile: "p95" as const,
+    threshold: 16,
+    unit: "ms",
+  },
+  {
+    metric: "render-frame",
+    percentile: "p99" as const,
+    threshold: 33,
+    unit: "ms",
+  },
   { metric: "fps", percentile: "p50" as const, threshold: 60, unit: "fps" },
   { metric: "memory", percentile: "p95" as const, threshold: 500, unit: "MB" },
-  { metric: "bus-dispatch", percentile: "p95" as const, threshold: 1, unit: "ms" },
+  {
+    metric: "bus-dispatch",
+    percentile: "p95" as const,
+    threshold: 1,
+    unit: "ms",
+  },
 ]);
 
 /** Return SLO definitions for a given metric name. */

@@ -10,7 +10,11 @@ const window = new Window();
 for (const name of ["Error", "SyntaxError", "TypeError", "ReferenceError", "RangeError"]) {
   const ctor = (globalThis as Record<string, unknown>)[name];
   if (ctor && typeof ctor === "function") {
-    Object.defineProperty(window, name, { value: ctor, writable: true, configurable: true });
+    Object.defineProperty(window, name, {
+      value: ctor,
+      writable: true,
+      configurable: true,
+    });
   }
 }
 

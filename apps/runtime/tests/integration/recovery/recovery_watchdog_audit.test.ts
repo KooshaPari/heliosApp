@@ -65,7 +65,9 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
         },
       ],
     };
-    const runtimeC = createRuntime({ recovery_metadata: unrecoverableCheckpoint });
+    const runtimeC = createRuntime({
+      recovery_metadata: unrecoverableCheckpoint,
+    });
     const brokenBootstrap = runtimeC.getBootstrapResult();
 
     expect(
@@ -83,7 +85,13 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
   test("watchdog classifies drift and exposes remediation-safe guidance", async () => {
     const runtime = createRuntime();
     runtime.bootstrapRecovery({
-      lanes: [{ lane_id: "lane-drift", workspace_id: "ws-2", session_id: "missing-session" }],
+      lanes: [
+        {
+          lane_id: "lane-drift",
+          workspace_id: "ws-2",
+          session_id: "missing-session",
+        },
+      ],
       sessions: [
         {
           session_id: "session-drift",
@@ -187,7 +195,9 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     });
     expect(stillHealthy.status).toBe("ok");
 
-    const auditBundle = runtime.exportAuditBundle({ correlation_id: "corr-harness" });
+    const auditBundle = runtime.exportAuditBundle({
+      correlation_id: "corr-harness",
+    });
     expect(auditBundle.count).toBeGreaterThan(0);
     const redactedRecord = auditBundle.records.find(
       (record: { type?: string; payload?: Record<string, unknown>; [key: string]: unknown }) =>

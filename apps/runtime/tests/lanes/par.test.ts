@@ -202,7 +202,12 @@ describe("ParManager - T012: Par task termination", () => {
   test("terminateParTask sends SIGTERM and cleans up", async () => {
     createLaneInRegistry(registry);
     const { spawnFn, kills } = createMockSpawn({ pid: 42, exitDelay: 5 });
-    const mgr = new ParManager({ registry, bus, spawnFn, forceKillTimeoutMs: 500 });
+    const mgr = new ParManager({
+      registry,
+      bus,
+      spawnFn,
+      forceKillTimeoutMs: 500,
+    });
 
     await mgr.bindParTask("test-lane-1", "/tmp/worktree");
     await mgr.terminateParTask("test-lane-1");
@@ -215,7 +220,12 @@ describe("ParManager - T012: Par task termination", () => {
   test("terminateParTask emits lane.par_task.terminated event", async () => {
     createLaneInRegistry(registry);
     const { spawnFn } = createMockSpawn({ pid: 42, exitDelay: 5 });
-    const mgr = new ParManager({ registry, bus, spawnFn, forceKillTimeoutMs: 500 });
+    const mgr = new ParManager({
+      registry,
+      bus,
+      spawnFn,
+      forceKillTimeoutMs: 500,
+    });
 
     await mgr.bindParTask("test-lane-1", "/tmp/worktree");
     bus.getEvents(); // clear
@@ -229,7 +239,12 @@ describe("ParManager - T012: Par task termination", () => {
   test("terminateParTask is idempotent on already-terminated binding", async () => {
     createLaneInRegistry(registry);
     const { spawnFn } = createMockSpawn({ pid: 42, exitDelay: 5 });
-    const mgr = new ParManager({ registry, bus, spawnFn, forceKillTimeoutMs: 500 });
+    const mgr = new ParManager({
+      registry,
+      bus,
+      spawnFn,
+      forceKillTimeoutMs: 500,
+    });
 
     await mgr.bindParTask("test-lane-1", "/tmp/worktree");
     await mgr.terminateParTask("test-lane-1");
@@ -266,7 +281,11 @@ describe("ParManager - T013: Command execution", () => {
         return createMockSpawn({ pid: 42, exitDelay: 60000 }).spawnFn(cmd, opts);
       }
       // exec spawn
-      return createMockSpawn({ pid: 43, stdout: "hello world", exitCode: 0 }).spawnFn(cmd, opts);
+      return createMockSpawn({
+        pid: 43,
+        stdout: "hello world",
+        exitCode: 0,
+      }).spawnFn(cmd, opts);
     };
 
     const mgr = new ParManager({ registry, bus, spawnFn });
@@ -502,7 +521,12 @@ describe("ParManager - T015: Event completeness", () => {
   test("all events include correlationId and timestamp", async () => {
     createLaneInRegistry(registry);
     const { spawnFn } = createMockSpawn({ pid: 42, exitDelay: 60000 });
-    const mgr = new ParManager({ registry, bus, spawnFn, forceKillTimeoutMs: 100 });
+    const mgr = new ParManager({
+      registry,
+      bus,
+      spawnFn,
+      forceKillTimeoutMs: 100,
+    });
 
     await mgr.bindParTask("test-lane-1", "/tmp/worktree");
     await mgr.terminateParTask("test-lane-1");

@@ -6,7 +6,11 @@ import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules, RedactionRuleManager } from "../redaction-rules.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 
-const ctx = { artifactId: "art-1", artifactType: "log", correlationId: "corr-1" };
+const ctx = {
+  artifactId: "art-1",
+  artifactType: "log",
+  correlationId: "corr-1",
+};
 
 function makeEngine(manager?: RedactionRuleManager): RedactionEngine {
   const engine = new RedactionEngine();
@@ -130,7 +134,9 @@ describe("RedactionRuleManager: custom rules", () => {
 
 describe("RedactionRuleManager: enable/disable", () => {
   it("disabled rule does not match", () => {
-    const manager = new RedactionRuleManager({ initialRules: getDefaultRules() });
+    const manager = new RedactionRuleManager({
+      initialRules: getDefaultRules(),
+    });
     manager.disableRule("aws-access-key");
     const engine = makeEngine(manager);
     const r = engine.redact("AKIAIOSFODNN7EXAMPLE", ctx);
@@ -138,7 +144,9 @@ describe("RedactionRuleManager: enable/disable", () => {
   });
 
   it("re-enabled rule matches again", () => {
-    const manager = new RedactionRuleManager({ initialRules: getDefaultRules() });
+    const manager = new RedactionRuleManager({
+      initialRules: getDefaultRules(),
+    });
     manager.disableRule("aws-access-key");
     manager.enableRule("aws-access-key");
     const engine = makeEngine(manager);
@@ -147,7 +155,9 @@ describe("RedactionRuleManager: enable/disable", () => {
   });
 
   it("removeRule removes the rule", () => {
-    const manager = new RedactionRuleManager({ initialRules: getDefaultRules() });
+    const manager = new RedactionRuleManager({
+      initialRules: getDefaultRules(),
+    });
     manager.removeRule("aws-access-key");
     expect(manager.listRules().some(r => r.id === "aws-access-key")).toBe(false);
   });
@@ -163,7 +173,9 @@ describe("RedactionRuleManager: persistence", () => {
   });
 
   it("exports and imports rules", () => {
-    const manager = new RedactionRuleManager({ initialRules: getDefaultRules() });
+    const manager = new RedactionRuleManager({
+      initialRules: getDefaultRules(),
+    });
     const path = join(tmpDir, "rules.json");
     manager.exportRules(path);
 

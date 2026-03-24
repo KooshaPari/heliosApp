@@ -13,7 +13,10 @@ import type { PtyManagerInterface } from "../types.js";
 function makeMockCli(): ZellijCli {
   return {
     run: mock(async () => ({ stdout: "", stderr: "", exitCode: 0 })),
-    checkAvailability: mock(async () => ({ available: true, version: "0.41.2" })),
+    checkAvailability: mock(async () => ({
+      available: true,
+      version: "0.41.2",
+    })),
     listSessions: mock(async () => []),
   } as unknown as ZellijCli;
 }
@@ -21,7 +24,10 @@ function makeMockCli(): ZellijCli {
 function makeMockPtyManager(): PtyManagerInterface {
   let counter = 0;
   return {
-    spawn: mock(async () => ({ ptyId: `pty-${++counter}`, pid: 1000 + counter })),
+    spawn: mock(async () => ({
+      ptyId: `pty-${++counter}`,
+      pid: 1000 + counter,
+    })),
     terminate: mock(async () => {}),
     resize: mock(() => {}),
   };
@@ -69,7 +75,11 @@ describe("ZellijPaneManager", () => {
         terminate: mock(async () => {}),
         resize: mock(() => {}),
       };
-      const mgr = new ZellijPaneManager({ cli, topology, ptyManager: failingPty });
+      const mgr = new ZellijPaneManager({
+        cli,
+        topology,
+        ptyManager: failingPty,
+      });
       topology.initializeTopology("test-session");
 
       expect(mgr.createPane("test-session", "lane-1")).rejects.toThrow(PtyBindingError);
@@ -109,7 +119,11 @@ describe("ZellijPaneManager", () => {
         }),
         resize: mock(() => {}),
       };
-      const mgr = new ZellijPaneManager({ cli, topology, ptyManager: failTerminate });
+      const mgr = new ZellijPaneManager({
+        cli,
+        topology,
+        ptyManager: failTerminate,
+      });
       topology.initializeTopology("test-session");
       const record = await mgr.createPane("test-session", "lane-1");
 
@@ -182,7 +196,9 @@ describe("ZellijPaneManager", () => {
       topology.initializeTopology("tiny-session", { cols: 10, rows: 3 });
 
       expect(
-        paneManager.createPane("tiny-session", "lane-1", { direction: "vertical" })
+        paneManager.createPane("tiny-session", "lane-1", {
+          direction: "vertical",
+        })
       ).rejects.toThrow(PaneTooSmallError);
     });
   });

@@ -9,7 +9,11 @@ import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 import { computeWorktreePath, computeBranchName } from "../../../src/lanes/worktree.js";
 
 async function runGit(args: string[], cwd: string): Promise<string> {
-  const proc = Bun.spawn(["git", ...args], { cwd, stdout: "pipe", stderr: "pipe" });
+  const proc = Bun.spawn(["git", ...args], {
+    cwd,
+    stdout: "pipe",
+    stderr: "pipe",
+  });
   const stdout = await new Response(proc.stdout).text();
   const exitCode = await proc.exited;
   if (exitCode !== 0) {

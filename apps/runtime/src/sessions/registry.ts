@@ -46,7 +46,10 @@ export class InMemorySessionRegistry {
   private readonly activeLaneSessions = new Map<string, string>();
   private readonly activeCodexSessions = new Map<string, string>();
 
-  ensure(input: EnsureSessionInput): { session: SessionRecord; created: boolean } {
+  ensure(input: EnsureSessionInput): {
+    session: SessionRecord;
+    created: boolean;
+  } {
     const nowIso = new Date().toISOString();
     const activeSessionId = this.activeLaneSessions.get(input.lane_id);
     if (activeSessionId) {
@@ -220,7 +223,9 @@ export class RecoveryRegistry {
     return {
       lanes: [...this.lanes.values()].map(lane => ({ ...lane })),
       sessions: [...this.sessions.values()].map(session => ({ ...session })),
-      terminals: [...this.terminals.values()].map(terminal => ({ ...terminal })),
+      terminals: [...this.terminals.values()].map(terminal => ({
+        ...terminal,
+      })),
     };
   }
 

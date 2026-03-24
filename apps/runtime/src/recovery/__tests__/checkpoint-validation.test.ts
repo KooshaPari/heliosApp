@@ -40,7 +40,9 @@ describe("Checkpoint Validation", () => {
 
   describe("version validation", () => {
     it("should reject future schema version", () => {
-      const checkpoint = createValidCheckpoint({ version: CHECKPOINT_VERSION + 1 });
+      const checkpoint = createValidCheckpoint({
+        version: CHECKPOINT_VERSION + 1,
+      });
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(false);
@@ -67,7 +69,9 @@ describe("Checkpoint Validation", () => {
 
     it("should accept timestamp within future tolerance", () => {
       const nearFutureTimestamp = Date.now() + 2 * 60 * 1000; // 2 minutes in future
-      const checkpoint = createValidCheckpoint({ timestamp: nearFutureTimestamp });
+      const checkpoint = createValidCheckpoint({
+        timestamp: nearFutureTimestamp,
+      });
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(true);

@@ -66,7 +66,10 @@ describe("JSON persistence round-trip", () => {
 
   test("workspace with Unicode name round-trips", async () => {
     const store = await createJsonStore(dataDir);
-    const ws = makeWorkspace({ name: "日本語ワークスペース 🚀", rootPath: "/tmp/日本語" });
+    const ws = makeWorkspace({
+      name: "日本語ワークスペース 🚀",
+      rootPath: "/tmp/日本語",
+    });
     await store.save(ws);
 
     const store2 = await createJsonStore(dataDir);

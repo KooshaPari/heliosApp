@@ -149,7 +149,12 @@ export function recordTransition(
     history = [];
     transitionHistories.set(laneId, history);
   }
-  history.push({ fromState, event, toState, timestamp: new Date().toISOString() });
+  history.push({
+    fromState,
+    event,
+    toState,
+    timestamp: new Date().toISOString(),
+  });
   if (history.length > MAX_HISTORY) {
     history.splice(0, history.length - MAX_HISTORY);
   }

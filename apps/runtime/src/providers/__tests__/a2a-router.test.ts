@@ -13,7 +13,12 @@ import { NormalizedProviderError } from "../errors.js";
 import type { ProviderHealthStatus } from "../adapter.js";
 
 type RouterConfig = {
-  endpoints: Array<{ id: string; url: string; priority: number; capabilities: string[] }>;
+  endpoints: Array<{
+    id: string;
+    url: string;
+    priority: number;
+    capabilities: string[];
+  }>;
   timeout: number;
   failoverEnabled: boolean;
 };

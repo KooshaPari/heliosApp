@@ -62,7 +62,10 @@ export function validateValue(key: string, value: unknown): { valid: boolean; re
 
   // Reject null and undefined for defined settings.
   if (value === null || value === undefined) {
-    return { valid: false, reason: `${key}: value must not be null or undefined` };
+    return {
+      valid: false,
+      reason: `${key}: value must not be null or undefined`,
+    };
   }
 
   switch (def.type) {

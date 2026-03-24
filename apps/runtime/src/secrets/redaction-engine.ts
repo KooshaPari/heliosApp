@@ -76,7 +76,12 @@ export class RedactionEngine {
     }
 
     // Collect all matches first (on original string), then apply replacements
-    const allMatches: Array<{ start: number; end: number; category: string; ruleId: string }> = [];
+    const allMatches: Array<{
+      start: number;
+      end: number;
+      category: string;
+      ruleId: string;
+    }> = [];
 
     for (const { rule, regex } of this.compiledRules) {
       regex.lastIndex = 0;

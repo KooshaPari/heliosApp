@@ -43,7 +43,10 @@ export class CommandBusImpl implements LocalBus {
   private readonly methods = new Map<string, MethodHandler>();
   private readonly subscribers = new Map<
     string,
-    Array<{ handler: (evt: EventEnvelope) => void | Promise<void>; removed: boolean }>
+    Array<{
+      handler: (evt: EventEnvelope) => void | Promise<void>;
+      removed: boolean;
+    }>
   >();
   private readonly options: Required<CommandBusOptions>;
   private destroyed = false;

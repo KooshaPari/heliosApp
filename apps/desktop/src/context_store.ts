@@ -57,7 +57,11 @@ export type ActiveContextAction =
   | { type: "operation.success"; operation: OperationKey }
   | { type: "operation.failure"; operation: OperationKey; error: string }
   | { type: "diagnostics.set"; diagnostics: TransportDiagnostics }
-  | { type: "renderer.switch.started"; previousEngine: string; targetEngine: string }
+  | {
+      type: "renderer.switch.started";
+      previousEngine: string;
+      targetEngine: string;
+    }
   | { type: "renderer.switch.succeeded"; targetEngine: string }
   | { type: "renderer.switch.failed"; message: string }
   | { type: "renderer.switch.rolled_back"; engine: string; message: string };
@@ -114,7 +118,9 @@ export function reduceActiveContextState(
         laneId: null,
         sessionId: null,
         terminalId: null,
-        trace: appendTrace(state.trace, action.type, { workspaceId: action.workspaceId }),
+        trace: appendTrace(state.trace, action.type, {
+          workspaceId: action.workspaceId,
+        }),
       };
     case "lane.set":
       return {
@@ -126,13 +132,17 @@ export function reduceActiveContextState(
       return {
         ...state,
         sessionId: action.sessionId,
-        trace: appendTrace(state.trace, action.type, { sessionId: action.sessionId }),
+        trace: appendTrace(state.trace, action.type, {
+          sessionId: action.sessionId,
+        }),
       };
     case "terminal.set":
       return {
         ...state,
         terminalId: action.terminalId,
-        trace: appendTrace(state.trace, action.type, { terminalId: action.terminalId }),
+        trace: appendTrace(state.trace, action.type, {
+          terminalId: action.terminalId,
+        }),
       };
     case "tab.set":
       return {
@@ -144,7 +154,9 @@ export function reduceActiveContextState(
       return {
         ...state,
         runtimeState: action.runtimeState,
-        trace: appendTrace(state.trace, action.type, { runtimeState: action.runtimeState }),
+        trace: appendTrace(state.trace, action.type, {
+          runtimeState: action.runtimeState,
+        }),
       };
     case "operation.start":
       return {
@@ -154,7 +166,9 @@ export function reduceActiveContextState(
           [action.operation]: "loading",
           error: null,
         },
-        trace: appendTrace(state.trace, action.type, { operation: action.operation }),
+        trace: appendTrace(state.trace, action.type, {
+          operation: action.operation,
+        }),
       };
     case "operation.success":
       return {
@@ -164,7 +178,9 @@ export function reduceActiveContextState(
           [action.operation]: "ready",
           error: null,
         },
-        trace: appendTrace(state.trace, action.type, { operation: action.operation }),
+        trace: appendTrace(state.trace, action.type, {
+          operation: action.operation,
+        }),
       };
     case "operation.failure":
       return {
@@ -183,7 +199,9 @@ export function reduceActiveContextState(
       return {
         ...state,
         diagnostics: action.diagnostics,
-        trace: appendTrace(state.trace, action.type, { diagnostics: action.diagnostics }),
+        trace: appendTrace(state.trace, action.type, {
+          diagnostics: action.diagnostics,
+        }),
       };
     case "renderer.switch.started":
       return {
@@ -219,7 +237,9 @@ export function reduceActiveContextState(
           lastStatus: "succeeded",
           targetEngine: action.targetEngine,
         },
-        trace: appendTrace(state.trace, action.type, { targetEngine: action.targetEngine }),
+        trace: appendTrace(state.trace, action.type, {
+          targetEngine: action.targetEngine,
+        }),
       };
     case "renderer.switch.failed":
       return {
@@ -235,7 +255,9 @@ export function reduceActiveContextState(
           lastStatus: "failed",
           message: action.message,
         },
-        trace: appendTrace(state.trace, action.type, { message: action.message }),
+        trace: appendTrace(state.trace, action.type, {
+          message: action.message,
+        }),
       };
     case "renderer.switch.rolled_back":
       return {

@@ -193,7 +193,10 @@ describe("LaneManager sharing", () => {
   test("force cleanup shared lane with agents succeeds", async () => {
     const lane = await mgr.create("ws-1", "main");
     const reg = mgr.getRegistry();
-    reg.update(lane.laneId, { state: "shared", attachedAgents: ["agent-1", "agent-2"] });
+    reg.update(lane.laneId, {
+      state: "shared",
+      attachedAgents: ["agent-1", "agent-2"],
+    });
     await mgr.cleanup(lane.laneId, true);
     const updated = reg.get(lane.laneId)!;
     expect(updated.state).toBe("closed");

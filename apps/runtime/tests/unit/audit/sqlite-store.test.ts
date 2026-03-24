@@ -93,7 +93,9 @@ describe("SQLiteAuditStore", () => {
     });
 
     it("should query with event type filter", () => {
-      const results = store.query({ eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED });
+      const results = store.query({
+        eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+      });
       expect(results.length).toBeGreaterThan(0);
       expect(results.every(e => e.eventType === AUDIT_EVENT_TYPES.COMMAND_EXECUTED)).toBe(true);
     });

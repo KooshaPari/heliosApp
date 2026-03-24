@@ -10,7 +10,11 @@ function makeEngine(): RedactionEngine {
   return engine;
 }
 
-const ctx = { artifactId: "art-1", artifactType: "log", correlationId: "corr-1" };
+const ctx = {
+  artifactId: "art-1",
+  artifactType: "log",
+  correlationId: "corr-1",
+};
 
 describe("RedactionAuditTrail: record creation", () => {
   it("creates a record and verify returns true", () => {
@@ -69,8 +73,16 @@ describe("RedactionAuditTrail: listRecords filtering", () => {
       artifactType: "artifact",
       correlationId: "c2",
     });
-    trail.record("a1", r1, { artifactId: "a1", artifactType: "log", correlationId: "c1" });
-    trail.record("a2", r2, { artifactId: "a2", artifactType: "artifact", correlationId: "c2" });
+    trail.record("a1", r1, {
+      artifactId: "a1",
+      artifactType: "log",
+      correlationId: "c1",
+    });
+    trail.record("a2", r2, {
+      artifactId: "a2",
+      artifactType: "artifact",
+      correlationId: "c2",
+    });
 
     const logs = trail.listRecords({ artifactType: "log" });
     expect(logs.length).toBe(1);

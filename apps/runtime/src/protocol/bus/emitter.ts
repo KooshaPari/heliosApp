@@ -80,7 +80,11 @@ export class InMemoryLocalBus implements LocalBus {
       validateEnvelope(event);
     } catch (err: unknown) {
       const auditErr = err instanceof ProtocolValidationError ? err.message : String(err);
-      this.auditLog.push({ envelope: event, outcome: "rejected", error: auditErr });
+      this.auditLog.push({
+        envelope: event,
+        outcome: "rejected",
+        error: auditErr,
+      });
       throw err;
     }
 
@@ -108,7 +112,11 @@ export class InMemoryLocalBus implements LocalBus {
             "ORDERING_VIOLATION",
             `Duplicate start topic "${topic}" for correlation "${correlationId}"`
           );
-          this.auditLog.push({ envelope: event, outcome: "rejected", error: err.message });
+          this.auditLog.push({
+            envelope: event,
+            outcome: "rejected",
+            error: err.message,
+          });
           throw err;
         }
         progress.add(topic);
@@ -126,7 +134,11 @@ export class InMemoryLocalBus implements LocalBus {
             "ORDERING_VIOLATION",
             `Topic '${topic}' cannot be published before '${expectedStart}'`
           );
-          this.auditLog.push({ envelope: event, outcome: "rejected", error: err.message });
+          this.auditLog.push({
+            envelope: event,
+            outcome: "rejected",
+            error: err.message,
+          });
           throw err;
         }
 
@@ -243,7 +255,12 @@ export class InMemoryLocalBus implements LocalBus {
   }
 
   async send(envelope: unknown): Promise<ResponseEnvelope> {
-    return { id: "stub", type: "response", ts: new Date().toISOString(), status: "ok" };
+    return {
+      id: "stub",
+      type: "response",
+      ts: new Date().toISOString(),
+      status: "ok",
+    };
   }
 
   subscribe(topic: string, handler: (evt: EventEnvelope) => void | Promise<void>): () => void {

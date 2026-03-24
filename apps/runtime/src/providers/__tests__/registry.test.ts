@@ -171,7 +171,11 @@ describe("ProviderRegistry", () => {
           throw new Error("Init failed");
         }
         async health(): Promise<ProviderHealthStatus> {
-          return { state: "unavailable", lastCheck: new Date(), failureCount: 0 };
+          return {
+            state: "unavailable",
+            lastCheck: new Date(),
+            failureCount: 0,
+          };
         }
         async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
           return { content: "", stopReason: "" };

@@ -21,7 +21,13 @@ export const DiffView: Component<DiffViewProps> = props => {
   };
 
   return (
-    <div style={{ border: "1px solid #313244", "border-radius": "8px", overflow: "hidden" }}>
+    <div
+      style={{
+        border: "1px solid #313244",
+        "border-radius": "8px",
+        overflow: "hidden",
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -68,7 +74,13 @@ export const DiffView: Component<DiffViewProps> = props => {
           </Show>
         </div>
       </div>
-      <div style={{ "font-family": "monospace", "font-size": "12px", "overflow-x": "auto" }}>
+      <div
+        style={{
+          "font-family": "monospace",
+          "font-size": "12px",
+          "overflow-x": "auto",
+        }}
+      >
         <For each={props.lines}>
           {line => {
             const style = lineColor(line.type);
@@ -91,7 +103,13 @@ export const DiffView: Component<DiffViewProps> = props => {
                 >
                   {line.lineNumber}
                 </span>
-                <span style={{ padding: "0 8px", color: style.color, "white-space": "pre" }}>
+                <span
+                  style={{
+                    padding: "0 8px",
+                    color: style.color,
+                    "white-space": "pre",
+                  }}
+                >
                   {line.type === "add" ? "+" : line.type === "remove" ? "-" : " "}
                   {line.content}
                 </span>

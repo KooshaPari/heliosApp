@@ -177,7 +177,10 @@ describe("ConfirmationDialog", () => {
     confirmBtn?.focus();
 
     // Tab should move to next button
-    const tabEvent = new KeyboardEvent("keydown", { key: "Tab", bubbles: true });
+    const tabEvent = new KeyboardEvent("keydown", {
+      key: "Tab",
+      bubbles: true,
+    });
     confirmBtn?.dispatchEvent(tabEvent);
 
     // This tests the focus trap logic

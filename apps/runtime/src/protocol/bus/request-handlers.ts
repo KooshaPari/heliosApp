@@ -147,7 +147,11 @@ export function handleSessionAttach(
       type: "response",
       ts: new Date().toISOString(),
       status: "error",
-      error: { code: "SESSION_ATTACH_FAILED", message: "forced error", retryable: false },
+      error: {
+        code: "SESSION_ATTACH_FAILED",
+        message: "forced error",
+        retryable: false,
+      },
     };
   }
 
@@ -233,7 +237,11 @@ export function handleTerminalSpawn(
       type: "response",
       ts: new Date().toISOString(),
       status: "error",
-      error: { code: "TERMINAL_SPAWN_FAILED", message: "forced error", retryable: false },
+      error: {
+        code: "TERMINAL_SPAWN_FAILED",
+        message: "forced error",
+        retryable: false,
+      },
     };
   }
 
@@ -334,7 +342,11 @@ export function handleRendererSwitch(
       type: "response",
       ts: new Date().toISOString(),
       status: "error",
-      error: { code: "RENDERER_SWITCH_FAILED", message: "forced error", retryable: false },
+      error: {
+        code: "RENDERER_SWITCH_FAILED",
+        message: "forced error",
+        retryable: false,
+      },
       result: {
         // biome-ignore lint/style/useNamingConvention: Protocol response fields use snake_case.
         active_engine: previousEngine,

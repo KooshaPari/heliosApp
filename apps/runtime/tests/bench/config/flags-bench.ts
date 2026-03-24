@@ -131,7 +131,11 @@ async function benchSettingsWrite(): Promise<BenchResult> {
 async function benchHotReloadPropagation(): Promise<BenchResult> {
   const { tempDir, settings, flags } = await setup();
   // Register theme as a hot-reloadable flag
-  flags.register({ key: "theme", defaultValue: "system", description: "Theme" });
+  flags.register({
+    key: "theme",
+    defaultValue: "system",
+    description: "Theme",
+  });
   flags.dispose();
   flags.init();
 

@@ -90,7 +90,11 @@ describe("CredentialStore: cross-provider isolation", () => {
     await store.create("providerA", "ws1", "myKey", "secret-value", "corr-001");
     try {
       await store.retrieveWithContext(
-        { requestingProviderId: "evil", requestingWorkspaceId: "ws1", correlationId: "corr-002" },
+        {
+          requestingProviderId: "evil",
+          requestingWorkspaceId: "ws1",
+          correlationId: "corr-002",
+        },
         "providerA",
         "ws1",
         "myKey"
@@ -126,7 +130,11 @@ describe("CredentialStore: cross-provider isolation", () => {
   it("rejects .. in requestingProviderId", async () => {
     await expect(
       store.retrieveWithContext(
-        { requestingProviderId: "../evil", requestingWorkspaceId: "ws1", correlationId: "c" },
+        {
+          requestingProviderId: "../evil",
+          requestingWorkspaceId: "ws1",
+          correlationId: "c",
+        },
         "providerA",
         "ws1",
         "myKey"
@@ -137,7 +145,11 @@ describe("CredentialStore: cross-provider isolation", () => {
   it("rejects / in requestingWorkspaceId", async () => {
     await expect(
       store.retrieveWithContext(
-        { requestingProviderId: "p", requestingWorkspaceId: "/etc/passwd", correlationId: "c" },
+        {
+          requestingProviderId: "p",
+          requestingWorkspaceId: "/etc/passwd",
+          correlationId: "c",
+        },
         "providerA",
         "ws1",
         "myKey"
@@ -157,7 +169,11 @@ describe("CredentialStore: cross-provider isolation", () => {
     await store.create("providerA", "ws1", "myKey", "secret", "corr-001");
     try {
       await store.retrieveWithContext(
-        { requestingProviderId: "other", requestingWorkspaceId: "ws1", correlationId: "c" },
+        {
+          requestingProviderId: "other",
+          requestingWorkspaceId: "ws1",
+          correlationId: "c",
+        },
         "providerA",
         "ws1",
         "myKey"

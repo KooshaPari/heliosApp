@@ -64,7 +64,9 @@ describe("AuditLedger", () => {
     });
 
     it("should filter by event type", () => {
-      const results = ledger.search({ eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED });
+      const results = ledger.search({
+        eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+      });
       expect(results.every(e => e.eventType === AUDIT_EVENT_TYPES.COMMAND_EXECUTED)).toBe(true);
     });
 
@@ -85,8 +87,16 @@ describe("AuditLedger", () => {
     });
 
     it("should respect limit and offset", () => {
-      const page1 = ledger.search({ workspaceId: "ws-1", limit: 10, offset: 0 });
-      const page2 = ledger.search({ workspaceId: "ws-1", limit: 10, offset: 10 });
+      const page1 = ledger.search({
+        workspaceId: "ws-1",
+        limit: 10,
+        offset: 0,
+      });
+      const page2 = ledger.search({
+        workspaceId: "ws-1",
+        limit: 10,
+        offset: 10,
+      });
 
       expect(page1.length).toBeLessThanOrEqual(10);
       expect(page2.length).toBeLessThanOrEqual(10);

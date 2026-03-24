@@ -166,7 +166,11 @@ function benchEnvelopeValidation(): BenchResult {
 }
 
 async function benchSustainedThroughput(): Promise<
-  BenchResult & { total_messages: number; duration_s: number; ordering_violations: number }
+  BenchResult & {
+    total_messages: number;
+    duration_s: number;
+    ordering_violations: number;
+  }
 > {
   const bus = createBus();
   let received = 0;

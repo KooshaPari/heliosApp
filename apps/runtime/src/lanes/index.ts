@@ -429,7 +429,10 @@ export class LaneManager {
           if (lane.worktreePath && !fsModule.existsSync(lane.worktreePath)) {
             result.orphanedRecords++;
             result.totalCleaned++;
-            this.registry.update(lane.laneId, { state: "closed", worktreePath: null });
+            this.registry.update(lane.laneId, {
+              state: "closed",
+              worktreePath: null,
+            });
           }
         }
       }

@@ -47,7 +47,13 @@ export const ChatPanel: Component<ChatPanelProps> = props => {
             padding: "48px",
           }}
         >
-          <h2 style={{ "font-size": "24px", "margin-bottom": "8px", color: "#cdd6f4" }}>
+          <h2
+            style={{
+              "font-size": "24px",
+              "margin-bottom": "8px",
+              color: "#cdd6f4",
+            }}
+          >
             How can I help you today?
           </h2>
           <p style={{ "font-size": "14px" }}>

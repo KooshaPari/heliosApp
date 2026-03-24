@@ -127,7 +127,10 @@ export class RedactionRuleManager {
       throw new Error(`Invalid regex pattern: ${(e as Error).message}`);
     }
     this.rules.set(rule.id, { ...rule, matchCount: 0 });
-    void this._emit("secrets.redaction.rules.changed", { action: "add", ruleId: rule.id });
+    void this._emit("secrets.redaction.rules.changed", {
+      action: "add",
+      ruleId: rule.id,
+    });
   }
 
   removeRule(id: string): void {
@@ -135,19 +138,28 @@ export class RedactionRuleManager {
       throw new Error(`Rule '${id}' not found`);
     }
     this.rules.delete(id);
-    void this._emit("secrets.redaction.rules.changed", { action: "remove", ruleId: id });
+    void this._emit("secrets.redaction.rules.changed", {
+      action: "remove",
+      ruleId: id,
+    });
   }
 
   enableRule(id: string): void {
     const rule = this._getRule(id);
     rule.enabled = true;
-    void this._emit("secrets.redaction.rules.changed", { action: "enable", ruleId: id });
+    void this._emit("secrets.redaction.rules.changed", {
+      action: "enable",
+      ruleId: id,
+    });
   }
 
   disableRule(id: string): void {
     const rule = this._getRule(id);
     rule.enabled = false;
-    void this._emit("secrets.redaction.rules.changed", { action: "disable", ruleId: id });
+    void this._emit("secrets.redaction.rules.changed", {
+      action: "disable",
+      ruleId: id,
+    });
   }
 
   listRules(): RedactionRule[] {
@@ -189,7 +201,10 @@ export class RedactionRuleManager {
       };
       this.rules.set(rule.id, { ...rule, matchCount: 0 });
     }
-    void this._emit("secrets.redaction.rules.changed", { action: "import", count: parsed.length });
+    void this._emit("secrets.redaction.rules.changed", {
+      action: "import",
+      count: parsed.length,
+    });
   }
 
   exportRules(filePath: string): void {
@@ -198,7 +213,9 @@ export class RedactionRuleManager {
       pattern: pattern.source,
       flags: pattern.flags,
     }));
-    writeFileSync(filePath, JSON.stringify(data, null, 2), { encoding: "utf8" });
+    writeFileSync(filePath, JSON.stringify(data, null, 2), {
+      encoding: "utf8",
+    });
   }
 
   private _getRule(id: string): RedactionRule & { matchCount: number } {

@@ -60,7 +60,9 @@ export class CrashLoopDetector {
       const tempPath = `${historyPath}.tmp`;
 
       // Atomic write
-      fs.writeFile(tempPath, JSON.stringify(this.crashHistory), { encoding: "utf-8" })
+      fs.writeFile(tempPath, JSON.stringify(this.crashHistory), {
+        encoding: "utf-8",
+      })
         .then(() => fs.rename(tempPath, historyPath))
         .catch(err => {
           // Silently fail - don't let history persistence block operations

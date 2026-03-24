@@ -12,7 +12,10 @@ export class MetricsRecorder {
   private metricSamples: MetricSample[] = [];
 
   recordMetric(metric: string, value?: number, tags?: Record<string, string>): void {
-    const existing = this.metricsAccumulator.get(metric) ?? { count: 0, values: [] };
+    const existing = this.metricsAccumulator.get(metric) ?? {
+      count: 0,
+      values: [],
+    };
     const latestValue = value !== undefined ? value : existing.latest;
     const updated = {
       count: existing.count + 1,
@@ -24,7 +27,11 @@ export class MetricsRecorder {
     }
     this.metricsAccumulator.set(metric, updated);
     if (value !== undefined) {
-      this.metricSamples.push({ metric, value, ...(tags !== undefined ? { tags } : {}) });
+      this.metricSamples.push({
+        metric,
+        value,
+        ...(tags !== undefined ? { tags } : {}),
+      });
     }
   }
 

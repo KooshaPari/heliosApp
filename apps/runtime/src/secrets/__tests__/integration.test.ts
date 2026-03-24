@@ -33,7 +33,11 @@ function makeFixedEncryption(): EncryptionService {
 }
 
 function makeStore(dataDir: string, bus: LocalBus): CredentialStore {
-  return new CredentialStore({ dataDir, bus, encryption: makeFixedEncryption() });
+  return new CredentialStore({
+    dataDir,
+    bus,
+    encryption: makeFixedEncryption(),
+  });
 }
 
 function makeEngine(): RedactionEngine {
@@ -141,7 +145,10 @@ describe("Integration Tests (T015)", () => {
     it("emits bus event on protected path access", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });
-      detector.check("cat .env", { terminalId: "term-1", correlationId: "corr-1" });
+      detector.check("cat .env", {
+        terminalId: "term-1",
+        correlationId: "corr-1",
+      });
 
       // Give microtask queue a chance to process
       await new Promise(r => setTimeout(r, 0));
@@ -333,7 +340,11 @@ describe("Integration Tests (T015)", () => {
 
       await storeWithAudit.create("prov", "ws", "key", "val", "corr-create");
       await storeWithAudit.retrieveWithContext(
-        { requestingProviderId: "prov", requestingWorkspaceId: "ws", correlationId: "corr-access" },
+        {
+          requestingProviderId: "prov",
+          requestingWorkspaceId: "ws",
+          correlationId: "corr-access",
+        },
         "prov",
         "ws",
         "key"
@@ -547,7 +558,10 @@ describe("Integration Tests (T015)", () => {
       const wrappedBus = sink.wrapBus(bus);
 
       const detector = new ProtectedPathDetector({ bus: wrappedBus });
-      detector.check("cat .env", { terminalId: "term-1", correlationId: "corr-path" });
+      detector.check("cat .env", {
+        terminalId: "term-1",
+        correlationId: "corr-path",
+      });
 
       // Allow event processing
       await new Promise(r => setTimeout(r, 5));

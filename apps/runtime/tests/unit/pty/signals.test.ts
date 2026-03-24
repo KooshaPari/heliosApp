@@ -46,17 +46,47 @@ const pidsToCleanup: number[] = [];
 describe("SignalHistory", () => {
   it("stores and retrieves envelopes", () => {
     const h = new SignalHistory(3);
-    h.add({ ptyId: "p1", signal: "SIGTERM", timestamp: 1, outcome: "delivered", pid: 1 });
-    h.add({ ptyId: "p1", signal: "SIGKILL", timestamp: 2, outcome: "escalated", pid: 1 });
+    h.add({
+      ptyId: "p1",
+      signal: "SIGTERM",
+      timestamp: 1,
+      outcome: "delivered",
+      pid: 1,
+    });
+    h.add({
+      ptyId: "p1",
+      signal: "SIGKILL",
+      timestamp: 2,
+      outcome: "escalated",
+      pid: 1,
+    });
     expect(h.length).toBe(2);
     expect(h.getAll()[0]!.signal).toBe("SIGTERM");
   });
 
   it("bounds history to maxRecords", () => {
     const h = new SignalHistory(2);
-    h.add({ ptyId: "p1", signal: "SIGWINCH", timestamp: 1, outcome: "delivered", pid: 1 });
-    h.add({ ptyId: "p1", signal: "SIGTERM", timestamp: 2, outcome: "delivered", pid: 1 });
-    h.add({ ptyId: "p1", signal: "SIGKILL", timestamp: 3, outcome: "escalated", pid: 1 });
+    h.add({
+      ptyId: "p1",
+      signal: "SIGWINCH",
+      timestamp: 1,
+      outcome: "delivered",
+      pid: 1,
+    });
+    h.add({
+      ptyId: "p1",
+      signal: "SIGTERM",
+      timestamp: 2,
+      outcome: "delivered",
+      pid: 1,
+    });
+    h.add({
+      ptyId: "p1",
+      signal: "SIGKILL",
+      timestamp: 3,
+      outcome: "escalated",
+      pid: 1,
+    });
     expect(h.length).toBe(2);
     expect(h.getAll()[0]!.signal).toBe("SIGTERM");
   });
@@ -76,7 +106,10 @@ describe("resize", () => {
 
     resize(record, 120, 40, registry, historyMap, bus);
 
-    expect(registry.get(record.ptyId)?.dimensions).toEqual({ cols: 120, rows: 40 });
+    expect(registry.get(record.ptyId)?.dimensions).toEqual({
+      cols: 120,
+      rows: 40,
+    });
     const topics = bus.events.map(e => e.topic);
     expect(topics).toContain("pty.signal.delivered");
     expect(topics).toContain("pty.resized");

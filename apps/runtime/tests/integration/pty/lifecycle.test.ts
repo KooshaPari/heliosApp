@@ -80,7 +80,9 @@ describe("PTY lifecycle integration", () => {
     // Register the external process for write operations.
     mgr.registerProcess(
       record.ptyId,
-      proc as unknown as { readonly stdin: { write(data: Uint8Array | string): number } }
+      proc as unknown as {
+        readonly stdin: { write(data: Uint8Array | string): number };
+      }
     );
 
     // Write input.
@@ -113,7 +115,10 @@ describe("PTY lifecycle integration", () => {
 
     const resizeEvt = bus.events.find(e => e.topic === "pty.resized");
     expect(resizeEvt).toBeDefined();
-    expect(resizeEvt!.payload["newDimensions"]).toEqual({ cols: 120, rows: 40 });
+    expect(resizeEvt!.payload["newDimensions"]).toEqual({
+      cols: 120,
+      rows: 40,
+    });
 
     const updated = mgr.get(record.ptyId);
     expect(updated?.dimensions).toEqual({ cols: 120, rows: 40 });
@@ -157,9 +162,24 @@ describe("PTY lifecycle integration", () => {
     const mgr = new PtyManager(10, bus);
 
     const records = await Promise.all([
-      mgr.spawn({ shell: "/bin/sh", laneId: "lane-1", sessionId: "sess-1", terminalId: "term-1" }),
-      mgr.spawn({ shell: "/bin/sh", laneId: "lane-1", sessionId: "sess-1", terminalId: "term-2" }),
-      mgr.spawn({ shell: "/bin/sh", laneId: "lane-2", sessionId: "sess-2", terminalId: "term-3" }),
+      mgr.spawn({
+        shell: "/bin/sh",
+        laneId: "lane-1",
+        sessionId: "sess-1",
+        terminalId: "term-1",
+      }),
+      mgr.spawn({
+        shell: "/bin/sh",
+        laneId: "lane-1",
+        sessionId: "sess-1",
+        terminalId: "term-2",
+      }),
+      mgr.spawn({
+        shell: "/bin/sh",
+        laneId: "lane-2",
+        sessionId: "sess-2",
+        terminalId: "term-3",
+      }),
     ]);
 
     for (const r of records) {

@@ -69,7 +69,11 @@ export function publishLifecycleEvent(
   topic: string,
   envelope: LocalBusEnvelope,
   eventLog: LocalBusEnvelope[],
-  auditLog: Array<{ envelope: LocalBusEnvelope; outcome: "accepted" | "rejected"; error?: string }>
+  auditLog: Array<{
+    envelope: LocalBusEnvelope;
+    outcome: "accepted" | "rejected";
+    error?: string;
+  }>
 ): void {
   const seq = eventLog.filter(e => e.type === "event").length + 1;
   const event: LocalBusEnvelope = {

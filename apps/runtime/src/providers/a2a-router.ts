@@ -58,7 +58,12 @@ export interface A2AResult {
  */
 // biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
 export interface A2ARouterConfig extends A2AConfig {
-  endpoints?: Array<{ id: string; url: string; priority: number; capabilities: string[] }>;
+  endpoints?: Array<{
+    id: string;
+    url: string;
+    priority: number;
+    capabilities: string[];
+  }>;
 }
 
 /**

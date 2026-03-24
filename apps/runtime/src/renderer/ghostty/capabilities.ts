@@ -32,7 +32,10 @@ export async function detectGpu(): Promise<GpuInfo> {
       });
       const text = await new Response(proc.stdout).text();
       const hasMetal = text.includes("Metal");
-      return { available: hasMetal, driverVersion: hasMetal ? "metal" : undefined };
+      return {
+        available: hasMetal,
+        driverVersion: hasMetal ? "metal" : undefined,
+      };
     }
 
     // Linux: probe for OpenGL

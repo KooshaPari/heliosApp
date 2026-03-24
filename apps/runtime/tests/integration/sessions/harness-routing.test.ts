@@ -197,7 +197,9 @@ describe("session routing lifecycle", () => {
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);
     expect(sessionResponse.status).toBe(200);
-    const sessionBody = (await sessionResponse.json()) as { session_id: string };
+    const sessionBody = (await sessionResponse.json()) as {
+      session_id: string;
+    };
 
     const terminalResponse = await runtime.fetch(
       jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/terminals`, {
@@ -238,7 +240,9 @@ describe("session routing lifecycle", () => {
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);
     expect(sessionResponse.status).toBe(200);
-    const sessionBody = (await sessionResponse.json()) as { session_id: string };
+    const sessionBody = (await sessionResponse.json()) as {
+      session_id: string;
+    };
 
     const terminalResponse = await runtime.fetch(
       jsonRequest(`http://localhost/v1/workspaces/ws_2/lanes/${laneId}/terminals`, {
@@ -264,7 +268,9 @@ describe("session routing lifecycle", () => {
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);
     expect(sessionResponse.status).toBe(200);
-    const sessionBody = (await sessionResponse.json()) as { session_id: string };
+    const sessionBody = (await sessionResponse.json()) as {
+      session_id: string;
+    };
 
     const terminalResponse = await runtime.fetch(
       jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/terminals`, {
@@ -290,7 +296,9 @@ describe("session routing lifecycle", () => {
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);
     expect(sessionResponse.status).toBe(200);
-    const sessionBody = (await sessionResponse.json()) as { session_id: string };
+    const sessionBody = (await sessionResponse.json()) as {
+      session_id: string;
+    };
 
     const cleanupResponse = await runtime.fetch(
       jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/cleanup`, {})
@@ -320,7 +328,9 @@ describe("session routing lifecycle", () => {
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);
     expect(sessionResponse.status).toBe(200);
-    const sessionBody = (await sessionResponse.json()) as { session_id: string };
+    const sessionBody = (await sessionResponse.json()) as {
+      session_id: string;
+    };
 
     const terminalResponse = await runtime.fetch(
       jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/terminals`, {
@@ -346,7 +356,9 @@ describe("session routing lifecycle", () => {
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);
     expect(sessionResponse.status).toBe(200);
-    const sessionBody = (await sessionResponse.json()) as { session_id: string };
+    const sessionBody = (await sessionResponse.json()) as {
+      session_id: string;
+    };
 
     const cleanupResponse = await runtime.fetch(
       jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/cleanup`, {})

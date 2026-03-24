@@ -144,7 +144,13 @@ describe("LanePanel", () => {
   it("should display active lane indicator", () => {
     const lanes: Lane[] = [
       { id: "lane-1", name: "Lane 1", state: "idle", workspaceId: "ws-1" },
-      { id: "lane-2", name: "Lane 2", state: "running", workspaceId: "ws-1", isActive: true },
+      {
+        id: "lane-2",
+        name: "Lane 2",
+        state: "running",
+        workspaceId: "ws-1",
+        isActive: true,
+      },
     ];
 
     panel = new LanePanel({ ...mockProps, lanes, activeLaneId: "lane-2" });

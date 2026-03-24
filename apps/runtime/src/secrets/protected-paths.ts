@@ -333,21 +333,30 @@ export class ProtectedPathConfig {
       throw new Error(`Pattern '${id}' not found`);
     }
     this.patterns.delete(id);
-    void this._emit("secrets.protected_paths.config.changed", { action: "remove", patternId: id });
+    void this._emit("secrets.protected_paths.config.changed", {
+      action: "remove",
+      patternId: id,
+    });
   }
 
   disablePattern(id: string): void {
     const p = this.patterns.get(id);
     if (!p) throw new Error(`Pattern '${id}' not found`);
     p.enabled = false;
-    void this._emit("secrets.protected_paths.config.changed", { action: "disable", patternId: id });
+    void this._emit("secrets.protected_paths.config.changed", {
+      action: "disable",
+      patternId: id,
+    });
   }
 
   enablePattern(id: string): void {
     const p = this.patterns.get(id);
     if (!p) throw new Error(`Pattern '${id}' not found`);
     p.enabled = true;
-    void this._emit("secrets.protected_paths.config.changed", { action: "enable", patternId: id });
+    void this._emit("secrets.protected_paths.config.changed", {
+      action: "enable",
+      patternId: id,
+    });
   }
 
   listPatterns(): ProtectedPathPattern[] {

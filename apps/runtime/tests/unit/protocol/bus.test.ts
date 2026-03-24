@@ -106,7 +106,9 @@ describe("LocalBus — command dispatch", () => {
     const res = await bus.send(cmd);
 
     expect(res.error).toBeUndefined();
-    expect((res.payload as { inner: unknown }).inner).toEqual({ result: "inner-result" });
+    expect((res.payload as { inner: unknown }).inner).toEqual({
+      result: "inner-result",
+    });
   });
 
   // FR-003: re-entrant depth limit
@@ -127,9 +129,9 @@ describe("LocalBus — command dispatch", () => {
   });
 
   it("returns HANDLER_ERROR when handler returns non-envelope value", async () => {
-    bus.registerMethod("bad.return", (() => ({ notAnEnvelope: true })) as unknown as (
-      cmd: CommandEnvelope
-    ) => ResponseEnvelope);
+    bus.registerMethod("bad.return", (() => ({
+      notAnEnvelope: true,
+    })) as unknown as (cmd: CommandEnvelope) => ResponseEnvelope);
 
     const cmd = createCommand("bad.return", {});
     const res = await bus.send(cmd);

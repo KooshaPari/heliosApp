@@ -86,7 +86,11 @@ export async function detachAgent(
   registry: LaneRegistry,
   laneId: string,
   agentId: string
-): Promise<{ transitioned: boolean; fromState?: LaneState; toState?: LaneState }> {
+): Promise<{
+  transitioned: boolean;
+  fromState?: LaneState;
+  toState?: LaneState;
+}> {
   return withLaneLock(laneId, async () => {
     const lane = registry.get(laneId);
     if (!lane) {

@@ -444,7 +444,10 @@ describe("MCP Bridge Adapter", () => {
       const results = await Promise.all([
         adapter.execute({ toolName: "read_file", arguments: { path: "/file1.txt" } }, "corr-1"),
         adapter.execute(
-          { toolName: "write_file", arguments: { path: "/file2.txt", content: "test" } },
+          {
+            toolName: "write_file",
+            arguments: { path: "/file2.txt", content: "test" },
+          },
           "corr-2"
         ),
         adapter.execute({ toolName: "list_directory", arguments: { path: "/tmp" } }, "corr-3"),

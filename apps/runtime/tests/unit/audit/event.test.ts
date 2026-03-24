@@ -114,8 +114,11 @@ describe("AuditEvent Schema", () => {
       expect(event.metadata.exitCode).toBe(0);
       expect(event.metadata.duration).toBe(250);
       expect(
-        (event.metadata.custom as Record<string, unknown> & { nested: { value: number } }).nested
-          .value
+        (
+          event.metadata.custom as Record<string, unknown> & {
+            nested: { value: number };
+          }
+        ).nested.value
       ).toBe(42);
     });
   });
