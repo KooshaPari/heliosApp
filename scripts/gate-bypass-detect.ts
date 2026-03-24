@@ -62,7 +62,7 @@ export function scanBypassDirectives(options: ScannerOptions = {}): GateFinding[
         if (stat.isDirectory()) {
           scanDir(fullPath);
         } else if (/\.(ts|tsx|js|jsx)$/.test(file)) {
-          if (!shouldExclude(fullPath)) scanFile(fullPath, file);
+          scanFile(fullPath, file);
         }
       });
     } catch (e) {
@@ -73,7 +73,6 @@ export function scanBypassDirectives(options: ScannerOptions = {}): GateFinding[
   function scanFile(filePath: string, fileName: string) {
     const content = readFileSync(filePath, 'utf-8');
     const lines = content.split('\n');
-    const isTestFile = /\.(test|spec)\.(ts|tsx|js|jsx)$/.test(fileName);
     const relativePath = filePath.replace(process.cwd(), '');
 
     lines.forEach((line, index) => {
@@ -112,7 +111,7 @@ async function main(): Promise<void> {
   const jsonFlag = args.includes('--json');
 
   const startTime = Date.now();
-  const findings = scanBypassDirectives({ exclude: ['node_modules', 'dist', '.git', '.worktrees', 'gate-bypass-detect.test', 'build-infra.test'] });
+  const findings = scanBypassDirectives({ exclude: ['node_modules', 'dist', '.git', '.worktrees'] });
   const duration = Date.now() - startTime;
 
   const report = createGateReport('bypass-detect', findings, duration);

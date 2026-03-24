@@ -18,7 +18,7 @@ function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
     laneId: "lane-1",
     sessionId: "session-1",
     terminalId: "term-1",
-    pid: process.pid, // use own pid for safe signal tests
+    pid: 99999,
     state: "active",
     dimensions: { cols: 80, rows: 24 },
     createdAt: Date.now(),
@@ -27,6 +27,21 @@ function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
     ...overrides,
   };
 }
+
+function spawnShellProcess(): number {
+  const proc = Bun.spawn(["/bin/sh"], {
+    stdout: "pipe",
+    stderr: "pipe",
+  }) as { pid?: number };
+
+  if (proc.pid === undefined) {
+    throw new Error("Bun.spawn did not return a process ID");
+  }
+
+  return proc.pid;
+}
+
+const pidsToCleanup: number[] = [];
 
 describe("SignalHistory", () => {
   it("stores and retrieves envelopes", () => {
@@ -79,8 +94,12 @@ describe("SignalHistory", () => {
 
 describe("resize", () => {
   it("updates dimensions and emits events", () => {
+    // Spawn a real child so SIGWINCH delivery succeeds.
+    const pid = spawnShellProcess();
+    pidsToCleanup.push(pid);
+
     const registry = new PtyRegistry();
-    const record = makeRecord();
+    const record = makeRecord({ pid });
     registry.register(record);
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
@@ -254,7 +273,21 @@ describe("terminate", () => {
 });
 
 describe("sendSighup", () => {
-  it("records signal delivery result", () => {
+  it("records successful delivery", () => {
+    // Spawn a real child so SIGHUP has a valid target (not the test runner).
+    const pid = spawnShellProcess();
+    pidsToCleanup.push(pid);
+
+    const record = makeRecord({ pid });
+    const historyMap: SignalHistoryMap = new Map();
+    const bus = new InMemoryBusPublisher();
+    const envelope = sendSighup(record, historyMap, bus);
+    expect(envelope.outcome).toBe("delivered");
+    expect(envelope.signal).toBe("SIGHUP");
+    expect(historyMap.get(record.ptyId)?.length).toBe(1);
+  });
+
+  it("records failed delivery for dead process", () => {
     // Use a non-existent PID to avoid sending signals to the test process
     const record = makeRecord({ pid: 999999 });
     const historyMap: SignalHistoryMap = new Map();
