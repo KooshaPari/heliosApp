@@ -78,7 +78,9 @@ export class TerminalRegistry implements RegistryQueryInterface {
     }
 
     // Validate binding triple
-    const validation = validateBindingTriple(triple, this);
+    const validation = validateBindingTriple(triple, this, {
+      skipReferenceChecks: true,
+    });
     if (!validation.valid) {
       throw new InvalidBinding(validation.errors);
     }
@@ -116,7 +118,9 @@ export class TerminalRegistry implements RegistryQueryInterface {
     }
 
     // Validate new binding triple
-    const validation = validateBindingTriple(newTriple, this);
+    const validation = validateBindingTriple(newTriple, this, {
+      skipReferenceChecks: true,
+    });
     if (!validation.valid) {
       throw new InvalidBinding(validation.errors);
     }
@@ -135,7 +139,7 @@ export class TerminalRegistry implements RegistryQueryInterface {
 
     // Update binding
     binding.binding = newTriple;
-    binding.state = BindingState.Rebound;
+    binding.state = BindingState.rebound;
     binding.updatedAt = Date.now();
 
     // Add to new indexes
@@ -161,7 +165,7 @@ export class TerminalRegistry implements RegistryQueryInterface {
     const triple = binding.binding;
 
     // Transition state
-    binding.state = BindingState.Unbound;
+    binding.state = BindingState.unbound;
     binding.updatedAt = Date.now();
 
     // Remove from all indexes
@@ -222,23 +226,35 @@ export class TerminalRegistry implements RegistryQueryInterface {
    * Implement RegistryQueryInterface for validation callbacks.
    */
   workspaceExists(_workspaceId: string): boolean {
-    return true; // External validation; assume exists if referenced
+    return this.workspaceIndex.has(_workspaceId);
   }
 
   laneExists(_laneId: string): boolean {
-    return true; // External validation
+    return this.laneIndex.has(_laneId);
   }
 
   sessionExists(_sessionId: string): boolean {
-    return true; // External validation
+    return this.sessionIndex.has(_sessionId);
   }
 
   laneInWorkspace(_laneId: string, _workspaceId: string): boolean {
-    return true; // External validation
+    const terminalIds = this.laneIndex.get(_laneId);
+    if (!terminalIds || terminalIds.size === 0) {
+      return false;
+    }
+
+    const firstBinding = this.primaryStore.get(terminalIds.values().next().value as string);
+    return firstBinding?.binding.workspaceId === _workspaceId;
   }
 
   sessionInLane(_sessionId: string, _laneId: string): boolean {
-    return true; // External validation
+    const terminalIds = this.sessionIndex.get(_sessionId);
+    if (!terminalIds || terminalIds.size === 0) {
+      return false;
+    }
+
+    const firstBinding = this.primaryStore.get(terminalIds.values().next().value as string);
+    return firstBinding?.binding.laneId === _laneId;
   }
 
   /**

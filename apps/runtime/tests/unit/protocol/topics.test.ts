@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'bun:test';
-import { createBus, LocalBus } from '../../../src/protocol/bus.js';
+import { createBus, type CommandBus } from '../../../src/protocol/bus.js';
 import { createEvent } from '../../../src/protocol/envelope.js';
 import type { EventEnvelope } from '../../../src/protocol/types.js';
 
@@ -8,7 +8,7 @@ import type { EventEnvelope } from '../../../src/protocol/types.js';
 // FR-010: Snapshot-based subscriber iteration
 
 describe('LocalBus — event fan-out', () => {
-  let bus: LocalBus;
+  let bus: CommandBus;
 
   beforeEach(() => {
     bus = createBus();
