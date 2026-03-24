@@ -31,8 +31,16 @@ jobs:
     name: docs-build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout heliosApp
         uses: actions/checkout@v4
+        with:
+          path: heliosApp
+
+      - name: Checkout phenodocs
+        uses: actions/checkout@v4
+        with:
+          repository: KooshaPari/phenodocs
+          path: phenodocs
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -40,22 +48,25 @@ jobs:
           bun-version: 1.2.20
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        working-directory: heliosApp
+        run: bun install
 
       - name: Generate docs index
+        working-directory: heliosApp
         run: bun run docs:index
 
       - name: Build docs
+        working-directory: heliosApp
         run: bun run docs:build
 
       - name: Verify docs output
-        run: test -f docs/.vitepress/dist/index.html
+        run: test -f heliosApp/docs/.vitepress/dist/index.html
 
       - name: Upload pages artifact
         if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/.vitepress/dist
+          path: heliosApp/docs/.vitepress/dist
 
   deploy:
     name: docs-deploy
