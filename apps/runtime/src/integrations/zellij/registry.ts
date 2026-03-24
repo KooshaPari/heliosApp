@@ -57,6 +57,14 @@ export class MuxRegistry {
   }
 
   /**
+   * Compatibility accessor for watchdog interfaces expecting `getSession`.
+   */
+  getSession(sessionName: string): { laneId?: string } | null {
+    const binding = this.getBySession(sessionName);
+    return binding ? { laneId: binding.laneId } : null;
+  }
+
+  /**
    * Look up a binding by lane ID.
    */
   getByLane(laneId: string): MuxBinding | undefined {
@@ -79,6 +87,16 @@ export class MuxRegistry {
    */
   list(): MuxBinding[] {
     return [...this.bySession.values()];
+  }
+
+  /**
+   * Compatibility accessor for watchdog interfaces expecting `getSessions`.
+   */
+  getSessions(): Array<{ id: string; laneId?: string }> {
+    return this.list().map((binding) => ({
+      id: binding.sessionName,
+      laneId: binding.laneId,
+    }));
   }
 
   /**

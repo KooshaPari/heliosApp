@@ -38,7 +38,7 @@ describe("FlagRegistry — get", () => {
     await settings.init();
     flags.register(RENDERER_ENGINE_FLAG);
     flags.init();
-    expect(flags.get("renderer_engine")).toBe("ghostty");
+    expect(flags.get<"ghostty" | "rio">("renderer_engine")).toBe("ghostty");
     flags.dispose();
     settings.dispose();
   });
@@ -62,7 +62,7 @@ describe("FlagRegistry — get", () => {
     flags.init();
 
     await settings.set("theme", "dark");
-    expect(flags.get("theme")).toBe("dark");
+    expect(flags.get<string>("theme")).toBe("dark");
     flags.dispose();
     settings.dispose();
   });
@@ -83,7 +83,7 @@ describe("FlagRegistry — get", () => {
     await settings.init();
     flags.register(RENDERER_ENGINE_FLAG);
     // Don't call flags.init() — cache populated at register time
-    expect(flags.get("renderer_engine")).toBe("ghostty");
+    expect(flags.get<"ghostty" | "rio">("renderer_engine")).toBe("ghostty");
     flags.dispose();
     settings.dispose();
   });
@@ -154,7 +154,7 @@ describe("FlagRegistry — restart-required flags", () => {
     flags.register(RENDERER_ENGINE_FLAG);
     flags.init();
     await settings.set("renderer_engine", "rio");
-    expect(flags.get("renderer_engine")).toBe("ghostty");
+    expect(flags.get<"ghostty" | "rio">("renderer_engine")).toBe("ghostty");
     expect(flags.pendingRestart).toBe(true);
     flags.dispose();
     settings.dispose();

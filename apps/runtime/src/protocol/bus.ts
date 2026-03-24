@@ -1,9 +1,13 @@
 import type { LocalBusEnvelope } from "./types.js";
+import { ProtocolValidationError } from "./types.js";
+import { validateEnvelope } from "./validator.js";
 
 export interface LocalBus {
   publish(event: LocalBusEnvelope): Promise<void>;
   request(command: LocalBusEnvelope): Promise<LocalBusEnvelope>;
 }
+
+type LocalBusEnvelopeWithSequence = LocalBusEnvelope & { sequence?: number };
 
 // ---------------------------------------------------------------------------
 // Audit record (for protocol_bus tests)
@@ -77,7 +81,7 @@ const START_TOPICS = new Set([
 const hasTopLevelDataField = (envelope: LocalBusEnvelope): boolean =>
   Object.prototype.hasOwnProperty.call(envelope, "data");
 
-export class InMemoryLocalBus implements ProtocolBus {
+export class InMemoryLocalBus implements LocalBus {
   private readonly eventLog: LocalBusEnvelope[] = [];
   private readonly auditLog: AuditRecord[] = [];
   private readonly metricsAccumulator: Map<
@@ -386,6 +390,21 @@ export class InMemoryLocalBus implements ProtocolBus {
         };
       }
 
+      if (command.method === "lane.attach") {
+        const laneResultId = command.lane_id ?? command.payload?.lane_id ?? `lane_${Date.now()}`;
+        return {
+          id: `res-${Date.now()}`,
+          type: "response",
+          ts: new Date().toISOString(),
+          status: "ok",
+          result: {
+            // biome-ignore lint/style/useNamingConvention: Protocol response fields use snake_case.
+            lane_id: laneResultId,
+            state: this.state,
+          },
+        };
+      }
+
       if (command.method === "session.attach") {
         const correlationId = command.correlation_id;
         if (!correlationId) {
@@ -437,7 +456,7 @@ export class InMemoryLocalBus implements ProtocolBus {
         }
         this.state = { session: "attached" };
         const sessionResultId =
-          command.payload?.id ?? command.payload?.session_id ?? `session_${Date.now()}`;
+          command.session_id ?? command.payload?.id ?? command.payload?.session_id ?? `session_${Date.now()}`;
         return {
           id: `res-${Date.now()}`,
           type: "response",
@@ -609,7 +628,7 @@ export class InMemoryLocalBus implements ProtocolBus {
     }
 
     return {
-      id: _command.id,
+      id: command.id,
       type: "response",
       ts: new Date().toISOString(),
       status: "ok",

@@ -2,7 +2,7 @@
 
 import type { PercentileBucket, Sample } from "./types.js";
 import type { MetricsRegistry } from "./metrics.js";
-import { computePercentiles } from "./percentiles.js";
+import { computePercentiles, EMPTY_PERCENTILE_BUCKET } from "./percentiles.js";
 
 /**
  * Read API for retrieving computed statistics from the metrics registry.
@@ -22,7 +22,7 @@ export class MetricsQuery {
   getStats(metric: string): PercentileBucket | null {
     const entry = this.registry.getMetric(metric);
     if (entry === undefined) {
-      return null;
+      return this.registry.getDefinition(metric) === undefined ? null : EMPTY_PERCENTILE_BUCKET;
     }
     return computePercentiles(entry.buffer);
   }

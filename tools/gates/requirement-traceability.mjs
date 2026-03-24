@@ -1,9 +1,9 @@
 import { readFileSync, existsSync } from "node:fs";
 
-const specPath = process.env.TRACE_SPEC_PATH ?? "kitty-specs/001-colab-agent-terminal-control-plane/spec.md";
+const specPath = process.env.TRACE_SPEC_PATH ?? "agileplus/001-colab-agent-terminal-control-plane/spec.md";
 const matrixPath =
   process.env.TRACE_MATRIX_PATH ??
-  "kitty-specs/001-colab-agent-terminal-control-plane/traceability-matrix.json";
+  "agileplus/001-colab-agent-terminal-control-plane/traceability-matrix.json";
 
 function extractRequirementIds(specText) {
   const matches = [...specText.matchAll(/\*\*((?:FR|NFR)-[0-9]+[a-z]?)\*\*/g)];

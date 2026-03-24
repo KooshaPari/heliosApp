@@ -70,10 +70,10 @@ const runtimeMethods = parseLiteralArray(resolve(root, "apps/runtime/src/protoco
 const formalTopics = readJson(resolve(root, "specs/protocol/v1/topics.json")).topics;
 const formalMethods = readJson(resolve(root, "specs/protocol/v1/methods.json")).methods;
 const matrix = readJson(
-  resolve(root, "kitty-specs/001-colab-agent-terminal-control-plane/contracts/protocol-parity-matrix.json")
+  resolve(root, "agileplus/001-colab-agent-terminal-control-plane/contracts/protocol-parity-matrix.json")
 );
 const contract = readJson(
-  resolve(root, "kitty-specs/001-colab-agent-terminal-control-plane/contracts/orchestration-envelope.schema.json")
+  resolve(root, "agileplus/001-colab-agent-terminal-control-plane/contracts/orchestration-envelope.schema.json")
 );
 
 const contractMethods = ((contract.properties?.method?.enum ?? []).filter(Boolean));

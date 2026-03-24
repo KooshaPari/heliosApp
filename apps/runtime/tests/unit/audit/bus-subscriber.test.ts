@@ -1,12 +1,25 @@
-import { describe, it, expect, beforeEach, mock } from 'bun:test';
-import { BusAuditSubscriber, BusEvent } from '../../../src/audit/bus-subscriber';
-import { DefaultAuditSink, NoOpAuditStorage } from '../../../src/audit/sink';
-import { AUDIT_EVENT_TYPES } from '../../../src/audit/event';
+import { describe, it, expect, beforeEach } from "bun:test";
+import { BusAuditSubscriber, type BusEvent } from "../../../src/audit/bus-subscriber";
+import { DefaultAuditSink, NoOpAuditStorage } from "../../../src/audit/sink";
+import { type AuditEvent } from "../../../src/audit/event";
+
+type MockBus = {
+  subscribe: (topic: string, handler: (event: BusEvent) => Promise<void>) => () => void;
+  emit: (event: BusEvent) => Promise<void>;
+};
+
+const AUDIT_EVENT_TYPES = {
+  lane_created: "lane.created",
+  session_created: "session.created",
+  policy_evaluation_completed: "policy.evaluation.completed",
+  approval_resolved: "approval.resolved",
+  unknown_topic: "unknown.topic.that.does.not.exist",
+} as const;
 
 describe('BusAuditSubscriber', () => {
   let subscriber: BusAuditSubscriber;
   let sink: DefaultAuditSink;
-  let mockBus: any;
+  let mockBus: MockBus;
 
   beforeEach(() => {
     subscriber = new BusAuditSubscriber();
@@ -16,15 +29,15 @@ describe('BusAuditSubscriber', () => {
     let subscriptionHandler: ((event: BusEvent) => Promise<void>) | null = null;
 
     mockBus = {
-      subscribe: (topic: string, handler: (event: BusEvent) => Promise<void>) => {
+      subscribe: (_topic: string, handler: (event: BusEvent) => Promise<void>) => {
         subscriptionHandler = handler;
         return () => {
           subscriptionHandler = null;
         };
       },
-      emit: (event: BusEvent) => {
+      emit: async (event: BusEvent) => {
         if (subscriptionHandler) {
-          return subscriptionHandler(event);
+          await subscriptionHandler(event);
         }
       },
     };
@@ -41,8 +54,8 @@ describe('BusAuditSubscriber', () => {
       subscriber.subscribe(mockBus, sink);
 
       const event: BusEvent = {
-        topic: 'lane.created',
-        payload: { laneId: 'lane-1' },
+        topic: AUDIT_EVENT_TYPES.lane_created,
+        payload: { laneId: "lane-1" },
         actor: 'operator-1',
         action: 'create',
         target: 'lane-1',
@@ -62,8 +75,8 @@ describe('BusAuditSubscriber', () => {
       subscriber.subscribe(mockBus, sink);
 
       const event: BusEvent = {
-        topic: 'session.created',
-        payload: { sessionId: 'session-1' },
+        topic: AUDIT_EVENT_TYPES.session_created,
+        payload: { sessionId: "session-1" },
         actor: 'agent-1',
         action: 'create',
         target: 'session-1',
@@ -81,8 +94,8 @@ describe('BusAuditSubscriber', () => {
       subscriber.subscribe(mockBus, sink);
 
       const event: BusEvent = {
-        topic: 'policy.evaluation.completed',
-        payload: { policyId: 'policy-1', result: 'allowed' },
+        topic: AUDIT_EVENT_TYPES.policy_evaluation_completed,
+        payload: { policyId: "policy-1", result: "allowed" },
         actor: 'system',
         action: 'evaluate',
         target: 'policy-1',
@@ -100,8 +113,8 @@ describe('BusAuditSubscriber', () => {
       subscriber.subscribe(mockBus, sink);
 
       const event: BusEvent = {
-        topic: 'approval.resolved',
-        payload: { approvalId: 'appr-1', decision: 'approved' },
+        topic: AUDIT_EVENT_TYPES.approval_resolved,
+        payload: { approvalId: "appr-1", decision: "approved" },
         actor: 'operator-1',
         action: 'resolve',
         target: 'appr-1',
@@ -121,7 +134,7 @@ describe('BusAuditSubscriber', () => {
       subscriber.subscribe(mockBus, sink);
 
       const event: BusEvent = {
-        topic: 'unknown.topic.that.does.not.exist',
+        topic: AUDIT_EVENT_TYPES.unknown_topic,
         payload: {},
         actor: 'agent-1',
         workspaceId: 'workspace-1',
@@ -139,7 +152,7 @@ describe('BusAuditSubscriber', () => {
 
   describe('correlation ID preservation', () => {
     it('should preserve correlation ID from bus event to audit event', async () => {
-      let capturedEvent: any = null;
+      let capturedEvent: AuditEvent | null = null;
 
       // Create a capturing storage to inspect events
       const capturingSink = new DefaultAuditSink({
@@ -153,7 +166,7 @@ describe('BusAuditSubscriber', () => {
       subscriber.subscribe(mockBus, capturingSink);
 
       const event: BusEvent = {
-        topic: 'session.created',
+        topic: AUDIT_EVENT_TYPES.session_created,
         payload: {},
         actor: 'agent-1',
         workspaceId: 'workspace-1',
@@ -164,7 +177,7 @@ describe('BusAuditSubscriber', () => {
       await capturingSink.flush();
 
       expect(capturedEvent).toBeTruthy();
-      expect(capturedEvent.correlationId).toBe('special-corr-id-123');
+      expect(capturedEvent?.correlationId).toBe('special-corr-id-123');
     });
   });
 
@@ -173,7 +186,7 @@ describe('BusAuditSubscriber', () => {
       subscriber.subscribe(mockBus, sink);
 
       const event1: BusEvent = {
-        topic: 'lane.created',
+        topic: AUDIT_EVENT_TYPES.lane_created,
         payload: {},
         actor: 'operator-1',
         workspaceId: 'workspace-1',
@@ -193,7 +206,7 @@ describe('BusAuditSubscriber', () => {
       sink = new DefaultAuditSink(new NoOpAuditStorage());
 
       const event2: BusEvent = {
-        topic: 'session.created',
+        topic: AUDIT_EVENT_TYPES.session_created,
         payload: {},
         actor: 'agent-1',
         workspaceId: 'workspace-1',

@@ -148,7 +148,7 @@ export class LaneEventHandler {
     if (this.options.onOrphanStatusChanged) {
       for (const laneId of orphanedLanes) {
         this.options.onOrphanStatusChanged?.(laneId, true);
-      });
+      }
     }
   }
 

@@ -6,7 +6,8 @@ import {
   InvalidBinding,
   TerminalNotFound,
 } from "../../../src/registry/terminal_registry.js";
-import { BindingState, type BindingTriple } from "../../../src/registry/binding_triple.js";
+import { BindingState } from "../../../src/registry/binding_triple.js";
+import { type BindingTriple } from "../../../src/registry/binding_triple.js";
 
 describe("TerminalRegistry", () => {
   let registry: TerminalRegistry;
@@ -27,7 +28,7 @@ describe("TerminalRegistry", () => {
 
       expect(binding.terminalId).toBe("terminal-1");
       expect(binding.binding).toEqual(triple);
-      expect(binding.state).toBe(BindingState.Bound);
+      expect(binding.state).toBe(BindingState.bound);
     });
 
     it("should reject duplicate terminal_id", () => {
@@ -134,7 +135,7 @@ describe("TerminalRegistry", () => {
       const rebound = registry.rebind("terminal-1", newTriple);
 
       expect(rebound.binding).toEqual(newTriple);
-      expect(rebound.state).toBe(BindingState.Rebound);
+      expect(rebound.state).toBe(BindingState.rebound);
     });
 
     it("should update indexes after rebind", () => {

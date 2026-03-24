@@ -43,6 +43,13 @@ jobs:
             core.setOutput('files', JSON.stringify(files));
             console.log('Changed files:', files);
 
+      - name: Generate SBOM (syft)
+        uses: anchore/sbom-action@v0
+        with:
+          file: ./package.json
+          format: 'spdx-json'
+          output-file: 'sbom.spdx.json'
+
       - name: Run compliance checker
         id: compliance
         continue-on-error: true

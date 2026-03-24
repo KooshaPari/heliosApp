@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
-import { ReplayEngine, ReplayStream } from '../../../src/audit/replay';
+import { ReplayEngine, type ReplayStream } from '../../../src/audit/replay';
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from '../../../src/audit/event';
-import { SessionSnapshot } from '../../../src/audit/snapshot';
+import { type SessionSnapshot } from '../../../src/audit/snapshot';
 
 describe('ReplayEngine', () => {
   let engine: ReplayEngine;

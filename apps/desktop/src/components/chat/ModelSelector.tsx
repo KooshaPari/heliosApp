@@ -103,7 +103,7 @@ export const ModelSelector: Component<ModelSelectorProps> = (props) => {
                           (not configured)
                         </span>
                       </Show>
-                    </div>
+                    </button>
                   )}
                 </For>
               </div>
