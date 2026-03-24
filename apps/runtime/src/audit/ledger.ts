@@ -223,8 +223,13 @@ export class AuditLedger {
 
     visited.add(correlationId);
 
-    // Get all events with this correlation ID
-    const events = this.store.getByCorrelationChain(correlationId);
+    // Get all events with this correlation ID from both ring buffer and store
+    const storeEvents = this.store.getByCorrelationChain(correlationId);
+    const ringEvents = this.ringBuffer.getByCorrelationId(correlationId);
+    const eventMap = new Map<string, AuditEvent>();
+    for (const event of storeEvents) eventMap.set(event.id, event);
+    for (const event of ringEvents) eventMap.set(event.id, event);
+    const events = Array.from(eventMap.values());
 
     if (events.length === 0) {
       console.warn(`[AuditLedger] No events found for correlation ID: ${correlationId}`);

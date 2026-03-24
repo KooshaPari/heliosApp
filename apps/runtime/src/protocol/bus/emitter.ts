@@ -128,7 +128,10 @@ export class InMemoryLocalBus implements LocalBus {
           );
           this.auditLog.push({ envelope: event, outcome: "rejected", error: err.message });
           throw err;
-        }
+        
+        // Clear lifecycle progress after successful terminal topic to allow re-use
+        this.lifecycleProgress.delete(correlationId);
+      }
       }
 
       // Handle terminal.output metrics
@@ -177,6 +180,7 @@ export class InMemoryLocalBus implements LocalBus {
     if (command.method) {
       const needsCorrelation = [
         "lane.create",
+        "lane.attach",
         "session.attach",
         "terminal.spawn",
         "terminal.input",
@@ -200,6 +204,10 @@ export class InMemoryLocalBus implements LocalBus {
 
       if (command.method === "lane.create") {
         return this.handleLaneCreate(command, startTime);
+      }
+
+      if (command.method === "lane.attach") {
+        return this.handleLaneAttach(command);
       }
 
       if (command.method === "session.attach") {
@@ -229,6 +237,31 @@ export class InMemoryLocalBus implements LocalBus {
       ts: new Date().toISOString(),
       status: "ok",
       result: {},
+    };
+  }
+
+  private handleLaneAttach(command: LocalBusEnvelope): LocalBusEnvelope {
+    const correlationId = command.correlation_id ?? "";
+    if (!this.lifecycleProgress.has(correlationId)) {
+      this.lifecycleProgress.set(correlationId, new Set());
+    }
+    this.lifecycleProgress.get(correlationId)?.add("lane.attach.started");
+    publishLifecycleEvent("lane.attach.started", command, this.eventLog, this.auditLog);
+
+    const laneId = command.lane_id ?? command.payload?.lane_id ?? `lane_${Date.now()}`;
+
+    this.lifecycleProgress.get(correlationId)?.add("lane.attached");
+    publishLifecycleEvent("lane.attached", command, this.eventLog, this.auditLog);
+
+    return {
+      id: `res-${Date.now()}`,
+      type: "response",
+      ts: new Date().toISOString(),
+      status: "ok",
+      result: {
+        // biome-ignore lint/style/useNamingConvention: Protocol response fields use snake_case.
+        lane_id: laneId,
+      },
     };
   }
 
@@ -347,7 +380,7 @@ export class InMemoryLocalBus implements LocalBus {
     }
     this.state = { session: "attached" };
     const sessionResultId =
-      command.payload?.id ?? command.payload?.session_id ?? `session_${Date.now()}`;
+      command.session_id ?? command.payload?.id ?? command.payload?.session_id ?? `session_${Date.now()}`;
     return {
       id: `res-${Date.now()}`,
       type: "response",

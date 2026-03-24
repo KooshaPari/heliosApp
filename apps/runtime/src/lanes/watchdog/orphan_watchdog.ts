@@ -15,10 +15,11 @@ export interface WatchdogConfig {
   terminalRegistry: TerminalRegistry;
   laneRegistry: LaneRegistry;
   bus: LocalBus;
+  checkpointBaseDir?: string;
 }
 
 export class OrphanWatchdog {
-  private readonly checkpointManager = new CheckpointManager();
+  private readonly checkpointManager: CheckpointManager;
   private readonly resourceClassifier = new ResourceClassifier();
   private readonly worktreeDetector: WorktreeDetector;
   private readonly zellijDetector: ZellijDetector;
@@ -33,6 +34,7 @@ export class OrphanWatchdog {
   private lastClassifiedOrphans: ClassifiedOrphan[] = [];
 
   constructor(config: WatchdogConfig) {
+    this.checkpointManager = new CheckpointManager(config.checkpointBaseDir);
     this.detectionInterval = config.detectionInterval || 60000;
     this.bus = config.bus;
 

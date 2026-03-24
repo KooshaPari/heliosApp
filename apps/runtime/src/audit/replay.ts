@@ -124,7 +124,7 @@ export class ReplayEngine {
     // Add significant events (commands, errors, approvals)
     for (const event of stream.events) {
       if (
-        ["COMMAND_EXECUTED", "POLICY_EVALUATION", "APPROVAL_RESOLVED"].includes(
+        ["command.executed", "policy.evaluation", "approval.resolved"].includes(
           event.eventType as any
         )
       ) {

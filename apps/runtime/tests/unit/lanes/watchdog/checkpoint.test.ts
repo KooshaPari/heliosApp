@@ -15,7 +15,7 @@ describe("CheckpointManager", () => {
 
   beforeEach(async () => {
     // Create manager
-    manager = new CheckpointManager();
+    manager = new CheckpointManager(testDir);
     // Clean up any existing test files
     try {
       await fs.rm(testDir, { recursive: true, force: true });
@@ -97,8 +97,8 @@ describe("CheckpointManager", () => {
   it("should handle corrupt checkpoint gracefully", async () => {
     // Create a corrupt checkpoint file manually
     try {
-      const checkpointPath = path.join(os.homedir(), ".helios", "data", "watchdog_checkpoint.json");
-      await fs.mkdir(path.dirname(checkpointPath), { recursive: true });
+      const checkpointPath = path.join(testDir, "watchdog_checkpoint.json");
+      await fs.mkdir(testDir, { recursive: true });
       await fs.writeFile(checkpointPath, "{ invalid json }", "utf-8");
 
       const loaded = await manager.load();

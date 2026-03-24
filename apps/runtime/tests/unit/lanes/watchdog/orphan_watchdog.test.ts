@@ -1,6 +1,8 @@
 // Unit tests for OrphanWatchdog
 
 import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
+import os from "os";
+import path from "path";
 import { OrphanWatchdog } from "../../../../src/lanes/watchdog/orphan_watchdog.js";
 import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
@@ -32,6 +34,7 @@ describe("OrphanWatchdog", () => {
 
   it("should start and stop cleanly", async () => {
     watchdog = new OrphanWatchdog({
+      checkpointBaseDir: path.join(os.tmpdir(), "helios-test-watchdog-" + Date.now()),
       detectionInterval: 100,
       worktreeBaseDir: "/tmp/test-worktrees",
       sessionRegistry: createMockSessionRegistry(),
@@ -53,6 +56,7 @@ describe("OrphanWatchdog", () => {
 
   it("should run detection cycles on interval", async () => {
     watchdog = new OrphanWatchdog({
+      checkpointBaseDir: path.join(os.tmpdir(), "helios-test-watchdog-" + Date.now()),
       detectionInterval: 50,
       worktreeBaseDir: "/tmp/test-worktrees",
       sessionRegistry: createMockSessionRegistry(),
@@ -75,6 +79,7 @@ describe("OrphanWatchdog", () => {
 
   it("should emit detection cycle event with correct structure", async () => {
     watchdog = new OrphanWatchdog({
+      checkpointBaseDir: path.join(os.tmpdir(), "helios-test-watchdog-" + Date.now()),
       detectionInterval: 50,
       worktreeBaseDir: "/tmp/test-worktrees",
       sessionRegistry: createMockSessionRegistry(),
@@ -104,6 +109,7 @@ describe("OrphanWatchdog", () => {
 
   it("should not allow double start", async () => {
     watchdog = new OrphanWatchdog({
+      checkpointBaseDir: path.join(os.tmpdir(), "helios-test-watchdog-" + Date.now()),
       detectionInterval: 100,
       worktreeBaseDir: "/tmp/test-worktrees",
       sessionRegistry: createMockSessionRegistry(),
@@ -123,6 +129,7 @@ describe("OrphanWatchdog", () => {
 
   it("should track detection duration", async () => {
     watchdog = new OrphanWatchdog({
+      checkpointBaseDir: path.join(os.tmpdir(), "helios-test-watchdog-" + Date.now()),
       detectionInterval: 50,
       worktreeBaseDir: "/tmp/test-worktrees",
       sessionRegistry: createMockSessionRegistry(),

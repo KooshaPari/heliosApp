@@ -433,7 +433,7 @@ function deepRedact(value: unknown, redactionSet: ReadonlySet<string>): unknown 
     const input = value as Record<string, unknown>;
     const output: Record<string, unknown> = {};
     for (const [key, nested] of Object.entries(input)) {
-      if (redactionSet.has(key.toLowerCase())) {
+      if (redactionSet.has(key.toLowerCase()) || isSensitiveKey(key)) {
         output[key] = "[REDACTED]";
       } else {
         output[key] = deepRedact(nested, redactionSet);
