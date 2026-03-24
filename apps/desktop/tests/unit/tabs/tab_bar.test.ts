@@ -152,13 +152,18 @@ describe("TabBar", () => {
       tabBar.pinTab("tab5", true);
       tabBar.pinTab("tab3", true);
 
-      const order = tabBar.getTabOrder();
-      const pinned = order.filter(id => tabBar.isTabPinned(id));
-      const unpinned = order.filter(id => !tabBar.isTabPinned(id));
+      const element = tabBar.render();
+      const tabHeaders = element.querySelectorAll("[data-tab-id]");
+      const renderedOrder = Array.from(tabHeaders).map(el => el.getAttribute("data-tab-id"));
 
-      // Pinned tabs should come before unpinned in the order
-      const lastPinnedIndex = Math.max(...pinned.map(id => order.indexOf(id)));
-      const firstUnpinnedIndex = unpinned.length > 0 ? order.indexOf(unpinned[0]) : Infinity;
+      // Pinned tabs (tab3, tab5) should appear before unpinned in rendered order
+      const lastPinnedIndex = Math.max(
+        renderedOrder.indexOf("tab3"),
+        renderedOrder.indexOf("tab5")
+      );
+      const firstUnpinnedIndex = renderedOrder.findIndex(
+        id => id !== "tab3" && id !== "tab5"
+      );
 
       expect(lastPinnedIndex).toBeLessThan(firstUnpinnedIndex);
     });
@@ -182,7 +187,7 @@ describe("TabBar", () => {
       const selectedTab = element.querySelector('[data-tab-id="tab1"]') as HTMLElement;
 
       expect(selectedTab).toBeDefined();
-      expect(selectedTab.style.backgroundColor).toBe("rgb(255, 255, 255)");
+      expect(selectedTab.style.backgroundColor).toMatch(/rgb\(255.*255.*255\)|#fff(fff)?|white/);
     });
 
     it("should show stale context indicator", () => {

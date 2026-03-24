@@ -171,9 +171,7 @@ describe("RendererSettings", () => {
     settings.mount(container);
 
     let activeOption = container.querySelector(".renderer-option.active");
-    expect(activeOption?.querySelector("[data-renderer]")?.getAttribute("data-renderer")).toBe(
-      "ghostty"
-    );
+    expect(activeOption?.getAttribute("data-renderer")).toBe("ghostty");
 
     const updatedRenderers = [
       { ...renderers[0], isActive: false },
@@ -183,9 +181,7 @@ describe("RendererSettings", () => {
     settings.update({ renderers: updatedRenderers });
 
     activeOption = container.querySelector(".renderer-option.active");
-    expect(activeOption?.querySelector("[data-renderer]")?.getAttribute("data-renderer")).toBe(
-      "rio"
-    );
+    expect(activeOption?.getAttribute("data-renderer")).toBe("rio");
   });
 
   it("should render radio buttons for each renderer", () => {
@@ -200,9 +196,8 @@ describe("RendererSettings", () => {
     const radios = container.querySelectorAll('input[type="radio"]');
     expect(radios.length).toBe(2);
 
-    const ghosttyRadio = container.querySelector(
-      '[data-renderer="ghostty"] input'
-    ) as HTMLInputElement;
+    const ghosttyOption = container.querySelector('[data-renderer="ghostty"]');
+    const ghosttyRadio = ghosttyOption?.querySelector('input[type="radio"]') as HTMLInputElement;
     expect(ghosttyRadio?.checked).toBeTruthy();
   });
 });

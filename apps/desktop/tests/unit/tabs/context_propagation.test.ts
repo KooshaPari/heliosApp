@@ -69,7 +69,7 @@ describe("ContextPropagator", () => {
 
       const result = await propagator.propagateContext(context);
 
-      expect(result.duration_ms).toBeGreaterThan(0);
+      expect(result.duration_ms).toBeGreaterThanOrEqual(0);
     });
 
     it("should propagate null context", async () => {

@@ -51,7 +51,7 @@ export class LaneEventHandler {
     this.unsubscribeFromEvents();
     this.stopConnectivityMonitoring();
     if (this.rafId) {
-      cancelAnimationFrame(this.rafId);
+      (typeof cancelAnimationFrame !== "undefined" ? cancelAnimationFrame : clearTimeout)(this.rafId as number);
     }
   }
 
@@ -191,7 +191,7 @@ export class LaneEventHandler {
   private scheduleRender(): void {
     if (this.rafId) return;
 
-    this.rafId = requestAnimationFrame(() => {
+    this.rafId = (typeof requestAnimationFrame !== "undefined" ? requestAnimationFrame : (cb: FrameRequestCallback) => setTimeout(cb, 0) as unknown as number)(() => {
       this.rafId = undefined;
       this.processPendingUpdates();
     });

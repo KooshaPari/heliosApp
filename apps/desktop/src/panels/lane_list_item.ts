@@ -55,6 +55,7 @@ export class LaneListItem {
   private createItemElement(): HTMLElement {
     const item = document.createElement("div");
     item.className = `lane-list-item ${this.props.isActive ? "active" : ""} ${this.props.isSelected ? "selected" : ""}`;
+    item.setAttribute("data-lane-item", this.props.laneId);
     item.setAttribute("role", "option");
     item.setAttribute("aria-selected", String(this.props.isSelected || false));
     item.setAttribute("tabindex", "0");
