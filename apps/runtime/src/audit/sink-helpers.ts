@@ -65,7 +65,10 @@ export interface AuditSinkMetrics {
   sqliteRetryCount?: number;
 }
 
-export function toExportRecord(record: AuditRecord, policy: RetentionPolicyConfig): AuditExportRecord {
+export function toExportRecord(
+  record: AuditRecord,
+  policy: RetentionPolicyConfig
+): AuditExportRecord {
   const envelope = sanitizeEnvelope(record.envelope, policy.redacted_fields);
   const envelopeObject = envelope as Record<string, unknown>;
   const methodOrTopic =

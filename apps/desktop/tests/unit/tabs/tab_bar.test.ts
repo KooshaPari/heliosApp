@@ -161,9 +161,7 @@ describe("TabBar", () => {
         renderedOrder.indexOf("tab3"),
         renderedOrder.indexOf("tab5")
       );
-      const firstUnpinnedIndex = renderedOrder.findIndex(
-        id => id !== "tab3" && id !== "tab5"
-      );
+      const firstUnpinnedIndex = renderedOrder.findIndex(id => id !== "tab3" && id !== "tab5");
 
       expect(lastPinnedIndex).toBeLessThan(firstUnpinnedIndex);
     });

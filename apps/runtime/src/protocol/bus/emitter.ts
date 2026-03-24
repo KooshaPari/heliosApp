@@ -12,11 +12,7 @@ import type {
 import type { MethodHandler } from "../methods.js";
 import { ProtocolValidationError } from "../types.js";
 import { validateEnvelope } from "../validator.js";
-import {
-  isTerminalTopic,
-  isStartTopic,
-  resolveExpectedStartTopic,
-} from "./lifecycle.js";
+import { isTerminalTopic, isStartTopic, resolveExpectedStartTopic } from "./lifecycle.js";
 import { MetricsRecorder } from "./metrics.js";
 import {
   handleLaneAttach,
@@ -184,8 +180,12 @@ export class InMemoryLocalBus implements LocalBus {
       auditLog: this.auditLog,
       metricsRecorder: this.metricsRecorder,
       rendererEngine: this.rendererEngine,
-      setState: (newState: BusState) => { this.state = newState; },
-      setRendererEngine: (engine: "ghostty" | "rio") => { this.rendererEngine = engine; },
+      setState: (newState: BusState) => {
+        this.state = newState;
+      },
+      setRendererEngine: (engine: "ghostty" | "rio") => {
+        this.rendererEngine = engine;
+      },
     };
   }
 
@@ -194,14 +194,24 @@ export class InMemoryLocalBus implements LocalBus {
     await Promise.resolve();
     if (command.method) {
       const needsCorrelation = [
-        "lane.create", "lane.attach", "session.attach",
-        "terminal.spawn", "terminal.input", "terminal.resize",
+        "lane.create",
+        "lane.attach",
+        "session.attach",
+        "terminal.spawn",
+        "terminal.input",
+        "terminal.resize",
       ];
       if (needsCorrelation.includes(command.method) && !command.correlation_id) {
         return {
-          id: `res-${Date.now()}`, type: "response", ts: new Date().toISOString(),
+          id: `res-${Date.now()}`,
+          type: "response",
+          ts: new Date().toISOString(),
           status: "error",
-          error: { code: "MISSING_CORRELATION_ID", message: "correlation_id is required", retryable: false },
+          error: {
+            code: "MISSING_CORRELATION_ID",
+            message: "correlation_id is required",
+            retryable: false,
+          },
         };
       }
 
@@ -213,13 +223,17 @@ export class InMemoryLocalBus implements LocalBus {
       if (command.method === "session.attach") return handleSessionAttach(command, startTime, ctx);
       if (command.method === "terminal.spawn") return handleTerminalSpawn(command, startTime, ctx);
       if (command.method === "terminal.input") return handleTerminalInput(command);
-      if (command.method === "renderer.capabilities") return handleRendererCapabilities(this.rendererEngine);
+      if (command.method === "renderer.capabilities")
+        return handleRendererCapabilities(this.rendererEngine);
       if (command.method === "renderer.switch") return handleRendererSwitch(command, ctx);
     }
 
     return {
-      id: command.id, type: "response", ts: new Date().toISOString(),
-      status: "ok", result: {},
+      id: command.id,
+      type: "response",
+      ts: new Date().toISOString(),
+      status: "ok",
+      result: {},
     };
   }
 

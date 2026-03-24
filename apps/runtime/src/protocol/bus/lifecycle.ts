@@ -7,10 +7,14 @@ import type { LocalBusEnvelope } from "../types.js";
 export const LIFECYCLE_SEQUENCES: Record<string, string[]> = {
   "session.attach": ["session.attach.started", "session.attached", "session.attach.failed"],
   "lane.create": ["lane.create.started", "lane.created", "lane.create.failed"],
-    "terminal.spawn": ["terminal.spawn.started",
-  "lane.attach.started", "terminal.spawned",
-  "lane.attached",
-  "lane.attach.failed", "terminal.spawn.failed"],
+  "terminal.spawn": [
+    "terminal.spawn.started",
+    "lane.attach.started",
+    "terminal.spawned",
+    "lane.attached",
+    "lane.attach.failed",
+    "terminal.spawn.failed",
+  ],
   "lane.attach": ["lane.attach.started", "lane.attached", "lane.attach.failed"],
 };
 

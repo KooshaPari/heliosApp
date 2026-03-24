@@ -20,7 +20,10 @@ export interface RequestHandlerContext {
   setRendererEngine(engine: "ghostty" | "rio"): void;
 }
 
-export function handleLaneAttach(command: LocalBusEnvelope, ctx: RequestHandlerContext): LocalBusEnvelope {
+export function handleLaneAttach(
+  command: LocalBusEnvelope,
+  ctx: RequestHandlerContext
+): LocalBusEnvelope {
   const correlationId = command.correlation_id ?? "";
   if (!ctx.lifecycleProgress.has(correlationId)) {
     ctx.lifecycleProgress.set(correlationId, new Set());
@@ -45,7 +48,11 @@ export function handleLaneAttach(command: LocalBusEnvelope, ctx: RequestHandlerC
   };
 }
 
-export function handleLaneCreate(command: LocalBusEnvelope, startTime: number, ctx: RequestHandlerContext): LocalBusEnvelope {
+export function handleLaneCreate(
+  command: LocalBusEnvelope,
+  startTime: number,
+  ctx: RequestHandlerContext
+): LocalBusEnvelope {
   const correlationId = command.correlation_id;
   if (!correlationId) {
     return {
@@ -104,7 +111,11 @@ export function handleLaneCreate(command: LocalBusEnvelope, startTime: number, c
   };
 }
 
-export function handleSessionAttach(command: LocalBusEnvelope, startTime: number, ctx: RequestHandlerContext): LocalBusEnvelope {
+export function handleSessionAttach(
+  command: LocalBusEnvelope,
+  startTime: number,
+  ctx: RequestHandlerContext
+): LocalBusEnvelope {
   const correlationId = command.correlation_id;
   if (!correlationId) {
     return {
@@ -160,7 +171,10 @@ export function handleSessionAttach(command: LocalBusEnvelope, startTime: number
   }
   ctx.setState({ session: "attached" });
   const sessionResultId =
-    command.session_id ?? command.payload?.id ?? command.payload?.session_id ?? `session_${Date.now()}`;
+    command.session_id ??
+    command.payload?.id ??
+    command.payload?.session_id ??
+    `session_${Date.now()}`;
   return {
     id: `res-${Date.now()}`,
     type: "response",
@@ -184,7 +198,11 @@ export function handleSessionAttach(command: LocalBusEnvelope, startTime: number
   };
 }
 
-export function handleTerminalSpawn(command: LocalBusEnvelope, startTime: number, ctx: RequestHandlerContext): LocalBusEnvelope {
+export function handleTerminalSpawn(
+  command: LocalBusEnvelope,
+  startTime: number,
+  ctx: RequestHandlerContext
+): LocalBusEnvelope {
   const correlationId = command.correlation_id;
   if (!correlationId) {
     return {
@@ -302,7 +320,10 @@ export function handleRendererCapabilities(rendererEngine: "ghostty" | "rio"): L
   };
 }
 
-export function handleRendererSwitch(command: LocalBusEnvelope, ctx: RequestHandlerContext): LocalBusEnvelope {
+export function handleRendererSwitch(
+  command: LocalBusEnvelope,
+  ctx: RequestHandlerContext
+): LocalBusEnvelope {
   const nextEngine = command.payload?.target_engine;
   const forceError = command.payload?.force_error === true;
   const previousEngine = ctx.rendererEngine ?? "ghostty";

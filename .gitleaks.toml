@@ -1,0 +1,5 @@
+[allowlist]
+paths = [
+  "__fixtures__/",
+  "__tests__/__fixtures__/",
+]

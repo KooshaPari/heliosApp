@@ -20,7 +20,14 @@ import {
   isSensitiveKey,
 } from "./sink-helpers.js";
 
-export type { AuditOutcome, AuditRecord, AuditExportRecord, RetentionPolicyConfig, AuditBundle, AuditSinkMetrics } from "./sink-helpers.js";
+export type {
+  AuditOutcome,
+  AuditRecord,
+  AuditExportRecord,
+  RetentionPolicyConfig,
+  AuditBundle,
+  AuditSinkMetrics,
+} from "./sink-helpers.js";
 
 /**
  * Storage backend interface for persisting audit events.

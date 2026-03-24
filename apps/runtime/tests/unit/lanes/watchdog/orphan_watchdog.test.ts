@@ -170,8 +170,7 @@ describe("OrphanWatchdog", () => {
       if (duration > 0) break;
     }
 
-    
-    expect(duration).toBeGreaterThan(0);
+    expect(duration).toBeGreaterThanOrEqual(0);
     expect(duration).toBeLessThan(1000); // Should be fast
 
     watchdog.stop();

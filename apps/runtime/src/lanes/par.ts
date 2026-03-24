@@ -19,7 +19,13 @@ import {
   defaultSpawn,
 } from "./par-types.js";
 
-export type { ParBinding, ExecResult, ParManagerOptions, SpawnFn, SpawnResult } from "./par-types.js";
+export type {
+  ParBinding,
+  ExecResult,
+  ParManagerOptions,
+  SpawnFn,
+  SpawnResult,
+} from "./par-types.js";
 export {
   ParNotFoundError,
   ParSpawnError,

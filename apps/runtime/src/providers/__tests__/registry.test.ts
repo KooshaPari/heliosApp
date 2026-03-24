@@ -389,5 +389,4 @@ describe("ProviderRegistry", () => {
       expect(ws2Providers).toHaveLength(1);
     });
   });
-
 });

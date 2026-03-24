@@ -82,7 +82,6 @@ export function validateBindingTriple(
     );
   }
 
-
   // Validate existence in registries
   if (!queryInterface.workspaceExists(triple.workspaceId)) {
     errors.push(`Workspace does not exist: ${triple.workspaceId}`);
@@ -93,7 +92,6 @@ export function validateBindingTriple(
   if (!queryInterface.sessionExists(triple.sessionId)) {
     errors.push(`Session does not exist: ${triple.sessionId}`);
   }
-
 
   // Validate cross-references
   if (!queryInterface.laneInWorkspace(triple.laneId, triple.workspaceId)) {
