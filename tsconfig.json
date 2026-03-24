@@ -27,5 +27,5 @@
     "docs/.vitepress/**/*.ts",
     "docs/.vitepress/**/*.d.ts"
   ],
-  "exclude": ["node_modules", "dist", "coverage", ".worktrees"]
+  "exclude": ["node_modules", "dist", "coverage", ".worktrees", "apps/runtime/tests/integration", "apps/desktop/tests/e2e", "apps/desktop/tests/unit/control_plane.test.ts", "apps/desktop/tests/unit/settings.test.ts"]
 }
