@@ -10,3 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Aligned CI Bun usage with the `packageManager` field in `package.json`, and documented local development troubleshooting in [Troubleshooting local development](docs/guides/troubleshooting-local-dev.md).
+- Created `KILL_SWITCH.md` documenting emergency shutdown procedures for PTY/secrets/bus.
+- Added `anchore/sbom-action` to CI for Syft-based SBOM generation.
+- Exported `ActiveContext` type from `tab_surface.ts` for module compatibility.
+
+### Fixed
+
+- Fixed syntax error in `ModelSelector.tsx` (unclosed button tag).
+- Fixed syntax error in `lane_event_handler.ts` (unclosed loop).
+- Installed missing type definitions (@types/node, bun-types, @playwright/test) and `vitest`.
