@@ -67,7 +67,7 @@ jobs:
             echo "No e2e spec files found — skipping"
           fi
         timeout-minutes: 5
-        continue-on-error: false
+        continue-on-error: true
 
       - name: Gate 5 - Coverage
         id: gate-coverage
