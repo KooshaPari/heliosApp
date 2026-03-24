@@ -187,8 +187,10 @@ export class KeyboardShortcuts {
   private eventToShortcut(event: KeyboardEvent): string {
     const parts: string[] = [];
 
-    if (event.ctrlKey || (this.isMac && event.metaKey)) {
-      parts.push(this.isMac ? "Cmd" : "Ctrl");
+    if (event.metaKey) {
+      parts.push("Cmd");
+    } else if (event.ctrlKey) {
+      parts.push("Ctrl");
     }
     if (event.altKey) {
       parts.push("Alt");
@@ -219,9 +221,7 @@ export class KeyboardShortcuts {
     this.reverseShortcuts.clear();
 
     for (const [action, shortcut] of Object.entries(this.shortcuts)) {
-      // Normalize Mac Cmd to Ctrl for matching
-      const normalizedShortcut = shortcut.replace(/Cmd/g, this.isMac ? "Cmd" : "Ctrl");
-      this.reverseShortcuts.set(normalizedShortcut, action as ShortcutAction);
+      this.reverseShortcuts.set(shortcut, action as ShortcutAction);
     }
   }
 
