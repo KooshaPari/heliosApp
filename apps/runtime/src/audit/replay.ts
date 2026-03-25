@@ -1,5 +1,5 @@
-import { AuditEvent } from './event';
-import { SessionSnapshot } from './snapshot';
+import type { AuditEvent } from './event';
+import type { SessionSnapshot } from './snapshot';
 
 /**
  * Timeline entry for significant events.

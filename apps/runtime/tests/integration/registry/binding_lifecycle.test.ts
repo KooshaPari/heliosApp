@@ -88,14 +88,14 @@ describe("Binding Lifecycle Integration", () => {
       };
 
       const binding = registry.register("terminal-1", triple);
-      expect(binding.state).toBe(BindingState.Bound);
+      expect(binding.state).toBe(BindingState.bound);
 
       const rebound = registry.rebind("terminal-1", {
         workspaceId: "ws-1",
         laneId: "lane-2",
         sessionId: "session-2",
       });
-      expect(rebound.state).toBe(BindingState.Rebound);
+      expect(rebound.state).toBe(BindingState.rebound);
     });
   });
 
@@ -180,7 +180,7 @@ describe("Binding Lifecycle Integration", () => {
       const finalBinding = registry.get(terminal);
       expect(finalBinding?.binding.laneId).toBe("lane-2");
       expect(finalBinding?.binding.sessionId).toBe("session-5");
-      expect(finalBinding?.state).toBe(BindingState.Rebound);
+      expect(finalBinding?.state).toBe(BindingState.rebound);
 
       // Verify indexes
       const byLane = registry.getByLane("lane-2");
@@ -213,7 +213,7 @@ describe("Binding Lifecycle Integration", () => {
       expect(event.session_id).toBe("session-1");
       expect(event.terminal_id).toBe("terminal-1");
       expect((event.payload as any).correlationId).toBe(correlationId);
-      expect((event.payload as any).state).toBe(BindingState.Bound);
+      expect((event.payload as any).state).toBe(BindingState.bound);
       expect((event.payload as any).binding).toEqual(triple);
     });
   });

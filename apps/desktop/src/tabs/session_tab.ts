@@ -50,7 +50,7 @@ export class SessionTab extends TabSurface {
       lifecycleState: "active",
       harnessTransport: "cliproxy_harness",
       terminalCount: 2,
-      degradationReason: null
+      degradationReason: undefined
     };
   }
 

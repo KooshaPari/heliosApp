@@ -17,11 +17,7 @@ import type {
   ACPExecuteInput,
   ACPExecuteOutput,
 } from "./adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-  PROVIDER_ERROR_CODES,
-} from "./errors.js";
+import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * Policy gate interface for access control.
@@ -115,12 +111,16 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
 
     try {
       // Validate config
-      if (!config.endpoint || typeof config.endpoint !== "string") {
+      if (!config.baseUrl || typeof config.baseUrl !== "string") {
+        throw new Error("Missing or invalid endpoint");
+      }
+      const endpoint = config.baseUrl.trim();
+      if (!endpoint) {
         throw new Error("Missing or invalid endpoint");
       }
 
-      if (!config.apiKeyRef || typeof config.apiKeyRef !== "string") {
-        throw new Error("Missing or invalid apiKeyRef");
+      if (!config.apiKey || typeof config.apiKey !== "string") {
+        throw new Error("Missing or invalid apiKey");
       }
 
       if (!config.model || typeof config.model !== "string") {
@@ -128,16 +128,21 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
       }
 
       // Validate timeout
-      if (config.timeoutMs && config.timeoutMs < 1000) {
+      if (config.timeout && config.timeout < 1000) {
         throw new Error("timeout must be >= 1000ms");
       }
 
+      // Validate optional health check interval
+      if (config.healthCheckIntervalMs !== undefined && config.healthCheckIntervalMs < 1000) {
+        throw new Error("healthCheckIntervalMs must be >= 1000ms");
+      }
+
       // Simulate endpoint reachability check with timeout
-      const probeTimeout = config.timeoutMs || 10000;
+      const probeTimeout = config.timeout || 10000;
       const probeResult = await Promise.race([
-        this.probeEndpoint(config.endpoint),
+        this.probeEndpoint(endpoint),
         new Promise<boolean>((_, reject) =>
-          setTimeout(() => reject(new Error("Probe timeout")), 2000)
+          setTimeout(() => reject(new Error("Probe timeout")), probeTimeout)
         ),
       ]);
 
@@ -145,8 +150,12 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
         throw new Error("Endpoint unreachable");
       }
 
-      this.config = config;
-      this.healthCheckInterval = config.healthCheckIntervalMs || 30000;
+      this.config = {
+        ...config,
+        baseUrl: endpoint,
+      };
+      this.healthCheckInterval = config.healthCheckIntervalMs ?? 30000;
+      this.lastHealthCheckTime = Date.now();
 
       this.healthStatus = {
         state: "healthy",
@@ -160,7 +169,7 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
       }
 
       await this.publishEvent("provider.acp.initialized", {
-        endpoint: config.endpoint,
+        endpoint,
         model: config.model,
       });
     } catch (error) {
@@ -192,10 +201,15 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
       };
     }
 
+    const now = Date.now();
+    if (now - this.lastHealthCheckTime < this.healthCheckInterval) {
+      return { ...this.healthStatus };
+    }
+
     try {
       // Perform lightweight health check
       const probeSuccess = await Promise.race([
-        this.probeEndpoint(this.config.endpoint),
+        this.probeEndpoint(this.config.baseUrl ?? ""),
         new Promise<boolean>((_, reject) =>
           setTimeout(() => reject(new Error("Health check timeout")), 5000)
         ),
@@ -219,6 +233,7 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
           });
         }
 
+        this.lastHealthCheckTime = now;
         return { ...this.healthStatus };
       }
     } catch (error) {
@@ -252,6 +267,7 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
       }
     }
 
+    this.lastHealthCheckTime = now;
     return { ...this.healthStatus };
   }
 
@@ -301,7 +317,7 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
 
       // Create abort controller for timeout
       const abortController = new AbortController();
-      const timeoutMs = this.config.timeoutMs || 30000;
+      const timeoutMs = this.config.timeout || 30000;
       const timeoutHandle = setTimeout(() => abortController.abort(), timeoutMs);
       this.inFlightTasks.set(correlationId, abortController);
 
@@ -349,7 +365,7 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
       if (error instanceof Error && error.name === "AbortError") {
         const normalized = new NormalizedProviderError(
           "PROVIDER_TIMEOUT",
-          `ACP execution timeout after ${this.config.timeoutMs || 30000}ms`,
+          `ACP execution timeout after ${this.config.timeout || 30000}ms`,
           "acp",
           true,
           correlationId
@@ -483,12 +499,22 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
   ): Promise<ACPResponse> {
     // Check for abort
     if (signal.aborted) {
-      throw new Error("Request aborted");
+      const aborted = new Error("Request aborted");
+      aborted.name = "AbortError";
+      throw aborted;
     }
 
     // Mock implementation: simulate ACP processing
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+      const onAbort = () => {
+        clearTimeout(timeout);
+        const aborted = new Error("Request cancelled");
+        aborted.name = "AbortError";
+        reject(aborted);
+      };
+
       const timeout = setTimeout(() => {
+        signal.removeEventListener("abort", onAbort);
         resolve({
           taskId: `task-${request.correlationId}`,
           content: "This is a mock ACP response.",
@@ -501,10 +527,7 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
       }, 10);
 
       // Clean up on abort
-      signal.addEventListener("abort", () => {
-        clearTimeout(timeout);
-        throw new Error("Request cancelled");
-      });
+      signal.addEventListener("abort", onAbort, { once: true });
     });
   }
 

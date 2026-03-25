@@ -228,7 +228,7 @@ export class TabBar {
       }
     });
 
-    headerEl.addEventListener("drop", () => {
+    headerEl.addEventListener("drop", (e) => {
       e.preventDefault();
       if (this.draggedTabId && this.draggedTabId !== tab.getTabId()) {
         this.handleTabDrop(tab.getTabId());

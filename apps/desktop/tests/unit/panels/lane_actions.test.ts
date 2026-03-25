@@ -1,15 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { LaneActions, RuntimeAPI } from '../../../src/panels/lane_actions';
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { LaneActions } from '../../../src/panels/lane_actions';
+import type { RuntimeAPI } from '../../../src/panels/lane_actions';
 
 describe('LaneActions', () => {
   let actions: LaneActions;
   let mockAPI: RuntimeAPI;
 
   const createMockAPI = (): RuntimeAPI => ({
-    createLane: vi.fn().mockResolvedValue({ id: 'lane-new', name: 'New Lane' }),
-    attachLane: vi.fn().mockResolvedValue(undefined),
-    detachLane: vi.fn().mockResolvedValue(undefined),
-    cleanupLane: vi.fn().mockResolvedValue(undefined),
+    createLane: mock().mockResolvedValue({ id: 'lane-new', name: 'New Lane' }),
+    attachLane: mock().mockResolvedValue(undefined),
+    detachLane: mock().mockResolvedValue(undefined),
+    cleanupLane: mock().mockResolvedValue(undefined),
   });
 
   beforeEach(() => {
@@ -23,7 +24,7 @@ describe('LaneActions', () => {
   });
 
   it('should create lane successfully', async () => {
-    const onLaneCreated = vi.fn();
+    const onLaneCreated = mock();
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onLaneCreated,
@@ -40,7 +41,7 @@ describe('LaneActions', () => {
       runtimeAPI: mockAPI,
     });
 
-    const optimisticCallback = vi.fn();
+    const optimisticCallback = mock();
 
     await actions.createLane('ws-1', optimisticCallback);
 
@@ -49,8 +50,8 @@ describe('LaneActions', () => {
 
   it('should handle create lane error', async () => {
     const error = new Error('API error');
-    mockAPI.createLane = vi.fn().mockRejectedValue(error);
-    const onError = vi.fn();
+    mockAPI.createLane = mock().mockRejectedValue(error);
+    const onError = mock();
 
     actions = new LaneActions({
       runtimeAPI: mockAPI,
@@ -65,7 +66,7 @@ describe('LaneActions', () => {
   });
 
   it('should attach lane successfully', async () => {
-    const onLaneAttached = vi.fn();
+    const onLaneAttached = mock();
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onLaneAttached,
@@ -78,8 +79,8 @@ describe('LaneActions', () => {
   });
 
   it('should handle attach lane error', async () => {
-    mockAPI.attachLane = vi.fn().mockRejectedValue(new Error('Attach failed'));
-    const onError = vi.fn();
+    mockAPI.attachLane = mock().mockRejectedValue(new Error('Attach failed'));
+    const onError = mock();
 
     actions = new LaneActions({
       runtimeAPI: mockAPI,
@@ -94,7 +95,7 @@ describe('LaneActions', () => {
   });
 
   it('should detach lane successfully', async () => {
-    const onLaneDetached = vi.fn();
+    const onLaneDetached = mock();
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onLaneDetached,
@@ -107,8 +108,8 @@ describe('LaneActions', () => {
   });
 
   it('should handle detach lane error', async () => {
-    mockAPI.detachLane = vi.fn().mockRejectedValue(new Error('Detach failed'));
-    const onError = vi.fn();
+    mockAPI.detachLane = mock().mockRejectedValue(new Error('Detach failed'));
+    const onError = mock();
 
     actions = new LaneActions({
       runtimeAPI: mockAPI,
@@ -121,7 +122,7 @@ describe('LaneActions', () => {
   });
 
   it('should cleanup lane successfully', async () => {
-    const onLaneCleaned = vi.fn();
+    const onLaneCleaned = mock();
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onLaneCleaned,
@@ -135,8 +136,8 @@ describe('LaneActions', () => {
   });
 
   it('should handle cleanup lane error', async () => {
-    mockAPI.cleanupLane = vi.fn().mockRejectedValue(new Error('Cleanup failed'));
-    const onError = vi.fn();
+    mockAPI.cleanupLane = mock().mockRejectedValue(new Error('Cleanup failed'));
+    const onError = mock();
 
     actions = new LaneActions({
       runtimeAPI: mockAPI,
@@ -150,14 +151,14 @@ describe('LaneActions', () => {
   });
 
   it('should dismiss error by code', async () => {
-    const onError = vi.fn();
+    const onError = mock();
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onError,
       errorDismissTimeout: 10000,
     });
 
-    mockAPI.createLane = vi.fn().mockRejectedValue(new Error('Create failed'));
+    mockAPI.createLane = mock().mockRejectedValue(new Error('Create failed'));
     await actions.createLane('ws-1');
 
     expect(onError).toHaveBeenCalled();
@@ -167,17 +168,17 @@ describe('LaneActions', () => {
   });
 
   it('should clear all errors', async () => {
-    const onError = vi.fn();
+    const onError = mock();
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onError,
       errorDismissTimeout: 10000,
     });
 
-    mockAPI.createLane = vi.fn().mockRejectedValue(new Error('Create failed'));
+    mockAPI.createLane = mock().mockRejectedValue(new Error('Create failed'));
     await actions.createLane('ws-1');
 
-    mockAPI.attachLane = vi.fn().mockRejectedValue(new Error('Attach failed'));
+    mockAPI.attachLane = mock().mockRejectedValue(new Error('Attach failed'));
     await actions.attachLane('lane-1');
 
     expect(onError).toHaveBeenCalledTimes(2);
@@ -187,9 +188,9 @@ describe('LaneActions', () => {
   });
 
   it('should revert optimistic update on error', async () => {
-    mockAPI.attachLane = vi.fn().mockRejectedValue(new Error('Attach failed'));
-    const onError = vi.fn();
-    const revertCallback = vi.fn();
+    mockAPI.attachLane = mock().mockRejectedValue(new Error('Attach failed'));
+    const onError = mock();
+    const revertCallback = mock();
 
     actions = new LaneActions({
       runtimeAPI: mockAPI,

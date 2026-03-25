@@ -48,7 +48,7 @@ describe("A2A Router Adapter", () => {
             capabilities: ["task-execution"],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
 
@@ -61,7 +61,7 @@ describe("A2A Router Adapter", () => {
     it("should reject missing endpoints", async () => {
       const config: RouterConfig = {
         endpoints: [],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
 
@@ -92,7 +92,7 @@ describe("A2A Router Adapter", () => {
             capabilities: [],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
 
@@ -114,7 +114,7 @@ describe("A2A Router Adapter", () => {
             capabilities: [],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
 
@@ -144,7 +144,7 @@ describe("A2A Router Adapter", () => {
             capabilities: ["inference"],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
       await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
@@ -257,7 +257,7 @@ describe("A2A Router Adapter", () => {
             capabilities: ["inference"],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
       await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
@@ -330,7 +330,7 @@ describe("A2A Router Adapter", () => {
             capabilities: [],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
       await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
@@ -359,7 +359,7 @@ describe("A2A Router Adapter", () => {
             capabilities: [],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
       await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
@@ -412,7 +412,7 @@ describe("A2A Router Adapter", () => {
             capabilities: ["inference"],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
       await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
@@ -575,7 +575,7 @@ describe("Provider Crash Isolation (SC-025-002)", () => {
           capabilities: ["task"],
         },
       ],
-      timeoutMs: 30000,
+      timeout: 30000,
       failoverEnabled: true,
     };
 
@@ -627,7 +627,7 @@ describe("Error Taxonomy Completeness (SC-025-004)", () => {
           capabilities: ["task"],
         },
       ],
-      timeoutMs: 30000,
+      timeout: 30000,
       failoverEnabled: true,
     };
     await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);

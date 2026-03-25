@@ -1,4 +1,5 @@
-import { AuditLedger, AuditFilter } from './ledger';
+import { AuditLedger } from './ledger';
+import type { AuditFilter } from './ledger';
 
 /**
  * API response wrapper for paginated results.

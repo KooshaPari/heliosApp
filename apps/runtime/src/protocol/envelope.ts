@@ -99,7 +99,16 @@ export function createResponse(
     payload,
   };
   if (error !== undefined) {
-    return { ...base, error };
+    return {
+      ...base,
+      error: {
+        code: error.code,
+        message: error.message,
+        ...(error.details && typeof error.details === "object"
+          ? { details: error.details as Record<string, unknown> }
+          : {}),
+      },
+    };
   }
   return base;
 }

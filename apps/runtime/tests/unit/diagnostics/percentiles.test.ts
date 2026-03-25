@@ -2,7 +2,10 @@
 
 import { describe, it, expect } from "bun:test";
 import { RingBuffer } from "../../../src/diagnostics/metrics.js";
-import { computePercentiles } from "../../../src/diagnostics/percentiles.js";
+import {
+  computePercentiles,
+  EMPTY_PERCENTILE_BUCKET,
+} from "../../../src/diagnostics/percentiles.js";
 
 describe("computePercentiles", () => {
   // FR-002: Known distribution [1..100]
@@ -24,7 +27,7 @@ describe("computePercentiles", () => {
   it("returns zeroed bucket for empty buffer", () => {
     const buf = new RingBuffer(10);
     const result = computePercentiles(buf);
-    expect(result).toEqual({ p50: 0, p95: 0, p99: 0, min: 0, max: 0, count: 0 });
+    expect(result).toEqual(EMPTY_PERCENTILE_BUCKET);
   });
 
   // FR-002: Single sample
@@ -80,7 +83,17 @@ describe("computePercentiles", () => {
     buf.push(NaN, 1);
     buf.push(NaN, 2);
     const result = computePercentiles(buf);
-    expect(result.count).toBe(0);
+    expect(result).toEqual(EMPTY_PERCENTILE_BUCKET);
+  });
+
+  it("accepts raw number arrays", () => {
+    const result = computePercentiles([10, 20, 30, 40, 50]);
+    expect(result.p50).toBe(30);
+    expect(result.p95).toBe(50);
+    expect(result.p99).toBe(50);
+    expect(result.min).toBe(10);
+    expect(result.max).toBe(50);
+    expect(result.count).toBe(5);
   });
 
   // FR-002: Sort is on a copy

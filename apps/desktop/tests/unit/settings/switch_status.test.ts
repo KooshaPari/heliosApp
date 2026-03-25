@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { SwitchStatus } from '../../../src/settings/switch_status';
 
 describe('SwitchStatus', () => {

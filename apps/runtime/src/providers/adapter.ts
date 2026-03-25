@@ -115,6 +115,7 @@ export interface ACPConfig {
   apiKey: string;
   model: string;
   baseUrl?: string;
+  healthCheckIntervalMs?: number;
   timeout?: number;
 }
 

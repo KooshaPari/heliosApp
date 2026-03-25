@@ -4,13 +4,16 @@
  * FR-025-001: Typed adapter interface with lifecycle methods.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from 'bun:test';
 import type {
   ProviderAdapter,
   ProviderHealthStatus,
   ProviderRegistration,
+  ACPConfig,
+  ACPExecuteInput,
+  ACPExecuteOutput,
 } from "../adapter.js";
-import { BaseProviderAdapter, ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import { BaseProviderAdapter } from "../adapter.js";
 
 /**
  * Mock provider implementation for testing.

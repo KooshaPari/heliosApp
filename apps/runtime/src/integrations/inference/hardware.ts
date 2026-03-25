@@ -29,7 +29,7 @@ export async function detectHardware(): Promise<HardwareCapabilities> {
       stdout: "pipe",
       stderr: "pipe",
     });
-    const output = await new Response(proc.stdout).text();
+    const output = proc.stdout ? await new Response(proc.stdout).text() : "";
     const exitCode = await proc.exited;
     if (exitCode === 0 && output.trim()) {
       const [name, memStr] = output.trim().split(", ");

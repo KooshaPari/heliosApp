@@ -7,12 +7,12 @@
  */
 
 import { describe, expect, it, beforeEach } from 'bun:test';
-import { createBus, LocalBus, getActiveCorrelationId } from '../../../src/protocol/bus.js';
+import { createBus, getActiveCorrelationId, type CommandBus } from '../../../src/protocol/bus.js';
 import { createCommand, createEvent, createResponse } from '../../../src/protocol/envelope.js';
 import type { EventEnvelope } from '../../../src/protocol/types.js';
 
 describe('Event ordering — per-topic monotonic sequences', () => {
-  let bus: LocalBus;
+  let bus: CommandBus;
 
   beforeEach(() => {
     bus = createBus();
@@ -109,7 +109,7 @@ describe('Event ordering — per-topic monotonic sequences', () => {
 });
 
 describe('Correlation ID propagation', () => {
-  let bus: LocalBus;
+  let bus: CommandBus;
 
   beforeEach(() => {
     bus = createBus();

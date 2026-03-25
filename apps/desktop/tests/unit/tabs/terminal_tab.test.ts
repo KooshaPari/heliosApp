@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { TerminalTab } from "../../../src/tabs/terminal_tab";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
 
@@ -198,10 +198,16 @@ describe("TerminalTab", () => {
       const state = tab.getState();
       const terminalId = state.terminalId;
 
+      expect(terminalId).toBeDefined();
+      if (terminalId === undefined) {
+        throw new Error("Expected terminalId in restored state");
+      }
+      const expectedTerminalId = terminalId;
+
       const newTab = new TerminalTab();
       newTab.restoreState(state);
 
-      expect(newTab.getState().terminalId).toBe(terminalId);
+      expect(newTab.getState().terminalId).toBe(expectedTerminalId);
     });
   });
 

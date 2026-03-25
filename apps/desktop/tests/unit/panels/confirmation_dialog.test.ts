@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { ConfirmationDialog } from '../../../src/panels/confirmation_dialog';
 
 describe('ConfirmationDialog', () => {
@@ -18,8 +18,8 @@ describe('ConfirmationDialog', () => {
   });
 
   it('should mount to container', () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: 'Delete Lane',
@@ -34,8 +34,8 @@ describe('ConfirmationDialog', () => {
   });
 
   it('should open dialog with title and message', async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: 'Delete Lane',
@@ -60,8 +60,8 @@ describe('ConfirmationDialog', () => {
   });
 
   it('should call onConfirm when confirm button is clicked', async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: 'Delete',
@@ -83,8 +83,8 @@ describe('ConfirmationDialog', () => {
   });
 
   it('should call onCancel when cancel button is clicked', async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: 'Delete',
@@ -106,8 +106,8 @@ describe('ConfirmationDialog', () => {
   });
 
   it('should close dialog when Escape is pressed', async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: 'Delete',
@@ -129,8 +129,8 @@ describe('ConfirmationDialog', () => {
   });
 
   it('should confirm when Enter is pressed', async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: 'Delete',
@@ -152,8 +152,8 @@ describe('ConfirmationDialog', () => {
   });
 
   it('should trap focus within dialog', async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: 'Delete',
@@ -184,8 +184,8 @@ describe('ConfirmationDialog', () => {
   });
 
   it('should apply danger styling when isDangerous is true', async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: 'Delete',
@@ -208,8 +208,8 @@ describe('ConfirmationDialog', () => {
   });
 
   it('should use custom button labels', async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: 'Action',
@@ -233,8 +233,8 @@ describe('ConfirmationDialog', () => {
   });
 
   it('should have proper ARIA attributes', async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: 'Delete',
@@ -254,8 +254,8 @@ describe('ConfirmationDialog', () => {
   });
 
   it('should close dialog with fade-out animation', async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: 'Delete',

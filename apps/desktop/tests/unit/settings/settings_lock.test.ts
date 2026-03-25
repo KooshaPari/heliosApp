@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { SettingsLock } from '../../../src/settings/settings_lock';
 
 describe('SettingsLock', () => {
@@ -67,7 +67,7 @@ describe('SettingsLock', () => {
   });
 
   it('should auto-unlock after timeout', async () => {
-    const onAutoUnlocked = vi.fn();
+    const onAutoUnlocked = mock();
     lock = new SettingsLock({
       autoUnlockTimeoutMs: 100,
       onAutoUnlocked,

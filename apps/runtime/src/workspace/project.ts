@@ -190,7 +190,9 @@ export async function gitClone(
   clearTimeout(timer);
 
   if (exitCode !== 0) {
-    const stderr = await new Response(proc.stderr).text();
+    const stderr = await new Response(
+      proc.stderr instanceof ReadableStream ? proc.stderr : null
+    ).text();
     throw new Error(`git clone failed (exit ${exitCode}): ${stderr.trim()}`);
   }
 

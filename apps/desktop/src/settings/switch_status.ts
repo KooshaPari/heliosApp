@@ -146,7 +146,7 @@ export class SwitchStatus {
 
       const progress = document.createElement('div');
       const elapsed = this.props.elapsedMs || (Date.now() - this.startTime);
-      const maxDuration = this.props.phase === 'committed' ? 3000 : 8000; // 3s for hot-swap, 8s for restart
+      const maxDuration = this.props.phase === 'committing' ? 3000 : 8000;
       const percentage = Math.min((elapsed / maxDuration) * 100, 100);
 
       progress.style.width = percentage + '%';

@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { LanePanel, Lane } from '../../../src/panels/lane_panel';
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { LanePanel } from '../../../src/panels/lane_panel';
+import type { Lane } from '../../../src/panels/lane_panel';
 
 describe('LanePanel', () => {
   let container: HTMLDivElement;
@@ -8,9 +9,9 @@ describe('LanePanel', () => {
   const mockProps = {
     lanes: [] as Lane[],
     activeWorkspaceId: 'ws-1',
-    onLaneSelect: vi.fn(),
-    onLaneCreate: vi.fn(),
-    onLaneDelete: vi.fn(),
+    onLaneSelect: mock(),
+    onLaneCreate: mock(),
+    onLaneDelete: mock(),
   };
 
   beforeEach(() => {
@@ -79,7 +80,7 @@ describe('LanePanel', () => {
 
   it('should call onLaneSelect when lane is clicked', () => {
     const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1', state: 'idle', workspaceId: 'ws-1' }];
-    const onLaneSelect = vi.fn();
+    const onLaneSelect = mock();
 
     panel = new LanePanel({ ...mockProps, lanes, onLaneSelect });
     panel.mount(container);
@@ -91,7 +92,7 @@ describe('LanePanel', () => {
   });
 
   it('should call onLaneCreate when create button is clicked', () => {
-    const onLaneCreate = vi.fn();
+    const onLaneCreate = mock();
 
     panel = new LanePanel({ ...mockProps, onLaneCreate });
     panel.mount(container);
@@ -190,7 +191,7 @@ describe('LanePanel', () => {
 
   it('should call onLaneDelete when Delete key is pressed', () => {
     const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1', state: 'idle', workspaceId: 'ws-1' }];
-    const onLaneDelete = vi.fn();
+    const onLaneDelete = mock();
 
     panel = new LanePanel({ ...mockProps, lanes, onLaneDelete });
     panel.mount(container);

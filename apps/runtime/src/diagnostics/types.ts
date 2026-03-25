@@ -2,6 +2,7 @@
 
 /** Supported metric types. */
 export type MetricType = "latency" | "gauge" | "counter";
+export type PercentileKey = "p50" | "p95" | "p99";
 
 /** Describes a metric that can be registered with the MetricsRegistry. */
 export interface MetricDefinition {
@@ -35,7 +36,7 @@ export interface PercentileBucket {
 /** Definition of a Service Level Objective threshold. */
 export interface SLODefinition {
   readonly metric: string;
-  readonly percentile: "p50" | "p95" | "p99";
+  readonly percentile: PercentileKey;
   readonly threshold: number;
   readonly unit: string;
 }
@@ -43,7 +44,7 @@ export interface SLODefinition {
 /** Emitted when an SLO threshold is breached. */
 export interface SLOViolationEvent {
   readonly metric: string;
-  readonly percentile: string;
+  readonly percentile: PercentileKey;
   readonly threshold: number;
   readonly actual: number;
   readonly timestamp: number;

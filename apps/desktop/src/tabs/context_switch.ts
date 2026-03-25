@@ -1,4 +1,4 @@
-import type { LocalBus } from "../../runtime/src/protocol/bus";
+import type { LocalBus } from "../../../runtime/src/protocol/bus";
 
 export interface ActiveContext {
   workspaceId: string;
@@ -80,13 +80,13 @@ export class ActiveContextStore {
           if (!isValid) {
             // Emit validation failure event
             if (this.bus) {
-              await this.bus.publish({
-                id: `validation-${Date.now()}`,
-                type: "event",
-                ts: new Date().toISOString(),
-                topic: "context.validation.failed",
-                payload: { context: contextToSet }
-              });
+            await this.bus.publish({
+              id: `validation-${Date.now()}`,
+              type: "event",
+              ts: new Date().toISOString(),
+              topic: "context.validation.failed",
+              payload: { context: contextToSet } as Record<string, unknown>
+            });
             }
             resolve();
             return;
@@ -119,7 +119,10 @@ export class ActiveContextStore {
             workspace_id: contextToSet?.workspaceId,
             lane_id: contextToSet?.laneId,
             session_id: contextToSet?.sessionId,
-            payload: changeEvent
+            payload: {
+              previous: changeEvent.previous,
+              current: changeEvent.current
+            } as Record<string, unknown>
           });
         }
 

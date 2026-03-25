@@ -82,6 +82,40 @@ export class MuxRegistry {
   }
 
   /**
+   * Compatibility shim for watchdog SessionRegistry interface.
+   * Accepts either a session name or a lane id.
+   */
+  getSession(sessionId: string): { id: string; laneId?: string } | null {
+    const bySession = this.bySession.get(sessionId);
+    if (bySession) {
+      return { id: bySession.sessionName, laneId: bySession.laneId };
+    }
+
+    const byLane = this.byLane.get(sessionId);
+    if (byLane) {
+      return { id: byLane.sessionName, laneId: byLane.laneId };
+    }
+
+    const canonicalName = `helios-lane-${sessionId}`;
+    const byCanonicalName = this.bySession.get(canonicalName);
+    if (byCanonicalName) {
+      return { id: byCanonicalName.sessionName, laneId: byCanonicalName.laneId };
+    }
+
+    return null;
+  }
+
+  /**
+   * Compatibility shim for watchdog SessionRegistry interface.
+   */
+  getSessions(): Array<{ id: string; laneId?: string }> {
+    return this.list().map((binding) => ({
+      id: binding.sessionName,
+      laneId: binding.laneId,
+    }));
+  }
+
+  /**
    * Return bindings whose sessions no longer exist in zellij.
    * Requires a ZellijCli instance to query live sessions.
    */

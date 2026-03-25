@@ -30,14 +30,18 @@ export async function detectGpu(): Promise<GpuInfo> {
         stdout: "pipe",
         stderr: "ignore",
       });
-      const text = await new Response(proc.stdout).text();
+      const text = await new Response(
+        proc.stdout instanceof ReadableStream ? proc.stdout : null
+      ).text();
       const hasMetal = text.includes("Metal");
       return { available: hasMetal, driverVersion: hasMetal ? "metal" : undefined };
     }
 
     // Linux: probe for OpenGL
     const proc = Bun.spawn(["glxinfo"], { stdout: "pipe", stderr: "ignore" });
-    const text = await new Response(proc.stdout).text();
+    const text = await new Response(
+      proc.stdout instanceof ReadableStream ? proc.stdout : null
+    ).text();
     const versionMatch = text.match(/OpenGL version string:\s*(.+)/);
     return {
       available: versionMatch !== null,

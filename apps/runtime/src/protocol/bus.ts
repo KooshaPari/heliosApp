@@ -1,9 +1,18 @@
-import type { LocalBusEnvelope } from "./types.js";
+import type {
+  CommandEnvelope,
+  EventEnvelope,
+  LocalBusEnvelope,
+  ResponseEnvelope,
+} from "./types.js";
+import { ProtocolValidationError } from "./types.js";
+import { validateEnvelope } from "./validator.js";
+import type { MethodHandler } from "./methods.js";
 
 export interface LocalBus {
   publish(event: LocalBusEnvelope): Promise<void>;
   request(command: LocalBusEnvelope): Promise<LocalBusEnvelope>;
 }
+type LocalBusEnvelopeWithSequence = LocalBusEnvelope & { sequence?: number };
 
 // ---------------------------------------------------------------------------
 // Audit record (for protocol_bus tests)
@@ -77,7 +86,7 @@ const START_TOPICS = new Set([
 const hasTopLevelDataField = (envelope: LocalBusEnvelope): boolean =>
   Object.prototype.hasOwnProperty.call(envelope, "data");
 
-export class InMemoryLocalBus implements ProtocolBus {
+export class InMemoryLocalBus implements LocalBus {
   private readonly eventLog: LocalBusEnvelope[] = [];
   private readonly auditLog: AuditRecord[] = [];
   private readonly metricsAccumulator: Map<
@@ -609,7 +618,7 @@ export class InMemoryLocalBus implements ProtocolBus {
     }
 
     return {
-      id: _command.id,
+      id: command.id,
       type: "response",
       ts: new Date().toISOString(),
       status: "ok",
@@ -624,13 +633,17 @@ export class InMemoryLocalBus implements ProtocolBus {
 // CommandBus — used by bus.test.ts and topics.test.ts via createBus()
 // ---------------------------------------------------------------------------
 
-import type { MethodHandler } from "./methods.js";
-
 export type CommandBusOptions = {
   maxDepth?: number;
 };
 
-export interface LocalBus {
+let activeCorrelationIdForCommandBus: string | undefined;
+
+export function getActiveCorrelationId(): string | undefined {
+  return activeCorrelationIdForCommandBus;
+}
+
+export interface CommandBus {
   registerMethod(method: string, handler: MethodHandler): void;
   send(envelope: unknown): Promise<ResponseEnvelope>;
   subscribe(topic: string, handler: (evt: EventEnvelope) => void | Promise<void>): () => void;
@@ -678,7 +691,7 @@ function isEventEnvelope(val: unknown): val is EventEnvelope {
   );
 }
 
-class CommandBusImpl implements LocalBus {
+class CommandBusImpl implements CommandBus {
   private readonly methods = new Map<string, MethodHandler>();
   private readonly subscribers = new Map<
     string,
@@ -757,6 +770,7 @@ class CommandBusImpl implements LocalBus {
     // Execute handler
     const prevCorrelation = this.activeCorrelationId;
     this.activeCorrelationId = cmd.correlation_id;
+    activeCorrelationIdForCommandBus = cmd.correlation_id;
     this.currentDepth++;
 
     try {
@@ -789,6 +803,7 @@ class CommandBusImpl implements LocalBus {
     } finally {
       this.currentDepth--;
       this.activeCorrelationId = prevCorrelation;
+      activeCorrelationIdForCommandBus = prevCorrelation;
     }
   }
 
@@ -863,7 +878,7 @@ class CommandBusImpl implements LocalBus {
   }
 
   getActiveCorrelationId(): string | undefined {
-    return getActiveCorrelationId();
+    return this.activeCorrelationId;
   }
 
   private okResponse(
@@ -913,26 +928,21 @@ class CommandBusImpl implements LocalBus {
     };
   }
 
-  private protocolErrorResponse(
-    command: CommandEnvelope,
-    code: ErrorCode,
-    details?: Record<string, unknown>
-  ): LocalBusEnvelope {
-    const error = createProtocolError(code, { details });
-    return this.errorResponse(command, error.code, error.message, error.details ?? undefined, error.retryable);
-  }
-
   private resolveContext(command: CommandEnvelope): {
     workspace_id?: string;
     lane_id?: string;
     session_id?: string;
     terminal_id?: string;
   } {
+    const payload =
+      command.payload && typeof command.payload === "object"
+        ? (command.payload as Record<string, unknown>)
+        : {};
     return {
-      workspace_id: command.workspace_id ?? this.readString(command.payload.workspace_id),
-      lane_id: command.lane_id ?? this.readString(command.payload.lane_id),
-      session_id: command.session_id ?? this.readString(command.payload.session_id),
-      terminal_id: command.terminal_id ?? this.readString(command.payload.terminal_id)
+      workspace_id: command.workspace_id ?? this.readString(payload.workspace_id),
+      lane_id: command.lane_id ?? this.readString(payload.lane_id),
+      session_id: command.session_id ?? this.readString(payload.session_id),
+      terminal_id: command.terminal_id ?? this.readString(payload.terminal_id)
     };
   }
 
@@ -949,6 +959,6 @@ class CommandBusImpl implements LocalBus {
   }
 }
 
-export function createBus(options?: CommandBusOptions): LocalBus {
+export function createBus(options?: CommandBusOptions): CommandBus {
   return new CommandBusImpl(options);
 }

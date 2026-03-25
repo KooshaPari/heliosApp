@@ -1,17 +1,18 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { KeyboardNav, KeyboardNavCallbacks } from '../../../src/panels/keyboard_nav';
+import { describe, it, expect, beforeEach, afterEach, mock, spyOn } from 'bun:test';
+import { KeyboardNav } from '../../../src/panels/keyboard_nav';
+import type { KeyboardNavCallbacks } from '../../../src/panels/keyboard_nav';
 
 describe('KeyboardNav', () => {
   let container: HTMLDivElement;
   let nav: KeyboardNav;
 
   const createMockCallbacks = (): KeyboardNavCallbacks => ({
-    onNavigateUp: vi.fn(),
-    onNavigateDown: vi.fn(),
-    onNavigateHome: vi.fn(),
-    onNavigateEnd: vi.fn(),
-    onSelect: vi.fn(),
-    onDelete: vi.fn().mockResolvedValue(true),
+    onNavigateUp: mock(),
+    onNavigateDown: mock(),
+    onNavigateHome: mock(),
+    onNavigateEnd: mock(),
+    onSelect: mock(),
+    onDelete: mock().mockResolvedValue(true),
   });
 
   beforeEach(() => {
@@ -206,7 +207,7 @@ describe('KeyboardNav', () => {
     nav.setItemCount(5);
 
     const event = new KeyboardEvent('keydown', { key: 'ArrowDown' });
-    const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+    const preventDefaultSpy = spyOn(event, 'preventDefault');
     container.dispatchEvent(event);
 
     expect(preventDefaultSpy).toHaveBeenCalled();

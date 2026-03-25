@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { MuxRegistry } from "../registry.js";
 import { DuplicateBindingError } from "../errors.js";
 import type { MuxSession } from "../types.js";

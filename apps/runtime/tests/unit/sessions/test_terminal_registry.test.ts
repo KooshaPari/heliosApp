@@ -6,7 +6,7 @@ describe("TerminalRegistry", () => {
   test("stores and queries terminal context", () => {
     const registry = new TerminalRegistry();
     const terminal = registry.spawn({
-      terminalId: "t-1",
+      terminal_id: "t-1",
       workspaceId: "ws-1",
       laneId: "lane-1",
       sessionId: "sess-1",
@@ -21,7 +21,7 @@ describe("TerminalRegistry", () => {
   test("enforces ownership boundaries for workspace lane session", () => {
     const registry = new TerminalRegistry();
     registry.spawn({
-      terminalId: "t-2",
+      terminal_id: "t-2",
       workspaceId: "ws-1",
       laneId: "lane-1",
       sessionId: "sess-1",
@@ -46,13 +46,13 @@ describe("TerminalRegistry", () => {
   test("cleans up session scoped terminals", () => {
     const registry = new TerminalRegistry();
     registry.spawn({
-      terminalId: "t-3",
+      terminal_id: "t-3",
       workspaceId: "ws-1",
       laneId: "lane-1",
       sessionId: "sess-1",
     });
     registry.spawn({
-      terminalId: "t-4",
+      terminal_id: "t-4",
       workspaceId: "ws-1",
       laneId: "lane-1",
       sessionId: "sess-1",
@@ -68,13 +68,13 @@ describe("TerminalRegistry", () => {
   test("re-indexes terminal ownership when terminal_id is reused", () => {
     const registry = new TerminalRegistry();
     registry.spawn({
-      terminalId: "t-5",
+      terminal_id: "t-5",
       workspaceId: "ws-1",
       laneId: "lane-1",
       sessionId: "sess-1",
     });
     registry.spawn({
-      terminalId: "t-5",
+      terminal_id: "t-5",
       workspaceId: "ws-1",
       laneId: "lane-2",
       sessionId: "sess-2",
