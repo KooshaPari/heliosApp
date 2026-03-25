@@ -265,10 +265,12 @@ export class InMemoryLocalBus implements LocalBus {
       ];
       if (needsCorrelation.includes(command.method) && !command.correlation_id) {
         return {
-          id: `res-${Date.now()}`,
+          id: command.id,
           type: "response",
           ts: new Date().toISOString(),
           status: "error",
+          correlation_id: command.correlation_id,
+          method: command.method,
           error: {
             code: "MISSING_CORRELATION_ID",
             message: "correlation_id is required",

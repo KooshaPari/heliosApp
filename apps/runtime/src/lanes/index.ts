@@ -147,6 +147,7 @@ export class LaneManager {
       this.registry.update(laneId, { state: toState });
 
       await this.emitEvent("lane.created", laneId, workspaceId, fromState, toState);
+      await this.emitEvent("lane.state.changed", laneId, workspaceId, fromState, toState);
 
       const updated = this.registry.get(laneId);
       return updated!;

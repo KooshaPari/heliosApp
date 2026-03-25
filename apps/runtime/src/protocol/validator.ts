@@ -8,9 +8,20 @@ const TOPIC_SET = new Set<string>(TOPICS);
 const RFC3339_PATTERN =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 
-const CORRELATION_REQUIRED_METHODS = new Set<string>([]);
+const CORRELATION_REQUIRED_METHODS = new Set<string>([
+  "lane.create",
+  "session.attach",
+  "terminal.spawn",
+  "terminal.input",
+  "terminal.resize"
+]);
 
-const CORRELATION_REQUIRED_TOPICS = new Set<string>([]);
+const CORRELATION_REQUIRED_TOPICS = new Set<string>([
+  "terminal.spawn.started",
+  "terminal.state.changed",
+  "terminal.spawned",
+  "terminal.output"
+]);
 
 const METHOD_CONTEXT_REQUIREMENTS: Record<
   string,

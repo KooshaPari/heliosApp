@@ -131,7 +131,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
   const redactionEngine = new RedactionEngine();
   redactionEngine.loadRules(getDefaultRules());
 
-  const auditRecords: RuntimeAuditRecord[] = [];
+  let auditRecords: RuntimeAuditRecord[] = [];
   const terminalBuffers = new Map<string, TerminalBuffer>();
   const terminalBufferCap = options.terminalBufferCapBytes ?? 1024 * 1024;
   let bootstrapResult: RecoveryBootstrapResult | null = null;
@@ -735,6 +735,26 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
     },
     async getAuditRecords(): Promise<RuntimeAuditRecord[]> {
       return [...auditRecords];
+    },
+    async enforceRetention(days: number): Promise<void> {
+      const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+      const initialCount = auditRecords.length;
+      auditRecords = auditRecords.filter((r) => new Date(r.recorded_at) >= cutoff);
+      const deletedCount = initialCount - auditRecords.length;
+
+      if (deletedCount > 0) {
+        publishEvent({
+          id: `evt-retention-deleted-${Date.now()}`,
+          type: "event",
+          ts: new Date().toISOString(),
+          topic: "audit.retention.deleted",
+          payload: {
+            deleted_count: deletedCount,
+            retention_days: days,
+            cutoff: cutoff.toISOString(),
+          },
+        });
+      }
     },
     shutdown(): void {},
   };
