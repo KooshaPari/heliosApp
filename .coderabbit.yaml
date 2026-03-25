@@ -47,14 +47,5 @@ settings:
     action: block_merge
     notify_author: true
 
-# Skip review for specific files/patterns
-review:
-  rules:
-    - path: |
-        docs/**
-        **/*.md
-      skip: true
-    - path: |
-        node_modules/**
-        dist/**
-      skip: true
+# Skip review for specific files/patterns (merged with auto review above)
+# Note: docs and node_modules are already handled by max_files/max_lines limits
