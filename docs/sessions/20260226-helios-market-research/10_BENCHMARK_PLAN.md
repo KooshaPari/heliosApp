@@ -54,3 +54,22 @@ Objective: Validate Helios v1 constraints for memory, responsiveness, and concur
 - Fail if any threshold violated for 3 consecutive runs
 - Fail immediately on data-loss in session restore
 - Fail immediately on policy bypass
+
+## Release Closure Execution Matrix
+
+| Gate | Profile | Focus | Required output |
+| --- | --- | --- | --- |
+| Policy and safety | A | blocked commands, protected paths, redaction, share approval | regression log + redaction sample |
+| Durability and replay | A/B | checkpoint, restart, restore, replay export | restore log + replay sample |
+| Provider conformance | A | adapter isolation, timeout/retry, audit coverage | conformance output + audit sample |
+| Performance stress | B | startup, memory, latency under sustained output | benchmark report |
+| Swarm soak | C | 25 terminals, lane churn, share-session load, renderer switch | soak log + threshold summary |
+
+## Release Evidence Bundle
+
+- benchmark profile results for A, B, and C
+- startup timing summary
+- memory ceiling summary
+- latency summary
+- renderer switch duration summary
+- session restore timing summary

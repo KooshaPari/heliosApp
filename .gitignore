@@ -20,7 +20,7 @@ apps/*/tests/**/*.js.map
 apps/*/tests/**/*.d.ts
 apps/*/tests/**/*.d.ts.map
 # Excluded via sparse-checkout
-kitty-specs/
+agileplus/
 
 # AI tool artifacts
 .claude/

@@ -7,6 +7,7 @@
       "docs/.generated/**",
       ".worktrees/**",
       "kitty-specs/**",
+      "agileplus/**",
       "docs/sessions/**",
       "tsconfig*.json"
     ]
@@ -77,7 +78,7 @@
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
       "semicolons": "always",
-      "trailingCommas": "es5"
+      "trailingComma": "es5"
     }
   },
   "overrides": [
