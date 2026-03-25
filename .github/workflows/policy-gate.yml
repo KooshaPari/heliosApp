@@ -30,7 +30,7 @@ jobs:
 
           # Prevent merge commits in PR branch diff range
           PR_HEAD="${HEAD_SHA}"
-          if ! git fetch origin "$BASE_REF" --depth=1; then
+          if ! git fetch origin "$BASE_REF"; then
             echo "ERROR: failed to fetch base ref $BASE_REF."
             exit 1
           fi
