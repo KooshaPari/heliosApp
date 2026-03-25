@@ -12,7 +12,7 @@ export interface LaneActionError {
 export type ActionCallback = (error?: LaneActionError) => void;
 
 export interface LaneActionsOptions {
-  runtimeApi: RuntimeApi;
+  runtimeAPI: RuntimeAPI;
   onLaneCreated?: (laneId: string) => void;
   onLaneAttached?: (laneId: string) => void;
   onLaneDetached?: (laneId: string) => void;
@@ -21,7 +21,7 @@ export interface LaneActionsOptions {
   errorDismissTimeout?: number;
 }
 
-export interface RuntimeApi {
+export interface RuntimeAPI {
   createLane(workspaceId: string): Promise<{ id: string; name: string }>;
   attachLane(laneId: string): Promise<void>;
   detachLane(laneId: string): Promise<void>;
@@ -48,7 +48,7 @@ export class LaneActions {
       }
 
       // Call runtime API
-      const result = await this.options.runtimeApi.createLane(workspaceId);
+      const result = await this.options.runtimeAPI.createLane(workspaceId);
 
       if (this.options.onLaneCreated) {
         this.options.onLaneCreated(result.id);
@@ -66,7 +66,7 @@ export class LaneActions {
       }
 
       // Call runtime API
-      await this.options.runtimeApi.attachLane(laneId);
+      await this.options.runtimeAPI.attachLane(laneId);
 
       if (this.options.onLaneAttached) {
         this.options.onLaneAttached(laneId);
@@ -84,7 +84,7 @@ export class LaneActions {
       }
 
       // Call runtime API
-      await this.options.runtimeApi.detachLane(laneId);
+      await this.options.runtimeAPI.detachLane(laneId);
 
       if (this.options.onLaneDetached) {
         this.options.onLaneDetached(laneId);
@@ -106,7 +106,7 @@ export class LaneActions {
 
   private async executeCleanup(laneId: string): Promise<boolean> {
     try {
-      await this.options.runtimeApi.cleanupLane(laneId);
+      await this.options.runtimeAPI.cleanupLane(laneId);
 
       if (this.options.onLaneCleaned) {
         this.options.onLaneCleaned(laneId);
@@ -151,9 +151,7 @@ export class LaneActions {
   }
 
   clearAllErrors(): void {
-    for (const timeout of this.errorTimeouts.values()) {
-      clearTimeout(timeout);
-    }
+    this.errorTimeouts.forEach(timeout => clearTimeout(timeout));
     this.errorTimeouts.clear();
   }
 
