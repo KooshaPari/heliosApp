@@ -74,6 +74,7 @@ export const ShareModal: Component<ShareModalProps> = props => {
               {props.shareUrl || "Generating link..."}
             </code>
             <button
+              type="button"
               onClick={copyToClipboard}
               style={{
                 background: copied() ? "#a6e3a1" : "#89b4fa",
@@ -90,6 +91,7 @@ export const ShareModal: Component<ShareModalProps> = props => {
             </button>
           </div>
           <button
+            type="button"
             onClick={props.onClose}
             style={{
               "margin-top": "16px",
