@@ -46,16 +46,8 @@ export default defineConfig({
           ],
         },
       ],
-<<<<<<< HEAD
       '/development/': [
         { text: 'Development Guide', items: [{ text: 'Overview', link: '/development/' }] },
-=======
-      "/development/": [
-        {
-          text: "Development Guide",
-          items: [{ text: "Overview", link: "/development/" }],
-        },
->>>>>>> origin/main
       ],
       '/index/': [
         {

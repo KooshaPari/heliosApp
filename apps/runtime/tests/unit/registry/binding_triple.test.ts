@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { describe, it, expect, beforeEach } from "vitest";
-=======
-import { describe, it, expect, beforeEach } from "bun:test";
->>>>>>> origin/main
 import {
   BindingState,
   type BindingTriple,

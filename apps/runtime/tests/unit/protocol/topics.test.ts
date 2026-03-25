@@ -1,27 +1,14 @@
-<<<<<<< HEAD
 import { describe, expect, it, beforeEach } from 'bun:test';
 import { createBus, type CommandBus } from '../../../src/protocol/bus.js';
 import { createEvent } from '../../../src/protocol/envelope.js';
 import type { EventEnvelope } from '../../../src/protocol/types.js';
-=======
-import { describe, expect, it, beforeEach } from "bun:test";
-import { createBus } from "../../../src/protocol/bus.js";
-import type { LocalBus } from "../../../src/protocol/bus.js";
-import { createEvent } from "../../../src/protocol/envelope.js";
-import type { LocalBusEnvelope } from "../../../src/protocol/types.js";
->>>>>>> origin/main
 
 // FR-004: Event fan-out with deterministic delivery
 // FR-009: Subscriber isolation (one throwing does not block others)
 // FR-010: Snapshot-based subscriber iteration
 
-<<<<<<< HEAD
 describe('LocalBus — event fan-out', () => {
   let bus: CommandBus;
-=======
-describe("LocalBus — event fan-out", () => {
-  let bus: LocalBus;
->>>>>>> origin/main
 
   beforeEach(() => {
     bus = createBus();

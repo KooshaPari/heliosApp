@@ -70,14 +70,9 @@ export type Envelope = CommandEnvelope | EventEnvelope | ResponseEnvelope;
 export type LocalBusEnvelope = {
   id: string;
   type: EnvelopeType;
-<<<<<<< HEAD
   ts: string;
   timestamp?: string | number;
   correlation_id?: string;
-=======
-  ts?: string;
-  timestamp?: number;
->>>>>>> origin/main
   workspace_id?: string;
   session_id?: string;
   terminal_id?: string;
