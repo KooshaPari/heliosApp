@@ -92,7 +92,7 @@ describe("T002 — RioBackend adapter conformance", () => {
   it("rejects operations when disabled", () => {
     backend.setDisabled();
     expect(() => backend.handleInput("pty-1", new Uint8Array([0x41]))).toThrow(
-      FeatureFlagDisabledError,
+      FeatureFlagDisabledError
     );
   });
 

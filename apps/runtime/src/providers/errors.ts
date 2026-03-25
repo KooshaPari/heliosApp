@@ -31,7 +31,7 @@ export const PROVIDER_ERROR_CODES = {
   PROVIDER_UNKNOWN: "PROVIDER_UNKNOWN",
 } as const;
 
-export type ProviderErrorCode = typeof PROVIDER_ERROR_CODES[keyof typeof PROVIDER_ERROR_CODES];
+export type ProviderErrorCode = (typeof PROVIDER_ERROR_CODES)[keyof typeof PROVIDER_ERROR_CODES];
 
 /**
  * Retryability status for each error code.
@@ -288,7 +288,10 @@ export function isRetryable(error: NormalizedProviderError): boolean {
  * @param details Additional details to include in the message
  * @returns Formatted message string
  */
-export function getErrorMessage(code: ProviderErrorCode, details?: Record<string, unknown>): string {
+export function getErrorMessage(
+  code: ProviderErrorCode,
+  details?: Record<string, unknown>
+): string {
   let message = ERROR_MESSAGE_TEMPLATES[code];
 
   if (details) {

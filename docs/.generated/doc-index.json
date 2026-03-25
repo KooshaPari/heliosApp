@@ -1,4 +1,4 @@
 {
-  "generated": true,
-  "tool": "docs/scripts/generate-doc-index.sh"
+	"generated": true,
+	"tool": "docs/scripts/generate-doc-index.sh"
 }

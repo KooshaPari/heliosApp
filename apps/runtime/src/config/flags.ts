@@ -63,11 +63,9 @@ export class FlagRegistry {
     }
 
     // Listen for future changes.
-    this.unsubscribe = this.settings.onSettingChanged(
-      (event: SettingChangeEvent) => {
-        this.handleChange(event);
-      },
-    );
+    this.unsubscribe = this.settings.onSettingChanged((event: SettingChangeEvent) => {
+      this.handleChange(event);
+    });
   }
 
   dispose(): void {
@@ -160,6 +158,5 @@ export class FlagRegistry {
 export const RENDERER_ENGINE_FLAG: FeatureFlag<"ghostty" | "rio"> = {
   key: "renderer_engine",
   defaultValue: "ghostty",
-  description:
-    "Terminal renderer engine. Changing requires restart (reloadPolicy=restart).",
+  description: "Terminal renderer engine. Changing requires restart (reloadPolicy=restart).",
 };

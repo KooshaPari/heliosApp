@@ -1,6 +1,6 @@
-import { AuditEvent } from './event';
-import { AuditRingBuffer, AuditFilter as RingBufferFilter } from './ring-buffer';
-import { SQLiteAuditStore } from './sqlite-store';
+import type { AuditEvent } from "./event";
+import { AuditRingBuffer, type AuditFilter as RingBufferFilter } from "./ring-buffer";
+import { SQLiteAuditStore } from "./sqlite-store";
 
 /**
  * Enhanced filter interface for ledger queries.
@@ -49,7 +49,7 @@ export class AuditLedger {
 
   constructor(
     private ringBuffer: AuditRingBuffer,
-    private store: SQLiteAuditStore,
+    private store: SQLiteAuditStore
   ) {}
 
   /**
@@ -83,16 +83,16 @@ export class AuditLedger {
     // Merge and deduplicate results by event ID
     const merged = new Map<string, AuditEvent>();
 
-    rbResults.forEach((event) => merged.set(event.id, event));
-    dbResults.forEach((event) => {
+    rbResults.forEach(event => merged.set(event.id, event));
+    dbResults.forEach(event => {
       if (!merged.has(event.id)) {
         merged.set(event.id, event);
       }
     });
 
     // Convert to array, sort chronologically, apply pagination
-    const combined = Array.from(merged.values()).sort((a, b) =>
-      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+    const combined = Array.from(merged.values()).sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
 
     return combined.slice(offset, offset + limit);
@@ -192,11 +192,11 @@ export class AuditLedger {
     this.batchedNotifications.forEach((events, callback) => {
       // Invoke callback asynchronously to avoid blocking
       setImmediate(() => {
-        events.forEach((event) => {
+        events.forEach(event => {
           try {
             callback(event);
           } catch (err) {
-            console.error('[AuditLedger] Subscription callback error:', err);
+            console.error("[AuditLedger] Subscription callback error:", err);
           }
         });
       });
@@ -212,31 +212,38 @@ export class AuditLedger {
   private traverseCorrelationChain(
     correlationId: string,
     visited: Set<string>,
-    chain: AuditEvent[],
+    chain: AuditEvent[]
   ): void {
     if (visited.has(correlationId)) {
-      console.warn(`[AuditLedger] Circular reference detected for correlation ID: ${correlationId}`);
+      console.warn(
+        `[AuditLedger] Circular reference detected for correlation ID: ${correlationId}`
+      );
       return;
     }
 
     visited.add(correlationId);
 
-    // Get all events with this correlation ID
-    const events = this.store.getByCorrelationChain(correlationId);
+    // Get all events with this correlation ID from both ring buffer and store
+    const ringEvents = this.ringBuffer.getByCorrelationId(correlationId);
+    const storeEvents = this.store.getByCorrelationChain(correlationId);
+    const eventMap = new Map<string, AuditEvent>();
+    for (const event of ringEvents) eventMap.set(event.id, event);
+    for (const event of storeEvents) eventMap.set(event.id, event);
+    const events = Array.from(eventMap.values());
 
     if (events.length === 0) {
       console.warn(`[AuditLedger] No events found for correlation ID: ${correlationId}`);
       return;
     }
 
-    events.forEach((event) => {
-      if (!chain.find((e) => e.id === event.id)) {
+    events.forEach(event => {
+      if (!chain.find(e => e.id === event.id)) {
         chain.push(event);
       }
 
       // Check for parent correlation ID in metadata
       const parentCorrelationId = event.metadata?.parentCorrelationId;
-      if (parentCorrelationId && typeof parentCorrelationId === 'string') {
+      if (parentCorrelationId && typeof parentCorrelationId === "string") {
         this.traverseCorrelationChain(parentCorrelationId, visited, chain);
       }
     });

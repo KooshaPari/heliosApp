@@ -33,7 +33,11 @@ function makeFixedEncryption(): EncryptionService {
 }
 
 function makeStore(dataDir: string, bus: LocalBus): CredentialStore {
-  return new CredentialStore({ dataDir, bus, encryption: makeFixedEncryption() });
+  return new CredentialStore({
+    dataDir,
+    bus,
+    encryption: makeFixedEncryption(),
+  });
 }
 
 function makeEngine(): RedactionEngine {
@@ -74,7 +78,7 @@ describe("Integration Tests (T015)", () => {
     it("cat .env triggers warning", () => {
       const detector = new ProtectedPathDetector();
       const warnings: string[] = [];
-      detector.onWarning((m) => warnings.push(m.matchedPath));
+      detector.onWarning(m => warnings.push(m.matchedPath));
 
       const matches = detector.check("cat .env");
       expect(matches.length).toBeGreaterThan(0);
@@ -141,13 +145,16 @@ describe("Integration Tests (T015)", () => {
     it("emits bus event on protected path access", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });
-      detector.check("cat .env", { terminalId: "term-1", correlationId: "corr-1" });
+      detector.check("cat .env", {
+        terminalId: "term-1",
+        correlationId: "corr-1",
+      });
 
       // Give microtask queue a chance to process
-      await new Promise((r) => setTimeout(r, 0));
+      await new Promise(r => setTimeout(r, 0));
 
       const events = bus.getEvents();
-      const pathEvent = events.find((e) => e.topic === "secrets.protected_path.accessed");
+      const pathEvent = events.find(e => e.topic === "secrets.protected_path.accessed");
       expect(pathEvent).toBeDefined();
       expect(pathEvent?.payload?.matchedPath).toBe(".env");
       expect(pathEvent?.payload?.terminalId).toBe("term-1");
@@ -183,7 +190,7 @@ describe("Integration Tests (T015)", () => {
       const config2 = new ProtectedPathConfig({ configPath });
       await config2.loadFromDisk();
       const patterns = config2.listPatterns();
-      const customPattern = patterns.find((p) => p.pattern === "*.secret");
+      const customPattern = patterns.find(p => p.pattern === "*.secret");
       expect(customPattern).toBeDefined();
     });
 
@@ -223,10 +230,10 @@ describe("Integration Tests (T015)", () => {
       detector.check("cat .env");
       detector.acknowledge("dotenv", ".env", "corr-ack");
 
-      await new Promise((r) => setTimeout(r, 0));
+      await new Promise(r => setTimeout(r, 0));
 
       const events = bus.getEvents();
-      const ackEvent = events.find((e) => e.topic === "secrets.protected_path.acknowledged");
+      const ackEvent = events.find(e => e.topic === "secrets.protected_path.acknowledged");
       expect(ackEvent).toBeDefined();
       expect(ackEvent?.payload?.matchedPath).toBe(".env");
     });
@@ -250,7 +257,11 @@ describe("Integration Tests (T015)", () => {
       for (let i = 0; i < attempts; i++) {
         try {
           await store.retrieveWithContext(
-            { requestingProviderId: "providerB", requestingWorkspaceId: "ws1", correlationId: `corr-${i}` },
+            {
+              requestingProviderId: "providerB",
+              requestingWorkspaceId: "ws1",
+              correlationId: `corr-${i}`,
+            },
             "providerA",
             "ws1",
             "apiKey"
@@ -274,17 +285,23 @@ describe("Integration Tests (T015)", () => {
 
       try {
         await store.retrieveWithContext(
-          { requestingProviderId: "providerB", requestingWorkspaceId: "ws1", correlationId: "corr-deny" },
+          {
+            requestingProviderId: "providerB",
+            requestingWorkspaceId: "ws1",
+            correlationId: "corr-deny",
+          },
           "providerA",
           "ws1",
           "key"
         );
-      } catch (_) { /* expected */ }
+      } catch (_) {
+        /* expected */
+      }
 
-      await new Promise((r) => setTimeout(r, 10));
+      await new Promise(r => setTimeout(r, 10));
 
       const events = bus.getEvents();
-      const deniedEvent = events.find((e) => e.topic === "secrets.credential.access.denied");
+      const deniedEvent = events.find(e => e.topic === "secrets.credential.access.denied");
       expect(deniedEvent).toBeDefined();
       expect(deniedEvent?.payload?.requestingProviderId).toBe("providerB");
       expect(deniedEvent?.payload?.targetProviderId).toBe("providerA");
@@ -296,7 +313,11 @@ describe("Integration Tests (T015)", () => {
       await store.create("providerA", "ws1", "key", "secret-value", "corr-1");
 
       const value = await store.retrieveWithContext(
-        { requestingProviderId: "providerA", requestingWorkspaceId: "ws1", correlationId: "corr-ok" },
+        {
+          requestingProviderId: "providerA",
+          requestingWorkspaceId: "ws1",
+          correlationId: "corr-ok",
+        },
         "providerA",
         "ws1",
         "key"
@@ -319,8 +340,14 @@ describe("Integration Tests (T015)", () => {
 
       await storeWithAudit.create("prov", "ws", "key", "val", "corr-create");
       await storeWithAudit.retrieveWithContext(
-        { requestingProviderId: "prov", requestingWorkspaceId: "ws", correlationId: "corr-access" },
-        "prov", "ws", "key"
+        {
+          requestingProviderId: "prov",
+          requestingWorkspaceId: "ws",
+          correlationId: "corr-access",
+        },
+        "prov",
+        "ws",
+        "key"
       );
       await storeWithAudit.rotate("prov", "ws", "key", "newval", "corr-rotate");
       await storeWithAudit.revoke("prov", "ws", "key", "corr-revoke");
@@ -470,7 +497,7 @@ describe("Integration Tests (T015)", () => {
       await store.rotate("prov", "ws", "key", "new", "corr-2");
 
       const events = bus.getEvents();
-      const rotatedEvent = events.find((e) => e.topic === "secrets.credential.rotated");
+      const rotatedEvent = events.find(e => e.topic === "secrets.credential.rotated");
       expect(rotatedEvent).toBeDefined();
       expect(rotatedEvent?.payload?.name).toBe("key");
       // Audit event must not contain old or new values
@@ -531,10 +558,13 @@ describe("Integration Tests (T015)", () => {
       const wrappedBus = sink.wrapBus(bus);
 
       const detector = new ProtectedPathDetector({ bus: wrappedBus });
-      detector.check("cat .env", { terminalId: "term-1", correlationId: "corr-path" });
+      detector.check("cat .env", {
+        terminalId: "term-1",
+        correlationId: "corr-path",
+      });
 
       // Allow event processing
-      await new Promise((r) => setTimeout(r, 5));
+      await new Promise(r => setTimeout(r, 5));
 
       const records = sink.query({ topic: "secrets.protected_path.accessed" });
       expect(records.length).toBeGreaterThan(0);
@@ -549,12 +579,12 @@ describe("Integration Tests (T015)", () => {
 
       const detector = new ProtectedPathDetector({ bus: wrappedBus });
       // Command that includes an AWS key inline (should be stripped in redactedCommand)
-      detector.check(
-        "cat .env AKIAIOSFODNN7EXAMPLE",
-        { terminalId: "term-1", correlationId: "corr-sensitive" }
-      );
+      detector.check("cat .env AKIAIOSFODNN7EXAMPLE", {
+        terminalId: "term-1",
+        correlationId: "corr-sensitive",
+      });
 
-      await new Promise((r) => setTimeout(r, 5));
+      await new Promise(r => setTimeout(r, 5));
 
       const bundle = sink.export();
       const bundleStr = JSON.stringify(bundle);

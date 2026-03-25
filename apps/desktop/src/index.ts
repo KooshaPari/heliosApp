@@ -6,6 +6,7 @@
  */
 
 import { healthCheck, VERSION, type HealthCheckResult } from "@helios/runtime";
+<<<<<<< HEAD
 import { InMemoryLocalBus } from "../../runtime/src/protocol/bus";
 import {
   ActiveContextStore,
@@ -21,12 +22,32 @@ import {
   type RendererEngine,
 } from "./settings";
 import { buildAllTabSurfaces, type TabSurface } from "./tabs";
+=======
+import { InMemoryLocalBus } from "../../runtime/src/protocol/bus/emitter.js";
+import type { LocalBus } from "../../runtime/src/protocol/bus.js";
+import {
+  ActiveContextStore,
+  selectActiveContext,
+  INITIAL_ACTIVE_CONTEXT_STATE,
+  type ActiveTab,
+} from "./context_store.js";
+import { DesktopRuntimeClient } from "./runtime_client.js";
+import {
+  type DesktopSettings,
+  DEFAULT_SETTINGS,
+  type RendererEngine,
+  switchRendererWithRollback,
+} from "./settings.js";
+import { type TabSurface, buildAllTabSurfaces } from "./tabs.js";
+>>>>>>> origin/main
 
 function main(): void {
   const health: HealthCheckResult = healthCheck();
 
   console.log(`[helios-desktop] runtime v${VERSION}`);
-  console.log(`[helios-desktop] health: ok=${String(health.ok)} uptime=${health.uptimeMs.toFixed(1)}ms`);
+  console.log(
+    `[helios-desktop] health: ok=${String(health.ok)} uptime=${health.uptimeMs.toFixed(1)}ms`
+  );
 
   // ElectroBun window creation will be wired in spec 001 WP00.
   // For now, confirm the monorepo cross-workspace import works.
@@ -36,7 +57,7 @@ function main(): void {
 main();
 
 export type BootDesktopInput = {
-  bus?: InMemoryLocalBus;
+  bus?: LocalBus;
   initialSettings?: DesktopSettings;
 };
 
@@ -83,10 +104,16 @@ export class EditorlessControlPlane {
     forceError?: boolean;
   }): Promise<{ ok: boolean; laneId: string | null; error: string | null }> {
     this.store.dispatch({ type: "operation.start", operation: "lane" });
-    this.store.dispatch({ type: "workspace.set", workspaceId: input.workspaceId });
+    this.store.dispatch({
+      type: "workspace.set",
+      workspaceId: input.workspaceId,
+    });
 
     const result = await this.runtimeClient.createLane(input);
-    this.store.dispatch({ type: "diagnostics.set", diagnostics: result.diagnostics });
+    this.store.dispatch({
+      type: "diagnostics.set",
+      diagnostics: result.diagnostics,
+    });
 
     if (!(result.ok && result.id)) {
       this.store.dispatch({
@@ -94,12 +121,19 @@ export class EditorlessControlPlane {
         operation: "lane",
         error: result.error ?? "lane create failed",
       });
-      return { ok: false, laneId: null, error: result.error ?? "lane create failed" };
+      return {
+        ok: false,
+        laneId: null,
+        error: result.error ?? "lane create failed",
+      };
     }
 
     this.store.dispatch({ type: "lane.set", laneId: result.id });
     if (result.runtimeState) {
-      this.store.dispatch({ type: "runtime.state.set", runtimeState: result.runtimeState });
+      this.store.dispatch({
+        type: "runtime.state.set",
+        runtimeState: result.runtimeState,
+      });
     }
     this.store.dispatch({ type: "operation.success", operation: "lane" });
     return { ok: true, laneId: result.id, error: null };
@@ -112,7 +146,10 @@ export class EditorlessControlPlane {
   }): Promise<{ ok: boolean; sessionId: string | null; error: string | null }> {
     this.store.dispatch({ type: "operation.start", operation: "session" });
     const result = await this.runtimeClient.ensureSession(input);
-    this.store.dispatch({ type: "diagnostics.set", diagnostics: result.diagnostics });
+    this.store.dispatch({
+      type: "diagnostics.set",
+      diagnostics: result.diagnostics,
+    });
 
     if (!(result.ok && result.id)) {
       this.store.dispatch({
@@ -120,12 +157,19 @@ export class EditorlessControlPlane {
         operation: "session",
         error: result.error ?? "session attach failed",
       });
-      return { ok: false, sessionId: null, error: result.error ?? "session attach failed" };
+      return {
+        ok: false,
+        sessionId: null,
+        error: result.error ?? "session attach failed",
+      };
     }
 
     this.store.dispatch({ type: "session.set", sessionId: result.id });
     if (result.runtimeState) {
-      this.store.dispatch({ type: "runtime.state.set", runtimeState: result.runtimeState });
+      this.store.dispatch({
+        type: "runtime.state.set",
+        runtimeState: result.runtimeState,
+      });
     }
     this.store.dispatch({ type: "operation.success", operation: "session" });
     return { ok: true, sessionId: result.id, error: null };
@@ -152,13 +196,20 @@ export class EditorlessControlPlane {
         operation: "session",
         error: result.error ?? "session restore failed",
       });
-      return { ok: false, sessionId: null, error: result.error ?? "session restore failed" };
+      return {
+        ok: false,
+        sessionId: null,
+        error: result.error ?? "session restore failed",
+      };
     }
 
     this.store.dispatch({ type: "lane.set", laneId: input.laneId });
     this.store.dispatch({ type: "session.set", sessionId: result.id });
     if (result.runtimeState) {
-      this.store.dispatch({ type: "runtime.state.set", runtimeState: result.runtimeState });
+      this.store.dispatch({
+        type: "runtime.state.set",
+        runtimeState: result.runtimeState,
+      });
     }
     this.store.dispatch({ type: "operation.success", operation: "session" });
     return { ok: true, sessionId: result.id, error: null };
@@ -169,7 +220,11 @@ export class EditorlessControlPlane {
     laneId: string;
     sessionId: string;
     forceError?: boolean;
-  }): Promise<{ ok: boolean; terminalId: string | null; error: string | null }> {
+  }): Promise<{
+    ok: boolean;
+    terminalId: string | null;
+    error: string | null;
+  }> {
     this.store.dispatch({ type: "operation.start", operation: "terminal" });
     const result = await this.runtimeClient.spawnTerminal(input);
     if (!(result.ok && result.id)) {
@@ -178,12 +233,19 @@ export class EditorlessControlPlane {
         operation: "terminal",
         error: result.error ?? "terminal spawn failed",
       });
-      return { ok: false, terminalId: null, error: result.error ?? "terminal spawn failed" };
+      return {
+        ok: false,
+        terminalId: null,
+        error: result.error ?? "terminal spawn failed",
+      };
     }
 
     this.store.dispatch({ type: "terminal.set", terminalId: result.id });
     if (result.runtimeState) {
-      this.store.dispatch({ type: "runtime.state.set", runtimeState: result.runtimeState });
+      this.store.dispatch({
+        type: "runtime.state.set",
+        runtimeState: result.runtimeState,
+      });
     }
     this.store.dispatch({ type: "operation.success", operation: "terminal" });
     return { ok: true, terminalId: result.id, error: null };

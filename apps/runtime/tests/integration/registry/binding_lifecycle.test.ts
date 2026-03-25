@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import { BindingEventEmitter } from "../../../src/registry/binding_events.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
@@ -88,14 +88,14 @@ describe("Binding Lifecycle Integration", () => {
       };
 
       const binding = registry.register("terminal-1", triple);
-      expect(binding.state).toBe(BindingState.Bound);
+      expect(binding.state).toBe(BindingState.bound);
 
       const rebound = registry.rebind("terminal-1", {
         workspaceId: "ws-1",
         laneId: "lane-2",
         sessionId: "session-2",
       });
-      expect(rebound.state).toBe(BindingState.Rebound);
+      expect(rebound.state).toBe(BindingState.rebound);
     });
   });
 
@@ -115,7 +115,7 @@ describe("Binding Lifecycle Integration", () => {
 
       const events = bus.getEvents();
       expect(events).toHaveLength(10);
-      expect(events.every((e) => e.topic === "terminal.binding.bound")).toBe(true);
+      expect(events.every(e => e.topic === "terminal.binding.bound")).toBe(true);
     });
 
     it("should maintain consistency with rapid rebinds", async () => {
@@ -144,7 +144,7 @@ describe("Binding Lifecycle Integration", () => {
       const events = bus.getEvents();
       expect(events).toHaveLength(6); // 1 bound + 5 rebound
       expect(events[0].topic).toBe("terminal.binding.bound");
-      expect(events.slice(1).every((e) => e.topic === "terminal.binding.rebound")).toBe(true);
+      expect(events.slice(1).every(e => e.topic === "terminal.binding.rebound")).toBe(true);
 
       const finalBinding = registry.get(terminal);
       expect(finalBinding?.binding.laneId).toBe("lane-6");
@@ -180,7 +180,7 @@ describe("Binding Lifecycle Integration", () => {
       const finalBinding = registry.get(terminal);
       expect(finalBinding?.binding.laneId).toBe("lane-2");
       expect(finalBinding?.binding.sessionId).toBe("session-5");
-      expect(finalBinding?.state).toBe(BindingState.Rebound);
+      expect(finalBinding?.state).toBe(BindingState.rebound);
 
       // Verify indexes
       const byLane = registry.getByLane("lane-2");
@@ -213,7 +213,7 @@ describe("Binding Lifecycle Integration", () => {
       expect(event.session_id).toBe("session-1");
       expect(event.terminal_id).toBe("terminal-1");
       expect((event.payload as any).correlationId).toBe(correlationId);
-      expect((event.payload as any).state).toBe(BindingState.Bound);
+      expect((event.payload as any).state).toBe(BindingState.bound);
       expect((event.payload as any).binding).toEqual(triple);
     });
   });

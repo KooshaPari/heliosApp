@@ -55,7 +55,7 @@ function reportResults(results: BenchmarkResult[]): void {
     timestamp: new Date().toISOString(),
     renderer: "ghostty",
     results,
-    allPassed: results.every((r) => r.passed),
+    allPassed: results.every(r => r.passed),
   };
   // Output structured JSON for CI tracking
   console.log("\n=== SLO BENCHMARK RESULTS ===");
@@ -201,7 +201,7 @@ describe("SLO Benchmarks - Memory per terminal (T014)", () => {
     }
 
     // Wait for streams to be consumed
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise(r => setTimeout(r, 100));
 
     expect(backend.getBoundStreamCount()).toBe(5);
 

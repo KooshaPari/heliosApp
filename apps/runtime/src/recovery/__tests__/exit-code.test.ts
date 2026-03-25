@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { Watchdog, CrashReason, type CrashEvent } from "../watchdog.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { promises as fs } from "fs";
@@ -17,7 +17,7 @@ describe("Exit Code Monitoring", () => {
     bus = new InMemoryLocalBus();
     watchdog = new Watchdog(tempDir, bus);
     crashEvents = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
   });
 
   afterEach(async () => {
@@ -38,7 +38,7 @@ describe("Exit Code Monitoring", () => {
       await watchdog.handleProcessExit("test-proc", 1234, 1);
 
       expect(crashEvents.length).toBe(1);
-      expect(crashEvents[0].reason).toBe(CrashReason.ExitCode);
+      expect(crashEvents[0].reason).toBe(CrashReason.EXIT_CODE);
       expect(crashEvents[0].exitCode).toBe(1);
     });
 
@@ -50,7 +50,7 @@ describe("Exit Code Monitoring", () => {
       }
 
       expect(crashEvents.length).toBe(3);
-      expect(crashEvents.map((e) => e.exitCode)).toEqual(codes);
+      expect(crashEvents.map(e => e.exitCode)).toEqual(codes);
     });
   });
 
@@ -67,7 +67,7 @@ describe("Exit Code Monitoring", () => {
       await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGKILL");
 
       expect(crashEvents.length).toBe(1);
-      expect(crashEvents[0].reason).toBe(CrashReason.Signal);
+      expect(crashEvents[0].reason).toBe(CrashReason.SIGNAL);
       expect(crashEvents[0].signal).toBe("SIGKILL");
     });
 
@@ -76,7 +76,7 @@ describe("Exit Code Monitoring", () => {
       await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGSEGV");
 
       expect(crashEvents.length).toBe(1);
-      expect(crashEvents[0].reason).toBe(CrashReason.Signal);
+      expect(crashEvents[0].reason).toBe(CrashReason.SIGNAL);
       expect(crashEvents[0].signal).toBe("SIGSEGV");
     });
 
@@ -85,7 +85,7 @@ describe("Exit Code Monitoring", () => {
       await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGBUS");
 
       expect(crashEvents.length).toBe(1);
-      expect(crashEvents[0].reason).toBe(CrashReason.Signal);
+      expect(crashEvents[0].reason).toBe(CrashReason.SIGNAL);
     });
 
     it("should trigger crash on SIGABRT (abort signal)", async () => {
@@ -93,7 +93,7 @@ describe("Exit Code Monitoring", () => {
       await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGABRT");
 
       expect(crashEvents.length).toBe(1);
-      expect(crashEvents[0].reason).toBe(CrashReason.Signal);
+      expect(crashEvents[0].reason).toBe(CrashReason.SIGNAL);
     });
   });
 
@@ -103,10 +103,13 @@ describe("Exit Code Monitoring", () => {
       await watchdog.handleProcessExit("test-proc", 1234, 1);
 
       // Give async I/O time
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       const recordPath = path.join(tempDir, "recovery", "last-crash.json");
-      const exists = await fs.access(recordPath).then(() => true).catch(() => false);
+      const exists = await fs
+        .access(recordPath)
+        .then(() => true)
+        .catch(() => false);
       expect(exists).toBe(true);
 
       const content = await fs.readFile(recordPath, "utf-8");
@@ -120,12 +123,12 @@ describe("Exit Code Monitoring", () => {
       watchdog.registerProcess("proc1", 1001, 2000);
       await watchdog.handleProcessExit("proc1", 1001, 1);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       watchdog.registerProcess("proc2", 1002, 2000);
       await watchdog.handleProcessExit("proc2", 1002, 2);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       const recordPath = path.join(tempDir, "recovery", "last-crash.json");
       const content = await fs.readFile(recordPath, "utf-8");
@@ -140,10 +143,13 @@ describe("Exit Code Monitoring", () => {
       watchdog.registerProcess("test-proc", 1234, 2000);
       await watchdog.handleProcessExit("test-proc", 1234, 1);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       const recoveryDir = path.join(tempDir, "recovery");
-      const exists = await fs.access(recoveryDir).then(() => true).catch(() => false);
+      const exists = await fs
+        .access(recoveryDir)
+        .then(() => true)
+        .catch(() => false);
       expect(exists).toBe(true);
     });
   });
@@ -155,9 +161,9 @@ describe("Exit Code Monitoring", () => {
 
       const events = bus.getEvents();
       expect(events.length).toBeGreaterThan(0);
-      const crashEvent = events.find((e) => e.topic === "recovery.crash.detected");
+      const crashEvent = events.find(e => e.topic === "recovery.crash.detected");
       expect(crashEvent).toBeDefined();
-      expect(crashEvent?.payload?.reason).toBe(CrashReason.ExitCode);
+      expect(crashEvent?.payload?.reason).toBe(CrashReason.EXIT_CODE);
     });
 
     it("should include full crash details in bus event", async () => {
@@ -165,7 +171,7 @@ describe("Exit Code Monitoring", () => {
       await watchdog.handleProcessExit("test-proc", 1234, 1);
 
       const events = bus.getEvents();
-      const crashEvent = events.find((e) => e.topic === "recovery.crash.detected");
+      const crashEvent = events.find(e => e.topic === "recovery.crash.detected");
       expect(crashEvent?.payload).toMatchObject({
         name: "test-proc",
         pid: 1234,
@@ -176,7 +182,7 @@ describe("Exit Code Monitoring", () => {
     it("should handle missing bus gracefully", async () => {
       const watchdogNoBus = new Watchdog(tempDir);
       const crashes: CrashEvent[] = [];
-      watchdogNoBus.onCrashDetected((event) => crashes.push(event));
+      watchdogNoBus.onCrashDetected(event => crashes.push(event));
 
       watchdogNoBus.registerProcess("test-proc", 1234, 2000);
       await watchdogNoBus.handleProcessExit("test-proc", 1234, 1);
@@ -184,9 +190,12 @@ describe("Exit Code Monitoring", () => {
       expect(crashes.length).toBe(1);
 
       // Should still write to filesystem
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
       const recordPath = path.join(tempDir, "recovery", "last-crash.json");
-      const exists = await fs.access(recordPath).then(() => true).catch(() => false);
+      const exists = await fs
+        .access(recordPath)
+        .then(() => true)
+        .catch(() => false);
       expect(exists).toBe(true);
     });
   });

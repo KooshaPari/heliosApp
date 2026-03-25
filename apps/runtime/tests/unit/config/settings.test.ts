@@ -140,7 +140,7 @@ describe("SettingsManager — hot-reload", () => {
     const events: SettingChangeEvent[] = [];
     const mgr = createManager();
     await mgr.init();
-    mgr.onSettingChanged((e) => events.push(e));
+    mgr.onSettingChanged(e => events.push(e));
     await mgr.set("theme", "dark");
     await mgr.set("renderer_engine", "rio");
     expect(events).toHaveLength(2);

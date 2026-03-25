@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { InMemoryLocalBus } from "../../src/protocol/bus";
 
+<<<<<<< HEAD
 const LANE_CREATE_P95_MS = 30;
 const SESSION_RESTORE_P95_MS = 35;
 const BACKLOG_DEPTH_P95 = 64;
@@ -88,3 +89,7 @@ test("soak: lane/session churn and backlog pressure stay within baseline thresho
   );
   expect(backlog?.p95 ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual(BACKLOG_DEPTH_P95);
 });
+=======
+// Requires InMemoryLocalBus.getMetricsReport() to be implemented
+test.todo("soak: lane/session churn and backlog pressure stay within baseline thresholds — requires bus.getMetricsReport()", () => {});
+>>>>>>> origin/main

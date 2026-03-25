@@ -42,7 +42,7 @@ export class IdleMonitor {
     registry: PtyRegistry,
     bus: BusPublisher,
     lifecycles: Map<string, PtyLifecycle>,
-    config?: IdleMonitorConfig,
+    config?: IdleMonitorConfig
   ) {
     this.registry = registry;
     this.bus = bus;

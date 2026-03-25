@@ -30,23 +30,23 @@ type StageChangeListener = (
 ) => void;
 
 const LEGAL_TRANSITIONS: Record<RecoveryStage, RecoveryStage[]> = {
-  [RecoveryStage.Crashed]: [RecoveryStage.Detecting],
-  [RecoveryStage.Detecting]: [RecoveryStage.Inventorying, RecoveryStage.DetectionFailed],
-  [RecoveryStage.Inventorying]: [RecoveryStage.Restoring, RecoveryStage.InventoryFailed],
-  [RecoveryStage.Restoring]: [RecoveryStage.Reconciling, RecoveryStage.RestorationFailed],
-  [RecoveryStage.Reconciling]: [RecoveryStage.Live, RecoveryStage.ReconciliationFailed],
-  [RecoveryStage.Live]: [], // Terminal state
-  [RecoveryStage.DetectionFailed]: [RecoveryStage.Detecting], // Retry
-  [RecoveryStage.InventoryFailed]: [RecoveryStage.Inventorying],
-  [RecoveryStage.RestorationFailed]: [RecoveryStage.Restoring],
-  [RecoveryStage.ReconciliationFailed]: [RecoveryStage.Reconciling],
+  [RecoveryStage.CRASHED]: [RecoveryStage.DETECTING],
+  [RecoveryStage.DETECTING]: [RecoveryStage.INVENTORYING, RecoveryStage.DETECTION_FAILED],
+  [RecoveryStage.INVENTORYING]: [RecoveryStage.RESTORING, RecoveryStage.INVENTORY_FAILED],
+  [RecoveryStage.RESTORING]: [RecoveryStage.RECONCILING, RecoveryStage.RESTORATION_FAILED],
+  [RecoveryStage.RECONCILING]: [RecoveryStage.LIVE, RecoveryStage.RECONCILIATION_FAILED],
+  [RecoveryStage.LIVE]: [], // Terminal state
+  [RecoveryStage.DETECTION_FAILED]: [RecoveryStage.DETECTING], // Retry
+  [RecoveryStage.INVENTORY_FAILED]: [RecoveryStage.INVENTORYING],
+  [RecoveryStage.RESTORATION_FAILED]: [RecoveryStage.RESTORING],
+  [RecoveryStage.RECONCILIATION_FAILED]: [RecoveryStage.RECONCILING],
 };
 
 const MAX_RETRIES_PER_STAGE = 3;
 const STAGE_TIMEOUT_MS = 30000; // 30 seconds
 
 export class RecoveryStateMachine {
-  private currentStage: RecoveryStage = RecoveryStage.Crashed;
+  private currentStage: RecoveryStage = RecoveryStage.CRASHED;
   private currentState: RecoveryState;
   private recoveryDataDir: string;
   private bus?: LocalBus;
@@ -57,7 +57,7 @@ export class RecoveryStateMachine {
     this.recoveryDataDir = recoveryDataDir;
     this.bus = bus;
     this.currentState = {
-      stage: RecoveryStage.Crashed,
+      stage: RecoveryStage.CRASHED,
       timestamp: Date.now(),
       attemptCount: 0,
     };
@@ -88,9 +88,7 @@ export class RecoveryStateMachine {
       // Retrying - increment attempt count
       this.currentState.attemptCount++;
       if (this.currentState.attemptCount > MAX_RETRIES_PER_STAGE) {
-        throw new Error(
-          `Max retries (${MAX_RETRIES_PER_STAGE}) exceeded for stage ${from}`
-        );
+        throw new Error(`Max retries (${MAX_RETRIES_PER_STAGE}) exceeded for stage ${from}`);
       }
     } else if (from !== to) {
       // New stage - reset attempt count
@@ -133,9 +131,9 @@ export class RecoveryStateMachine {
   }
 
   async reset(): Promise<void> {
-    this.currentStage = RecoveryStage.Crashed;
+    this.currentStage = RecoveryStage.CRASHED;
     this.currentState = {
-      stage: RecoveryStage.Crashed,
+      stage: RecoveryStage.CRASHED,
       timestamp: Date.now(),
       attemptCount: 0,
     };
@@ -160,9 +158,9 @@ export class RecoveryStateMachine {
       this.currentState = state;
     } catch {
       // No persisted state - start fresh
-      this.currentStage = RecoveryStage.Crashed;
+      this.currentStage = RecoveryStage.CRASHED;
       this.currentState = {
-        stage: RecoveryStage.Crashed,
+        stage: RecoveryStage.CRASHED,
         timestamp: Date.now(),
         attemptCount: 0,
       };
@@ -195,11 +193,7 @@ export class RecoveryStateMachine {
     }
   }
 
-  private notifyListeners(
-    from: RecoveryStage,
-    to: RecoveryStage,
-    attemptCount: number
-  ): void {
+  private notifyListeners(from: RecoveryStage, to: RecoveryStage, attemptCount: number): void {
     for (const listener of this.listeners) {
       listener(from, to, attemptCount);
     }
@@ -214,7 +208,7 @@ export class RecoveryStateMachine {
         const failureStage = this.getFailureStateFor(this.currentStage);
         if (failureStage) {
           this.currentState.lastError = `Stage timeout after ${STAGE_TIMEOUT_MS}ms`;
-          this.transition(failureStage).catch((err) => {
+          this.transition(failureStage).catch(err => {
             console.error("Failed to transition to failure state:", err);
           });
         }
@@ -231,16 +225,16 @@ export class RecoveryStateMachine {
 
   private getFailureStateFor(stage: RecoveryStage): RecoveryStage | undefined {
     const failureMap: Record<RecoveryStage, RecoveryStage | undefined> = {
-      [RecoveryStage.Detecting]: RecoveryStage.DetectionFailed,
-      [RecoveryStage.Inventorying]: RecoveryStage.InventoryFailed,
-      [RecoveryStage.Restoring]: RecoveryStage.RestorationFailed,
-      [RecoveryStage.Reconciling]: RecoveryStage.ReconciliationFailed,
-      [RecoveryStage.Crashed]: RecoveryStage.Crashed,
-      [RecoveryStage.Live]: undefined,
-      [RecoveryStage.DetectionFailed]: undefined,
-      [RecoveryStage.InventoryFailed]: undefined,
-      [RecoveryStage.RestorationFailed]: undefined,
-      [RecoveryStage.ReconciliationFailed]: undefined,
+      [RecoveryStage.DETECTING]: RecoveryStage.DETECTION_FAILED,
+      [RecoveryStage.INVENTORYING]: RecoveryStage.INVENTORY_FAILED,
+      [RecoveryStage.RESTORING]: RecoveryStage.RESTORATION_FAILED,
+      [RecoveryStage.RECONCILING]: RecoveryStage.RECONCILIATION_FAILED,
+      [RecoveryStage.CRASHED]: RecoveryStage.CRASHED,
+      [RecoveryStage.LIVE]: undefined,
+      [RecoveryStage.DETECTION_FAILED]: undefined,
+      [RecoveryStage.INVENTORY_FAILED]: undefined,
+      [RecoveryStage.RESTORATION_FAILED]: undefined,
+      [RecoveryStage.RECONCILIATION_FAILED]: undefined,
     };
     return failureMap[stage];
   }

@@ -73,7 +73,11 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
   }
 
   if (Array.isArray(value)) {
+<<<<<<< HEAD
     return value.map((item) => redactStructuredValue(item));
+=======
+    return value.map(item => redactStructuredValue(item));
+>>>>>>> origin/main
   }
 
   if (value && typeof value === "object") {
@@ -81,7 +85,11 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
       Object.entries(value as Record<string, unknown>).map(([entryKey, entryValue]) => [
         entryKey,
         redactStructuredValue(entryValue, entryKey),
+<<<<<<< HEAD
       ]),
+=======
+      ])
+>>>>>>> origin/main
     );
   }
 
@@ -91,7 +99,11 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
 function redactPayload(
   engine: RedactionEngine,
   payload: Record<string, unknown>,
+<<<<<<< HEAD
   correlationId: string,
+=======
+  correlationId: string
+>>>>>>> origin/main
 ): Record<string, unknown> {
   const structured = redactStructuredValue(payload) as Record<string, unknown>;
   const serialized = JSON.stringify(structured);
@@ -112,6 +124,7 @@ export function healthCheck(): HealthCheckResult {
   };
 }
 
+<<<<<<< HEAD
 export interface TerminalBufferEntry {
   seq: number;
   data: string;
@@ -125,14 +138,20 @@ export interface TerminalBuffer {
 }
 
 export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes?: number } = {}) {
+=======
+export function createRuntime(options: RuntimeOptions = {}) {
+>>>>>>> origin/main
   const bus = new InMemoryLocalBus();
   const recovery = new RecoveryRegistry();
   const redactionEngine = new RedactionEngine();
   redactionEngine.loadRules(getDefaultRules());
 
   const auditRecords: RuntimeAuditRecord[] = [];
+<<<<<<< HEAD
   const terminalBuffers = new Map<string, TerminalBuffer>();
   const terminalBufferCap = options.terminalBufferCapBytes ?? 1024 * 1024;
+=======
+>>>>>>> origin/main
   let bootstrapResult: RecoveryBootstrapResult | null = null;
 
   if (options.recovery_metadata) {
@@ -143,6 +162,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
     auditRecords.push(record);
   }
 
+<<<<<<< HEAD
   function getTerminalBuffer(terminalId: string): TerminalBuffer {
     let buffer = terminalBuffers.get(terminalId);
     if (!buffer) {
@@ -199,6 +219,8 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
     });
   }
 
+=======
+>>>>>>> origin/main
   function recordCommand(envelope: LocalBusEnvelope): void {
     appendAuditRecord({
       recorded_at: new Date().toISOString(),
@@ -208,7 +230,11 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       payload: redactPayload(
         redactionEngine,
         normalizePayload(envelope.payload),
+<<<<<<< HEAD
         envelope.correlation_id ?? envelope.id,
+=======
+        envelope.correlation_id ?? envelope.id
+>>>>>>> origin/main
       ),
       error: null,
     });
@@ -223,7 +249,11 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       payload: redactPayload(
         redactionEngine,
         normalizePayload(envelope.result ?? envelope.payload),
+<<<<<<< HEAD
         envelope.correlation_id ?? envelope.id,
+=======
+        envelope.correlation_id ?? envelope.id
+>>>>>>> origin/main
       ),
       error: envelope.error ?? null,
     });
@@ -242,17 +272,35 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       lane_id:
         command.lane_id ??
         (typeof payload.lane_id === "string" ? payload.lane_id : undefined) ??
+<<<<<<< HEAD
         (typeof payload.id === "string" && command.method === "lane.create" ? payload.id : undefined) ??
+=======
+        (typeof payload.id === "string" && command.method === "lane.create"
+          ? payload.id
+          : undefined) ??
+>>>>>>> origin/main
         (typeof result.lane_id === "string" ? result.lane_id : undefined),
       session_id:
         command.session_id ??
         (typeof payload.session_id === "string" ? payload.session_id : undefined) ??
+<<<<<<< HEAD
         (typeof payload.id === "string" && command.method === "session.attach" ? payload.id : undefined) ??
+=======
+        (typeof payload.id === "string" && command.method === "session.attach"
+          ? payload.id
+          : undefined) ??
+>>>>>>> origin/main
         (typeof result.session_id === "string" ? result.session_id : undefined),
       terminal_id:
         command.terminal_id ??
         (typeof payload.terminal_id === "string" ? payload.terminal_id : undefined) ??
+<<<<<<< HEAD
         (typeof payload.id === "string" && command.method === "terminal.spawn" ? payload.id : undefined) ??
+=======
+        (typeof payload.id === "string" && command.method === "terminal.spawn"
+          ? payload.id
+          : undefined) ??
+>>>>>>> origin/main
         (typeof result.terminal_id === "string" ? result.terminal_id : undefined),
       codex_session_id:
         typeof payload.codex_session_id === "string" ? payload.codex_session_id : undefined,
@@ -262,6 +310,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
   async function request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
     recordCommand(command);
 
+<<<<<<< HEAD
     if (command.type === "command" && command.method === "terminal.spawn") {
       const payload = normalizePayload(command.payload);
       const terminalId = typeof payload.terminal_id === "string" ? payload.terminal_id : `term-${Date.now()}`;
@@ -424,6 +473,8 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
         return response;
     }
 
+=======
+>>>>>>> origin/main
     if (command.type === "command" && command.method && !METHOD_SET.has(command.method)) {
       const response: LocalBusEnvelope = {
         id: command.id,
@@ -502,7 +553,11 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
             error: result.error?.code ?? "dispatch_error",
             details: result.error?.details ?? null,
           },
+<<<<<<< HEAD
           { status },
+=======
+          { status }
+>>>>>>> origin/main
         );
       }
 
@@ -514,7 +569,11 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
 
   function exportAuditBundle(filter?: { correlation_id?: string }): RuntimeAuditBundle {
     const records = filter?.correlation_id
+<<<<<<< HEAD
       ? auditRecords.filter((record) => record.correlation_id === filter.correlation_id)
+=======
+      ? auditRecords.filter(record => record.correlation_id === filter.correlation_id)
+>>>>>>> origin/main
       : [...auditRecords];
     return {
       count: records.length,
@@ -543,6 +602,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       return recovery.scanForOrphans(new Date().toISOString());
     },
     exportAuditBundle,
+<<<<<<< HEAD
     getTerminalBuffer(terminalId: string): TerminalBuffer {
       return getTerminalBuffer(terminalId);
     },
@@ -596,6 +656,8 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
         } as LocalBusEnvelope;
       });
     },
+=======
+>>>>>>> origin/main
     async getAuditRecords(): Promise<RuntimeAuditRecord[]> {
       return [...auditRecords];
     },
