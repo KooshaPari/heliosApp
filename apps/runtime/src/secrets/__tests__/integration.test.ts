@@ -9,19 +9,19 @@
  *   SC-028-005: Redaction audit trail present for every persisted artifact
  */
 
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { randomBytes } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { mkdtempSync, rmSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { AuditSink } from "../../audit/audit-sink.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { RedactionAuditTrail } from "../audit-trail.js";
-import { CredentialAccessDeniedError, CredentialStore } from "../credential-store.js";
+import { randomBytes } from "node:crypto";
+import { CredentialStore, CredentialAccessDeniedError } from "../credential-store.js";
 import { EncryptionService } from "../encryption.js";
-import { ProtectedPathConfig, ProtectedPathDetector } from "../protected-paths.js";
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules } from "../redaction-rules.js";
+import { RedactionAuditTrail } from "../audit-trail.js";
+import { ProtectedPathDetector, ProtectedPathConfig } from "../protected-paths.js";
+import { AuditSink } from "../../audit/audit-sink.js";
+import { InMemoryLocalBus, type LocalBus } from "../../protocol/bus.js";
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -32,8 +32,12 @@ function makeFixedEncryption(): EncryptionService {
   return new EncryptionService({ masterKeyOverride: async () => fixedKey });
 }
 
-function makeStore(dataDir: string, bus: any): CredentialStore {
-  return new CredentialStore({ dataDir, bus, encryption: makeFixedEncryption() });
+function makeStore(dataDir: string, bus: LocalBus): CredentialStore {
+  return new CredentialStore({
+    dataDir,
+    bus,
+    encryption: makeFixedEncryption(),
+  });
 }
 
 function makeEngine(): RedactionEngine {
@@ -141,7 +145,10 @@ describe("Integration Tests (T015)", () => {
     it("emits bus event on protected path access", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });
-      detector.check("cat .env", { terminalId: "term-1", correlationId: "corr-1" });
+      detector.check("cat .env", {
+        terminalId: "term-1",
+        correlationId: "corr-1",
+      });
 
       // Give microtask queue a chance to process
       await new Promise(r => setTimeout(r, 0));
@@ -333,7 +340,11 @@ describe("Integration Tests (T015)", () => {
 
       await storeWithAudit.create("prov", "ws", "key", "val", "corr-create");
       await storeWithAudit.retrieveWithContext(
-        { requestingProviderId: "prov", requestingWorkspaceId: "ws", correlationId: "corr-access" },
+        {
+          requestingProviderId: "prov",
+          requestingWorkspaceId: "ws",
+          correlationId: "corr-access",
+        },
         "prov",
         "ws",
         "key"
@@ -396,9 +407,7 @@ describe("Integration Tests (T015)", () => {
       const trail = new RedactionAuditTrail({ bus: wrappedBus });
 
       const secretKey = "AKIAIOSFODNN7EXAMPLE";
-      const terminalOutput = `Starting deployment...
-Using key: ${secretKey}
-Deployment complete`;
+      const terminalOutput = `Starting deployment...\nUsing key: ${secretKey}\nDeployment complete`;
 
       // Redact the terminal output before persisting
       const redactResult = engine.redact(terminalOutput, {
@@ -455,8 +464,8 @@ Deployment complete`;
       const bus = new InMemoryLocalBus();
       const store = makeStore(tmpDir, bus);
 
-      const oldValue = `old-secret-${randomBytes(8).toString("hex")}`;
-      const newValue = `new-secret-${randomBytes(8).toString("hex")}`;
+      const oldValue = "old-secret-" + randomBytes(8).toString("hex");
+      const newValue = "new-secret-" + randomBytes(8).toString("hex");
 
       await store.create("prov", "ws", "apiKey", oldValue, "corr-create");
 
@@ -549,7 +558,10 @@ Deployment complete`;
       const wrappedBus = sink.wrapBus(bus);
 
       const detector = new ProtectedPathDetector({ bus: wrappedBus });
-      detector.check("cat .env", { terminalId: "term-1", correlationId: "corr-path" });
+      detector.check("cat .env", {
+        terminalId: "term-1",
+        correlationId: "corr-path",
+      });
 
       // Allow event processing
       await new Promise(r => setTimeout(r, 5));

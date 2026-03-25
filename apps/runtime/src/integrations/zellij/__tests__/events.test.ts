@@ -1,40 +1,39 @@
 import { describe, expect, it, mock } from "bun:test";
 import {
-  type EventBus,
-  type MuxEvent,
   MuxEventEmitter,
   MuxEventType,
-  type PaneAddedEvent,
-  type PaneDimensionRejectedEvent,
-  type SessionCreatedEvent,
-  type TabSwitchedEvent,
   generateCorrelationId,
+  type EventBus,
+  type MuxEvent,
+  type SessionCreatedEvent,
+  type PaneAddedEvent,
+  type TabSwitchedEvent,
+  type PaneDimensionRejectedEvent,
 } from "../events.js";
 
 function makeBus(): EventBus & { events: MuxEvent[] } {
   const events: MuxEvent[] = [];
   return {
     events,
-    publish: mock((event: MuxEvent) => {
+    publish: mock(async (event: MuxEvent) => {
       events.push(event);
-      return Promise.resolve();
     }),
   };
 }
 
 describe("MuxEventType constants", () => {
   it("defines all expected event types", () => {
-    expect(MuxEventType.sessionCreated).toBe("mux.session.created");
-    expect(MuxEventType.sessionReattached).toBe("mux.session.reattached");
-    expect(MuxEventType.sessionTerminated).toBe("mux.session.terminated");
-    expect(MuxEventType.paneAdded).toBe("mux.pane.added");
-    expect(MuxEventType.paneClosed).toBe("mux.pane.closed");
-    expect(MuxEventType.paneResized).toBe("mux.pane.resized");
-    expect(MuxEventType.panePtyBound).toBe("mux.pane.pty_bound");
-    expect(MuxEventType.paneDimensionRejected).toBe("mux.pane.dimension_rejected");
-    expect(MuxEventType.tabCreated).toBe("mux.tab.created");
-    expect(MuxEventType.tabClosed).toBe("mux.tab.closed");
-    expect(MuxEventType.tabSwitched).toBe("mux.tab.switched");
+    expect(MuxEventType.SESSION_CREATED).toBe("mux.session.created");
+    expect(MuxEventType.SESSION_REATTACHED).toBe("mux.session.reattached");
+    expect(MuxEventType.SESSION_TERMINATED).toBe("mux.session.terminated");
+    expect(MuxEventType.PANE_ADDED).toBe("mux.pane.added");
+    expect(MuxEventType.PANE_CLOSED).toBe("mux.pane.closed");
+    expect(MuxEventType.PANE_RESIZED).toBe("mux.pane.resized");
+    expect(MuxEventType.PANE_PTY_BOUND).toBe("mux.pane.pty_bound");
+    expect(MuxEventType.PANE_DIMENSION_REJECTED).toBe("mux.pane.dimension_rejected");
+    expect(MuxEventType.TAB_CREATED).toBe("mux.tab.created");
+    expect(MuxEventType.TAB_CLOSED).toBe("mux.tab.closed");
+    expect(MuxEventType.TAB_SWITCHED).toBe("mux.tab.switched");
   });
 });
 
@@ -53,7 +52,7 @@ describe("MuxEventEmitter", () => {
     const emitter = new MuxEventEmitter(bus);
 
     const event: SessionCreatedEvent = {
-      type: MuxEventType.sessionCreated,
+      type: MuxEventType.SESSION_CREATED,
       sessionName: "helios-lane-test",
       laneId: "test",
       timestamp: Date.now(),
@@ -70,7 +69,7 @@ describe("MuxEventEmitter", () => {
     const emitter = new MuxEventEmitter(bus);
 
     emitter.emitTyped<PaneAddedEvent>({
-      type: MuxEventType.paneAdded,
+      type: MuxEventType.PANE_ADDED,
       sessionName: "s1",
       laneId: "l1",
       paneId: 42,
@@ -80,8 +79,7 @@ describe("MuxEventEmitter", () => {
     // Wait for async publish
     await new Promise(r => setTimeout(r, 10));
     expect(bus.events).toHaveLength(1);
-    const evt = bus.events[0];
-    expect(evt).toBeDefined();
+    const evt = bus.events[0]!;
     expect(evt.timestamp).toBeGreaterThan(0);
     expect(evt.correlationId).toMatch(/^mux-/);
   });
@@ -91,7 +89,7 @@ describe("MuxEventEmitter", () => {
     const emitter = new MuxEventEmitter(bus);
 
     emitter.emitTyped<TabSwitchedEvent>({
-      type: MuxEventType.tabSwitched,
+      type: MuxEventType.TAB_SWITCHED,
       sessionName: "s1",
       laneId: "l1",
       fromTabId: 0,
@@ -100,7 +98,7 @@ describe("MuxEventEmitter", () => {
     });
 
     await new Promise(r => setTimeout(r, 10));
-    expect(bus.events[0]?.correlationId).toBe("custom-123");
+    expect(bus.events[0]!.correlationId).toBe("custom-123");
   });
 
   it("emits pane.dimension_rejected events", async () => {
@@ -108,7 +106,7 @@ describe("MuxEventEmitter", () => {
     const emitter = new MuxEventEmitter(bus);
 
     emitter.emitTyped<PaneDimensionRejectedEvent>({
-      type: MuxEventType.paneDimensionRejected,
+      type: MuxEventType.PANE_DIMENSION_REJECTED,
       sessionName: "s1",
       laneId: "l1",
       paneId: 5,
@@ -117,20 +115,20 @@ describe("MuxEventEmitter", () => {
     });
 
     await new Promise(r => setTimeout(r, 10));
-    expect(bus.events[0]?.type).toBe("mux.pane.dimension_rejected");
+    expect(bus.events[0]!.type).toBe("mux.pane.dimension_rejected");
   });
 
   it("swallows bus publish failures without throwing", async () => {
     const failingBus: EventBus = {
-      publish: mock(() => {
-        return Promise.reject(new Error("bus down"));
+      publish: mock(async () => {
+        throw new Error("bus down");
       }),
     };
     const emitter = new MuxEventEmitter(failingBus);
 
     // Should not throw
     emitter.emit({
-      type: MuxEventType.sessionTerminated,
+      type: MuxEventType.SESSION_TERMINATED,
       sessionName: "s",
       laneId: "l",
       timestamp: Date.now(),
@@ -145,18 +143,15 @@ describe("MuxEventEmitter", () => {
   it("isolates bus failure from subsequent emits", async () => {
     let callCount = 0;
     const bus: EventBus = {
-      publish: mock(() => {
+      publish: mock(async () => {
         callCount++;
-        if (callCount === 1) {
-          return Promise.reject(new Error("transient"));
-        }
-        return Promise.resolve();
+        if (callCount === 1) throw new Error("transient");
       }),
     };
     const emitter = new MuxEventEmitter(bus);
 
     emitter.emit({
-      type: MuxEventType.paneClosed,
+      type: MuxEventType.PANE_CLOSED,
       sessionName: "s",
       laneId: "l",
       timestamp: 1,
@@ -165,7 +160,7 @@ describe("MuxEventEmitter", () => {
     } as MuxEvent);
 
     emitter.emit({
-      type: MuxEventType.paneClosed,
+      type: MuxEventType.PANE_CLOSED,
       sessionName: "s",
       laneId: "l",
       timestamp: 2,

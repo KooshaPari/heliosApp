@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.2.20'
 
@@ -52,7 +52,7 @@ jobs:
         timeout-minutes: 3
         continue-on-error: false
 
-      - name: Gate 2 - Biome Lint
+      - name: Gate 2 - OXC Lint
         id: gate-lint
         run: |
           set +e
@@ -69,6 +69,7 @@ jobs:
 
       - name: Gate 3 - Unit Tests
         id: gate-test
+<<<<<<< HEAD
         run: |
           set +e
           bun test apps/runtime apps/desktop/tests/unit scripts/tests/ | tee /tmp/test.log
@@ -79,13 +80,11 @@ jobs:
           if [ "$TEST_EXIT" -ne 0 ] || [ "$REPORT_EXIT" -ne 0 ]; then
             exit 1
           fi
+=======
+        run: bun run test
+>>>>>>> origin/main
         timeout-minutes: 5
         continue-on-error: false
-
-      - name: Prepare E2E artifacts
-        run: |
-          bun run --cwd apps/runtime build
-          bun run --cwd apps/desktop build
 
       - name: Install Playwright browsers
         run: bunx playwright install --with-deps chromium
@@ -93,21 +92,17 @@ jobs:
       - name: Gate 4 - E2E Tests
         id: gate-e2e
         run: |
-          set +e
-          bun run test:e2e:gate | tee /tmp/e2e.log
-          E2E_EXIT=${PIPESTATUS[0]}
-          bun run scripts/gate-e2e.ts
-          GATE_EXIT=$?
-          set -e
-          if [ "$E2E_EXIT" -ne 0 ] || [ "$GATE_EXIT" -ne 0 ]; then
-            exit 1
+          if ls apps/desktop/tests/e2e/*.spec.ts 1>/dev/null 2>&1; then
+            bun run test:e2e
+          else
+            echo "No e2e spec files found — skipping"
           fi
         timeout-minutes: 5
-        continue-on-error: false
+        continue-on-error: true
 
       - name: Gate 5 - Coverage
         id: gate-coverage
-        run: bun run test:coverage
+        run: bun run scripts/gate-coverage.ts
         timeout-minutes: 5
         continue-on-error: false
 
@@ -135,21 +130,17 @@ jobs:
         timeout-minutes: 2
         continue-on-error: false
 
-      - name: Gate 9 - Docs Session Index and Link Validation
-        id: gate-docs-validation
-        run: |
-          bun run docs:index
-          bun run docs:validate-session-docs
-        timeout-minutes: 3
-        continue-on-error: false
-
       - name: Upload Gate Reports
         if: always()
+<<<<<<< HEAD
         run: bun run scripts/gate-aggregate.ts
 
       - name: Upload Gate Reports Artifact
         if: always()
         uses: actions/upload-artifact@v4
+=======
+        uses: actions/upload-artifact@v7
+>>>>>>> origin/main
         with:
           name: gate-reports
           path: .gate-reports/

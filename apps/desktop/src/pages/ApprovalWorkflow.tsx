@@ -12,7 +12,7 @@ export function ApprovalWorkflowPage() {
   const [workflow, setWorkflow] = createSignal<ApprovalWorkflow | null>(null);
   const [loading, setLoading] = createSignal(true);
 
-  onMount(() => {
+  onMount(async () => {
     setRequests([]);
     setWorkflow({
       userId: "current-user",
@@ -24,11 +24,11 @@ export function ApprovalWorkflowPage() {
     setLoading(false);
   });
 
-  const handleApprove = async (id: string) => {
+  const handleApprove = (id: string) => {
     setRequests(requests().map(r => (r.id === id ? { ...r, status: ApprovalStatus.Approved } : r)));
   };
 
-  const handleReject = async (id: string, reason: string) => {
+  const handleReject = (id: string, reason: string) => {
     setRequests(
       requests().map(r =>
         r.id === id ? { ...r, status: ApprovalStatus.Rejected, rejectedReason: reason } : r
@@ -51,19 +51,19 @@ export function ApprovalWorkflowPage() {
             <div class="workflow-stats">
               <div class="stat">
                 <span class="label">Total</span>
-                <span class="value">{workflow()?.totalRequests}</span>
+                <span class="value">{workflow()!.totalRequests}</span>
               </div>
               <div class="stat">
                 <span class="label">Pending</span>
-                <span class="value pending">{workflow()?.pendingRequests}</span>
+                <span class="value pending">{workflow()!.pendingRequests}</span>
               </div>
               <div class="stat">
                 <span class="label">Approved</span>
-                <span class="value approved">{workflow()?.approvedRequests}</span>
+                <span class="value approved">{workflow()!.approvedRequests}</span>
               </div>
               <div class="stat">
                 <span class="label">Rejected</span>
-                <span class="value rejected">{workflow()?.rejectedRequests}</span>
+                <span class="value rejected">{workflow()!.rejectedRequests}</span>
               </div>
             </div>
           )}

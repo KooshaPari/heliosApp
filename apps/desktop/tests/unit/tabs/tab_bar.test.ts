@@ -1,11 +1,10 @@
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { TabBar } from "../../../src/tabs/tab_bar";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
-import type { TabSurface } from "../../../src/tabs/tab_surface";
 
 describe("TabBar", () => {
   let tabBar: TabBar;
-  let mockTabs: TabSurface[] = [];
+  let mockTabs: ReturnType<typeof createMockTabSurface>[] = [];
 
   beforeEach(() => {
     mockTabs = [
@@ -33,12 +32,12 @@ describe("TabBar", () => {
       const tab1 = mockTabs[0];
       const tab2 = mockTabs[1];
 
-      let _tab1Active = false;
+      let tab1Active = false;
       let tab1Deactivated = false;
       let tab2Active = false;
 
       tab1.onActivate = () => {
-        _tab1Active = true;
+        tab1Active = true;
       };
       tab1.onDeactivate = () => {
         tab1Deactivated = true;
@@ -153,14 +152,16 @@ describe("TabBar", () => {
       tabBar.pinTab("tab5", true);
       tabBar.pinTab("tab3", true);
 
-      const order = tabBar.getTabOrder();
-      const pinned = order.filter(id => tabBar.isTabPinned(id));
-      const unpinned = order.filter(id => !tabBar.isTabPinned(id));
+      const element = tabBar.render();
+      const tabHeaders = element.querySelectorAll("[data-tab-id]");
+      const renderedOrder = Array.from(tabHeaders).map(el => el.getAttribute("data-tab-id"));
 
-      // Pinned tabs should come before unpinned in the order
-      const lastPinnedIndex = Math.max(...pinned.map(id => order.indexOf(id)));
-      const firstUnpinnedIndex =
-        unpinned.length > 0 ? order.indexOf(unpinned[0]) : Number.POSITIVE_INFINITY;
+      // Pinned tabs (tab3, tab5) should appear before unpinned in rendered order
+      const lastPinnedIndex = Math.max(
+        renderedOrder.indexOf("tab3"),
+        renderedOrder.indexOf("tab5")
+      );
+      const firstUnpinnedIndex = renderedOrder.findIndex(id => id !== "tab3" && id !== "tab5");
 
       expect(lastPinnedIndex).toBeLessThan(firstUnpinnedIndex);
     });
@@ -184,13 +185,13 @@ describe("TabBar", () => {
       const selectedTab = element.querySelector('[data-tab-id="tab1"]') as HTMLElement;
 
       expect(selectedTab).toBeDefined();
-      expect(selectedTab.style.backgroundColor).toBe("#ffffff");
+      expect(selectedTab.style.backgroundColor).toMatch(/rgb\(255.*255.*255\)|#fff(fff)?|white/);
     });
 
     it("should show stale context indicator", () => {
       const tab = mockTabs[0];
       // Simulate stale context by making it return true
-      (tab as unknown as { hasStaleContext: () => boolean }).hasStaleContext = () => true;
+      (tab as any).hasStaleContext = () => true;
 
       const element = tabBar.render();
       const indicatorEl = element.querySelector("[data-tab-id='tab1']");

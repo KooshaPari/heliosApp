@@ -4,25 +4,24 @@
  * FR-012-007, SC-012-003.
  */
 
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach } from "bun:test";
+import { RioBackend } from "../../../../src/renderer/rio/backend.js";
+import { RendererRegistry } from "../../../../src/renderer/registry.js";
 import type {
-  RenderSurface,
   RendererAdapter,
   RendererConfig,
+  RenderSurface,
   RendererState,
 } from "../../../../src/renderer/adapter.js";
 import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
-import { RendererRegistry } from "../../../../src/renderer/registry.js";
-import { RioBackend } from "../../../../src/renderer/rio/backend.js";
 
 // ---------------------------------------------------------------------------
 // Mock ghostty
 // ---------------------------------------------------------------------------
 
-function createMockGhostty(opts?: { failInit?: boolean }): RendererAdapter & {
-  _state: RendererState;
-  _initCalled: boolean;
-} {
+function createMockGhostty(opts?: {
+  failInit?: boolean;
+}): RendererAdapter & { _state: RendererState; _initCalled: boolean } {
   const adapter = {
     id: "ghostty" as const,
     version: "0.1.0",
@@ -30,33 +29,20 @@ function createMockGhostty(opts?: { failInit?: boolean }): RendererAdapter & {
     _initCalled: false,
 
     async init(_config: RendererConfig): Promise<void> {
-      await Promise.resolve();
       adapter._initCalled = true;
-      if (opts?.failInit) {
-        throw new Error("ghostty init failed");
-      }
+      if (opts?.failInit) throw new Error("ghostty init failed");
       adapter._state = "running";
     },
     async start(_surface: RenderSurface): Promise<void> {
-      await Promise.resolve();
       adapter._state = "running";
     },
     async stop(): Promise<void> {
-      await Promise.resolve();
       adapter._state = "stopped";
     },
-    bindStream(_ptyId: string, _stream: ReadableStream<Uint8Array>): void {
-      // No-op in this test stub.
-    },
-    unbindStream(_ptyId: string): void {
-      // No-op in this test stub.
-    },
-    handleInput(_ptyId: string, _data: Uint8Array): void {
-      // No-op in this test stub.
-    },
-    resize(_ptyId: string, _cols: number, _rows: number): void {
-      // No-op in this test stub.
-    },
+    bindStream(_ptyId: string, _stream: ReadableStream<Uint8Array>): void {},
+    unbindStream(_ptyId: string): void {},
+    handleInput(_ptyId: string, _data: Uint8Array): void {},
+    resize(_ptyId: string, _cols: number, _rows: number): void {},
     queryCapabilities(): RendererCapabilities {
       return {
         gpuAccelerated: false,
@@ -72,9 +58,7 @@ function createMockGhostty(opts?: { failInit?: boolean }): RendererAdapter & {
     getState(): RendererState {
       return adapter._state;
     },
-    onCrash(_handler: (error: Error) => void): void {
-      // No-op in this test stub.
-    },
+    onCrash(_handler: (error: Error) => void): void {},
   };
   return adapter;
 }

@@ -92,13 +92,13 @@ export class NormalizedProviderError extends Error {
   /**
    * Optional correlation ID for bus message tracing.
    */
-  readonly correlationId?: string | undefined;
+  readonly correlationId?: string;
 
   /**
    * Original error that triggered this normalization.
    * Preserved for debugging and detailed error analysis.
    */
-  readonly originalError?: Error | undefined;
+  readonly originalError?: Error;
 
   constructor(
     code: ProviderErrorCode,
@@ -146,7 +146,7 @@ export function normalizeError(
       "PROVIDER_UNKNOWN",
       "Unknown error: received null or undefined",
       source,
-      ERROR_RETRYABLE_STATUS.PROVIDER_UNKNOWN,
+      ERROR_RETRYABLE_STATUS["PROVIDER_UNKNOWN"],
       correlationId
     );
   }
@@ -157,7 +157,7 @@ export function normalizeError(
       "PROVIDER_UNKNOWN",
       `Unknown error: ${error}`,
       source,
-      ERROR_RETRYABLE_STATUS.PROVIDER_UNKNOWN,
+      ERROR_RETRYABLE_STATUS["PROVIDER_UNKNOWN"],
       correlationId
     );
   }
@@ -185,38 +185,29 @@ export function normalizeError(
         "PROVIDER_TIMEOUT",
         error.message,
         source,
-        ERROR_RETRYABLE_STATUS.PROVIDER_TIMEOUT,
+        ERROR_RETRYABLE_STATUS["PROVIDER_TIMEOUT"],
         correlationId,
         error
       );
     }
 
-    if (
-      error.message.toLowerCase().includes("init") ||
-      error.message.toLowerCase().includes("initialization")
-    ) {
+    if (error.message.includes("init") || error.message.includes("initialization")) {
       return new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
         error.message,
         source,
-        ERROR_RETRYABLE_STATUS.PROVIDER_INIT_FAILED,
+        ERROR_RETRYABLE_STATUS["PROVIDER_INIT_FAILED"],
         correlationId,
         error
       );
     }
 
-    if (
-      error.message.includes("crash") ||
-      error.message.includes("exit") ||
-      error.message.includes("killed") ||
-      error.message.includes("SIGTERM") ||
-      error.message.includes("SIGKILL")
-    ) {
+    if (error.message.includes("crash") || error.message.includes("exit")) {
       return new NormalizedProviderError(
         "PROVIDER_CRASHED",
         error.message,
         source,
-        ERROR_RETRYABLE_STATUS.PROVIDER_CRASHED,
+        ERROR_RETRYABLE_STATUS["PROVIDER_CRASHED"],
         correlationId,
         error
       );
@@ -227,7 +218,7 @@ export function normalizeError(
         "PROVIDER_UNAVAILABLE",
         error.message,
         source,
-        ERROR_RETRYABLE_STATUS.PROVIDER_UNAVAILABLE,
+        ERROR_RETRYABLE_STATUS["PROVIDER_UNAVAILABLE"],
         correlationId,
         error
       );
@@ -238,7 +229,7 @@ export function normalizeError(
       "PROVIDER_EXECUTE_FAILED",
       error.message || "Provider execution failed",
       source,
-      ERROR_RETRYABLE_STATUS.PROVIDER_EXECUTE_FAILED,
+      ERROR_RETRYABLE_STATUS["PROVIDER_EXECUTE_FAILED"],
       correlationId,
       error
     );
@@ -256,7 +247,7 @@ export function normalizeError(
       "PROVIDER_UNKNOWN",
       message,
       source,
-      ERROR_RETRYABLE_STATUS.PROVIDER_UNKNOWN,
+      ERROR_RETRYABLE_STATUS["PROVIDER_UNKNOWN"],
       correlationId
     );
   }
@@ -266,7 +257,7 @@ export function normalizeError(
     "PROVIDER_UNKNOWN",
     `Unknown error of type ${typeof error}`,
     source,
-    ERROR_RETRYABLE_STATUS.PROVIDER_UNKNOWN,
+    ERROR_RETRYABLE_STATUS["PROVIDER_UNKNOWN"],
     correlationId
   );
 }

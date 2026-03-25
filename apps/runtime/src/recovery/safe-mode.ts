@@ -1,7 +1,7 @@
-import { randomUUID } from "node:crypto";
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
+import type { LocalBus } from "../protocol/bus.js";
+import { promises as fs } from "fs";
+import path from "path";
+import { randomUUID } from "crypto";
 
 export interface CrashRecord {
   timestamp: number;
@@ -13,7 +13,7 @@ export class CrashLoopDetector {
   private thresholdCount: number;
   private windowMs: number;
 
-  constructor(crashDataDir: string, thresholdCount = 3, windowMs = 60000) {
+  constructor(crashDataDir: string, thresholdCount: number = 3, windowMs: number = 60000) {
     this.crashDataDir = crashDataDir;
     this.thresholdCount = thresholdCount;
     this.windowMs = windowMs;
@@ -56,21 +56,20 @@ export class CrashLoopDetector {
 
   private persistCrashHistory(): void {
     try {
-      const dir = path.join(this.crashDataDir, "recovery");
-      const historyPath = path.join(dir, "crash-history.json");
+      const historyPath = path.join(this.crashDataDir, "recovery", "crash-history.json");
       const tempPath = `${historyPath}.tmp`;
 
-      // Atomic write (ensure directory exists first)
-      fs.mkdir(dir, { recursive: true })
-        .then(() =>
-          fs.writeFile(tempPath, JSON.stringify(this.crashHistory), { encoding: "utf-8" })
-        )
+      // Atomic write
+      fs.writeFile(tempPath, JSON.stringify(this.crashHistory), {
+        encoding: "utf-8",
+      })
         .then(() => fs.rename(tempPath, historyPath))
-        .catch(_error => {
-          // Ignore persistence failures to keep crash-loop detection non-blocking.
+        .catch(err => {
+          // Silently fail - don't let history persistence block operations
+          console.error("Failed to persist crash history:", err);
         });
-    } catch (_error) {
-      // Ignore synchronous persistence setup errors to keep safe mode responsive.
+    } catch (err) {
+      console.error("Failed to persist crash history:", err);
     }
   }
 }
@@ -85,7 +84,7 @@ type SafeModeChangeListener = (active: boolean) => void;
 
 export class SafeMode {
   private active = false;
-  private bus?: LocalBus | undefined;
+  private bus?: LocalBus;
   private listeners: SafeModeChangeListener[] = [];
   private config: SafeModeConfig;
 
@@ -99,9 +98,7 @@ export class SafeMode {
   }
 
   async enter(): Promise<void> {
-    if (this.active) {
-      return;
-    }
+    if (this.active) return;
 
     this.active = true;
 
@@ -124,9 +121,7 @@ export class SafeMode {
   }
 
   async exit(): Promise<void> {
-    if (!this.active) {
-      return;
-    }
+    if (!this.active) return;
 
     this.active = false;
 
@@ -163,14 +158,14 @@ export class SafeMode {
 
   // Query methods for subsystems to check if they should be active
   isProvidersEnabled(): boolean {
-    return !(this.active && this.config.disableProviders);
+    return !this.active || !this.config.disableProviders;
   }
 
   isShareSessionsEnabled(): boolean {
-    return !(this.active && this.config.disableShareSessions);
+    return !this.active || !this.config.disableShareSessions;
   }
 
   isBackgroundCheckpointsEnabled(): boolean {
-    return !(this.active && this.config.disableBackgroundCheckpoints);
+    return !this.active || !this.config.disableBackgroundCheckpoints;
   }
 }

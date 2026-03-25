@@ -1,4 +1,0 @@
-[push] [DRY-RUN] branch=main primary=upstream fallback=origin skip-primary=0 tmp-dir-override=<none>
-[push] [DRY-RUN] queue preview complete: 1 item(s) in docs/sessions/20260303-heliosapp-stabilization/artifacts/push-queue.ndjson
-{"branch": "heliosapp-upstream-recon", "dry_run": true, "fallback_tmp_dir_override": "", "final_reason": "", "mode": {"drain_queue": true, "queue_mode": false}, "remotes": {"fallback": {"attempt_count": 0, "attempted": false, "name": "origin", "reason": "", "success": false}, "primary": {"attempt_count": 0, "attempted": false, "name": "upstream", "reason": "", "success": false}}, "repository_root": "/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp", "retry_counters": {"dns_network": 0, "object_tmp_dir": 0}, "skip_primary": false, "status": "success"}
-[push] Queue drain dry-run completed successfully.

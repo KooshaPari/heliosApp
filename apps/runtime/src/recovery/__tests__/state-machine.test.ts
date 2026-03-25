@@ -1,9 +1,9 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+import { RecoveryStateMachine, RecoveryStage, type RecoveryState } from "../state-machine.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { RecoveryStage, type RecoveryState, RecoveryStateMachine } from "../state-machine.js";
+import { promises as fs } from "fs";
+import path from "path";
+import os from "os";
 
 describe("RecoveryStateMachine", () => {
   let stateMachine: RecoveryStateMachine;
@@ -11,6 +11,7 @@ describe("RecoveryStateMachine", () => {
   let bus: InMemoryLocalBus;
 
   beforeEach(async () => {
+    vi.useFakeTimers();
     tempDir = path.join(os.tmpdir(), `state-machine-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
     bus = new InMemoryLocalBus();
@@ -19,9 +20,9 @@ describe("RecoveryStateMachine", () => {
   });
 
   afterEach(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {
-      // Best-effort cleanup in test teardown.
-    });
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
   });
 
   describe("stage progression", () => {
@@ -32,7 +33,7 @@ describe("RecoveryStateMachine", () => {
     it("should progress through all stages in order", async () => {
       const stages: RecoveryStage[] = [];
 
-      stateMachine.onStageChange((_from, to) => {
+      stateMachine.onStageChange((from, to) => {
         stages.push(to);
       });
 
@@ -215,7 +216,7 @@ describe("RecoveryStateMachine", () => {
 
   describe("listener notifications", () => {
     it("should notify listeners on stage change", async () => {
-      const changes: [string, string, number][] = [];
+      const changes: Array<[string, string, number]> = [];
 
       stateMachine.onStageChange((from, to, attemptCount) => {
         changes.push([from, to, attemptCount]);

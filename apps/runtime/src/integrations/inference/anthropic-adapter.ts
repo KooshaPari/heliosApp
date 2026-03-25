@@ -1,7 +1,5 @@
-import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference.ts";
-import type { InferenceEngine } from "./engine.ts";
-
-type AnthropicResponseContentBlock = { type?: string; text?: string };
+import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
+import type { InferenceEngine } from "./engine";
 
 export class AnthropicInferenceEngine implements InferenceEngine {
   readonly id = "anthropic";
@@ -15,22 +13,15 @@ export class AnthropicInferenceEngine implements InferenceEngine {
     this.endpoint = endpoint;
   }
 
-  init(): Promise<void> {
+  async init(): Promise<void> {
     if (!this.apiKey) {
       throw new Error(
         "Anthropic API key not configured. Set ANTHROPIC_API_KEY or HELIOS_ACP_API_KEY environment variable."
       );
     }
-    return Promise.resolve();
   }
 
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
-    const payload: Record<string, unknown> = {
-      model: request.model || "claude-sonnet-4-20250514",
-      messages: request.messages.map(m => ({ role: m.role, content: m.content })),
-    };
-    payload.max_tokens = request.maxTokens ?? 4096;
-
     const response = await fetch(`${this.endpoint}/v1/messages`, {
       method: "POST",
       headers: {
@@ -38,7 +29,14 @@ export class AnthropicInferenceEngine implements InferenceEngine {
         "x-api-key": this.apiKey,
         "anthropic-version": "2023-06-01",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        model: request.model || "claude-sonnet-4-20250514",
+        max_tokens: request.maxTokens ?? 4096,
+        messages: request.messages.map(m => ({
+          role: m.role,
+          content: m.content,
+        })),
+      }),
     });
 
     if (!response.ok) {
@@ -46,35 +44,26 @@ export class AnthropicInferenceEngine implements InferenceEngine {
       throw new Error(`Anthropic API error (${response.status}): ${errorText}`);
     }
 
-    const responsePayload = (await response.json()) as Record<string, unknown>;
-    const usage =
-      typeof responsePayload.usage === "object" && responsePayload.usage !== null
-        ? (responsePayload.usage as Record<string, unknown>)
-        : {};
-    const stopReason = responsePayload.stop_reason;
-    const isTextBlock = (value: unknown): value is AnthropicResponseContentBlock => {
-      return (
-        typeof value === "object" &&
-        value !== null &&
-        (value as { type?: unknown }).type === "text" &&
-        typeof (value as { text?: unknown }).text === "string"
-      );
+    const data = (await response.json()) as {
+      content: Array<{ type: string; text: string }>;
+      model: string;
+      usage: { input_tokens: number; output_tokens: number };
+      stop_reason: string;
     };
 
-    const contentBlocks = Array.isArray(responsePayload.content) ? responsePayload.content : [];
-    const content = contentBlocks
-      .filter(isTextBlock)
-      .map(block => String(block.text))
+    const content = data.content
+      .filter((c: { type: string }) => c.type === "text")
+      .map((c: { text: string }) => c.text)
       .join("");
 
     return {
       content,
-      model: typeof responsePayload.model === "string" ? responsePayload.model : request.model,
+      model: data.model,
       tokenUsage: {
-        input: typeof usage.input_tokens === "number" ? usage.input_tokens : 0,
-        output: typeof usage.output_tokens === "number" ? usage.output_tokens : 0,
+        input: data.usage.input_tokens,
+        output: data.usage.output_tokens,
       },
-      finishReason: stopReason === "end_turn" ? "end_turn" : "max_tokens",
+      finishReason: data.stop_reason === "end_turn" ? "end_turn" : "max_tokens",
     };
   }
 
@@ -84,8 +73,8 @@ export class AnthropicInferenceEngine implements InferenceEngine {
     yield response.content;
   }
 
-  listModels(): Promise<ModelInfo[]> {
-    return Promise.resolve([
+  async listModels(): Promise<ModelInfo[]> {
+    return [
       {
         id: "claude-sonnet-4-20250514",
         name: "Claude Sonnet 4",
@@ -104,20 +93,12 @@ export class AnthropicInferenceEngine implements InferenceEngine {
         contextWindow: 200000,
         providerId: "anthropic",
       },
-    ]);
+    ];
   }
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
-    if (!this.apiKey) {
-      return "unavailable";
-    }
+    if (!this.apiKey) return "unavailable";
     try {
-      const payload: Record<string, unknown> = {
-        model: "claude-haiku-4-20250514",
-        messages: [{ role: "user", content: "hi" }],
-      };
-      payload.max_tokens = 1;
-
       const response = await fetch(`${this.endpoint}/v1/messages`, {
         method: "POST",
         headers: {
@@ -125,7 +106,11 @@ export class AnthropicInferenceEngine implements InferenceEngine {
           "x-api-key": this.apiKey,
           "anthropic-version": "2023-06-01",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          model: "claude-haiku-4-20250514",
+          max_tokens: 1,
+          messages: [{ role: "user", content: "hi" }],
+        }),
       });
       return response.ok ? "healthy" : "degraded";
     } catch {
@@ -133,7 +118,5 @@ export class AnthropicInferenceEngine implements InferenceEngine {
     }
   }
 
-  terminate(): Promise<void> {
-    return Promise.resolve();
-  }
+  async terminate(): Promise<void> {}
 }

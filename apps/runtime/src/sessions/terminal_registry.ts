@@ -1,27 +1,27 @@
 export type TerminalLifecycleState = "idle" | "spawning" | "active" | "throttled" | "closed";
 
 export type TerminalContext = {
-  terminalId: string;
-  workspaceId: string;
-  laneId: string;
-  sessionId: string;
+  terminal_id: string;
+  workspace_id: string;
+  lane_id: string;
+  session_id: string;
   title: string;
   state: TerminalLifecycleState;
-  lastOutputSeq: number;
+  last_output_seq: number;
 };
 
 type SpawnInput = {
-  terminalId: string;
-  workspaceId: string;
-  laneId: string;
-  sessionId: string;
+  terminal_id: string;
+  workspace_id: string;
+  lane_id: string;
+  session_id: string;
   title?: string;
 };
 
 type ExpectedContext = {
-  workspaceId: string;
-  laneId: string;
-  sessionId: string;
+  workspace_id: string;
+  lane_id: string;
+  session_id: string;
 };
 
 export class TerminalRegistry {
@@ -29,34 +29,34 @@ export class TerminalRegistry {
   private readonly terminalsBySession = new Map<string, Set<string>>();
 
   spawn(input: SpawnInput): TerminalContext {
-    const existing = this.terminals.get(input.terminalId);
+    const existing = this.terminals.get(input.terminal_id);
     if (existing) {
-      const existingSessionSet = this.terminalsBySession.get(existing.sessionId);
+      const existingSessionSet = this.terminalsBySession.get(existing.session_id);
       if (existingSessionSet) {
-        existingSessionSet.delete(existing.terminalId);
+        existingSessionSet.delete(existing.terminal_id);
         if (existingSessionSet.size === 0) {
-          this.terminalsBySession.delete(existing.sessionId);
+          this.terminalsBySession.delete(existing.session_id);
         }
       }
     }
 
     const terminal: TerminalContext = {
-      terminalId: input.terminalId,
-      workspaceId: input.workspaceId,
-      laneId: input.laneId,
-      sessionId: input.sessionId,
+      terminal_id: input.terminal_id,
+      workspace_id: input.workspace_id,
+      lane_id: input.lane_id,
+      session_id: input.session_id,
       title: input.title ?? "Terminal",
       state: "spawning",
-      lastOutputSeq: 0,
+      last_output_seq: 0,
     };
 
-    this.terminals.set(terminal.terminalId, terminal);
-    let sessionSet = this.terminalsBySession.get(terminal.sessionId);
+    this.terminals.set(terminal.terminal_id, terminal);
+    let sessionSet = this.terminalsBySession.get(terminal.session_id);
     if (!sessionSet) {
       sessionSet = new Set<string>();
-      this.terminalsBySession.set(terminal.sessionId, sessionSet);
+      this.terminalsBySession.set(terminal.session_id, sessionSet);
     }
-    sessionSet.add(terminal.terminalId);
+    sessionSet.add(terminal.terminal_id);
     return terminal;
   }
 
@@ -93,8 +93,8 @@ export class TerminalRegistry {
     if (!terminal) {
       return 0;
     }
-    terminal.lastOutputSeq += 1;
-    return terminal.lastOutputSeq;
+    terminal.last_output_seq += 1;
+    return terminal.last_output_seq;
   }
 
   remove(terminalId: string): void {
@@ -103,13 +103,13 @@ export class TerminalRegistry {
       return;
     }
     this.terminals.delete(terminalId);
-    const sessionSet = this.terminalsBySession.get(terminal.sessionId);
+    const sessionSet = this.terminalsBySession.get(terminal.session_id);
     if (!sessionSet) {
       return;
     }
     sessionSet.delete(terminalId);
     if (sessionSet.size === 0) {
-      this.terminalsBySession.delete(terminal.sessionId);
+      this.terminalsBySession.delete(terminal.session_id);
     }
   }
 
@@ -130,9 +130,9 @@ export class TerminalRegistry {
       return false;
     }
     return (
-      terminal.workspaceId === context.workspaceId &&
-      terminal.laneId === context.laneId &&
-      terminal.sessionId === context.sessionId
+      terminal.workspace_id === context.workspace_id &&
+      terminal.lane_id === context.lane_id &&
+      terminal.session_id === context.session_id
     );
   }
 }

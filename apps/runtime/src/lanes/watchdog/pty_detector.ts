@@ -51,6 +51,7 @@ export class PtyDetector {
         });
       }
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: PTY detection failures are intentionally logged for operational diagnostics.
       console.warn(`PTY leak detection failed: ${String(error)}`);
     }
 
@@ -65,6 +66,7 @@ export class PtyDetector {
       const result = await execCommand("ps", ["-ef", "-o", "pid,tty,etime,comm"]);
 
       if (result.code !== 0) {
+        console.warn("ps command failed:", result.stderr);
         return [];
       }
 
@@ -78,11 +80,9 @@ export class PtyDetector {
       const lines = result.stdout.split("\n").slice(1); // Skip header
       for (const line of lines) {
         const parts = line.trim().split(/\s+/);
-        if (parts.length < 4) {
-          continue;
-        }
+        if (parts.length < 4) continue;
 
-        const pid = Number.parseInt(parts[0], 10);
+        const pid = parseInt(parts[0], 10);
         const tty = parts[1];
         const command = parts.slice(3).join(" ");
 
@@ -104,6 +104,7 @@ export class PtyDetector {
 
       return processes;
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: PTY process enumeration is best-effort and should remain observable.
       console.warn(`Failed to list PTY processes: ${String(error)}`);
       return [];
     }
@@ -115,19 +116,15 @@ export class PtyDetector {
     try {
       const parts = etimeStr.split(":").reverse();
       let seconds = 0;
-      if (parts.length > 0) {
-        seconds += Number.parseInt(parts[0], 10);
-      }
-      if (parts.length >= 2) {
-        seconds += Number.parseInt(parts[1], 10) * 60;
-      }
+      if (parts.length >= 1) seconds += parseInt(parts[0], 10);
+      if (parts.length >= 2) seconds += parseInt(parts[1], 10) * 60;
       if (parts.length >= 3) {
         const hourOrDay = parts[2];
         if (hourOrDay.includes("-")) {
-          const [day, hour] = hourOrDay.split("-").map(x => Number.parseInt(x, 10));
+          const [day, hour] = hourOrDay.split("-").map(x => parseInt(x, 10));
           seconds += (day * 24 + hour) * 3600;
         } else {
-          seconds += Number.parseInt(hourOrDay, 10) * 3600;
+          seconds += parseInt(hourOrDay, 10) * 3600;
         }
       }
 
@@ -138,10 +135,7 @@ export class PtyDetector {
     }
   }
 
-  private isSystemProcess(proc: {
-    pid: number;
-    command: string;
-  }): boolean {
+  private isSystemProcess(proc: { pid: number; command: string }): boolean {
     // Filter out common system processes that typically have PTY
     const systemPatterns = [
       /^(kernel_task|launchd|sshd|bash|sh|zsh|tmux|screen)/i,

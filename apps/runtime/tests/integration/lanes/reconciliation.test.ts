@@ -1,14 +1,18 @@
 // T019 - Integration test for orphan reconciliation scenario
 // (FR-008-008, SC-008-002, SC-008-004)
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { LaneManager, _resetIdCounter } from "../../../src/lanes/index.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 
 async function runGit(args: string[], cwd: string): Promise<string> {
-  const proc = (Bun as any).spawn(["git", ...args], { cwd, stdout: "pipe", stderr: "pipe" });
+  const proc = Bun.spawn(["git", ...args], {
+    cwd,
+    stdout: "pipe",
+    stderr: "pipe",
+  });
   const stdout = await new Response(proc.stdout).text();
   await proc.exited;
   return stdout.trim();
@@ -26,8 +30,6 @@ async function createTempRepo(): Promise<string> {
   fs.writeFileSync(path.join(tmpDir, "README.md"), "# Test Repo\n");
   await runGit(["add", "."], tmpDir);
   await runGit(["commit", "-m", "initial commit"], tmpDir);
-  // Ensure the default branch is named 'main' regardless of git config
-  await runGit(["branch", "-M", "main"], tmpDir);
   return tmpDir;
 }
 
@@ -80,7 +82,7 @@ describe("Orphan Reconciliation Integration (FR-008-008, SC-008-004)", () => {
 
     expect(result.orphanedRecords).toBe(1);
     // Lane should now be closed
-    expect(mgr.getRegistry().get(lane.laneId)?.state).toBe("closed");
+    expect(mgr.getRegistry().get(lane.laneId)!.state).toBe("closed");
   });
 
   test("handles both orphan types simultaneously", async () => {
@@ -109,8 +111,8 @@ describe("Orphan Reconciliation Integration (FR-008-008, SC-008-004)", () => {
     const events = bus.getEvents();
     const reconEvent = events.find(e => e.topic === "reconciliation.completed");
     expect(reconEvent).toBeDefined();
-    expect(reconEvent?.payload?.orphanedWorktrees).toBe(1);
-    expect(reconEvent?.payload?.totalCleaned).toBeGreaterThanOrEqual(1);
+    expect(reconEvent!.payload!["orphanedWorktrees"]).toBe(1);
+    expect(reconEvent!.payload!["totalCleaned"]).toBeGreaterThanOrEqual(1);
   });
 
   test("completes within 30 seconds (SC-008-004)", async () => {

@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-const vi = { fn: mock, spyOn: spyOn };
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { RendererOption } from "../../../src/settings/renderer_option";
 
 describe("RendererOption", () => {

@@ -22,7 +22,7 @@ type ExitHandler = (code: number) => void;
 const SIGKILL_TIMEOUT_MS = 3000;
 
 export class RioProcess {
-  private _proc: any | undefined;
+  private _proc: ReturnType<typeof Bun.spawn> | undefined;
   private _pid: number | undefined;
   private _running = false;
   private _startedAt: number | undefined;
@@ -47,18 +47,18 @@ export class RioProcess {
         args.push("--no-gpu");
       }
 
-      this._proc = (Bun as any).spawn(args, {
+      this._proc = Bun.spawn(args, {
         stdin: "pipe",
         stdout: "pipe",
         stderr: "pipe",
       });
 
-      this._pid = (this._proc as any).pid;
+      this._pid = this._proc.pid;
       this._running = true;
       this._startedAt = Date.now();
 
       // Monitor for unexpected exit.
-      this._proc.exited.then((code: number) => {
+      this._proc.exited.then(code => {
         this._running = false;
         for (const handler of this._exitHandlers) {
           try {
@@ -69,7 +69,7 @@ export class RioProcess {
         }
       });
 
-      return { pid: this._pid! };
+      return { pid: this._pid };
     } catch (err) {
       this._running = false;
       this._startLock = false;
@@ -85,7 +85,7 @@ export class RioProcess {
    * Stop the rio process with SIGTERM -> SIGKILL escalation.
    */
   async stop(): Promise<void> {
-    if (!(this._proc && this._running)) {
+    if (!this._proc || !this._running) {
       return;
     }
 
@@ -117,9 +117,7 @@ export class RioProcess {
   }
 
   getUptime(): number | undefined {
-    if (this._startedAt === undefined) {
-      return undefined;
-    }
+    if (this._startedAt === undefined) return undefined;
     return Date.now() - this._startedAt;
   }
 
@@ -134,9 +132,7 @@ export class RioProcess {
    * Write data to the rio process stdin.
    */
   writeToStdin(data: Uint8Array): void {
-    if (!(this._proc && this._running)) {
-      return;
-    }
+    if (!this._proc || !this._running) return;
     try {
       const stdin = this._proc.stdin;
       if (stdin && typeof stdin === "object" && "write" in stdin) {

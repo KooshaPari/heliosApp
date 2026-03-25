@@ -1,6 +1,6 @@
 // Unit tests for ZellijDetector
 
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { ZellijDetector } from "../../../../src/lanes/watchdog/zellij_detector.js";
 import type { SessionRegistry } from "../../../../src/lanes/watchdog/zellij_detector.js";
 
@@ -47,7 +47,9 @@ describe("ZellijDetector", () => {
     const orphans = await detector.detect();
     for (const orphan of orphans) {
       expect(orphan.createdAt).toBeDefined();
-      // void test suppressed
+      expect(orphan.metadata === undefined || orphan.metadata?.sessionName !== undefined).toBe(
+        true
+      );
     }
   });
 });

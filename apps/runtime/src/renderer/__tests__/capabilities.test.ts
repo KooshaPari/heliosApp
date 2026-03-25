@@ -51,7 +51,10 @@ describe("compareCapabilities", () => {
 
   it("treats same inputModes in different order as equal", () => {
     const a = baseCaps();
-    const b = { ...baseCaps(), inputModes: ["cooked" as const, "raw" as const] };
+    const b = {
+      ...baseCaps(),
+      inputModes: ["cooked" as const, "raw" as const],
+    };
     const diff = compareCapabilities(a, b);
     expect(diff.differences.some(d => d.field === "inputModes")).toBe(false);
   });

@@ -1,13 +1,13 @@
 // Unit tests for CheckpointManager
 
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import {
   CheckpointManager,
   type WatchdogCheckpoint,
 } from "../../../../src/lanes/watchdog/checkpoint.js";
+import { promises as fs } from "fs";
+import path from "path";
+import os from "os";
 
 describe("CheckpointManager", () => {
   let manager: CheckpointManager;
@@ -15,18 +15,12 @@ describe("CheckpointManager", () => {
 
   beforeEach(async () => {
     // Create manager
-    manager = new CheckpointManager();
+    manager = new CheckpointManager(testDir);
     // Clean up any existing test files
     try {
       await fs.rm(testDir, { recursive: true, force: true });
     } catch {
       // Ignore cleanup errors
-    }
-    // Clean up any real checkpoint file left by other tests
-    try {
-      await manager.delete();
-    } catch {
-      // Ignore if not present
     }
   });
 
@@ -103,8 +97,8 @@ describe("CheckpointManager", () => {
   it("should handle corrupt checkpoint gracefully", async () => {
     // Create a corrupt checkpoint file manually
     try {
-      const checkpointPath = path.join(os.homedir(), ".helios", "data", "watchdog_checkpoint.json");
-      await fs.mkdir(path.dirname(checkpointPath), { recursive: true });
+      const checkpointPath = path.join(testDir, "watchdog_checkpoint.json");
+      await fs.mkdir(testDir, { recursive: true });
       await fs.writeFile(checkpointPath, "{ invalid json }", "utf-8");
 
       const loaded = await manager.load();

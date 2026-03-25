@@ -1,13 +1,13 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { type Checkpoint, CheckpointReader, CheckpointWriter } from "../checkpoint.js";
-import { OrphanReconciler } from "../orphan-reconciler.js";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { RestorationPipeline } from "../restoration.js";
+import { RecoveryStateMachine, RecoveryStage } from "../state-machine.js";
 import { CrashLoopDetector, SafeMode } from "../safe-mode.js";
-import { RecoveryStage, RecoveryStateMachine } from "../state-machine.js";
+import { CheckpointWriter, CheckpointReader, type Checkpoint } from "../checkpoint.js";
+import { OrphanReconciler } from "../orphan-reconciler.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { promises as fs } from "fs";
+import path from "path";
+import os from "os";
 
 describe("Chaos Tests - Crash Recovery Resilience", () => {
   let tempDir: string;
@@ -36,9 +36,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
   });
 
   afterEach(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {
-      // Best-effort cleanup in test teardown.
-    });
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
   });
 
   describe("Crash during checkpoint write", () => {
@@ -81,6 +79,8 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
   describe("Crash loop detection (SC-027-004)", () => {
     it("should detect crash loop and enter safe mode within 5 seconds", async () => {
+      vi.useFakeTimers();
+
       const detector = new CrashLoopDetector(tempDir, 3, 60000);
       await detector.initialize();
 
@@ -98,6 +98,8 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       }
 
       expect(safeMode.isActive()).toBe(true);
+
+      vi.useRealTimers();
     });
 
     it("should disable non-essential subsystems in safe mode", async () => {
@@ -192,11 +194,11 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       await stateMachine.transition(RecoveryStage.DETECTING);
 
       // Simulate concurrent activity
-      const activityPromises: Promise<void>[] = [];
+      const activityPromises = [];
       for (let i = 0; i < 5; i++) {
         activityPromises.push(
           new Promise(resolve => {
-            setTimeout(() => {
+            setTimeout(async () => {
               // Simulate user activity
               resolve(undefined);
             }, Math.random() * 1000);
@@ -213,7 +215,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
   describe("Repeated chaos scenarios", () => {
     it("should maintain consistency across 5 recovery cycles", async () => {
-      const results: Awaited<ReturnType<RestorationPipeline["restore"]>>[] = [];
+      const results = [];
 
       for (let i = 0; i < 5; i++) {
         const checkpoint = createMockCheckpoint(3);
@@ -251,7 +253,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
       await stateMachine.transition(RecoveryStage.DETECTING);
 
-      // Retry MAX_RETRIES times (3)
+      // Try 3 times
       for (let i = 0; i < 3; i++) {
         await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
         await stateMachine.transition(RecoveryStage.DETECTING);

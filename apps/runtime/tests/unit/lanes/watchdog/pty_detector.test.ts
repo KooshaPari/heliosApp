@@ -1,6 +1,7 @@
 // Unit tests for PtyDetector
 
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach, mock } from "bun:test";
+import * as execModule from "../../../../src/integrations/exec.js";
 import { PtyDetector } from "../../../../src/lanes/watchdog/pty_detector.js";
 import type { TerminalRegistry } from "../../../../src/lanes/watchdog/pty_detector.js";
 
@@ -14,6 +15,11 @@ describe("PtyDetector", () => {
       getTerminals: () => [],
     };
     detector = new PtyDetector(terminalRegistry);
+  });
+  beforeEach(() => {
+    mock.module("../../../../src/integrations/exec.js", () => ({
+      execCommand: () => Promise.resolve({ code: 0, stdout: "", stderr: "" }),
+    }));
   });
 
   it("should initialize without error", () => {
@@ -54,7 +60,7 @@ describe("PtyDetector", () => {
     const orphans = await detector.detect();
     for (const orphan of orphans) {
       expect(orphan.createdAt).toBeDefined();
-      // void test suppressed
+      expect(orphan.pid === undefined || typeof orphan.pid === "number").toBe(true);
     }
   });
 

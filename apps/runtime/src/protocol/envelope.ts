@@ -5,15 +5,16 @@
  * well-formed envelopes with auto-generated IDs and timestamps.
  */
 
-import { backpressureError, validationError } from "./errors.js";
+import type { CommandEnvelope, ResponseEnvelope, EventEnvelope, Envelope } from "./types.js";
+import { validationError, backpressureError } from "./errors.js";
 import type { BusError } from "./errors.js";
-import type { CommandEnvelope, Envelope, EventEnvelope, ResponseEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
 
 /** Maximum serialised payload size in bytes (default 1 MB). */
+// biome-ignore lint/style/useNamingConvention: Protocol payload field must remain snake_case for external schema compatibility.
 export let MAX_PAYLOAD_SIZE = 1_048_576;
 
 /** Override the maximum payload size (for testing or configuration). */
@@ -54,7 +55,7 @@ function monotonicNow(): number {
  */
 export function createCommand(
   method: string,
-  payload: unknown,
+  payload: Record<string, unknown>,
   correlationId?: string
 ): CommandEnvelope {
   if (!method) {
@@ -62,6 +63,7 @@ export function createCommand(
   }
   return {
     id: generateId("cmd"),
+    // biome-ignore lint/style/useNamingConvention: Protocol schema requires correlation_id.
     correlation_id: correlationId ?? generateId("cor"),
     timestamp: monotonicNow(),
     type: "command",
@@ -79,11 +81,12 @@ export function createCommand(
  */
 export function createResponse(
   command: CommandEnvelope,
-  payload: unknown,
+  payload: Record<string, unknown> | null | undefined,
   error?: BusError
 ): ResponseEnvelope {
   const base: ResponseEnvelope = {
     id: generateId("res"),
+    // biome-ignore lint/style/useNamingConvention: Protocol schema requires correlation_id.
     correlation_id: command.correlation_id,
     timestamp: monotonicNow(),
     type: "response",
@@ -108,7 +111,7 @@ export function createResponse(
  */
 export function createEvent(
   topic: string,
-  payload: unknown,
+  payload: Record<string, unknown> | undefined,
   correlationId?: string
 ): EventEnvelope {
   if (!topic) {
@@ -116,6 +119,7 @@ export function createEvent(
   }
   return {
     id: generateId("evt"),
+    // biome-ignore lint/style/useNamingConvention: Protocol schema requires correlation_id.
     correlation_id: correlationId ?? generateId("cor"),
     timestamp: monotonicNow(),
     type: "event",
@@ -137,104 +141,6 @@ function fail(message: string, details?: unknown): ValidationFailure {
   return { valid: false, error: validationError(message, details) };
 }
 
-type RawEnvelope = Record<string, unknown>;
-
-function getCorrelationIdentifier(envelope: RawEnvelope): string {
-  if (typeof envelope.topic === "string" && envelope.topic !== "") {
-    return envelope.topic;
-  }
-  if (typeof envelope.method === "string" && envelope.method !== "") {
-    return envelope.method;
-  }
-  return "unknown";
-}
-
-function validateBaseFields(envelope: RawEnvelope): ValidationResult | null {
-  if (typeof envelope.id !== "string" || envelope.id === "") {
-    return fail('Missing or empty "id" field');
-  }
-  if (typeof envelope.correlation_id !== "string" || envelope.correlation_id === "") {
-    return fail('Missing or empty "correlation_id" field');
-  }
-  if (typeof envelope.timestamp !== "number" || !(envelope.timestamp > 0)) {
-    return fail('Missing or invalid "timestamp" field (must be a positive number)');
-  }
-  return null;
-}
-
-function validateByEnvelopeType(envelope: RawEnvelope): ValidationResult | null {
-  if (envelope.type !== "command" && envelope.type !== "response" && envelope.type !== "event") {
-    return fail(`Unknown envelope type: ${String(envelope.type)}`, { type: envelope.type });
-  }
-
-  if (envelope.type === "command") {
-    if (typeof envelope.method !== "string" || envelope.method === "") {
-      return fail('Command envelope requires a non-empty "method" field');
-    }
-    if (!("payload" in envelope)) {
-      return fail('Command envelope requires a "payload" field');
-    }
-    return null;
-  }
-
-  if (envelope.type === "response") {
-    if (typeof envelope.method !== "string" || envelope.method === "") {
-      return fail('Response envelope requires a non-empty "method" field');
-    }
-    return null;
-  }
-
-  if (typeof envelope.topic !== "string" || envelope.topic === "") {
-    return fail('Event envelope requires a non-empty "topic" field');
-  }
-  if (!("payload" in envelope)) {
-    return fail('Event envelope requires a "payload" field');
-  }
-  return null;
-}
-
-function validatePayloadSize(envelope: RawEnvelope): ValidationResult | null {
-  if (!("payload" in envelope) || envelope.payload === undefined || envelope.payload === null) {
-    return null;
-  }
-
-  const payload = envelope.payload;
-  const topicOrMethod = getCorrelationIdentifier(envelope);
-  const payloadLength = getPayloadLength(payload);
-  if (payloadLength === null) {
-    return fail("Payload cannot be serialised (possible circular reference)");
-  }
-  if (payloadLength > MAX_PAYLOAD_SIZE) {
-    return { valid: false, error: backpressureError(topicOrMethod) };
-  }
-  return null;
-}
-
-function getPayloadLength(payload: unknown): number | null {
-  if (payload instanceof ArrayBuffer) {
-    return payload.byteLength;
-  }
-
-  if (typeof Buffer !== "undefined" && Buffer.isBuffer(payload)) {
-    return payload.byteLength;
-  }
-
-  if (typeof payload === "string") {
-    return payload.length;
-  }
-
-  if (typeof payload === "number" || typeof payload === "boolean") {
-    return 0;
-  }
-
-  try {
-    const serialised = JSON.stringify(payload);
-    return serialised === undefined ? null : serialised.length;
-  } catch {
-    return null;
-  }
-}
-
 /**
  * Validate an unknown value as a well-formed Envelope.
  *
@@ -245,21 +151,99 @@ export function validateEnvelope(input: unknown): ValidationResult {
     return fail("Envelope must be a non-null object");
   }
 
-  const envelope = input as RawEnvelope;
+  const envelope = input as Record<string, unknown>;
 
-  const baseCheck = validateBaseFields(envelope);
-  if (baseCheck) {
-    return baseCheck;
+  // --- Required base fields ---
+  if (typeof envelope["id"] !== "string" || envelope["id"] === "") {
+    return fail('Missing or empty "id" field');
+  }
+  if (typeof envelope["correlation_id"] !== "string" || envelope["correlation_id"] === "") {
+    return fail('Missing or empty "correlation_id" field');
+  }
+  if (typeof envelope["timestamp"] !== "number" || !(envelope["timestamp"] > 0)) {
+    return fail('Missing or invalid "timestamp" field (must be a positive number)');
   }
 
-  const typedCheck = validateByEnvelopeType(envelope);
-  if (typedCheck) {
-    return typedCheck;
+  const type = envelope["type"];
+  if (type !== "command" && type !== "response" && type !== "event") {
+    return fail(`Unknown envelope type: ${String(type)}`, { type });
   }
 
-  const payloadCheck = validatePayloadSize(envelope);
-  if (payloadCheck) {
-    return payloadCheck;
+  // --- Type-specific fields ---
+  if (type === "command") {
+    if (typeof envelope["method"] !== "string" || envelope["method"] === "") {
+      return fail('Command envelope requires a non-empty "method" field');
+    }
+    if (!("payload" in envelope)) {
+      return fail('Command envelope requires a "payload" field');
+    }
+  }
+
+  if (type === "response") {
+    if (typeof envelope["method"] !== "string" || envelope["method"] === "") {
+      return fail('Response envelope requires a non-empty "method" field');
+    }
+  }
+
+  if (type === "event") {
+    if (typeof envelope["topic"] !== "string" || envelope["topic"] === "") {
+      return fail('Event envelope requires a non-empty "topic" field');
+    }
+    if (!("payload" in envelope)) {
+      return fail('Event envelope requires a "payload" field');
+    }
+  }
+
+  // --- Payload size check ---
+  if ("payload" in envelope && envelope["payload"] !== undefined && envelope["payload"] !== null) {
+    const payload = envelope["payload"];
+    const topicOrMethod =
+      typeof envelope["topic"] === "string"
+        ? envelope["topic"]
+        : typeof envelope["method"] === "string"
+          ? envelope["method"]
+          : "unknown";
+
+    // Fast-path: Buffer/ArrayBuffer — check byteLength directly.
+    if (payload instanceof ArrayBuffer) {
+      if (payload.byteLength > MAX_PAYLOAD_SIZE) {
+        return {
+          valid: false,
+          error: backpressureError(topicOrMethod),
+        };
+      }
+    } else if (typeof Buffer !== "undefined" && Buffer.isBuffer(payload)) {
+      if (payload.byteLength > MAX_PAYLOAD_SIZE) {
+        return {
+          valid: false,
+          error: backpressureError(topicOrMethod),
+        };
+      }
+    } else if (typeof payload === "string") {
+      // Fast-path: strings — check length directly (no serialization needed).
+      if (payload.length > MAX_PAYLOAD_SIZE) {
+        return {
+          valid: false,
+          error: backpressureError(topicOrMethod),
+        };
+      }
+    } else if (typeof payload === "number" || typeof payload === "boolean") {
+      // Primitives are always small — skip size check.
+    } else {
+      // Object payloads — serialize to check size.
+      try {
+        const serialised = JSON.stringify(payload);
+        if (serialised !== undefined && serialised.length > MAX_PAYLOAD_SIZE) {
+          return {
+            valid: false,
+            error: backpressureError(topicOrMethod),
+          };
+        }
+      } catch {
+        // Circular reference or other serialisation error
+        return fail("Payload cannot be serialised (possible circular reference)");
+      }
+    }
   }
 
   return { valid: true, envelope: envelope as unknown as Envelope };

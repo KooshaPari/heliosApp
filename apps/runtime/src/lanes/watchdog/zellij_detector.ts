@@ -48,6 +48,7 @@ export class ZellijDetector {
         });
       }
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: Zellij CLI failure should remain observable for operators.
       console.warn(`Zellij session detection failed: ${String(error)}`);
     }
 
@@ -59,6 +60,7 @@ export class ZellijDetector {
       // Use zellij CLI to list sessions
       const result = await execCommand("zellij", ["list-sessions", "-n"]);
       if (result.code !== 0) {
+        console.warn("zellij list-sessions failed:", result.stderr);
         return [];
       }
 
@@ -72,7 +74,8 @@ export class ZellijDetector {
           };
         });
       return sessions;
-    } catch (_error) {
+    } catch (error) {
+      console.error("Failed to list zellij sessions:", error);
       return [];
     }
   }

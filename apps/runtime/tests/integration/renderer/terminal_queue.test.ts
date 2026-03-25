@@ -5,15 +5,15 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
-import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
 import { createSwitchOrchestrator } from "../../../src/renderer/switch_transaction.js";
+import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
 import {
   MockGhosttyAdapter,
   MockRioAdapter,
   TEST_CONFIG,
   TEST_SURFACE,
 } from "../../helpers/mock_adapter.js";
+import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 
 describe("Terminal creation queueing", () => {
   it("queues terminal creation during active transaction", async () => {
@@ -23,7 +23,17 @@ describe("Terminal creation queueing", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const switchPromise = orchestrator.startSwitch({
@@ -54,7 +64,17 @@ describe("Terminal creation queueing", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const switchPromise = orchestrator.startSwitch({
@@ -113,7 +133,17 @@ describe("Terminal creation queueing", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const switchPromise = orchestrator.startSwitch({
@@ -127,7 +157,9 @@ describe("Terminal creation queueing", () => {
     });
 
     // Queue a terminal creation
-    const creationPromise = orchestrator.queueTerminalCreation({ ptyId: "pty-new" });
+    const creationPromise = orchestrator.queueTerminalCreation({
+      ptyId: "pty-new",
+    });
 
     // Wait for completion
     const [switchResult, creationResult] = await Promise.all([
@@ -148,7 +180,17 @@ describe("Terminal creation queueing", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     expect(orchestrator.isSwitchInProgress()).toBe(false);
@@ -167,7 +209,9 @@ describe("Terminal creation queueing", () => {
     expect(orchestrator.isSwitchInProgress()).toBe(true);
 
     // Queue should still work
-    const creationPromise = orchestrator.queueTerminalCreation({ ptyId: "pty-new" });
+    const creationPromise = orchestrator.queueTerminalCreation({
+      ptyId: "pty-new",
+    });
 
     // Wait for completion
     await Promise.all([switchPromise, creationPromise]);

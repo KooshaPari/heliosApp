@@ -1,6 +1,6 @@
 // FR-004, FR-010: Integration tests for SLO violation detection, rate limiting, and bus emission.
 
-import { afterEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach, afterEach, jest } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 import { SLOMonitor } from "../../../src/diagnostics/slo.js";
 import type { SLODefinition } from "../../../src/diagnostics/types.js";
@@ -34,10 +34,10 @@ describe("SLO Violation Detection", () => {
     }
     const violations = monitor.checkAll();
     expect(violations.length).toBe(1);
-    expect(violations[0]?.metric).toBe(METRIC_NAME);
-    expect(violations[0]?.percentile).toBe("p95");
-    expect(violations[0]?.actual).toBeGreaterThan(60);
-    expect(violations[0]?.threshold).toBe(60);
+    expect(violations[0]!.metric).toBe(METRIC_NAME);
+    expect(violations[0]!.percentile).toBe("p95");
+    expect(violations[0]!.actual).toBeGreaterThan(60);
+    expect(violations[0]!.threshold).toBe(60);
   });
 
   // FR-004: no violation when metric is within threshold
@@ -112,8 +112,18 @@ describe("Rate Limiting", () => {
   // FR-010: independent rate limiting per metric
   it("rate limits each metric independently", () => {
     const registry = new MetricsRegistry();
-    registry.register({ name: "metric-a", type: "latency", unit: "ms", description: "A" });
-    registry.register({ name: "metric-b", type: "latency", unit: "ms", description: "B" });
+    registry.register({
+      name: "metric-a",
+      type: "latency",
+      unit: "ms",
+      description: "A",
+    });
+    registry.register({
+      name: "metric-b",
+      type: "latency",
+      unit: "ms",
+      description: "B",
+    });
 
     const defs: SLODefinition[] = [
       { metric: "metric-a", percentile: "p95", threshold: 50, unit: "ms" },
@@ -160,8 +170,8 @@ describe("Bus Integration", () => {
     }
     monitor.checkAll();
     expect(events.length).toBe(1);
-    expect(events[0]?.topic).toBe("perf.slo_violation");
-    const payload = events[0]?.payload as Record<string, unknown>;
+    expect(events[0]!.topic).toBe("perf.slo_violation");
+    const payload = events[0]!.payload as Record<string, unknown>;
     expect(payload.metric).toBe(METRIC_NAME);
     expect(payload.percentile).toBe("p95");
   });
@@ -270,9 +280,24 @@ describe("Periodic Check Loop", () => {
   // FR-010: multiple metrics violating simultaneously
   it("handles multiple simultaneous violations", () => {
     const registry = new MetricsRegistry();
-    registry.register({ name: "m1", type: "latency", unit: "ms", description: "M1" });
-    registry.register({ name: "m2", type: "latency", unit: "ms", description: "M2" });
-    registry.register({ name: "m3", type: "latency", unit: "ms", description: "M3" });
+    registry.register({
+      name: "m1",
+      type: "latency",
+      unit: "ms",
+      description: "M1",
+    });
+    registry.register({
+      name: "m2",
+      type: "latency",
+      unit: "ms",
+      description: "M2",
+    });
+    registry.register({
+      name: "m3",
+      type: "latency",
+      unit: "ms",
+      description: "M3",
+    });
 
     const defs: SLODefinition[] = [
       { metric: "m1", percentile: "p95", threshold: 50, unit: "ms" },
@@ -281,7 +306,9 @@ describe("Periodic Check Loop", () => {
     ];
 
     const events: unknown[] = [];
-    const m = new SLOMonitor(registry, defs, ((_: any, p: any) => events.push(p)) as any);
+    const m = new SLOMonitor(registry, defs, (_: string, p: unknown) => {
+      events.push(p);
+    });
 
     for (let i = 0; i < 100; i++) {
       registry.record("m1", 100, i);

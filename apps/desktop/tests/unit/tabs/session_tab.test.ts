@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import type { ActiveContext } from "../../../src/tabs/context_switch";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { SessionTab } from "../../../src/tabs/session_tab";
+import type { ActiveContext } from "../../../src/tabs/context_switch";
 
 describe("SessionTab", () => {
   let tab: SessionTab;
@@ -171,7 +171,7 @@ describe("SessionTab", () => {
       const newTab = new SessionTab();
       newTab.restoreState(originalState);
 
-      expect(newTab.getState().expandedSections).toEqual(originalState.expandedSections ?? []);
+      expect(newTab.getState().expandedSections).toEqual(originalState.expandedSections);
     });
   });
 

@@ -1,5 +1,5 @@
-import type { ProtocolBus as LocalBus } from "../protocol/bus.ts";
-import type { ProtocolTopic } from "../protocol/topics.ts";
+import type { LocalBus } from "../protocol/bus";
+import type { ProtocolTopic } from "../protocol/topics";
 
 export type LaneState =
   | "new"
@@ -61,13 +61,13 @@ const LANE_TRANSITIONS: Record<LaneState, LaneState[]> = {
 };
 
 export type LaneRecord = {
-  laneId: string;
-  workspaceId: string;
-  projectContextId: string;
-  displayName: string;
+  lane_id: string;
+  workspace_id: string;
+  project_context_id: string;
+  display_name: string;
   status: LaneState;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export class LaneLifecycleError extends Error {
@@ -83,22 +83,22 @@ export class LaneLifecycleService {
   constructor(private readonly bus: LocalBus) {}
 
   async create(input: {
-    workspaceId: string;
-    projectContextId: string;
-    displayName: string;
+    workspace_id: string;
+    project_context_id: string;
+    display_name: string;
   }): Promise<LaneRecord> {
     const nowIso = new Date().toISOString();
     const laneId = `lane_${crypto.randomUUID()}`;
     const correlationId = `lane.create:${laneId}:${Date.now()}`;
 
     const lane: LaneRecord = {
-      laneId,
-      workspaceId: input.workspaceId,
-      projectContextId: input.projectContextId,
-      displayName: input.displayName,
+      lane_id: laneId,
+      workspace_id: input.workspace_id,
+      project_context_id: input.project_context_id,
+      display_name: input.display_name,
       status: "new",
-      createdAt: nowIso,
-      updatedAt: nowIso,
+      created_at: nowIso,
+      updated_at: nowIso,
     };
 
     this.lanes.set(laneId, lane);
@@ -116,7 +116,7 @@ export class LaneLifecycleService {
   list(workspaceId: string): LaneRecord[] {
     const result: LaneRecord[] = [];
     for (const lane of this.lanes.values()) {
-      if (lane.workspaceId === workspaceId) {
+      if (lane.workspace_id === workspaceId) {
         result.push({ ...lane });
       }
     }
@@ -125,7 +125,7 @@ export class LaneLifecycleService {
 
   async attach(workspaceId: string, laneId: string): Promise<LaneRecord> {
     const lane = this.getRequired(laneId);
-    if (lane.workspaceId !== workspaceId) {
+    if (lane.workspace_id !== workspaceId) {
       throw new LaneLifecycleError(`lane ${laneId} does not belong to workspace ${workspaceId}`);
     }
     if (lane.status === "running") {
@@ -138,7 +138,7 @@ export class LaneLifecycleService {
 
   async cleanup(workspaceId: string, laneId: string): Promise<LaneRecord> {
     const lane = this.getRequired(laneId);
-    if (lane.workspaceId !== workspaceId) {
+    if (lane.workspace_id !== workspaceId) {
       throw new LaneLifecycleError(`lane ${laneId} does not belong to workspace ${workspaceId}`);
     }
     if (lane.status === "closed") {
@@ -175,37 +175,21 @@ export class LaneLifecycleService {
     }
 
     lane.status = nextState;
-    lane.updatedAt = new Date().toISOString();
-    const event: {
-      id: string;
-      type: "event";
-      ts: string;
-      workspaceId: string;
-      laneId: string;
-      topic: ProtocolTopic;
-      payload: {
-        runtimeEvent: RuntimeEvent;
-        laneId: string;
-        state: LaneState;
-      };
-      correlationId?: string;
-    } = {
+    lane.updated_at = new Date().toISOString();
+    await this.bus.publish({
       id: `${laneId}:${runtimeEvent}:${Date.now()}`,
       type: "event",
       ts: new Date().toISOString(),
-      workspaceId: lane.workspaceId,
-      laneId: lane.laneId,
+      workspace_id: lane.workspace_id,
+      lane_id: lane.lane_id,
+      correlation_id: correlationId,
       topic,
       payload: {
-        runtimeEvent,
-        laneId: lane.laneId,
+        runtime_event: runtimeEvent,
+        lane_id: lane.lane_id,
         state: lane.status,
       },
-    };
-    if (correlationId !== undefined) {
-      event.correlationId = correlationId;
-    }
-    await this.bus.publish(event);
+    });
   }
 }
 

@@ -1,10 +1,10 @@
-import { describe, expect, it } from "bun:test";
+import { describe, it, expect } from "bun:test";
 import {
-  AUDIT_EVENT_RESULTS,
-  AUDIT_EVENT_TYPES,
   type AuditEvent,
   createAuditEvent,
   validateAuditEvent,
+  AUDIT_EVENT_TYPES,
+  AUDIT_EVENT_RESULTS,
 } from "../../../src/audit/event";
 
 describe("AuditEvent Schema", () => {
@@ -72,7 +72,7 @@ describe("AuditEvent Schema", () => {
       });
 
       const ts = new Date(event.timestamp);
-      expect(Number.isNaN(ts.getTime())).toBe(false);
+      expect(isNaN(ts.getTime())).toBe(false);
       expect(event.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     });
 
@@ -113,7 +113,13 @@ describe("AuditEvent Schema", () => {
 
       expect(event.metadata.exitCode).toBe(0);
       expect(event.metadata.duration).toBe(250);
-      expect((event.metadata.custom as any).nested.value).toBe(42);
+      expect(
+        (
+          event.metadata.custom as Record<string, unknown> & {
+            nested: { value: number };
+          }
+        ).nested.value
+      ).toBe(42);
     });
   });
 

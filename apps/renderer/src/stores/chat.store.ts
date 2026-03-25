@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import type { Conversation, Message } from "../../../runtime/src/types/conversation.ts";
+import type { Conversation, Message } from "../../../runtime/src/types/conversation";
 
 const [conversations, setConversations] = createSignal<Conversation[]>([]);
 const [activeConversationId, setActiveConversationId] = createSignal<string | null>(null);
@@ -17,9 +17,7 @@ export function getConversations(): Conversation[] {
 
 export function getActiveConversation(): Conversation | null {
   const id = activeConversationId();
-  if (!id) {
-    return null;
-  }
+  if (!id) return null;
   return conversations().find(c => c.id === id) ?? null;
 }
 
@@ -73,9 +71,7 @@ export async function sendMessage(text: string): Promise<void> {
 
   setConversations((prev: Conversation[]) =>
     prev.map(c => {
-      if (c.id !== convId) {
-        return c;
-      }
+      if (c.id !== convId) return c;
       return {
         ...c,
         messages: [...c.messages, userMsg, assistantMsg],
@@ -112,13 +108,6 @@ export async function sendMessage(text: string): Promise<void> {
         .filter(m => m.id !== assistantMsg.id)
         .map(m => ({ role: m.role, content: m.content })) ?? [];
 
-    const requestBody = {
-      model: "claude-sonnet-4-20250514",
-      messages: history,
-      // biome-ignore lint/style/useNamingConvention: Anthropic request body requires snake_case key name.
-      max_tokens: 4096,
-    };
-
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -126,7 +115,11 @@ export async function sendMessage(text: string): Promise<void> {
         "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 4096,
+        messages: history,
+      }),
     });
 
     if (!response.ok) {
@@ -138,7 +131,7 @@ export async function sendMessage(text: string): Promise<void> {
 
     const data = (await response.json()) as {
       content: Array<{ type: string; text: string }>;
-      usage: Record<string, number>;
+      usage: { input_tokens: number; output_tokens: number };
     };
     const content = data.content
       .filter((c: { type: string }) => c.type === "text")
@@ -157,15 +150,11 @@ export async function sendMessage(text: string): Promise<void> {
 function appendToAssistantMessage(convId: string, msgId: string, content: string): void {
   setConversations((prev: Conversation[]) =>
     prev.map(c => {
-      if (c.id !== convId) {
-        return c;
-      }
+      if (c.id !== convId) return c;
       return {
         ...c,
         messages: c.messages.map(m => {
-          if (m.id !== msgId) {
-            return m;
-          }
+          if (m.id !== msgId) return m;
           return { ...m, content: m.content + content };
         }),
       };
@@ -180,15 +169,11 @@ function finalizeAssistantMessage(
 ): void {
   setConversations((prev: Conversation[]) =>
     prev.map(c => {
-      if (c.id !== convId) {
-        return c;
-      }
+      if (c.id !== convId) return c;
       return {
         ...c,
         messages: c.messages.map(m => {
-          if (m.id !== msgId) {
-            return m;
-          }
+          if (m.id !== msgId) return m;
           return { ...m, metadata: { ...m.metadata, status } };
         }),
       };
@@ -200,9 +185,7 @@ function finalizeAssistantMessage(
 export function cancelResponse(): void {
   // TODO: AbortController integration for cancelling in-flight requests
   const conv = getActiveConversation();
-  if (!conv) {
-    return;
-  }
+  if (!conv) return;
   const lastMsg = conv.messages[conv.messages.length - 1];
   if (lastMsg?.metadata?.status === "streaming") {
     finalizeAssistantMessage(conv.id, lastMsg.id, "cancelled");

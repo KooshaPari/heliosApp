@@ -1,4 +1,4 @@
-import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
+import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
 
 export interface LaneInfo {
   laneId: string;
@@ -39,12 +39,12 @@ export class ProjectTab extends TabSurface {
     super("project-tab", "project", "Project");
   }
 
-  onContextChange(context: ActiveContext | null): Promise<void> {
+  async onContextChange(context: ActiveContext | null): Promise<void> {
     // When context changes, query workspace/project metadata
     this.metadata = null;
 
     if (!context) {
-      return Promise.resolve();
+      return;
     }
 
     // In a real implementation, query workspace registry:
@@ -79,8 +79,6 @@ export class ProjectTab extends TabSurface {
       gitStatus: "On branch main, 3 commits ahead of origin/main",
       recentActivity: "Last update 10 minutes ago",
     };
-
-    return Promise.resolve();
   }
 
   render(): HTMLElement {
@@ -122,7 +120,7 @@ export class ProjectTab extends TabSurface {
       retryBtn.style.cursor = "pointer";
       retryBtn.style.fontSize = "12px";
       retryBtn.addEventListener("click", () => {
-        this.render();
+        console.log("Retry workspace load");
       });
 
       errorEl.appendChild(titleEl);
@@ -371,7 +369,7 @@ export class ProjectTab extends TabSurface {
     createBtn.style.fontSize = "12px";
     createBtn.style.width = "100%";
     createBtn.addEventListener("click", () => {
-      this.contentEl?.dispatchEvent(new CustomEvent("helios:project:create-lane"));
+      console.log("Create lane action triggered");
     });
 
     const openBtn = document.createElement("button");
@@ -385,7 +383,7 @@ export class ProjectTab extends TabSurface {
     openBtn.style.fontSize = "12px";
     openBtn.style.width = "100%";
     openBtn.addEventListener("click", () => {
-      this.contentEl?.dispatchEvent(new CustomEvent("helios:project:open-workspace"));
+      console.log("Open workspace in file manager");
     });
 
     bodyEl.appendChild(createBtn);

@@ -5,10 +5,10 @@ export type BufferedOutput = {
 };
 
 export type TerminalBufferSnapshot = {
-  terminalId: string;
-  totalBytes: number;
-  capBytes: number;
-  droppedBytes: number;
+  terminal_id: string;
+  total_bytes: number;
+  cap_bytes: number;
+  dropped_bytes: number;
   entries: BufferedOutput[];
 };
 
@@ -61,18 +61,18 @@ export class TerminalOutputBuffer {
     const state = this.stateByTerminal.get(terminalId);
     if (!state) {
       return {
-        terminalId: terminalId,
-        totalBytes: 0,
-        capBytes: this.capBytes,
-        droppedBytes: 0,
+        terminal_id: terminalId,
+        total_bytes: 0,
+        cap_bytes: this.capBytes,
+        dropped_bytes: 0,
         entries: [],
       };
     }
     return {
-      terminalId: terminalId,
-      totalBytes: state.totalBytes,
-      capBytes: this.capBytes,
-      droppedBytes: state.droppedBytes,
+      terminal_id: terminalId,
+      total_bytes: state.totalBytes,
+      cap_bytes: this.capBytes,
+      dropped_bytes: state.droppedBytes,
       entries: [...state.entries],
     };
   }

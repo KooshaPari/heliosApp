@@ -33,10 +33,13 @@ export const ToastContainer: Component<ToastContainerProps> = props => {
     >
       <For each={props.toasts}>
         {toast => (
-          <button
-            type="button"
+          <div
             onClick={() => props.onDismiss(toast.id)}
-            aria-label={`Dismiss toast: ${toast.message}`}
+            onKeyDown={e => {
+              if (e.key === "Enter" || e.key === " ") {
+                props.onDismiss(toast.id);
+              }
+            }}
             style={{
               padding: "10px 16px",
               "border-radius": "8px",
@@ -47,13 +50,10 @@ export const ToastContainer: Component<ToastContainerProps> = props => {
               "font-size": "13px",
               "max-width": "360px",
               "box-shadow": "0 4px 12px rgba(0,0,0,0.3)",
-              border: "none",
-              width: "100%",
-              "text-align": "left",
             }}
           >
             {toast.message}
-          </button>
+          </div>
         )}
       </For>
     </div>

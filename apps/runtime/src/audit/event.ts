@@ -1,29 +1,19 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID } from "crypto";
 
 /**
  * Audit event type constants to prevent typos and enable type safety.
  * These categorize the event for filtering, searching, and analysis.
  */
 export const AUDIT_EVENT_TYPES = {
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   COMMAND_EXECUTED: "command.executed",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   POLICY_EVALUATION: "policy.evaluation",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   SESSION_CREATED: "session.created",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   TERMINAL_OUTPUT: "terminal.output",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   APPROVAL_RESOLVED: "approval.resolved",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   LANE_LIFECYCLE: "lane.lifecycle",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   SESSION_LIFECYCLE: "session.lifecycle",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   TERMINAL_LIFECYCLE: "terminal.lifecycle",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   POLICY_LIFECYCLE: "policy.lifecycle",
-  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   APPROVAL_LIFECYCLE: "approval.lifecycle",
 } as const;
 
@@ -33,15 +23,10 @@ export type AuditEventType = (typeof AUDIT_EVENT_TYPES)[keyof typeof AUDIT_EVENT
  * Result values for audit events indicating the outcome of an action.
  */
 export const AUDIT_EVENT_RESULTS = {
-  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
   SUCCESS: "success",
-  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
   FAILURE: "failure",
-  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
   DENIED: "denied",
-  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
   TIMEOUT: "timeout",
-  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
   PENDING: "pending",
 } as const;
 
@@ -96,12 +81,12 @@ export interface AuditEvent {
   /**
    * Optional lane ID for lane-scoped operations.
    */
-  laneId?: string | undefined;
+  laneId?: string;
 
   /**
    * Optional session ID for session tracking.
    */
-  sessionId?: string | undefined;
+  sessionId?: string;
 
   /**
    * Correlation ID linking related events across the system.
@@ -132,7 +117,7 @@ export function createAuditEvent(input: AuditEventInput): AuditEvent {
   const now = new Date();
 
   return {
-    id: generateUuiDv7(),
+    id: generateUUIDv7(),
     timestamp: now.toISOString(),
     ...input,
   };
@@ -189,7 +174,7 @@ export function validateAuditEvent(event: AuditEvent): boolean {
 
   // Validate timestamp is valid ISO 8601
   const ts = new Date(event.timestamp);
-  if (Number.isNaN(ts.getTime())) {
+  if (isNaN(ts.getTime())) {
     return false;
   }
 
@@ -205,7 +190,7 @@ export function validateAuditEvent(event: AuditEvent): boolean {
  *
  * @returns UUID v7 string
  */
-function generateUuiDv7(): string {
+function generateUUIDv7(): string {
   // For now, use randomUUID as a placeholder.
   // TODO: Replace with proper UUID v7 generation for time-ordered IDs.
   return randomUUID();

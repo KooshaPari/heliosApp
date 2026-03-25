@@ -33,7 +33,7 @@ export interface PercentileBucket {
 }
 
 /** Definition of a Service Level Objective threshold. */
-export interface SloDefinition {
+export interface SLODefinition {
   readonly metric: string;
   readonly percentile: "p50" | "p95" | "p99";
   readonly threshold: number;
@@ -41,18 +41,10 @@ export interface SloDefinition {
 }
 
 /** Emitted when an SLO threshold is breached. */
-export interface SloViolationEvent {
+export interface SLOViolationEvent {
   readonly metric: string;
   readonly percentile: string;
   readonly threshold: number;
   readonly actual: number;
   readonly timestamp: number;
 }
-
-/** Legacy naming preserved for compatibility with existing consumers. */
-// biome-ignore lint/style/useNamingConvention: backward-compatible alias used intentionally.
-export type SLODefinition = SloDefinition;
-
-/** Legacy naming preserved for compatibility with existing consumers. */
-// biome-ignore lint/style/useNamingConvention: backward-compatible alias used intentionally.
-export type SLOViolationEvent = SloViolationEvent;

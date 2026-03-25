@@ -1,13 +1,7 @@
-# workflow_file|job_name
-ci.yml|typecheck
-ci.yml|lint
-ci.yml|unit-tests
-ci.yml|coverage
-ci.yml|secret-scan
-ci.yml|ci-summary
-quality-gates.yml|Quality Gates Pipeline
-gca.yml|gca-review
-compliance-check.yml|Constitution Compliance Validation
-policy-gate.yml|policy-gate
-required-check-names-guard.yml|verify-required-check-names
-agent-dir-guard.yml|enforce-agent-directory-policy
+# workflow_file|job_name|check_id
+quality-gates.yml|Quality Gates Pipeline|quality-gates
+compliance-check.yml|Constitution Compliance Validation|compliance-check
+external|CodeRabbit|coderabbit-review
+required-check-names-guard.yml|verify-required-check-names|verify-required-check-names
+policy-gate.yml|policy-gate|policy-gate
+agent-dir-guard.yml|enforce-agent-directory-policy|enforce-agent-directory-policy

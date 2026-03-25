@@ -4,11 +4,11 @@
  * @see FR-010-005, NFR-010-002
  */
 
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, expect, it, beforeEach } from "bun:test";
+import { StreamBindingManager, SwitchBuffer } from "../stream_binding.js";
+import type { StreamBindingEventBus, BufferOverflowEvent } from "../stream_binding.js";
 import type { RendererAdapter, RendererState } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
-import { StreamBindingManager, SwitchBuffer } from "../stream_binding.js";
-import type { BufferOverflowEvent, StreamBindingEventBus } from "../stream_binding.js";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -34,9 +34,9 @@ function createMockAdapter(id: string): RendererAdapter & {
   return {
     id,
     version: "1.0.0",
-    init: () => Promise.resolve(),
-    start: () => Promise.resolve(),
-    stop: () => Promise.resolve(),
+    init: async () => {},
+    start: async () => {},
+    stop: async () => {},
     bindStream: (ptyId: string, stream: ReadableStream<Uint8Array>) => {
       boundStreams.set(ptyId, stream);
     },
@@ -44,28 +44,18 @@ function createMockAdapter(id: string): RendererAdapter & {
       boundStreams.delete(ptyId);
       unboundPtys.push(ptyId);
     },
-    handleInput: () => {
-      // no-op
-    },
-    resize: () => {
-      // no-op
-    },
+    handleInput: () => {},
+    resize: () => {},
     queryCapabilities: () => DEFAULT_CAPS,
     getState: (): RendererState => "running",
-    onCrash: () => {
-      // no-op
-    },
+    onCrash: () => {},
     boundStreams,
     unboundPtys,
   };
 }
 
 function openStream(): ReadableStream<Uint8Array> {
-  return new ReadableStream({
-    start() {
-      // no-op
-    },
-  });
+  return new ReadableStream({ start() {} });
 }
 
 // ---------------------------------------------------------------------------
@@ -95,8 +85,8 @@ describe("StreamBindingManager", () => {
     expect(adapter.boundStreams.has("pty-1")).toBe(true);
     const binding = mgr.getBindings().get("pty-1");
     expect(binding).toBeDefined();
-    expect(binding?.ptyId).toBe("pty-1");
-    expect(binding?.renderer).toBe(adapter);
+    expect(binding!.ptyId).toBe("pty-1");
+    expect(binding!.renderer).toBe(adapter);
   });
 
   it("measures relay latency on bind", () => {
@@ -105,7 +95,7 @@ describe("StreamBindingManager", () => {
     const latency = mgr.getRelayLatency("pty-1");
     expect(latency).toBeDefined();
     expect(typeof latency).toBe("number");
-    expect(latency ?? -1).toBeGreaterThanOrEqual(0);
+    expect(latency!).toBeGreaterThanOrEqual(0);
   });
 
   // Edge case: bind already bound PTY replaces existing binding
@@ -117,7 +107,7 @@ describe("StreamBindingManager", () => {
     mgr.bind("pty-1", openStream(), adapter2);
 
     expect(mgr.count()).toBe(1);
-    expect(mgr.getBindings().get("pty-1")?.renderer).toBe(adapter2);
+    expect(mgr.getBindings().get("pty-1")!.renderer).toBe(adapter2);
     // Old adapter should have been unbound
     expect(adapter1.unboundPtys).toContain("pty-1");
   });
@@ -264,8 +254,8 @@ describe("SwitchBuffer", () => {
     expect(buf.getBufferedBytes()).toBeLessThanOrEqual(maxBytes);
     expect(buf.getDroppedBytes("pty-1")).toBeGreaterThan(0);
     expect(events.length).toBeGreaterThan(0);
-    expect(events[0]?.type).toBe("renderer.switch.buffer_overflow");
-    expect(events[0]?.ptyId).toBe("pty-1");
+    expect(events[0]!.type).toBe("renderer.switch.buffer_overflow");
+    expect(events[0]!.ptyId).toBe("pty-1");
   });
 
   // Edge case: multiple PTYs have independent buffers

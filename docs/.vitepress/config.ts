@@ -25,13 +25,14 @@ export default defineConfig({
           items: [
             { text: "Overview", link: "/wiki/" },
             { text: "DevOps and CI/CD", link: "/wiki/devops-cicd" },
-            { text: "DevOps Checkers and Release Gates", link: "/wiki/devops-checkers" },
-            { text: "Publish Worker and Queue Lane", link: "/wiki/publish-worker" },
           ],
         },
       ],
       "/development/": [
-        { text: "Development Guide", items: [{ text: "Overview", link: "/development/" }] },
+        {
+          text: "Development Guide",
+          items: [{ text: "Overview", link: "/development/" }],
+        },
       ],
       "/index/": [
         {

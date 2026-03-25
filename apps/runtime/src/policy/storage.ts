@@ -3,10 +3,10 @@
  * Persists policy rules to disk with in-memory caching and hot-swap support.
  */
 
-import { promises as fs } from "node:fs";
-import { join } from "node:path";
+import { promises as fs } from "fs";
+import * as path from "path";
+import type { PolicyRule, PolicyRuleInput } from "./types";
 import { PolicyRuleSet } from "./rules";
-import type { PolicyRule } from "./types";
 
 export type RulesChangedCallback = (workspaceId: string, rules: PolicyRule[]) => void;
 
@@ -16,11 +16,11 @@ export type RulesChangedCallback = (workspaceId: string, rules: PolicyRule[]) =>
 export class PolicyStorage {
   private cache: Map<string, PolicyRuleSet> = new Map();
   private policyDir: string;
-  private watchers: Map<string, () => void> = new Map();
+  private watchers: Map<string, AbortController> = new Map();
   private changeCallbacks: RulesChangedCallback[] = [];
   private debounceTimers: Map<string, NodeJS.Timeout> = new Map();
 
-  constructor(policyDir: string = join(process.env.HOME || "/tmp", ".helios/policies")) {
+  constructor(policyDir: string = path.join(process.env.HOME || "/tmp", ".helios/policies")) {
     this.policyDir = policyDir;
   }
 
@@ -30,10 +30,7 @@ export class PolicyStorage {
   async getRuleSet(workspaceId: string): Promise<PolicyRuleSet> {
     // Return cached rule set if available
     if (this.cache.has(workspaceId)) {
-      const cached = this.cache.get(workspaceId);
-      if (cached !== undefined) {
-        return cached;
-      }
+      return this.cache.get(workspaceId)!;
     }
 
     // Load from file
@@ -57,7 +54,7 @@ export class PolicyStorage {
    * Returns empty array if file doesn't exist.
    */
   async loadRules(workspaceId: string): Promise<PolicyRule[]> {
-    const filePath = join(this.policyDir, `${workspaceId}.json`);
+    const filePath = path.join(this.policyDir, `${workspaceId}.json`);
 
     try {
       const content = await fs.readFile(filePath, "utf-8");
@@ -87,7 +84,7 @@ export class PolicyStorage {
     // Ensure directory exists
     await fs.mkdir(this.policyDir, { recursive: true });
 
-    const filePath = join(this.policyDir, `${workspaceId}.json`);
+    const filePath = path.join(this.policyDir, `${workspaceId}.json`);
     const tempPath = `${filePath}.tmp`;
 
     try {
@@ -126,7 +123,7 @@ export class PolicyStorage {
       return; // Already watching
     }
 
-    const filePath = join(this.policyDir, `${workspaceId}.json`);
+    const filePath = path.join(this.policyDir, `${workspaceId}.json`);
 
     // Simple file watching using setInterval (cross-platform, no native watch needed)
     let lastMtime = 0;
@@ -146,7 +143,8 @@ export class PolicyStorage {
             }
             this.cache.set(workspaceId, ruleSet);
             this.notifyChangedDebounced(workspaceId, rules);
-          } catch (_error) {
+          } catch (error) {
+            console.error(`Failed to reload policy rules for ${workspaceId}:`, error);
             // Keep previous rules on error
           }
         }
@@ -159,7 +157,9 @@ export class PolicyStorage {
 
     const timer = setInterval(checkFile, 500); // Check every 500ms
 
-    this.watchers.set(workspaceId, () => clearInterval(timer));
+    this.watchers.set(workspaceId, {
+      abort: () => clearInterval(timer),
+    } as any);
 
     // Check immediately
     checkFile();
@@ -171,17 +171,12 @@ export class PolicyStorage {
   private notifyChangedDebounced(workspaceId: string, rules: PolicyRule[]): void {
     // Clear existing timer
     if (this.debounceTimers.has(workspaceId)) {
-      const existingTimer = this.debounceTimers.get(workspaceId);
-      if (existingTimer !== undefined) {
-        clearTimeout(existingTimer);
-      }
+      clearTimeout(this.debounceTimers.get(workspaceId)!);
     }
 
     // Set new timer
     const timer = setTimeout(() => {
-      for (const callback of this.changeCallbacks) {
-        callback(workspaceId, rules);
-      }
+      this.changeCallbacks.forEach(cb => cb(workspaceId, rules));
       this.debounceTimers.delete(workspaceId);
     }, 100); // Debounce 100ms
 
@@ -203,36 +198,24 @@ export class PolicyStorage {
       throw new Error("Rules must be an array");
     }
 
-    const isAllowedPatternType = (
-      patternType: string | undefined
-    ): patternType is "glob" | "regex" => patternType === "glob" || patternType === "regex";
-    const isAllowedClassification = (
-      classification: string | undefined
-    ): classification is "safe" | "needs-approval" | "blocked" =>
-      classification === "safe" ||
-      classification === "needs-approval" ||
-      classification === "blocked";
-
     for (const rule of rules) {
-      const ruleId = rule.id;
-      if (!ruleId || typeof ruleId !== "string") {
+      if (!rule.id || typeof rule.id !== "string") {
         throw new Error("Rule must have an id field");
       }
-
       if (!rule.pattern || typeof rule.pattern !== "string") {
-        throw new Error(`Rule ${ruleId} must have a pattern field`);
+        throw new Error(`Rule ${rule.id} must have a pattern field`);
       }
-
-      if (!isAllowedPatternType(rule.patternType)) {
-        throw new Error(`Rule ${ruleId} has invalid patternType`);
+      if (!rule.patternType || !["glob", "regex"].includes(rule.patternType)) {
+        throw new Error(`Rule ${rule.id} has invalid patternType`);
       }
-
-      if (!isAllowedClassification(rule.classification)) {
-        throw new Error(`Rule ${ruleId} has invalid classification`);
+      if (
+        !rule.classification ||
+        !["safe", "needs-approval", "blocked"].includes(rule.classification)
+      ) {
+        throw new Error(`Rule ${rule.id} has invalid classification`);
       }
-
       if (typeof rule.priority !== "number") {
-        throw new Error(`Rule ${ruleId} must have a numeric priority`);
+        throw new Error(`Rule ${rule.id} must have a numeric priority`);
       }
     }
   }
@@ -241,8 +224,8 @@ export class PolicyStorage {
    * Close all watchers.
    */
   close(): void {
-    for (const stopWatching of this.watchers.values()) {
-      stopWatching();
+    for (const controller of this.watchers.values()) {
+      controller.abort();
     }
     this.watchers.clear();
 

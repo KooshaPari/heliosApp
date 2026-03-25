@@ -13,7 +13,7 @@ export interface SwitchConfirmationProps {
 export class SwitchConfirmation {
   private props: SwitchConfirmationProps;
   private container: HTMLElement | null = null;
-  private isOpen = false;
+  private isOpen: boolean = false;
   private previousFocus: HTMLElement | null = null;
 
   constructor(props: SwitchConfirmationProps) {
@@ -31,10 +31,8 @@ export class SwitchConfirmation {
     this.container = null;
   }
 
-  open(): void {
-    if (this.isOpen || !this.container) {
-      return;
-    }
+  async open(): Promise<void> {
+    if (this.isOpen || !this.container) return;
 
     this.previousFocus = document.activeElement as HTMLElement;
     this.isOpen = true;
@@ -43,9 +41,7 @@ export class SwitchConfirmation {
   }
 
   close(): void {
-    if (!this.isOpen) {
-      return;
-    }
+    if (!this.isOpen) return;
 
     this.isOpen = false;
     this.detachEventListeners();
@@ -66,9 +62,7 @@ export class SwitchConfirmation {
   }
 
   private createAndShowDialog(): void {
-    if (!this.container) {
-      return;
-    }
+    if (!this.container) return;
 
     // Backdrop
     const backdrop = document.createElement("div");
@@ -211,9 +205,7 @@ export class SwitchConfirmation {
 
   private attachEventListeners(): void {
     const dialog = document.querySelector(".switch-confirmation-dialog") as HTMLElement;
-    if (!dialog) {
-      return;
-    }
+    if (!dialog) return;
 
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -255,10 +247,12 @@ export class SwitchConfirmation {
         event.preventDefault();
         buttons[buttons.length - 1].focus();
       }
-    } else if (focusedIndex >= buttons.length - 1) {
+    } else {
       // Tab
-      event.preventDefault();
-      buttons[0].focus();
+      if (focusedIndex >= buttons.length - 1) {
+        event.preventDefault();
+        buttons[0].focus();
+      }
     }
   }
 }

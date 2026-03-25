@@ -8,21 +8,21 @@
  * FR-025-007: Process-level isolation for tool execution.
  */
 
-import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
+import type { LocalBus } from "../protocol/bus.js";
 import type {
+  ProviderAdapter,
+  ProviderHealthStatus,
   MCPConfig,
   MCPExecuteInput,
   MCPExecuteOutput,
   MCPTool,
-  ProviderAdapter,
-  ProviderHealthStatus,
 } from "./adapter.js";
 import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * MCP server connection state.
  */
-interface McpConnection {
+interface MCPConnection {
   connected: boolean;
   lastConnectionAttempt: Date;
   reconnectAttempts: number;
@@ -46,13 +46,14 @@ interface ToolEntry {
  *
  * FR-025-004: MCP tool discovery and sandboxed invocation.
  */
-export class MCPBridgeAdapter
-  implements ProviderAdapter<MCPConfig, MCPExecuteInput, MCPExecuteOutput>
-{
+export class MCPBridgeAdapter implements ProviderAdapter<
+  MCPConfig,
+  MCPExecuteInput,
+  MCPExecuteOutput
+> {
   private config: MCPConfig | null = null;
   private bus: LocalBus | null = null;
-  private terminated = false;
-  private connection: McpConnection = {
+  private connection: MCPConnection = {
     connected: false,
     lastConnectionAttempt: new Date(),
     reconnectAttempts: 0,
@@ -122,9 +123,6 @@ export class MCPBridgeAdapter
    */
   async health(): Promise<ProviderHealthStatus> {
     if (!this.config) {
-      if (this.terminated) {
-        return { ...this.healthStatus };
-      }
       return {
         state: "unavailable",
         lastCheck: new Date(),
@@ -180,10 +178,10 @@ export class MCPBridgeAdapter
    * @throws NormalizedProviderError on failure
    */
   async execute(input: MCPExecuteInput, correlationId: string): Promise<MCPExecuteOutput> {
-    if (!(this.config && this.connection.connected)) {
+    if (!this.config || !this.connection.connected) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        "MCP bridge unavailable: not initialized or disconnected",
+        "MCP bridge not initialized or disconnected",
         "mcp"
       );
     }
@@ -303,7 +301,6 @@ export class MCPBridgeAdapter
       this.toolCatalog.clear();
 
       this.config = null;
-      this.terminated = true;
 
       this.healthStatus = {
         state: "unavailable",
@@ -468,7 +465,7 @@ export class MCPBridgeAdapter
    */
   private async invokeTool(
     toolName: string,
-    _toolArguments: Record<string, unknown>,
+    toolArguments: Record<string, unknown>,
     signal: AbortSignal
   ): Promise<unknown> {
     // Check for abort
@@ -483,15 +480,7 @@ export class MCPBridgeAdapter
       list_directory: { entries: ["file1.txt", "file2.txt", "subdir/"] },
     };
 
-    const result = results[toolName] || { message: `Mock result for ${toolName}` };
-
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => resolve(result), 5);
-      signal.addEventListener("abort", () => {
-        clearTimeout(timeout);
-        reject(new Error("Tool invocation cancelled"));
-      });
-    });
+    return results[toolName] || { message: `Mock result for ${toolName}` };
   }
 
   /**
@@ -513,6 +502,8 @@ export class MCPBridgeAdapter
         topic,
         payload,
       });
-    } catch (_error) {}
+    } catch (error) {
+      console.warn(`Failed to publish MCP event ${topic}:`, error);
+    }
   }
 }

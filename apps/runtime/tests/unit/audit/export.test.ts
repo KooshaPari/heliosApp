@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { AuditExporter } from "../../../src/audit/export";
+import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 
 describe("AuditExporter", () => {
   let exporter: AuditExporter;
@@ -15,7 +15,7 @@ describe("AuditExporter", () => {
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
         actor: "agent@example.com",
         action: "execute",
-        target: "cmd --api-key=secret123",
+        target: "cmd --api-key=FAKE_TEST_KEY_000",
         result: AUDIT_EVENT_RESULTS.SUCCESS,
         workspaceId: "ws-1",
         correlationId: "corr-1",
@@ -80,7 +80,7 @@ describe("AuditExporter", () => {
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
         actor: "agent-1",
         action: "execute",
-        target: "curl --api_key=abc123def456",
+        target: "curl --api_key=FAKE_TEST_KEY_000",
         result: AUDIT_EVENT_RESULTS.SUCCESS,
         workspaceId: "ws-1",
         correlationId: "corr-1",

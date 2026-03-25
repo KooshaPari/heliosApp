@@ -7,66 +7,8 @@
 import type { EventEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
-// Protocol topic constants (aligned with specs/protocol/v1/topics.json)
-// ---------------------------------------------------------------------------
-
-export const TOPICS = [
-  "workspace.opened",
-  "project.ready",
-  "session.created",
-  "session.attach.started",
-  "session.attached",
-  "session.attach.failed",
-  "session.restore.started",
-  "session.restore.completed",
-  "session.terminated",
-  "terminal.spawn.started",
-  "terminal.spawned",
-  "terminal.spawn.failed",
-  "terminal.output",
-  "terminal.state.changed",
-  "renderer.switch.started",
-  "renderer.switch.succeeded",
-  "renderer.switch.failed",
-  "agent.run.started",
-  "agent.run.progress",
-  "agent.run.completed",
-  "agent.run.failed",
-  "approval.requested",
-  "approval.resolved",
-  "share.session.started",
-  "share.session.stopped",
-  "lane.create.started",
-  "lane.created",
-  "lane.create.failed",
-  "lane.attached",
-  "lane.cleaned",
-  "harness.status.changed",
-  "audit.recorded",
-  "diagnostics.metric",
-  "orphan.detection.cycle_completed",
-  "orphan.detection.resource_found",
-  "recovery.stage.changed",
-  "recovery.crash.detected",
-  "recovery.safemode.entered",
-  "recovery.safemode.exited",
-  "recovery.orphans.cleaned",
-  "recovery.session.restored",
-  "recovery.session.failed",
-  "secrets.credential.created",
-  "secrets.credential.accessed",
-  "secrets.credential.rotated",
-  "secrets.credential.revoked",
-  "secrets.redaction.applied",
-  "secrets.protected_path.accessed",
-] as const satisfies readonly string[];
-
-// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-/** A valid protocol topic name. */
-export type ProtocolTopic = (typeof TOPICS)[number];
 
 /** A topic subscriber receives an event (return value is ignored). */
 export type TopicSubscriber = (event: EventEnvelope) => void | Promise<void>;
@@ -89,6 +31,56 @@ function assertValidTopicName(topic: string): void {
 // ---------------------------------------------------------------------------
 // Registry
 // ---------------------------------------------------------------------------
+
+/** Canonical list of known topic names for validation. */
+export const TOPICS: readonly string[] = [
+  "workspace.opened",
+  "project.ready",
+  "session.created",
+  "session.restore.started",
+  "session.restore.completed",
+  "session.attach.started",
+  "session.attached",
+  "session.attach.failed",
+  "session.restore.started",
+  "session.restore.completed",
+  "session.terminated",
+  "lane.attach.started",
+  "lane.attach.failed",
+  "lane.cleanup.started",
+  "lane.cleanup.failed",
+  "terminal.spawn.started",
+  "terminal.spawned",
+  "terminal.spawn.failed",
+  "terminal.output",
+  "terminal.state.changed",
+  "renderer.switch.started",
+  "renderer.switch.succeeded",
+  "renderer.switch.failed",
+  "agent.run.started",
+  "agent.run.progress",
+  "agent.run.completed",
+  "agent.run.failed",
+  "approval.requested",
+  "approval.resolved",
+  "share.session.started",
+  "share.session.stopped",
+  "lane.create.started",
+  "lane.created",
+  "lane.create.failed",
+  "lane.attached",
+  "lane.cleaned",
+  "harness.status.changed",
+  "boundary.local.dispatched",
+  "boundary.tool.dispatched",
+  "boundary.a2a.delegated",
+  "boundary.dispatch.failed",
+  "audit.recorded",
+  "diagnostics.metric",
+] as const;
+
+/** Type for valid protocol topics. */
+export type ProtocolTopic = (typeof TOPICS)[number];
 
 export class TopicRegistry {
   private readonly subs = new Map<string, TopicSubscriber[]>();
@@ -113,14 +105,10 @@ export class TopicRegistry {
 
     let removed = false;
     return () => {
-      if (removed) {
-        return; // idempotent unsubscribe
-      }
+      if (removed) return; // idempotent unsubscribe
       removed = true;
       const current = this.subs.get(topic);
-      if (!current) {
-        return;
-      }
+      if (!current) return;
       const idx = current.indexOf(entry);
       if (idx !== -1) {
         current.splice(idx, 1);
@@ -150,6 +138,7 @@ export class TopicRegistry {
     let next = current + 1;
     // Handle overflow at Number.MAX_SAFE_INTEGER — reset to 1 with warning.
     if (current >= Number.MAX_SAFE_INTEGER) {
+      console.warn(`[topics] Sequence counter overflow for topic "${topic}" — resetting to 1`);
       next = 1;
     }
     this.sequenceCounters.set(topic, next);

@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-const vi = { fn: mock, spyOn: spyOn };
-import { type Capability, CapabilityDisplay } from "../../../src/settings/capability_display";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+import { CapabilityDisplay } from "../../../src/settings/capability_display";
+import type { Capability } from "../../../src/settings/capability_display";
 
 describe("CapabilityDisplay", () => {
   let container: HTMLDivElement;
@@ -37,7 +37,7 @@ describe("CapabilityDisplay", () => {
     expect(content).toBeFalsy();
   });
 
-  it("should expand when toggle clicked", () => {
+  it("should expand when toggle clicked", async () => {
     const onToggle = vi.fn();
     display = new CapabilityDisplay({
       capability: mockCapability,

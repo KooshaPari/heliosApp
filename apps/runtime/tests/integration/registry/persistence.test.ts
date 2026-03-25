@@ -1,10 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import type { BindingTriple } from "../../../src/registry/binding_triple.js";
-import { InMemoryPersistence, JsonFilePersistence } from "../../../src/registry/persistence.js";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
+import { JsonFilePersistence, InMemoryPersistence } from "../../../src/registry/persistence.js";
+import { promises as fs } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
+import type { BindingTriple } from "../../../src/registry/binding_triple.js";
 
 describe("Persistence Integration", () => {
   let registry: TerminalRegistry;

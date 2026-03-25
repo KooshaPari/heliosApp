@@ -6,10 +6,11 @@
  * FR-009: Subscriber isolation during fan-out.
  */
 
-import { beforeEach, describe, expect, it } from "bun:test";
-import { type LocalBus, createBus } from "../../../src/protocol/bus.js";
+import { describe, expect, it, beforeEach } from "bun:test";
+import { createBus } from "../../../src/protocol/bus.js";
+import type { LocalBus } from "../../../src/protocol/bus.js";
 import { createCommand, createEvent, createResponse } from "../../../src/protocol/envelope.js";
-import type { EventEnvelope } from "../../../src/protocol/types.js";
+import type { LocalBusEnvelope } from "../../../src/protocol/types.js";
 
 describe("Event ordering — per-topic monotonic sequences", () => {
   let bus: LocalBus;
@@ -22,14 +23,14 @@ describe("Event ordering — per-topic monotonic sequences", () => {
   it("maintains strictly increasing sequences across 10,000 events on one topic", async () => {
     const received: number[] = [];
 
-    bus.subscribe("load.test", (event: EventEnvelope) => {
-      received.push(event.sequence);
+    bus.subscribe("load.test", event => {
+      received.push(event.sequence!);
     });
 
     // Publish 10,000 events (all awaited — simulates concurrent async contexts)
     const promises: Promise<void>[] = [];
     for (let i = 0; i < 10_000; i++) {
-      const evt = createEvent("load.test", { i });
+      const evt = createEvent("load.test", { i }) as LocalBusEnvelope;
       promises.push(bus.publish(evt));
     }
     await Promise.all(promises);
@@ -53,16 +54,16 @@ describe("Event ordering — per-topic monotonic sequences", () => {
     const topicB: number[] = [];
 
     bus.subscribe("topic.a", e => {
-      topicA.push(e.sequence);
+      topicA.push(e.sequence!);
     });
     bus.subscribe("topic.b", e => {
-      topicB.push(e.sequence);
+      topicB.push(e.sequence!);
     });
 
     const promises: Promise<void>[] = [];
     for (let i = 0; i < 100; i++) {
-      promises.push(bus.publish(createEvent("topic.a", { i })));
-      promises.push(bus.publish(createEvent("topic.b", { i })));
+      promises.push(bus.publish(createEvent("topic.a", { i }) as LocalBusEnvelope));
+      promises.push(bus.publish(createEvent("topic.b", { i }) as LocalBusEnvelope));
     }
     await Promise.all(promises);
 
@@ -90,19 +91,19 @@ describe("Event ordering — per-topic monotonic sequences", () => {
     for (const topic of topicNames) {
       topicEvents.set(topic, []);
       bus.subscribe(topic, e => {
-        topicEvents.get(topic)?.push(e.sequence);
+        topicEvents.get(topic)!.push(e.sequence!);
       });
     }
 
     const promises: Promise<void>[] = [];
     for (let i = 0; i < 100; i++) {
       for (const topic of topicNames) {
-        promises.push(bus.publish(createEvent(topic, { i })));
+        promises.push(bus.publish(createEvent(topic, { i }) as LocalBusEnvelope));
       }
     }
     await Promise.all(promises);
 
-    for (const [_topic, seqs] of topicEvents) {
+    for (const [topic, seqs] of topicEvents) {
       expect(seqs.length).toBe(100);
       expect(seqs[0]).toBe(1);
       for (let i = 1; i < seqs.length; i++) {
@@ -124,19 +125,19 @@ describe("Correlation ID propagation", () => {
     const receivedCorrelations: string[] = [];
 
     bus.subscribe("handler.event", e => {
-      receivedCorrelations.push(e.correlation_id);
+      receivedCorrelations.push(e.correlation_id!);
     });
 
     bus.registerMethod("emit.events", async cmd => {
       // Publish 5 events inside the handler
       for (let i = 0; i < 5; i++) {
-        const evt = createEvent("handler.event", { i });
+        const evt = createEvent("handler.event", { i }) as LocalBusEnvelope;
         await bus.publish(evt);
       }
-      return createResponse(cmd, "done");
+      return createResponse(cmd, { result: "done" });
     });
 
-    const cmd = createCommand("emit.events", null, "trace_cmd_123");
+    const cmd = createCommand("emit.events", {}, "trace_cmd_123");
     await bus.send(cmd);
 
     expect(receivedCorrelations.length).toBe(5);
@@ -151,10 +152,10 @@ describe("Correlation ID propagation", () => {
     const received: string[] = [];
 
     bus.subscribe("standalone.event", e => {
-      received.push(e.correlation_id);
+      received.push(e.correlation_id!);
     });
 
-    const evt = createEvent("standalone.event", {}, "my_own_correlation");
+    const evt = createEvent("standalone.event", {}, "my_own_correlation") as LocalBusEnvelope;
     await bus.publish(evt);
 
     expect(received.length).toBe(1);
@@ -167,37 +168,37 @@ describe("Correlation ID propagation", () => {
     const innerCorrelations: string[] = [];
 
     bus.subscribe("outer.event", e => {
-      outerCorrelations.push(e.correlation_id);
+      outerCorrelations.push(e.correlation_id!);
     });
     bus.subscribe("inner.event", e => {
-      innerCorrelations.push(e.correlation_id);
+      innerCorrelations.push(e.correlation_id!);
     });
 
     bus.registerMethod("inner.cmd", async cmd => {
       // Check that active correlation is the inner command's
-      expect(bus.getActiveCorrelationId()).toBe(cmd.correlation_id as any);
-      await bus.publish(createEvent("inner.event", {}));
-      return createResponse(cmd, "inner-done");
+      expect(bus.getActiveCorrelationId()).toBe(cmd.correlation_id);
+      await bus.publish(createEvent("inner.event", {}) as LocalBusEnvelope);
+      return createResponse(cmd, { result: "inner-done" });
     });
 
     bus.registerMethod("outer.cmd", async cmd => {
       // Publish event — should get outer correlation
-      await bus.publish(createEvent("outer.event", {}));
+      await bus.publish(createEvent("outer.event", {}) as LocalBusEnvelope);
 
       // Dispatch inner command with different correlation
-      const innerCmd = createCommand("inner.cmd", null, "inner_trace_456");
+      const innerCmd = createCommand("inner.cmd", {}, "inner_trace_456");
       await bus.send(innerCmd);
 
       // After inner returns, active correlation should be outer again
-      expect(bus.getActiveCorrelationId()).toBe(cmd.correlation_id as any);
+      expect(bus.getActiveCorrelationId()).toBe(cmd.correlation_id);
 
       // Publish another outer event
-      await bus.publish(createEvent("outer.event", {}));
+      await bus.publish(createEvent("outer.event", {}) as LocalBusEnvelope);
 
-      return createResponse(cmd, "outer-done");
+      return createResponse(cmd, { result: "outer-done" });
     });
 
-    const cmd = createCommand("outer.cmd", null, "outer_trace_123");
+    const cmd = createCommand("outer.cmd", {}, "outer_trace_123");
     await bus.send(cmd);
 
     expect(outerCorrelations.length).toBe(2);

@@ -45,7 +45,7 @@ Success criteria:
 Reference docs:
 - `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/001-colab-agent-terminal-control-plane/quickstart.md`
 - `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/001-colab-agent-terminal-control-plane/plan.md`
-- `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- `docs/reference/constitution.md`
 
 Constraints:
 - Device-first performance expectations with bounded resource use.

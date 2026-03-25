@@ -1,21 +1,21 @@
 // Tests for T006-T010: Worktree provisioning, cleanup, PTY termination, orphan reconciliation
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
-import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
-import type { PtyManager } from "../../src/lanes/index.js";
+import * as os from "node:os";
 import {
-  WorktreeProvisionError,
-  computeBranchName,
-  computeWorktreePath,
-  lastMetrics,
   provisionWorktree,
-  reconcileOrphanedWorktrees,
   removeWorktree,
+  reconcileOrphanedWorktrees,
+  computeWorktreePath,
+  computeBranchName,
+  WorktreeProvisionError,
   resetMetrics,
+  lastMetrics,
 } from "../../src/lanes/worktree.js";
+import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
+import type { PtyManager, PtyHandle } from "../../src/lanes/index.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -27,14 +27,12 @@ function createTempGitRepo(): string {
   tmpDirs.push(dir);
 
   // Initialize a git repo with an initial commit
-  (Bun as any).spawnSync(["git", "init"], { cwd: dir });
-  (Bun as any).spawnSync(["git", "config", "user.email", "test@test.com"], { cwd: dir });
-  (Bun as any).spawnSync(["git", "config", "user.name", "Test"], { cwd: dir });
+  Bun.spawnSync(["git", "init"], { cwd: dir });
+  Bun.spawnSync(["git", "config", "user.email", "test@test.com"], { cwd: dir });
+  Bun.spawnSync(["git", "config", "user.name", "Test"], { cwd: dir });
   fs.writeFileSync(path.join(dir, "README.md"), "# test repo\n");
-  (Bun as any).spawnSync(["git", "add", "."], { cwd: dir });
-  (Bun as any).spawnSync(["git", "commit", "-m", "initial"], { cwd: dir });
-  // Ensure the default branch is named 'main' regardless of git config
-  (Bun as any).spawnSync(["git", "branch", "-M", "main"], { cwd: dir });
+  Bun.spawnSync(["git", "add", "."], { cwd: dir });
+  Bun.spawnSync(["git", "commit", "-m", "initial"], { cwd: dir });
 
   return dir;
 }
@@ -43,7 +41,7 @@ function cleanup(): void {
   for (const dir of tmpDirs) {
     try {
       // Prune worktrees first to avoid locked file issues
-      (Bun as any).spawnSync(["git", "worktree", "prune"], { cwd: dir });
+      Bun.spawnSync(["git", "worktree", "prune"], { cwd: dir });
     } catch {
       // ignore
     }
@@ -89,9 +87,7 @@ describe("T006 - provisionWorktree", () => {
     expect(fs.existsSync(result.worktreePath)).toBe(true);
 
     // Verify branch exists
-    const branches = (Bun as any).spawnSync(["git", "branch", "--list", result.branchName], {
-      cwd: repo,
-    });
+    const branches = Bun.spawnSync(["git", "branch", "--list", result.branchName], { cwd: repo });
     const branchOutput = new TextDecoder().decode(branches.stdout).trim();
     expect(branchOutput).toContain("helios/lane/lane_test_1");
   });

@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-const vi = { fn: mock, spyOn: spyOn };
-import { type Renderer, RendererSettings } from "../../../src/settings/renderer_settings";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+import { RendererSettings } from "../../../src/settings/renderer_settings";
+import type { Renderer } from "../../../src/settings/renderer_settings";
 
 describe("RendererSettings", () => {
   let container: HTMLDivElement;
@@ -196,9 +196,8 @@ describe("RendererSettings", () => {
     const radios = container.querySelectorAll('input[type="radio"]');
     expect(radios.length).toBe(2);
 
-    const ghosttyRadio = container.querySelector(
-      '[data-renderer="ghostty"] input'
-    ) as HTMLInputElement;
+    const ghosttyOption = container.querySelector('[data-renderer="ghostty"]');
+    const ghosttyRadio = ghosttyOption?.querySelector('input[type="radio"]') as HTMLInputElement;
     expect(ghosttyRadio?.checked).toBeTruthy();
   });
 });

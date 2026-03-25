@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import {
-  InvalidTransitionError,
-  type PtyEvent,
-  PtyLifecycle,
-  type PtyState,
   transition,
+  PtyLifecycle,
+  InvalidTransitionError,
+  type PtyState,
+  type PtyEvent,
 } from "../state_machine.js";
 
 describe("transition()", () => {
@@ -76,10 +76,10 @@ describe("PtyLifecycle", () => {
 
     expect(lc.state).toBe("active");
     expect(lc.history).toHaveLength(2);
-    expect(lc.history[0]?.from).toBe("idle");
-    expect(lc.history[0]?.to).toBe("spawning");
-    expect(lc.history[1]?.from).toBe("spawning");
-    expect(lc.history[1]?.to).toBe("active");
+    expect(lc.history[0]!.from).toBe("idle");
+    expect(lc.history[0]!.to).toBe("spawning");
+    expect(lc.history[1]!.from).toBe("spawning");
+    expect(lc.history[1]!.to).toBe("active");
   });
 
   it("bounds history to 10 entries", () => {

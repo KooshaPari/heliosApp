@@ -7,15 +7,35 @@
  * Tags: FR-011-001, FR-011-003, FR-011-004
  */
 
-import { beforeEach, describe, expect, test } from "bun:test";
-import type { RenderSurface, RendererConfig } from "../../../../src/renderer/adapter.js";
+import { describe, test, expect, beforeEach, afterEach, mock } from "bun:test";
 import {
-  GhosttyAlreadyInitializedError,
   GhosttyBackend,
   GhosttyNotInitializedError,
   GhosttyNotRunningError,
+  GhosttyAlreadyInitializedError,
 } from "../../../../src/renderer/ghostty/backend.js";
+import type { RendererConfig, RenderSurface } from "../../../../src/renderer/adapter.js";
 import type { PtyWriter } from "../../../../src/renderer/ghostty/input.js";
+
+// Mock Bun.spawn to avoid slow system_profiler calls during detectCapabilities
+const originalSpawn = Bun.spawn;
+beforeEach(() => {
+  (Bun as any).spawn = mock((..._args: unknown[]) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode("Metal: Supported");
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(data);
+        controller.close();
+      },
+    });
+    return { stdout: stream, stderr: null, exitCode: Promise.resolve(0) };
+  });
+});
+
+afterEach(() => {
+  (Bun as any).spawn = originalSpawn;
+});
 
 const TEST_CONFIG: RendererConfig = {
   gpuAcceleration: true,
@@ -37,35 +57,6 @@ function makeStream(chunks: Uint8Array[]): ReadableStream<Uint8Array> {
       controller.close();
     },
   });
-}
-
-function makeInfiniteStream(): { stream: ReadableStream<Uint8Array>; cancel: () => void } {
-  let cancelled = false;
-  const stream = new ReadableStream<Uint8Array>({
-    async pull(controller) {
-      // Wait indefinitely unless cancelled
-      await new Promise<void>(resolve => {
-        const id = setInterval(() => {
-          if (cancelled) {
-            clearInterval(id);
-            resolve();
-          }
-        }, 10);
-      });
-      if (!cancelled) {
-        controller.enqueue(new Uint8Array([0x41]));
-      }
-    },
-    cancel() {
-      cancelled = true;
-    },
-  });
-  return {
-    stream,
-    cancel: () => {
-      cancelled = true;
-    },
-  };
 }
 
 describe("GhosttyBackend - lifecycle (T012)", () => {
@@ -307,7 +298,9 @@ describe("GhosttyBackend - metrics (T012)", () => {
 describe("GhosttyBackend - input relay (T012)", () => {
   let backend: GhosttyBackend;
   const mockWriter: PtyWriter = {
-    writeInput: () => {},
+    writeInput: () => {
+      // no-op: adapter contract requires writer callback
+    },
   };
 
   beforeEach(async () => {

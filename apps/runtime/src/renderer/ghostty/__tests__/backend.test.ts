@@ -2,14 +2,14 @@
  * Unit tests for GhosttyBackend (T001).
  */
 
-import { beforeEach, describe, expect, test } from "bun:test";
-import type { RenderSurface, RendererConfig } from "../../adapter.js";
+import { describe, test, expect, beforeEach } from "bun:test";
 import {
-  GhosttyAlreadyInitializedError,
   GhosttyBackend,
   GhosttyNotInitializedError,
   GhosttyNotRunningError,
+  GhosttyAlreadyInitializedError,
 } from "../backend.js";
+import type { RendererConfig, RenderSurface } from "../../adapter.js";
 
 const TEST_CONFIG: RendererConfig = {
   gpuAcceleration: true,

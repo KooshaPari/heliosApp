@@ -7,37 +7,6 @@
 import type { CommandEnvelope, ResponseEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
-// Protocol method constants (aligned with specs/protocol/v1/methods.json)
-// ---------------------------------------------------------------------------
-
-export const METHODS = [
-  "workspace.create",
-  "workspace.open",
-  "project.clone",
-  "project.init",
-  "session.create",
-  "session.attach",
-  "session.terminate",
-  "terminal.spawn",
-  "terminal.resize",
-  "terminal.input",
-  "renderer.switch",
-  "renderer.capabilities",
-  "agent.run",
-  "agent.cancel",
-  "approval.request.resolve",
-  "share.upterm.start",
-  "share.upterm.stop",
-  "share.tmate.start",
-  "share.tmate.stop",
-  "zmx.checkpoint",
-  "zmx.restore",
-  "lane.create",
-  "lane.attach",
-  "lane.cleanup",
-] as const satisfies readonly string[];
-
-// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -64,6 +33,37 @@ function assertValidMethodName(method: string): void {
 // ---------------------------------------------------------------------------
 // Registry
 // ---------------------------------------------------------------------------
+
+/** Canonical list of known method names for validation. */
+export const METHODS: readonly string[] = [
+  "workspace.create",
+  "workspace.open",
+  "project.clone",
+  "project.init",
+  "session.create",
+  "session.attach",
+  "session.terminate",
+  "terminal.spawn",
+  "terminal.resize",
+  "terminal.input",
+  "renderer.switch",
+  "renderer.capabilities",
+  "agent.run",
+  "agent.cancel",
+  "approval.request.resolve",
+  "share.upterm.start",
+  "share.upterm.stop",
+  "share.tmate.start",
+  "share.tmate.stop",
+  "zmx.checkpoint",
+  "zmx.restore",
+  "lane.create",
+  "lane.attach",
+  "lane.cleanup",
+  "boundary.local.dispatch",
+  "boundary.tool.dispatch",
+  "boundary.a2a.dispatch",
+] as const;
 
 export class MethodRegistry {
   private readonly handlers = new Map<string, MethodHandler>();

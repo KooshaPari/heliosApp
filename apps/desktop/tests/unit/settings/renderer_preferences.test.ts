@@ -1,8 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-const _vi = { fn: mock, spyOn: spyOn };
-import { unlinkSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { RendererPreferencesManager } from "../../../src/settings/renderer_preferences";
+import { writeFileSync, unlinkSync, mkdirSync } from "fs";
+import { resolve } from "path";
 
 describe("RendererPreferencesManager", () => {
   let tempPath: string;

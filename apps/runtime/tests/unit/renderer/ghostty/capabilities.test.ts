@@ -6,15 +6,33 @@
  * Tags: FR-011-004, SC-011-002
  */
 
-import { afterEach, describe, expect, test } from "bun:test";
+import { describe, test, expect, afterEach, mock, beforeEach } from "bun:test";
 import {
-  clearCapabilityCache,
   detectCapabilities,
   getCachedCapabilities,
+  clearCapabilityCache,
 } from "../../../../src/renderer/ghostty/capabilities.js";
+
+// Mock Bun.spawn to avoid slow system_profiler calls in tests
+const originalSpawn = Bun.spawn;
+beforeEach(() => {
+  (Bun as any).spawn = mock((...args: any[]) => {
+    // Return a fake process with stdout that has Metal info
+    const encoder = new TextEncoder();
+    const data = encoder.encode("Metal: Supported");
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(data);
+        controller.close();
+      },
+    });
+    return { stdout: stream, stderr: null, exitCode: Promise.resolve(0) };
+  });
+});
 
 afterEach(() => {
   clearCapabilityCache();
+  (Bun as any).spawn = originalSpawn;
 });
 
 describe("Capability detection", () => {
@@ -45,7 +63,7 @@ describe("Capability detection", () => {
   });
 
   test("detectCapabilities forceRefresh re-detects", async () => {
-    const _caps1 = await detectCapabilities();
+    const caps1 = await detectCapabilities();
     const caps2 = await detectCapabilities(true);
     // Both valid but may be different objects
     expect(caps2).toBeDefined();
