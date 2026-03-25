@@ -5,7 +5,7 @@ import type {
   RecoveryMetadata,
   RecoverySessionRecord,
   RecoveryTerminalRecord,
-  WatchdogScanResult
+  WatchdogScanResult,
 } from "./types";
 
 export type SessionTransport = "cliproxy_harness" | "native_openai";
@@ -84,7 +84,7 @@ export class InMemorySessionRegistry {
       codex_session_id: codexSessionId,
       transport: input.transport,
       status: "attached",
-      last_heartbeat_at: nowIso
+      last_heartbeat_at: nowIso,
     };
 
     this.bySessionId.set(session.session_id, session);
@@ -192,7 +192,7 @@ export class RecoveryRegistry {
           artifact_id: session.session_id,
           reason: "missing codex_session_id",
           remediation: "cleanup",
-          state: "unrecoverable"
+          state: "unrecoverable",
         });
         continue;
       }
@@ -204,7 +204,7 @@ export class RecoveryRegistry {
           artifact_id: session.session_id,
           reason: "missing lane mapping",
           remediation: "reattach",
-          state: "recoverable"
+          state: "recoverable",
         });
         continue;
       }
@@ -218,9 +218,9 @@ export class RecoveryRegistry {
 
   snapshot(): RecoveryMetadata {
     return {
-      lanes: [...this.lanes.values()].map((lane) => ({ ...lane })),
-      sessions: [...this.sessions.values()].map((session) => ({ ...session })),
-      terminals: [...this.terminals.values()].map((terminal) => ({ ...terminal }))
+      lanes: [...this.lanes.values()].map(lane => ({ ...lane })),
+      sessions: [...this.sessions.values()].map(session => ({ ...session })),
+      terminals: [...this.terminals.values()].map(terminal => ({ ...terminal })),
     };
   }
 
@@ -234,7 +234,7 @@ export class RecoveryRegistry {
           artifact_id: lane.lane_id,
           reason: "references missing session",
           remediation: "reconcile",
-          state: "recoverable"
+          state: "recoverable",
         });
       }
       if (lane.terminal_id && !this.terminals.has(lane.terminal_id)) {
@@ -243,7 +243,7 @@ export class RecoveryRegistry {
           artifact_id: lane.lane_id,
           reason: "references missing terminal",
           remediation: "reconcile",
-          state: "recoverable"
+          state: "recoverable",
         });
       }
     }
@@ -257,7 +257,7 @@ export class RecoveryRegistry {
             artifact_id: session.session_id,
             reason: "detached session can be reattached by codex_session_id",
             remediation: "reattach",
-            state: "recoverable"
+            state: "recoverable",
           });
         } else {
           issues.push({
@@ -265,7 +265,7 @@ export class RecoveryRegistry {
             artifact_id: session.session_id,
             reason: "session has no valid lane mapping",
             remediation: "cleanup",
-            state: "unrecoverable"
+            state: "unrecoverable",
           });
         }
       }
@@ -276,7 +276,7 @@ export class RecoveryRegistry {
           artifact_id: session.session_id,
           reason: "session references missing terminal",
           remediation: "reconcile",
-          state: "recoverable"
+          state: "recoverable",
         });
       }
     }
@@ -288,7 +288,7 @@ export class RecoveryRegistry {
           artifact_id: terminal.terminal_id,
           reason: "terminal has no valid session mapping",
           remediation: "cleanup",
-          state: "unrecoverable"
+          state: "unrecoverable",
         });
       }
     }
@@ -318,7 +318,7 @@ export class RecoveryRegistry {
       lane_id: input.lane_id,
       workspace_id: input.workspace_id,
       session_id: existing?.session_id,
-      terminal_id: existing?.terminal_id
+      terminal_id: existing?.terminal_id,
     });
   }
 
@@ -360,7 +360,7 @@ export class RecoveryRegistry {
       lane_id: laneId,
       codex_session_id: input.codex_session_id ?? existing?.codex_session_id,
       terminal_id: existing?.terminal_id,
-      status: "attached"
+      status: "attached",
     });
   }
 
@@ -399,7 +399,7 @@ export class RecoveryRegistry {
       workspace_id: input.workspace_id,
       lane_id: input.lane_id,
       session_id: input.session_id,
-      status: "active"
+      status: "active",
     });
   }
 }

@@ -1,10 +1,10 @@
 // T020 - Stress test for concurrent lane operations (50 lanes)
 // (NFR-008-003, SC-008-002)
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { LaneManager, _resetIdCounter } from "../../../src/lanes/index.js";
+import { _resetIdCounter, LaneManager } from "../../../src/lanes/index.js";
 import { LaneCapacityExceededError } from "../../../src/lanes/registry.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 
@@ -18,7 +18,7 @@ async function runGit(args: string[], cwd: string): Promise<string> {
 async function createTempRepo(): Promise<string> {
   const tmpDir = path.join(
     (await import("node:os")).tmpdir(),
-    `helios-stress-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    `helios-stress-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
   );
   fs.mkdirSync(tmpDir, { recursive: true });
   await runGit(["init"], tmpDir);
@@ -36,109 +36,113 @@ function cleanupDir(dir: string): void {
   }
 }
 
-describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
-  let repoDir: string;
-  let bus: InMemoryLocalBus;
-  let mgr: LaneManager;
+describe(
+  "Concurrent Lane Stress Test (NFR-008-003)",
+  () => {
+    let repoDir: string;
+    let bus: InMemoryLocalBus;
+    let mgr: LaneManager;
 
-  beforeEach(async () => {
-    _resetIdCounter();
-    repoDir = await createTempRepo();
-    bus = new InMemoryLocalBus();
-    mgr = new LaneManager({ bus, capacityLimit: 50 });
-  });
+    beforeEach(async () => {
+      _resetIdCounter();
+      repoDir = await createTempRepo();
+      bus = new InMemoryLocalBus();
+      mgr = new LaneManager({ bus, capacityLimit: 50 });
+    });
 
-  afterEach(() => {
-    cleanupDir(repoDir);
-  });
+    afterEach(() => {
+      cleanupDir(repoDir);
+    });
 
-  test("50 concurrent lanes: create, provision, verify, cleanup", async () => {
-    const LANE_COUNT = 50;
-    const startTime = Date.now();
+    test("50 concurrent lanes: create, provision, verify, cleanup", async () => {
+      const LANE_COUNT = 50;
+      const startTime = Date.now();
 
-    // Step 1: Create 50 lanes concurrently
-    const createPromises = Array.from({ length: LANE_COUNT }, (_, i) =>
-      mgr.create(`ws-stress`, "main"),
-    );
-    const lanes = await Promise.all(createPromises);
-    expect(lanes.length).toBe(LANE_COUNT);
-
-    // Step 2: Provision all 50 lanes - must be sequential for git worktree
-    // (git worktree add has a lock file that prevents true concurrency)
-    const provisionedLanes = [];
-    for (const lane of lanes) {
-      const provisioned = await mgr.provision(lane.laneId, repoDir);
-      provisionedLanes.push(provisioned);
-    }
-
-    // Step 3: Verify all 50 lanes reach ready state
-    for (const lane of provisionedLanes) {
-      expect(lane.state).toBe("ready");
-      expect(lane.worktreePath).toBeTruthy();
-      expect(fs.existsSync(lane.worktreePath!)).toBe(true);
-    }
-
-    // Step 4: Execute a simple operation in each lane
-    for (const lane of provisionedLanes) {
-      fs.writeFileSync(
-        path.join(lane.worktreePath!, "stress-output.txt"),
-        `lane-${lane.laneId}\n`,
+      // Step 1: Create 50 lanes concurrently
+      const createPromises = Array.from({ length: LANE_COUNT }, (_, _i) =>
+        mgr.create(`ws-stress`, "main")
       );
-    }
+      const lanes = await Promise.all(createPromises);
+      expect(lanes.length).toBe(LANE_COUNT);
 
-    // Step 5: Cleanup all 50 lanes (sequentially to avoid git lock contention)
-    for (const lane of provisionedLanes) {
-      await mgr.cleanup(lane.laneId);
-    }
+      // Step 2: Provision all 50 lanes - must be sequential for git worktree
+      // (git worktree add has a lock file that prevents true concurrency)
+      const provisionedLanes = [];
+      for (const lane of lanes) {
+        const provisioned = await mgr.provision(lane.laneId, repoDir);
+        provisionedLanes.push(provisioned);
+      }
 
-    // Step 6: Verify zero orphans
-    const worktreeRoot = path.join(repoDir, ".helios-worktrees");
-    if (fs.existsSync(worktreeRoot)) {
-      const remaining = fs.readdirSync(worktreeRoot);
-      expect(remaining.length).toBe(0);
-    }
+      // Step 3: Verify all 50 lanes reach ready state
+      for (const lane of provisionedLanes) {
+        expect(lane.state).toBe("ready");
+        expect(lane.worktreePath).toBeTruthy();
+        expect(fs.existsSync(lane.worktreePath!)).toBe(true);
+      }
 
-    // Verify all lane records are closed
-    const allLanes = mgr.list();
-    for (const lane of allLanes) {
-      expect(lane.state).toBe("closed");
-    }
+      // Step 4: Execute a simple operation in each lane
+      for (const lane of provisionedLanes) {
+        fs.writeFileSync(
+          path.join(lane.worktreePath!, "stress-output.txt"),
+          `lane-${lane.laneId}\n`
+        );
+      }
 
-    // Verify no active lanes remain
-    expect(mgr.getRegistry().getActive().length).toBe(0);
+      // Step 5: Cleanup all 50 lanes (sequentially to avoid git lock contention)
+      for (const lane of provisionedLanes) {
+        await mgr.cleanup(lane.laneId);
+      }
 
-    const totalTime = Date.now() - startTime;
-    console.log(`50-lane stress cycle completed in ${totalTime}ms`);
-  }, 120_000);
+      // Step 6: Verify zero orphans
+      const worktreeRoot = path.join(repoDir, ".helios-worktrees");
+      if (fs.existsSync(worktreeRoot)) {
+        const remaining = fs.readdirSync(worktreeRoot);
+        expect(remaining.length).toBe(0);
+      }
 
-  test("lane 51 rejected at capacity (NFR-008-003)", async () => {
-    // Create exactly 50 lanes
-    for (let i = 0; i < 50; i++) {
-      await mgr.create("ws-cap", "main");
-    }
+      // Verify all lane records are closed
+      const allLanes = mgr.list();
+      for (const lane of allLanes) {
+        expect(lane.state).toBe("closed");
+      }
 
-    // Lane 51 should be rejected
-    try {
-      await mgr.create("ws-cap", "main");
-      expect(true).toBe(false); // should not reach
-    } catch (e) {
-      expect(e).toBeInstanceOf(LaneCapacityExceededError);
-    }
-  });
+      // Verify no active lanes remain
+      expect(mgr.getRegistry().getActive().length).toBe(0);
 
-  test("capacity freed after cleanup allows new lanes", async () => {
-    // Fill to capacity
-    const lanes = [];
-    for (let i = 0; i < 50; i++) {
-      lanes.push(await mgr.create("ws-free", "main"));
-    }
+      const totalTime = Date.now() - startTime;
+      console.log(`50-lane stress cycle completed in ${totalTime}ms`);
+    }, 120_000);
 
-    // Cleanup one lane
-    mgr.getRegistry().update(lanes[0]!.laneId, { state: "ready" });
-    await mgr.cleanup(lanes[0]!.laneId);
+    test("lane 51 rejected at capacity (NFR-008-003)", async () => {
+      // Create exactly 50 lanes
+      for (let i = 0; i < 50; i++) {
+        await mgr.create("ws-cap", "main");
+      }
 
-    // Should now be able to create another
-    const newLane = await mgr.create("ws-free", "main");
-    expect(newLane.laneId).toBeTruthy();
-  });
-}, { timeout: 120_000 });
+      // Lane 51 should be rejected
+      try {
+        await mgr.create("ws-cap", "main");
+        expect(true).toBe(false); // should not reach
+      } catch (e) {
+        expect(e).toBeInstanceOf(LaneCapacityExceededError);
+      }
+    });
+
+    test("capacity freed after cleanup allows new lanes", async () => {
+      // Fill to capacity
+      const lanes = [];
+      for (let i = 0; i < 50; i++) {
+        lanes.push(await mgr.create("ws-free", "main"));
+      }
+
+      // Cleanup one lane
+      mgr.getRegistry().update(lanes[0]?.laneId, { state: "ready" });
+      await mgr.cleanup(lanes[0]?.laneId);
+
+      // Should now be able to create another
+      const newLane = await mgr.create("ws-free", "main");
+      expect(newLane.laneId).toBeTruthy();
+    });
+  },
+  { timeout: 120_000 }
+);

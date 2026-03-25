@@ -1,8 +1,7 @@
+import { randomUUID } from "node:crypto";
+import { promises as fs, mkdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
-import { promises as fs } from "fs";
-import { mkdirSync, writeFileSync } from "fs";
-import path from "path";
-import { randomUUID } from "crypto";
 
 export interface CrashRecord {
   timestamp: number;
@@ -14,11 +13,7 @@ export class CrashLoopDetector {
   private thresholdCount: number;
   private windowMs: number;
 
-  constructor(
-    crashDataDir: string,
-    thresholdCount: number = 3,
-    windowMs: number = 60000
-  ) {
+  constructor(crashDataDir: string, thresholdCount: number = 3, windowMs: number = 60000) {
     this.crashDataDir = crashDataDir;
     this.thresholdCount = thresholdCount;
     this.windowMs = windowMs;
@@ -41,9 +36,7 @@ export class CrashLoopDetector {
 
   private cleanOldCrashes(): void {
     const now = Date.now();
-    this.crashHistory = this.crashHistory.filter(
-      (ts) => now - ts < this.windowMs
-    );
+    this.crashHistory = this.crashHistory.filter(ts => now - ts < this.windowMs);
   }
 
   private async loadCrashHistory(): Promise<void> {

@@ -401,7 +401,10 @@ export class InMemoryLocalBus implements LocalBus {
         }
         this.state = { session: "attached" };
         const sessionResultId =
-          command.session_id ?? command.payload?.id ?? command.payload?.session_id ?? `session_${Date.now()}`;
+          command.session_id ??
+          command.payload?.id ??
+          command.payload?.session_id ??
+          `session_${Date.now()}`;
         return {
           id: `res-${Date.now()}`,
           type: "response",
@@ -650,7 +653,6 @@ class CommandBusImpl implements LocalBus {
   >();
   private readonly options: Required<CommandBusOptions>;
   private destroyed = false;
-  private activeCorrelationId: string | undefined = undefined;
   private currentDepth = 0;
   private topicSequenceCounters = new Map<string, number>();
 
@@ -830,88 +832,6 @@ class CommandBusImpl implements LocalBus {
 
   getActiveCorrelationId(): string | undefined {
     return getActiveCorrelationId();
-  }
-
-  private okResponse(
-    command: CommandEnvelope,
-    result: Record<string, unknown>
-  ): LocalBusEnvelope {
-    return {
-      id: command.id,
-      type: "response",
-      ts: new Date().toISOString(),
-      workspace_id: command.workspace_id,
-      lane_id: command.lane_id,
-      session_id: command.session_id,
-      terminal_id: command.terminal_id,
-      correlation_id: command.correlation_id,
-      method: command.method,
-      status: "ok",
-      result
-    };
-  }
-
-  private errorResponse(
-    command: CommandEnvelope,
-    code: string,
-    message: string,
-    details?: Record<string, unknown>,
-    retryable = false
-  ): LocalBusEnvelope {
-    return {
-      id: command.id,
-      type: "response",
-      ts: new Date().toISOString(),
-      workspace_id: command.workspace_id,
-      lane_id: command.lane_id,
-      session_id: command.session_id,
-      terminal_id: command.terminal_id,
-      correlation_id: command.correlation_id,
-      method: command.method,
-      status: "error",
-      result: null,
-      error: {
-        code,
-        message,
-        retryable,
-        details: details ?? null
-      }
-    };
-  }
-
-  private protocolErrorResponse(
-    command: CommandEnvelope,
-    code: ErrorCode,
-    details?: Record<string, unknown>
-  ): LocalBusEnvelope {
-    const error = createProtocolError(code, { details });
-    return this.errorResponse(command, error.code, error.message, error.details ?? undefined, error.retryable);
-  }
-
-  private resolveContext(command: CommandEnvelope): {
-    workspace_id?: string;
-    lane_id?: string;
-    session_id?: string;
-    terminal_id?: string;
-  } {
-    return {
-      workspace_id: command.workspace_id ?? this.readString(command.payload.workspace_id),
-      lane_id: command.lane_id ?? this.readString(command.payload.lane_id),
-      session_id: command.session_id ?? this.readString(command.payload.session_id),
-      terminal_id: command.terminal_id ?? this.readString(command.payload.terminal_id)
-    };
-  }
-
-  private readString(value: unknown): string | undefined {
-    return typeof value === "string" && value.length > 0 ? value : undefined;
-  }
-
-  private readNonEmptyString(value: unknown): string | undefined {
-    return typeof value === "string" && value.length > 0 ? value : undefined;
-  }
-
-  private readNumber(value: unknown): number | undefined {
-    return typeof value === "number" ? value : undefined;
   }
 }
 

@@ -1,4 +1,4 @@
-import { AuditEvent } from './event';
+import type { AuditEvent } from "./event";
 
 /**
  * Filter options for ring buffer queries.

@@ -4,7 +4,7 @@
  * Manages ordered subscriber lists per topic with deterministic delivery.
  */
 
-import type { EventEnvelope } from './types.js';
+import type { EventEnvelope } from "./types.js";
 
 export const TOPICS = [
   "workspace.opened",
@@ -65,7 +65,7 @@ const TOPIC_NAME_RE = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
 function assertValidTopicName(topic: string): void {
   if (!TOPIC_NAME_RE.test(topic)) {
     throw new Error(
-      `Invalid topic name "${topic}": must be non-empty, alphanumeric segments separated by dots`,
+      `Invalid topic name "${topic}": must be non-empty, alphanumeric segments separated by dots`
     );
   }
 }
@@ -130,9 +130,7 @@ export class TopicRegistry {
     let next = current + 1;
     // Handle overflow at Number.MAX_SAFE_INTEGER — reset to 1 with warning.
     if (current >= Number.MAX_SAFE_INTEGER) {
-      console.warn(
-        `[topics] Sequence counter overflow for topic "${topic}" — resetting to 1`,
-      );
+      console.warn(`[topics] Sequence counter overflow for topic "${topic}" — resetting to 1`);
       next = 1;
     }
     this.sequenceCounters.set(topic, next);

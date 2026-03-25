@@ -1,10 +1,10 @@
 // Integration test for detection accuracy
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
+import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
 
 describe("Detection Accuracy", () => {
   let engine: RemediationEngine;
@@ -151,7 +151,7 @@ describe("Detection Accuracy", () => {
     expect(suggestions.length).toBe(3);
 
     // Verify high-risk appears first (if sorting is applied)
-    const riskLevels = suggestions.map((s) => s.resource.riskLevel);
+    const riskLevels = suggestions.map(s => s.resource.riskLevel);
     expect(riskLevels[0]).toBe("high");
   });
 

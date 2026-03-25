@@ -10,17 +10,14 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
   MCPConfig,
   MCPExecuteInput,
   MCPExecuteOutput,
   MCPTool,
+  ProviderAdapter,
+  ProviderHealthStatus,
 } from "./adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-} from "./errors.js";
+import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * MCP server connection state.
@@ -49,7 +46,9 @@ interface ToolEntry {
  *
  * FR-025-004: MCP tool discovery and sandboxed invocation.
  */
-export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteInput, MCPExecuteOutput> {
+export class MCPBridgeAdapter
+  implements ProviderAdapter<MCPConfig, MCPExecuteInput, MCPExecuteOutput>
+{
   private config: MCPConfig | null = null;
   private bus: LocalBus | null = null;
   private connection: MCPConnection = {
@@ -156,8 +155,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
         };
       } else {
         this.healthStatus.failureCount++;
-        const newState =
-          this.healthStatus.failureCount >= 5 ? "unavailable" : "degraded";
+        const newState = this.healthStatus.failureCount >= 5 ? "unavailable" : "degraded";
         this.healthStatus = {
           state: newState,
           lastCheck: new Date(),
@@ -405,10 +403,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
       await this.connectToServer();
     } catch (error) {
       // Exponential backoff: 1s, 2s, 4s, 8s, etc. (max 30s)
-      this.connection.reconnectBackoffMs = Math.min(
-        this.connection.reconnectBackoffMs * 2,
-        30000
-      );
+      this.connection.reconnectBackoffMs = Math.min(this.connection.reconnectBackoffMs * 2, 30000);
       throw error;
     }
   }
@@ -487,7 +482,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
    */
   private async invokeTool(
     toolName: string,
-    toolArguments: Record<string, unknown>,
+    _toolArguments: Record<string, unknown>,
     signal: AbortSignal
   ): Promise<unknown> {
     return new Promise((resolve, reject) => {

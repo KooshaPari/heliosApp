@@ -1,7 +1,7 @@
-import { promises as fs } from "fs";
-import * as path from "path";
-import { homedir } from "os";
-import type { TabSurface, TabState } from "./tab_surface";
+import { promises as fs } from "node:fs";
+import { homedir } from "node:os";
+import * as path from "node:path";
+import type { TabState, TabSurface } from "./tab_surface";
 
 /**
  * Persisted tab state structure.
@@ -33,8 +33,7 @@ export class TabPersistence {
   private lastLoadTime: number = 0;
 
   constructor(storageDir?: string) {
-    this.storageDir =
-      storageDir ?? path.join(homedir(), ".helios", "data");
+    this.storageDir = storageDir ?? path.join(homedir(), ".helios", "data");
     this.storagePath = path.join(this.storageDir, "tab_state.json");
   }
 
@@ -58,9 +57,7 @@ export class TabPersistence {
       this.lastLoadTime = Date.now() - startTime;
 
       if (this.lastLoadTime > 100) {
-        console.warn(
-          `Tab state load took ${this.lastLoadTime}ms (target: <100ms)`
-        );
+        console.warn(`Tab state load took ${this.lastLoadTime}ms (target: <100ms)`);
       }
 
       return state;
@@ -89,7 +86,7 @@ export class TabPersistence {
     this.pendingState = state;
 
     // Debounce: wait 500ms before writing
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       this.debounceTimer = setTimeout(async () => {
         this.debounceTimer = null;
 
@@ -164,7 +161,7 @@ export class TabPersistence {
       tabOrder,
       pinnedTabIds,
       perTabState,
-      savedAt: new Date().toISOString()
+      savedAt: new Date().toISOString(),
     };
   }
 
@@ -172,7 +169,7 @@ export class TabPersistence {
    * Restore persisted state to tab instances.
    */
   restoreState(state: TabPersistedState, tabs: TabSurface[]): void {
-    const tabMap = new Map(tabs.map((t) => [t.getTabId(), t]));
+    const tabMap = new Map(tabs.map(t => [t.getTabId(), t]));
 
     for (const [tabId, tabState] of Object.entries(state.perTabState)) {
       const tab = tabMap.get(tabId);
@@ -203,9 +200,9 @@ export class TabPersistence {
       typeof s.version === "number" &&
       (s.selectedTabId === null || typeof s.selectedTabId === "string") &&
       Array.isArray(s.tabOrder) &&
-      s.tabOrder.every((id) => typeof id === "string") &&
+      s.tabOrder.every(id => typeof id === "string") &&
       Array.isArray(s.pinnedTabIds) &&
-      s.pinnedTabIds.every((id) => typeof id === "string") &&
+      s.pinnedTabIds.every(id => typeof id === "string") &&
       typeof s.perTabState === "object" &&
       s.perTabState !== null &&
       typeof s.savedAt === "string"

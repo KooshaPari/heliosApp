@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
+import { readFileSync, writeFileSync } from "node:fs";
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
 import type { RedactionRule } from "./redaction-engine.js";
@@ -24,7 +24,8 @@ export function getDefaultRules(): RedactionRule[] {
       id: "aws-secret-key",
       category: "AWS_SECRET_KEY",
       // 40-char base64 after aws_secret context
-      pattern: /(?:aws_secret(?:_access_key)?|AWS_SECRET(?:_ACCESS_KEY)?)\s*[=:]\s*["']?([A-Za-z0-9+/]{40})["']?/,
+      pattern:
+        /(?:aws_secret(?:_access_key)?|AWS_SECRET(?:_ACCESS_KEY)?)\s*[=:]\s*["']?([A-Za-z0-9+/]{40})["']?/,
       description: "AWS Secret Access Key",
       enabled: true,
       falsePositiveRate: 0.001,

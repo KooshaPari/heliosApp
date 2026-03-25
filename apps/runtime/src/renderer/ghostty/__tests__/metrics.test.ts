@@ -2,9 +2,9 @@
  * Unit tests for GhosttyMetrics (T008, T009).
  */
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
-import { GhosttyMetrics } from "../metrics.js";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import type { MetricsSnapshot } from "../metrics.js";
+import { GhosttyMetrics } from "../metrics.js";
 
 describe("GhosttyMetrics", () => {
   let metrics: GhosttyMetrics;
@@ -190,7 +190,7 @@ describe("GhosttyMetrics", () => {
     fastMetrics.recordFrame(Date.now());
 
     // Wait for at least one publish cycle
-    await new Promise((resolve) => setTimeout(resolve, 120));
+    await new Promise(resolve => setTimeout(resolve, 120));
 
     fastMetrics.disable();
 
@@ -207,11 +207,11 @@ describe("GhosttyMetrics", () => {
     });
 
     fastMetrics.enable();
-    await new Promise((resolve) => setTimeout(resolve, 80));
+    await new Promise(resolve => setTimeout(resolve, 80));
     fastMetrics.disable();
 
     const countAfterDisable = published.length;
-    await new Promise((resolve) => setTimeout(resolve, 80));
+    await new Promise(resolve => setTimeout(resolve, 80));
 
     // No new events after disable
     expect(published.length).toBe(countAfterDisable);
@@ -226,7 +226,7 @@ describe("GhosttyMetrics", () => {
     });
 
     noPublish.enable();
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 100));
     noPublish.disable();
 
     expect(published.length).toBe(0);
@@ -241,10 +241,10 @@ describe("GhosttyMetrics", () => {
     });
 
     fastMetrics.enable();
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
     fastMetrics.clearPublisher();
     const count = published.length;
-    await new Promise((resolve) => setTimeout(resolve, 80));
+    await new Promise(resolve => setTimeout(resolve, 80));
     fastMetrics.disable();
 
     expect(published.length).toBe(count);

@@ -52,10 +52,7 @@ export function getAllDefaults(): Record<string, unknown> {
 }
 
 /** Validate a value against the schema for the given key. */
-export function validateValue(
-  key: string,
-  value: unknown,
-): { valid: boolean; reason?: string } {
+export function validateValue(key: string, value: unknown): { valid: boolean; reason?: string } {
   const def: SettingDefinition | undefined = SETTINGS_SCHEMA[key];
 
   // Unknown keys are always valid (forward-compat preservation).

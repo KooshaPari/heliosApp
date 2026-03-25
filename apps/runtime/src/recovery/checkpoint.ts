@@ -1,6 +1,6 @@
-import { promises as fs } from "fs";
-import path from "path";
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 
 export const CHECKPOINT_VERSION = 1;
 export const MAX_SCROLLBACK_SIZE = 10240; // 10 KB per session

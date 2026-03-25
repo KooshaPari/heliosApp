@@ -11,17 +11,13 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
   ACPConfig,
   ACPExecuteInput,
   ACPExecuteOutput,
+  ProviderAdapter,
+  ProviderHealthStatus,
 } from "./adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-  PROVIDER_ERROR_CODES,
-} from "./errors.js";
+import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * Policy gate interface for access control.
@@ -83,7 +79,9 @@ interface ACPResponse {
  *
  * FR-025-003: ACP protocol client for Claude.
  */
-export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput> {
+export class ACPClientAdapter
+  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
+{
   private config: ACPConfig | null = null;
   private bus: LocalBus | null = null;
   private policyGate: PolicyGate;
@@ -93,8 +91,6 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
     failureCount: 0,
   };
   private inFlightTasks = new Map<string, AbortController>();
-  private lastHealthCheckTime = 0;
-  private healthCheckInterval = 30000; // Default 30s
   private terminated = false;
 
   constructor(bus?: LocalBus, policyGate?: PolicyGate) {
@@ -280,17 +276,19 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
     if (!this.config || this.terminated) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        this.terminated ? "ACP client unavailable: terminated" : "ACP client unavailable: not initialized",
+        this.terminated
+          ? "ACP client unavailable: terminated"
+          : "ACP client unavailable: not initialized",
         "acp"
       );
     }
 
     try {
       // Check policy gate
-      const policyDecision = await this.policyGate.evaluate(
-        "provider.acp.execute",
-        { correlationId, prompt: input.prompt }
-      );
+      const policyDecision = await this.policyGate.evaluate("provider.acp.execute", {
+        correlationId,
+        prompt: input.prompt,
+      });
 
       if (!policyDecision.allowed) {
         const reason = policyDecision.reason || "Policy denied";
@@ -399,7 +397,9 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
     if (!this.config || this.terminated) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        this.terminated ? "ACP client unavailable: terminated" : "ACP client unavailable: not initialized",
+        this.terminated
+          ? "ACP client unavailable: terminated"
+          : "ACP client unavailable: not initialized",
         "acp"
       );
     }
@@ -488,17 +488,14 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
    * @param signal Abort signal
    * @returns ACP response
    */
-  private async sendACPRequest(
-    request: ACPRequest,
-    signal: AbortSignal
-  ): Promise<ACPResponse> {
+  private async sendACPRequest(request: ACPRequest, signal: AbortSignal): Promise<ACPResponse> {
     // Check for abort
     if (signal.aborted) {
       throw new Error("Request aborted");
     }
 
     // Mock implementation: simulate ACP processing
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const timeout = setTimeout(() => {
         resolve({
           taskId: `task-${request.correlationId}`,

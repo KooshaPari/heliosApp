@@ -6,10 +6,10 @@
  * Verifies that disabled rio has absolutely zero runtime impact.
  */
 
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { RendererRegistry } from "../../../../src/renderer/registry.js";
-import { registerRio, isRioEnabled } from "../../../../src/renderer/rio/index.js";
-import { RioBackend, FeatureFlagDisabledError } from "../../../../src/renderer/rio/backend.js";
+import { FeatureFlagDisabledError, RioBackend } from "../../../../src/renderer/rio/backend.js";
+import { isRioEnabled, registerRio } from "../../../../src/renderer/rio/index.js";
 
 // ---------------------------------------------------------------------------
 // Zero-cost: flag off means no registration
@@ -49,25 +49,31 @@ describe("Zero-cost — switch rejection", () => {
     const backend = new RioBackend();
     backend.setDisabled();
 
-    await expect(backend.init({
-      gpuAcceleration: false,
-      colorDepth: 24,
-      maxDimensions: { cols: 200, rows: 50 },
-    })).rejects.toThrow(FeatureFlagDisabledError);
+    await expect(
+      backend.init({
+        gpuAcceleration: false,
+        colorDepth: 24,
+        maxDimensions: { cols: 200, rows: 50 },
+      })
+    ).rejects.toThrow(FeatureFlagDisabledError);
   });
 
   it("handleInput throws FeatureFlagDisabledError when disabled", () => {
     const backend = new RioBackend();
     backend.setDisabled();
 
-    expect(() => backend.handleInput("pty-1", new Uint8Array([0x41]))).toThrow(FeatureFlagDisabledError);
+    expect(() => backend.handleInput("pty-1", new Uint8Array([0x41]))).toThrow(
+      FeatureFlagDisabledError
+    );
   });
 
   it("bindStream throws FeatureFlagDisabledError when disabled", () => {
     const backend = new RioBackend();
     backend.setDisabled();
 
-    expect(() => backend.bindStream("pty-1", new ReadableStream())).toThrow(FeatureFlagDisabledError);
+    expect(() => backend.bindStream("pty-1", new ReadableStream())).toThrow(
+      FeatureFlagDisabledError
+    );
   });
 
   it("resize throws FeatureFlagDisabledError when disabled", () => {
@@ -87,7 +93,7 @@ describe("Zero-cost — registry empty", () => {
     const registry = new RendererRegistry();
     await registerRio(registry, { featureFlags: { rioRenderer: false } });
 
-    const ids = registry.list().map((a) => a.id);
+    const ids = registry.list().map(a => a.id);
     expect(ids).not.toContain("rio");
   });
 

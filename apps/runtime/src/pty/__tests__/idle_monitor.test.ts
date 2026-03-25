@@ -1,14 +1,14 @@
 import { describe, expect, it } from "bun:test";
-import { IdleMonitor } from "../idle_monitor.js";
-import { PtyRegistry } from "../registry.js";
-import type { PtyRecord } from "../registry.js";
-import { PtyLifecycle } from "../state_machine.js";
 import { InMemoryBusPublisher } from "../events.js";
+import { IdleMonitor } from "../idle_monitor.js";
+import type { PtyRecord } from "../registry.js";
+import { PtyRegistry } from "../registry.js";
+import { PtyLifecycle } from "../state_machine.js";
 
 function makeRecord(
   registry: PtyRegistry,
   ptyId: string,
-  overrides?: Partial<PtyRecord>,
+  overrides?: Partial<PtyRecord>
 ): PtyRecord {
   const record: PtyRecord = {
     ptyId,
@@ -33,7 +33,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 
@@ -48,7 +48,7 @@ describe("IdleMonitor", () => {
     expect(lifecycle.state).toBe("throttled");
     expect(registry.get("pty-1")?.state).toBe("throttled");
 
-    const topics = bus.events.map((e) => e.topic);
+    const topics = bus.events.map(e => e.topic);
     expect(topics).toContain("pty.idle_timeout");
     expect(topics).toContain("pty.state.changed");
   });
@@ -58,7 +58,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 
@@ -79,7 +79,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 
@@ -98,7 +98,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1", { state: "throttled" });
+    const _record = makeRecord(registry, "pty-1", { state: "throttled" });
     const lifecycle = new PtyLifecycle("pty-1", "throttled");
     lifecycles.set("pty-1", lifecycle);
 
@@ -115,7 +115,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 

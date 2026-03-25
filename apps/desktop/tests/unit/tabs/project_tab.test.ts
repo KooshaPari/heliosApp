@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { ProjectTab } from "../../../src/tabs/project_tab";
+import { beforeEach, describe, expect, it } from "vitest";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
+import { ProjectTab } from "../../../src/tabs/project_tab";
 
 describe("ProjectTab", () => {
   let tab: ProjectTab;
@@ -22,7 +22,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -42,7 +42,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -54,7 +54,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -66,7 +66,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -80,7 +80,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -92,7 +92,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -104,7 +104,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -118,7 +118,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -132,7 +132,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -144,12 +144,12 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
       const el = tab.render();
-      const button = Array.from(el.querySelectorAll("button")).find((b) =>
+      const button = Array.from(el.querySelectorAll("button")).find(b =>
         b.textContent?.includes("Create New Lane")
       );
 
@@ -160,12 +160,12 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
       const el = tab.render();
-      const button = Array.from(el.querySelectorAll("button")).find((b) =>
+      const button = Array.from(el.querySelectorAll("button")).find(b =>
         b.textContent?.includes("Open in File Manager")
       );
 
@@ -195,7 +195,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -211,7 +211,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -225,7 +225,7 @@ describe("ProjectTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);

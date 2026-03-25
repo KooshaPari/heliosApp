@@ -1,7 +1,7 @@
+import { randomUUID } from "node:crypto";
+import { mkdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
-import { mkdirSync, writeFileSync } from "fs";
-import path from "path";
-import { randomUUID } from "crypto";
 
 export enum CrashReason {
   HEARTBEAT_TIMEOUT = "HEARTBEAT_TIMEOUT",
@@ -40,11 +40,7 @@ export class Watchdog {
     this.bus = bus;
   }
 
-  registerProcess(
-    name: string,
-    pid: number,
-    heartbeatIntervalMs: number = 2000
-  ): void {
+  registerProcess(name: string, pid: number, heartbeatIntervalMs: number = 2000): void {
     // Clear any existing monitor for this name
     this.unregister(name);
 
@@ -71,7 +67,7 @@ export class Watchdog {
 
   unregister(name: string): void {
     const monitor = this.monitors.get(name);
-    if (monitor && monitor.timeoutId) {
+    if (monitor?.timeoutId) {
       clearTimeout(monitor.timeoutId);
     }
     this.monitors.delete(name);
@@ -148,22 +144,24 @@ export class Watchdog {
 
     // Publish bus event if available
     if (this.bus) {
-      void this.bus.publish({
-        id: randomUUID(),
-        type: "event",
-        ts: new Date().toISOString(),
-        topic: "recovery.crash.detected",
-        payload: {
-          name: event.name,
-          pid: event.pid,
-          reason: event.reason,
-          exitCode: event.exitCode,
-          signal: event.signal,
-          timestamp: event.timestamp,
-        },
-      }).catch((err) => {
-        console.error("Failed to publish crash event:", err);
-      });
+      void this.bus
+        .publish({
+          id: randomUUID(),
+          type: "event",
+          ts: new Date().toISOString(),
+          topic: "recovery.crash.detected",
+          payload: {
+            name: event.name,
+            pid: event.pid,
+            reason: event.reason,
+            exitCode: event.exitCode,
+            signal: event.signal,
+            timestamp: event.timestamp,
+          },
+        })
+        .catch(err => {
+          console.error("Failed to publish crash event:", err);
+        });
     }
 
     // Persist crash record after observers have been notified.

@@ -2,9 +2,14 @@
  * Unit tests for GhosttyBackend (T001).
  */
 
-import { describe, test, expect, beforeEach } from "bun:test";
-import { GhosttyBackend, GhosttyNotInitializedError, GhosttyNotRunningError, GhosttyAlreadyInitializedError } from "../backend.js";
+import { beforeEach, describe, expect, test } from "bun:test";
 import type { RendererConfig, RenderSurface } from "../../adapter.js";
+import {
+  GhosttyAlreadyInitializedError,
+  GhosttyBackend,
+  GhosttyNotInitializedError,
+  GhosttyNotRunningError,
+} from "../backend.js";
 
 const TEST_CONFIG: RendererConfig = {
   gpuAcceleration: true,
@@ -88,7 +93,7 @@ describe("GhosttyBackend", () => {
 
   test("handleInput when not running throws", () => {
     expect(() => backend.handleInput("pty-1", new Uint8Array([0x41]))).toThrow(
-      GhosttyNotRunningError,
+      GhosttyNotRunningError
     );
   });
 

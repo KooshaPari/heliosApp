@@ -141,11 +141,9 @@ export class GhosttyMetrics {
   private readonly _targetFrameTimeMs: number;
 
   private _enabled = false;
-  private _frameCount = 0;
   private _droppedFrames = 0;
   private _lastFrameTimestamp = 0;
   private _windowStartTimestamp = 0;
-  private _framesInWindow = 0;
 
   private _publisher: MetricsPublisher | undefined;
   private _publishTimer: ReturnType<typeof setInterval> | undefined;

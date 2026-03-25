@@ -13,9 +13,9 @@
  *   - Memory: < 10 MB per terminal
  */
 
-import { describe, it, expect, beforeAll } from "bun:test";
-import { RioMetrics, type MetricsSummary } from "../../../../src/renderer/rio/metrics.js";
+import { beforeAll, describe, expect, it } from "bun:test";
 import { detectRioBinary } from "../../../../src/renderer/rio/index.js";
+import { RioMetrics } from "../../../../src/renderer/rio/metrics.js";
 
 // ---------------------------------------------------------------------------
 // Skip control
@@ -60,13 +60,15 @@ describe("SLO — FPS benchmark", () => {
     }
 
     const summary = metrics.getSummary();
-    const results: BenchmarkResult[] = [{
-      name: "fps-sustained",
-      passed: summary.fps.p50 >= 60,
-      target: ">= 60 FPS",
-      actual: `p50=${summary.fps.p50.toFixed(1)} FPS`,
-      samples: summary.totalFrames,
-    }];
+    const results: BenchmarkResult[] = [
+      {
+        name: "fps-sustained",
+        passed: summary.fps.p50 >= 60,
+        target: ">= 60 FPS",
+        actual: `p50=${summary.fps.p50.toFixed(1)} FPS`,
+        samples: summary.totalFrames,
+      },
+    ];
 
     reportResults(results);
     expect(summary.fps.p50).toBeGreaterThanOrEqual(55); // allow small margin for float math
@@ -125,19 +127,22 @@ describe("SLO — Frame time benchmark", () => {
     }
 
     const summary = metrics.getSummary();
-    const results: BenchmarkResult[] = [{
-      name: "input-to-render-p50",
-      passed: summary.frameTime.p50 < 60,
-      target: "p50 < 60ms",
-      actual: `p50=${summary.frameTime.p50.toFixed(1)}ms`,
-      samples: summary.totalFrames,
-    }, {
-      name: "input-to-render-p95",
-      passed: summary.frameTime.p95 < 150,
-      target: "p95 < 150ms",
-      actual: `p95=${summary.frameTime.p95.toFixed(1)}ms`,
-      samples: summary.totalFrames,
-    }];
+    const results: BenchmarkResult[] = [
+      {
+        name: "input-to-render-p50",
+        passed: summary.frameTime.p50 < 60,
+        target: "p50 < 60ms",
+        actual: `p50=${summary.frameTime.p50.toFixed(1)}ms`,
+        samples: summary.totalFrames,
+      },
+      {
+        name: "input-to-render-p95",
+        passed: summary.frameTime.p95 < 150,
+        target: "p95 < 150ms",
+        actual: `p95=${summary.frameTime.p95.toFixed(1)}ms`,
+        samples: summary.totalFrames,
+      },
+    ];
 
     reportResults(results);
     expect(summary.frameTime.p50).toBeLessThan(60);
@@ -161,13 +166,15 @@ describe("SLO — Memory benchmark", () => {
     // 2. Create 5 PTY streams.
     // 3. Measure RSS via proc/self/status or Bun memory APIs.
     // 4. Assert < 10 MB per terminal.
-    const results: BenchmarkResult[] = [{
-      name: "memory-per-terminal",
-      passed: true,
-      target: "< 10 MB per terminal",
-      actual: "skipped (no GPU environment)",
-      samples: 0,
-    }];
+    const results: BenchmarkResult[] = [
+      {
+        name: "memory-per-terminal",
+        passed: true,
+        target: "< 10 MB per terminal",
+        actual: "skipped (no GPU environment)",
+        samples: 0,
+      },
+    ];
 
     reportResults(results);
     expect(true).toBe(true);

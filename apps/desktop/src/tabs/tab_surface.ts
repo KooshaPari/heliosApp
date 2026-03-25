@@ -1,7 +1,4 @@
-import {
-  type ActiveContext,
-  getActiveContextStore
-} from "./context_switch";
+import { type ActiveContext, getActiveContextStore } from "./context_switch";
 
 export type { ActiveContext };
 export type TabType = "terminal" | "agent" | "session" | "chat" | "project";
@@ -46,7 +43,7 @@ export abstract class TabSurface {
 
     // Subscribe to context changes
     const store = getActiveContextStore();
-    this.unsubscribeContext = store.onContextChange(async (event) => {
+    this.unsubscribeContext = store.onContextChange(async event => {
       try {
         this.staleContext = false;
         this.errorMessage = null;
@@ -60,7 +57,7 @@ export abstract class TabSurface {
 
         // Emit error event
         try {
-          const store = getActiveContextStore();
+          const _store = getActiveContextStore();
           // Note: would publish to bus if it was available
         } catch {
           // Silently ignore if store not available
@@ -144,7 +141,7 @@ export abstract class TabSurface {
     return {
       tabId: this.tabId,
       tabType: this.tabType,
-      label: this.label
+      label: this.label,
     };
   }
 
@@ -206,11 +203,7 @@ export abstract class TabSurface {
 /**
  * Factory function to create a mock tab for testing.
  */
-export function createMockTabSurface(
-  tabId: string,
-  tabType: TabType,
-  label: string
-): TabSurface {
+export function createMockTabSurface(tabId: string, tabType: TabType, label: string): TabSurface {
   return new (class extends TabSurface {
     async onContextChange(_context: ActiveContext | null): Promise<void> {
       // Mock implementation does nothing

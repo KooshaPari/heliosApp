@@ -5,7 +5,7 @@
 
 export interface BusEvent {
   topic: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   sequenceNumber?: number;
   timestamp: number;
 }
@@ -29,7 +29,6 @@ export class LaneEventHandler {
   private options: LaneEventHandlerOptions;
   private subscriptions: Map<string, (event: BusEvent) => void> = new Map();
   private pendingUpdates: Map<string, BusEvent> = new Map();
-  private lastEventTime: number = Date.now();
   private connectivityTimeoutId?: ReturnType<typeof setTimeout>;
   private rafId?: number | undefined;
   private lastSequenceNumbers: Map<string, number> = new Map();
@@ -72,15 +71,15 @@ export class LaneEventHandler {
       this.handleOrphanDetectionCycle(event);
     };
 
-    this.subscriptions.set('lane.state.changed', stateChangedHandler);
-    this.subscriptions.set('lane.created', laneCreatedHandler);
-    this.subscriptions.set('lane.cleaned_up', laneCleanedHandler);
-    this.subscriptions.set('orphan.detection.cycle_completed', orphanCycleHandler);
+    this.subscriptions.set("lane.state.changed", stateChangedHandler);
+    this.subscriptions.set("lane.created", laneCreatedHandler);
+    this.subscriptions.set("lane.cleaned_up", laneCleanedHandler);
+    this.subscriptions.set("orphan.detection.cycle_completed", orphanCycleHandler);
 
-    this.options.bus.subscribe('lane.state.changed', stateChangedHandler);
-    this.options.bus.subscribe('lane.created', laneCreatedHandler);
-    this.options.bus.subscribe('lane.cleaned_up', laneCleanedHandler);
-    this.options.bus.subscribe('orphan.detection.cycle_completed', orphanCycleHandler);
+    this.options.bus.subscribe("lane.state.changed", stateChangedHandler);
+    this.options.bus.subscribe("lane.created", laneCreatedHandler);
+    this.options.bus.subscribe("lane.cleaned_up", laneCleanedHandler);
+    this.options.bus.subscribe("orphan.detection.cycle_completed", orphanCycleHandler);
   }
 
   private unsubscribeFromEvents(): void {
@@ -118,7 +117,7 @@ export class LaneEventHandler {
     this.recordEventReceived();
 
     const laneId = event.payload.laneId;
-    const name = event.payload.name || 'New Lane';
+    const name = event.payload.name || "New Lane";
 
     if (!laneId) return;
 

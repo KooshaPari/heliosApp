@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
 import {
-  SETTINGS_SCHEMA,
-  getDefault,
   getAllDefaults,
+  getDefault,
+  SETTINGS_SCHEMA,
   validateValue,
 } from "../../../src/config/schema.js";
 
@@ -32,9 +32,7 @@ describe("getDefault", () => {
 describe("getAllDefaults", () => {
   it("returns an object with all schema keys", () => {
     const defaults = getAllDefaults();
-    expect(Object.keys(defaults).sort()).toEqual(
-      Object.keys(SETTINGS_SCHEMA).sort(),
-    );
+    expect(Object.keys(defaults).sort()).toEqual(Object.keys(SETTINGS_SCHEMA).sort());
   });
 });
 

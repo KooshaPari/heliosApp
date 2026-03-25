@@ -1,8 +1,8 @@
 // Unit tests for ZellijDetector
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { ZellijDetector } from "../../../../src/lanes/watchdog/zellij_detector.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import type { SessionRegistry } from "../../../../src/lanes/watchdog/zellij_detector.js";
+import { ZellijDetector } from "../../../../src/lanes/watchdog/zellij_detector.js";
 
 describe("ZellijDetector", () => {
   let detector: ZellijDetector;
@@ -34,7 +34,7 @@ describe("ZellijDetector", () => {
 
   it("should handle registry with active sessions", async () => {
     const registryWithSessions: SessionRegistry = {
-      getSession: (id) => (id === "session-active" ? { laneId: "lane-1" } : null),
+      getSession: id => (id === "session-active" ? { laneId: "lane-1" } : null),
       getSessions: () => [{ id: "session-active", laneId: "lane-1" }],
     };
 

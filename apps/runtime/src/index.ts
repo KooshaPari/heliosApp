@@ -5,18 +5,18 @@
  * the current test suite.
  */
 
-import { InMemoryLocalBus } from "./protocol/bus.js";
 import { createBoundaryDispatcher } from "./protocol/boundary_adapter.js";
+import { InMemoryLocalBus } from "./protocol/bus.js";
 import { METHODS } from "./protocol/methods.js";
 import type { LocalBusEnvelope } from "./protocol/types.js";
+import { RedactionEngine } from "./secrets/redaction-engine.js";
+import { getDefaultRules } from "./secrets/redaction-rules.js";
 import { RecoveryRegistry } from "./sessions/registry.js";
 import type {
   RecoveryBootstrapResult,
   RecoveryMetadata,
   WatchdogScanResult,
 } from "./sessions/types.js";
-import { RedactionEngine } from "./secrets/redaction-engine.js";
-import { getDefaultRules } from "./secrets/redaction-rules.js";
 
 /** Semantic version of the runtime package. */
 export const VERSION = "0.0.1" as const;
@@ -74,7 +74,7 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
   }
 
   if (Array.isArray(value)) {
-    return value.map((item) => redactStructuredValue(item));
+    return value.map(item => redactStructuredValue(item));
   }
 
   if (value && typeof value === "object") {
@@ -82,7 +82,7 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
       Object.entries(value as Record<string, unknown>).map(([entryKey, entryValue]) => [
         entryKey,
         redactStructuredValue(entryValue, entryKey),
-      ]),
+      ])
     );
   }
 
@@ -92,7 +92,7 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
 function redactPayload(
   engine: RedactionEngine,
   payload: Record<string, unknown>,
-  correlationId: string,
+  correlationId: string
 ): Record<string, unknown> {
   const structured = redactStructuredValue(payload) as Record<string, unknown>;
   const serialized = JSON.stringify(structured);
@@ -154,7 +154,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       payload: redactPayload(
         redactionEngine,
         normalizePayload(event.payload),
-        event.correlation_id ?? event.id,
+        event.correlation_id ?? event.id
       ),
       error: null,
       envelope: event as unknown as Record<string, unknown>,
@@ -227,7 +227,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       payload: redactPayload(
         redactionEngine,
         normalizePayload(envelope.payload),
-        envelope.correlation_id ?? envelope.id,
+        envelope.correlation_id ?? envelope.id
       ),
       error: null,
       envelope: envelope as unknown as Record<string, unknown>,
@@ -244,7 +244,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       payload: redactPayload(
         redactionEngine,
         normalizePayload(envelope.result ?? envelope.payload),
-        envelope.correlation_id ?? envelope.id,
+        envelope.correlation_id ?? envelope.id
       ),
       error: envelope.error ?? null,
       envelope: envelope as unknown as Record<string, unknown>,
@@ -264,17 +264,23 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       lane_id:
         command.lane_id ??
         (typeof payload.lane_id === "string" ? payload.lane_id : undefined) ??
-        (typeof payload.id === "string" && command.method === "lane.create" ? payload.id : undefined) ??
+        (typeof payload.id === "string" && command.method === "lane.create"
+          ? payload.id
+          : undefined) ??
         (typeof result.lane_id === "string" ? result.lane_id : undefined),
       session_id:
         command.session_id ??
         (typeof payload.session_id === "string" ? payload.session_id : undefined) ??
-        (typeof payload.id === "string" && command.method === "session.attach" ? payload.id : undefined) ??
+        (typeof payload.id === "string" && command.method === "session.attach"
+          ? payload.id
+          : undefined) ??
         (typeof result.session_id === "string" ? result.session_id : undefined),
       terminal_id:
         command.terminal_id ??
         (typeof payload.terminal_id === "string" ? payload.terminal_id : undefined) ??
-        (typeof payload.id === "string" && command.method === "terminal.spawn" ? payload.id : undefined) ??
+        (typeof payload.id === "string" && command.method === "terminal.spawn"
+          ? payload.id
+          : undefined) ??
         (typeof result.terminal_id === "string" ? result.terminal_id : undefined),
       codex_session_id:
         typeof payload.codex_session_id === "string" ? payload.codex_session_id : undefined,
@@ -283,28 +289,39 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
 
   async function request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
     if (command.type === "command" && command.method) {
-        const needsCorrelation = ["lane.create", "session.attach", "terminal.spawn"];
-        if (needsCorrelation.includes(command.method) && !command.correlation_id) {
-            const response: LocalBusEnvelope = {
-                id: command.id,
-                type: "response",
-                ts: new Date().toISOString(),
-                correlation_id: command.correlation_id,
-                method: command.method,
-                status: "error",
-                error: { code: "MISSING_CORRELATION_ID", message: "Correlation ID is required", retryable: false },
-            };
-            recordResponse(response);
-            return response;
-        }
+      const needsCorrelation = ["lane.create", "session.attach", "terminal.spawn"];
+      if (needsCorrelation.includes(command.method) && !command.correlation_id) {
+        const response: LocalBusEnvelope = {
+          id: command.id,
+          type: "response",
+          ts: new Date().toISOString(),
+          correlation_id: command.correlation_id,
+          method: command.method,
+          status: "error",
+          error: {
+            code: "MISSING_CORRELATION_ID",
+            message: "Correlation ID is required",
+            retryable: false,
+          },
+        };
+        recordResponse(response);
+        return response;
+      }
     }
 
     recordCommand(command);
 
     if (command.type === "command" && command.method === "terminal.spawn") {
       const payload = normalizePayload(command.payload);
-      const sessionId = command.session_id ?? (typeof payload.session_id === "string" ? payload.session_id : undefined);
-      const terminalId = typeof payload.terminal_id === "string" ? payload.terminal_id : (sessionId ? `${sessionId}-term-${Date.now()}` : `term-${Date.now()}`);
+      const sessionId =
+        command.session_id ??
+        (typeof payload.session_id === "string" ? payload.session_id : undefined);
+      const terminalId =
+        typeof payload.terminal_id === "string"
+          ? payload.terminal_id
+          : sessionId
+            ? `${sessionId}-term-${Date.now()}`
+            : `term-${Date.now()}`;
       terminalBuffers.delete(terminalId);
 
       const response: LocalBusEnvelope = {
@@ -359,7 +376,12 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
 
     if (command.type === "command" && command.method === "terminal.input") {
       const payload = normalizePayload(command.payload);
-      const terminalId = typeof command.terminal_id === "string" ? command.terminal_id : typeof payload.terminal_id === "string" ? payload.terminal_id : undefined;
+      const terminalId =
+        typeof command.terminal_id === "string"
+          ? command.terminal_id
+          : typeof payload.terminal_id === "string"
+            ? payload.terminal_id
+            : undefined;
       const data = typeof payload.data === "string" ? payload.data : undefined;
 
       if (!terminalId) {
@@ -370,7 +392,11 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
           correlation_id: command.correlation_id,
           method: command.method,
           status: "error",
-          error: { code: "MISSING_TERMINAL_ID", message: "Terminal ID is required", retryable: false },
+          error: {
+            code: "MISSING_TERMINAL_ID",
+            message: "Terminal ID is required",
+            retryable: false,
+          },
         };
         recordResponse(response);
         return response;
@@ -384,7 +410,11 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
           correlation_id: command.correlation_id,
           method: command.method,
           status: "error",
-          error: { code: "INVALID_TERMINAL_INPUT", message: "Payload 'data' is required", retryable: false },
+          error: {
+            code: "INVALID_TERMINAL_INPUT",
+            message: "Payload 'data' is required",
+            retryable: false,
+          },
         };
         recordResponse(response);
         return response;
@@ -395,17 +425,21 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
 
       // Check cross-lane access (mocked for test)
       if (command.lane_id === "lane-2" && terminalId.includes("sess-1")) {
-          const response: LocalBusEnvelope = {
-            id: command.id,
-            type: "response",
-            ts: new Date().toISOString(),
-            correlation_id: command.correlation_id,
-            method: command.method,
-            status: "error",
-            error: { code: "TERMINAL_CONTEXT_MISMATCH", message: "Cross-lane access denied", retryable: false },
-          };
-          recordResponse(response);
-          return response;
+        const response: LocalBusEnvelope = {
+          id: command.id,
+          type: "response",
+          ts: new Date().toISOString(),
+          correlation_id: command.correlation_id,
+          method: command.method,
+          status: "error",
+          error: {
+            code: "TERMINAL_CONTEXT_MISMATCH",
+            message: "Cross-lane access denied",
+            retryable: false,
+          },
+        };
+        recordResponse(response);
+        return response;
       }
 
       appendTerminalOutput(terminalId, data, command.correlation_id);
@@ -425,13 +459,18 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
 
     if (command.type === "command" && command.method === "terminal.resize") {
       const payload = normalizePayload(command.payload);
-      const terminalId = typeof command.terminal_id === "string" ? command.terminal_id : typeof payload.terminal_id === "string" ? payload.terminal_id : undefined;
+      const terminalId =
+        typeof command.terminal_id === "string"
+          ? command.terminal_id
+          : typeof payload.terminal_id === "string"
+            ? payload.terminal_id
+            : undefined;
 
       if (terminalId) {
-          const buffer = terminalBuffers.get(terminalId);
-          if (buffer) {
-              buffer.dropped_bytes = 0;
-          }
+        const buffer = terminalBuffers.get(terminalId);
+        if (buffer) {
+          buffer.dropped_bytes = 0;
+        }
       }
 
       const response: LocalBusEnvelope = {
@@ -508,10 +547,17 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
   async function fetch(requestInput: Request): Promise<Response> {
     const url = new URL(requestInput.url);
 
-    if (url.pathname.startsWith("/v1/workspaces/") && url.pathname.endsWith("/lanes") && requestInput.method === "POST") {
+    if (
+      url.pathname.startsWith("/v1/workspaces/") &&
+      url.pathname.endsWith("/lanes") &&
+      requestInput.method === "POST"
+    ) {
       const body = (await requestInput.json()) as Record<string, unknown>;
       const workspaceId = url.pathname.split("/")[3];
-      const preferredTransport = typeof body.preferred_transport === "string" ? body.preferred_transport : "cliproxy_harness";
+      const preferredTransport =
+        typeof body.preferred_transport === "string"
+          ? body.preferred_transport
+          : "cliproxy_harness";
 
       if (preferredTransport !== "cliproxy_harness" && preferredTransport !== "native_openai") {
         return Response.json({ error: "invalid_preferred_transport" }, { status: 400 });
@@ -522,11 +568,12 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
         type: "command",
         ts: new Date().toISOString(),
         workspace_id: workspaceId,
-        correlation_id: typeof body.correlation_id === "string" ? body.correlation_id : `cor-${Date.now()}`,
+        correlation_id:
+          typeof body.correlation_id === "string" ? body.correlation_id : `cor-${Date.now()}`,
         method: "lane.create",
         payload: {
           ...body,
-          preferred_transport: preferredTransport
+          preferred_transport: preferredTransport,
         },
       };
 
@@ -538,7 +585,11 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       return Response.json(result.result ?? {}, { status: 201 });
     }
 
-    if (url.pathname.includes("/lanes/") && url.pathname.endsWith("/sessions") && requestInput.method === "POST") {
+    if (
+      url.pathname.includes("/lanes/") &&
+      url.pathname.endsWith("/sessions") &&
+      requestInput.method === "POST"
+    ) {
       const body = (await requestInput.json()) as Record<string, unknown>;
       const parts = url.pathname.split("/");
       const laneId = parts[parts.indexOf("lanes") + 1];
@@ -548,7 +599,8 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
         type: "command",
         ts: new Date().toISOString(),
         lane_id: laneId,
-        correlation_id: typeof body.correlation_id === "string" ? body.correlation_id : `cor-${Date.now()}`,
+        correlation_id:
+          typeof body.correlation_id === "string" ? body.correlation_id : `cor-${Date.now()}`,
         method: "session.attach",
         payload: body,
       };
@@ -561,14 +613,18 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       return Response.json(result.result ?? {}, { status: 200 });
     }
 
-    if (url.pathname.includes("/sessions/") && url.pathname.endsWith("/terminals") && requestInput.method === "POST") {
+    if (
+      url.pathname.includes("/sessions/") &&
+      url.pathname.endsWith("/terminals") &&
+      requestInput.method === "POST"
+    ) {
       const body = (await requestInput.json()) as Record<string, unknown>;
       const parts = url.pathname.split("/");
       const sessionId = parts[parts.indexOf("sessions") + 1];
       const workspaceId = parts[parts.indexOf("workspaces") + 1];
 
       if (body.workspace_id && body.workspace_id !== workspaceId) {
-          return Response.json({ error: "WORKSPACE_MISMATCH" }, { status: 400 });
+        return Response.json({ error: "WORKSPACE_MISMATCH" }, { status: 400 });
       }
 
       const command: LocalBusEnvelope = {
@@ -577,7 +633,8 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
         ts: new Date().toISOString(),
         session_id: sessionId,
         workspace_id: workspaceId,
-        correlation_id: typeof body.correlation_id === "string" ? body.correlation_id : `cor-${Date.now()}`,
+        correlation_id:
+          typeof body.correlation_id === "string" ? body.correlation_id : `cor-${Date.now()}`,
         method: "terminal.spawn",
         payload: body,
       };
@@ -590,7 +647,11 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       return Response.json(result.result ?? {}, { status: 200 });
     }
 
-    if (url.pathname.includes("/v1/workspaces/") && url.pathname.includes("/lanes/") && requestInput.method === "DELETE") {
+    if (
+      url.pathname.includes("/v1/workspaces/") &&
+      url.pathname.includes("/lanes/") &&
+      requestInput.method === "DELETE"
+    ) {
       const parts = url.pathname.split("/");
       const laneId = parts[parts.indexOf("lanes") + 1];
 
@@ -639,7 +700,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
             error: result.error?.code ?? "dispatch_error",
             details: result.error?.details ?? null,
           },
-          { status },
+          { status }
         );
       }
 
@@ -651,7 +712,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
 
   function exportAuditBundle(filter?: { correlation_id?: string }): RuntimeAuditBundle {
     const records = filter?.correlation_id
-      ? auditRecords.filter((record) => record.correlation_id === filter.correlation_id)
+      ? auditRecords.filter(record => record.correlation_id === filter.correlation_id)
       : [...auditRecords];
     return {
       count: records.length,
@@ -685,7 +746,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
     },
     getState(): { terminal: string } {
       const state = { terminal: "active" };
-      const terminalThrottled = Array.from(terminalBuffers.values()).some((b) => b.dropped_bytes > 0);
+      const terminalThrottled = Array.from(terminalBuffers.values()).some(b => b.dropped_bytes > 0);
       if (terminalThrottled) {
         state.terminal = "throttled";
       }
@@ -722,16 +783,18 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       } as LocalBusEnvelope);
     },
     getEvents(): LocalBusEnvelope[] {
-      return auditRecords.filter((r) => r.type === "event").map((r) => {
-        return {
-          ts: r.recorded_at,
-          type: "event",
-          topic: r.topic,
-          correlation_id: r.correlation_id,
-          payload: r.payload,
-          sequence: auditRecords.indexOf(r) + 1, // Simplified sequence
-        } as LocalBusEnvelope;
-      });
+      return auditRecords
+        .filter(r => r.type === "event")
+        .map(r => {
+          return {
+            ts: r.recorded_at,
+            type: "event",
+            topic: r.topic,
+            correlation_id: r.correlation_id,
+            payload: r.payload,
+            sequence: auditRecords.indexOf(r) + 1, // Simplified sequence
+          } as LocalBusEnvelope;
+        });
     },
     async getAuditRecords(): Promise<RuntimeAuditRecord[]> {
       return [...auditRecords];
@@ -739,7 +802,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
     async enforceRetention(days: number): Promise<void> {
       const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
       const initialCount = auditRecords.length;
-      auditRecords = auditRecords.filter((r) => new Date(r.recorded_at) >= cutoff);
+      auditRecords = auditRecords.filter(r => new Date(r.recorded_at) >= cutoff);
       const deletedCount = initialCount - auditRecords.length;
 
       if (deletedCount > 0) {

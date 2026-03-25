@@ -1,13 +1,14 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.2/schema.json",
   "files": {
-    "ignore": [
-      "node_modules/**",
-      "docs/.vitepress/dist/**",
-      "docs/.generated/**",
-      ".worktrees/**",
-      "agileplus/**",
-      "docs/sessions/**"
+    "includes": [
+      "**",
+      "!**/node_modules/**",
+      "!**/docs/.vitepress/dist/**",
+      "!**/docs/.generated/**",
+      "!**/.worktrees/**",
+      "!**/agileplus/**",
+      "!**/docs/sessions/**"
     ]
   },
   "formatter": {
@@ -20,21 +21,11 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "suspicious": {
-        "all": true
-      },
-      "correctness": {
-        "all": true
-      },
-      "style": {
-        "all": true
-      },
-      "complexity": {
-        "all": true
-      },
-      "security": {
-        "all": true
-      }
+      "suspicious": {},
+      "correctness": {},
+      "style": {},
+      "complexity": {},
+      "security": {}
     }
   },
   "javascript": {
@@ -45,12 +36,12 @@
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
       "semicolons": "always",
-      "trailingComma": "es5"
+      "trailingCommas": "es5"
     }
   },
   "overrides": [
     {
-      "include": ["apps/desktop/src/runtime_client.ts"],
+      "includes": ["**/apps/desktop/src/runtime_client.ts"],
       "linter": {
         "rules": {
           "style": {

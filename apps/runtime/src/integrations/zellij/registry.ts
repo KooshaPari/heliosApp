@@ -6,8 +6,8 @@
  */
 
 import type { ZellijCli } from "./cli.js";
-import type { MuxBinding, MuxSession } from "./types.js";
 import { DuplicateBindingError } from "./errors.js";
+import type { MuxBinding, MuxSession } from "./types.js";
 
 export class MuxRegistry {
   private readonly bySession = new Map<string, MuxBinding>();
@@ -24,18 +24,12 @@ export class MuxRegistry {
   bind(sessionName: string, laneId: string, session: MuxSession): void {
     const existingBySession = this.bySession.get(sessionName);
     if (existingBySession) {
-      throw new DuplicateBindingError(
-        `session=${sessionName}`,
-        `lane=${existingBySession.laneId}`
-      );
+      throw new DuplicateBindingError(`session=${sessionName}`, `lane=${existingBySession.laneId}`);
     }
 
     const existingByLane = this.byLane.get(laneId);
     if (existingByLane) {
-      throw new DuplicateBindingError(
-        `lane=${laneId}`,
-        `session=${existingByLane.sessionName}`
-      );
+      throw new DuplicateBindingError(`lane=${laneId}`, `session=${existingByLane.sessionName}`);
     }
 
     const binding: MuxBinding = {
@@ -93,7 +87,7 @@ export class MuxRegistry {
    * Compatibility accessor for watchdog interfaces expecting `getSessions`.
    */
   getSessions(): Array<{ id: string; laneId?: string }> {
-    return this.list().map((binding) => ({
+    return this.list().map(binding => ({
       id: binding.sessionName,
       laneId: binding.laneId,
     }));
@@ -112,8 +106,8 @@ export class MuxRegistry {
     }
 
     const liveSessions = await this.cli.listSessions();
-    const liveNames = new Set(liveSessions.map((s) => s.name));
+    const liveNames = new Set(liveSessions.map(s => s.name));
 
-    return this.list().filter((b) => !liveNames.has(b.sessionName));
+    return this.list().filter(b => !liveNames.has(b.sessionName));
   }
 }

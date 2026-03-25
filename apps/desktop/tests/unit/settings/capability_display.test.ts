@@ -1,18 +1,18 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { CapabilityDisplay, Capability } from '../../../src/settings/capability_display';
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { type Capability, CapabilityDisplay } from "../../../src/settings/capability_display";
 
-describe('CapabilityDisplay', () => {
+describe("CapabilityDisplay", () => {
   let container: HTMLDivElement;
   let display: CapabilityDisplay;
 
   const mockCapability: Capability = {
-    version: '0.20.0',
+    version: "0.20.0",
     supportsHotSwap: true,
-    features: ['GPU acceleration', 'Ligatures', 'Sixel support'],
+    features: ["GPU acceleration", "Ligatures", "Sixel support"],
   };
 
   beforeEach(() => {
-    container = document.createElement('div');
+    container = document.createElement("div");
     document.body.appendChild(container);
   });
 
@@ -23,7 +23,7 @@ describe('CapabilityDisplay', () => {
     document.body.removeChild(container);
   });
 
-  it('should render collapsed by default', () => {
+  it("should render collapsed by default", () => {
     const onToggle = vi.fn();
     display = new CapabilityDisplay({
       capability: mockCapability,
@@ -32,11 +32,11 @@ describe('CapabilityDisplay', () => {
 
     display.mount(container);
 
-    const content = container.querySelector('.capability-content');
+    const content = container.querySelector(".capability-content");
     expect(content).toBeFalsy();
   });
 
-  it('should expand when toggle clicked', async () => {
+  it("should expand when toggle clicked", async () => {
     const onToggle = vi.fn();
     display = new CapabilityDisplay({
       capability: mockCapability,
@@ -45,13 +45,13 @@ describe('CapabilityDisplay', () => {
 
     display.mount(container);
 
-    const header = container.querySelector('.capability-header') as HTMLElement;
+    const header = container.querySelector(".capability-header") as HTMLElement;
     header?.click();
 
     expect(onToggle).toHaveBeenCalledWith(true);
   });
 
-  it('should display version when expanded', () => {
+  it("should display version when expanded", () => {
     display = new CapabilityDisplay({
       capability: mockCapability,
       isExpanded: true,
@@ -60,10 +60,10 @@ describe('CapabilityDisplay', () => {
     display.mount(container);
 
     const content = container.textContent;
-    expect(content).toContain('0.20.0');
+    expect(content).toContain("0.20.0");
   });
 
-  it('should show hot-swap support when expanded', () => {
+  it("should show hot-swap support when expanded", () => {
     display = new CapabilityDisplay({
       capability: mockCapability,
       isExpanded: true,
@@ -72,11 +72,11 @@ describe('CapabilityDisplay', () => {
     display.mount(container);
 
     const content = container.textContent;
-    expect(content).toContain('Supported');
-    expect(content).toContain('3s');
+    expect(content).toContain("Supported");
+    expect(content).toContain("3s");
   });
 
-  it('should show hot-swap unsupported message', () => {
+  it("should show hot-swap unsupported message", () => {
     const noHotSwapCapability: Capability = {
       ...mockCapability,
       supportsHotSwap: false,
@@ -90,12 +90,12 @@ describe('CapabilityDisplay', () => {
     display.mount(container);
 
     const content = container.textContent;
-    expect(content).toContain('Not supported');
-    expect(content).toContain('restart');
-    expect(content).toContain('8s');
+    expect(content).toContain("Not supported");
+    expect(content).toContain("restart");
+    expect(content).toContain("8s");
   });
 
-  it('should display feature list when expanded', () => {
+  it("should display feature list when expanded", () => {
     display = new CapabilityDisplay({
       capability: mockCapability,
       isExpanded: true,
@@ -104,12 +104,12 @@ describe('CapabilityDisplay', () => {
     display.mount(container);
 
     const content = container.textContent;
-    expect(content).toContain('GPU acceleration');
-    expect(content).toContain('Ligatures');
-    expect(content).toContain('Sixel support');
+    expect(content).toContain("GPU acceleration");
+    expect(content).toContain("Ligatures");
+    expect(content).toContain("Sixel support");
   });
 
-  it('should display loading state when isLoading is true', () => {
+  it("should display loading state when isLoading is true", () => {
     display = new CapabilityDisplay({
       capability: null,
       isLoading: true,
@@ -118,11 +118,11 @@ describe('CapabilityDisplay', () => {
 
     display.mount(container);
 
-    const loading = container.querySelector('.capability-loading');
-    expect(loading?.textContent).toContain('Loading capabilities');
+    const loading = container.querySelector(".capability-loading");
+    expect(loading?.textContent).toContain("Loading capabilities");
   });
 
-  it('should display error when capability is null', () => {
+  it("should display error when capability is null", () => {
     display = new CapabilityDisplay({
       capability: null,
       isExpanded: true,
@@ -130,7 +130,7 @@ describe('CapabilityDisplay', () => {
 
     display.mount(container);
 
-    const error = container.querySelector('.capability-error');
-    expect(error?.textContent).toContain('unavailable');
+    const error = container.querySelector(".capability-error");
+    expect(error?.textContent).toContain("unavailable");
   });
 });

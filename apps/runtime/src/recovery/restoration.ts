@@ -1,7 +1,7 @@
+import { randomUUID } from "node:crypto";
+import { promises as fs } from "node:fs";
 import type { LocalBus } from "../protocol/bus.js";
 import type { Checkpoint, CheckpointSession } from "./checkpoint.js";
-import { randomUUID } from "crypto";
-import { promises as fs } from "fs";
 
 export interface RestoredSession {
   sessionId: string;
@@ -61,7 +61,7 @@ export class RestorationPipeline {
             };
             restored.push(restored_session);
             await this.publishSessionRestored(restored_session);
-          } catch (err) {
+          } catch (_err) {
             // Fall through to respawn attempt
             await this.attemptRespawn(session, restored, failed);
           }
@@ -86,11 +86,11 @@ export class RestorationPipeline {
           ...failed,
           ...checkpoint.sessions
             .filter(
-              (s) =>
-                !restored.some((r) => r.sessionId === s.sessionId) &&
-                !failed.some((f) => f.sessionId === s.sessionId)
+              s =>
+                !restored.some(r => r.sessionId === s.sessionId) &&
+                !failed.some(f => f.sessionId === s.sessionId)
             )
-            .map((s) => ({
+            .map(s => ({
               sessionId: s.sessionId,
               terminalId: s.terminalId,
               laneId: s.laneId,
@@ -120,11 +120,11 @@ export class RestorationPipeline {
     sessionName: string,
     survivingSessions: string[]
   ): string | undefined {
-    return survivingSessions.find((s) => s === sessionName);
+    return survivingSessions.find(s => s === sessionName);
   }
 
   private async reattachZelijjSession(
-    session: CheckpointSession,
+    _session: CheckpointSession,
     zellijSessionName: string
   ): Promise<void> {
     // In a real implementation, this would use zellij IPC to reattach

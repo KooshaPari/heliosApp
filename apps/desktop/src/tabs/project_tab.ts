@@ -1,4 +1,4 @@
-import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
+import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
 
 export interface LaneInfo {
   laneId: string;
@@ -33,7 +33,6 @@ export interface ProjectMetadata {
 export class ProjectTab extends TabSurface {
   private metadata: ProjectMetadata | null = null;
   private expandedSections = new Set<string>(["lanes", "info"]);
-  private contentEl: HTMLElement | null = null;
 
   constructor() {
     super("project-tab", "project", "Project");
@@ -61,23 +60,23 @@ export class ProjectTab extends TabSurface {
           laneId: context.laneId,
           name: "Current Lane",
           state: "active",
-          createdAt: new Date(Date.now() - 86400000).toISOString()
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
         },
         {
           laneId: "lane-2",
           name: "Feature Branch",
           state: "inactive",
-          createdAt: new Date(Date.now() - 172800000).toISOString()
+          createdAt: new Date(Date.now() - 172800000).toISOString(),
         },
         {
           laneId: "lane-3",
           name: "Experimental",
           state: "paused",
-          createdAt: new Date(Date.now() - 604800000).toISOString()
-        }
+          createdAt: new Date(Date.now() - 604800000).toISOString(),
+        },
       ],
       gitStatus: "On branch main, 3 commits ahead of origin/main",
-      recentActivity: "Last update 10 minutes ago"
+      recentActivity: "Last update 10 minutes ago",
     };
   }
 
@@ -144,11 +143,7 @@ export class ProjectTab extends TabSurface {
     scrollEl.appendChild(infoSectionEl);
 
     // Lanes Section
-    const lanesSectionEl = this.renderSection(
-      "lanes",
-      "Lanes",
-      this.renderLanesInfo()
-    );
+    const lanesSectionEl = this.renderSection("lanes", "Lanes", this.renderLanesInfo());
     scrollEl.appendChild(lanesSectionEl);
 
     // Actions Section
@@ -160,11 +155,7 @@ export class ProjectTab extends TabSurface {
     return container;
   }
 
-  private renderSection(
-    sectionId: string,
-    title: string,
-    contentEl: HTMLElement
-  ): HTMLElement {
+  private renderSection(sectionId: string, title: string, contentEl: HTMLElement): HTMLElement {
     const sectionEl = document.createElement("div");
     sectionEl.style.marginBottom = "16px";
     sectionEl.style.backgroundColor = "white";
@@ -232,7 +223,7 @@ export class ProjectTab extends TabSurface {
     const rows = [
       ["Project Name", this.metadata.projectName],
       ["Workspace Path", this.metadata.workspacePath],
-      ["Active Lanes", this.metadata.lanesCount.toString()]
+      ["Active Lanes", this.metadata.lanesCount.toString()],
     ];
 
     for (const [label, value] of rows) {
@@ -407,7 +398,7 @@ export class ProjectTab extends TabSurface {
     const baseState = super.getState();
     return {
       ...baseState,
-      expandedSections: Array.from(this.expandedSections)
+      expandedSections: Array.from(this.expandedSections),
     };
   }
 

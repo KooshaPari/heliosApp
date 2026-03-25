@@ -1,7 +1,7 @@
 import type { LocalBus } from "../protocol/bus.js";
-import { RecoveryStage } from "./state-machine.js";
-import type { RestorationResult } from "./restoration.js";
 import type { CleanupResult } from "./orphan-reconciler.js";
+import type { RestorationResult } from "./restoration.js";
+import { RecoveryStage } from "./state-machine.js";
 
 export interface BannerConfig {
   containerId?: string;
@@ -44,10 +44,7 @@ export class RecoveryBanner {
     this.renderBanner(detail);
   }
 
-  showSummary(
-    result: RestorationResult,
-    orphanResult: CleanupResult
-  ): void {
+  showSummary(result: RestorationResult, orphanResult: CleanupResult): void {
     this.isActive = false;
     this.renderSummary(result, orphanResult);
 
@@ -95,19 +92,14 @@ export class RecoveryBanner {
     console.log(`[Recovery Banner] ${fullMessage}`);
   }
 
-  private renderSummary(
-    result: RestorationResult,
-    orphanResult: CleanupResult
-  ): void {
+  private renderSummary(result: RestorationResult, orphanResult: CleanupResult): void {
     const hasIssues = result.failed.length > 0;
-    const header = hasIssues
-      ? "Recovery complete with issues"
-      : "Recovery complete";
+    const header = hasIssues ? "Recovery complete with issues" : "Recovery complete";
 
     const summary = {
       header,
-      restored: result.restored.map((s) => s.zellijSessionName || s.sessionId),
-      failed: result.failed.map((f) => ({
+      restored: result.restored.map(s => s.zellijSessionName || s.sessionId),
+      failed: result.failed.map(f => ({
         sessionId: f.sessionId,
         reason: f.reason,
         suggestion: f.suggestion,

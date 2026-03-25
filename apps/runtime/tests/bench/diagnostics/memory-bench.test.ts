@@ -1,6 +1,6 @@
 // NFR-004: Memory overhead test — 20 metrics x 10k samples must stay under 10 MB.
 
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 
 describe("Memory Overhead", () => {
@@ -52,7 +52,7 @@ describe("Memory Overhead", () => {
         metricCount: METRIC_COUNT,
         bufferSize: BUFFER_SIZE,
         expectedMinMB: 3.2,
-      }),
+      })
     );
 
     expect(totalMB).toBeLessThan(10);
@@ -88,7 +88,7 @@ describe("Memory Overhead", () => {
       JSON.stringify({
         benchmark: "empty-buffers",
         totalKB: Number(totalKB.toFixed(2)),
-      }),
+      })
     );
 
     // Empty (lazy) buffers should use very little memory.

@@ -1,7 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { ContextPropagator, resetContextPropagator } from "../../../src/tabs/context_switch_propagation";
-import { createMockTabSurface } from "../../../src/tabs/tab_surface";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
+import {
+  ContextPropagator,
+  resetContextPropagator,
+} from "../../../src/tabs/context_switch_propagation";
+import { createMockTabSurface } from "../../../src/tabs/tab_surface";
 
 describe("ContextPropagator", () => {
   let propagator: ContextPropagator;
@@ -14,7 +17,7 @@ describe("ContextPropagator", () => {
     mockTabs = [
       createMockTabSurface("tab1", "terminal", "Terminal"),
       createMockTabSurface("tab2", "agent", "Agent"),
-      createMockTabSurface("tab3", "session", "Session")
+      createMockTabSurface("tab3", "session", "Session"),
     ];
 
     for (const tab of mockTabs) {
@@ -47,7 +50,7 @@ describe("ContextPropagator", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const result = await propagator.propagateContext(context);
@@ -61,7 +64,7 @@ describe("ContextPropagator", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const result = await propagator.propagateContext(context);
@@ -88,7 +91,7 @@ describe("ContextPropagator", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const result = await propagator.propagateContext(context);
@@ -101,13 +104,13 @@ describe("ContextPropagator", () => {
 
       // Make the tab's onContextChange very slow
       slowTab.onContextChange = async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       };
 
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const result = await propagator.propagateContext(context);
@@ -119,30 +122,30 @@ describe("ContextPropagator", () => {
   describe("Propagation Cancellation", () => {
     it("should cancel previous propagation on new context", async () => {
       const slowTab = mockTabs[0];
-      let callCount = 0;
+      let _callCount = 0;
 
       slowTab.onContextChange = async () => {
-        callCount++;
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        _callCount++;
+        await new Promise(resolve => setTimeout(resolve, 200));
       };
 
       const context1: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const context2: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane2",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       // Start first propagation
-      const promise1 = propagator.propagateContext(context1);
+      const _promise1 = propagator.propagateContext(context1);
 
       // Immediately start second propagation (should cancel first)
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise(resolve => setTimeout(resolve, 50));
       const promise2 = propagator.propagateContext(context2);
 
       // Second propagation should complete
@@ -162,13 +165,13 @@ describe("ContextPropagator", () => {
       };
 
       mockTabs[2].onContextChange = async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       };
 
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const result = await propagator.propagateContext(context);
@@ -186,7 +189,7 @@ describe("ContextPropagator", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       const result = await propagator.propagateContext(context);

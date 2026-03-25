@@ -1,5 +1,5 @@
+import { randomUUID } from "node:crypto";
 import type { LocalBus } from "../protocol/bus.js";
-import { randomUUID } from "crypto";
 
 export interface OrphanItem {
   type: "pty" | "zellij_session" | "par_lane" | "share_worker" | "temp_file";
@@ -23,7 +23,6 @@ export interface CleanupResult {
 
 export class OrphanReconciler {
   private bus?: LocalBus;
-  private restoredSessionIds: Set<string>;
 
   constructor(restoredSessionIds: string[], bus?: LocalBus) {
     this.restoredSessionIds = new Set(restoredSessionIds);
@@ -65,7 +64,7 @@ export class OrphanReconciler {
             try {
               process.kill(item.pid, "SIGTERM");
               // Wait 3s for graceful shutdown
-              await new Promise((resolve) => setTimeout(resolve, 3000));
+              await new Promise(resolve => setTimeout(resolve, 3000));
               // Check if process is still alive
               try {
                 process.kill(item.pid, 0);
@@ -80,7 +79,7 @@ export class OrphanReconciler {
             }
           }
         } else if (item.type === "temp_file" && item.path) {
-          const { promises: fs } = await import("fs");
+          const { promises: fs } = await import("node:fs");
           await fs.unlink(item.path);
           removed++;
         }
@@ -92,7 +91,9 @@ export class OrphanReconciler {
     const reviewPending = report.needsReview.length;
 
     // Log cleanup result
-    console.log(`Orphan cleanup: ${terminated} terminated, ${removed} removed, ${reviewPending} pending review`);
+    console.log(
+      `Orphan cleanup: ${terminated} terminated, ${removed} removed, ${reviewPending} pending review`
+    );
 
     // Publish cleanup event
     if (this.bus) {
@@ -117,8 +118,8 @@ export class OrphanReconciler {
   }
 
   private async scanOrphanPTYs(
-    safeToTerminate: OrphanItem[],
-    needsReview: OrphanItem[]
+    _safeToTerminate: OrphanItem[],
+    _needsReview: OrphanItem[]
   ): Promise<void> {
     // In a real implementation, this would scan /proc or use Bun/Node APIs
     // to find PTY processes owned by heliosApp but not associated with restored sessions
@@ -126,8 +127,8 @@ export class OrphanReconciler {
   }
 
   private async scanStaleZelijjSessions(
-    safeToTerminate: OrphanItem[],
-    needsReview: OrphanItem[]
+    _safeToTerminate: OrphanItem[],
+    _needsReview: OrphanItem[]
   ): Promise<void> {
     // In a real implementation, this would call zellij list-sessions
     // and compare against restored session IDs
@@ -136,11 +137,11 @@ export class OrphanReconciler {
 
   private async scanStaleTempFiles(
     safeToTerminate: OrphanItem[],
-    needsReview: OrphanItem[]
+    _needsReview: OrphanItem[]
   ): Promise<void> {
     try {
-      const { promises: fs } = await import("fs");
-      const path = await import("path");
+      const { promises: fs } = await import("node:fs");
+      const path = await import("node:path");
 
       // Look for stale temp files in recovery directory
       // This is a simplified version; real implementation would be more thorough

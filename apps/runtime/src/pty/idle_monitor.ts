@@ -7,11 +7,10 @@
  * @module
  */
 
-import { PtyRegistry } from "./registry.js";
-import type { PtyRecord } from "./registry.js";
-import { PtyLifecycle } from "./state_machine.js";
 import type { BusPublisher, PtyEventCorrelation } from "./events.js";
 import { emitPtyEvent } from "./events.js";
+import type { PtyRegistry } from "./registry.js";
+import type { PtyLifecycle } from "./state_machine.js";
 
 /** Configuration for the idle monitor. */
 export interface IdleMonitorConfig {
@@ -42,7 +41,7 @@ export class IdleMonitor {
     registry: PtyRegistry,
     bus: BusPublisher,
     lifecycles: Map<string, PtyLifecycle>,
-    config?: IdleMonitorConfig,
+    config?: IdleMonitorConfig
   ) {
     this.registry = registry;
     this.bus = bus;

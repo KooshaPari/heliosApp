@@ -6,8 +6,6 @@
  * FR-026-004: Tmate backend adapter.
  */
 
-import type { ChildProcess } from "bun";
-
 /**
  * Share backend adapter interface.
  */
@@ -68,7 +66,7 @@ export class UptermAdapter implements ShareBackendAdapter {
 
       // Generate upterm command
       const attachCommand = `zellij attach ${zellijSessionName}`;
-      const uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
+      const _uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
 
       // Mock implementation: return simulated result
       const link = `https://upterm.io/${terminalId}-${Date.now()}`;
@@ -115,8 +113,6 @@ export interface TmateConfig {
  * FR-026-004: Tmate backend with link generation.
  */
 export class TmateAdapter implements ShareBackendAdapter {
-  private config: TmateConfig;
-
   constructor(config?: TmateConfig) {
     this.config = config || {};
   }
@@ -148,7 +144,7 @@ export class TmateAdapter implements ShareBackendAdapter {
 
       // Generate tmate command
       const attachCommand = `zellij attach ${zellijSessionName}`;
-      const tmateCommand = `tmate -F -c "${attachCommand}"`;
+      const _tmateCommand = `tmate -F -c "${attachCommand}"`;
 
       // Mock implementation: return simulated result
       // Tmate typically outputs link to stderr
@@ -189,10 +185,7 @@ export class TmateAdapter implements ShareBackendAdapter {
  * @param config Backend-specific configuration
  * @returns Adapter instance
  */
-export function getBackendAdapter(
-  backend: string,
-  config?: any
-): ShareBackendAdapter {
+export function getBackendAdapter(backend: string, config?: any): ShareBackendAdapter {
   switch (backend) {
     case "upterm":
       return new UptermAdapter(config as UptermConfig | undefined);

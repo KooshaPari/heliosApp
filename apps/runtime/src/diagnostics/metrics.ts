@@ -1,7 +1,7 @@
 // FR-009: Bounded ring buffer and metric registration / recording.
 
-import type { MetricDefinition } from "./types.js";
 import { monotonicNow } from "./hooks.js";
+import type { MetricDefinition } from "./types.js";
 
 // ── Ring Buffer ────────────────────────────────────────────────────────
 
@@ -126,9 +126,7 @@ export class MetricsRegistry {
   }
 
   /** Retrieve a metric's definition and buffer (if any samples recorded). */
-  getMetric(
-    name: string,
-  ): { definition: MetricDefinition; buffer: RingBuffer } | undefined {
+  getMetric(name: string): { definition: MetricDefinition; buffer: RingBuffer } | undefined {
     const entry = this.metrics.get(name);
     if (entry === undefined) {
       return undefined;

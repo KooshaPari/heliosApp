@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
-import { AuditLedger } from '../../../src/audit/ledger';
-import { AuditRingBuffer } from '../../../src/audit/ring-buffer';
-import { SQLiteAuditStore } from '../../../src/audit/sqlite-store';
-import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from '../../../src/audit/event';
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
+import { AuditLedger } from "../../../src/audit/ledger";
+import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
+import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
 
 /**
  * Calculate percentile from array of values.
@@ -13,14 +13,14 @@ function percentile(values: number[], p: number): number {
   return values[Math.max(0, index)];
 }
 
-describe('Audit Search Performance', () => {
+describe("Audit Search Performance", () => {
   let ledger: AuditLedger;
   let ringBuffer: AuditRingBuffer;
   let store: SQLiteAuditStore;
 
   beforeEach(() => {
     ringBuffer = new AuditRingBuffer(10_000);
-    store = new SQLiteAuditStore(':memory:');
+    store = new SQLiteAuditStore(":memory:");
     ledger = new AuditLedger(ringBuffer, store);
   });
 
@@ -28,7 +28,7 @@ describe('Audit Search Performance', () => {
     store.close();
   });
 
-  it('should search with workspace filter in < 500ms p95 for large dataset', () => {
+  it("should search with workspace filter in < 500ms p95 for large dataset", () => {
     // Insert 100k events (sample from 1M scale test)
     const events = [];
     const WORKSPACES = 10;
@@ -37,16 +37,15 @@ describe('Audit Search Performance', () => {
 
     for (let i = 0; i < 100_000; i++) {
       const event = createAuditEvent({
-        eventType:
-          [
-            AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-            AUDIT_EVENT_TYPES.SESSION_CREATED,
-            AUDIT_EVENT_TYPES.POLICY_EVALUATION,
-            AUDIT_EVENT_TYPES.APPROVAL_RESOLVED,
-            AUDIT_EVENT_TYPES.TERMINAL_OUTPUT,
-          ][i % EVENT_TYPES],
+        eventType: [
+          AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+          AUDIT_EVENT_TYPES.SESSION_CREATED,
+          AUDIT_EVENT_TYPES.POLICY_EVALUATION,
+          AUDIT_EVENT_TYPES.APPROVAL_RESOLVED,
+          AUDIT_EVENT_TYPES.TERMINAL_OUTPUT,
+        ][i % EVENT_TYPES],
         actor: `actor-${i % ACTORS}`,
-        action: 'test',
+        action: "test",
         target: `target-${i}`,
         result: AUDIT_EVENT_RESULTS.SUCCESS,
         workspaceId: `ws-${i % WORKSPACES}`,
@@ -71,7 +70,7 @@ describe('Audit Search Performance', () => {
 
     for (let i = 0; i < 20; i++) {
       const startTime = Date.now();
-      const results = ledger.search({ workspaceId: 'ws-0', limit: 100 });
+      const results = ledger.search({ workspaceId: "ws-0", limit: 100 });
       const endTime = Date.now();
 
       latencies.push(endTime - startTime);
@@ -84,7 +83,7 @@ describe('Audit Search Performance', () => {
     expect(p95).toBeLessThan(500);
   });
 
-  it('should search with time range filter in < 500ms p95', () => {
+  it("should search with time range filter in < 500ms p95", () => {
     // Insert events with various timestamps
     const events = [];
     const now = new Date();
@@ -95,11 +94,11 @@ describe('Audit Search Performance', () => {
 
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-        actor: 'agent-1',
-        action: 'execute',
+        actor: "agent-1",
+        action: "execute",
         target: `cmd-${i}`,
         result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: 'ws-1',
+        workspaceId: "ws-1",
         correlationId: `corr-${i}`,
         metadata: {},
       });
@@ -118,7 +117,7 @@ describe('Audit Search Performance', () => {
 
     for (let i = 0; i < 20; i++) {
       const startTime = Date.now();
-      const results = ledger.search({
+      const _results = ledger.search({
         timeRange: { from: oneHourAgo, to: now2 },
         limit: 100,
       });
@@ -133,15 +132,16 @@ describe('Audit Search Performance', () => {
     expect(p95).toBeLessThan(500);
   });
 
-  it('should search with combined filters in < 500ms p95', () => {
+  it("should search with combined filters in < 500ms p95", () => {
     // Insert diverse events
     const events = [];
 
     for (let i = 0; i < 50_000; i++) {
       const event = createAuditEvent({
-        eventType: i % 3 === 0 ? AUDIT_EVENT_TYPES.COMMAND_EXECUTED : AUDIT_EVENT_TYPES.SESSION_CREATED,
+        eventType:
+          i % 3 === 0 ? AUDIT_EVENT_TYPES.COMMAND_EXECUTED : AUDIT_EVENT_TYPES.SESSION_CREATED,
         actor: `actor-${i % 20}`,
-        action: 'test',
+        action: "test",
         target: `target-${i}`,
         result: AUDIT_EVENT_RESULTS.SUCCESS,
         workspaceId: `ws-${i % 5}`,
@@ -158,9 +158,9 @@ describe('Audit Search Performance', () => {
 
     for (let i = 0; i < 20; i++) {
       const startTime = Date.now();
-      const results = ledger.search({
-        workspaceId: 'ws-0',
-        actor: 'actor-0',
+      const _results = ledger.search({
+        workspaceId: "ws-0",
+        actor: "actor-0",
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
         limit: 100,
       });
@@ -175,7 +175,7 @@ describe('Audit Search Performance', () => {
     expect(p95).toBeLessThan(500);
   });
 
-  it('should traverse correlation chains in < 500ms p95', () => {
+  it("should traverse correlation chains in < 500ms p95", () => {
     // Create chains of correlated events
     const CHAIN_COUNT = 100;
     const CHAIN_LENGTH = 10;
@@ -187,11 +187,11 @@ describe('Audit Search Performance', () => {
       for (let eventIdx = 0; eventIdx < CHAIN_LENGTH; eventIdx++) {
         const event = createAuditEvent({
           eventType: AUDIT_EVENT_TYPES.POLICY_EVALUATION,
-          actor: 'system',
-          action: 'evaluate',
+          actor: "system",
+          action: "evaluate",
           target: `target-${chainIdx}-${eventIdx}`,
           result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: 'ws-1',
+          workspaceId: "ws-1",
           correlationId,
           metadata: { chainIndex: chainIdx, eventIndex: eventIdx },
         });
@@ -219,7 +219,7 @@ describe('Audit Search Performance', () => {
     expect(p95).toBeLessThan(500);
   });
 
-  it('should document storage efficiency', () => {
+  it("should document storage efficiency", () => {
     // Insert 100k events
     const events = [];
 
@@ -227,7 +227,7 @@ describe('Audit Search Performance', () => {
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
         actor: `actor-${i % 50}`,
-        action: 'execute',
+        action: "execute",
         target: `cmd-${i}`,
         result: AUDIT_EVENT_RESULTS.SUCCESS,
         workspaceId: `ws-${i % 10}`,

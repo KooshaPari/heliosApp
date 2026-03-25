@@ -5,8 +5,8 @@
  * Events are published via the internal bus for downstream consumers.
  */
 
+import { v4 as uuidv4 } from "node:crypto";
 import type { LocalBus } from "../protocol/bus.js";
-import { v4 as uuidv4 } from "crypto";
 import type { BindingTriple, TerminalBinding } from "./binding_triple.js";
 
 // Event topics
@@ -43,10 +43,7 @@ export class BindingEventEmitter {
   /**
    * Emit event for a terminal binding state change.
    */
-  private async emitEvent(
-    topic: BindingEventTopic,
-    payload: BindingEventPayload,
-  ): Promise<void> {
+  private async emitEvent(topic: BindingEventTopic, payload: BindingEventPayload): Promise<void> {
     const event = {
       id: uuidv4(),
       type: "event" as const,
@@ -69,10 +66,7 @@ export class BindingEventEmitter {
   /**
    * Emit 'bound' event when a terminal is registered.
    */
-  async emitBound(
-    binding: TerminalBinding,
-    correlationId: string = uuidv4(),
-  ): Promise<void> {
+  async emitBound(binding: TerminalBinding, correlationId: string = uuidv4()): Promise<void> {
     await this.emitEvent(BINDING_TOPICS.BOUND, {
       terminalId: binding.terminalId,
       binding: binding.binding,
@@ -88,7 +82,7 @@ export class BindingEventEmitter {
   async emitRebound(
     binding: TerminalBinding,
     previousBinding: BindingTriple,
-    correlationId: string = uuidv4(),
+    correlationId: string = uuidv4()
   ): Promise<void> {
     await this.emitEvent(BINDING_TOPICS.REBOUND, {
       terminalId: binding.terminalId,
@@ -103,10 +97,7 @@ export class BindingEventEmitter {
   /**
    * Emit 'unbound' event when a terminal is unregistered.
    */
-  async emitUnbound(
-    binding: TerminalBinding,
-    correlationId: string = uuidv4(),
-  ): Promise<void> {
+  async emitUnbound(binding: TerminalBinding, correlationId: string = uuidv4()): Promise<void> {
     await this.emitEvent(BINDING_TOPICS.UNBOUND, {
       terminalId: binding.terminalId,
       binding: binding.binding,
@@ -122,7 +113,7 @@ export class BindingEventEmitter {
   async emitValidationFailed(
     binding: TerminalBinding,
     reason: string,
-    correlationId: string = uuidv4(),
+    correlationId: string = uuidv4()
   ): Promise<void> {
     const payloadWithReason = {
       terminalId: binding.terminalId,

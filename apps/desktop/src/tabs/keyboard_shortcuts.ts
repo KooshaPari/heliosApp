@@ -1,6 +1,6 @@
-import { promises as fs } from "fs";
-import * as path from "path";
-import { homedir } from "os";
+import { promises as fs } from "node:fs";
+import { homedir } from "node:os";
+import * as path from "node:path";
 
 export interface ShortcutMap {
   [key: string]: string;
@@ -14,7 +14,7 @@ export const DEFAULT_SHORTCUTS: ShortcutMap = {
   "select-project": "Cmd+5",
   "previous-tab": "Cmd+[",
   "next-tab": "Cmd+]",
-  "focus-tabbar": "Cmd+Shift+T"
+  "focus-tabbar": "Cmd+Shift+T",
 };
 
 export type ShortcutAction =
@@ -72,7 +72,7 @@ export class KeyboardShortcuts {
       }
 
       this.buildReverseMap();
-    } catch (error) {
+    } catch (_error) {
       // File not found or parse error, use defaults
       this.shortcuts = { ...DEFAULT_SHORTCUTS };
       this.buildReverseMap();
@@ -122,9 +122,7 @@ export class KeyboardShortcuts {
         existingAction !== action &&
         this.normalizeShortcut(existingShortcut) === this.normalizeShortcut(shortcut)
       ) {
-        console.error(
-          `Shortcut conflict: "${shortcut}" is already mapped to "${existingAction}"`
-        );
+        console.error(`Shortcut conflict: "${shortcut}" is already mapped to "${existingAction}"`);
         return false;
       }
     }
@@ -239,7 +237,7 @@ export class KeyboardShortcuts {
       "select-project",
       "previous-tab",
       "next-tab",
-      "focus-tabbar"
+      "focus-tabbar",
     ].includes(action);
   }
 }

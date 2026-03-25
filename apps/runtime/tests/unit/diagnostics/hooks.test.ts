@@ -1,15 +1,14 @@
 // FR-001, FR-008: Unit tests for monotonic clock and markStart/markEnd API.
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import {
-  monotonicNow,
-  markStart,
-  markEnd,
-  getMarkOverflowCount,
-  createInstrumentationHooks,
-  _resetGlobalHooks,
-} from "../../../src/diagnostics/hooks.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import type { MonotonicClock } from "../../../src/diagnostics/hooks.js";
+import {
+  _resetGlobalHooks,
+  createInstrumentationHooks,
+  markEnd,
+  markStart,
+  monotonicNow,
+} from "../../../src/diagnostics/hooks.js";
 
 // ── Helper: deterministic mock clock ───────────────────────────────────
 
@@ -73,7 +72,7 @@ describe("markStart / markEnd (global)", () => {
 
   it("markEnd with real delay produces plausible duration", async () => {
     const handle = markStart("test_metric");
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise(resolve => setTimeout(resolve, 10));
     const duration = markEnd("test_metric", handle);
     // Allow 5-50ms range for CI variability.
     expect(duration).toBeGreaterThan(5);
@@ -178,7 +177,7 @@ describe("createInstrumentationHooks", () => {
     hooks.markEnd("render", h);
 
     expect(samples).toHaveLength(1);
-    expect(samples[0]!.metric).toBe("render");
-    expect(samples[0]!.value).toBe(7);
+    expect(samples[0]?.metric).toBe("render");
+    expect(samples[0]?.value).toBe(7);
   });
 });

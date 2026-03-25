@@ -1,12 +1,12 @@
 // T007-T009 - Remediation engine with confirmation gates and recovery suppression
 
-import { promises as fs } from "fs";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { execCommand } from "../../integrations/exec.js";
-import path from "path";
-import os from "os";
-import { type ClassifiedOrphan, type ResourceType } from "./resource_classifier.js";
 import type { LocalBus } from "../../protocol/bus.js";
 import type { LaneRegistry } from "../registry.js";
+import type { ClassifiedOrphan, ResourceType } from "./resource_classifier.js";
 
 export interface RemediationSuggestion {
   id: string;
@@ -46,9 +46,7 @@ export class RemediationEngine {
     this.loadCooldownMap();
   }
 
-  async generateSuggestions(
-    orphans: ClassifiedOrphan[]
-  ): Promise<RemediationSuggestion[]> {
+  async generateSuggestions(orphans: ClassifiedOrphan[]): Promise<RemediationSuggestion[]> {
     const suggestions: RemediationSuggestion[] = [];
 
     // Expire old cooldown entries
@@ -181,9 +179,7 @@ export class RemediationEngine {
       payload: {
         suggestionId,
         resourcePath: suggestion.resource.path || suggestion.resource.pid,
-        cooldownUntil: new Date(
-          Date.now() + this.cooldownDurationMs
-        ).toISOString(),
+        cooldownUntil: new Date(Date.now() + this.cooldownDurationMs).toISOString(),
       },
     });
   }
@@ -260,12 +256,7 @@ export class RemediationEngine {
   private async snapshotWorktree(orphan: ClassifiedOrphan): Promise<void> {
     if (!orphan.path) return;
 
-    const snapshotDir = path.join(
-      os.homedir(),
-      ".helios",
-      "data",
-      "worktree_snapshots"
-    );
+    const snapshotDir = path.join(os.homedir(), ".helios", "data", "worktree_snapshots");
     await fs.mkdir(snapshotDir, { recursive: true });
 
     const snapshotName = `${Date.now()}-${orphan.estimatedOwner}.json`;
@@ -282,9 +273,7 @@ export class RemediationEngine {
     await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2));
   }
 
-  private async cleanupZellijSession(
-    orphan: ClassifiedOrphan
-  ): Promise<CleanupResult> {
+  private async cleanupZellijSession(orphan: ClassifiedOrphan): Promise<CleanupResult> {
     if (!orphan.path) {
       return {
         resourceId: "unknown",
@@ -295,10 +284,7 @@ export class RemediationEngine {
     }
 
     try {
-      const result = await execCommand("zellij", [
-        "kill-session",
-        orphan.path,
-      ]);
+      const result = await execCommand("zellij", ["kill-session", orphan.path]);
 
       if (result.code === 0) {
         return {
@@ -461,6 +447,6 @@ export class RemediationEngine {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }

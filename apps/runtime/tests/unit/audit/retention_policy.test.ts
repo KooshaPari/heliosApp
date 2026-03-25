@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createRetentionPolicyConfig } from "../../../src/config/retention";
 import { InMemoryAuditSink } from "../../../src/audit/sink";
+import { createRetentionPolicyConfig } from "../../../src/config/retention";
 
 describe("retention policy", () => {
   test("enforces minimum retention days", () => {
@@ -21,8 +21,8 @@ describe("retention policy", () => {
         type: "event",
         ts: "2026-01-01T00:00:00.000Z",
         topic: "session.attached",
-        payload: {}
-      }
+        payload: {},
+      },
     });
     await sink.append({
       recorded_at: "2026-02-20T00:00:00.000Z",
@@ -34,8 +34,8 @@ describe("retention policy", () => {
         type: "event",
         ts: "2026-02-20T00:00:00.000Z",
         topic: "session.attached",
-        payload: {}
-      }
+        payload: {},
+      },
     });
 
     const result = await sink.enforceRetention(new Date("2026-02-27T00:00:00.000Z"));
@@ -43,11 +43,10 @@ describe("retention policy", () => {
 
     const records = sink.getRecords();
     expect(records).toHaveLength(2);
-    const proof = records.find((record) => {
+    const proof = records.find(record => {
       const envelope = record.envelope as Record<string, unknown>;
       return envelope.topic === "audit.retention.deleted";
     });
     expect(proof).toBeDefined();
   });
 });
-
