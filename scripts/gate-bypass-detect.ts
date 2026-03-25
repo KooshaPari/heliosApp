@@ -124,7 +124,14 @@ async function main(): Promise<void> {
 
 	const startTime = Date.now();
 	const findings = scanBypassDirectives({
-		exclude: ["node_modules", "dist", ".git", ".worktrees"],
+		exclude: [
+			"node_modules",
+			"dist",
+			".git",
+			".worktrees",
+			"scripts/tests/gate-bypass-detect.test.ts",
+			"apps/runtime/tests/unit/build-infra.test.ts",
+		],
 	});
 	const duration = Date.now() - startTime;
 
