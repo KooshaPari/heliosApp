@@ -6,7 +6,8 @@ import {
   InvalidBinding,
   TerminalNotFound,
 } from "../../../src/registry/terminal_registry.js";
-import { BindingState, type BindingTriple } from "../../../src/registry/binding_triple.js";
+import { BindingState } from "../../../src/registry/binding_triple.js";
+import { type BindingTriple } from "../../../src/registry/binding_triple.js";
 
 describe("TerminalRegistry", () => {
   let registry: TerminalRegistry;

@@ -65,7 +65,7 @@ describe("protocol asset parity", () => {
   test("keeps contract schema enums aligned with runtime protocol sets", () => {
     const contract = readJson<Record<string, unknown>>(
       [
-        "kitty-specs",
+        "agileplus",
         "001-colab-agent-terminal-control-plane",
         "contracts",
         "orchestration-envelope.schema.json",
@@ -84,7 +84,7 @@ describe("protocol asset parity", () => {
   test("keeps contract schema conditional required fields aligned with runtime guards", () => {
     const contract = readJson<Record<string, unknown>>(
       [
-        "kitty-specs",
+        "agileplus",
         "001-colab-agent-terminal-control-plane",
         "contracts",
         "orchestration-envelope.schema.json",
@@ -128,7 +128,7 @@ describe("protocol asset parity", () => {
   test("keeps schema timestamp pattern aligned with strict RFC3339 runtime contract", () => {
     const contract = readJson<Record<string, unknown>>(
       [
-        "kitty-specs",
+        "agileplus",
         "001-colab-agent-terminal-control-plane",
         "contracts",
         "orchestration-envelope.schema.json",

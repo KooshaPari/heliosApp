@@ -6,8 +6,11 @@
  */
 
 import { InMemoryLocalBus } from "./protocol/bus.js";
+<<<<<<< HEAD
+=======
 import { createBoundaryDispatcher } from "./protocol/boundary_adapter.js";
 import { METHODS } from "./protocol/methods.js";
+>>>>>>> origin/main
 import type { LocalBusEnvelope } from "./protocol/types.js";
 import { RecoveryRegistry } from "./sessions/registry.js";
 import type {
@@ -17,10 +20,25 @@ import type {
 } from "./sessions/types.js";
 import { RedactionEngine } from "./secrets/redaction-engine.js";
 import { getDefaultRules } from "./secrets/redaction-rules.js";
+<<<<<<< HEAD
+import { handleRuntimeRequest } from "./runtime/ops.js";
+import { handleRuntimeFetch } from "./runtime/fetch.js";
+import type {
+  HealthCheckResult,
+  RuntimeAuditBundle,
+  RuntimeAuditRecord,
+  RuntimeOptions,
+  TerminalBuffer,
+  TerminalBufferEntry,
+} from "./runtime/types.js";
+=======
+>>>>>>> origin/main
 
 /** Semantic version of the runtime package. */
 export const VERSION = "0.0.1" as const;
 
+<<<<<<< HEAD
+=======
 /** Result of a runtime health check. */
 export interface HealthCheckResult {
   readonly ok: boolean;
@@ -50,6 +68,7 @@ export type RuntimeOptions = {
 
 type RuntimeInstance = ReturnType<typeof createRuntime>;
 
+>>>>>>> origin/main
 const startTime = performance.now();
 const METHOD_SET = new Set<string>(METHODS);
 
@@ -112,13 +131,25 @@ export function healthCheck(): HealthCheckResult {
   };
 }
 
+<<<<<<< HEAD
+export type RuntimeInstance = ReturnType<typeof createRuntime>;
+
+export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes?: number } = {}) {
+=======
 export function createRuntime(options: RuntimeOptions = {}) {
+>>>>>>> origin/main
   const bus = new InMemoryLocalBus();
   const recovery = new RecoveryRegistry();
   const redactionEngine = new RedactionEngine();
   redactionEngine.loadRules(getDefaultRules());
 
   const auditRecords: RuntimeAuditRecord[] = [];
+<<<<<<< HEAD
+  const terminalBuffers = new Map<string, TerminalBuffer>();
+  const terminalBufferCap = options.terminalBufferCapBytes ?? 1024 * 1024;
+  let terminalState: "active" | "throttled" = "active";
+=======
+>>>>>>> origin/main
   let bootstrapResult: RecoveryBootstrapResult | null = null;
 
   if (options.recovery_metadata) {
@@ -126,6 +157,57 @@ export function createRuntime(options: RuntimeOptions = {}) {
   }
 
   function appendAuditRecord(record: RuntimeAuditRecord): void {
+<<<<<<< HEAD
+    const enriched = { ...record };
+    if (!enriched.recorded_at) {
+        enriched.recorded_at = new Date().toISOString();
+    }
+    auditRecords.push(enriched);
+  }
+
+  function getTerminalBuffer(terminalId: string): TerminalBuffer {
+    let buffer = terminalBuffers.get(terminalId);
+    if (!buffer) {
+      buffer = {
+        terminal_id: terminalId,
+        total_bytes: 0,
+        dropped_bytes: 0,
+        entries: [],
+      };
+      terminalBuffers.set(terminalId, buffer);
+    }
+    return buffer;
+  }
+
+  async function request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+    return handleRuntimeRequest(
+      {
+      bus,
+      recovery,
+      redactionEngine,
+      terminalBufferCap,
+      terminalBuffers,
+      appendAuditRecord,
+      getTerminalBuffer,
+      getTerminalState: () => terminalState,
+      setTerminalState: (state) => {
+        terminalState = state;
+      },
+    },
+    command,
+  );
+  }
+
+  async function fetch(requestInput: Request): Promise<Response> {
+    return handleRuntimeFetch(
+      requestInput,
+      request,
+      {
+        bus,
+        appendAuditRecord,
+      },
+    );
+=======
     auditRecords.push(record);
   }
 
@@ -284,11 +366,16 @@ export function createRuntime(options: RuntimeOptions = {}) {
     }
 
     return new Response("Not found", { status: 404 });
+>>>>>>> origin/main
   }
 
   function exportAuditBundle(filter?: { correlation_id?: string }): RuntimeAuditBundle {
     const records = filter?.correlation_id
+<<<<<<< HEAD
+      ? auditRecords.filter((record) => record.correlation_id === filter.correlation_id)
+=======
       ? auditRecords.filter(record => record.correlation_id === filter.correlation_id)
+>>>>>>> origin/main
       : [...auditRecords];
     return {
       count: records.length,
@@ -317,11 +404,89 @@ export function createRuntime(options: RuntimeOptions = {}) {
       return recovery.scanForOrphans(new Date().toISOString());
     },
     exportAuditBundle,
+<<<<<<< HEAD
+    getTerminalBuffer(terminalId: string): TerminalBuffer {
+      return getTerminalBuffer(terminalId);
+    },
+    getState(): any {
+      const state: any = { terminal: terminalState };
+      const hasSessions = auditRecords.some(r => r.topic === "session.attached");
+      if (hasSessions) {
+          state.session = "attached";
+      }
+      return state;
+    },
+    async spawnTerminal(payload: Record<string, unknown>): Promise<LocalBusEnvelope> {
+      return request({
+        id: `cmd-spawn-${Date.now()}`,
+        type: "command",
+        ts: new Date().toISOString(),
+        method: "terminal.spawn",
+        payload,
+        ...payload,
+      } as LocalBusEnvelope);
+    },
+    async inputTerminal(payload: Record<string, unknown>): Promise<LocalBusEnvelope> {
+      return request({
+        id: `cmd-input-${Date.now()}`,
+        type: "command",
+        ts: new Date().toISOString(),
+        method: "terminal.input",
+        payload,
+        ...payload,
+      } as LocalBusEnvelope);
+    },
+    async resizeTerminal(payload: Record<string, unknown>): Promise<LocalBusEnvelope> {
+      return request({
+        id: `cmd-resize-${Date.now()}`,
+        type: "command",
+        ts: new Date().toISOString(),
+        method: "terminal.resize",
+        payload,
+        ...payload,
+      } as LocalBusEnvelope);
+    },
+    getEvents(): LocalBusEnvelope[] {
+      return auditRecords.filter((r) => r.type === "event").map((r, index) => {
+        return {
+          ts: r.recorded_at,
+          type: "event",
+          topic: r.topic,
+          correlation_id: r.correlation_id,
+          payload: r.payload,
+          sequence: index + 1,
+        } as LocalBusEnvelope;
+      });
+    },
+    async getAuditRecords(): Promise<any[]> {
+      return auditRecords.map(r => ({ 
+          recorded_at: r.recorded_at,
+          type: r.type,
+          envelope: { 
+              correlation_id: r.correlation_id,
+              topic: r.topic,
+              method: r.method,
+              payload: r.payload
+          } 
+      }));
+=======
     async getAuditRecords(): Promise<RuntimeAuditRecord[]> {
       return [...auditRecords];
+>>>>>>> origin/main
     },
     shutdown(): void {},
   };
 }
 
+<<<<<<< HEAD
+export type {
+  HealthCheckResult,
+  RuntimeAuditRecord,
+  RuntimeAuditBundle,
+  RuntimeOptions,
+  TerminalBuffer,
+  TerminalBufferEntry,
+} from "./runtime/types.js";
+=======
 export type { RuntimeInstance };
+>>>>>>> origin/main

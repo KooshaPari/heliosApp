@@ -2,6 +2,10 @@
 
 <!-- Brief description of what this PR does -->
 
+## Worktree / branch
+
+<!-- Worktree path or branch name: -->
+
 ## Changes
 
 -
@@ -15,8 +19,10 @@
 ## Test Plan
 
 - [ ] Unit tests pass (`bun test`)
+- [ ] Runtime tests pass (`bun test` in `apps/runtime`)
 - [ ] Type check passes (`bun run typecheck`)
 - [ ] No regressions in existing tests
+- [ ] If this PR touches policy or compliance surfaces, confirm `quality-gates` / `compliance-check` are relevant and green (otherwise N/A)
 
 ## Review Checklist
 

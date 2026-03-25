@@ -23,7 +23,7 @@
 | #40 | refactor: decompose runtime into pty/renderer/secrets/lanes services | **Core decomposition — 807 files, 87K ins** | 2026-03-02 |
 
 ### What PR #40 Delivered
-- 30 feature specifications (kitty-specs/001–030) with 152 work packages
+- 30 feature specifications (agileplus/001–030) with 152 work packages
 - Bun monorepo: apps/desktop, apps/runtime, packages/ids
 - Renderer abstraction (Ghostty + Rio adapters)
 - PTY lifecycle management with backpressure

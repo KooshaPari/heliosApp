@@ -1,3 +1,14 @@
+<<<<<<< HEAD
+export * from "./protected-paths-types.js";
+export {
+  DEFAULT_PATTERNS,
+  matchesPattern,
+  extractFilePaths,
+  redactCommandForAudit,
+} from "./protected-paths-matching.js";
+export { ProtectedPathConfig } from "./protected-paths-config.js";
+export { ProtectedPathDetector } from "./protected-paths-detector.js";
+=======
 import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
@@ -558,3 +569,4 @@ function redactCommandForAudit(command: string): string {
       (_, _k) => "[REDACTED:API_KEY]"
     );
 }
+>>>>>>> origin/main
