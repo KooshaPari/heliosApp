@@ -191,6 +191,12 @@ export class HarnessRouteSelector {
   }
 }
 
+function toResponseBody(
+  stream: number | ReadableStream<Uint8Array> | null | undefined
+): ReadableStream<Uint8Array> | null {
+  return typeof stream === "number" ? null : (stream ?? null);
+}
+
 export async function execCommand(command: string, args: string[]): Promise<ExecResult> {
   const proc = Bun.spawn([command, ...args], {
     stdout: "pipe",
@@ -198,8 +204,8 @@ export async function execCommand(command: string, args: string[]): Promise<Exec
   });
 
   const [stdoutBuf, stderrBuf, code] = await Promise.all([
-    new Response(proc.stdout).arrayBuffer(),
-    new Response(proc.stderr).arrayBuffer(),
+    new Response(toResponseBody(proc.stdout)).arrayBuffer(),
+    new Response(toResponseBody(proc.stderr)).arrayBuffer(),
     proc.exited,
   ]);
 

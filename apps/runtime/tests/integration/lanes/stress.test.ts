@@ -8,9 +8,13 @@ import { LaneManager, _resetIdCounter } from "../../../src/lanes/index.js";
 import { LaneCapacityExceededError } from "../../../src/lanes/registry.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 
+function toResponseBody(stream: number | ReadableStream<Uint8Array> | null | undefined): ReadableStream<Uint8Array> | null {
+  return typeof stream === "number" ? null : (stream ?? null);
+}
+
 async function runGit(args: string[], cwd: string): Promise<string> {
   const proc = (Bun as any).spawn(["git", ...args], { cwd, stdout: "pipe", stderr: "pipe" });
-  const stdout = await new Response(proc.stdout).text();
+  const stdout = await new Response(toResponseBody(proc.stdout as number | ReadableStream<Uint8Array> | null | undefined)).text();
   await proc.exited;
   return stdout.trim();
 }

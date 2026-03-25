@@ -76,6 +76,12 @@ type SpawnOptions = {
 
 const spawn = Bun.spawn as unknown as (command: string[], options: SpawnOptions) => SpawnResult;
 
+function toResponseBody(
+  stream: number | ReadableStream<Uint8Array> | null | undefined
+): ReadableStream<Uint8Array> | null {
+  return typeof stream === "number" ? null : (stream ?? null);
+}
+
 async function runGit(
   args: string[],
   cwd: string
@@ -87,8 +93,8 @@ async function runGit(
   });
 
   const [stdout, stderr] = await Promise.all([
-    new Response(proc.stdout).text(),
-    new Response(proc.stderr).text(),
+    new Response(toResponseBody(proc.stdout)).text(),
+    new Response(toResponseBody(proc.stderr)).text(),
   ]);
 
   const exitCode = await proc.exited;

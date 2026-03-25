@@ -8,12 +8,16 @@ import { LaneManager, _resetIdCounter } from "../../../src/lanes/index.js";
 import { computeBranchName } from "../../../src/lanes/worktree.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 
+function toResponseBody(stream: number | ReadableStream<Uint8Array> | null | undefined): ReadableStream<Uint8Array> | null {
+  return typeof stream === "number" ? null : (stream ?? null);
+}
+
 async function runGit(args: string[], cwd: string): Promise<string> {
   const proc = (Bun as any).spawn(["git", ...args], { cwd, stdout: "pipe", stderr: "pipe" });
-  const stdout = await new Response(proc.stdout).text();
+  const stdout = await new Response(toResponseBody(proc.stdout as number | ReadableStream<Uint8Array> | null | undefined)).text();
   const exitCode = await proc.exited;
   if (exitCode !== 0) {
-    const stderr = await new Response(proc.stderr).text();
+    const stderr = await new Response(toResponseBody(proc.stderr as number | ReadableStream<Uint8Array> | null | undefined)).text();
     throw new Error(`git ${args.join(" ")} failed: ${stderr}`);
   }
   return stdout.trim();
