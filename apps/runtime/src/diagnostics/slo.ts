@@ -1,10 +1,6 @@
 // FR-004, FR-010: SLO violation detection, rate-limited event emission, and periodic check loop.
 
-<<<<<<< HEAD
 import type { PercentileBucket, SLODefinition, SLOViolationEvent } from "./types.js";
-=======
-import type { SLODefinition, SLOViolationEvent, PercentileBucket } from "./types.js";
->>>>>>> origin/main
 import type { MetricsRegistry } from "./metrics.js";
 import { computePercentiles } from "./percentiles.js";
 

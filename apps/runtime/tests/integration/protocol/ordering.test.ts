@@ -6,7 +6,6 @@
  * FR-009: Subscriber isolation during fan-out.
  */
 
-<<<<<<< HEAD
 import { describe, expect, it, beforeEach } from 'bun:test';
 import { createBus, type CommandBus, getActiveCorrelationId } from '../../../src/protocol/bus.js';
 import { createCommand, createEvent, createResponse } from '../../../src/protocol/envelope.js';
@@ -14,16 +13,6 @@ import type { EventEnvelope } from '../../../src/protocol/types.js';
 
 describe('Event ordering — per-topic monotonic sequences', () => {
   let bus: CommandBus;
-=======
-import { describe, expect, it, beforeEach } from "bun:test";
-import { createBus } from "../../../src/protocol/bus.js";
-import type { LocalBus } from "../../../src/protocol/bus.js";
-import { createCommand, createEvent, createResponse } from "../../../src/protocol/envelope.js";
-import type { LocalBusEnvelope } from "../../../src/protocol/types.js";
-
-describe("Event ordering — per-topic monotonic sequences", () => {
-  let bus: LocalBus;
->>>>>>> origin/main
 
   beforeEach(() => {
     bus = createBus();
@@ -123,13 +112,8 @@ describe("Event ordering — per-topic monotonic sequences", () => {
   });
 });
 
-<<<<<<< HEAD
 describe('Correlation ID propagation', () => {
   let bus: CommandBus;
-=======
-describe("Correlation ID propagation", () => {
-  let bus: LocalBus;
->>>>>>> origin/main
 
   beforeEach(() => {
     bus = createBus();
