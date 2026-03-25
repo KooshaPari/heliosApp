@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
+import { InMemoryBusPublisher } from "../events.js";
 import { IdleMonitor } from "../idle_monitor.js";
 import { PtyRegistry } from "../registry.js";
 import type { PtyRecord } from "../registry.js";
 import { PtyLifecycle } from "../state_machine.js";
-import { InMemoryBusPublisher } from "../events.js";
 
 function makeRecord(
   registry: PtyRegistry,
@@ -33,7 +33,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 
@@ -58,7 +58,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 
@@ -79,7 +79,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 
@@ -98,7 +98,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1", { state: "throttled" });
+    const _record = makeRecord(registry, "pty-1", { state: "throttled" });
     const lifecycle = new PtyLifecycle("pty-1", "throttled");
     lifecycles.set("pty-1", lifecycle);
 
@@ -115,7 +115,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 

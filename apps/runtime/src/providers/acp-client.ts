@@ -11,11 +11,11 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
   ACPConfig,
   ACPExecuteInput,
   ACPExecuteOutput,
+  ProviderAdapter,
+  ProviderHealthStatus,
 } from "./adapter.js";
 import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
 
@@ -46,7 +46,7 @@ class DefaultPolicyGate implements PolicyGate {
 /**
  * Mock ACP request for testing/prototyping.
  */
-interface ACPRequest {
+interface AcpRequest {
   correlationId: string;
   model: string;
   messages: Array<{ role: string; content: string }>;
@@ -57,7 +57,7 @@ interface ACPRequest {
 /**
  * Mock ACP response.
  */
-interface ACPResponse {
+interface AcpResponse {
   taskId: string;
   content: string;
   stopReason: string;
@@ -117,19 +117,11 @@ export class ACPClientAdapter implements ProviderAdapter<
     try {
       // Validate config
       if (!config.baseUrl || typeof config.baseUrl !== "string") {
-<<<<<<< HEAD
-        throw new Error("Missing or invalid baseUrl");
-      }
-
-      if (!config.apiKey || typeof config.apiKey !== "string") {
-        throw new Error("Missing or invalid apiKey");
-=======
         throw new Error("Missing or invalid endpoint");
       }
 
       if (!config.apiKey || typeof config.apiKey !== "string") {
         throw new Error("Missing or invalid apiKeyRef");
->>>>>>> origin/main
       }
 
       if (!config.model || typeof config.model !== "string") {
@@ -137,20 +129,12 @@ export class ACPClientAdapter implements ProviderAdapter<
       }
 
       // Validate timeout
-<<<<<<< HEAD
-      if (config.timeout && config.timeout <= 0) {
-        throw new Error("timeout must be > 0ms");
-      }
-
-      // Simulate endpoint reachability check with timeout
-=======
       if (config.timeout && config.timeout < 1000) {
         throw new Error("timeout must be >= 1000ms");
       }
 
       // Simulate endpoint reachability check with timeout
       const probeTimeout = config.timeout || 10000;
->>>>>>> origin/main
       const probeResult = await Promise.race([
         this.probeEndpoint(config.baseUrl),
         new Promise<boolean>((_, reject) =>
@@ -163,10 +147,6 @@ export class ACPClientAdapter implements ProviderAdapter<
       }
 
       this.config = config;
-<<<<<<< HEAD
-      this.terminated = false;
-=======
->>>>>>> origin/main
       this.healthCheckInterval = 30000;
 
       this.healthStatus = {
@@ -181,11 +161,7 @@ export class ACPClientAdapter implements ProviderAdapter<
       }
 
       await this.publishEvent("provider.acp.initialized", {
-<<<<<<< HEAD
-        baseUrl: config.baseUrl,
-=======
         endpoint: config.baseUrl,
->>>>>>> origin/main
         model: config.model,
       });
     } catch (error) {
@@ -229,11 +205,7 @@ export class ACPClientAdapter implements ProviderAdapter<
     try {
       // Perform lightweight health check
       const probeSuccess = await Promise.race([
-<<<<<<< HEAD
-        this.probeEndpoint(this.config.baseUrl),
-=======
         this.probeEndpoint(this.config.baseUrl ?? ""),
->>>>>>> origin/main
         new Promise<boolean>((_, reject) =>
           setTimeout(() => reject(new Error("Health check timeout")), 5000)
         ),
@@ -308,7 +280,9 @@ export class ACPClientAdapter implements ProviderAdapter<
     if (!this.config || this.terminated) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        this.terminated ? "ACP client unavailable: terminated" : "ACP client unavailable: not initialized",
+        this.terminated
+          ? "ACP client unavailable: terminated"
+          : "ACP client unavailable: not initialized",
         "acp"
       );
     }
@@ -347,7 +321,7 @@ export class ACPClientAdapter implements ProviderAdapter<
         const startTime = Date.now();
 
         // Construct ACP request
-        const acpRequest: ACPRequest = {
+        const acpRequest: AcpRequest = {
           correlationId,
           model: this.config.model,
           messages: [
@@ -427,7 +401,9 @@ export class ACPClientAdapter implements ProviderAdapter<
     if (!this.config || this.terminated) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        this.terminated ? "ACP client unavailable: terminated" : "ACP client unavailable: not initialized",
+        this.terminated
+          ? "ACP client unavailable: terminated"
+          : "ACP client unavailable: not initialized",
         "acp"
       );
     }
@@ -563,9 +539,6 @@ export class ACPClientAdapter implements ProviderAdapter<
         topic,
         payload,
       });
-    } catch (error) {
-      // Log but don't throw (event publishing is best-effort)
-      console.warn(`Failed to publish ACP event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }

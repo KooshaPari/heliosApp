@@ -1,9 +1,9 @@
 // Unit tests for ResourceClassifier
 
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import {
-  ResourceClassifier,
   type OrphanedResource,
+  ResourceClassifier,
 } from "../../../../src/lanes/watchdog/resource_classifier.js";
 
 describe("ResourceClassifier", () => {

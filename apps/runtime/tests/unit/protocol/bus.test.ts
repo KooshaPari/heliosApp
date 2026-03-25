@@ -1,28 +1,16 @@
-<<<<<<< HEAD
-import { describe, expect, it, beforeEach } from 'bun:test';
-import { createBus, type CommandBus } from '../../../src/protocol/bus.js';
-import { createCommand, createResponse } from '../../../src/protocol/envelope.js';
-import type { CommandEnvelope, ResponseEnvelope } from '../../../src/protocol/types.js';
-=======
 import { describe, expect, it, beforeEach } from "bun:test";
 import { createBus } from "../../../src/protocol/bus.js";
 import type { LocalBus } from "../../../src/protocol/bus.js";
 import { createCommand, createResponse } from "../../../src/protocol/envelope.js";
 import type { CommandEnvelope, ResponseEnvelope } from "../../../src/protocol/types.js";
->>>>>>> origin/main
 
 // FR-003: Command dispatch pipeline
 // FR-004: Event fan-out
 // FR-009: Subscriber isolation
 // FR-010: Snapshot-based iteration
 
-<<<<<<< HEAD
-describe('LocalBus — command dispatch', () => {
-  let bus: CommandBus;
-=======
 describe("LocalBus — command dispatch", () => {
   let bus: LocalBus;
->>>>>>> origin/main
 
   beforeEach(() => {
     bus = createBus();

@@ -1,8 +1,8 @@
 // T002 - Orphaned worktree detector
 
-import { promises as fs } from "fs";
-import path from "path";
-import { LaneRegistry, type LaneRecord } from "../registry.js";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import type { LaneRecord, LaneRegistry } from "../registry.js";
 import type { OrphanedResource } from "./resource_classifier.js";
 
 export class WorktreeDetector {
@@ -18,7 +18,9 @@ export class WorktreeDetector {
       const entries = await fs.readdir(this.baseDir, { withFileTypes: true });
 
       for (const entry of entries) {
-        if (!entry.isDirectory()) continue;
+        if (!entry.isDirectory()) {
+          continue;
+        }
 
         const worktreePath = path.join(this.baseDir, entry.name);
         const laneId = this.extractLaneId(entry.name);
@@ -33,11 +35,7 @@ export class WorktreeDetector {
 
         // Exclude transient states
         if (lane) {
-<<<<<<< HEAD
-          if (lane.state === "cleaning") {
-=======
           if (lane.state === "cleaning" || (lane.state as string) === "recovering") {
->>>>>>> origin/main
             continue; // Not orphaned, just in transient state
           }
           // Lane is active and not in transient state

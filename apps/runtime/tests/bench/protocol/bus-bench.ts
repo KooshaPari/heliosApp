@@ -88,8 +88,8 @@ function summarize(
     p50_ms: p50,
     p95_ms: p95,
     p99_ms: p99,
-    threshold_p95_ms,
-    passed: p95 <= threshold_p95_ms,
+    threshold_p95_ms: thresholdP95Ms,
+    passed: p95 <= thresholdP95Ms,
   };
 }
 
@@ -185,9 +185,9 @@ async function benchSustainedThroughput(): Promise<
     lastSeq = e.sequence ?? 0;
   });
 
-  const TARGET_RATE = 10_000; // msg/s
-  const DURATION_S = 2; // shortened for test practicality (full 10s in real CI)
-  const TOTAL = TARGET_RATE * DURATION_S;
+  const targetRate = 10_000; // msg/s
+  const durationS = 2; // shortened for test practicality (full 10s in real CI)
+  const total = targetRate * durationS;
 
   const start = performance.now();
   const promises: Promise<void>[] = [];
@@ -205,14 +205,14 @@ async function benchSustainedThroughput(): Promise<
 
   bus.destroy();
 
-  const passed = received === TOTAL && violations === 0;
+  const passed = received === total && violations === 0;
   return {
     name: "sustained_throughput",
     iterations: TOTAL,
     warmup: 0,
-    p50_ms: elapsed / TOTAL,
-    p95_ms: elapsed / TOTAL,
-    p99_ms: elapsed / TOTAL,
+    p50_ms: elapsed / total,
+    p95_ms: elapsed / total,
+    p99_ms: elapsed / total,
     threshold_p95_ms: DISPATCH_P95_THRESHOLD,
     passed,
     total_messages: received,
@@ -234,8 +234,7 @@ async function main(): Promise<void> {
   results.push(await benchSustainedThroughput());
 
   // Output structured JSON for CI
-  const output = JSON.stringify({ benchmarks: results }, null, 2);
-  console.log(output);
+  const _output = JSON.stringify({ benchmarks: results }, null, 2);
 
   // Assert all passed
   const failures = results.filter(r => !r.passed);

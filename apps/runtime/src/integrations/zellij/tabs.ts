@@ -6,10 +6,10 @@
  */
 
 import type { ZellijCli } from "./cli.js";
-import type { TopologyTracker } from "./topology.js";
-import type { ZellijPaneManager } from "./panes.js";
-import type { TabRecord, PtyManagerInterface } from "./types.js";
 import { TabNotFoundError, ZellijCliError } from "./errors.js";
+import type { ZellijPaneManager } from "./panes.js";
+import type { TopologyTracker } from "./topology.js";
+import type { PtyManagerInterface, TabRecord } from "./types.js";
 
 /**
  * Manages tab lifecycle within zellij sessions.

@@ -8,9 +8,8 @@ import { mkdtempSync, mkdirSync, rmdirSync, symlinkSync, realpathSync } from "no
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-  bindLocalProject,
   bindGitProject,
-  unbindProject,
+  bindLocalProject,
   detectStaleProjects,
   gitClone,
 } from "../../../src/workspace/project.js";
@@ -67,7 +66,7 @@ describe("bindLocalProject", () => {
     symlinkSync(realDir, linkPath);
 
     const updated = bindLocalProject(ws, linkPath);
-    expect(updated.projects[0]!.rootPath).toBe(realpathSync(realDir));
+    expect(updated.projects[0]?.rootPath).toBe(realpathSync(realDir));
   });
 
   test("path with spaces works", () => {
@@ -89,7 +88,7 @@ describe("bindLocalProject", () => {
 describe("unbindProject", () => {
   test("removes existing binding", () => {
     const bound = bindLocalProject(ws, tempDir);
-    const projectId = bound.projects[0]!.id;
+    const projectId = bound.projects[0]?.id;
     const unbound = unbindProject(bound, projectId);
     expect(unbound.projects).toHaveLength(0);
   });

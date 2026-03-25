@@ -29,12 +29,12 @@ describe("KeyboardShortcuts", () => {
 
   describe("Default Shortcuts", () => {
     it("should have default shortcuts", () => {
-      const shortcuts_map = shortcuts.getShortcuts();
-      expect(shortcuts_map["select-terminal"]).toBeDefined();
-      expect(shortcuts_map["select-agent"]).toBeDefined();
-      expect(shortcuts_map["select-session"]).toBeDefined();
-      expect(shortcuts_map["select-chat"]).toBeDefined();
-      expect(shortcuts_map["select-project"]).toBeDefined();
+      const shortcutsMap = shortcuts.getShortcuts();
+      expect(shortcutsMap["select-terminal"]).toBeDefined();
+      expect(shortcutsMap["select-agent"]).toBeDefined();
+      expect(shortcutsMap["select-session"]).toBeDefined();
+      expect(shortcutsMap["select-chat"]).toBeDefined();
+      expect(shortcutsMap["select-project"]).toBeDefined();
     });
 
     it("should get specific shortcut", () => {
@@ -94,7 +94,7 @@ describe("KeyboardShortcuts", () => {
     });
 
     it("should support shortcut listeners", () => {
-      let actions: ShortcutAction[] = [];
+      const actions: ShortcutAction[] = [];
 
       shortcuts.onShortcut(action => {
         actions.push(action);

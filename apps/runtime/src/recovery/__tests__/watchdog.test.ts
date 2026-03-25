@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { Watchdog, CrashReason, type CrashEvent } from "../watchdog.js";
-import { InMemoryLocalBus, type LocalBus } from "../../protocol/bus.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
@@ -107,13 +107,8 @@ describe("Watchdog", () => {
     await watchdog.handleProcessExit("test-proc", 1234, 1);
 
     expect(crashEvents.length).toBe(1);
-<<<<<<< HEAD
-    expect(crashEvents.at(0)?.reason).toBe(CrashReason.EXIT_CODE);
-    expect(crashEvents.at(0)?.exitCode).toBe(1);
-=======
     expect(crashEvents[0].reason).toBe(CrashReason.EXIT_CODE);
     expect(crashEvents[0].exitCode).toBe(1);
->>>>>>> origin/main
   });
 
   it("should not trigger crash on graceful exit code 0", async () => {
@@ -144,11 +139,7 @@ describe("Watchdog", () => {
     await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGKILL");
 
     expect(crashEvents.length).toBe(1);
-<<<<<<< HEAD
-    expect(crashEvents.at(0)?.reason).toBe(CrashReason.SIGNAL);
-=======
     expect(crashEvents[0].reason).toBe(CrashReason.SIGNAL);
->>>>>>> origin/main
   });
 
   it("should handle multiple process monitoring", async () => {

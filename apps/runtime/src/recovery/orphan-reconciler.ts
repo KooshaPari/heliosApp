@@ -1,5 +1,5 @@
+import { randomUUID } from "node:crypto";
 import type { LocalBus } from "../protocol/bus.js";
-import { randomUUID } from "crypto";
 
 export interface OrphanItem {
   type: "pty" | "zellij_session" | "par_lane" | "share_worker" | "temp_file";
@@ -80,13 +80,11 @@ export class OrphanReconciler {
             }
           }
         } else if (item.type === "temp_file" && item.path) {
-          const { promises: fs } = await import("fs");
+          const { promises: fs } = await import("node:fs");
           await fs.unlink(item.path);
           removed++;
         }
-      } catch (err) {
-        console.error(`Failed to cleanup orphan ${item.id}:`, err);
-      }
+      } catch (_err) {}
     }
 
     const reviewPending = report.needsReview.length;
@@ -119,8 +117,8 @@ export class OrphanReconciler {
   }
 
   private async scanOrphanPTYs(
-    safeToTerminate: OrphanItem[],
-    needsReview: OrphanItem[]
+    _safeToTerminate: OrphanItem[],
+    _needsReview: OrphanItem[]
   ): Promise<void> {
     // In a real implementation, this would scan /proc or use Bun/Node APIs
     // to find PTY processes owned by heliosApp but not associated with restored sessions
@@ -128,8 +126,8 @@ export class OrphanReconciler {
   }
 
   private async scanStaleZelijjSessions(
-    safeToTerminate: OrphanItem[],
-    needsReview: OrphanItem[]
+    _safeToTerminate: OrphanItem[],
+    _needsReview: OrphanItem[]
   ): Promise<void> {
     // In a real implementation, this would call zellij list-sessions
     // and compare against restored session IDs
@@ -138,11 +136,11 @@ export class OrphanReconciler {
 
   private async scanStaleTempFiles(
     safeToTerminate: OrphanItem[],
-    needsReview: OrphanItem[]
+    _needsReview: OrphanItem[]
   ): Promise<void> {
     try {
-      const { promises: fs } = await import("fs");
-      const path = await import("path");
+      const { promises: fs } = await import("node:fs");
+      const path = await import("node:path");
 
       // Look for stale temp files in recovery directory
       // This is a simplified version; real implementation would be more thorough
@@ -163,8 +161,6 @@ export class OrphanReconciler {
       } catch {
         // Recovery directory doesn't exist
       }
-    } catch (err) {
-      console.error("Failed to scan for stale temp files:", err);
-    }
+    } catch (_err) {}
   }
 }

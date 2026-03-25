@@ -1,7 +1,7 @@
-import { promises as fs } from "fs";
-import * as path from "path";
-import { homedir } from "os";
-import type { TabSurface, TabState } from "./tab_surface";
+import { promises as fs } from "node:fs";
+import { homedir } from "node:os";
+import * as path from "node:path";
+import type { TabState, TabSurface } from "./tab_surface.ts";
 
 /**
  * Persisted tab state structure.
@@ -30,7 +30,7 @@ export class TabPersistence {
   private readonly storagePath: string;
   private debounceTimer: NodeJS.Timeout | null = null;
   private pendingState: TabPersistedState | null = null;
-  private lastLoadTime: number = 0;
+  private lastLoadTime = 0;
 
   constructor(storageDir?: string) {
     this.storageDir = storageDir ?? path.join(homedir(), ".helios", "data");
@@ -50,7 +50,6 @@ export class TabPersistence {
 
       // Validate structure
       if (!this.validateState(state)) {
-        console.warn("Invalid tab state file, using defaults");
         return null;
       }
 
@@ -69,7 +68,6 @@ export class TabPersistence {
           return null;
         }
       }
-      console.warn("Failed to load tab state:", error);
       return null;
     }
   }
@@ -105,9 +103,7 @@ export class TabPersistence {
           // Write state to file
           const data = JSON.stringify(stateToWrite, null, 2);
           await fs.writeFile(this.storagePath, data, "utf-8");
-        } catch (error) {
-          console.error("Failed to save tab state:", error);
-        }
+        } catch (_error) {}
 
         resolve();
       }, 500);
@@ -135,9 +131,7 @@ export class TabPersistence {
       await fs.mkdir(this.storageDir, { recursive: true });
       const data = JSON.stringify(stateToWrite, null, 2);
       await fs.writeFile(this.storagePath, data, "utf-8");
-    } catch (error) {
-      console.error("Failed to flush tab state:", error);
-    }
+    } catch (_error) {}
   }
 
   /**
@@ -219,7 +213,6 @@ export class TabPersistence {
       if (error instanceof Error && "code" in error) {
         const nodeError = error as NodeJS.ErrnoException;
         if (nodeError.code !== "ENOENT") {
-          console.error("Failed to delete tab state:", error);
         }
       }
     }

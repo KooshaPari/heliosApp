@@ -1,16 +1,7 @@
-import type { LocalBusEnvelope } from "./types";
-import { ProtocolValidationError } from "./types";
-<<<<<<< HEAD
-import {
-  assertIsoTimestamp,
-  assertOptionalString,
-  assertRecord,
-  assertStringField,
-  validateCommandEnvelope,
-  validateEventEnvelope,
-  validateResponseEnvelope,
-} from "./validator-rules";
-=======
+import { METHODS } from "./methods.ts";
+import { TOPICS } from "./topics.ts";
+import type { LocalBusEnvelope } from "./types.ts";
+import { ProtocolValidationError } from "./types.ts";
 
 const METHOD_SET = new Set<string>(METHODS);
 const TOPIC_SET = new Set<string>(TOPICS);
@@ -273,7 +264,6 @@ function validateResponseEnvelope(envelope: Record<string, unknown>): void {
     });
   }
 }
->>>>>>> origin/main
 
 export function validateEnvelope(input: unknown): LocalBusEnvelope {
   assertRecord(input);
@@ -284,7 +274,7 @@ export function validateEnvelope(input: unknown): LocalBusEnvelope {
     throw new ProtocolValidationError(
       "INVALID_ENVELOPE_TYPE",
       `Unsupported envelope type '${type}'`,
-      { type },
+      { type }
     );
   }
 
@@ -314,6 +304,7 @@ export function validateEnvelope(input: unknown): LocalBusEnvelope {
     validateResponseEnvelope(envelope);
   }
 
+  // id is checked for completeness and stable semantics in thrown errors.
   if (!id) {
     throw new ProtocolValidationError("MISSING_REQUIRED_FIELD", "Envelope field 'id' is required");
   }

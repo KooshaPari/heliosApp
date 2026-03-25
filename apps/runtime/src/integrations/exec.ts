@@ -1,4 +1,4 @@
-import type { LocalBus } from "../protocol/bus";
+import type { LocalBus } from "../protocol/bus.ts";
 
 export type ExecResult = {
   code: number;

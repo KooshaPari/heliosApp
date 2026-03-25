@@ -1,6 +1,6 @@
 // NFR-004: Memory overhead test — 20 metrics x 10k samples must stay under 10 MB.
 
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 
 describe("Memory Overhead", () => {
@@ -13,22 +13,22 @@ describe("Memory Overhead", () => {
     const heapBefore = process.memoryUsage().heapUsed;
 
     const registry = new MetricsRegistry();
-    const METRIC_COUNT = 20;
-    const BUFFER_SIZE = 10_000;
+    const metricCount = 20;
+    const bufferSize = 10_000;
 
-    for (let i = 0; i < METRIC_COUNT; i++) {
+    for (let i = 0; i < metricCount; i++) {
       registry.register({
         name: `mem-metric-${i}`,
         type: "latency",
         unit: "ms",
         description: `Memory test metric ${i}`,
-        bufferSize: BUFFER_SIZE,
+        bufferSize: bufferSize,
       });
     }
 
     // Fill all buffers completely.
-    for (let i = 0; i < METRIC_COUNT; i++) {
-      for (let j = 0; j < BUFFER_SIZE; j++) {
+    for (let i = 0; i < metricCount; i++) {
+      for (let j = 0; j < bufferSize; j++) {
         registry.record(`mem-metric-${i}`, Math.random() * 1000, j);
       }
     }
@@ -39,10 +39,10 @@ describe("Memory Overhead", () => {
 
     const heapAfter = process.memoryUsage().heapUsed;
     const totalBytes = heapAfter - heapBefore;
-    const totalMB = totalBytes / (1024 * 1024);
+    const totalMb = totalBytes / (1024 * 1024);
 
     // Expected: 20 * 10k * 16 bytes = ~3.2 MB + overhead
-    const perMetricKB = totalBytes / METRIC_COUNT / 1024;
+    const _perMetricKb = totalBytes / metricCount / 1024;
 
     console.log(
       JSON.stringify({
@@ -92,6 +92,6 @@ describe("Memory Overhead", () => {
     );
 
     // Empty (lazy) buffers should use very little memory.
-    expect(totalKB).toBeLessThan(100);
+    expect(totalKb).toBeLessThan(100);
   });
 });

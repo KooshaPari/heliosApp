@@ -1,10 +1,10 @@
 // FR-002: Unit tests for rolling percentile computation.
 
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { RingBuffer } from "../../../src/diagnostics/metrics.js";
 import {
-  computePercentiles,
   EMPTY_PERCENTILE_BUCKET,
+  computePercentiles,
 } from "../../../src/diagnostics/percentiles.js";
 import type { PercentileBucket } from "../../../src/diagnostics/types.js";
 
@@ -15,15 +15,6 @@ describe("computePercentiles", () => {
     for (let i = 1; i <= 100; i++) {
       buf.push(i, i);
     }
-<<<<<<< HEAD
-    const result: PercentileBucket = computePercentiles(buf);
-    expect(result.p50).toBe(51);
-    expect(result.p95).toBe(96);
-    expect(result.p99).toBe(100);
-    expect(result.min).toBe(1);
-    expect(result.max).toBe(100);
-    expect(result.count).toBe(100);
-=======
     const result = computePercentiles(buf.getValues());
     expect(result!.p50).toBe(51);
     expect(result!.p95).toBe(96);
@@ -31,34 +22,19 @@ describe("computePercentiles", () => {
     expect(result!.min).toBe(1);
     expect(result!.max).toBe(100);
     expect(result!.count).toBe(100);
->>>>>>> origin/main
   });
 
   // FR-002: Empty buffer
   it("returns zeroed bucket for empty buffer", () => {
     const buf = new RingBuffer(10);
-<<<<<<< HEAD
-    const result: PercentileBucket = computePercentiles(buf);
-    expect(result).toEqual(EMPTY_PERCENTILE_BUCKET);
-=======
     const result = computePercentiles(buf.getValues());
     expect(result).toBeUndefined();
->>>>>>> origin/main
   });
 
   // FR-002: Single sample
   it("returns that value for all percentiles with single sample", () => {
     const buf = new RingBuffer(10);
     buf.push(42, 1);
-<<<<<<< HEAD
-    const result: PercentileBucket = computePercentiles(buf);
-    expect(result.p50).toBe(42);
-    expect(result.p95).toBe(42);
-    expect(result.p99).toBe(42);
-    expect(result.min).toBe(42);
-    expect(result.max).toBe(42);
-    expect(result.count).toBe(1);
-=======
     const result = computePercentiles(buf.getValues());
     expect(result!.p50).toBe(42);
     expect(result!.p95).toBe(42);
@@ -66,7 +42,6 @@ describe("computePercentiles", () => {
     expect(result!.min).toBe(42);
     expect(result!.max).toBe(42);
     expect(result!.count).toBe(1);
->>>>>>> origin/main
   });
 
   // FR-002: Two samples
@@ -74,57 +49,35 @@ describe("computePercentiles", () => {
     const buf = new RingBuffer(10);
     buf.push(10, 1);
     buf.push(20, 2);
-<<<<<<< HEAD
-    const result: PercentileBucket = computePercentiles(buf);
-    expect(result.min).toBe(10);
-    expect(result.max).toBe(20);
-    expect(result.p99).toBe(20);
-    expect(result.count).toBe(2);
-=======
     const result = computePercentiles(buf.getValues());
     expect(result!.min).toBe(10);
     expect(result!.max).toBe(20);
     expect(result!.p99).toBe(20);
     expect(result!.count).toBe(2);
->>>>>>> origin/main
   });
 
   // FR-002: All identical values
   it("returns same value for all percentiles when values are identical", () => {
     const buf = new RingBuffer(10);
     for (let i = 0; i < 5; i++) buf.push(7, i);
-<<<<<<< HEAD
-    const result: PercentileBucket = computePercentiles(buf);
-    expect(result.p50).toBe(7);
-    expect(result.p95).toBe(7);
-    expect(result.p99).toBe(7);
-=======
     const result = computePercentiles(buf.getValues());
     expect(result!.p50).toBe(7);
     expect(result!.p95).toBe(7);
     expect(result!.p99).toBe(7);
->>>>>>> origin/main
   });
 
   // FR-002: NaN filtering — computePercentiles does not filter NaN, so we filter before passing
   it("filters NaN values before computing", () => {
     const buf = new RingBuffer(10);
     buf.push(10, 1);
-    buf.push(NaN, 2);
+    buf.push(Number.NaN, 2);
     buf.push(20, 3);
-<<<<<<< HEAD
-    const result: PercentileBucket = computePercentiles(buf);
-    expect(result.count).toBe(2);
-    expect(result.min).toBe(10);
-    expect(result.max).toBe(20);
-=======
     const values = buf.getValues();
     const filtered = new Float64Array(Array.from(values).filter(v => !Number.isNaN(v)));
     const result = computePercentiles(filtered);
     expect(result!.count).toBe(2);
     expect(result!.min).toBe(10);
     expect(result!.max).toBe(20);
->>>>>>> origin/main
   });
 
   // FR-002: All NaN
@@ -132,26 +85,10 @@ describe("computePercentiles", () => {
     const buf = new RingBuffer(10);
     buf.push(NaN, 1);
     buf.push(NaN, 2);
-<<<<<<< HEAD
-    const result: PercentileBucket = computePercentiles(buf);
-    expect(result).toEqual(EMPTY_PERCENTILE_BUCKET);
-  });
-
-  // FR-002: Input compatibility for plain arrays
-  it("accepts plain number arrays as input", () => {
-    const result = computePercentiles([1, 2, 3, 4, 5]);
-    expect(result.p50).toBe(3);
-    expect(result.p95).toBe(5);
-    expect(result.p99).toBe(5);
-    expect(result.min).toBe(1);
-    expect(result.max).toBe(5);
-    expect(result.count).toBe(5);
-=======
     const values = buf.getValues();
     const filtered = new Float64Array(Array.from(values).filter(v => !Number.isNaN(v)));
     const result = computePercentiles(filtered);
     expect(result).toBeUndefined();
->>>>>>> origin/main
   });
 
   // FR-002: Sort is on a copy
@@ -160,33 +97,22 @@ describe("computePercentiles", () => {
     buf.push(30, 1);
     buf.push(10, 2);
     buf.push(20, 3);
-<<<<<<< HEAD
-    const before: number[] = Array.from(buf.getValues());
-    computePercentiles(buf);
-    const after: number[] = Array.from(buf.getValues());
-=======
     const before = Array.from(buf.getValues());
     computePercentiles(buf.getValues());
     const after = Array.from(buf.getValues());
->>>>>>> origin/main
     expect(after).toEqual(before);
   });
 
   // FR-002: Skewed distribution
   it("handles skewed distribution with one outlier", () => {
     const buf = new RingBuffer(200);
-    for (let i = 0; i < 99; i++) buf.push(1, i);
+    for (let i = 0; i < 99; i++) {
+      buf.push(1, i);
+    }
     buf.push(1000, 99);
-<<<<<<< HEAD
-    const result: PercentileBucket = computePercentiles(buf);
-    expect(result.p50).toBe(1);
-    expect(result.max).toBe(1000);
-    expect(result.count).toBe(100);
-=======
     const result = computePercentiles(buf.getValues());
     expect(result!.p50).toBe(1);
     expect(result!.max).toBe(1000);
     expect(result!.count).toBe(100);
->>>>>>> origin/main
   });
 });

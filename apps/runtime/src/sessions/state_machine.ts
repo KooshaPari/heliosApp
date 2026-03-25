@@ -1,5 +1,5 @@
-import type { LocalBus } from "../protocol/bus";
-import type { ProtocolTopic } from "../protocol/topics";
+import type { LocalBus } from "../protocol/bus.ts";
+import type { ProtocolTopic } from "../protocol/topics.ts";
 
 export type LaneState =
   | "new"

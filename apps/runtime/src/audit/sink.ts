@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-export * from "./sink-types";
-export * from "./default-audit-sink";
-export * from "./in-memory-audit-sink";
-=======
 import type { AuditEvent } from "./event";
 import { AuditRingBuffer } from "./ring-buffer";
 import type { AuditFilter } from "./ring-buffer";
@@ -194,7 +189,7 @@ export class DefaultAuditSink implements AuditSink {
           await this.storage.persist(eventsToPersist);
           this.buffer = [];
           break;
-        } catch (err) {
+        } catch (_err) {
           this.metrics.persistenceFailures++;
           this.metrics.retryCount++;
           retries++;
@@ -228,7 +223,7 @@ export class DefaultAuditSink implements AuditSink {
         await this.storage.persist(eventsToPersist);
         this.overflowQueue = [];
         break;
-      } catch (err) {
+      } catch (_err) {
         this.metrics.sqliteWriteFailures!++;
         this.metrics.sqliteRetryCount!++;
         retries++;
@@ -366,4 +361,3 @@ export class NoOpAuditStorage implements AuditStorage {
 
 /** @deprecated Use DefaultAuditSink. Alias retained for backward compatibility. */
 export { DefaultAuditSink as InMemoryAuditSink };
->>>>>>> origin/main

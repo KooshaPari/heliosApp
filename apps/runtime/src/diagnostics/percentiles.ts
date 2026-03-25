@@ -22,7 +22,7 @@ export const EMPTY_PERCENTILE_BUCKET: PercentileBucket = {
  * The input values are never mutated.
  */
 export function computePercentiles(
-  source: Float64Array | ReadonlyArray<number> | ValueBufferLike,
+  source: Float64Array | readonly number[] | ValueBufferLike
 ): PercentileBucket {
   const values =
     source instanceof Float64Array
@@ -76,93 +76,17 @@ export function computePercentiles(
   }
 
   return {
-<<<<<<< HEAD
-    p50,
-    p95,
-    p99,
-    min,
-    max,
-=======
     p50: percentileFromSorted(sorted, 0.5),
     p95: percentileFromSorted(sorted, 0.95),
     p99: percentileFromSorted(sorted, 0.99),
     min: sorted[0]!,
     max: sorted[count - 1]!,
->>>>>>> origin/main
     count,
   };
 }
 
-<<<<<<< HEAD
-function percentileIndex(count: number, p: number): number {
-  return Math.min(count - 1, Math.max(0, Math.ceil(p * (count + 1)) - 1));
-}
-
-function quickSelect(values: Float64Array, left: number, right: number, target: number): number {
-  let lo = left;
-  let hi = right;
-
-  while (lo <= hi) {
-    if (lo === hi) {
-      return values[lo]!;
-    }
-
-    const pivotIndex = partition(values, lo, hi, medianOfThree(values, lo, hi));
-    if (pivotIndex === target) {
-      return values[pivotIndex]!;
-    }
-    if (target < pivotIndex) {
-      hi = pivotIndex - 1;
-    } else {
-      lo = pivotIndex + 1;
-    }
-  }
-
-  return values[target]!;
-}
-
-function medianOfThree(values: Float64Array, left: number, right: number): number {
-  const mid = left + ((right - left) >> 1);
-  const a = values[left]!;
-  const b = values[mid]!;
-  const c = values[right]!;
-
-  if ((a <= b && b <= c) || (c <= b && b <= a)) {
-    return mid;
-  }
-  if ((b <= a && a <= c) || (c <= a && a <= b)) {
-    return left;
-  }
-  return right;
-}
-
-function partition(values: Float64Array, left: number, right: number, pivotIndex: number): number {
-  const pivotValue = values[pivotIndex]!;
-  swap(values, pivotIndex, right);
-  let storeIndex = left;
-
-  for (let i = left; i < right; i++) {
-    if (values[i]! < pivotValue) {
-      swap(values, storeIndex, i);
-      storeIndex++;
-    }
-  }
-
-  swap(values, storeIndex, right);
-  return storeIndex;
-}
-
-function swap(values: Float64Array, a: number, b: number): void {
-  if (a === b) {
-    return;
-  }
-  const tmp = values[a]!;
-  values[a] = values[b]!;
-  values[b] = tmp;
-=======
 /** Nearest-rank percentile on a pre-sorted Float64Array. */
 function percentileFromSorted(sorted: Float64Array, p: number): number {
   const index = Math.ceil(p * sorted.length);
   return sorted[Math.min(index, sorted.length - 1)]!;
->>>>>>> origin/main
 }

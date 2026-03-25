@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { createRuntime } from "../../../src/index";
+import { createRuntime } from "../../../src/index.ts";
 
 function jsonRequest(url: string, body: Record<string, unknown>): Request {
   return new Request(url, {

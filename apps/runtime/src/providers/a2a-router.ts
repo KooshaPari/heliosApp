@@ -109,7 +109,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
   async init(config: A2ARouterConfig): Promise<void> {
     try {
       // Validate config
-      if (!config.endpoints || !Array.isArray(config.endpoints) || config.endpoints.length === 0) {
+      if (!(config.endpoints && Array.isArray(config.endpoints)) || config.endpoints.length === 0) {
         throw new Error("Missing or invalid endpoints");
       }
 
@@ -461,9 +461,9 @@ export class A2ARouterAdapter implements ProviderAdapter<
    * @returns Delegation result
    */
   private async sendDelegation(
-    endpoint: A2AEndpoint,
+    _endpoint: A2AEndpoint,
     delegation: A2ADelegation & { correlationId?: string },
-    correlationId: string,
+    _correlationId: string,
     signal: AbortSignal
   ): Promise<unknown> {
     await Promise.resolve();

@@ -1,6 +1,6 @@
-import { describe, expect, it, mock, beforeEach } from "bun:test";
-import { TopologyTracker } from "../topology.js";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 import type { ZellijCli } from "../cli.js";
+import { TopologyTracker } from "../topology.js";
 
 /**
  * Unit tests for TopologyTracker.
@@ -29,8 +29,8 @@ describe("TopologyTracker", () => {
 
       expect(topo.sessionName).toBe("session-1");
       expect(topo.tabs).toHaveLength(1);
-      expect(topo.tabs[0]!.panes).toHaveLength(1);
-      expect(topo.tabs[0]!.panes[0]!.focused).toBe(true);
+      expect(topo.tabs[0]?.panes).toHaveLength(1);
+      expect(topo.tabs[0]?.panes[0]?.focused).toBe(true);
       expect(topo.activeTabId).toBe(0);
     });
 
@@ -60,7 +60,7 @@ describe("TopologyTracker", () => {
       expect(newPane.ptyId).toBe("pty-1");
       expect(newPane.focused).toBe(true);
       // Previous pane should be unfocused
-      expect(activeTab.panes[0]!.focused).toBe(false);
+      expect(activeTab.panes[0]?.focused).toBe(false);
     });
 
     it("removes a pane and refocuses", () => {
@@ -71,7 +71,7 @@ describe("TopologyTracker", () => {
       const topo = tracker.getTopology("s1")!;
       const activeTab = topo.tabs.find(t => t.tabId === topo.activeTabId)!;
       expect(activeTab.panes).toHaveLength(1);
-      expect(activeTab.panes[0]!.focused).toBe(true);
+      expect(activeTab.panes[0]?.focused).toBe(true);
     });
 
     it("does nothing for unknown session", () => {
@@ -120,7 +120,7 @@ describe("TopologyTracker", () => {
       tracker.addTab("s1", 1, "Tab 2");
       tracker.switchTab("s1", 0);
 
-      expect(tracker.getTopology("s1")!.activeTabId).toBe(0);
+      expect(tracker.getTopology("s1")?.activeTabId).toBe(0);
     });
   });
 

@@ -7,10 +7,10 @@
  * @module
  */
 
-import type { PtyRecord } from "./registry.js";
-import type { PtyState } from "./state_machine.js";
 import type { BusPublisher, PtyEventCorrelation } from "./events.js";
 import { emitPtyEvent } from "./events.js";
+import type { PtyRecord } from "./registry.js";
+import type { PtyState } from "./state_machine.js";
 
 /** Error thrown when a write targets a PTY in an invalid state. */
 export class InvalidStateError extends Error {

@@ -7,8 +7,8 @@
  * Tags: FR-011-001, FR-011-002
  */
 
-import { describe, test, expect, beforeEach } from "bun:test";
-import { GhosttyProcess, GhosttyProcessError } from "../../../../src/renderer/ghostty/process.js";
+import { beforeEach, describe, expect, test } from "bun:test";
+import { GhosttyProcess } from "../../../../src/renderer/ghostty/process.js";
 
 describe("GhosttyProcess", () => {
   let proc: GhosttyProcess;

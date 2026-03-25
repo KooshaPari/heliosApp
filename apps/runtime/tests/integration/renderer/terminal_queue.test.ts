@@ -14,6 +14,14 @@ import {
   TEST_SURFACE,
 } from "../../helpers/mock_adapter.js";
 import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
+import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
+import { createSwitchOrchestrator } from "../../../src/renderer/switch_transaction.js";
+import {
+  MockGhosttyAdapter,
+  MockRioAdapter,
+  TEST_CONFIG,
+  TEST_SURFACE,
+} from "../../helpers/mock_adapter.js";
 
 describe("Terminal creation queueing", () => {
   it("queues terminal creation during active transaction", async () => {

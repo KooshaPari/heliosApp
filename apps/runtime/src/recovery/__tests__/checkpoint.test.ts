@@ -1,15 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import {
-  CheckpointWriter,
-  CheckpointReader,
   type Checkpoint,
+  CheckpointReader,
   type CheckpointSession,
+  CheckpointWriter,
   estimateCheckpointSize,
-  MAX_SCROLLBACK_SIZE,
 } from "../checkpoint.js";
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
 
 describe("CheckpointWriter and CheckpointReader", () => {
   let writer: CheckpointWriter;
@@ -199,8 +195,8 @@ describe("CheckpointWriter and CheckpointReader", () => {
 
       // Corrupt the file
       const checkpointPath = writer.getCheckpointPath();
-      let content = await fs.readFile(checkpointPath, "utf-8");
-      let parsed = JSON.parse(content) as Checkpoint;
+      const content = await fs.readFile(checkpointPath, "utf-8");
+      const parsed = JSON.parse(content) as Checkpoint;
       parsed.checksum = "invalid-checksum";
       await fs.writeFile(checkpointPath, JSON.stringify(parsed));
 
@@ -239,8 +235,8 @@ describe("CheckpointWriter and CheckpointReader", () => {
 
       // Corrupt primary
       const checkpointPath = writer.getCheckpointPath();
-      let content = await fs.readFile(checkpointPath, "utf-8");
-      let parsed = JSON.parse(content) as Checkpoint;
+      const content = await fs.readFile(checkpointPath, "utf-8");
+      const parsed = JSON.parse(content) as Checkpoint;
       parsed.checksum = "invalid";
       await fs.writeFile(checkpointPath, JSON.stringify(parsed));
 

@@ -1,16 +1,6 @@
-<<<<<<< HEAD
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import {
-  RecoveryStateMachine,
-  RecoveryStage,
-  type RecoveryState,
-} from "../state-machine.js";
-import { InMemoryLocalBus, type LocalBus } from "../../protocol/bus.js";
-=======
 import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { RecoveryStateMachine, RecoveryStage, type RecoveryState } from "../state-machine.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
->>>>>>> origin/main
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
@@ -43,7 +33,7 @@ describe("RecoveryStateMachine", () => {
     it("should progress through all stages in order", async () => {
       const stages: RecoveryStage[] = [];
 
-      stateMachine.onStageChange((from, to) => {
+      stateMachine.onStageChange((_from, to) => {
         stages.push(to);
       });
 
@@ -206,16 +196,9 @@ describe("RecoveryStateMachine", () => {
 
     it("should include correct payload in stage change event", async () => {
       await stateMachine.transition(RecoveryStage.DETECTING);
-<<<<<<< HEAD
-      const event = bus.getEvents().at(0);
-      expect(event).toBeDefined();
-      expect(event).not.toBeUndefined();
-      expect(event?.payload).toMatchObject({
-=======
       const events = bus.getEvents();
       const event = events[0];
       expect(event.payload).toMatchObject({
->>>>>>> origin/main
         previous: RecoveryStage.CRASHED,
         current: RecoveryStage.DETECTING,
         attemptCount: 0,
@@ -233,7 +216,7 @@ describe("RecoveryStateMachine", () => {
 
   describe("listener notifications", () => {
     it("should notify listeners on stage change", async () => {
-      const changes: Array<[string, string, number]> = [];
+      const changes: [string, string, number][] = [];
 
       stateMachine.onStageChange((from, to, attemptCount) => {
         changes.push([from, to, attemptCount]);
@@ -243,19 +226,8 @@ describe("RecoveryStateMachine", () => {
       await stateMachine.transition(RecoveryStage.INVENTORYING);
 
       expect(changes.length).toBe(2);
-<<<<<<< HEAD
-      const firstChange = changes.at(0);
-      const secondChange = changes.at(1);
-      expect(firstChange).toEqual([RecoveryStage.CRASHED, RecoveryStage.DETECTING, 0]);
-      expect(secondChange).toEqual([
-        RecoveryStage.DETECTING,
-        RecoveryStage.INVENTORYING,
-        0,
-      ]);
-=======
       expect(changes[0]).toEqual([RecoveryStage.CRASHED, RecoveryStage.DETECTING, 0]);
       expect(changes[1]).toEqual([RecoveryStage.DETECTING, RecoveryStage.INVENTORYING, 0]);
->>>>>>> origin/main
     });
   });
 });

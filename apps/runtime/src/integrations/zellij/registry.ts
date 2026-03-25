@@ -6,8 +6,8 @@
  */
 
 import type { ZellijCli } from "./cli.js";
-import type { MuxBinding, MuxSession } from "./types.js";
 import { DuplicateBindingError } from "./errors.js";
+import type { MuxBinding, MuxSession } from "./types.js";
 
 export class MuxRegistry {
   private readonly bySession = new Map<string, MuxBinding>();
@@ -70,7 +70,9 @@ export class MuxRegistry {
    */
   unbind(sessionName: string): void {
     const binding = this.bySession.get(sessionName);
-    if (!binding) return;
+    if (!binding) {
+      return;
+    }
 
     this.bySession.delete(sessionName);
     this.byLane.delete(binding.laneId);
@@ -87,7 +89,7 @@ export class MuxRegistry {
    * Compatibility accessor for watchdog interfaces expecting `getSessions`.
    */
   getSessions(): Array<{ id: string; laneId?: string }> {
-    return this.list().map((binding) => ({
+    return this.list().map(binding => ({
       id: binding.sessionName,
       laneId: binding.laneId,
     }));
@@ -99,9 +101,6 @@ export class MuxRegistry {
    */
   async getOrphaned(): Promise<MuxBinding[]> {
     if (!this.cli) {
-      console.warn(
-        "[zellij-registry] getOrphaned() called without a cli; returning cached bindings only"
-      );
       return [];
     }
 

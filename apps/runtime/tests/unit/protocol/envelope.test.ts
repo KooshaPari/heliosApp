@@ -1,10 +1,9 @@
 import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import {
-  createCommand,
-  createResponse,
-  createEvent,
-  validateEnvelope,
   MAX_PAYLOAD_SIZE,
+  createCommand,
+  createEvent,
+  createResponse,
   setMaxPayloadSize,
 } from "../../../src/protocol/envelope.js";
 import type { CommandEnvelope } from "../../../src/protocol/types.js";

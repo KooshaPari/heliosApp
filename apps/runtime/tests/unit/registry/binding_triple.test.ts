@@ -1,14 +1,9 @@
-<<<<<<< HEAD
-import { describe, it, expect, beforeEach } from "vitest";
-=======
 import { describe, it, expect, beforeEach } from "bun:test";
->>>>>>> origin/main
 import {
   BindingState,
   type BindingTriple,
   createBinding,
   validateBindingTriple,
-  type RegistryQueryInterface,
 } from "../../../src/registry/binding_triple.js";
 
 /**

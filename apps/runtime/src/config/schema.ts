@@ -91,7 +91,7 @@ export function validateValue(key: string, value: unknown): { valid: boolean; re
       break;
     }
     case "enum": {
-      if (!def.enumValues || !def.enumValues.includes(value as string)) {
+      if (!def.enumValues?.includes(value as string)) {
         return {
           valid: false,
           reason: `${key}: expected one of [${(def.enumValues ?? []).join(", ")}]`,

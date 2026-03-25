@@ -6,51 +6,6 @@
 
 import type { EventEnvelope } from "./types.js";
 
-export const TOPICS = [
-  "workspace.opened",
-  "project.ready",
-  "session.created",
-  "session.attach.started",
-  "session.attached",
-  "session.attach.failed",
-  "session.restore.started",
-  "session.restore.completed",
-  "session.terminated",
-  "terminal.spawn.started",
-  "terminal.spawned",
-  "terminal.spawn.failed",
-  "terminal.output",
-  "terminal.state.changed",
-  "renderer.switch.started",
-  "renderer.switch.succeeded",
-  "renderer.switch.failed",
-  "agent.run.started",
-  "agent.run.progress",
-  "agent.run.completed",
-  "agent.run.failed",
-  "approval.requested",
-  "approval.resolved",
-  "share.session.started",
-  "share.session.stopped",
-  "lane.create.started",
-  "lane.created",
-  "lane.create.failed",
-  "lane.attached",
-  "lane.cleaned",
-  "recovery.crash.detected",
-  "recovery.stage.changed",
-  "recovery.session.restored",
-  "recovery.session.failed",
-  "recovery.orphans.cleaned",
-  "recovery.safemode.entered",
-  "recovery.safemode.exited",
-  "harness.status.changed",
-  "audit.recorded",
-  "diagnostics.metric",
-] as const;
-
-export type ProtocolTopic = (typeof TOPICS)[number];
-
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -150,10 +105,14 @@ export class TopicRegistry {
 
     let removed = false;
     return () => {
-      if (removed) return; // idempotent unsubscribe
+      if (removed) {
+        return; // idempotent unsubscribe
+      }
       removed = true;
       const current = this.subs.get(topic);
-      if (!current) return;
+      if (!current) {
+        return;
+      }
       const idx = current.indexOf(entry);
       if (idx !== -1) {
         current.splice(idx, 1);

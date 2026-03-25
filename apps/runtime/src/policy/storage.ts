@@ -143,8 +143,7 @@ export class PolicyStorage {
             }
             this.cache.set(workspaceId, ruleSet);
             this.notifyChangedDebounced(workspaceId, rules);
-          } catch (error) {
-            console.error(`Failed to reload policy rules for ${workspaceId}:`, error);
+          } catch (_error) {
             // Keep previous rules on error
           }
         }

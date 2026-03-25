@@ -42,7 +42,9 @@ export class LaneListItem {
   }
 
   private render(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
@@ -126,7 +128,9 @@ export class LaneListItem {
   }
 
   private attachEventListeners(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     const item = this.container.querySelector(".lane-list-item");
     if (!item) return;
@@ -150,7 +154,9 @@ export class LaneListItem {
   }
 
   private detachEventListeners(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     const item = this.container.querySelector(".lane-list-item");
     if (!item) return;

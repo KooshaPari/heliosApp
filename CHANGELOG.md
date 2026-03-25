@@ -23,3 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed syntax error in `lane_event_handler.ts` (unclosed loop).
 - Installed missing type definitions (@types/node, bun-types, @playwright/test) and `vitest`.
 - Deduplicated `dependencies` and pinned `engines` in `package.json`.
+## [0.1.1] - 2026-03-25
+
+### Fixed
+- Consolidate CI stabilization fixes (#218).
+- Migrate biome configuration to 2.x and resolve lint/a11y issues.
+- Address package.json merge conflicts.

@@ -221,7 +221,7 @@ export class ShareSessionManager {
     if (!this.sessionsByTerminal.has(terminalId)) {
       this.sessionsByTerminal.set(terminalId, new Set());
     }
-    this.sessionsByTerminal.get(terminalId)!.add(session.id);
+    this.sessionsByTerminal.get(terminalId)?.add(session.id);
 
     await this.publishEvent("share.session.created", {
       sessionId: session.id,
@@ -344,8 +344,6 @@ export class ShareSessionManager {
         topic,
         payload,
       });
-    } catch (error) {
-      console.warn(`Failed to publish share event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }

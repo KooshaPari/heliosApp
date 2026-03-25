@@ -2,8 +2,10 @@ import { describe, it, expect, beforeEach } from "bun:test";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import { BindingEventEmitter } from "../../../src/registry/binding_events.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
+import { BindingEventEmitter } from "../../../src/registry/binding_events.js";
 import type { BindingTriple } from "../../../src/registry/binding_triple.js";
 import { BindingState } from "../../../src/registry/binding_triple.js";
+import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 
 describe("Binding Lifecycle Integration", () => {
   let registry: TerminalRegistry;
@@ -154,7 +156,7 @@ describe("Binding Lifecycle Integration", () => {
   describe("binding consistency after rapid lane switches", () => {
     it("should maintain accurate binding state after lane switches", async () => {
       const terminal = "terminal-1";
-      let binding = registry.register(terminal, {
+      let _binding = registry.register(terminal, {
         workspaceId: "ws-1",
         laneId: "lane-1",
         sessionId: "session-1",
@@ -169,7 +171,7 @@ describe("Binding Lifecycle Integration", () => {
       ];
 
       for (const { lane, session } of switches) {
-        binding = registry.rebind(terminal, {
+        _binding = registry.rebind(terminal, {
           workspaceId: "ws-1",
           laneId: lane,
           sessionId: session,

@@ -12,8 +12,8 @@
  * - Per-event latency measured for NFR-011-001.
  */
 
-import type { GhosttyProcess } from "./process.js";
 import type { GhosttyMetrics } from "./metrics.js";
+import type { GhosttyProcess } from "./process.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -149,7 +149,9 @@ export class GhosttyInputRelay {
    */
   teardownInputRelay(ptyId: string): void {
     const binding = this._bindings.get(ptyId);
-    if (binding === undefined) return;
+    if (binding === undefined) {
+      return;
+    }
 
     binding.teardown?.();
     this._bindings.delete(ptyId);
@@ -170,8 +172,6 @@ export class GhosttyInputRelay {
    */
   relayInput(event: GhosttyInputEvent): void {
     if (this._focusedPtyId === undefined) {
-      // No focused PTY: discard input
-      console.warn("[ghostty/input] Input received but no PTY is focused; discarding.");
       return;
     }
 
