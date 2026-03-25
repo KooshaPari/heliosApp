@@ -1,5 +1,6 @@
-import type { LocalBusEnvelope } from "./types.js";
+import { handleLifecycleRequest } from "./bus_in_memory_lifecycle.js";
 import {
+  type InMemoryBusContext,
   buildErrorResponse,
   buildMethodNotSupportedResponse,
   buildMissingCorrelationResponse,
@@ -9,9 +10,8 @@ import {
   payloadRecord,
   publishLifecycleEvent,
   recordMetric,
-  type InMemoryBusContext,
 } from "./bus_in_memory_support.js";
-import { handleLifecycleRequest } from "./bus_in_memory_lifecycle.js";
+import type { LocalBusEnvelope } from "./types.js";
 
 const NEEDS_CORRELATION = new Set([
   "lane.attach",
@@ -26,7 +26,7 @@ const NEEDS_CORRELATION = new Set([
 
 export async function handleInMemoryRequest(
   context: InMemoryBusContext,
-  command: LocalBusEnvelope,
+  command: LocalBusEnvelope
 ): Promise<LocalBusEnvelope> {
   await Promise.resolve();
 
@@ -75,7 +75,7 @@ export async function handleInMemoryRequest(
 function handleTerminalSpawn(
   context: InMemoryBusContext,
   command: LocalBusEnvelope,
-  startTime: number,
+  startTime: number
 ): LocalBusEnvelope {
   const correlationId = command.correlation_id;
   if (!correlationId) {
@@ -134,7 +134,7 @@ function handleTerminalInput(command: LocalBusEnvelope): LocalBusEnvelope {
 
 function handleRendererSwitch(
   context: InMemoryBusContext,
-  command: LocalBusEnvelope,
+  command: LocalBusEnvelope
 ): LocalBusEnvelope {
   const payload = payloadRecord(command.payload);
   const previousEngine = context.rendererEngineRef.current;

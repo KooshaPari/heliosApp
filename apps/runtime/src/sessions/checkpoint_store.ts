@@ -27,4 +27,3 @@ export class Slice1CheckpointStorePlaceholder implements CheckpointStore {
     return [];
   }
 }
-

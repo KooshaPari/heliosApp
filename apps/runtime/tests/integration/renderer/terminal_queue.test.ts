@@ -5,10 +5,15 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { createSwitchOrchestrator } from "../../../src/renderer/switch_transaction.js";
-import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
-import { MockGhosttyAdapter, MockRioAdapter, TEST_CONFIG, TEST_SURFACE } from "../../helpers/mock_adapter.js";
 import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
+import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
+import { createSwitchOrchestrator } from "../../../src/renderer/switch_transaction.js";
+import {
+  MockGhosttyAdapter,
+  MockRioAdapter,
+  TEST_CONFIG,
+  TEST_SURFACE,
+} from "../../helpers/mock_adapter.js";
 
 describe("Terminal creation queueing", () => {
   it("queues terminal creation during active transaction", async () => {
@@ -68,7 +73,12 @@ describe("Terminal creation queueing", () => {
     const creation3 = orchestrator.queueTerminalCreation({ ptyId: "pty-3" });
 
     // Wait for all to complete
-    const [switchResult, c1, c2, c3] = await Promise.all([switchPromise, creation1, creation2, creation3]);
+    const [switchResult, c1, c2, c3] = await Promise.all([
+      switchPromise,
+      creation1,
+      creation2,
+      creation3,
+    ]);
 
     expect(switchResult.state).toBe("committed");
     expect(c1).toEqual({ ptyId: "pty-1" });
@@ -120,7 +130,10 @@ describe("Terminal creation queueing", () => {
     const creationPromise = orchestrator.queueTerminalCreation({ ptyId: "pty-new" });
 
     // Wait for completion
-    const [switchResult, creationResult] = await Promise.all([switchPromise.catch(() => null), creationPromise]);
+    const [switchResult, creationResult] = await Promise.all([
+      switchPromise.catch(() => null),
+      creationPromise,
+    ]);
 
     // Switch should have rolled back
     expect(switchResult?.state).toBe("rolled-back");

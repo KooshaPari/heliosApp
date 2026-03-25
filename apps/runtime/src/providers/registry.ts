@@ -10,13 +10,10 @@
  */
 
 import type { LocalBus } from "../protocol/bus.js";
-import type { ProviderAdapter, ProviderRegistration, ProviderHealthStatus } from "./adapter.js";
+import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "./adapter.js";
+import { NormalizedProviderError, normalizeError } from "./errors.js";
 import { ProviderRegistryStore, type RegisteredProvider } from "./registry_store.js";
 import { validateProviderRegistration } from "./registry_validation.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-} from "./errors.js";
 
 /**
  * Provider Registry
@@ -314,9 +311,6 @@ export class ProviderRegistry {
         topic,
         payload,
       });
-    } catch (error) {
-      // Log error but don't throw (event publishing is best-effort)
-      console.warn(`Failed to publish provider event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }

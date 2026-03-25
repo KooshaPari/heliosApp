@@ -1,6 +1,6 @@
 import { describe, expect, it, mock } from "bun:test";
-import { refreshSessionTopology } from "../topology/refresh.js";
 import type { ZellijCli } from "../cli.js";
+import { refreshSessionTopology } from "../topology/refresh.js";
 import type { LayoutTopology } from "../types.js";
 
 function makeMockCli(stdout: string, exitCode = 0): ZellijCli {
@@ -18,7 +18,7 @@ describe("refreshSessionTopology", () => {
         'tab name="Main" focus=true',
         "pane size_cols=120 size_rows=40 focus=true",
         "pane size_cols=80 size_rows=24",
-      ].join("\n"),
+      ].join("\n")
     );
 
     const existingTopology: LayoutTopology = {
@@ -41,30 +41,21 @@ describe("refreshSessionTopology", () => {
       activeTabId: 0,
     };
 
-    const topology = await refreshSessionTopology(
-      cli,
-      "session-1",
-      existingTopology,
-    );
+    const topology = await refreshSessionTopology(cli, "session-1", existingTopology);
 
     expect(topology.sessionName).toBe("session-1");
     expect(topology.tabs).toHaveLength(1);
-    expect(topology.tabs[0]!.panes).toHaveLength(2);
-    expect(topology.tabs[0]!.panes[0]!.ptyId).toBe("pty-keep");
-    expect(topology.tabs[0]!.panes[0]!.dimensions).toEqual({
+    expect(topology.tabs[0]?.panes).toHaveLength(2);
+    expect(topology.tabs[0]?.panes[0]?.ptyId).toBe("pty-keep");
+    expect(topology.tabs[0]?.panes[0]?.dimensions).toEqual({
       cols: 120,
       rows: 40,
     });
-    expect(topology.tabs[0]!.panes[1]!.dimensions).toEqual({
+    expect(topology.tabs[0]?.panes[1]?.dimensions).toEqual({
       cols: 80,
       rows: 24,
     });
-    expect(cli.run).toHaveBeenCalledWith([
-      "--session",
-      "session-1",
-      "action",
-      "dump-layout",
-    ]);
+    expect(cli.run).toHaveBeenCalledWith(["--session", "session-1", "action", "dump-layout"]);
   });
 
   it("falls back to a minimal topology when dump-layout fails", async () => {
@@ -89,14 +80,10 @@ describe("refreshSessionTopology", () => {
       activeTabId: 0,
     };
 
-    const topology = await refreshSessionTopology(
-      cli,
-      "session-2",
-      existingTopology,
-    );
+    const topology = await refreshSessionTopology(cli, "session-2", existingTopology);
 
     expect(topology.tabs).toHaveLength(1);
-    expect(topology.tabs[0]!.panes).toHaveLength(1);
-    expect(topology.tabs[0]!.panes[0]!.ptyId).toBe("pty-keep");
+    expect(topology.tabs[0]?.panes).toHaveLength(1);
+    expect(topology.tabs[0]?.panes[0]?.ptyId).toBe("pty-keep");
   });
 });

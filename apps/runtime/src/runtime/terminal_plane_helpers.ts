@@ -1,4 +1,4 @@
-import type { LocalBusEnvelope } from "../protocol/types";
+import type { LocalBusEnvelope } from "../protocol/types.ts";
 
 type ResponseError = {
   code: string;
@@ -60,7 +60,7 @@ export function makeTerminalId(sessionId: string): string {
 export function errorResponse(
   correlationId: string,
   code: string,
-  message: string,
+  message: string
 ): ProtocolResponse<never> {
   return {
     id: `res-${Date.now()}`,
@@ -79,7 +79,7 @@ export function errorResponse(
 export function cloneBuffer(buffer: TerminalBuffer): TerminalBuffer {
   return {
     ...buffer,
-    entries: buffer.entries.map((entry) => ({ ...entry })),
+    entries: buffer.entries.map(entry => ({ ...entry })),
   };
 }
 
@@ -88,10 +88,14 @@ export function isTerminalRecord(value: unknown): value is TerminalRecord {
 }
 
 export function isTerminalOutputEnvelope(
-  envelope: LocalBusEnvelope,
+  envelope: LocalBusEnvelope
 ): envelope is LocalBusEnvelope & {
   topic: "terminal.output";
   payload: Record<string, unknown>;
 } {
-  return envelope.topic === "terminal.output" && Boolean(envelope.payload) && typeof envelope.payload === "object";
+  return (
+    envelope.topic === "terminal.output" &&
+    Boolean(envelope.payload) &&
+    typeof envelope.payload === "object"
+  );
 }

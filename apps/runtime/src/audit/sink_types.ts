@@ -1,5 +1,5 @@
-import type { AuditEvent } from "./event";
 import type { LocalBusEnvelope } from "../protocol/types.js";
+import type { AuditEvent } from "./event.ts";
 
 export interface AuditSinkMetrics {
   totalEventsWritten: number;

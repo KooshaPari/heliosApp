@@ -4,7 +4,7 @@
  * Manages ordered subscriber lists per topic with deterministic delivery.
  */
 
-import type { EventEnvelope } from './types.js';
+import type { EventEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -81,7 +81,7 @@ export type ProtocolTopic = (typeof TOPICS)[number];
 function assertValidTopicName(topic: string): void {
   if (!TOPIC_NAME_RE.test(topic)) {
     throw new Error(
-      `Invalid topic name "${topic}": must be non-empty, alphanumeric segments separated by dots`,
+      `Invalid topic name "${topic}": must be non-empty, alphanumeric segments separated by dots`
     );
   }
 }
@@ -113,10 +113,14 @@ export class TopicRegistry {
 
     let removed = false;
     return () => {
-      if (removed) return; // idempotent unsubscribe
+      if (removed) {
+        return; // idempotent unsubscribe
+      }
       removed = true;
       const current = this.subs.get(topic);
-      if (!current) return;
+      if (!current) {
+        return;
+      }
       const idx = current.indexOf(entry);
       if (idx !== -1) {
         current.splice(idx, 1);
@@ -146,9 +150,6 @@ export class TopicRegistry {
     let next = current + 1;
     // Handle overflow at Number.MAX_SAFE_INTEGER — reset to 1 with warning.
     if (current >= Number.MAX_SAFE_INTEGER) {
-      console.warn(
-        `[topics] Sequence counter overflow for topic "${topic}" — resetting to 1`,
-      );
       next = 1;
     }
     this.sequenceCounters.set(topic, next);

@@ -24,7 +24,7 @@ describe("MCP Bridge Adapter - Error Handling", () => {
         },
         "corr-123"
       )
-      .catch((e) => e);
+      .catch(e => e);
 
     expect(error).toBeInstanceOf(NormalizedProviderError);
   });
@@ -44,9 +44,7 @@ describe("MCP Bridge Adapter - Error Handling", () => {
       // Expected.
     }
 
-    const errorEvent = bus
-      .getEvents()
-      .find((e) => e.topic === "provider.mcp.tool.failed");
+    const errorEvent = bus.getEvents().find(e => e.topic === "provider.mcp.tool.failed");
     expect(errorEvent).toBeDefined();
     expect(errorEvent?.payload?.toolName).toBe("nonexistent_tool");
   });

@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { randomBytes } from "node:crypto";
-import { rmSync, readFileSync } from "node:fs";
+import { readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import { CredentialStore } from "../credential-store.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import type { CredentialStore } from "../credential-store.js";
 import { makeStore } from "./integration_helpers.js";
 import { makeTestTempDir } from "./tempdir.js";
 
@@ -21,8 +21,8 @@ describe("Credential rotation [SC-028-002]", () => {
   });
 
   it("old credential value is not recoverable from encrypted file after rotation", async () => {
-    const oldValue = "old-secret-" + randomBytes(8).toString("hex");
-    const newValue = "new-secret-" + randomBytes(8).toString("hex");
+    const oldValue = `old-secret-${randomBytes(8).toString("hex")}`;
+    const newValue = `new-secret-${randomBytes(8).toString("hex")}`;
 
     await store.create("prov", "ws", "apiKey", oldValue, "corr-create");
 
@@ -48,7 +48,7 @@ describe("Credential rotation [SC-028-002]", () => {
     await store.rotate("prov", "ws", "key", "new", "corr-2");
 
     const events = bus.getEvents();
-    const rotatedEvent = events.find((e) => e.topic === "secrets.credential.rotated");
+    const rotatedEvent = events.find(e => e.topic === "secrets.credential.rotated");
     expect(rotatedEvent).toBeDefined();
     expect(rotatedEvent?.payload?.name).toBe("key");
     const raw = JSON.stringify(rotatedEvent);

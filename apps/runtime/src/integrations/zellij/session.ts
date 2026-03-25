@@ -5,17 +5,13 @@
  */
 
 import type { ZellijCli } from "./cli.js";
-import type { MuxRegistry } from "./registry.js";
-import type { TopologyTracker } from "./topology.js";
 import type { MuxEventEmitter } from "./events.js";
-import type {
-  MuxSession,
-  SessionOptions,
-  PtyManagerInterface,
-} from "./types.js";
+import type { MuxRegistry } from "./registry.js";
 import { createZellijSession } from "./session/create.js";
 import { reattachZellijSession } from "./session/reattach.js";
 import { terminateZellijSession } from "./session/terminate.js";
+import type { TopologyTracker } from "./topology.js";
+import type { MuxSession, PtyManagerInterface, SessionOptions } from "./types.js";
 
 /**
  * Generate the canonical session name for a lane.
@@ -38,7 +34,7 @@ export class ZellijSessionManager {
       topology?: TopologyTracker;
       ptyManager?: PtyManagerInterface;
       emitter?: MuxEventEmitter;
-    },
+    }
   ) {
     this.cli = cli;
     this.registry = registry;
@@ -50,10 +46,7 @@ export class ZellijSessionManager {
   /**
    * T002 - Create a new zellij session bound to a lane.
    */
-  async createSession(
-    laneId: string,
-    options?: SessionOptions,
-  ): Promise<MuxSession> {
+  async createSession(laneId: string, options?: SessionOptions): Promise<MuxSession> {
     return createZellijSession({
       cli: this.cli,
       registry: this.registry,

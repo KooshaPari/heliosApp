@@ -10,7 +10,7 @@ export class GhosttyStreamManager {
     private readonly surface: GhosttySurface,
     private readonly writeToGhostty: (ptyId: string, data: Uint8Array) => Promise<void>,
     private readonly notifyStreamEnd: (ptyId: string) => void,
-    private readonly notifyPaneRemoved: (ptyId: string) => void,
+    private readonly notifyPaneRemoved: (ptyId: string) => void
   ) {}
 
   bindStream(ptyId: string, stream: ReadableStream<Uint8Array>): void {
@@ -85,7 +85,7 @@ export class GhosttyStreamManager {
   private async _pumpStream(
     ptyId: string,
     reader: ReadableStreamDefaultReader<Uint8Array>,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): Promise<void> {
     try {
       while (!signal.aborted) {

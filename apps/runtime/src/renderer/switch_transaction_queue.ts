@@ -27,9 +27,8 @@ export class SwitchTerminalCreationQueue {
           this.items.splice(index, 1);
           reject(
             new Error(
-              `Terminal creation request timed out after ${timeoutMs}ms ` +
-                "while switch is active",
-            ),
+              `Terminal creation request timed out after ${timeoutMs}ms while switch is active`
+            )
           );
         }
       }, timeoutMs);
@@ -44,9 +43,11 @@ export class SwitchTerminalCreationQueue {
     this.items.length = 0;
 
     for (const queued of queue) {
-      const timeoutId = (queued as QueuedTerminalCreation & {
-        timeoutId?: ReturnType<typeof setTimeout>;
-      }).timeoutId;
+      const timeoutId = (
+        queued as QueuedTerminalCreation & {
+          timeoutId?: ReturnType<typeof setTimeout>;
+        }
+      ).timeoutId;
       if (timeoutId) {
         clearTimeout(timeoutId);
       }

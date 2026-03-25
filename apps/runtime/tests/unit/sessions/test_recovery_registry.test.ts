@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { RecoveryRegistry } from "../../../src/sessions/registry";
+import { RecoveryRegistry } from "../../../src/sessions/registry.ts";
 
 describe("RecoveryRegistry", () => {
   test("applies lifecycle updates and snapshots state", () => {
@@ -47,6 +47,6 @@ describe("RecoveryRegistry", () => {
 
     const result = registry.scanForOrphans("2026-03-24T00:00:00.000Z");
     expect(result.issues.length).toBeGreaterThan(0);
-    expect(result.issues.some((issue) => issue.artifact_type === "session")).toBe(true);
+    expect(result.issues.some(issue => issue.artifact_type === "session")).toBe(true);
   });
 });

@@ -1,6 +1,6 @@
 // FR-002: Unit tests for rolling percentile computation.
 
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { RingBuffer } from "../../../src/diagnostics/metrics.js";
 import { computePercentiles } from "../../../src/diagnostics/percentiles.js";
 
@@ -61,7 +61,9 @@ describe("computePercentiles", () => {
   // FR-002: All identical values
   it("returns same value for all percentiles when values are identical", () => {
     const buf = new RingBuffer(10);
-    for (let i = 0; i < 5; i++) buf.push(7, i);
+    for (let i = 0; i < 5; i++) {
+      buf.push(7, i);
+    }
     const result = expectBucket(buf);
     expect(result.p50).toBe(7);
     expect(result.p95).toBe(7);
@@ -72,7 +74,7 @@ describe("computePercentiles", () => {
   it("filters NaN values before computing", () => {
     const buf = new RingBuffer(10);
     buf.push(10, 1);
-    buf.push(NaN, 2);
+    buf.push(Number.NaN, 2);
     buf.push(20, 3);
     const result = expectBucket(buf);
     expect(result.count).toBe(2);
@@ -83,8 +85,8 @@ describe("computePercentiles", () => {
   // FR-002: All NaN
   it("returns zeroed bucket when all values are NaN", () => {
     const buf = new RingBuffer(10);
-    buf.push(NaN, 1);
-    buf.push(NaN, 2);
+    buf.push(Number.NaN, 1);
+    buf.push(Number.NaN, 2);
     const result = computePercentiles(buf);
     expect(result).toBeUndefined();
   });
@@ -104,7 +106,9 @@ describe("computePercentiles", () => {
   // FR-002: Skewed distribution
   it("handles skewed distribution with one outlier", () => {
     const buf = new RingBuffer(200);
-    for (let i = 0; i < 99; i++) buf.push(1, i);
+    for (let i = 0; i < 99; i++) {
+      buf.push(1, i);
+    }
     buf.push(1000, 99);
     const result = expectBucket(buf);
     expect(result.p50).toBe(1);

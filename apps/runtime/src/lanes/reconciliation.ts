@@ -1,6 +1,6 @@
+import type { PtyManager } from "./cleanup.js";
 import type { LaneRegistry } from "./registry.js";
 import { reconcileOrphanedWorktrees } from "./worktree.js";
-import type { PtyManager } from "./cleanup.js";
 
 export interface FullReconciliationResult {
   orphanedWorktrees: number;
@@ -21,7 +21,7 @@ export interface LaneReconciliationOptions {
 }
 
 export async function reconcileLaneOrphans(
-  options: LaneReconciliationOptions,
+  options: LaneReconciliationOptions
 ): Promise<FullReconciliationResult> {
   const startTime = Date.now();
   const result: FullReconciliationResult = {
@@ -37,7 +37,7 @@ export async function reconcileLaneOrphans(
 
   try {
     const activeLanes = options.registry.getActive();
-    const knownLaneIds = new Set(activeLanes.map((lane) => lane.laneId));
+    const knownLaneIds = new Set(activeLanes.map(lane => lane.laneId));
 
     if (!isTimedOut()) {
       const worktreeResult = await reconcileOrphanedWorktrees(
@@ -49,7 +49,7 @@ export async function reconcileLaneOrphans(
           } catch {
             // Lane may not exist in the registry anymore.
           }
-        },
+        }
       );
       result.orphanedWorktrees = worktreeResult.orphanedWorktrees;
       result.cleaned += worktreeResult.cleaned;
@@ -88,7 +88,7 @@ export async function reconcileLaneOrphans(
     }
 
     if (!isTimedOut() && options.ptyManager) {
-      const closedLanes = options.registry.list().filter((lane) => lane.state === "closed");
+      const closedLanes = options.registry.list().filter(lane => lane.state === "closed");
       for (const lane of closedLanes) {
         if (isTimedOut()) {
           break;

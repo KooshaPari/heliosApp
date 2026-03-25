@@ -1,9 +1,5 @@
-import type { TabSurface } from "./tab_surface";
-import {
-  focusTabElement,
-  getOrderedTabs,
-  renderTabHeader,
-} from "./tab_bar_helpers";
+import { focusTabElement, getOrderedTabs, renderTabHeader } from "./tab_bar_helpers.ts";
+import type { TabSurface } from "./tab_surface.ts";
 
 export interface TabBarConfig {
   onTabSelected?: (tabId: string) => void;
@@ -27,19 +23,19 @@ export class TabBar {
   private selectedTabId: string | null = null;
   private pinnedTabIds = new Set<string>();
   private tabOrder: string[] = [];
-  private focusedTabIndex: number = 0;
+  private focusedTabIndex = 0;
   private draggedTabId: string | null = null;
   private config: Required<TabBarConfig>;
   private container: HTMLElement | null = null;
 
   constructor(tabs: TabSurface[], config: TabBarConfig = {}) {
     this.tabs = tabs;
-    this.tabOrder = tabs.map((t) => t.getTabId());
+    this.tabOrder = tabs.map(t => t.getTabId());
     this.selectedTabId = tabs.length > 0 ? tabs[0].getTabId() : null;
     this.config = {
       onTabSelected: config.onTabSelected ?? (() => {}),
       onTabReordered: config.onTabReordered ?? (() => {}),
-      onTabPinned: config.onTabPinned ?? (() => {})
+      onTabPinned: config.onTabPinned ?? (() => {}),
     };
   }
 
@@ -54,12 +50,14 @@ export class TabBar {
    * Select a tab by ID.
    */
   selectTab(tabId: string): void {
-    const tab = this.tabs.find((t) => t.getTabId() === tabId);
-    if (!tab) return;
+    const tab = this.tabs.find(t => t.getTabId() === tabId);
+    if (!tab) {
+      return;
+    }
 
     // Deactivate previous tab
     if (this.selectedTabId) {
-      const prevTab = this.tabs.find((t) => t.getTabId() === this.selectedTabId);
+      const prevTab = this.tabs.find(t => t.getTabId() === this.selectedTabId);
       if (prevTab) {
         prevTab.onDeactivate();
       }
@@ -90,14 +88,10 @@ export class TabBar {
    */
   reorderTabs(newOrder: string[]): void {
     // Validate that all tab IDs are present
-    const tabIds = new Set(this.tabs.map((t) => t.getTabId()));
+    const tabIds = new Set(this.tabs.map(t => t.getTabId()));
     const newOrderSet = new Set(newOrder);
 
-    if (
-      newOrder.length !== this.tabs.length ||
-      ![...tabIds].every((id) => newOrderSet.has(id))
-    ) {
-      console.error("Invalid tab order: missing or extra tab IDs");
+    if (newOrder.length !== this.tabs.length || ![...tabIds].every(id => newOrderSet.has(id))) {
       return;
     }
 
@@ -108,9 +102,11 @@ export class TabBar {
   /**
    * Pin a tab so it appears first and cannot be reordered past other pinned tabs.
    */
-  pinTab(tabId: string, pinned: boolean = true): void {
-    const tab = this.tabs.find((t) => t.getTabId() === tabId);
-    if (!tab) return;
+  pinTab(tabId: string, pinned = true): void {
+    const tab = this.tabs.find(t => t.getTabId() === tabId);
+    if (!tab) {
+      return;
+    }
 
     if (pinned) {
       this.pinnedTabIds.add(tabId);
@@ -119,8 +115,8 @@ export class TabBar {
     }
 
     this.tabOrder = [
-      ...this.tabOrder.filter((id) => this.pinnedTabIds.has(id)),
-      ...this.tabOrder.filter((id) => !this.pinnedTabIds.has(id))
+      ...this.tabOrder.filter(id => this.pinnedTabIds.has(id)),
+      ...this.tabOrder.filter(id => !this.pinnedTabIds.has(id)),
     ];
     this.config.onTabPinned(tabId, pinned);
   }
@@ -155,10 +151,10 @@ export class TabBar {
           selectedTabId: this.selectedTabId,
           focusedTabIndex: this.focusedTabIndex,
           pinnedTabIds: this.pinnedTabIds,
-          onTabSelected: (tabId) => this.selectTab(tabId),
+          onTabSelected: tabId => this.selectTab(tabId),
           onTabKeydown: (event, tabId) => this.handleTabKeydown(event, tabId),
-          onTabDrop: (targetTabId) => this.handleTabDrop(targetTabId),
-          onDragStart: (tabId) => {
+          onTabDrop: targetTabId => this.handleTabDrop(targetTabId),
+          onDragStart: tabId => {
             this.draggedTabId = tabId;
           },
           onDragEnd: () => {
@@ -176,16 +172,17 @@ export class TabBar {
    */
   private handleTabKeydown(event: KeyboardEvent, tabId: string): void {
     const orderedTabs = this.getOrderedTabs();
-    const currentIndex = orderedTabs.findIndex((t) => t.getTabId() === tabId);
+    const currentIndex = orderedTabs.findIndex(t => t.getTabId() === tabId);
 
     switch (event.key) {
       case "Enter":
-      case " ":
+      case " ": {
         event.preventDefault();
         this.selectTab(tabId);
         break;
+      }
 
-      case "ArrowRight":
+      case "ArrowRight": {
         event.preventDefault();
         if (currentIndex < orderedTabs.length - 1) {
           const nextTab = orderedTabs[currentIndex + 1];
@@ -193,8 +190,9 @@ export class TabBar {
           focusTabElement(this.container, nextTab.getTabId());
         }
         break;
+      }
 
-      case "ArrowLeft":
+      case "ArrowLeft": {
         event.preventDefault();
         if (currentIndex > 0) {
           const prevTab = orderedTabs[currentIndex - 1];
@@ -202,6 +200,7 @@ export class TabBar {
           focusTabElement(this.container, prevTab.getTabId());
         }
         break;
+      }
 
       case "Tab":
         // Allow natural Tab behavior to move focus out of tab bar
@@ -242,10 +241,10 @@ export class TabBar {
     this.tabs = tabs;
     // Preserve order where possible, add new tabs at the end
     const existingIds = new Set(this.tabOrder);
-    const newIds = tabs.map((t) => t.getTabId());
-    const addedIds = newIds.filter((id) => !existingIds.has(id));
+    const newIds = tabs.map(t => t.getTabId());
+    const addedIds = newIds.filter(id => !existingIds.has(id));
 
-    this.tabOrder = [...this.tabOrder.filter((id) => newIds.includes(id)), ...addedIds];
+    this.tabOrder = [...this.tabOrder.filter(id => newIds.includes(id)), ...addedIds];
 
     // Remove selected if no longer exists
     if (this.selectedTabId && !newIds.includes(this.selectedTabId)) {

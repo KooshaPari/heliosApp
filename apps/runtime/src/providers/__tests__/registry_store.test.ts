@@ -26,7 +26,7 @@ class TestProvider implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExe
 function createRegisteredProvider(
   id: string,
   type: "acp" | "mcp" | "a2a",
-  workspaceId: string,
+  workspaceId: string
 ): RegisteredProvider {
   const registration: ProviderRegistration<ACPConfig> = {
     id,
@@ -34,7 +34,11 @@ function createRegisteredProvider(
     workspaceId,
     concurrencyLimit: 5,
     healthCheckIntervalMs: 30000,
-    config: { endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" },
+    config: {
+      endpoint: "http://localhost:8080/acp",
+      apiKeyRef: "acp-key",
+      model: "claude-3-sonnet",
+    },
   };
 
   return {

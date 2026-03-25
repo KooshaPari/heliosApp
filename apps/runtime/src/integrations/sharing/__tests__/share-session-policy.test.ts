@@ -17,9 +17,9 @@ describe("Policy Gate Integration", () => {
   it("should deny share creation when policy gate denies", async () => {
     policyGate.setShouldDeny(true, "Access denied");
 
-    await expect(
-      manager.create("terminal-123", "upterm", 60000, "corr-001"),
-    ).rejects.toThrow(/policy denied|access denied/i);
+    await expect(manager.create("terminal-123", "upterm", 60000, "corr-001")).rejects.toThrow(
+      /policy denied|access denied/i
+    );
   });
 
   it("should emit failure event when policy denies", async () => {
@@ -32,9 +32,7 @@ describe("Policy Gate Integration", () => {
       // expected
     }
 
-    const failedEvent = bus
-      .getEvents()
-      .find((e) => e.topic === "share.session.failed");
+    const failedEvent = bus.getEvents().find(e => e.topic === "share.session.failed");
     expect(failedEvent).toBeDefined();
     expect(failedEvent?.payload?.reason).toContain("Access denied");
   });

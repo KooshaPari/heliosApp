@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { makeRegistration, makeRegistry, TestProvider } from "./registry_test_helpers.js";
+import { describe, expect, it } from "vitest";
+import { TestProvider, makeRegistration, makeRegistry } from "./registry_test_helpers.js";
 
 describe("ProviderRegistry: Registration and Unregistration", () => {
   it("should register a provider with valid config", async () => {
@@ -29,7 +29,7 @@ describe("ProviderRegistry: Registration and Unregistration", () => {
     await registry.register(makeRegistration("test-provider"), adapter);
 
     const events = bus.getEvents();
-    const registeredEvent = events.find((e) => e.topic === "provider.registered");
+    const registeredEvent = events.find(e => e.topic === "provider.registered");
     expect(registeredEvent).toBeDefined();
     expect(registeredEvent?.payload?.providerId).toBe("test-provider");
   });
@@ -44,10 +44,12 @@ describe("ProviderRegistry: Registration and Unregistration", () => {
     const { registry, bus } = makeRegistry();
     const adapter = new FailingProvider();
 
-    await expect(registry.register(makeRegistration("failing-provider"), adapter)).rejects.toThrow();
+    await expect(
+      registry.register(makeRegistration("failing-provider"), adapter)
+    ).rejects.toThrow();
 
     const events = bus.getEvents();
-    const failedEvent = events.find((e) => e.topic === "provider.init.failed");
+    const failedEvent = events.find(e => e.topic === "provider.init.failed");
     expect(failedEvent).toBeDefined();
   });
 
@@ -72,7 +74,7 @@ describe("ProviderRegistry: Registration and Unregistration", () => {
     await registry.unregister("test-provider");
 
     const events = bus.getEvents();
-    const unregisteredEvent = events.find((e) => e.topic === "provider.unregistered");
+    const unregisteredEvent = events.find(e => e.topic === "provider.unregistered");
     expect(unregisteredEvent).toBeDefined();
   });
 

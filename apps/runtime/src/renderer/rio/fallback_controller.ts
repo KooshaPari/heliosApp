@@ -88,8 +88,8 @@ export class RioFallbackController {
       }
 
       const switchPromise = this.switchToGhostty(ghostty, boundPtyIds);
-      const timeout = new Promise<"timeout">((resolve) =>
-        setTimeout(() => resolve("timeout"), RioFallbackController.FALLBACK_TIMEOUT_MS),
+      const timeout = new Promise<"timeout">(resolve =>
+        setTimeout(() => resolve("timeout"), RioFallbackController.FALLBACK_TIMEOUT_MS)
       );
 
       const result = await Promise.race([switchPromise, timeout]);
@@ -107,10 +107,7 @@ export class RioFallbackController {
     }
   }
 
-  private async switchToGhostty(
-    ghostty: RendererAdapter,
-    _boundPtyIds: string[],
-  ): Promise<void> {
+  private async switchToGhostty(ghostty: RendererAdapter, _boundPtyIds: string[]): Promise<void> {
     const ghosttyState = ghostty.getState();
     if (
       ghosttyState === "uninitialized" ||

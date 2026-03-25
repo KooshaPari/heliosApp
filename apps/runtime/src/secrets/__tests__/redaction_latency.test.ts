@@ -1,4 +1,4 @@
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { makeEngine } from "./integration_helpers.js";
 
 describe("Redaction latency [SC-028-003]", () => {

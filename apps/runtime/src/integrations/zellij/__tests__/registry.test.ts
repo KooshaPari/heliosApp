@@ -1,12 +1,9 @@
-import { describe, expect, it, mock, beforeEach, afterEach } from "bun:test";
-import { MuxRegistry } from "../registry.js";
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import { DuplicateBindingError } from "../errors.js";
+import { MuxRegistry } from "../registry.js";
 import type { MuxSession } from "../types.js";
 
-function makeMockSession(
-  sessionName: string,
-  laneId: string
-): MuxSession {
+function makeMockSession(sessionName: string, laneId: string): MuxSession {
   return {
     sessionName,
     laneId,
@@ -63,9 +60,7 @@ describe("MuxRegistry", () => {
 
     registry.bind("helios-lane-a", "a", session1);
 
-    expect(() =>
-      registry.bind("helios-lane-a", "b", session2)
-    ).toThrow(DuplicateBindingError);
+    expect(() => registry.bind("helios-lane-a", "b", session2)).toThrow(DuplicateBindingError);
   });
 
   it("enforces one-to-one: duplicate lane throws", () => {
@@ -75,9 +70,7 @@ describe("MuxRegistry", () => {
 
     registry.bind("session-1", "lane-1", session1);
 
-    expect(() =>
-      registry.bind("session-2", "lane-1", session2)
-    ).toThrow(DuplicateBindingError);
+    expect(() => registry.bind("session-2", "lane-1", session2)).toThrow(DuplicateBindingError);
   });
 
   it("unbind removes the binding", () => {
@@ -129,7 +122,7 @@ describe("MuxRegistry", () => {
     const orphaned = await registry.getOrphaned();
 
     expect(orphaned).toHaveLength(1);
-    expect(orphaned[0]!.sessionName).toBe("stale-session");
+    expect(orphaned[0]?.sessionName).toBe("stale-session");
     expect(cli.listSessions).toHaveBeenCalledTimes(1);
   });
 

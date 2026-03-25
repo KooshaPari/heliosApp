@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { makeRegistration, makeRegistry, TestProvider } from "./registry_test_helpers.js";
+import { describe, expect, it } from "vitest";
+import { TestProvider, makeRegistration, makeRegistry } from "./registry_test_helpers.js";
 
 describe("ProviderRegistry: Lane Binding and Health Status", () => {
   it("should bind provider to lane", async () => {

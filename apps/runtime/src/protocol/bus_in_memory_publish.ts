@@ -1,9 +1,3 @@
-import {
-  ProtocolValidationError,
-  type LocalBusEnvelope,
-  type LocalBusEnvelopeWithSequence,
-} from "./types.js";
-import { validateEnvelope } from "./validator.js";
 import type { InMemoryBusContext } from "./bus_in_memory_context.js";
 import {
   appendAcceptedEvent,
@@ -12,10 +6,11 @@ import {
   recordMetric,
 } from "./bus_in_memory_metrics.js";
 import {
-  buildErrorResponse,
-  buildMethodNotSupportedResponse,
-  payloadRecord,
-} from "./bus_in_memory_envelope.js";
+  type LocalBusEnvelope,
+  type LocalBusEnvelopeWithSequence,
+  ProtocolValidationError,
+} from "./types.js";
+import { validateEnvelope } from "./validator.js";
 
 const TERMINAL_TOPICS = new Set([
   "lane.attached",
@@ -44,7 +39,7 @@ const START_TOPICS = new Set([
 function appendRejectedEvent(
   context: InMemoryBusContext,
   event: LocalBusEnvelope,
-  error: string,
+  error: string
 ): void {
   context.auditLog.push({
     envelope: event,
@@ -56,7 +51,7 @@ function appendRejectedEvent(
 
 export function ensureLifecycleProgress(
   lifecycleProgress: Map<string, Set<string>>,
-  correlationId: string,
+  correlationId: string
 ): Set<string> {
   let progress = lifecycleProgress.get(correlationId);
   if (!progress) {
@@ -69,7 +64,7 @@ export function ensureLifecycleProgress(
 export function publishLifecycleEvent(
   context: InMemoryBusContext,
   topic: string,
-  envelope: LocalBusEnvelope,
+  envelope: LocalBusEnvelope
 ): void {
   const event: LocalBusEnvelope = {
     id: `evt-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -89,7 +84,7 @@ export function publishLifecycleEvent(
 
 export async function publishInMemoryEvent(
   context: InMemoryBusContext,
-  candidate: unknown,
+  candidate: unknown
 ): Promise<void> {
   await Promise.resolve();
 
@@ -114,7 +109,7 @@ export async function publishInMemoryEvent(
       if (progress.has(topic)) {
         const error = new ProtocolValidationError(
           "ORDERING_VIOLATION",
-          `Duplicate start topic "${topic}" for correlation "${correlationId}"`,
+          `Duplicate start topic "${topic}" for correlation "${correlationId}"`
         );
         appendRejectedEvent(context, event, error.message);
         throw error;
@@ -136,7 +131,7 @@ export async function publishInMemoryEvent(
               ? ".create.started"
               : topic.includes("spawn")
                 ? ".spawn.started"
-                : "",
+                : ""
         )
         .replace(".created", ".create.started")
         .replace(".spawned", ".spawn.started");
@@ -144,7 +139,7 @@ export async function publishInMemoryEvent(
       if (!seen?.has(expectedStart) && expectedStart !== topic) {
         const error = new ProtocolValidationError(
           "ORDERING_VIOLATION",
-          `Topic '${topic}' cannot be published before '${expectedStart}'`,
+          `Topic '${topic}' cannot be published before '${expectedStart}'`
         );
         appendRejectedEvent(context, event, error.message);
         throw error;
@@ -169,7 +164,7 @@ export async function publishInMemoryEvent(
         context,
         "terminal_output_backlog_depth",
         backlogDepth,
-        Object.keys(tags).length > 0 ? tags : undefined,
+        Object.keys(tags).length > 0 ? tags : undefined
       );
       emitMetricEvent(context, "terminal_output_backlog_depth", backlogDepth);
     }

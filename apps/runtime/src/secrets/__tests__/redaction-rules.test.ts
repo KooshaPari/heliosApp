@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { rmSync } from "node:fs";
 import { join } from "node:path";
-import { RedactionEngine } from "../redaction-engine.js";
-import { getDefaultRules, RedactionRuleManager } from "../redaction-rules.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { RedactionEngine } from "../redaction-engine.js";
+import { RedactionRuleManager, getDefaultRules } from "../redaction-rules.js";
 import { makeTestTempDir } from "./tempdir.js";
 
 const ctx = { artifactId: "art-1", artifactType: "log", correlationId: "corr-1" };
@@ -16,7 +16,9 @@ function makeEngine(manager?: RedactionRuleManager): RedactionEngine {
 
 describe("Default rules: positive examples", () => {
   let engine: RedactionEngine;
-  beforeEach(() => { engine = makeEngine(); });
+  beforeEach(() => {
+    engine = makeEngine();
+  });
 
   it("AWS Access Key - positive", () => {
     const r = engine.redact("AKIAIOSFODNN7EXAMPLE", ctx);
@@ -72,7 +74,9 @@ describe("Default rules: positive examples", () => {
 
 describe("Default rules: negative examples", () => {
   let engine: RedactionEngine;
-  beforeEach(() => { engine = makeEngine(); });
+  beforeEach(() => {
+    engine = makeEngine();
+  });
 
   it("AWS Access Key - negative (too short)", () => {
     const r = engine.redact("AKIA123SHORT", ctx);
@@ -151,8 +155,12 @@ describe("RedactionRuleManager: enable/disable", () => {
 
 describe("RedactionRuleManager: persistence", () => {
   let tmpDir: string;
-  beforeEach(() => { tmpDir = makeTestTempDir("helios-rules-test-"); });
-  afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
+  beforeEach(() => {
+    tmpDir = makeTestTempDir("helios-rules-test-");
+  });
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
 
   it("exports and imports rules", () => {
     const manager = new RedactionRuleManager({ initialRules: getDefaultRules() });

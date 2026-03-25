@@ -15,7 +15,7 @@ function toValues(input: PercentileInput): Float64Array {
  * The input array is **not** mutated — a sorted copy is created internally.
  */
 export function computePercentiles(input: PercentileInput): PercentileBucket | undefined {
-  const values = toValues(input).filter((value) => !Number.isNaN(value));
+  const values = toValues(input).filter(value => !Number.isNaN(value));
   const count = values.length;
   if (count === 0) {
     return undefined;
@@ -26,7 +26,7 @@ export function computePercentiles(input: PercentileInput): PercentileBucket | u
   sorted.sort();
 
   return {
-    p50: percentileFromSorted(sorted, 0.50),
+    p50: percentileFromSorted(sorted, 0.5),
     p95: percentileFromSorted(sorted, 0.95),
     p99: percentileFromSorted(sorted, 0.99),
     min: sorted[0]!,

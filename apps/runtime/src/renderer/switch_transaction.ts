@@ -1,29 +1,15 @@
-/**
- * Switch transaction orchestrator.
- *
- * Coordinates the complete renderer switch lifecycle:
- * - Manages transaction state (pending, hot-swapping, committed, rolled-back, failed)
- * - Enforces atomic all-or-nothing semantics
- * - Rejects concurrent switches
- * - Routes to hot-swap or restart-with-restore based on capability matrix
- *
- * @see FR-010-008, FR-010-009, SC-010-002
- */
-
-import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.js";
+import { executeHotSwap } from "./hot_swap.js";
 import type { RendererEventBus } from "./index.js";
-import { executeHotSwap, type TerminalContext } from "./hot_swap.js";
-import { executeRollback } from "./rollback.js";
 import { executeRestartWithRestore } from "./restart_restore.js";
-import type { SwitchBuffer } from "./stream_binding.js";
+import { executeRollback } from "./rollback.js";
 import { SwitchTerminalCreationQueue } from "./switch_transaction_queue.js";
 import {
   ConcurrentSwitchError,
   InvalidTransitionError,
-  VALID_TRANSITIONS,
   type SwitchTransaction,
   type SwitchTransactionRequest,
   type SwitchTransactionState,
+  VALID_TRANSITIONS,
 } from "./switch_transaction_types.js";
 
 export {
@@ -122,7 +108,7 @@ export class SwitchTransactionOrchestrator {
    */
   private async _executeHotSwapPath(
     transaction: SwitchTransaction,
-    request: SwitchTransactionRequest,
+    request: SwitchTransactionRequest
   ): Promise<SwitchTransaction> {
     // Transition to hot-swapping
     this._transitionState(transaction, "hot-swapping");
@@ -145,10 +131,10 @@ export class SwitchTransactionOrchestrator {
             request.terminals,
             request.streamBuffer,
             error.message,
-            this._eventBus,
+            this._eventBus
           );
         },
-        this._eventBus,
+        this._eventBus
       );
 
       if (result.success) {
@@ -161,14 +147,13 @@ export class SwitchTransactionOrchestrator {
         request.onProgress?.("committed");
 
         return transaction;
-      } else {
-        // Hot-swap failed, rollback was triggered
-        this._transitionState(transaction, "rolled-back");
-        request.onProgress?.("rolled-back");
-
-        transaction.error = result.error;
-        return transaction;
       }
+      // Hot-swap failed, rollback was triggered
+      this._transitionState(transaction, "rolled-back");
+      request.onProgress?.("rolled-back");
+
+      transaction.error = result.error;
+      return transaction;
     } catch (error: unknown) {
       // Unexpected error during hot-swap
       this._transitionState(transaction, "failed");
@@ -185,7 +170,7 @@ export class SwitchTransactionOrchestrator {
    */
   private async _executeRestartRestorePath(
     transaction: SwitchTransaction,
-    request: SwitchTransactionRequest,
+    request: SwitchTransactionRequest
   ): Promise<SwitchTransaction> {
     // Transition to restarting
     this._transitionState(transaction, "restarting");
@@ -208,10 +193,10 @@ export class SwitchTransactionOrchestrator {
             request.terminals,
             request.streamBuffer,
             error.message,
-            this._eventBus,
+            this._eventBus
           );
         },
-        this._eventBus,
+        this._eventBus
       );
 
       if (result.success) {
@@ -224,14 +209,13 @@ export class SwitchTransactionOrchestrator {
         request.onProgress?.("committed");
 
         return transaction;
-      } else {
-        // Restart-with-restore failed, rollback was triggered
-        this._transitionState(transaction, "rolled-back");
-        request.onProgress?.("rolled-back");
-
-        transaction.error = result.error;
-        return transaction;
       }
+      // Restart-with-restore failed, rollback was triggered
+      this._transitionState(transaction, "rolled-back");
+      request.onProgress?.("rolled-back");
+
+      transaction.error = result.error;
+      return transaction;
     } catch (error: unknown) {
       // Unexpected error during restart-with-restore
       this._transitionState(transaction, "failed");
@@ -271,10 +255,7 @@ export class SwitchTransactionOrchestrator {
     }
     const { state } = this._activeTransaction;
     return (
-      state !== "committed" &&
-      state !== "rolled-back" &&
-      state !== "failed" &&
-      state !== "degraded"
+      state !== "committed" && state !== "rolled-back" && state !== "failed" && state !== "degraded"
     );
   }
 
@@ -313,7 +294,7 @@ export class SwitchTransactionOrchestrator {
  * Create a new switch transaction orchestrator instance.
  */
 export function createSwitchOrchestrator(
-  eventBus?: RendererEventBus,
+  eventBus?: RendererEventBus
 ): SwitchTransactionOrchestrator {
   return new SwitchTransactionOrchestrator(eventBus);
 }

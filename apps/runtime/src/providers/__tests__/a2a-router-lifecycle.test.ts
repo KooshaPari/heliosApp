@@ -2,9 +2,9 @@
  * A2A Router lifecycle, health monitoring, termination, and error handling tests.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
-import { A2ARouterAdapter } from "../a2a-router.js";
+import { beforeEach, describe, expect, it } from "vitest";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { A2ARouterAdapter } from "../a2a-router.js";
 
 type RouterConfig = {
   endpoints: Array<{ id: string; url: string; priority: number; capabilities: string[] }>;
@@ -83,7 +83,7 @@ describe("A2A Router Adapter: Lifecycle", () => {
       await adapter.terminate();
 
       const events = bus.getEvents();
-      const terminatedEvent = events.find((e) => e.topic === "provider.a2a.terminated");
+      const terminatedEvent = events.find(e => e.topic === "provider.a2a.terminated");
       expect(terminatedEvent).toBeDefined();
     });
 
@@ -137,9 +137,7 @@ describe("A2A Router Adapter: Lifecycle", () => {
       }
 
       const events = bus.getEvents();
-      const errorEvent = events.find(
-        (e) => e.topic === "provider.a2a.delegation.failed"
-      );
+      const errorEvent = events.find(e => e.topic === "provider.a2a.delegation.failed");
       expect(errorEvent).toBeDefined();
     });
   });

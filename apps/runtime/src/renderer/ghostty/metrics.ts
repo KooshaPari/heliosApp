@@ -104,7 +104,9 @@ export class GhosttyMetrics {
    * publishIntervalMs > 0, starts periodic publishing.
    */
   enable(): void {
-    if (this._enabled) return;
+    if (this._enabled) {
+      return;
+    }
     this._enabled = true;
     this._windowStartTimestamp = Date.now();
     this._startPublishing();
@@ -114,7 +116,9 @@ export class GhosttyMetrics {
    * Disable metrics collection and stop publishing.
    */
   disable(): void {
-    if (!this._enabled) return;
+    if (!this._enabled) {
+      return;
+    }
     this._enabled = false;
     this._stopPublishing();
   }
@@ -153,7 +157,9 @@ export class GhosttyMetrics {
    *                    (e.g., performance.now() or Date.now()).
    */
   recordFrame(timestamp: number = Date.now()): void {
-    if (!this._enabled) return;
+    if (!this._enabled) {
+      return;
+    }
 
     this._frameCount++;
     this._framesInWindow++;
@@ -189,7 +195,9 @@ export class GhosttyMetrics {
    * @param echoTimestamp  - When the echo was rendered.
    */
   recordInputLatency(inputTimestamp: number, echoTimestamp: number): void {
-    if (!this._enabled) return;
+    if (!this._enabled) {
+      return;
+    }
     const latencyMs = echoTimestamp - inputTimestamp;
     this._inputLatencies.push(latencyMs);
   }
@@ -252,9 +260,15 @@ export class GhosttyMetrics {
   // -----------------------------------------------------------------------
 
   private _startPublishing(): void {
-    if (this._publishTimer !== undefined) return;
-    if (this._publisher === undefined) return;
-    if (this._publishIntervalMs <= 0) return;
+    if (this._publishTimer !== undefined) {
+      return;
+    }
+    if (this._publisher === undefined) {
+      return;
+    }
+    if (this._publishIntervalMs <= 0) {
+      return;
+    }
 
     this._publishTimer = setInterval(() => {
       this._publish();
@@ -269,7 +283,9 @@ export class GhosttyMetrics {
   }
 
   private _publish(): void {
-    if (this._publisher === undefined || !this._enabled) return;
+    if (this._publisher === undefined || !this._enabled) {
+      return;
+    }
 
     try {
       const snapshot = this.getSnapshot();

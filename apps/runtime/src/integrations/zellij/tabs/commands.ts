@@ -5,7 +5,7 @@ import type { CliResult } from "../types.js";
 export async function runTabCommand(
   cli: ZellijCli,
   commandLabel: string,
-  args: string[],
+  args: string[]
 ): Promise<CliResult> {
   const result = await cli.run(args);
   if (result.exitCode !== 0) {

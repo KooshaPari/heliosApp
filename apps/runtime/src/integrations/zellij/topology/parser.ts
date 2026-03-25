@@ -4,10 +4,7 @@ import type { LayoutTopology, PaneTopology, TabTopology } from "../types.js";
  * Parse zellij dump-layout output into a LayoutTopology.
  * Zellij dump-layout returns KDL format; we do a best-effort parse.
  */
-export function parseLayoutDump(
-  sessionName: string,
-  output: string,
-): LayoutTopology {
+export function parseLayoutDump(sessionName: string, output: string): LayoutTopology {
   const tabs: TabTopology[] = [];
   let activeTabId = 0;
 
@@ -51,8 +48,8 @@ export function parseLayoutDump(
       panes.push({
         paneId: paneCounter++,
         dimensions: {
-          cols: colsMatch ? parseInt(colsMatch[1]!, 10) : 80,
-          rows: rowsMatch ? parseInt(rowsMatch[1]!, 10) : 24,
+          cols: colsMatch ? Number.parseInt(colsMatch[1]!, 10) : 80,
+          rows: rowsMatch ? Number.parseInt(rowsMatch[1]!, 10) : 24,
         },
         focused: focusMatch,
       });

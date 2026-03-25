@@ -6,7 +6,7 @@ export function collectOrphanPidsFromPsOutput(
   output: string,
   currentPid: number,
   shellPatterns: string[] = DEFAULT_SHELL_PATTERNS,
-  trackedPids: ReadonlySet<number> = new Set(),
+  trackedPids: ReadonlySet<number> = new Set()
 ): number[] {
   const orphanPids: number[] = [];
   const lines = output.trim().split("\n").slice(1);
@@ -31,7 +31,7 @@ export function collectOrphanPidsFromPsOutput(
 
     const basename = comm.split("/").pop() ?? "";
     const isShell = shellPatterns.some(
-      (pattern) => basename === pattern || basename === `-${pattern}`,
+      pattern => basename === pattern || basename === `-${pattern}`
     );
 
     if (isShell && !trackedPids.has(pid)) {
@@ -45,7 +45,7 @@ export function collectOrphanPidsFromPsOutput(
 export async function reconcileRegistryOrphans(
   registry: PtyRegistry,
   shellPatterns: string[] = DEFAULT_SHELL_PATTERNS,
-  gracePeriodMs = 5000,
+  gracePeriodMs = 5000
 ): Promise<ReconciliationSummary> {
   const start = performance.now();
   let found = 0;
@@ -59,7 +59,7 @@ export async function reconcileRegistryOrphans(
 
     for (const pid of orphanPids) {
       try {
-        const existingRecord = registry.list().find((record) => record.pid === pid);
+        const existingRecord = registry.list().find(record => record.pid === pid);
         if (existingRecord) {
           reattached++;
           continue;
@@ -84,10 +84,7 @@ export async function reconcileRegistryOrphans(
   };
 }
 
-async function scanForOrphans(
-  registry: PtyRegistry,
-  shellPatterns: string[],
-): Promise<number[]> {
+async function scanForOrphans(registry: PtyRegistry, shellPatterns: string[]): Promise<number[]> {
   const currentPid = process.pid;
 
   try {
@@ -99,13 +96,8 @@ async function scanForOrphans(
     const output = await new Response(proc.stdout).text();
     await proc.exited;
 
-    const trackedPids = new Set(registry.list().map((record) => record.pid));
-    return collectOrphanPidsFromPsOutput(
-      output,
-      currentPid,
-      shellPatterns,
-      trackedPids,
-    );
+    const trackedPids = new Set(registry.list().map(record => record.pid));
+    return collectOrphanPidsFromPsOutput(output, currentPid, shellPatterns, trackedPids);
   } catch {
     return [];
   }
@@ -118,7 +110,7 @@ async function terminateOrphan(pid: number, gracePeriodMs: number): Promise<void
     return;
   }
 
-  await new Promise((resolve) => setTimeout(resolve, gracePeriodMs));
+  await new Promise(resolve => setTimeout(resolve, gracePeriodMs));
 
   try {
     process.kill(pid, 0);

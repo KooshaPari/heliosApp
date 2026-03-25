@@ -6,19 +6,15 @@
  * SC-025-002: Provider crash in lane A must produce zero effect on lane B.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
-  ProviderRegistration,
   ACPConfig,
   ACPExecuteInput,
   ACPExecuteOutput,
+  ProviderAdapter,
+  ProviderHealthStatus,
 } from "../adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-} from "../errors.js";
+import { normalizeError } from "../errors.js";
 
 /**
  * Mock isolated provider for testing lane isolation behavior.
@@ -27,7 +23,8 @@ import {
  * For testing, we simulate the behavior with in-process state.
  */
 class MockIsolatedProvider
-  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput> {
+  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
+{
   private laneId: string;
   private initialized = false;
   private shouldCrash = false;
@@ -88,8 +85,16 @@ describe("Process-Level Isolation", () => {
       const laneProviderB = new MockIsolatedProvider("lane-b");
 
       // Initialize both providers
-      await laneProviderA.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
-      await laneProviderB.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
+      await laneProviderA.init({
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
+        model: "claude-3-sonnet",
+      });
+      await laneProviderB.init({
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
+        model: "claude-3-sonnet",
+      });
 
       // Lane A provider crashes
       laneProviderA.setCrash(true);
@@ -106,8 +111,16 @@ describe("Process-Level Isolation", () => {
       const laneProviderA = new MockIsolatedProvider("lane-a");
       const laneProviderB = new MockIsolatedProvider("lane-b");
 
-      await laneProviderA.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
-      await laneProviderB.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
+      await laneProviderA.init({
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
+        model: "claude-3-sonnet",
+      });
+      await laneProviderB.init({
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
+        model: "claude-3-sonnet",
+      });
 
       // Crash lane A provider multiple times
       laneProviderA.setCrash(true);
@@ -134,13 +147,17 @@ describe("Process-Level Isolation", () => {
     it("should prevent memory leaks from crashed provider", async () => {
       const provider = new MockIsolatedProvider("lane-1");
 
-      await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
+      await provider.init({
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
+        model: "claude-3-sonnet",
+      });
 
       // Simulate multiple executions
       for (let i = 0; i < 100; i++) {
         try {
           await provider.execute({ prompt: `test-${i}` }, `corr-${i}`);
-        } catch (e) {
+        } catch (_e) {
           // Handle error
         }
       }
@@ -156,7 +173,11 @@ describe("Process-Level Isolation", () => {
     it("should handle graceful termination", async () => {
       const provider = new MockIsolatedProvider("lane-1");
 
-      await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
+      await provider.init({
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
+        model: "claude-3-sonnet",
+      });
 
       let health = await provider.health();
       expect(health.state).toBe("healthy");
@@ -205,15 +226,17 @@ describe("Process-Level Isolation", () => {
       // Create providers for each lane
       for (let i = 0; i < laneCount; i++) {
         const provider = new MockIsolatedProvider(`lane-${i}`);
-        await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
+        await provider.init({
+          endpoint: "http://localhost:8080/acp",
+          apiKeyRef: "acp-key",
+          model: "claude-3-sonnet",
+        });
         providers.push(provider);
       }
 
       // Execute in all lanes
       const results = await Promise.all(
-        providers.map((p) =>
-          p.execute({ prompt: "test" }, "corr-123")
-        )
+        providers.map(p => p.execute({ prompt: "test" }, "corr-123"))
       );
 
       // All should succeed
@@ -229,7 +252,11 @@ describe("Process-Level Isolation", () => {
       // Create 5 providers
       for (let i = 0; i < 5; i++) {
         const provider = new MockIsolatedProvider(`lane-${i}`);
-        await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
+        await provider.init({
+          endpoint: "http://localhost:8080/acp",
+          apiKeyRef: "acp-key",
+          model: "claude-3-sonnet",
+        });
         providers.push(provider);
       }
 
@@ -239,9 +266,7 @@ describe("Process-Level Isolation", () => {
 
       // Execute in all lanes and track results
       const results = await Promise.allSettled(
-        providers.map((p, i) =>
-          p.execute({ prompt: `test-${i}` }, `corr-${i}`)
-        )
+        providers.map((p, i) => p.execute({ prompt: `test-${i}` }, `corr-${i}`))
       );
 
       // Check results: 1 and 3 should fail, others succeed
@@ -270,33 +295,35 @@ describe("Process-Level Isolation", () => {
 
       // Initialize all
       for (const provider of providers) {
-        await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
+        await provider.init({
+          endpoint: "http://localhost:8080/acp",
+          apiKeyRef: "acp-key",
+          model: "claude-3-sonnet",
+        });
       }
 
       // Get initial health
-      const initialHealth = await Promise.all(providers.map((p) => p.health()));
+      const initialHealth = await Promise.all(providers.map(p => p.health()));
 
       // Lane B crashes multiple times
       providers[1].setCrash(true);
       for (let i = 0; i < 5; i++) {
         try {
           await providers[1].execute({ prompt: "test" }, `corr-${i}`);
-        } catch (e) {
+        } catch (_e) {
           // Expected
         }
       }
 
       // Check health again
-      const finalHealth = await Promise.all(providers.map((p) => p.health()));
+      const finalHealth = await Promise.all(providers.map(p => p.health()));
 
       // Lanes A and C should be unaffected
       expect(finalHealth[0].failureCount).toBe(initialHealth[0].failureCount);
       expect(finalHealth[2].failureCount).toBe(initialHealth[2].failureCount);
 
       // Lane B should show increased failures
-      expect(finalHealth[1].failureCount).toBeGreaterThan(
-        initialHealth[1].failureCount
-      );
+      expect(finalHealth[1].failureCount).toBeGreaterThan(initialHealth[1].failureCount);
     });
   });
 
@@ -304,7 +331,11 @@ describe("Process-Level Isolation", () => {
     it("should cleanup resources on terminate", async () => {
       const provider = new MockIsolatedProvider("lane-1");
 
-      await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
+      await provider.init({
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
+        model: "claude-3-sonnet",
+      });
 
       // Execute some operations
       const result = await provider.execute({ prompt: "test" }, "corr-123");
@@ -321,13 +352,17 @@ describe("Process-Level Isolation", () => {
     it("should handle termination of crashed provider", async () => {
       const provider = new MockIsolatedProvider("lane-1");
 
-      await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
+      await provider.init({
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
+        model: "claude-3-sonnet",
+      });
 
       // Cause a crash
       provider.setCrash(true);
       try {
         await provider.execute({ prompt: "test" }, "corr-123");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 

@@ -4,7 +4,7 @@
  * Provides single-handler binding per method name with strict validation.
  */
 
-import type { CommandEnvelope, ResponseEnvelope } from './types.js';
+import type { CommandEnvelope, ResponseEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -12,7 +12,7 @@ import type { CommandEnvelope, ResponseEnvelope } from './types.js';
 
 /** A method handler receives a command and returns a response (sync or async). */
 export type MethodHandler = (
-  command: CommandEnvelope,
+  command: CommandEnvelope
 ) => ResponseEnvelope | Promise<ResponseEnvelope>;
 
 // ---------------------------------------------------------------------------
@@ -57,7 +57,7 @@ export type ProtocolMethod = (typeof METHODS)[number];
 function assertValidMethodName(method: string): void {
   if (!METHOD_NAME_RE.test(method)) {
     throw new Error(
-      `Invalid method name "${method}": must be non-empty, alphanumeric segments separated by dots`,
+      `Invalid method name "${method}": must be non-empty, alphanumeric segments separated by dots`
     );
   }
 }

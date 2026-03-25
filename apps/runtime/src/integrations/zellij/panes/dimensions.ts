@@ -1,10 +1,10 @@
-import type { PaneDimensions, MinPaneDimensions } from "../types.js";
 import { PaneTooSmallError } from "../errors.js";
+import type { MinPaneDimensions, PaneDimensions } from "../types.js";
 
 export function calculateResizedDimensions(
   current: PaneDimensions,
   direction: "left" | "right" | "up" | "down",
-  amount: number,
+  amount: number
 ): PaneDimensions {
   const result = { ...current };
   switch (direction) {
@@ -12,13 +12,13 @@ export function calculateResizedDimensions(
       result.cols = Math.max(1, result.cols - amount);
       break;
     case "right":
-      result.cols = result.cols + amount;
+      result.cols += amount;
       break;
     case "up":
       result.rows = Math.max(1, result.rows - amount);
       break;
     case "down":
-      result.rows = result.rows + amount;
+      result.rows += amount;
       break;
   }
   return result;
@@ -26,15 +26,10 @@ export function calculateResizedDimensions(
 
 export function validatePaneDimensions(
   dimensions: PaneDimensions,
-  minDimensions: MinPaneDimensions,
+  minDimensions: MinPaneDimensions
 ): void {
   const { minCols, minRows } = minDimensions;
   if (dimensions.cols < minCols || dimensions.rows < minRows) {
-    throw new PaneTooSmallError(
-      dimensions.cols,
-      dimensions.rows,
-      minCols,
-      minRows,
-    );
+    throw new PaneTooSmallError(dimensions.cols, dimensions.rows, minCols, minRows);
   }
 }

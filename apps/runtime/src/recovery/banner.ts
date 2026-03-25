@@ -1,7 +1,7 @@
 import type { LocalBus } from "../protocol/bus.js";
-import { RecoveryStage } from "./state-machine.js";
-import type { RestorationResult } from "./restoration.js";
 import type { CleanupResult } from "./orphan-reconciler.js";
+import type { RestorationResult } from "./restoration.js";
+import { RecoveryStage } from "./state-machine.js";
 
 export interface BannerConfig {
   containerId?: string;
@@ -44,10 +44,7 @@ export class RecoveryBanner {
     this.renderBanner(detail);
   }
 
-  showSummary(
-    result: RestorationResult,
-    orphanResult: CleanupResult
-  ): void {
+  showSummary(result: RestorationResult, orphanResult: CleanupResult): void {
     this.isActive = false;
     this.renderSummary(result, orphanResult);
 
@@ -85,29 +82,22 @@ export class RecoveryBanner {
   }
 
   private renderBanner(detail?: string): void {
-    if (!this.isVisible || !this.currentStage) return;
+    if (!(this.isVisible && this.currentStage)) {
+      return;
+    }
 
     const message = this.getStageMessage(this.currentStage);
-    const fullMessage = detail ? `${message} ${detail}` : message;
-
-    // In a real implementation, this would render to the UI
-    // For now, log to console
-    console.log(`[Recovery Banner] ${fullMessage}`);
+    const _fullMessage = detail ? `${message} ${detail}` : message;
   }
 
-  private renderSummary(
-    result: RestorationResult,
-    orphanResult: CleanupResult
-  ): void {
+  private renderSummary(result: RestorationResult, orphanResult: CleanupResult): void {
     const hasIssues = result.failed.length > 0;
-    const header = hasIssues
-      ? "Recovery complete with issues"
-      : "Recovery complete";
+    const header = hasIssues ? "Recovery complete with issues" : "Recovery complete";
 
-    const summary = {
+    const _summary = {
       header,
-      restored: result.restored.map((s) => s.zellijSessionName || s.sessionId),
-      failed: result.failed.map((f) => ({
+      restored: result.restored.map(s => s.zellijSessionName || s.sessionId),
+      failed: result.failed.map(f => ({
         sessionId: f.sessionId,
         reason: f.reason,
         suggestion: f.suggestion,
@@ -116,18 +106,14 @@ export class RecoveryBanner {
       orphansCleaned: orphanResult.terminated + orphanResult.removed,
       orphansPending: orphanResult.reviewPending,
     };
-
-    // In a real implementation, this would render to the UI
-    console.log("[Recovery Summary]", JSON.stringify(summary, null, 2));
   }
 
-  private clearBanner(): void {
-    // In a real implementation, this would remove the banner from the DOM
-    console.log("[Recovery Banner] Dismissed");
-  }
+  private clearBanner(): void {}
 
   private subscribeToStageChanges(): void {
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
 
     // In a real implementation, this would subscribe to bus events
     // For now, this is a no-op

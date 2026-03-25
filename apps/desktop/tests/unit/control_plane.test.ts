@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createRuntime } from "../../../runtime/src";
-import { bootDesktop } from "../../src";
+import { createRuntime } from "../../../runtime/src.ts";
+import { bootDesktop } from "../../src.ts";
 
 describe("EditorlessControlPlane", () => {
   test("wires lane/session/terminal actions and keeps context in sync", async () => {
@@ -9,14 +9,14 @@ describe("EditorlessControlPlane", () => {
 
     const laneResult = await controlPlane.createLane({
       workspaceId: "workspace_alpha",
-      simulateDegrade: true
+      simulateDegrade: true,
     });
     expect(laneResult.ok).toBe(true);
 
     const laneId = laneResult.laneId as string;
     const sessionResult = await controlPlane.ensureSession({
       workspaceId: "workspace_alpha",
-      laneId
+      laneId,
     });
     expect(sessionResult.ok).toBe(true);
 
@@ -24,7 +24,7 @@ describe("EditorlessControlPlane", () => {
     const terminalResult = await controlPlane.spawnTerminal({
       workspaceId: "workspace_alpha",
       laneId,
-      sessionId
+      sessionId,
     });
     expect(terminalResult.ok).toBe(true);
 

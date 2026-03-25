@@ -9,20 +9,25 @@
  */
 
 import type { LocalBus } from "../protocol/bus.js";
-import type { ProviderAdapter, ProviderHealthStatus } from "./adapter.js";
-import { NormalizedProviderError, normalizeError } from "./errors.js";
 import {
+  type A2ADelegation,
+  type A2AEndpoint,
+  type A2AResult,
+  type A2ARouterConfig,
   createA2AEndpoints,
   probeA2AEndpoint,
   publishA2AEvent,
   selectA2AEndpoint,
   sendA2ADelegation,
-  type A2ADelegation,
-  type A2AEndpoint,
-  type A2ARouterConfig,
-  type A2AResult,
 } from "./a2a-router_helpers.js";
-export type { A2ADelegation, A2AEndpoint, A2ARouterConfig, A2AResult } from "./a2a-router_helpers.js";
+import type { ProviderAdapter, ProviderHealthStatus } from "./adapter.js";
+import { NormalizedProviderError, normalizeError } from "./errors.js";
+export type {
+  A2ADelegation,
+  A2AEndpoint,
+  A2ARouterConfig,
+  A2AResult,
+} from "./a2a-router_helpers.js";
 export { HealthMonitoringCoordinator } from "./a2a-health-coordinator.js";
 
 /**
@@ -38,12 +43,8 @@ export { HealthMonitoringCoordinator } from "./a2a-health-coordinator.js";
  */
 // biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
 export class A2ARouterAdapter
-  implements
-    ProviderAdapter<
-      A2ARouterConfig,
-      A2ADelegation & { correlationId?: string },
-      A2AResult
-    > {
+  implements ProviderAdapter<A2ARouterConfig, A2ADelegation & { correlationId?: string }, A2AResult>
+{
   private config: A2ARouterConfig | null = null;
   private bus: LocalBus | null = null;
   private endpoints: A2AEndpoint[] = [];
@@ -69,7 +70,7 @@ export class A2ARouterAdapter
   async init(config: A2ARouterConfig): Promise<void> {
     try {
       // Validate config
-      if (!config.endpoints || !Array.isArray(config.endpoints) || config.endpoints.length === 0) {
+      if (!(config.endpoints && Array.isArray(config.endpoints)) || config.endpoints.length === 0) {
         throw new Error("Missing or invalid endpoints");
       }
 
@@ -98,11 +99,21 @@ export class A2ARouterAdapter
         failureCount: 0,
       };
 
-      await publishA2AEvent(this.bus, "provider.a2a.initialized", {
-        endpointCount: this.endpoints.length,
-      }, "a2a");
+      await publishA2AEvent(
+        this.bus,
+        "provider.a2a.initialized",
+        {
+          endpointCount: this.endpoints.length,
+        },
+        "a2a"
+      );
     } catch (error) {
-      throw new NormalizedProviderError("PROVIDER_INIT_FAILED", `A2A router init failed: ${normalizeError(error, "a2a").message}`, "a2a", false);
+      throw new NormalizedProviderError(
+        "PROVIDER_INIT_FAILED",
+        `A2A router init failed: ${normalizeError(error, "a2a").message}`,
+        "a2a",
+        false
+      );
     }
   }
 
@@ -123,7 +134,7 @@ export class A2ARouterAdapter
 
     try {
       // Check if any endpoint is healthy
-      const healthyEndpoints = this.endpoints.filter((ep) => ep.healthStatus?.state === "healthy");
+      const healthyEndpoints = this.endpoints.filter(ep => ep.healthStatus?.state === "healthy");
 
       if (healthyEndpoints.length > 0) {
         this.healthStatus = {
@@ -133,8 +144,7 @@ export class A2ARouterAdapter
         };
       } else {
         this.healthStatus.failureCount++;
-        const newState =
-          this.healthStatus.failureCount >= 5 ? "unavailable" : "degraded";
+        const newState = this.healthStatus.failureCount >= 5 ? "unavailable" : "degraded";
         this.healthStatus = {
           state: newState,
           lastCheck: new Date(),
@@ -203,11 +213,16 @@ export class A2ARouterAdapter
         const duration = Date.now() - startTime;
 
         // Publish success event
-        await publishA2AEvent(this.bus, "provider.a2a.delegation.completed", {
-          correlationId,
-          endpointId: selectedEndpoint.id,
-          duration,
-        }, "a2a");
+        await publishA2AEvent(
+          this.bus,
+          "provider.a2a.delegation.completed",
+          {
+            correlationId,
+            endpointId: selectedEndpoint.id,
+            duration,
+          },
+          "a2a"
+        );
 
         return {
           endpointId: selectedEndpoint.id,
@@ -230,11 +245,16 @@ export class A2ARouterAdapter
           correlationId
         );
 
-        await publishA2AEvent(this.bus, "provider.a2a.delegation.failed", {
-          correlationId,
-          code: normalized.code,
-          message: normalized.message,
-        }, "a2a");
+        await publishA2AEvent(
+          this.bus,
+          "provider.a2a.delegation.failed",
+          {
+            correlationId,
+            code: normalized.code,
+            message: normalized.message,
+          },
+          "a2a"
+        );
 
         throw normalized;
       }
@@ -242,11 +262,16 @@ export class A2ARouterAdapter
       // Handle other errors
       const normalized = normalizeError(error, "a2a", correlationId);
 
-      await publishA2AEvent(this.bus, "provider.a2a.delegation.failed", {
-        correlationId,
-        code: normalized.code,
-        message: normalized.message,
-      }, "a2a");
+      await publishA2AEvent(
+        this.bus,
+        "provider.a2a.delegation.failed",
+        {
+          correlationId,
+          code: normalized.code,
+          message: normalized.message,
+        },
+        "a2a"
+      );
 
       throw normalized;
     }
@@ -303,7 +328,7 @@ export class A2ARouterAdapter
    * @param status New health status
    */
   updateEndpointHealth(endpointId: string, status: ProviderHealthStatus): void {
-    const endpoint = this.endpoints.find((ep) => ep.id === endpointId);
+    const endpoint = this.endpoints.find(ep => ep.id === endpointId);
     if (endpoint) {
       endpoint.healthStatus = status;
     }

@@ -85,13 +85,19 @@ export function matchesPattern(filePath: string, pattern: string): boolean {
   }
 
   // Direct filename match (no glob)
-  if (!pattern.includes("*") && !pattern.includes("?")) {
+  if (!(pattern.includes("*") || pattern.includes("?"))) {
     const base = filePath.split("/").pop() ?? filePath;
     const patBase = pattern.split("/").pop() ?? pattern;
-    if (base === patBase) return true;
+    if (base === patBase) {
+      return true;
+    }
     // Full path match
-    if (filePath.endsWith(pattern) || filePath === pattern) return true;
-    if (expandedPath.endsWith(expandedPattern) || expandedPath === expandedPattern) return true;
+    if (filePath.endsWith(pattern) || filePath === pattern) {
+      return true;
+    }
+    if (expandedPath.endsWith(expandedPattern) || expandedPath === expandedPattern) {
+      return true;
+    }
     return false;
   }
 
@@ -110,7 +116,9 @@ function globToRegex(glob: string): string {
     if (ch === "*" && glob[i + 1] === "*") {
       result += ".*";
       i += 2;
-      if (glob[i] === "/") i++; // consume optional slash after **
+      if (glob[i] === "/") {
+        i++; // consume optional slash after **
+      }
     } else if (ch === "*") {
       result += "[^/]*";
       i++;
@@ -118,12 +126,12 @@ function globToRegex(glob: string): string {
       result += "[^/]";
       i++;
     } else if (/[.+^${}()|[\]\\]/.test(ch)) {
-      result += "\\" + ch;
+      result += `\\${ch}`;
       i++;
     } else {
       result += ch;
       i++;
     }
   }
-  return "(^|/|^.*[/\\\\])" + result + "($|[/\\\\])";
+  return `(^|/|^.*[/\\\\])${result}($|[/\\\\])`;
 }

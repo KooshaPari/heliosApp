@@ -7,7 +7,7 @@ export type {
   AuditSink,
   AuditSinkMetrics,
   AuditStorage,
-} from "./sink_types";
+} from "./sink_types.ts";
 
-export { DefaultAuditSink, NoOpAuditStorage } from "./default_audit_sink";
-export { InMemoryAuditSink } from "./audit_records";
+export { DefaultAuditSink, NoOpAuditStorage } from "./default_audit_sink.ts";
+export { InMemoryAuditSink } from "./audit_records.ts";

@@ -1,4 +1,3 @@
-import type { LocalBusEnvelope } from "./types.js";
 import type {
   AuditRecord,
   BusState,
@@ -6,6 +5,7 @@ import type {
   MetricSample,
   RendererEngine,
 } from "./bus_in_memory_types.js";
+import type { LocalBusEnvelope } from "./types.js";
 
 export type InMemoryBusContext = {
   auditLog: AuditRecord[];

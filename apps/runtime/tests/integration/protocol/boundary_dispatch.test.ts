@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { createRuntime } from "../../../src/index";
+import { createRuntime } from "../../../src/index.ts";
 
 function jsonRequest(url: string, body: Record<string, unknown>): Request {
   return new Request(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
   });
 }
 
@@ -17,7 +17,7 @@ describe("protocol boundary dispatch", () => {
         method: "renderer.capabilities",
         workspace_id: "ws_1",
         correlation_id: "corr-1",
-        payload: {}
+        payload: {},
       })
     );
 
@@ -34,7 +34,7 @@ describe("protocol boundary dispatch", () => {
         method: "boundary.tool.dispatch",
         workspace_id: "ws_1",
         correlation_id: "corr-tool",
-        payload: {}
+        payload: {},
       })
     );
 
@@ -55,7 +55,7 @@ describe("protocol boundary dispatch", () => {
         method: "boundary.a2a.dispatch",
         workspace_id: "ws_1",
         correlation_id: "corr-a2a",
-        payload: {}
+        payload: {},
       })
     );
 

@@ -5,22 +5,17 @@
  * ghostty terminal emulator backend.
  */
 
-import type {
-  RendererAdapter,
-  RendererConfig,
-  RendererState,
-  RenderSurface,
-} from "../adapter.js";
+import type { RenderSurface, RendererAdapter, RendererConfig, RendererState } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
-import { GhosttyProcess } from "./process.js";
-import { GhosttySurface } from "./surface.js";
 import { detectCapabilities, getCachedCapabilities } from "./capabilities.js";
-import { GhosttyMetrics } from "./metrics.js";
-import type { MetricsSnapshot, MetricsPublisher } from "./metrics.js";
 import { GhosttyInputRelay } from "./input.js";
-import type { PtyWriter, GhosttyInputEvent } from "./input.js";
+import type { PtyWriter } from "./input.js";
+import { GhosttyMetrics } from "./metrics.js";
+import type { MetricsPublisher, MetricsSnapshot } from "./metrics.js";
+import { GhosttyProcess } from "./process.js";
 import { GhosttyRenderLoopMonitor } from "./render_loop.js";
 import { GhosttyStreamManager } from "./streams.js";
+import { GhosttySurface } from "./surface.js";
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -71,17 +66,17 @@ export class GhosttyBackend implements RendererAdapter {
     this._renderMonitor = new GhosttyRenderLoopMonitor(
       this._metrics,
       () => this._state,
-      () => this._process.isRunning(),
+      () => this._process.isRunning()
     );
     this._streamManager = new GhosttyStreamManager(
       this._surface,
       this._writeToGhostty.bind(this),
       this._notifyStreamEnd.bind(this),
-      this._notifyPaneRemoved.bind(this),
+      this._notifyPaneRemoved.bind(this)
     );
 
     // Wire process crash events to the adapter crash handler
-    this._process.onCrash((error) => {
+    this._process.onCrash(error => {
       this._state = "errored";
       this._crashHandler?.(error);
     });

@@ -1,7 +1,6 @@
-import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.js";
-import type { SwitchBuffer } from "./stream_binding.js";
-import type { RendererEventBus } from "./index.js";
+import type { RenderSurface, RendererAdapter, RendererConfig } from "./adapter.js";
 import type { TerminalContext } from "./hot_swap.js";
+import type { SwitchBuffer } from "./stream_binding.js";
 
 export type SwitchTransactionState =
   | "pending"

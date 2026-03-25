@@ -1,15 +1,12 @@
 // T007-T009 - Remediation engine with confirmation gates and recovery suppression
 
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
-import { type ClassifiedOrphan } from "./resource_classifier.js";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import type { LocalBus } from "../../protocol/bus.js";
 import type { LaneRegistry } from "../registry.js";
-import {
-  CleanupExecutor,
-  type CleanupResult,
-} from "./cleanup_executor.js";
+import { CleanupExecutor, type CleanupResult } from "./cleanup_executor.js";
+import type { ClassifiedOrphan } from "./resource_classifier.js";
 
 export interface RemediationSuggestion {
   id: string;
@@ -43,9 +40,7 @@ export class RemediationEngine {
     this.loadCooldownMap();
   }
 
-  async generateSuggestions(
-    orphans: ClassifiedOrphan[]
-  ): Promise<RemediationSuggestion[]> {
+  async generateSuggestions(orphans: ClassifiedOrphan[]): Promise<RemediationSuggestion[]> {
     const suggestions: RemediationSuggestion[] = [];
 
     // Expire old cooldown entries
@@ -177,9 +172,7 @@ export class RemediationEngine {
       payload: {
         suggestionId,
         resourcePath: suggestion.resource.path || suggestion.resource.pid,
-        cooldownUntil: new Date(
-          Date.now() + this.cooldownDurationMs
-        ).toISOString(),
+        cooldownUntil: new Date(Date.now() + this.cooldownDurationMs).toISOString(),
       },
     });
   }
@@ -200,11 +193,11 @@ export class RemediationEngine {
   private getResourceKey(orphan: ClassifiedOrphan): string {
     if (orphan.path) {
       return `${orphan.type}:${orphan.path}`;
-    } else if (orphan.pid) {
-      return `${orphan.type}:${orphan.pid}`;
-    } else {
-      return `${orphan.type}:unknown`;
     }
+    if (orphan.pid) {
+      return `${orphan.type}:${orphan.pid}`;
+    }
+    return `${orphan.type}:unknown`;
   }
 
   private expireCooldownEntries(): void {
@@ -247,9 +240,6 @@ export class RemediationEngine {
         const entries = Array.from(this.cooldownMap.values());
         fs.writeFile(this.cooldownPath, JSON.stringify(entries, null, 2));
       });
-    } catch (error) {
-      console.error("Failed to save cooldown map:", error);
-    }
+    } catch (_error) {}
   }
-
 }

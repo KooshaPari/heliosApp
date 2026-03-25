@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { rmSync } from "node:fs";
-import { makeTestTempDir } from "./tempdir.js";
 import { AuditSink } from "../../audit/audit-sink.js";
 import { RedactionAuditTrail } from "../audit-trail.js";
 import { makeAuditSink, makeEngine, makeRedactFn, makeStore } from "./integration_helpers.js";
+import { makeTestTempDir } from "./tempdir.js";
 
 describe("Audit completeness [SC-028-005]", () => {
   let tmpDir: string;

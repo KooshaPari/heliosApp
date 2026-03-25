@@ -1,4 +1,4 @@
-import type { TabSurface } from "./tab_surface";
+import type { TabSurface } from "./tab_surface.ts";
 
 export interface TabBarRenderContext {
   selectedTabId: string | null;
@@ -16,12 +16,12 @@ export function getOrderedTabs(
   tabOrder: string[],
   pinnedTabIds: Set<string>
 ): TabSurface[] {
-  const tabMap = new Map(tabs.map((tab) => [tab.getTabId(), tab]));
-  const pinned = tabOrder.filter((id) => pinnedTabIds.has(id));
-  const unpinned = tabOrder.filter((id) => !pinnedTabIds.has(id));
+  const tabMap = new Map(tabs.map(tab => [tab.getTabId(), tab]));
+  const pinned = tabOrder.filter(id => pinnedTabIds.has(id));
+  const unpinned = tabOrder.filter(id => !pinnedTabIds.has(id));
 
   return [...pinned, ...unpinned]
-    .map((id) => tabMap.get(id))
+    .map(id => tabMap.get(id))
     .filter((tab): tab is TabSurface => tab !== undefined);
 }
 
@@ -79,7 +79,7 @@ export function renderTabHeader(
     context.onTabSelected(tab.getTabId());
   });
 
-  headerEl.addEventListener("keydown", (event) => {
+  headerEl.addEventListener("keydown", event => {
     context.onTabKeydown(event, tab.getTabId());
   });
 
@@ -87,12 +87,12 @@ export function renderTabHeader(
     context.onDragStart(tab.getTabId());
   });
 
-  headerEl.addEventListener("dragover", (event) => {
+  headerEl.addEventListener("dragover", event => {
     event.preventDefault();
     context.onTabDrop(tab.getTabId());
   });
 
-  headerEl.addEventListener("drop", (event) => {
+  headerEl.addEventListener("drop", event => {
     event.preventDefault();
     context.onTabDrop(tab.getTabId());
   });
@@ -106,16 +106,20 @@ export function renderTabHeader(
 }
 
 export function focusTabElement(container: HTMLElement | null, tabId: string): void {
-  if (!container) return;
+  if (!container) {
+    return;
+  }
 
   const tabEl = container.querySelector(`[data-tab-id="${tabId}"]`) as HTMLElement | null;
-  if (!tabEl) return;
+  if (!tabEl) {
+    return;
+  }
 
   tabEl.setAttribute("tabindex", "0");
   tabEl.focus();
 
   const allTabs = container.querySelectorAll("[data-tab-id]");
-  allTabs.forEach((el) => {
+  allTabs.forEach(el => {
     if (el !== tabEl) {
       (el as HTMLElement).setAttribute("tabindex", "-1");
     }

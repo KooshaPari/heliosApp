@@ -1,7 +1,7 @@
 import type { ZellijCli } from "../cli.js";
+import { ZellijCliError } from "../errors.js";
 import type { TopologyTracker } from "../topology.js";
 import type { PtyManagerInterface } from "../types.js";
-import { ZellijCliError } from "../errors.js";
 import { buildResizePaneArgs } from "./commands.js";
 import { calculateResizedDimensions } from "./dimensions.js";
 
@@ -15,16 +15,8 @@ export async function resizeZellijPane(args: {
   amount: number;
   validateDimensions: (dimensions: { cols: number; rows: number }) => void;
 }): Promise<void> {
-  const {
-    cli,
-    topology,
-    ptyManager,
-    sessionName,
-    paneId,
-    direction,
-    amount,
-    validateDimensions,
-  } = args;
+  const { cli, topology, ptyManager, sessionName, paneId, direction, amount, validateDimensions } =
+    args;
   const startMs = performance.now();
 
   const paneTopology = topology.findPane(sessionName, paneId);
@@ -32,18 +24,14 @@ export async function resizeZellijPane(args: {
     const resultingDimensions = calculateResizedDimensions(
       paneTopology.dimensions,
       direction,
-      amount,
+      amount
     );
     validateDimensions(resultingDimensions);
   }
 
   const result = await cli.run(buildResizePaneArgs(sessionName, direction, amount));
   if (result.exitCode !== 0) {
-    throw new ZellijCliError(
-      `resize --session ${sessionName}`,
-      result.exitCode,
-      result.stderr,
-    );
+    throw new ZellijCliError(`resize --session ${sessionName}`, result.exitCode, result.stderr);
   }
 
   await topology.refreshTopology(sessionName);
@@ -54,13 +42,10 @@ export async function resizeZellijPane(args: {
       ptyManager.resize(
         updatedPane.ptyId,
         updatedPane.dimensions.cols,
-        updatedPane.dimensions.rows,
+        updatedPane.dimensions.rows
       );
     }
   }
 
-  const durationMs = performance.now() - startMs;
-  console.debug(
-    `[zellij-panes] resizePane(${sessionName}, ${paneId}) duration=${durationMs.toFixed(1)}ms`,
-  );
+  const _durationMs = performance.now() - startMs;
 }

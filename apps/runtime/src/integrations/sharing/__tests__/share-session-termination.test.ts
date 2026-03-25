@@ -27,9 +27,7 @@ describe("Share Session Termination", () => {
 
     await manager.terminate(session.id);
 
-    const terminatedEvent = bus
-      .getEvents()
-      .find((e) => e.topic === "share.session.terminated");
+    const terminatedEvent = bus.getEvents().find(e => e.topic === "share.session.terminated");
     expect(terminatedEvent).toBeDefined();
   });
 

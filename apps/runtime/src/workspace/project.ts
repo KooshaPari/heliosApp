@@ -1,8 +1,8 @@
 // T006, T007, T008 — Project binding, stale detection, and git clone delegation
 
-import type { Workspace, ProjectBinding } from './types.js';
-import { existsSync, realpathSync, accessSync, constants } from 'node:fs';
-import { isAbsolute } from 'node:path';
+import { constants, accessSync, existsSync, realpathSync } from "node:fs";
+import { isAbsolute } from "node:path";
+import type { ProjectBinding, Workspace } from "./types.js";
 
 type SpawnProc = {
   stdout: ReadableStream<Uint8Array> | null;
@@ -11,10 +11,7 @@ type SpawnProc = {
   kill(signal?: string): void;
 };
 
-function spawnProcess(
-  cmd: string[],
-  options: { stdout: "pipe"; stderr: "pipe" },
-): SpawnProc {
+function spawnProcess(cmd: string[], options: { stdout: "pipe"; stderr: "pipe" }): SpawnProc {
   const bunRuntime = (globalThis as Record<string, unknown>).Bun as
     | { spawn(command: string[], opts: { stdout: "pipe"; stderr: "pipe" }): SpawnProc }
     | undefined;
@@ -35,12 +32,9 @@ function generateProjectId(): string {
  * Bind a local directory as a project in a workspace.
  * Validates rootPath is absolute and accessible, rejects duplicates.
  */
-export function bindLocalProject(
-  workspace: Workspace,
-  rootPath: string,
-): Workspace {
+export function bindLocalProject(workspace: Workspace, rootPath: string): Workspace {
   if (!isAbsolute(rootPath)) {
-    throw new Error('Project rootPath must be absolute');
+    throw new Error("Project rootPath must be absolute");
   }
 
   // Resolve symlinks to canonical path
@@ -59,10 +53,8 @@ export function bindLocalProject(
   }
 
   // Duplicate check
-  if (workspace.projects.some((p) => p.rootPath === resolvedPath)) {
-    throw new Error(
-      `Project with rootPath '${resolvedPath}' is already bound to this workspace`,
-    );
+  if (workspace.projects.some(p => p.rootPath === resolvedPath)) {
+    throw new Error(`Project with rootPath '${resolvedPath}' is already bound to this workspace`);
   }
 
   const binding: ProjectBinding = {
@@ -70,7 +62,7 @@ export function bindLocalProject(
     workspaceId: workspace.id,
     rootPath: resolvedPath,
     gitUrl: undefined,
-    status: 'active',
+    status: "active",
     boundAt: Date.now(),
   };
 
@@ -87,10 +79,10 @@ export function bindLocalProject(
 export async function bindGitProject(
   workspace: Workspace,
   gitUrl: string,
-  targetDir: string,
+  targetDir: string
 ): Promise<Workspace> {
   if (!isAbsolute(targetDir)) {
-    throw new Error('Target directory must be absolute');
+    throw new Error("Target directory must be absolute");
   }
 
   await gitClone(gitUrl, targetDir);
@@ -98,10 +90,8 @@ export async function bindGitProject(
   const resolvedPath = realpathSync(targetDir);
 
   // Duplicate check
-  if (workspace.projects.some((p) => p.rootPath === resolvedPath)) {
-    throw new Error(
-      `Project with rootPath '${resolvedPath}' is already bound to this workspace`,
-    );
+  if (workspace.projects.some(p => p.rootPath === resolvedPath)) {
+    throw new Error(`Project with rootPath '${resolvedPath}' is already bound to this workspace`);
   }
 
   const binding: ProjectBinding = {
@@ -109,7 +99,7 @@ export async function bindGitProject(
     workspaceId: workspace.id,
     rootPath: resolvedPath,
     gitUrl,
-    status: 'active',
+    status: "active",
     boundAt: Date.now(),
   };
 
@@ -123,18 +113,15 @@ export async function bindGitProject(
 /**
  * Remove a project binding from a workspace.
  */
-export function unbindProject(
-  workspace: Workspace,
-  projectId: string,
-): Workspace {
-  const idx = workspace.projects.findIndex((p) => p.id === projectId);
+export function unbindProject(workspace: Workspace, projectId: string): Workspace {
+  const idx = workspace.projects.findIndex(p => p.id === projectId);
   if (idx === -1) {
     throw new Error(`Project '${projectId}' not found in workspace`);
   }
 
   return {
     ...workspace,
-    projects: workspace.projects.filter((p) => p.id !== projectId),
+    projects: workspace.projects.filter(p => p.id !== projectId),
     updatedAt: Date.now(),
   };
 }
@@ -143,28 +130,26 @@ export function unbindProject(
  * Detect stale project bindings by checking rootPath accessibility.
  * Auto-heals previously stale paths that are now accessible.
  */
-export async function detectStaleProjects(
-  workspace: Workspace,
-): Promise<Workspace> {
+export async function detectStaleProjects(workspace: Workspace): Promise<Workspace> {
   const updatedProjects = workspace.projects.map((binding): ProjectBinding => {
     try {
       accessSync(binding.rootPath, constants.R_OK);
       // Accessible — mark active (auto-heal if was stale)
-      return binding.status === 'active'
-        ? binding
-        : { ...binding, status: 'active' };
+      return binding.status === "active" ? binding : { ...binding, status: "active" };
     } catch {
       // Inaccessible — mark stale
-      if (binding.status === 'stale') return binding;
-      return { ...binding, status: 'stale' };
+      if (binding.status === "stale") {
+        return binding;
+      }
+      return { ...binding, status: "stale" };
     }
   });
 
-  const changed = updatedProjects.some(
-    (p, i) => p.status !== workspace.projects[i]!.status,
-  );
+  const changed = updatedProjects.some((p, i) => p.status !== workspace.projects[i]?.status);
 
-  if (!changed) return workspace;
+  if (!changed) {
+    return workspace;
+  }
 
   return {
     ...workspace,
@@ -176,30 +161,24 @@ export async function detectStaleProjects(
 /**
  * Clone a git repository using system git binary.
  */
-export async function gitClone(
-  url: string,
-  targetDir: string,
-  timeoutMs: number = 120_000,
-): Promise<void> {
+export async function gitClone(url: string, targetDir: string, timeoutMs = 120_000): Promise<void> {
   // Check git availability
   try {
-    const versionProc = spawnProcess(['git', '--version'], {
-      stdout: 'pipe',
-      stderr: 'pipe',
+    const versionProc = spawnProcess(["git", "--version"], {
+      stdout: "pipe",
+      stderr: "pipe",
     });
     const versionExitCode = await versionProc.exited;
     if (versionExitCode !== 0) {
-      throw new Error('git binary not functional');
+      throw new Error("git binary not functional");
     }
   } catch {
-    throw new Error(
-      'git is not available on this system. Install git to clone repositories.',
-    );
+    throw new Error("git is not available on this system. Install git to clone repositories.");
   }
 
-  const proc = spawnProcess(['git', 'clone', url, targetDir], {
-    stdout: 'pipe',
-    stderr: 'pipe',
+  const proc = spawnProcess(["git", "clone", url, targetDir], {
+    stdout: "pipe",
+    stderr: "pipe",
   });
 
   const timer = setTimeout(() => {
@@ -216,8 +195,6 @@ export async function gitClone(
 
   // Validate target exists
   if (!existsSync(targetDir)) {
-    throw new Error(
-      `git clone reported success but target directory does not exist: ${targetDir}`,
-    );
+    throw new Error(`git clone reported success but target directory does not exist: ${targetDir}`);
   }
 }

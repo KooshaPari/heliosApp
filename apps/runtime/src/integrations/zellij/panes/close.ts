@@ -17,16 +17,10 @@ export async function closeZellijPane(args: {
     if (paneTopology?.ptyId) {
       try {
         await ptyManager.terminate(paneTopology.ptyId);
-      } catch (error) {
-        console.warn(
-          `[zellij-panes] PTY terminate for pane ${paneId} failed (may already be stopped):`,
-          error,
-        );
-      }
+      } catch (_error) {}
     }
   }
 
   await closePaneRaw(cli, sessionName);
   topology.removePane(sessionName, paneId);
-  console.debug(`[zellij-panes] mux.pane.closed: session=${sessionName} pane=${paneId}`);
 }

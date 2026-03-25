@@ -1,7 +1,7 @@
 import { access, readdir } from "node:fs/promises";
 import { join } from "node:path";
-import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
-import type { InferenceEngine } from "./engine";
+import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference.ts";
+import type { InferenceEngine } from "./engine.ts";
 
 export class LlamaCppInferenceEngine implements InferenceEngine {
   readonly id = "llamacpp";
@@ -26,7 +26,9 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
     const prompt = request.messages.map(m => `${m.role}: ${m.content}`).join("\n");
     const args = [this.binaryPath, "-m", request.model, "-p", prompt, "--no-display-prompt"];
-    if (request.maxTokens) args.push("-n", String(request.maxTokens));
+    if (request.maxTokens) {
+      args.push("-n", String(request.maxTokens));
+    }
 
     const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
     const output = await new Response(proc.stdout).text();
@@ -55,8 +57,17 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
     try {
       const models: ModelInfo[] = [];
       for (const path of await findGgufFiles(this.modelDir)) {
-        const name = path.replace(/\.gguf$/, "").split("/").pop() ?? path;
-        models.push({ id: join(this.modelDir, path), name, contextWindow: 4096, providerId: "llamacpp" });
+        const name =
+          path
+            .replace(/\.gguf$/, "")
+            .split("/")
+            .pop() ?? path;
+        models.push({
+          id: join(this.modelDir, path),
+          name,
+          contextWindow: 4096,
+          providerId: "llamacpp",
+        });
       }
       return models;
     } catch {
@@ -80,13 +91,13 @@ async function findGgufFiles(rootDir: string, relativeDir = ""): Promise<string[
   const dirPath = relativeDir === "" ? rootDir : join(rootDir, relativeDir);
   const entries = await readdir(dirPath, { withFileTypes: true });
   const files = await Promise.all(
-    entries.map(async (entry) => {
+    entries.map(async entry => {
       const entryRelativePath = relativeDir === "" ? entry.name : join(relativeDir, entry.name);
       if (entry.isDirectory()) {
         return findGgufFiles(rootDir, entryRelativePath);
       }
       return entry.name.endsWith(".gguf") ? [entryRelativePath] : [];
-    }),
+    })
   );
   return files.flat();
 }

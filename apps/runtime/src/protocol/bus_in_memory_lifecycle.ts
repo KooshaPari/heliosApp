@@ -1,27 +1,32 @@
-import type { LocalBusEnvelope } from "./types.js";
+import { handleLaneLifecycleRequest } from "./bus_in_memory_lifecycle_lane.js";
+import { handleSessionLifecycleRequest } from "./bus_in_memory_lifecycle_session.js";
 import {
+  type InMemoryBusContext,
   buildMissingCorrelationResponse,
   ensureLifecycleProgress,
   payloadRecord,
-  type InMemoryBusContext,
 } from "./bus_in_memory_support.js";
-import { handleLaneLifecycleRequest } from "./bus_in_memory_lifecycle_lane.js";
-import { handleSessionLifecycleRequest } from "./bus_in_memory_lifecycle_session.js";
+import type { LocalBusEnvelope } from "./types.js";
 
-type LifecycleMethod = "lane.attach" | "lane.create" | "lane.cleanup" | "session.attach" | "session.terminate";
+type LifecycleMethod =
+  | "lane.attach"
+  | "lane.create"
+  | "lane.cleanup"
+  | "session.attach"
+  | "session.terminate";
 
 export function handleLifecycleRequest(
   context: InMemoryBusContext,
   command: LocalBusEnvelope,
   method: LifecycleMethod,
-  startTime: number,
+  startTime: number
 ): LocalBusEnvelope {
   const correlationId = command.correlation_id;
   if (!correlationId) {
     return buildMissingCorrelationResponse(method);
   }
 
-  const payload = payloadRecord(command.payload);
+  const _payload = payloadRecord(command.payload);
   const progress = ensureLifecycleProgress(context.lifecycleProgress, correlationId);
 
   switch (method) {

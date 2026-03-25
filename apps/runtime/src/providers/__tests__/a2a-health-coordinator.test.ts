@@ -2,12 +2,12 @@
  * A2A Health Monitoring Coordinator tests.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
-import { HealthMonitoringCoordinator } from "../a2a-router.js";
+import { beforeEach, describe, expect, it } from "vitest";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { HealthMonitoringCoordinator } from "../a2a-router.js";
 import { A2ARouterAdapter } from "../a2a-router.js";
-import { NormalizedProviderError } from "../errors.js";
 import type { ProviderHealthStatus } from "../adapter.js";
+import { NormalizedProviderError } from "../errors.js";
 
 describe("Health Monitoring Coordinator", () => {
   let coordinator: HealthMonitoringCoordinator;
@@ -116,8 +116,8 @@ describe("Health Monitoring Coordinator", () => {
       coordinator.registerProvider("acp-provider-2", 5000, checkFunction);
       coordinator.registerProvider("mcp-provider-1", 5000, checkFunction);
 
-      const healthyACP = coordinator.getHealthyProvidersByType("acp");
-      expect(healthyACP).toBeDefined();
+      const healthyAcp = coordinator.getHealthyProvidersByType("acp");
+      expect(healthyAcp).toBeDefined();
     });
   });
 });
@@ -203,7 +203,7 @@ describe("Error Taxonomy Completeness (SC-025-004)", () => {
         },
         "corr-123"
       )
-      .catch((e) => e);
+      .catch(e => e);
 
     expect(error).toBeInstanceOf(NormalizedProviderError);
   });

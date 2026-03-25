@@ -1,15 +1,15 @@
-import type { EventEnvelope, LocalBusEnvelope, ResponseEnvelope } from "./types.js";
-import type { MethodHandler } from "./methods.js";
 import type { LocalBus } from "./bus_contract.js";
-import type { AuditRecord, BusState, MetricsReport } from "./bus_in_memory_types.js";
+import { handleInMemoryRequest } from "./bus_in_memory_runtime.js";
 import {
+  type InMemoryBusContext,
   appendAcceptedEvent,
   getMetricsReport,
   getSequence,
-  type InMemoryBusContext,
 } from "./bus_in_memory_support.js";
 import { publishInMemoryEvent } from "./bus_in_memory_support.js";
-import { handleInMemoryRequest } from "./bus_in_memory_runtime.js";
+import type { AuditRecord, BusState, MetricsReport } from "./bus_in_memory_types.js";
+import type { MethodHandler } from "./methods.js";
+import type { EventEnvelope, LocalBusEnvelope, ResponseEnvelope } from "./types.js";
 
 export class InMemoryLocalBus implements LocalBus {
   private readonly context: InMemoryBusContext;

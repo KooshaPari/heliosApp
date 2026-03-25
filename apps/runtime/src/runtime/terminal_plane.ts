@@ -1,22 +1,46 @@
-import { buildSpawnTerminalCommand } from "../integrations/exec";
-import type { LocalBusEnvelope } from "../protocol/types";
+import { buildSpawnTerminalCommand } from "../integrations/exec.ts";
+import type { LocalBusEnvelope } from "../protocol/types.ts";
 import {
-  cloneBuffer,
-  createTerminalBuffer,
-  errorResponse,
-  makeTerminalId,
   type ProtocolResponse,
   type TerminalBuffer,
   type TerminalRecord,
   type TerminalState,
-} from "./terminal_plane_helpers";
+  cloneBuffer,
+  createTerminalBuffer,
+  errorResponse,
+  makeTerminalId,
+} from "./terminal_plane_helpers.ts";
 
 type CommandDispatcher = (command: LocalBusEnvelope) => Promise<LocalBusEnvelope>;
 type EventPublisher = (event: LocalBusEnvelope) => Promise<void>;
 
-type SpawnTerminalInput = { command_id: string; correlation_id: string; workspace_id: string; lane_id: string; session_id: string; title?: string };
-type InputTerminalInput = { command_id: string; correlation_id: string; workspace_id: string; lane_id: string; session_id: string; terminal_id: string; data: string };
-type ResizeTerminalInput = { command_id: string; correlation_id: string; workspace_id: string; lane_id: string; session_id: string; terminal_id: string; cols: number; rows: number };
+type SpawnTerminalInput = {
+  command_id: string;
+  correlation_id: string;
+  workspace_id: string;
+  lane_id: string;
+  session_id: string;
+  title?: string;
+};
+type InputTerminalInput = {
+  command_id: string;
+  correlation_id: string;
+  workspace_id: string;
+  lane_id: string;
+  session_id: string;
+  terminal_id: string;
+  data: string;
+};
+type ResizeTerminalInput = {
+  command_id: string;
+  correlation_id: string;
+  workspace_id: string;
+  lane_id: string;
+  session_id: string;
+  terminal_id: string;
+  cols: number;
+  rows: number;
+};
 
 type TerminalPlaneOptions = {
   dispatchCommand: CommandDispatcher;
@@ -34,7 +58,7 @@ export function createTerminalPlane(options: TerminalPlaneOptions) {
     terminalId: string,
     workspaceId: string,
     laneId: string,
-    sessionId: string,
+    sessionId: string
   ): void => {
     terminals.set(terminalId, {
       terminal_id: terminalId,
@@ -86,7 +110,7 @@ export function createTerminalPlane(options: TerminalPlaneOptions) {
         ? (event.payload.state as TerminalState)
         : undefined;
 
-    if (!terminal || !nextState) {
+    if (!(terminal && nextState)) {
       return;
     }
 
@@ -95,20 +119,22 @@ export function createTerminalPlane(options: TerminalPlaneOptions) {
   };
 
   const spawnTerminal = async (
-    input: SpawnTerminalInput,
-  ): Promise<ProtocolResponse<{
-    terminal_id: string;
-    lane_id: string | null;
-    session_id: string | null;
-    state: TerminalState;
-    diagnostics?: Record<string, unknown>;
-  }>> => {
+    input: SpawnTerminalInput
+  ): Promise<
+    ProtocolResponse<{
+      terminal_id: string;
+      lane_id: string | null;
+      session_id: string | null;
+      state: TerminalState;
+      diagnostics?: Record<string, unknown>;
+    }>
+  > => {
     const terminalId = makeTerminalId(input.session_id);
     const response = await options.dispatchCommand(
       buildSpawnTerminalCommand({
         ...input,
         terminal_id: terminalId,
-      }),
+      })
     );
 
     if (response.type === "response" && response.status === "ok") {
@@ -118,7 +144,7 @@ export function createTerminalPlane(options: TerminalPlaneOptions) {
         !Array.isArray(response.result) &&
         typeof response.result.terminal_id === "string"
           ? response.result.terminal_id
-        : terminalId;
+          : terminalId;
       registerTerminal(resultTerminalId, input.workspace_id, input.lane_id, input.session_id);
     }
 
@@ -132,7 +158,7 @@ export function createTerminalPlane(options: TerminalPlaneOptions) {
   };
 
   const inputTerminal = async (
-    input: InputTerminalInput,
+    input: InputTerminalInput
   ): Promise<ProtocolResponse<{ output_seq: number }>> => {
     const terminal = terminals.get(input.terminal_id);
     if (!terminal) {
@@ -147,7 +173,7 @@ export function createTerminalPlane(options: TerminalPlaneOptions) {
       return errorResponse(
         input.correlation_id,
         "TERMINAL_CONTEXT_MISMATCH",
-        "Terminal does not belong to this lane",
+        "Terminal does not belong to this lane"
       );
     }
 
@@ -155,7 +181,7 @@ export function createTerminalPlane(options: TerminalPlaneOptions) {
       return errorResponse(
         input.correlation_id,
         "INVALID_TERMINAL_INPUT",
-        "payload.data is required",
+        "payload.data is required"
       );
     }
 
@@ -235,7 +261,7 @@ export function createTerminalPlane(options: TerminalPlaneOptions) {
   };
 
   const resizeTerminal = async (
-    input: ResizeTerminalInput,
+    input: ResizeTerminalInput
   ): Promise<ProtocolResponse<{ cols: number; rows: number }>> => {
     const terminal = terminals.get(input.terminal_id);
     if (!terminal) {
@@ -250,7 +276,7 @@ export function createTerminalPlane(options: TerminalPlaneOptions) {
       return errorResponse(
         input.correlation_id,
         "TERMINAL_CONTEXT_MISMATCH",
-        "Terminal does not belong to this lane",
+        "Terminal does not belong to this lane"
       );
     }
 

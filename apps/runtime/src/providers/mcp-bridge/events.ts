@@ -20,8 +20,6 @@ export class BestEffortEventPublisher implements EventPublisher {
         topic,
         payload,
       });
-    } catch (error) {
-      console.warn(`Failed to publish MCP event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }

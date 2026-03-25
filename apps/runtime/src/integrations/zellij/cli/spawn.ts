@@ -8,10 +8,7 @@ export interface SpawnProcessLike {
 export function spawnProcess(command: string[]): SpawnProcessLike {
   const bunRuntime = (globalThis as Record<string, unknown>).Bun as
     | {
-        spawn(
-          cmd: string[],
-          options: { stdout: "pipe"; stderr: "pipe" },
-        ): SpawnProcessLike;
+        spawn(cmd: string[], options: { stdout: "pipe"; stderr: "pipe" }): SpawnProcessLike;
       }
     | undefined;
   if (!bunRuntime) {

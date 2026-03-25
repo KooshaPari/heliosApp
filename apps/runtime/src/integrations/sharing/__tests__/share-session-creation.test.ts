@@ -14,12 +14,7 @@ describe("Share Session Creation", () => {
   });
 
   it("should create a share session with upterm backend", async () => {
-    const session = await manager.create(
-      "terminal-123",
-      "upterm",
-      60000,
-      "corr-001",
-    );
+    const session = await manager.create("terminal-123", "upterm", 60000, "corr-001");
 
     expect(session.id).toBeTruthy();
     expect(session.terminalId).toBe("terminal-123");
@@ -30,12 +25,7 @@ describe("Share Session Creation", () => {
   });
 
   it("should create a share session with tmate backend", async () => {
-    const session = await manager.create(
-      "terminal-456",
-      "tmate",
-      60000,
-      "corr-002",
-    );
+    const session = await manager.create("terminal-456", "tmate", 60000, "corr-002");
 
     expect(session.id).toBeTruthy();
     expect(session.backend).toBe("tmate");
@@ -46,12 +36,7 @@ describe("Share Session Creation", () => {
   it("should include correlation ID in session", async () => {
     const correlationId = "unique-trace-id";
 
-    const session = await manager.create(
-      "terminal-123",
-      "upterm",
-      60000,
-      correlationId,
-    );
+    const session = await manager.create("terminal-123", "upterm", 60000, correlationId);
 
     expect(session.correlationId).toBe(correlationId);
   });
@@ -60,12 +45,7 @@ describe("Share Session Creation", () => {
     const ttlMs = 3_600_000;
     const beforeCreate = Date.now();
 
-    const session = await manager.create(
-      "terminal-123",
-      "upterm",
-      ttlMs,
-      "corr-001",
-    );
+    const session = await manager.create("terminal-123", "upterm", ttlMs, "corr-001");
 
     const afterCreate = Date.now();
 
@@ -82,9 +62,7 @@ describe("Share Session Creation", () => {
 
     await manager.create("terminal-123", "upterm", 60000, "corr-001");
 
-    const createdEvent = bus
-      .getEvents()
-      .find((e) => e.topic === "share.session.created");
+    const createdEvent = bus.getEvents().find(e => e.topic === "share.session.created");
     expect(createdEvent).toBeDefined();
     expect(createdEvent?.payload?.backend).toBe("upterm");
   });
@@ -94,43 +72,26 @@ describe("Share Session Creation", () => {
 
     await manager.create("terminal-123", "upterm", 60000, "corr-001");
 
-    const activeEvent = bus
-      .getEvents()
-      .find((e) => e.topic === "share.session.active");
+    const activeEvent = bus.getEvents().find(e => e.topic === "share.session.active");
     expect(activeEvent).toBeDefined();
     expect(activeEvent?.payload?.shareLink).toBeTruthy();
   });
 
   it("should start in pending state before worker spawn", async () => {
-    const session = await manager.create(
-      "terminal-123",
-      "upterm",
-      60000,
-      "corr-001",
-    );
+    const session = await manager.create("terminal-123", "upterm", 60000, "corr-001");
 
     expect(session.state).toBe("active");
   });
 
   it("should transition to active after worker spawn", async () => {
-    const session = await manager.create(
-      "terminal-123",
-      "upterm",
-      60000,
-      "corr-001",
-    );
+    const session = await manager.create("terminal-123", "upterm", 60000, "corr-001");
 
     expect(session.state).toBe("active");
     expect(session.shareLink).toBeTruthy();
   });
 
   it("should transition to revoked on terminate", async () => {
-    const session = await manager.create(
-      "terminal-123",
-      "upterm",
-      60000,
-      "corr-001",
-    );
+    const session = await manager.create("terminal-123", "upterm", 60000, "corr-001");
 
     await manager.terminate(session.id);
 
@@ -138,12 +99,7 @@ describe("Share Session Creation", () => {
   });
 
   it("should fail if worker spawn fails", async () => {
-    const session = await manager.create(
-      "terminal-123",
-      "upterm",
-      60000,
-      "corr-001",
-    );
+    const session = await manager.create("terminal-123", "upterm", 60000, "corr-001");
     expect(session.state).toBe("active");
   });
 
@@ -167,7 +123,7 @@ describe("Share Session Creation", () => {
     await manager.create(terminalId, "upterm", 60000, "corr-001");
     await manager.create(terminalId, "tmate", 60000, "corr-002");
 
-    const backends = manager.listByTerminal(terminalId).map((session) => session.backend);
+    const backends = manager.listByTerminal(terminalId).map(session => session.backend);
 
     expect(backends).toContain("upterm");
     expect(backends).toContain("tmate");

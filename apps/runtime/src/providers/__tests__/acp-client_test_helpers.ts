@@ -1,5 +1,5 @@
-import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
 
 export class MockPolicyGate implements PolicyGate {
   private shouldDeny = false;

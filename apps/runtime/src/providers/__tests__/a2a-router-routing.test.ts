@@ -2,9 +2,9 @@
  * A2A Router delegation and failover routing tests.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
-import { A2ARouterAdapter } from "../a2a-router.js";
+import { beforeEach, describe, expect, it } from "vitest";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { A2ARouterAdapter } from "../a2a-router.js";
 
 type RouterConfig = {
   endpoints: Array<{ id: string; url: string; priority: number; capabilities: string[] }>;
@@ -113,9 +113,7 @@ describe("A2A Router Adapter: Routing", () => {
       );
 
       const events = bus.getEvents();
-      const completedEvent = events.find(
-        (e) => e.topic === "provider.a2a.delegation.completed"
-      );
+      const completedEvent = events.find(e => e.topic === "provider.a2a.delegation.completed");
       expect(completedEvent).toBeDefined();
       expect(completedEvent?.payload?.correlationId).toBe("corr-123");
     });

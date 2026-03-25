@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { METHODS } from "../../../src/protocol/methods";
-import { TOPICS } from "../../../src/protocol/topics";
+import { METHODS } from "../../../src/protocol/methods.ts";
+import { TOPICS } from "../../../src/protocol/topics.ts";
 
 type StringCollectionDoc = {
   methods?: string[];
@@ -24,7 +24,7 @@ function readJson<T>(path: string): T {
 
 function getConditionalRequiredSets(contract: Record<string, unknown>) {
   const branches = ((contract.allOf as SchemaBranch[] | undefined) ?? []).filter(
-    (branch) => branch.if?.properties && branch.then?.required
+    branch => branch.if?.properties && branch.then?.required
   );
 
   const responseRequired = new Set<string>();
@@ -68,7 +68,7 @@ describe("protocol asset parity", () => {
         "kitty-specs",
         "001-colab-agent-terminal-control-plane",
         "contracts",
-        "orchestration-envelope.schema.json"
+        "orchestration-envelope.schema.json",
       ].join("/")
     );
     const properties = (contract.properties as Record<string, unknown>) ?? {};
@@ -87,7 +87,7 @@ describe("protocol asset parity", () => {
         "kitty-specs",
         "001-colab-agent-terminal-control-plane",
         "contracts",
-        "orchestration-envelope.schema.json"
+        "orchestration-envelope.schema.json",
       ].join("/")
     );
     const { responseRequired, methodRequired, topicRequired } =
@@ -98,7 +98,7 @@ describe("protocol asset parity", () => {
       new Map<string, string[]>([
         ["lane.create", ["correlation_id", "workspace_id"]],
         ["session.attach", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
-        ["terminal.spawn", ["correlation_id", "lane_id", "session_id", "workspace_id"]]
+        ["terminal.spawn", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
       ])
     );
     expect(topicRequired).toEqual(
@@ -110,32 +110,17 @@ describe("protocol asset parity", () => {
         ["lane.create.started", ["correlation_id", "lane_id", "workspace_id"]],
         ["lane.created", ["correlation_id", "lane_id", "workspace_id"]],
         ["lane.create.failed", ["correlation_id", "lane_id", "workspace_id"]],
-        [
-          "session.attach.started",
-          ["correlation_id", "lane_id", "session_id", "workspace_id"]
-        ],
+        ["session.attach.started", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
         ["session.attached", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
-        [
-          "session.attach.failed",
-          ["correlation_id", "lane_id", "session_id", "workspace_id"]
-        ],
-        [
-          "session.terminate.started",
-          ["correlation_id", "lane_id", "session_id", "workspace_id"]
-        ],
-        [
-          "session.terminate.failed",
-          ["correlation_id", "lane_id", "session_id", "workspace_id"]
-        ],
-        [
-          "terminal.spawn.started",
-          ["correlation_id", "lane_id", "session_id", "workspace_id"]
-        ],
+        ["session.attach.failed", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
+        ["session.terminate.started", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
+        ["session.terminate.failed", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
+        ["terminal.spawn.started", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
         [
           "terminal.spawned",
-          ["correlation_id", "lane_id", "session_id", "terminal_id", "workspace_id"]
+          ["correlation_id", "lane_id", "session_id", "terminal_id", "workspace_id"],
         ],
-        ["terminal.spawn.failed", ["correlation_id", "lane_id", "session_id", "workspace_id"]]
+        ["terminal.spawn.failed", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
       ])
     );
   });
@@ -146,7 +131,7 @@ describe("protocol asset parity", () => {
         "kitty-specs",
         "001-colab-agent-terminal-control-plane",
         "contracts",
-        "orchestration-envelope.schema.json"
+        "orchestration-envelope.schema.json",
       ].join("/")
     );
     const properties = (contract.properties as Record<string, unknown>) ?? {};

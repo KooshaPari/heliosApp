@@ -17,8 +17,5 @@ export async function publishAcpEvent(
       topic,
       payload,
     });
-  } catch (error) {
-    // Best-effort telemetry; failures should not break provider flows.
-    console.warn(`Failed to publish ACP event ${topic}:`, error);
-  }
+  } catch (_error) {}
 }

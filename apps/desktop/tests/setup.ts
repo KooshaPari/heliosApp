@@ -1,5 +1,11 @@
-import { SimpleDocumentImpl, SimpleElement } from "./dom_element";
-import { SimpleEvent, SimpleKeyboardEvent, SimpleMouseEvent, SimpleNode, SimpleTextNode } from "./dom_core";
+import {
+  SimpleEvent,
+  SimpleKeyboardEvent,
+  SimpleMouseEvent,
+  SimpleNode,
+  SimpleTextNode,
+} from "./dom_core.ts";
+import { SimpleDocumentImpl, SimpleElement } from "./dom_element.ts";
 
 const document = new SimpleDocumentImpl();
 
@@ -18,8 +24,7 @@ Object.assign(globalThis, {
   HTMLInputElement: SimpleElement,
   HTMLTextAreaElement: SimpleElement,
   Text: SimpleTextNode,
-  requestAnimationFrame: (callback: FrameRequestCallback) => setTimeout(() => callback(Date.now()), 0),
+  requestAnimationFrame: (callback: FrameRequestCallback) =>
+    setTimeout(() => callback(Date.now()), 0),
   cancelAnimationFrame: (handle: number) => clearTimeout(handle),
 });
-
-export {};

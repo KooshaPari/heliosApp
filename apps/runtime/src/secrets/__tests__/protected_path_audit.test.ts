@@ -1,4 +1,4 @@
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { AuditSink } from "../../audit/audit-sink.js";
 import { ProtectedPathDetector } from "../protected-paths.js";
 import { makeEngine, makeRedactFn } from "./integration_helpers.js";
@@ -14,7 +14,7 @@ describe("Protected path audit integration [SC-028-005]", () => {
     const detector = new ProtectedPathDetector({ bus: wrappedBus });
     detector.check("cat .env", { terminalId: "term-1", correlationId: "corr-path" });
 
-    await new Promise((r) => setTimeout(r, 5));
+    await new Promise(r => setTimeout(r, 5));
 
     const records = sink.query({ topic: "secrets.protected_path.accessed" });
     expect(records.length).toBeGreaterThan(0);
@@ -34,7 +34,7 @@ describe("Protected path audit integration [SC-028-005]", () => {
       correlationId: "corr-sensitive",
     });
 
-    await new Promise((r) => setTimeout(r, 5));
+    await new Promise(r => setTimeout(r, 5));
 
     const bundle = sink.export();
     const bundleStr = JSON.stringify(bundle);

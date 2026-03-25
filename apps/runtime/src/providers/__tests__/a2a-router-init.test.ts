@@ -2,9 +2,9 @@
  * A2A Router initialization tests.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
-import { A2ARouterAdapter } from "../a2a-router.js";
+import { beforeEach, describe, expect, it } from "vitest";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { A2ARouterAdapter } from "../a2a-router.js";
 
 type RouterConfig = {
   endpoints: Array<{ id: string; url: string; priority: number; capabilities: string[] }>;
@@ -110,7 +110,7 @@ describe("A2A Router Adapter: Initialization", () => {
     await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
 
     const events = bus.getEvents();
-    const initEvent = events.find((e) => e.topic === "provider.a2a.initialized");
+    const initEvent = events.find(e => e.topic === "provider.a2a.initialized");
     expect(initEvent).toBeDefined();
     expect(initEvent?.payload?.endpointCount).toBe(1);
   });

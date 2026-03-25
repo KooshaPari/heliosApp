@@ -4,7 +4,9 @@ import { parseLayoutDump } from "./parser.js";
 
 function collectPtyBindings(topology: LayoutTopology | undefined): Map<number, string> {
   const ptyBindings = new Map<number, string>();
-  if (!topology) return ptyBindings;
+  if (!topology) {
+    return ptyBindings;
+  }
 
   for (const tab of topology.tabs) {
     for (const pane of tab.panes) {
@@ -20,7 +22,7 @@ function collectPtyBindings(topology: LayoutTopology | undefined): Map<number, s
 export async function refreshSessionTopology(
   cli: ZellijCli,
   sessionName: string,
-  existingTopology?: LayoutTopology,
+  existingTopology?: LayoutTopology
 ): Promise<LayoutTopology> {
   const result = await cli.run(["--session", sessionName, "action", "dump-layout"]);
   const ptyBindings = collectPtyBindings(existingTopology);

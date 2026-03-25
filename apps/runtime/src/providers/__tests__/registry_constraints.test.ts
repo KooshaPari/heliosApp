@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { NormalizedProviderError } from "../errors.js";
-import { makeRegistration, makeRegistry, TestProvider } from "./registry_test_helpers.js";
+import { TestProvider, makeRegistration, makeRegistry } from "./registry_test_helpers.js";
 
 describe("ProviderRegistry: Concurrency Limit Enforcement", () => {
   it("should allow execution up to concurrency limit", async () => {
@@ -21,9 +21,7 @@ describe("ProviderRegistry: Concurrency Limit Enforcement", () => {
     registry.checkConcurrencyLimit("test-provider");
     registry.incrementInFlight("test-provider");
 
-    expect(() => registry.checkConcurrencyLimit("test-provider")).toThrow(
-      /concurrency limit/i
-    );
+    expect(() => registry.checkConcurrencyLimit("test-provider")).toThrow(/concurrency limit/i);
   });
 
   it("should reject execution exceeding concurrency limit", async () => {
@@ -40,9 +38,7 @@ describe("ProviderRegistry: Concurrency Limit Enforcement", () => {
     registry.checkConcurrencyLimit("test-provider");
     registry.incrementInFlight("test-provider");
 
-    expect(() => registry.checkConcurrencyLimit("test-provider")).toThrow(
-      NormalizedProviderError
-    );
+    expect(() => registry.checkConcurrencyLimit("test-provider")).toThrow(NormalizedProviderError);
   });
 
   it("should allow reuse of slots after decrement", async () => {

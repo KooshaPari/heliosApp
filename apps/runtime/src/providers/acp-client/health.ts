@@ -50,10 +50,7 @@ export async function runHealthCheck(params: {
       newState = "degraded";
     }
 
-    const normalized = normalizeError(
-      error,
-      providerId as "acp" | "mcp" | "a2a" | "internal"
-    );
+    const normalized = normalizeError(error, providerId as "acp" | "mcp" | "a2a" | "internal");
     const next: ProviderHealthStatus = {
       state: newState,
       lastCheck: new Date(),

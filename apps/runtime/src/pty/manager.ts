@@ -1,27 +1,20 @@
-import { PtyRegistry } from "./registry.js";
-import { PtyLifecycle } from "./state_machine.js";
-import { spawnPty } from "./spawn.js";
-import type { SpawnOptions } from "./spawn.js";
-import type { PtyRecord, ReconciliationSummary } from "./registry.js";
+import { type BufferStats, OutputBuffer, type OutputBufferConfig } from "./buffers.js";
 import type { BusPublisher } from "./events.js";
-import {
-  NoOpBusPublisher,
-  emitPtyEvent,
-} from "./events.js";
-import type { SignalHistoryMap } from "./signals.js";
-import {
-  resize as resizePty,
-  terminate as terminatePty,
-  type TerminateOptions,
-} from "./signals.js";
+import { NoOpBusPublisher, emitPtyEvent } from "./events.js";
+import { IdleMonitor, type IdleMonitorConfig } from "./idle_monitor.js";
 import { writeInput } from "./io.js";
 import type { ProcessMap } from "./io.js";
-import { IdleMonitor, type IdleMonitorConfig } from "./idle_monitor.js";
+import { PtyRegistry } from "./registry.js";
+import type { PtyRecord, ReconciliationSummary } from "./registry.js";
+import type { SignalHistoryMap } from "./signals.js";
 import {
-  OutputBuffer,
-  type OutputBufferConfig,
-  type BufferStats,
-} from "./buffers.js";
+  type TerminateOptions,
+  resize as resizePty,
+  terminate as terminatePty,
+} from "./signals.js";
+import { spawnPty } from "./spawn.js";
+import type { SpawnOptions } from "./spawn.js";
+import { PtyLifecycle } from "./state_machine.js";
 
 /**
  * High-level facade for PTY operations.
@@ -43,17 +36,12 @@ export class PtyManager {
     maxCapacity = 300,
     bus?: BusPublisher,
     idleConfig?: IdleMonitorConfig,
-    bufferConfig?: OutputBufferConfig,
+    bufferConfig?: OutputBufferConfig
   ) {
     this.bufferConfig = bufferConfig;
     this.registry = new PtyRegistry(maxCapacity);
     this.bus = bus ?? new NoOpBusPublisher();
-    this.idleMonitor = new IdleMonitor(
-      this.registry,
-      this.bus,
-      this.lifecycles,
-      idleConfig,
-    );
+    this.idleMonitor = new IdleMonitor(this.registry, this.bus, this.lifecycles, idleConfig);
   }
 
   async spawn(options: SpawnOptions): Promise<PtyRecord> {
@@ -94,7 +82,7 @@ export class PtyManager {
 
   registerProcess(
     ptyId: string,
-    proc: { readonly stdin: { write(data: Uint8Array | string): number } },
+    proc: { readonly stdin: { write(data: Uint8Array | string): number } }
   ): void {
     this.processes.set(ptyId, proc);
   }
@@ -113,7 +101,7 @@ export class PtyManager {
       throw new Error(`PTY '${ptyId}' not found`);
     }
 
-    writeInput(record, data, this.processes, this.bus, (id) => {
+    writeInput(record, data, this.processes, this.bus, id => {
       const lifecycle = this.lifecycles.get(id);
       if (lifecycle && lifecycle.state === "active") {
         try {
@@ -149,14 +137,7 @@ export class PtyManager {
 
     const lc = this.lifecycles.get(ptyId)!;
 
-    await terminatePty(
-      record,
-      lc,
-      this.registry,
-      this.signalHistories,
-      this.bus,
-      options,
-    );
+    await terminatePty(record, lc, this.registry, this.signalHistories, this.bus, options);
 
     this.lifecycles.delete(ptyId);
     this.processes.delete(ptyId);

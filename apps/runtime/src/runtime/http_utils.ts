@@ -1,6 +1,6 @@
-import type { SessionTransport } from "../sessions/registry";
-import { LaneLifecycleService } from "../sessions/state_machine";
-import { ProtocolValidationError } from "../protocol/types";
+import { ProtocolValidationError } from "../protocol/types.ts";
+import type { SessionTransport } from "../sessions/registry.ts";
+import type { LaneLifecycleService } from "../sessions/state_machine.ts";
 
 export function json(status: number, payload: Record<string, unknown>): Response {
   return new Response(JSON.stringify(payload), {
@@ -20,7 +20,7 @@ export async function parseBody(request: Request): Promise<Record<string, unknow
 export function asString(
   body: Record<string, unknown>,
   key: string,
-  required = true,
+  required = true
 ): string | undefined {
   const value = body[key];
   if (value === undefined || value === null) {
@@ -36,7 +36,7 @@ export function asString(
 }
 
 export function parsePreferredTransport(
-  body: Record<string, unknown>,
+  body: Record<string, unknown>
 ): SessionTransport | undefined {
   const value = asString(body, "preferred_transport", false);
   if (!value) {
@@ -71,7 +71,7 @@ function isLifecycleOrderingViolation(error: unknown, topic: string): boolean {
 export async function attachLaneForHttpLifecycle(
   laneService: LaneLifecycleService,
   workspaceId: string,
-  laneId: string,
+  laneId: string
 ) {
   try {
     return await laneService.attach(workspaceId, laneId);
@@ -86,7 +86,7 @@ export async function attachLaneForHttpLifecycle(
 export async function cleanupLaneForHttpLifecycle(
   laneService: LaneLifecycleService,
   workspaceId: string,
-  laneId: string,
+  laneId: string
 ) {
   try {
     return await laneService.cleanup(workspaceId, laneId);

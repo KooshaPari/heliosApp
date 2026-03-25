@@ -65,7 +65,7 @@ export class TerminalOutputBuffer {
         total_bytes: 0,
         cap_bytes: this.capBytes,
         dropped_bytes: 0,
-        entries: []
+        entries: [],
       };
     }
     return {
@@ -73,7 +73,7 @@ export class TerminalOutputBuffer {
       total_bytes: state.totalBytes,
       cap_bytes: this.capBytes,
       dropped_bytes: state.droppedBytes,
-      entries: [...state.entries]
+      entries: [...state.entries],
     };
   }
 

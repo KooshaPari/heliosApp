@@ -36,11 +36,7 @@ export class OutputBuffer {
   private lastOverflowEventTs = 0;
   private firstOverflowLogged = false;
 
-  constructor(
-    bus: BusPublisher,
-    correlation: PtyEventCorrelation,
-    config?: OutputBufferConfig,
-  ) {
+  constructor(bus: BusPublisher, correlation: PtyEventCorrelation, config?: OutputBufferConfig) {
     const capacity = config?.capacityBytes ?? 4 * 1024 * 1024;
     this.ring = new RingBuffer(capacity);
     this.bus = bus;
@@ -144,9 +140,6 @@ export class OutputBuffer {
   private handleOverflow(droppedBytes: number): void {
     if (!this.firstOverflowLogged) {
       this.firstOverflowLogged = true;
-      console.warn(
-        `[OutputBuffer] overflow: ${droppedBytes} bytes dropped for pty ${this.correlation.ptyId}`,
-      );
     }
 
     const now = Date.now();

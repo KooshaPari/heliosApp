@@ -3,31 +3,14 @@
 // T011-T015 - Par task binding, termination, execution, stale detection, lifecycle events
 
 import type { LocalBus } from "../protocol/bus.js";
-import { LaneRegistry, type LaneRecord, LaneNotFoundError } from "./registry.js";
-import {
-  transition,
-  withLaneLock,
-  recordTransition,
-  type LaneState,
-  type LaneEvent,
-} from "./state_machine.js";
-import {
-  shareLane,
-  attachAgent,
-  detachAgent,
-} from "./sharing.js";
-import { provisionWorktree } from "./worktree.js";
-import { cleanupLane, type PtyManager } from "./cleanup.js";
-import {
-  reconcileLaneOrphans,
-  type FullReconciliationResult,
-} from "./reconciliation.js";
-import {
-  publishLaneEvent,
-  publishReconciliationEvent,
-  type LaneBusEventTopic,
-} from "./events.js";
+import { type PtyManager, cleanupLane } from "./cleanup.js";
+import { type LaneBusEventTopic, publishLaneEvent, publishReconciliationEvent } from "./events.js";
 import { generateLaneId, resetLaneIdCounter } from "./ids.js";
+import { type FullReconciliationResult, reconcileLaneOrphans } from "./reconciliation.js";
+import { LaneNotFoundError, type LaneRecord, LaneRegistry } from "./registry.js";
+import { attachAgent, detachAgent, shareLane } from "./sharing.js";
+import { type LaneState, recordTransition, transition, withLaneLock } from "./state_machine.js";
+import { provisionWorktree } from "./worktree.js";
 
 export class NotImplementedError extends Error {
   constructor(operation: string) {
@@ -107,13 +90,15 @@ export class LaneManager {
   async provision(laneId: string, workspaceRepoPath: string): Promise<LaneRecord> {
     return withLaneLock(laneId, async () => {
       const lane = this.registry.get(laneId);
-      if (!lane) throw new LaneNotFoundError(laneId);
+      if (!lane) {
+        throw new LaneNotFoundError(laneId);
+      }
       if (lane.state !== "provisioning") {
         throw new Error(`Cannot provision lane in state ${lane.state}`);
       }
 
       try {
-      const result = await provisionWorktree({
+        const result = await provisionWorktree({
           workspaceRepoPath,
           laneId,
           baseBranch: lane.baseBranch,
@@ -133,7 +118,7 @@ export class LaneManager {
           laneId,
           lane.workspaceId,
           fromState,
-          toState,
+          toState
         );
         await this.emitEvent("lane.state.changed", laneId, lane.workspaceId, fromState, toState);
         return this.registry.get(laneId)!;
@@ -177,7 +162,7 @@ export class LaneManager {
         laneId,
         lane?.workspaceId ?? "",
         result.fromState,
-        result.toState,
+        result.toState
       );
     }
   }
@@ -193,14 +178,14 @@ export class LaneManager {
         laneId,
         lane?.workspaceId ?? "",
         result.fromState,
-        result.toState,
+        result.toState
       );
     }
   }
 
   // ── T003: cleanup ────────────────────────────────────────────────────────
 
-  async cleanup(laneId: string, force: boolean = false): Promise<void> {
+  async cleanup(laneId: string, force = false): Promise<void> {
     await withLaneLock(laneId, async () => {
       await cleanupLane({
         emitEvent: this.emitEvent.bind(this),
@@ -217,7 +202,7 @@ export class LaneManager {
 
   async reconcileOrphans(
     workspaceRepoPath: string,
-    options?: { timeoutMs?: number },
+    options?: { timeoutMs?: number }
   ): Promise<FullReconciliationResult> {
     return await reconcileLaneOrphans({
       emitReconciliationEvent: this.emitReconciliationEvent.bind(this),
@@ -229,7 +214,9 @@ export class LaneManager {
   }
 
   private async emitReconciliationEvent(result: FullReconciliationResult): Promise<void> {
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
     await publishReconciliationEvent(this.bus, result);
   }
 
@@ -240,9 +227,11 @@ export class LaneManager {
     laneId: string,
     workspaceId: string,
     fromState: LaneState,
-    toState: LaneState,
+    toState: LaneState
   ): Promise<void> {
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
     await publishLaneEvent(this.bus, topic, laneId, workspaceId, fromState, toState);
   }
 }

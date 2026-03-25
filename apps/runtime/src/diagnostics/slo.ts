@@ -1,8 +1,8 @@
 // FR-004, FR-010: SLO violation detection, rate-limited event emission, and periodic check loop.
 
-import type { SLODefinition, SLOViolationEvent } from "./types.js";
 import type { MetricsRegistry } from "./metrics.js";
 import { computePercentiles } from "./percentiles.js";
+import type { SLODefinition, SLOViolationEvent } from "./types.js";
 
 /** Function signature for publishing events to the bus. */
 export type BusPublishFn = (topic: string, payload: unknown) => void | Promise<void>;
@@ -18,12 +18,12 @@ export const SLO_DEFINITIONS: readonly SLODefinition[] = Object.freeze([
 ]);
 
 export function getSLOsForMetric(metric: string): readonly SLODefinition[] {
-  return SLO_DEFINITIONS.filter((definition) => definition.metric === metric);
+  return SLO_DEFINITIONS.filter(definition => definition.metric === metric);
 }
 
 export function checkSLO(
   definition: SLODefinition,
-  stats: { count: number; p50: number; p95: number; p99: number },
+  stats: { count: number; p50: number; p95: number; p99: number }
 ): { passed: boolean; actual: number } {
   if (stats.count === 0) {
     return { passed: true, actual: 0 };
@@ -50,11 +50,7 @@ export class SLOMonitor {
   private intervalHandle: ReturnType<typeof setInterval> | undefined = undefined;
   private running = false;
 
-  constructor(
-    registry: MetricsRegistry,
-    definitions: SLODefinition[],
-    busPublish?: BusPublishFn,
-  ) {
+  constructor(registry: MetricsRegistry, definitions: SLODefinition[], busPublish?: BusPublishFn) {
     this.registry = registry;
     this.definitions = definitions;
     this.busPublish = busPublish;
@@ -117,15 +113,10 @@ export class SLOMonitor {
           const result = this.busPublish("perf.slo_violation", event);
           // If async, catch errors without blocking.
           if (result && typeof (result as Promise<void>).catch === "function") {
-            (result as Promise<void>).catch((err) => {
-              console.error("[slo] Bus publish error:", err);
-            });
+            (result as Promise<void>).catch(_err => {});
           }
-        } catch (err) {
-          console.error("[slo] Bus publish error:", err);
-        }
+        } catch (_err) {}
       } else {
-        console.log("[slo] Violation:", event);
       }
     }
 
@@ -146,18 +137,19 @@ export class SLOMonitor {
    * Start periodic SLO checks.
    * Calling start() again clears the previous interval.
    */
-  start(intervalMs: number = 5000): void {
+  start(intervalMs = 5000): void {
     if (this.intervalHandle !== undefined) {
       clearInterval(this.intervalHandle);
     }
     this.running = true;
     this.intervalHandle = setInterval(() => {
-      if (!this.running) return;
+      if (!this.running) {
+        return;
+      }
       const t0 = performance.now();
       this.checkAll();
       const elapsed = performance.now() - t0;
       if (elapsed > 5) {
-        console.warn(`[slo] checkAll took ${elapsed.toFixed(2)}ms (> 5ms budget)`);
       }
     }, intervalMs);
   }

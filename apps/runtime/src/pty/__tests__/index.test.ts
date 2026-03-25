@@ -1,5 +1,5 @@
-import { describe, expect, it, afterEach } from "bun:test";
-import { PtyManager, InMemoryBusPublisher } from "../index.js";
+import { afterEach, describe, expect, it } from "bun:test";
+import { InMemoryBusPublisher, PtyManager } from "../index.js";
 
 describe("PtyManager", () => {
   const pidsToCleanup: number[] = [];
@@ -31,7 +31,7 @@ describe("PtyManager", () => {
     expect(mgr.get(record.ptyId)).toBe(record);
 
     // Should have emitted spawned and state.changed events.
-    const topics = bus.events.map((e) => e.topic);
+    const topics = bus.events.map(e => e.topic);
     expect(topics).toContain("pty.spawned");
     expect(topics).toContain("pty.state.changed");
   });
@@ -75,7 +75,7 @@ describe("PtyManager", () => {
     const updated = mgr.get(record.ptyId);
     expect(updated?.dimensions).toEqual({ cols: 120, rows: 40 });
 
-    const topics = bus.events.map((e) => e.topic);
+    const topics = bus.events.map(e => e.topic);
     expect(topics).toContain("pty.signal.delivered");
     expect(topics).toContain("pty.resized");
   });
@@ -91,15 +91,9 @@ describe("PtyManager", () => {
 
     pidsToCleanup.push(record.pid);
 
-    expect(() => mgr.resize(record.ptyId, 0, 24)).toThrow(
-      "Invalid PTY dimensions",
-    );
-    expect(() => mgr.resize(record.ptyId, 80, -1)).toThrow(
-      "Invalid PTY dimensions",
-    );
-    expect(() => mgr.resize(record.ptyId, 10001, 24)).toThrow(
-      "Invalid PTY dimensions",
-    );
+    expect(() => mgr.resize(record.ptyId, 0, 24)).toThrow("Invalid PTY dimensions");
+    expect(() => mgr.resize(record.ptyId, 80, -1)).toThrow("Invalid PTY dimensions");
+    expect(() => mgr.resize(record.ptyId, 10001, 24)).toThrow("Invalid PTY dimensions");
   });
 
   it("resize rejects on stopped PTY", async () => {
@@ -137,7 +131,7 @@ describe("PtyManager", () => {
     expect(mgr.get(record.ptyId)).toBeUndefined();
 
     // Should have emitted terminating and stopped events.
-    const topics = bus.events.map((e) => e.topic);
+    const topics = bus.events.map(e => e.topic);
     expect(topics).toContain("pty.terminating");
     expect(topics).toContain("pty.stopped");
   });
@@ -150,9 +144,7 @@ describe("PtyManager", () => {
 
   it("writeInput throws for nonexistent PTY", () => {
     const mgr = new PtyManager();
-    expect(() =>
-      mgr.writeInput("nonexistent", new Uint8Array([65])),
-    ).toThrow("not found");
+    expect(() => mgr.writeInput("nonexistent", new Uint8Array([65]))).toThrow("not found");
   });
 
   it("reconcileOrphans completes without error", async () => {

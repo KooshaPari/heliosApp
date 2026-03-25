@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync } from "node:fs";
+import { mkdirSync, mkdtempSync } from "node:fs";
 import { join } from "node:path";
 
 const BASE_DIR = join(process.cwd(), ".tmp", "runtime-secrets-tests");

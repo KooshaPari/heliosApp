@@ -35,8 +35,8 @@ describe("MCP Bridge Adapter - Initialization and Health", () => {
 
       const tools = adapter.getTools();
       expect(tools.length).toBeGreaterThan(0);
-      expect(tools.some((t) => t.name === "read_file")).toBe(true);
-      expect(tools.some((t) => t.name === "write_file")).toBe(true);
+      expect(tools.some(t => t.name === "read_file")).toBe(true);
+      expect(tools.some(t => t.name === "write_file")).toBe(true);
     });
 
     it("should emit initialization event", async () => {
@@ -45,7 +45,7 @@ describe("MCP Bridge Adapter - Initialization and Health", () => {
       await adapter.init(defaultMcpConfig);
 
       const events = bus.getEvents();
-      const initEvent = events.find((e) => e.topic === "provider.mcp.initialized");
+      const initEvent = events.find(e => e.topic === "provider.mcp.initialized");
       expect(initEvent).toBeDefined();
       expect(initEvent?.payload?.serverPath).toBe("stdio");
     });
@@ -55,9 +55,9 @@ describe("MCP Bridge Adapter - Initialization and Health", () => {
 
       await adapter.init(defaultMcpConfig);
 
-      const discoveryEvents = bus.getEvents().filter(
-        (e) => e.topic === "provider.mcp.tool.discovered"
-      );
+      const discoveryEvents = bus
+        .getEvents()
+        .filter(e => e.topic === "provider.mcp.tool.discovered");
       expect(discoveryEvents.length).toBeGreaterThan(0);
     });
   });
@@ -74,7 +74,7 @@ describe("MCP Bridge Adapter - Initialization and Health", () => {
       const tools = adapter.getTools();
 
       expect(tools).toHaveLength(3);
-      tools.forEach((tool) => {
+      tools.forEach(tool => {
         expect(tool.name).toBeTruthy();
         expect(tool.description).toBeTruthy();
         expect(tool.inputSchema).toBeDefined();
@@ -84,7 +84,7 @@ describe("MCP Bridge Adapter - Initialization and Health", () => {
     it("should provide valid JSON schemas", async () => {
       const tools = adapter.getTools();
 
-      const readFileTool = tools.find((t) => t.name === "read_file");
+      const readFileTool = tools.find(t => t.name === "read_file");
       expect(readFileTool).toBeDefined();
       expect(readFileTool?.inputSchema.type).toBe("object");
       expect(readFileTool?.inputSchema.properties).toBeDefined();

@@ -1,19 +1,19 @@
+import { randomBytes } from "node:crypto";
 import {
   chmodSync,
   existsSync,
   mkdirSync,
-  readdirSync,
   readFileSync,
+  readdirSync,
   renameSync,
   rmSync,
   statSync,
   writeFileSync,
 } from "node:fs";
-import { randomBytes } from "node:crypto";
-import { EncryptionService } from "./encryption.js";
 import type { LocalBus } from "../protocol/bus.js";
-import { credentialDir, credentialPath, validateId } from "./credential-store.paths.js";
 import { emitCredentialEvent } from "./credential-store.events.js";
+import { credentialDir, credentialPath, validateId } from "./credential-store.paths.js";
+import { EncryptionService } from "./encryption.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -78,12 +78,7 @@ export class CredentialStore {
    * Encrypts and writes a credential to disk.
    * Uses atomic write (temp file + rename) and sets 0600 permissions.
    */
-  async store(
-    providerId: string,
-    workspaceId: string,
-    name: string,
-    value: string
-  ): Promise<void> {
+  async store(providerId: string, workspaceId: string, name: string, value: string): Promise<void> {
     validateId("providerId", providerId);
     validateId("workspaceId", workspaceId);
     validateId("name", name);
@@ -106,11 +101,7 @@ export class CredentialStore {
   /**
    * Reads and decrypts a credential from disk.
    */
-  async retrieve(
-    providerId: string,
-    workspaceId: string,
-    name: string
-  ): Promise<string> {
+  async retrieve(providerId: string, workspaceId: string, name: string): Promise<string> {
     validateId("providerId", providerId);
     validateId("workspaceId", workspaceId);
     validateId("name", name);
@@ -133,22 +124,20 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
 
     const dir = credentialDir(this.dataDir, providerId, workspaceId);
-    if (!existsSync(dir)) return [];
+    if (!existsSync(dir)) {
+      return [];
+    }
 
     return readdirSync(dir)
-      .filter((f) => f.endsWith(".enc"))
-      .map((f) => f.slice(0, -4)); // strip ".enc"
+      .filter(f => f.endsWith(".enc"))
+      .map(f => f.slice(0, -4)); // strip ".enc"
   }
 
   /**
    * Overwrites the credential file with random data before removing it
    * to prevent forensic recovery.
    */
-  async delete(
-    providerId: string,
-    workspaceId: string,
-    name: string
-  ): Promise<void> {
+  async delete(providerId: string, workspaceId: string, name: string): Promise<void> {
     validateId("providerId", providerId);
     validateId("workspaceId", workspaceId);
     validateId("name", name);

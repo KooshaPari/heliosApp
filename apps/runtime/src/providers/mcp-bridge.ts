@@ -10,15 +10,15 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
   MCPConfig,
   MCPExecuteInput,
   MCPExecuteOutput,
+  ProviderAdapter,
+  ProviderHealthStatus,
 } from "./adapter.js";
 import { NormalizedProviderError, normalizeError } from "./errors.js";
-import { BestEffortEventPublisher } from "./mcp-bridge/events.js";
 import { MCPConnectionManager } from "./mcp-bridge/connection.js";
+import { BestEffortEventPublisher } from "./mcp-bridge/events.js";
 import { MCPToolCatalog } from "./mcp-bridge/tool-catalog.js";
 
 /**
@@ -29,7 +29,9 @@ import { MCPToolCatalog } from "./mcp-bridge/tool-catalog.js";
  *
  * FR-025-004: MCP tool discovery and sandboxed invocation.
  */
-export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteInput, MCPExecuteOutput> {
+export class MCPBridgeAdapter
+  implements ProviderAdapter<MCPConfig, MCPExecuteInput, MCPExecuteOutput>
+{
   private config: MCPConfig | null = null;
   private terminated = false;
   private connection = new MCPConnectionManager();
@@ -110,8 +112,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
         };
       } else {
         this.healthStatus = {
-          state:
-            this.healthStatus.failureCount + 1 >= 5 ? "unavailable" : "degraded",
+          state: this.healthStatus.failureCount + 1 >= 5 ? "unavailable" : "degraded",
           lastCheck: new Date(),
           failureCount: this.healthStatus.failureCount + 1,
           message: "MCP server disconnected",

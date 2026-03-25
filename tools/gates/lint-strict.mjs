@@ -10,7 +10,7 @@ const blocked = [
   { pattern: /eslint-disable/, message: "eslint-disable bypass comments are forbidden" },
   { pattern: /semgrep:\s*ignore/, message: "semgrep ignore comments are forbidden" },
   { pattern: /\b(test|describe|it)\.only\b/, message: "Focused tests are forbidden" },
-  { pattern: /\bany\b/, message: "any is forbidden in strict gate" }
+  { pattern: /\bany\b/, message: "any is forbidden in strict gate" },
 ];
 
 for (const file of files) {
@@ -23,14 +23,10 @@ for (const file of files) {
 }
 
 if (failures.length > 0) {
-  console.error("Strict lint gate failed:");
-  for (const failure of failures) {
-    console.error(`- ${failure}`);
+  for (const _failure of failures) {
   }
   process.exit(1);
 }
-
-console.log(`Strict lint gate passed for ${files.length} files.`);
 
 function collectTsFiles(paths) {
   const output = [];

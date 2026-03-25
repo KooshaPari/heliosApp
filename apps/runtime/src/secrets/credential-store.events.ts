@@ -5,9 +5,11 @@ import type { LocalBusEnvelope } from "../protocol/types.js";
 export async function emitCredentialEvent(
   bus: LocalBus | null,
   topic: string,
-  payload: Record<string, unknown>,
+  payload: Record<string, unknown>
 ): Promise<void> {
-  if (bus === null) return;
+  if (bus === null) {
+    return;
+  }
   const envelope: LocalBusEnvelope = {
     id: `secrets:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
     type: "event",

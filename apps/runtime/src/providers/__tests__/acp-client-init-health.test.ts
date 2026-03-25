@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { makeAdapter } from "./acp-client_test_helpers.js";
 
 describe("ACP Client Adapter: Initialization and Health", () => {
@@ -39,13 +39,13 @@ describe("ACP Client Adapter: Initialization and Health", () => {
     await adapter.init(config);
 
     const events = bus.getEvents();
-    const initEvent = events.find((e) => e.topic === "provider.acp.initialized");
+    const initEvent = events.find(e => e.topic === "provider.acp.initialized");
     expect(initEvent).toBeDefined();
     expect(initEvent?.payload?.endpoint).toBe(config.endpoint);
   });
 
   describe("Health Checks", () => {
-    let adapter = makeAdapter().adapter;
+    const adapter = makeAdapter().adapter;
 
     beforeEach(async () => {
       await adapter.init(config);

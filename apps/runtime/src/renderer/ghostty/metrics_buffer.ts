@@ -22,7 +22,9 @@ export class NumberRingBuffer {
   }
 
   sorted(): Float64Array {
-    if (this._size === 0) return new Float64Array(0);
+    if (this._size === 0) {
+      return new Float64Array(0);
+    }
 
     const out = new Float64Array(this._size);
     if (this._size < this._capacity) {
@@ -43,7 +45,9 @@ export class NumberRingBuffer {
 }
 
 export function percentile(sorted: Float64Array, p: number): number {
-  if (sorted.length === 0) return 0;
+  if (sorted.length === 0) {
+    return 0;
+  }
   const idx = Math.ceil((p / 100) * sorted.length) - 1;
   return sorted[Math.max(0, idx)] ?? 0;
 }

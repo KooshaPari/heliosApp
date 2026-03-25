@@ -5,15 +5,12 @@ export type ReadableSpawn = {
 };
 
 type BunReadableRuntime = {
-  spawn(
-    cmd: readonly string[],
-    options: { stdout: "pipe"; stderr: "pipe" },
-  ): ReadableSpawn;
+  spawn(cmd: readonly string[], options: { stdout: "pipe"; stderr: "pipe" }): ReadableSpawn;
 };
 
 export function spawnReadableProcess(
   command: readonly string[],
-  runtimeErrorMessage: string,
+  runtimeErrorMessage: string
 ): ReadableSpawn {
   const bunRuntime = (globalThis as Record<string, unknown>).Bun as BunReadableRuntime | undefined;
   if (!bunRuntime) {

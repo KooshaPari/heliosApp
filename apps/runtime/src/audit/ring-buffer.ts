@@ -1,4 +1,4 @@
-import type { AuditEvent } from './event';
+import type { AuditEvent } from "./event.ts";
 
 /**
  * Filter options for ring buffer queries.
@@ -31,18 +31,18 @@ export interface RingBufferMetrics {
  */
 export class AuditRingBuffer {
   private buffer: (AuditEvent | undefined)[];
-  private head: number = 0;
-  private tail: number = 0;
-  private size: number = 0;
-  private totalEventsProcessed: number = 0;
-  private totalEventsEvicted: number = 0;
+  private head = 0;
+  private tail = 0;
+  private size = 0;
+  private totalEventsProcessed = 0;
+  private totalEventsEvicted = 0;
 
   /**
    * Create a new ring buffer with specified capacity.
    *
    * @param capacity - Maximum number of events to hold (default 10,000)
    */
-  constructor(private capacity: number = 10_000) {
+  constructor(private capacity = 10_000) {
     this.buffer = new Array(capacity);
   }
 
@@ -113,7 +113,9 @@ export class AuditRingBuffer {
       const index = (this.head + i) % this.capacity;
       const event = this.buffer[index];
 
-      if (!event) continue;
+      if (!event) {
+        continue;
+      }
 
       if (!this.matchesFilter(event, filter)) {
         continue;

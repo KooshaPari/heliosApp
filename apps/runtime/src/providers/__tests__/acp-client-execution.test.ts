@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { NormalizedProviderError } from "../errors.js";
 import { makeAdapter } from "./acp-client_test_helpers.js";
 
@@ -37,7 +37,7 @@ describe("ACP Client Adapter: Task Execution and Policy Gate", () => {
     expect(result).toBeDefined();
 
     const events = bus.getEvents();
-    const completedEvent = events.find((e) => e.topic === "provider.acp.execute.completed");
+    const completedEvent = events.find(e => e.topic === "provider.acp.execute.completed");
     expect(completedEvent?.payload?.correlationId).toBe(correlationId);
   });
 
@@ -46,7 +46,7 @@ describe("ACP Client Adapter: Task Execution and Policy Gate", () => {
     await adapter.execute({ prompt: "Test" }, "corr-123");
 
     const events = bus.getEvents();
-    const completedEvent = events.find((e) => e.topic === "provider.acp.execute.completed");
+    const completedEvent = events.find(e => e.topic === "provider.acp.execute.completed");
     expect(completedEvent).toBeDefined();
     expect(completedEvent?.payload?.duration).toBeGreaterThanOrEqual(0);
   });
@@ -84,7 +84,7 @@ describe("ACP Client Adapter: Task Execution and Policy Gate", () => {
       }
 
       const events = bus.getEvents();
-      const policyEvent = events.find((e) => e.topic === "provider.acp.policy.denied");
+      const policyEvent = events.find(e => e.topic === "provider.acp.policy.denied");
       expect(policyEvent).toBeDefined();
       expect(policyEvent?.payload?.reason).toContain("Access denied");
     });

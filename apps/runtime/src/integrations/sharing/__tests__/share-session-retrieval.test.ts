@@ -34,8 +34,8 @@ describe("Share Session Retrieval", () => {
     const sessions = manager.listByTerminal(terminalId);
 
     expect(sessions).toHaveLength(2);
-    expect(sessions.map((s) => s.id)).toContain(session1.id);
-    expect(sessions.map((s) => s.id)).toContain(session2.id);
+    expect(sessions.map(s => s.id)).toContain(session1.id);
+    expect(sessions.map(s => s.id)).toContain(session2.id);
   });
 
   it("should return empty list for terminal with no sessions", async () => {

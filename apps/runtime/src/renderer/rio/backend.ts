@@ -5,20 +5,15 @@
  * to the abstract contract defined in spec 010.
  */
 
-import type {
-  RendererAdapter,
-  RendererConfig,
-  RendererState,
-  RenderSurface,
-} from "../adapter.js";
+import type { RenderSurface, RendererAdapter, RendererConfig, RendererState } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
 import type { RendererRegistry } from "../registry.js";
+import { RioCapabilities } from "./capabilities.js";
+import { RioFallbackController } from "./fallback_controller.js";
+import { RioInputRelay } from "./input.js";
+import { RioMetrics } from "./metrics.js";
 import { RioProcess } from "./process.js";
 import { RioSurface } from "./surface.js";
-import { RioCapabilities } from "./capabilities.js";
-import { RioMetrics } from "./metrics.js";
-import { RioInputRelay } from "./input.js";
-import { RioFallbackController } from "./fallback_controller.js";
 
 // ---------------------------------------------------------------------------
 // Error
@@ -63,12 +58,12 @@ export class RioBackend implements RendererAdapter {
     this._inputRelay = new RioInputRelay();
     this._fallbackController = new RioFallbackController({
       getRegistry: () => this._registry,
-      setRegistry: (registry) => {
+      setRegistry: registry => {
         this._registry = registry;
       },
       getConfig: () => this._config,
       getState: () => this._state,
-      setState: (state) => {
+      setState: state => {
         this._state = state;
       },
       getProcess: () => this._process,
@@ -159,14 +154,14 @@ export class RioBackend implements RendererAdapter {
     }
 
     this._surface = new RioSurface();
-    const pid = await this._process!.start({
+    const pid = await this._process?.start({
       gpuAcceleration: this._config?.gpuAcceleration ?? false,
     });
 
     this._surface.bind(surface, pid.pid);
 
     // Set up crash detection forwarding with fallback.
-    this._process!.onExit((code) => {
+    this._process?.onExit(code => {
       if (this._state === "running") {
         this._fallbackController.incrementCrashCount();
         const error = new Error(`Rio process exited unexpectedly with code ${code}`);
@@ -201,7 +196,7 @@ export class RioBackend implements RendererAdapter {
     this._metrics.stop();
 
     // Abort all stream bindings.
-    for (const [ptyId, binding] of this._streamBindings) {
+    for (const [_ptyId, binding] of this._streamBindings) {
       binding.aborted = true;
       try {
         binding.reader.cancel().catch(() => {});
@@ -244,7 +239,9 @@ export class RioBackend implements RendererAdapter {
       try {
         while (!binding.aborted) {
           const { done, value } = await reader.read();
-          if (done || binding.aborted) break;
+          if (done || binding.aborted) {
+            break;
+          }
           if (value && this._process?.isRunning()) {
             this._process.writeToStdin(value);
           }
@@ -260,7 +257,9 @@ export class RioBackend implements RendererAdapter {
 
   unbindStream(ptyId: string): void {
     const binding = this._streamBindings.get(ptyId);
-    if (!binding) return;
+    if (!binding) {
+      return;
+    }
     binding.aborted = true;
     binding.reader.cancel().catch(() => {});
     this._streamBindings.delete(ptyId);
@@ -271,7 +270,7 @@ export class RioBackend implements RendererAdapter {
     this._inputRelay.relay(ptyId, data);
   }
 
-  resize(ptyId: string, cols: number, rows: number): void {
+  resize(_ptyId: string, cols: number, rows: number): void {
     this.guardEnabled();
     if (this._surface) {
       this._surface.resize({

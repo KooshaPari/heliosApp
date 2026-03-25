@@ -1,6 +1,6 @@
 import type { LocalBus } from "../protocol/bus.js";
-import type { ProviderHealthStatus } from "./adapter.js";
 import { publishA2AEvent } from "./a2a-router_helpers.js";
+import type { ProviderHealthStatus } from "./adapter.js";
 
 /**
  * Health Monitoring Coordinator

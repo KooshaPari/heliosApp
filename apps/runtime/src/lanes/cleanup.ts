@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import type { LaneRecord, LaneRegistry } from "./registry.js";
 import { SharedLaneCleanupError } from "./sharing.js";
-import { recordTransition, transition, type LaneState } from "./state_machine.js";
+import { type LaneState, recordTransition, transition } from "./state_machine.js";
 import { removeWorktree } from "./worktree.js";
 
 export interface PtyHandle {
@@ -25,7 +25,7 @@ type EmitLaneEvent = (
   laneId: string,
   workspaceId: string,
   fromState: LaneState,
-  toState: LaneState,
+  toState: LaneState
 ) => Promise<void>;
 
 export interface LaneCleanupOptions {
@@ -51,12 +51,16 @@ export async function cleanupLane(options: LaneCleanupOptions): Promise<void> {
   await transitionLaneToCleaning(options, lane);
   await terminateLanePtys(options, lane.workspaceId);
   await removeLaneWorktree(options, lane.workspaceId);
-  await closeCleaningLane(options.registry, options.emitEvent, options.registry.get(options.laneId)!);
+  await closeCleaningLane(
+    options.registry,
+    options.emitEvent,
+    options.registry.get(options.laneId)!
+  );
 }
 
 async function transitionLaneToCleaning(
   options: LaneCleanupOptions,
-  lane: LaneRecord,
+  lane: LaneRecord
 ): Promise<void> {
   if (lane.state === "shared" && lane.attachedAgents.length > 0) {
     if (!options.force) {
@@ -76,7 +80,7 @@ async function transitionLaneToCleaning(
       options.laneId,
       lane.workspaceId,
       lane.state,
-      cleaningState,
+      cleaningState
     );
     return;
   }
@@ -89,14 +93,11 @@ async function transitionLaneToCleaning(
     options.laneId,
     lane.workspaceId,
     lane.state,
-    cleaningState,
+    cleaningState
   );
 }
 
-async function terminateLanePtys(
-  options: LaneCleanupOptions,
-  workspaceId: string,
-): Promise<void> {
+async function terminateLanePtys(options: LaneCleanupOptions, workspaceId: string): Promise<void> {
   if (!options.ptyManager) {
     return;
   }
@@ -113,17 +114,17 @@ async function terminateLanePtys(
   }
 
   await Promise.all(
-    ptys.map(async (pty) => {
+    ptys.map(async pty => {
       try {
-        const timeout = new Promise<"timeout">((resolve) =>
-          setTimeout(() => resolve("timeout"), options.ptyTerminationTimeoutMs),
+        const timeout = new Promise<"timeout">(resolve =>
+          setTimeout(() => resolve("timeout"), options.ptyTerminationTimeoutMs)
         );
-        const termination = options.ptyManager!.terminate(pty.ptyId).then(() => "done" as const);
+        const termination = options.ptyManager?.terminate(pty.ptyId).then(() => "done" as const);
         await Promise.race([termination, timeout]);
       } catch {
         // Best-effort; cleanup continues even if PTY termination fails.
       }
-    }),
+    })
   );
 
   await options.emitEvent(
@@ -131,14 +132,11 @@ async function terminateLanePtys(
     options.laneId,
     workspaceId,
     "cleaning",
-    "cleaning",
+    "cleaning"
   );
 }
 
-async function removeLaneWorktree(
-  options: LaneCleanupOptions,
-  workspaceId: string,
-): Promise<void> {
+async function removeLaneWorktree(options: LaneCleanupOptions, workspaceId: string): Promise<void> {
   const lane = options.registry.get(options.laneId);
   if (!lane?.worktreePath) {
     return;
@@ -153,7 +151,7 @@ async function removeLaneWorktree(
       options.laneId,
       workspaceId,
       "cleaning",
-      "cleaning",
+      "cleaning"
     );
   } catch {
     // Best-effort; the worktree may already be gone.
@@ -165,7 +163,7 @@ async function removeLaneWorktree(
 async function closeCleaningLane(
   registry: LaneRegistry,
   emitEvent: EmitLaneEvent,
-  lane: LaneRecord,
+  lane: LaneRecord
 ): Promise<void> {
   const closedState = transition(lane.state, "cleanup_complete", lane.laneId);
   recordTransition(lane.laneId, lane.state, "cleanup_complete", closedState);

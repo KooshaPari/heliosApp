@@ -5,9 +5,7 @@ const FORBIDDEN_PATTERNS = ["..", "/", "\\", "\0"];
 export function validateId(label: string, value: string): void {
   for (const pat of FORBIDDEN_PATTERNS) {
     if (value.includes(pat)) {
-      throw new Error(
-        `Invalid ${label}: contains forbidden character sequence '${pat}'`,
-      );
+      throw new Error(`Invalid ${label}: contains forbidden character sequence '${pat}'`);
     }
   }
   if (value.length === 0) {
@@ -28,7 +26,7 @@ export function credentialPath(
   dataDir: string,
   providerId: string,
   workspaceId: string,
-  name: string,
+  name: string
 ): string {
   return join(credentialDir(dataDir, providerId, workspaceId), `${name}.enc`);
 }

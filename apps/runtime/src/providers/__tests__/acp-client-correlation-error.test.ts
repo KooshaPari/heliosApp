@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { NormalizedProviderError } from "../errors.js";
 import { makeAdapter } from "./acp-client_test_helpers.js";
 
@@ -30,9 +30,7 @@ describe("ACP Client Adapter: Correlation ID Propagation and Error Handling", ()
       await adapter.execute({ prompt: "Test" }, correlationId);
 
       const events = bus.getEvents();
-      const relevantEvents = events.filter((e) =>
-        e.topic?.startsWith("provider.acp.execute")
-      );
+      const relevantEvents = events.filter(e => e.topic?.startsWith("provider.acp.execute"));
 
       for (const event of relevantEvents) {
         expect(event.payload?.correlationId).toBe(correlationId);
@@ -52,7 +50,7 @@ describe("ACP Client Adapter: Correlation ID Propagation and Error Handling", ()
       }
 
       const events = bus.getEvents();
-      const policyEvent = events.find((e) => e.topic === "provider.acp.policy.denied");
+      const policyEvent = events.find(e => e.topic === "provider.acp.policy.denied");
       expect(policyEvent?.payload?.correlationId).toBe(correlationId);
     });
   });
@@ -70,7 +68,7 @@ describe("ACP Client Adapter: Correlation ID Propagation and Error Handling", ()
     it("should throw NormalizedProviderError on policy denial", async () => {
       policyGate.setShouldDeny(true);
 
-      const error = await adapter.execute({ prompt: "Test" }, "corr-123").catch((e) => e);
+      const error = await adapter.execute({ prompt: "Test" }, "corr-123").catch(e => e);
 
       expect(error).toBeInstanceOf(NormalizedProviderError);
       expect((error as NormalizedProviderError).code).toBe("PROVIDER_POLICY_DENIED");
@@ -88,7 +86,7 @@ describe("ACP Client Adapter: Correlation ID Propagation and Error Handling", ()
       }
 
       const events = bus.getEvents();
-      const errorEvent = events.find((e) => e.topic === "provider.acp.execute.failed");
+      const errorEvent = events.find(e => e.topic === "provider.acp.execute.failed");
       expect(errorEvent).toBeDefined();
       expect(errorEvent?.payload?.retryable).toBeDefined();
     });

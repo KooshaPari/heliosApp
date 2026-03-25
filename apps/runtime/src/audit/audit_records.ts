@@ -1,13 +1,7 @@
-import type { RetentionPolicyConfig } from "../config/retention";
-import { createRetentionPolicyConfig } from "../config/retention";
+import type { RetentionPolicyConfig } from "../config/retention.ts";
+import { createRetentionPolicyConfig } from "../config/retention.ts";
 import type { LocalBusEnvelope } from "../protocol/types.js";
-import type {
-  AuditBundle,
-  AuditExportRecord,
-  AuditFilter,
-  AuditRecord,
-} from "./sink_types";
-import type { SessionSnapshot } from "./snapshot";
+import type { AuditBundle, AuditExportRecord, AuditFilter, AuditRecord } from "./sink_types.ts";
 
 export class InMemoryAuditSink {
   private readonly retentionPolicy: RetentionPolicyConfig;
@@ -47,22 +41,30 @@ export class InMemoryAuditSink {
   }
 
   async exportRecords(): Promise<AuditExportRecord[]> {
-    return this.query().map((record) => toExportRecord(record, this.retentionPolicy));
+    return this.query().map(record => toExportRecord(record, this.retentionPolicy));
   }
 
   query(filter: AuditFilter = {}): AuditRecord[] {
-    return this.records.filter((record) => {
+    return this.records.filter(record => {
       const envelope = record.envelope as Record<string, unknown>;
-      if (filter.workspace_id && getString(envelope.workspace_id) !== filter.workspace_id) return false;
-      if (filter.lane_id && getString(envelope.lane_id) !== filter.lane_id) return false;
-      if (filter.session_id && getString(envelope.session_id) !== filter.session_id) return false;
-      if (filter.correlation_id && getString(envelope.correlation_id) !== filter.correlation_id) return false;
+      if (filter.workspace_id && getString(envelope.workspace_id) !== filter.workspace_id) {
+        return false;
+      }
+      if (filter.lane_id && getString(envelope.lane_id) !== filter.lane_id) {
+        return false;
+      }
+      if (filter.session_id && getString(envelope.session_id) !== filter.session_id) {
+        return false;
+      }
+      if (filter.correlation_id && getString(envelope.correlation_id) !== filter.correlation_id) {
+        return false;
+      }
       return true;
     });
   }
 
   exportBundle(filter: AuditFilter = {}): AuditBundle {
-    const records = this.query(filter).map((record) => toExportRecord(record, this.retentionPolicy));
+    const records = this.query(filter).map(record => toExportRecord(record, this.retentionPolicy));
     return {
       generated_at: new Date().toISOString(),
       filters: { ...filter },
@@ -94,9 +96,10 @@ function toExportRecord(record: AuditRecord, policy: RetentionPolicyConfig): Aud
     terminal_id: getString(envelope.terminal_id) ?? null,
     method_or_topic: methodOrTopic,
     envelope,
-    type: envelopeType === "command" || envelopeType === "response" || envelopeType === "event"
-      ? envelopeType
-      : "system",
+    type:
+      envelopeType === "command" || envelopeType === "response" || envelopeType === "event"
+        ? envelopeType
+        : "system",
     status: outcomeStatus,
     payload,
   };
@@ -110,7 +113,7 @@ function getRecordPayload(envelope: Record<string, unknown>): Record<string, unk
 function shouldRetainRecord(
   record: AuditRecord,
   policy: RetentionPolicyConfig,
-  now: Date,
+  now: Date
 ): boolean {
   const topic = getString((record.envelope as Record<string, unknown>).topic);
   if (topic && policy.exempt_topics.includes(topic)) {
@@ -142,21 +145,23 @@ function buildDeletionProofRecord(expiredCount: number, now: Date): AuditRecord 
 
 function sanitizeEnvelope(
   envelope: LocalBusEnvelope | Record<string, unknown>,
-  redactedFields: string[],
+  redactedFields: string[]
 ): Record<string, unknown> {
-  const redactionSet = new Set(redactedFields.map((field) => field.toLowerCase()));
+  const redactionSet = new Set(redactedFields.map(field => field.toLowerCase()));
   return deepRedact(envelope, redactionSet) as Record<string, unknown>;
 }
 
 function deepRedact(value: unknown, redactionSet: ReadonlySet<string>): unknown {
   if (Array.isArray(value)) {
-    return value.map((item) => deepRedact(item, redactionSet));
+    return value.map(item => deepRedact(item, redactionSet));
   }
   if (value && typeof value === "object") {
     const input = value as Record<string, unknown>;
     const output: Record<string, unknown> = {};
     for (const [key, nested] of Object.entries(input)) {
-      output[key] = redactionSet.has(key.toLowerCase()) ? "[REDACTED]" : deepRedact(nested, redactionSet);
+      output[key] = redactionSet.has(key.toLowerCase())
+        ? "[REDACTED]"
+        : deepRedact(nested, redactionSet);
     }
     return output;
   }
@@ -165,7 +170,7 @@ function deepRedact(value: unknown, redactionSet: ReadonlySet<string>): unknown 
 
 function sanitize(value: unknown): unknown {
   if (Array.isArray(value)) {
-    return value.map((entry) => sanitize(entry));
+    return value.map(entry => sanitize(entry));
   }
   if (value && typeof value === "object") {
     return Object.fromEntries(
@@ -174,7 +179,7 @@ function sanitize(value: unknown): unknown {
         /(token|secret|password|api[_-]?key|authorization|bearer)/i.test(key)
           ? "[REDACTED]"
           : sanitize(item),
-      ]),
+      ])
     );
   }
   return value;

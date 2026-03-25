@@ -1,6 +1,6 @@
-import { promises as fs } from "fs";
-import os from "os";
-import path from "path";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { execCommand } from "../../integrations/exec.js";
 import type { ClassifiedOrphan, ResourceType } from "./resource_classifier.js";
 
@@ -200,6 +200,6 @@ export class CleanupExecutor {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }

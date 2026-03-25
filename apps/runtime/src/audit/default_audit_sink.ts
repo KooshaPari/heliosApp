@@ -1,6 +1,6 @@
-import { AuditRingBuffer } from "./ring-buffer";
-import type { AuditEvent } from "./event";
-import type { AuditSink, AuditSinkMetrics, AuditStorage } from "./sink_types";
+import type { AuditEvent } from "./event.ts";
+import { AuditRingBuffer } from "./ring-buffer.ts";
+import type { AuditSink, AuditSinkMetrics, AuditStorage } from "./sink_types.ts";
 
 export class DefaultAuditSink implements AuditSink {
   private buffer: AuditEvent[] = [];
@@ -23,7 +23,7 @@ export class DefaultAuditSink implements AuditSink {
 
   constructor(
     private readonly storage: AuditStorage,
-    ringBufferCapacity: number = 10_000,
+    ringBufferCapacity = 10_000
   ) {
     this.ringBuffer = new AuditRingBuffer(ringBufferCapacity);
     this.startPeriodicFlush();
@@ -40,7 +40,7 @@ export class DefaultAuditSink implements AuditSink {
     this.buffer.push(event);
     this.metrics.bufferHighWaterMark = Math.max(
       this.metrics.bufferHighWaterMark,
-      this.buffer.length,
+      this.buffer.length
     );
 
     if (this.buffer.length >= 10_000) {
@@ -115,7 +115,7 @@ export class DefaultAuditSink implements AuditSink {
         if (attempt >= this.maxRetries) {
           throw error;
         }
-        await new Promise((resolve) => setTimeout(resolve, this.retryBackoffMs * attempt));
+        await new Promise(resolve => setTimeout(resolve, this.retryBackoffMs * attempt));
       }
     }
   }

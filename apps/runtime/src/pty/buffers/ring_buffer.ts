@@ -56,7 +56,9 @@ export class RingBuffer {
 
   peek(count?: number): Uint8Array {
     const n = Math.min(count ?? this._size, this._size);
-    if (n === 0) return new Uint8Array(0);
+    if (n === 0) {
+      return new Uint8Array(0);
+    }
 
     const result = new Uint8Array(n);
     const firstChunk = Math.min(n, this._capacity - this.head);

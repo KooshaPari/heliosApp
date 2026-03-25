@@ -5,16 +5,11 @@
  * using Bun.spawn for process execution.
  */
 
-import type { AvailabilityResult, CliResult, ZellijSession } from "./types.js";
-import {
-  ZellijNotFoundError,
-  ZellijVersionError,
-  ZellijCliError,
-  ZellijTimeoutError,
-} from "./errors.js";
-import { spawnProcess, type SpawnProcessLike } from "./cli/spawn.js";
-import { compareSemver } from "./cli/version.js";
 import { parseSessionLine } from "./cli/session_parser.js";
+import { type SpawnProcessLike, spawnProcess } from "./cli/spawn.js";
+import { compareSemver } from "./cli/version.js";
+import { ZellijNotFoundError, ZellijTimeoutError, ZellijVersionError } from "./errors.js";
+import type { AvailabilityResult, CliResult, ZellijSession } from "./types.js";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const MINIMUM_VERSION = "0.40.0";
@@ -31,10 +26,7 @@ export class ZellijCli {
   /**
    * Run a zellij CLI command with optional timeout.
    */
-  async run(
-    args: string[],
-    options?: { timeout?: number }
-  ): Promise<CliResult> {
+  async run(args: string[], options?: { timeout?: number }): Promise<CliResult> {
     const timeout = options?.timeout ?? this.defaultTimeout;
     const command = `${this.zellijPath} ${args.join(" ")}`;
     const startMs = performance.now();
@@ -52,7 +44,7 @@ export class ZellijCli {
 
     // Race between process completion and timeout
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const timeoutPromise = new Promise<"timeout">((resolve) => {
+    const timeoutPromise = new Promise<"timeout">(resolve => {
       timer = setTimeout(() => {
         resolve("timeout");
       }, timeout);
@@ -75,14 +67,9 @@ export class ZellijCli {
       proc.exited,
     ]);
 
-    const durationMs = performance.now() - startMs;
+    const _durationMs = performance.now() - startMs;
     const stdout = new TextDecoder().decode(stdoutBuf);
     const stderr = new TextDecoder().decode(stderrBuf);
-
-    // Debug logging for all CLI calls
-    console.debug(
-      `[zellij-cli] ${command} -> exit=${exitCode} duration=${durationMs.toFixed(1)}ms`
-    );
 
     return { stdout, stderr, exitCode };
   }

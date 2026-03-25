@@ -20,7 +20,7 @@ export function validateProviderRegistration<TConfig>(
     );
   }
 
-  if (!registration.type || !["acp", "mcp", "a2a"].includes(registration.type)) {
+  if (!(registration.type && ["acp", "mcp", "a2a"].includes(registration.type))) {
     throw new NormalizedProviderError(
       "PROVIDER_INIT_FAILED",
       "Registration missing or invalid required field: type",

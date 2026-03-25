@@ -12,7 +12,6 @@ export function validateAcpConfig(config: ACPConfig): void {
   if (!config.model || typeof config.model !== "string") {
     throw new Error("Missing or invalid model");
   }
-
 }
 
 export function resolveHealthCheckInterval(config: ACPConfig): number {

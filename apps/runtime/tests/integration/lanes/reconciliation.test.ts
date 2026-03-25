@@ -1,7 +1,7 @@
 // T019 - Integration test for orphan reconciliation scenario
 // (FR-008-008, SC-008-002, SC-008-004)
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { LaneManager, _resetIdCounter } from "../../../src/lanes/index.js";
@@ -33,7 +33,7 @@ async function runGit(args: string[], cwd: string): Promise<string> {
 async function createTempRepo(): Promise<string> {
   const tmpDir = path.join(
     (await import("node:os")).tmpdir(),
-    `helios-recon-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    `helios-recon-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
   );
   fs.mkdirSync(tmpDir, { recursive: true });
   await runGit(["init"], tmpDir);
@@ -94,7 +94,7 @@ describe("Orphan Reconciliation Integration (FR-008-008, SC-008-004)", () => {
 
     expect(result.orphanedRecords).toBe(1);
     // Lane should now be closed
-    expect(mgr.getRegistry().get(lane.laneId)!.state).toBe("closed");
+    expect(mgr.getRegistry().get(lane.laneId)?.state).toBe("closed");
   });
 
   test("handles both orphan types simultaneously", async () => {
@@ -121,10 +121,10 @@ describe("Orphan Reconciliation Integration (FR-008-008, SC-008-004)", () => {
     await mgr.reconcileOrphans(repoDir);
 
     const events = bus.getEvents();
-    const reconEvent = events.find((e) => e.topic === "reconciliation.completed");
+    const reconEvent = events.find(e => e.topic === "reconciliation.completed");
     expect(reconEvent).toBeDefined();
-    expect(reconEvent!.payload!["orphanedWorktrees"]).toBe(1);
-    expect(reconEvent!.payload!["totalCleaned"]).toBeGreaterThanOrEqual(1);
+    expect(reconEvent?.payload?.orphanedWorktrees).toBe(1);
+    expect(reconEvent?.payload?.totalCleaned).toBeGreaterThanOrEqual(1);
   });
 
   test("completes within 30 seconds (SC-008-004)", async () => {
@@ -177,7 +177,7 @@ describe("Orphan Reconciliation Integration (FR-008-008, SC-008-004)", () => {
     const worktreeRoot = path.join(repoDir, ".helios-worktrees");
     if (fs.existsSync(worktreeRoot)) {
       const entries = fs.readdirSync(worktreeRoot);
-      const activeLaneIds = new Set(active.map((l) => l.laneId));
+      const activeLaneIds = new Set(active.map(l => l.laneId));
       for (const entry of entries) {
         expect(activeLaneIds.has(entry)).toBe(true);
       }

@@ -35,7 +35,7 @@ export function createA2AEndpoints(
   endpoints: NonNullable<A2ARouterConfig["endpoints"]>
 ): A2AEndpoint[] {
   return endpoints
-    .map((endpoint) => ({
+    .map(endpoint => ({
       id: endpoint.id,
       url: endpoint.url,
       priority: endpoint.priority,
@@ -54,36 +54,33 @@ export function selectA2AEndpoint(
   requiredCapabilities: string[]
 ): A2AEndpoint | undefined {
   let selected = endpoints.find(
-    (endpoint) =>
+    endpoint =>
       endpoint.healthStatus?.state === "healthy" &&
       hasA2ACapabilities(endpoint, requiredCapabilities)
   );
 
   if (!selected) {
     selected = endpoints.find(
-      (endpoint) =>
+      endpoint =>
         endpoint.healthStatus?.state === "degraded" &&
         hasA2ACapabilities(endpoint, requiredCapabilities)
     );
   }
 
   if (!selected) {
-    selected = endpoints.find((endpoint) => hasA2ACapabilities(endpoint, requiredCapabilities));
+    selected = endpoints.find(endpoint => hasA2ACapabilities(endpoint, requiredCapabilities));
   }
 
   return selected;
 }
 
-export function hasA2ACapabilities(
-  endpoint: A2AEndpoint,
-  requiredCapabilities: string[]
-): boolean {
+export function hasA2ACapabilities(endpoint: A2AEndpoint, requiredCapabilities: string[]): boolean {
   if (requiredCapabilities.length === 0) {
     return true;
   }
 
   const endpointCaps = new Set(endpoint.capabilities);
-  return requiredCapabilities.every((capability) => endpointCaps.has(capability));
+  return requiredCapabilities.every(capability => endpointCaps.has(capability));
 }
 
 export async function probeA2AEndpoint(endpoint: A2AEndpoint): Promise<void> {

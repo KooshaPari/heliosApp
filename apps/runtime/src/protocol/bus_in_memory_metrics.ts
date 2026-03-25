@@ -1,11 +1,10 @@
+import type { InMemoryBusContext } from "./bus_in_memory_context.js";
 import type {
   MetricAccumulatorEntry,
-  MetricSample,
   MetricSummary,
   MetricsReport,
 } from "./bus_in_memory_types.js";
 import type { LocalBusEnvelope } from "./types.js";
-import type { InMemoryBusContext } from "./bus_in_memory_context.js";
 
 export function getMetricsReport(context: InMemoryBusContext): MetricsReport {
   const summaries: MetricSummary[] = [];
@@ -30,13 +29,13 @@ export function getMetricsReport(context: InMemoryBusContext): MetricsReport {
 }
 
 export function getSequence(context: InMemoryBusContext): number {
-  return context.eventLog.filter((event) => event.type === "event").length;
+  return context.eventLog.filter(event => event.type === "event").length;
 }
 
 export function appendAcceptedEvent(
   context: InMemoryBusContext,
   event: LocalBusEnvelope,
-  recordedAt = new Date().toISOString(),
+  recordedAt = new Date().toISOString()
 ): void {
   context.auditLog.push({ envelope: event, outcome: "accepted", recorded_at: recordedAt });
   context.eventLog.push(event);
@@ -46,7 +45,7 @@ export function recordMetric(
   context: InMemoryBusContext,
   metric: string,
   value?: number,
-  tags?: Record<string, string>,
+  tags?: Record<string, string>
 ): void {
   const existing = context.metricsAccumulator.get(metric) ?? { count: 0, values: [] };
   const latestValue = value !== undefined ? value : existing.latest;
@@ -64,11 +63,7 @@ export function recordMetric(
   }
 }
 
-export function emitMetricEvent(
-  context: InMemoryBusContext,
-  metric: string,
-  value?: number,
-): void {
+export function emitMetricEvent(context: InMemoryBusContext, metric: string, value?: number): void {
   const event: LocalBusEnvelope = {
     id: `metric-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     type: "event",

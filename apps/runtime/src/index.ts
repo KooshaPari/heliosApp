@@ -4,18 +4,22 @@
  * Exports foundational types, utilities, and service APIs consumed by other packages.
  */
 
-import type { AuditBundle, AuditFilter, AuditSink } from "./audit/sink";
-import { HarnessRouteSelector, type HarnessProbe } from "./integrations/exec";
-import { createBoundaryDispatcher } from "./protocol/boundary_adapter";
-import { InMemoryLocalBus } from "./protocol/bus";
-import type { AuditRecord as BusAuditRecord } from "./protocol/bus";
-import type { LocalBusEnvelope } from "./protocol/types";
-import { InMemorySessionRegistry, RecoveryRegistry } from "./sessions/registry";
-import { LaneLifecycleService } from "./sessions/state_machine";
-import type { RecoveryBootstrapResult, RecoveryMetadata, WatchdogScanResult } from "./sessions/types";
-import { matchAuditFilter, toAuditBundleRecord } from "./runtime/audit_bundle";
-import { createRuntimeHttpHandler } from "./runtime/http_dispatcher";
-import { createTerminalPlane } from "./runtime/terminal_plane";
+import type { AuditBundle, AuditFilter, AuditSink } from "./audit/sink.ts";
+import { type HarnessProbe, HarnessRouteSelector } from "./integrations/exec.ts";
+import { createBoundaryDispatcher } from "./protocol/boundary_adapter.ts";
+import { InMemoryLocalBus } from "./protocol/bus.ts";
+import type { AuditRecord as BusAuditRecord } from "./protocol/bus.ts";
+import type { LocalBusEnvelope } from "./protocol/types.ts";
+import { matchAuditFilter, toAuditBundleRecord } from "./runtime/audit_bundle.ts";
+import { createRuntimeHttpHandler } from "./runtime/http_dispatcher.ts";
+import { createTerminalPlane } from "./runtime/terminal_plane.ts";
+import { InMemorySessionRegistry, RecoveryRegistry } from "./sessions/registry.ts";
+import { LaneLifecycleService } from "./sessions/state_machine.ts";
+import type {
+  RecoveryBootstrapResult,
+  RecoveryMetadata,
+  WatchdogScanResult,
+} from "./sessions/types.ts";
 
 /** Semantic version of the runtime package. */
 export const VERSION = "0.0.1" as const;
@@ -38,8 +42,8 @@ export function healthCheck(): HealthCheckResult {
   };
 }
 
-export { InMemoryLocalBus } from "./protocol/bus";
-export type { LocalBus } from "./protocol/bus";
+export { InMemoryLocalBus } from "./protocol/bus.ts";
+export type { LocalBus } from "./protocol/bus.ts";
 
 type RuntimeOptions = {
   auditSink?: AuditSink;
@@ -80,11 +84,11 @@ export function createRuntime(options: RuntimeOptions = {}) {
   const originalRequest = bus.request.bind(bus);
   const originalPublish = bus.publish.bind(bus);
   const dispatchBoundaryCommand = createBoundaryDispatcher({
-    dispatchLocal: (command) => bus.request(command),
+    dispatchLocal: command => bus.request(command),
   });
   const terminalPlane = createTerminalPlane({
     dispatchCommand: dispatchBoundaryCommand,
-    publishEvent: (event) => bus.publish(event),
+    publishEvent: event => bus.publish(event),
     terminalBufferCapBytes: options.terminalBufferCapBytes ?? 65_536,
   });
   const fetch = createRuntimeHttpHandler({
@@ -97,7 +101,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
 
   const updateRecoveryFromResponse = (
     command: RuntimeEnvelope,
-    response: Awaited<ReturnType<typeof originalRequest>>,
+    response: Awaited<ReturnType<typeof originalRequest>>
   ): void => {
     if (response.type !== "response" || response.status !== "ok") {
       return;
@@ -110,25 +114,28 @@ export function createRuntime(options: RuntimeOptions = {}) {
     const sessionId = command.session_id ?? "";
 
     switch (command.method) {
-      case "lane.create":
+      case "lane.create": {
         recoveryRegistry.apply("lane.create", {
           workspace_id: workspaceId,
           lane_id: String(result.lane_id ?? payload.id ?? payload.lane_id ?? ""),
         });
         return;
-      case "lane.attach":
+      }
+      case "lane.attach": {
         recoveryRegistry.apply("lane.attach", {
           workspace_id: workspaceId,
           lane_id: String(result.lane_id ?? payload.id ?? payload.lane_id ?? laneId),
         });
         return;
-      case "lane.cleanup":
+      }
+      case "lane.cleanup": {
         recoveryRegistry.apply("lane.cleanup", {
           workspace_id: workspaceId,
           lane_id: String(result.lane_id ?? payload.id ?? payload.lane_id ?? laneId),
         });
         return;
-      case "session.attach":
+      }
+      case "session.attach": {
         recoveryRegistry.apply("session.attach", {
           workspace_id: workspaceId,
           lane_id: laneId,
@@ -137,11 +144,13 @@ export function createRuntime(options: RuntimeOptions = {}) {
             typeof payload.codex_session_id === "string" ? payload.codex_session_id : undefined,
         });
         return;
-      case "session.terminate":
+      }
+      case "session.terminate": {
         recoveryRegistry.apply("session.terminate", {
           session_id: String(result.session_id ?? payload.id ?? payload.session_id ?? sessionId),
         });
         return;
+      }
       case "terminal.spawn": {
         const terminalId = String(result.terminal_id ?? payload.id ?? payload.terminal_id ?? "");
         if (!terminalId) {
@@ -205,16 +214,19 @@ export function createRuntime(options: RuntimeOptions = {}) {
     const terminalId = event.terminal_id ?? "";
 
     switch (event.topic) {
-      case "lane.created":
+      case "lane.created": {
         recoveryRegistry.apply("lane.create", { workspace_id: workspaceId, lane_id: laneId });
         return;
-      case "lane.attached":
+      }
+      case "lane.attached": {
         recoveryRegistry.apply("lane.attach", { workspace_id: workspaceId, lane_id: laneId });
         return;
-      case "lane.cleaned":
+      }
+      case "lane.cleaned": {
         recoveryRegistry.apply("lane.cleanup", { workspace_id: workspaceId, lane_id: laneId });
         return;
-      case "session.attached":
+      }
+      case "session.attached": {
         recoveryRegistry.apply("session.attach", {
           workspace_id: workspaceId,
           lane_id: laneId,
@@ -225,10 +237,12 @@ export function createRuntime(options: RuntimeOptions = {}) {
               : undefined,
         });
         return;
-      case "session.terminated":
+      }
+      case "session.terminated": {
         recoveryRegistry.apply("session.terminate", { session_id: sessionId });
         return;
-      case "terminal.spawned":
+      }
+      case "terminal.spawned": {
         recoveryRegistry.apply("terminal.spawn", {
           workspace_id: workspaceId,
           lane_id: laneId,
@@ -237,9 +251,11 @@ export function createRuntime(options: RuntimeOptions = {}) {
         });
         terminalPlane.applyEvent(event);
         return;
-      case "terminal.state.changed":
+      }
+      case "terminal.state.changed": {
         terminalPlane.applyEvent(event);
         return;
+      }
       default:
         return;
     }
@@ -249,8 +265,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
     bus,
     fetch,
     listLanes: (workspaceId: string) => laneService.list(workspaceId),
-    cleanupLane: (workspaceId: string, laneId: string) =>
-      laneService.cleanup(workspaceId, laneId),
+    cleanupLane: (workspaceId: string, laneId: string) => laneService.cleanup(workspaceId, laneId),
     getState: () => {
       const state = bus.getState();
       const terminalState = terminalPlane.getTerminalState();
@@ -260,7 +275,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
     getAuditRecords: async () => {
       const records = await bus.getAuditRecords();
       return records
-        .map((record) => ({
+        .map(record => ({
           ...record,
           recorded_at: record.recorded_at ?? record.envelope.ts ?? new Date().toISOString(),
         }))
@@ -269,7 +284,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
     exportAuditBundle: (filter: AuditFilter = {}): AuditBundle => {
       const exported = auditRecords
         .map(toAuditBundleRecord)
-        .filter((record) => matchAuditFilter(record, filter));
+        .filter(record => matchAuditFilter(record, filter));
       return {
         generated_at: new Date().toISOString(),
         filters: { ...filter },

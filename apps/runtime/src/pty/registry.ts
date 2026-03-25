@@ -1,7 +1,5 @@
+import { reconcileRegistryOrphans } from "./registry_reconciliation.js";
 import type { PtyState } from "./state_machine.js";
-import {
-  reconcileRegistryOrphans,
-} from "./registry_reconciliation.js";
 
 /** Dimensions of a PTY viewport. */
 export interface PtyDimensions {
@@ -132,10 +130,7 @@ export class PtyRegistry {
       this.removeFromIndex(this.byLane, existing.laneId, ptyId);
       this.addToIndex(this.byLane, patch.laneId, ptyId);
     }
-    if (
-      patch.sessionId !== undefined &&
-      patch.sessionId !== existing.sessionId
-    ) {
+    if (patch.sessionId !== undefined && patch.sessionId !== existing.sessionId) {
       this.removeFromIndex(this.bySession, existing.sessionId, ptyId);
       this.addToIndex(this.bySession, patch.sessionId, ptyId);
     }
@@ -177,18 +172,14 @@ export class PtyRegistry {
 
   async reconcileOrphans(
     shellPatterns: string[] = ["bash", "zsh", "sh", "fish"],
-    gracePeriodMs = 5000,
+    gracePeriodMs = 5000
   ): Promise<ReconciliationSummary> {
     return reconcileRegistryOrphans(this, shellPatterns, gracePeriodMs);
   }
 
   // ── Private helpers ──────────────────────────────────────────────────
 
-  private addToIndex(
-    index: Map<string, Set<string>>,
-    key: string,
-    ptyId: string,
-  ): void {
+  private addToIndex(index: Map<string, Set<string>>, key: string, ptyId: string): void {
     let set = index.get(key);
     if (!set) {
       set = new Set();
@@ -197,11 +188,7 @@ export class PtyRegistry {
     set.add(ptyId);
   }
 
-  private removeFromIndex(
-    index: Map<string, Set<string>>,
-    key: string,
-    ptyId: string,
-  ): void {
+  private removeFromIndex(index: Map<string, Set<string>>, key: string, ptyId: string): void {
     const set = index.get(key);
     if (set) {
       set.delete(ptyId);
@@ -211,18 +198,18 @@ export class PtyRegistry {
     }
   }
 
-  private resolveIndex(
-    index: Map<string, Set<string>>,
-    key: string,
-  ): PtyRecord[] {
+  private resolveIndex(index: Map<string, Set<string>>, key: string): PtyRecord[] {
     const ids = index.get(key);
-    if (!ids) return [];
+    if (!ids) {
+      return [];
+    }
     const records: PtyRecord[] = [];
     for (const id of ids) {
       const rec = this.primary.get(id);
-      if (rec) records.push(rec);
+      if (rec) {
+        records.push(rec);
+      }
     }
     return records;
   }
-
 }

@@ -1,7 +1,7 @@
-import type { PtyRecord } from "../registry.js";
 import type { BusPublisher, PtyEventCorrelation } from "../events.js";
 import { emitPtyEvent } from "../events.js";
-import { SignalHistory, type SignalEnvelope, type SignalHistoryMap } from "./history.js";
+import type { PtyRecord } from "../registry.js";
+import { type SignalEnvelope, SignalHistory, type SignalHistoryMap } from "./history.js";
 
 export function createSignalCorrelation(record: PtyRecord): PtyEventCorrelation {
   return {
@@ -17,7 +17,7 @@ export function recordSignal(
   envelope: SignalEnvelope,
   historyMap: SignalHistoryMap,
   bus: BusPublisher,
-  correlation: PtyEventCorrelation,
+  correlation: PtyEventCorrelation
 ): void {
   let history = historyMap.get(envelope.ptyId);
   if (!history) {
@@ -40,7 +40,7 @@ export function deliverSignal(
   ptyId: string,
   historyMap: SignalHistoryMap,
   bus: BusPublisher,
-  correlation: PtyEventCorrelation,
+  correlation: PtyEventCorrelation
 ): SignalEnvelope {
   const timestamp = Date.now();
   try {

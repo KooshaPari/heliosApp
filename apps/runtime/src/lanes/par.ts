@@ -1,22 +1,19 @@
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
-import type { LaneRegistry } from "./registry.js";
 import { executeCommandInLane } from "./par_execution.js";
 import { runParHealthCheck, terminateManagedParTask } from "./par_process.js";
 import {
+  type ExecResult,
+  type ParBinding,
+  type ParManagerOptions,
+  ParSpawnError,
+  type SpawnFn,
+  type SpawnResult,
   defaultSpawn,
   generateParTaskId,
   resetParIdCounter,
-  type ParBinding,
-  type ExecResult,
-  type ParManagerOptions,
-  type SpawnFn,
-  type SpawnResult,
-  ParNotFoundError,
-  ParSpawnError,
-  LaneNotReadyError,
-  ExecTimeoutError,
 } from "./par_types.js";
+import type { LaneRegistry } from "./registry.js";
 
 export class ParManager {
   private readonly bindings = new Map<string, ParBinding>();
@@ -53,15 +50,13 @@ export class ParManager {
     let proc: SpawnResult;
 
     try {
-      proc = this.spawnFn(
-        ["par", "task", "create", "--cwd", worktreePath],
-        { cwd: worktreePath, stdout: "pipe", stderr: "pipe" },
-      );
+      proc = this.spawnFn(["par", "task", "create", "--cwd", worktreePath], {
+        cwd: worktreePath,
+        stdout: "pipe",
+        stderr: "pipe",
+      });
     } catch (err) {
-      throw new ParSpawnError(
-        laneId,
-        err instanceof Error ? err.message : String(err),
-      );
+      throw new ParSpawnError(laneId, err instanceof Error ? err.message : String(err));
     }
 
     const pid = proc.pid;
@@ -87,22 +82,24 @@ export class ParManager {
     this.registry.update(laneId, { parTaskPid: pid });
 
     // Monitor for unexpected exit
-    proc.exited.then((exitCode) => {
-      const current = this.bindings.get(laneId);
-      if (current && current.status === "active") {
-        current.status = "terminated";
-        this.registry.update(laneId, { parTaskPid: null });
-        this.processHandles.delete(laneId);
-        this.emitParEvent("lane.par_task.terminated", laneId, lane.workspaceId, {
-          parTaskId,
-          pid,
-          exitCode,
-          reason: "unexpected_exit",
-        });
-      }
-    }).catch(() => {
-      // Process monitoring failed - will be caught by health check
-    });
+    proc.exited
+      .then(exitCode => {
+        const current = this.bindings.get(laneId);
+        if (current && current.status === "active") {
+          current.status = "terminated";
+          this.registry.update(laneId, { parTaskPid: null });
+          this.processHandles.delete(laneId);
+          this.emitParEvent("lane.par_task.terminated", laneId, lane.workspaceId, {
+            parTaskId,
+            pid,
+            exitCode,
+            reason: "unexpected_exit",
+          });
+        }
+      })
+      .catch(() => {
+        // Process monitoring failed - will be caught by health check
+      });
 
     await this.emitParEvent("lane.par_task.bound", laneId, lane.workspaceId, {
       parTaskId,
@@ -143,7 +140,9 @@ export class ParManager {
   // ── T014: Stale detection and health check ──────────────────────────────
 
   startHealthCheck(): void {
-    if (this.healthCheckTimer) return;
+    if (this.healthCheckTimer) {
+      return;
+    }
     this.healthCheckTimer = setInterval(() => {
       this.runHealthCheck().catch(() => {
         // Health check error - will retry next cycle
@@ -185,7 +184,7 @@ export class ParManager {
   }
 
   getAllBindings(): ParBinding[] {
-    return [...this.bindings.values()].map((b) => ({ ...b }));
+    return [...this.bindings.values()].map(b => ({ ...b }));
   }
 
   // ── Event Publishing ──────────────────────────────────────────────────
@@ -194,9 +193,11 @@ export class ParManager {
     topic: string,
     laneId: string,
     workspaceId: string,
-    extra: Record<string, unknown>,
+    extra: Record<string, unknown>
   ): Promise<void> {
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
 
     const envelope: LocalBusEnvelope = {
       id: `${laneId}:${topic}:${Date.now()}`,

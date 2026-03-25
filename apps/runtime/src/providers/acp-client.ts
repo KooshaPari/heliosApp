@@ -10,21 +10,21 @@
  */
 
 import type { LocalBus } from "../protocol/bus.js";
-import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
-  ACPConfig,
-  ACPExecuteInput,
-  ACPExecuteOutput,
-} from "./adapter.js";
-import { NormalizedProviderError, normalizeError } from "./errors.js";
-import { publishAcpEvent } from "./acp-client/events.js";
 import { resolveHealthCheckInterval, validateAcpConfig } from "./acp-client/config.js";
+import { publishAcpEvent } from "./acp-client/events.js";
+import { runHealthCheck } from "./acp-client/health.js";
+import { buildACPRequest, sendACPRequest } from "./acp-client/plumbing.js";
 import { DefaultPolicyGate } from "./acp-client/policy-gate.js";
 import type { PolicyGate } from "./acp-client/policy-gate.js";
 import { probeEndpoint } from "./acp-client/probe.js";
-import { buildACPRequest, sendACPRequest } from "./acp-client/plumbing.js";
-import { runHealthCheck } from "./acp-client/health.js";
+import type {
+  ACPConfig,
+  ACPExecuteInput,
+  ACPExecuteOutput,
+  ProviderAdapter,
+  ProviderHealthStatus,
+} from "./adapter.js";
+import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 export type { PolicyGate } from "./acp-client/policy-gate.js";
 
@@ -40,7 +40,9 @@ export type { PolicyGate } from "./acp-client/policy-gate.js";
  *
  * FR-025-003: ACP protocol client for Claude.
  */
-export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput> {
+export class ACPClientAdapter
+  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
+{
   private config: ACPConfig | null = null;
   private terminated = false;
   private bus: LocalBus | null = null;
@@ -150,10 +152,10 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
     }
 
     try {
-      const policyDecision = await this.policyGate.evaluate(
-        "provider.acp.execute",
-        { correlationId, prompt: input.prompt }
-      );
+      const policyDecision = await this.policyGate.evaluate("provider.acp.execute", {
+        correlationId,
+        prompt: input.prompt,
+      });
 
       if (!policyDecision.allowed) {
         const reason = policyDecision.reason || "Policy denied";

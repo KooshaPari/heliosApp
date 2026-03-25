@@ -1,4 +1,4 @@
-import { MuxEventType, type EventBus, type MuxEvent } from "./types.js";
+import type { EventBus, MuxEvent } from "./types.js";
 
 let correlationCounter = 0;
 
@@ -14,15 +14,11 @@ export class MuxEventEmitter {
   }
 
   emit(event: MuxEvent): void {
-    this.bus.publish(event).catch((err) => {
-      console.warn(
-        `[mux-events] Bus publish failed for ${event.type}: ${err instanceof Error ? err.message : String(err)}`,
-      );
-    });
+    this.bus.publish(event).catch(_err => {});
   }
 
   emitTyped<T extends MuxEvent>(
-    partial: Omit<T, "timestamp" | "correlationId"> & { correlationId?: string },
+    partial: Omit<T, "timestamp" | "correlationId"> & { correlationId?: string }
   ): void {
     const event = {
       ...partial,

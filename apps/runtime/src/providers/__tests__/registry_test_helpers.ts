@@ -1,5 +1,4 @@
 import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { ProviderRegistry } from "../registry.js";
 import type {
   ACPConfig,
   ACPExecuteInput,
@@ -8,10 +7,9 @@ import type {
   ProviderHealthStatus,
   ProviderRegistration,
 } from "../adapter.js";
+import { ProviderRegistry } from "../registry.js";
 
-export class TestProvider
-  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
-{
+export class TestProvider implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput> {
   private initialized = false;
 
   async init(config: ACPConfig): Promise<void> {
@@ -52,7 +50,11 @@ export function makeRegistry() {
   };
 }
 
-export function makeRegistration(id: string, type: "acp" | "mcp" = "acp", workspaceId = "ws-1"): ProviderRegistration<ACPConfig> {
+export function makeRegistration(
+  id: string,
+  type: "acp" | "mcp" = "acp",
+  workspaceId = "ws-1"
+): ProviderRegistration<ACPConfig> {
   return {
     id,
     type,

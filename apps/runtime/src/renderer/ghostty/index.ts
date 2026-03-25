@@ -30,7 +30,13 @@ export {
   detectGpu,
 } from "./capabilities.js";
 export { GhosttyMetrics } from "./metrics.js";
-export type { FrameSample, InputLatencySample, MetricsSnapshot, MetricsConfig, MetricsPublisher } from "./metrics.js";
+export type {
+  FrameSample,
+  InputLatencySample,
+  MetricsSnapshot,
+  MetricsConfig,
+  MetricsPublisher,
+} from "./metrics.js";
 export { GhosttyInputRelay, InputRelayError } from "./input.js";
 export type { PtyWriter, GhosttyInputEvent, InputEventListener } from "./input.js";
 
@@ -48,7 +54,7 @@ export async function isGhosttyAvailable(binaryPath = "ghostty"): Promise<boolea
   try {
     const proc = spawnReadableProcess(
       ["which", binaryPath],
-      "Ghostty renderer registration requires Bun runtime",
+      "Ghostty renderer registration requires Bun runtime"
     );
     const exitCode = await proc.exited;
     return exitCode === 0;
@@ -66,7 +72,7 @@ export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<stri
   try {
     const proc = spawnReadableProcess(
       [binaryPath, "--version"],
-      "Ghostty renderer registration requires Bun runtime",
+      "Ghostty renderer registration requires Bun runtime"
     );
     const text = await readStdoutText(proc);
     await proc.exited;
@@ -92,12 +98,11 @@ export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<stri
  */
 export async function registerGhostty(
   registry: RendererRegistry,
-  binaryPath?: string | undefined,
+  binaryPath?: string | undefined
 ): Promise<void> {
   const available = await isGhosttyAvailable(binaryPath);
 
   if (!available) {
-    console.warn("[ghostty] Ghostty binary not found; skipping registration.");
     return;
   }
 

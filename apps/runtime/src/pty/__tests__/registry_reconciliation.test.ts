@@ -17,7 +17,7 @@ describe("collectOrphanPidsFromPsOutput", () => {
       output,
       50,
       ["bash", "zsh", "sh", "fish"],
-      new Set([101]),
+      new Set([101])
     );
 
     expect(orphanPids).toEqual([100, 103, 104, 105]);

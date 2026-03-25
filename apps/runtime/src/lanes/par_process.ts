@@ -1,12 +1,12 @@
-import type { LaneRegistry } from "./registry.js";
 import type { ParBinding, SpawnResult } from "./par_types.js";
 import { isProcessAlive } from "./par_types.js";
+import type { LaneRegistry } from "./registry.js";
 
 type EmitParEvent = (
   topic: string,
   laneId: string,
   workspaceId: string,
-  extra: Record<string, unknown>,
+  extra: Record<string, unknown>
 ) => Promise<void>;
 
 type TerminateManagedParTaskInput = {
@@ -27,9 +27,7 @@ type RunParHealthCheckInput = {
   terminateParTask: (laneId: string) => Promise<void>;
 };
 
-export async function terminateManagedParTask(
-  input: TerminateManagedParTaskInput,
-): Promise<void> {
+export async function terminateManagedParTask(input: TerminateManagedParTaskInput): Promise<void> {
   const { laneId, bindings, processHandles, registry, forceKillTimeoutMs, emitParEvent } = input;
   const binding = bindings.get(laneId);
   if (!binding) {
@@ -56,7 +54,7 @@ export async function terminateManagedParTask(
 
     const exited = await Promise.race([
       proc.exited.then(() => true).catch(() => true),
-      new Promise<false>((resolve) => setTimeout(() => resolve(false), forceKillTimeoutMs)),
+      new Promise<false>(resolve => setTimeout(() => resolve(false), forceKillTimeoutMs)),
     ]);
 
     if (!exited) {
@@ -85,14 +83,8 @@ export async function terminateManagedParTask(
 }
 
 export async function runParHealthCheck(input: RunParHealthCheckInput): Promise<void> {
-  const {
-    bindings,
-    processHandles,
-    registry,
-    staleTimeoutMs,
-    emitParEvent,
-    terminateParTask,
-  } = input;
+  const { bindings, processHandles, registry, staleTimeoutMs, emitParEvent, terminateParTask } =
+    input;
 
   for (const [laneId, binding] of bindings) {
     if (binding.status !== "active") {

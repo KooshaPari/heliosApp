@@ -6,12 +6,12 @@
  * FR-009: Subscriber isolation during fan-out.
  */
 
-import { describe, expect, it, beforeEach } from 'bun:test';
-import { createBus, type LocalBus } from '../../../src/protocol/bus.js';
-import { createCommand, createEvent, createResponse } from '../../../src/protocol/envelope.js';
-import type { EventEnvelope } from '../../../src/protocol/types.js';
+import { beforeEach, describe, expect, it } from "bun:test";
+import { type LocalBus, createBus } from "../../../src/protocol/bus.js";
+import { createCommand, createEvent, createResponse } from "../../../src/protocol/envelope.js";
+import type { EventEnvelope } from "../../../src/protocol/types.js";
 
-describe('Event ordering — per-topic monotonic sequences', () => {
+describe("Event ordering — per-topic monotonic sequences", () => {
   let bus: LocalBus;
 
   beforeEach(() => {
@@ -19,17 +19,17 @@ describe('Event ordering — per-topic monotonic sequences', () => {
   });
 
   // FR-005: 10,000 concurrent publishes produce zero sequence inversions
-  it('maintains strictly increasing sequences across 10,000 events on one topic', async () => {
+  it("maintains strictly increasing sequences across 10,000 events on one topic", async () => {
     const received: number[] = [];
 
-    bus.subscribe('load.test', (event: EventEnvelope) => {
+    bus.subscribe("load.test", (event: EventEnvelope) => {
       received.push(event.sequence);
     });
 
     // Publish 10,000 events (all awaited — simulates concurrent async contexts)
     const promises: Promise<void>[] = [];
     for (let i = 0; i < 10_000; i++) {
-      const evt = createEvent('load.test', { i });
+      const evt = createEvent("load.test", { i });
       promises.push(bus.publish(evt));
     }
     await Promise.all(promises);
@@ -48,17 +48,21 @@ describe('Event ordering — per-topic monotonic sequences', () => {
   });
 
   // FR-005: independent topic counters
-  it('maintains independent sequence counters per topic', async () => {
+  it("maintains independent sequence counters per topic", async () => {
     const topicA: number[] = [];
     const topicB: number[] = [];
 
-    bus.subscribe('topic.a', (e) => { topicA.push(e.sequence); });
-    bus.subscribe('topic.b', (e) => { topicB.push(e.sequence); });
+    bus.subscribe("topic.a", e => {
+      topicA.push(e.sequence);
+    });
+    bus.subscribe("topic.b", e => {
+      topicB.push(e.sequence);
+    });
 
     const promises: Promise<void>[] = [];
     for (let i = 0; i < 100; i++) {
-      promises.push(bus.publish(createEvent('topic.a', { i })));
-      promises.push(bus.publish(createEvent('topic.b', { i })));
+      promises.push(bus.publish(createEvent("topic.a", { i })));
+      promises.push(bus.publish(createEvent("topic.b", { i })));
     }
     await Promise.all(promises);
 
@@ -79,14 +83,14 @@ describe('Event ordering — per-topic monotonic sequences', () => {
   });
 
   // FR-005: 10 topics concurrent
-  it('handles 10 topics concurrently with independent monotonic sequences', async () => {
+  it("handles 10 topics concurrently with independent monotonic sequences", async () => {
     const topicEvents = new Map<string, number[]>();
     const topicNames = Array.from({ length: 10 }, (_, i) => `concurrent.topic${String(i)}`);
 
     for (const topic of topicNames) {
       topicEvents.set(topic, []);
-      bus.subscribe(topic, (e) => {
-        topicEvents.get(topic)!.push(e.sequence);
+      bus.subscribe(topic, e => {
+        topicEvents.get(topic)?.push(e.sequence);
       });
     }
 
@@ -98,7 +102,7 @@ describe('Event ordering — per-topic monotonic sequences', () => {
     }
     await Promise.all(promises);
 
-    for (const [topic, seqs] of topicEvents) {
+    for (const [_topic, seqs] of topicEvents) {
       expect(seqs.length).toBe(100);
       expect(seqs[0]).toBe(1);
       for (let i = 1; i < seqs.length; i++) {
@@ -108,7 +112,7 @@ describe('Event ordering — per-topic monotonic sequences', () => {
   });
 });
 
-describe('Correlation ID propagation', () => {
+describe("Correlation ID propagation", () => {
   let bus: LocalBus;
 
   beforeEach(() => {
@@ -116,97 +120,97 @@ describe('Correlation ID propagation', () => {
   });
 
   // FR-008: events inside command handler inherit correlation_id
-  it('propagates correlation_id from command to events published in handler', async () => {
+  it("propagates correlation_id from command to events published in handler", async () => {
     const receivedCorrelations: string[] = [];
 
-    bus.subscribe('handler.event', (e) => {
+    bus.subscribe("handler.event", e => {
       receivedCorrelations.push(e.correlation_id ?? "");
     });
 
-    bus.registerMethod('emit.events', async (cmd) => {
+    bus.registerMethod("emit.events", async cmd => {
       // Publish 5 events inside the handler
       for (let i = 0; i < 5; i++) {
-        const evt = createEvent('handler.event', { i });
+        const evt = createEvent("handler.event", { i });
         await bus.publish(evt);
       }
-      return createResponse(cmd, 'done');
+      return createResponse(cmd, "done");
     });
 
-    const cmd = createCommand('emit.events', null, 'trace_cmd_123');
+    const cmd = createCommand("emit.events", null, "trace_cmd_123");
     await bus.send(cmd);
 
     expect(receivedCorrelations.length).toBe(5);
     // All events should inherit the command's correlation_id
     for (const corr of receivedCorrelations) {
-      expect(corr).toBe('trace_cmd_123');
+      expect(corr).toBe("trace_cmd_123");
     }
   });
 
   // FR-008: events outside command context retain their own correlation_id
-  it('events outside command context retain their own correlation_id', async () => {
+  it("events outside command context retain their own correlation_id", async () => {
     const received: string[] = [];
 
-    bus.subscribe('standalone.event', (e) => {
+    bus.subscribe("standalone.event", e => {
       received.push(e.correlation_id ?? "");
     });
 
-    const evt = createEvent('standalone.event', {}, 'my_own_correlation');
+    const evt = createEvent("standalone.event", {}, "my_own_correlation");
     await bus.publish(evt);
 
     expect(received.length).toBe(1);
-    expect(received[0]).toBe('my_own_correlation');
+    expect(received[0]).toBe("my_own_correlation");
   });
 
   // FR-008: nested commands maintain their own correlation context
-  it('nested dispatch maintains isolated correlation contexts', async () => {
+  it("nested dispatch maintains isolated correlation contexts", async () => {
     const outerCorrelations: string[] = [];
     const innerCorrelations: string[] = [];
 
-    bus.subscribe('outer.event', (e) => {
+    bus.subscribe("outer.event", e => {
       outerCorrelations.push(e.correlation_id ?? "");
     });
-    bus.subscribe('inner.event', (e) => {
+    bus.subscribe("inner.event", e => {
       innerCorrelations.push(e.correlation_id ?? "");
     });
 
-    bus.registerMethod('inner.cmd', async (cmd) => {
+    bus.registerMethod("inner.cmd", async cmd => {
       // Check that active correlation is the inner command's
       expect(bus.getActiveCorrelationId()).toBe(cmd.correlation_id ?? "");
-      await bus.publish(createEvent('inner.event', {}));
-      return createResponse(cmd, 'inner-done');
+      await bus.publish(createEvent("inner.event", {}));
+      return createResponse(cmd, "inner-done");
     });
 
-    bus.registerMethod('outer.cmd', async (cmd) => {
+    bus.registerMethod("outer.cmd", async cmd => {
       // Publish event — should get outer correlation
-      await bus.publish(createEvent('outer.event', {}));
+      await bus.publish(createEvent("outer.event", {}));
 
       // Dispatch inner command with different correlation
-      const innerCmd = createCommand('inner.cmd', null, 'inner_trace_456');
+      const innerCmd = createCommand("inner.cmd", null, "inner_trace_456");
       await bus.send(innerCmd);
 
       // After inner returns, active correlation should be outer again
       expect(bus.getActiveCorrelationId()).toBe(cmd.correlation_id ?? "");
 
       // Publish another outer event
-      await bus.publish(createEvent('outer.event', {}));
+      await bus.publish(createEvent("outer.event", {}));
 
-      return createResponse(cmd, 'outer-done');
+      return createResponse(cmd, "outer-done");
     });
 
-    const cmd = createCommand('outer.cmd', null, 'outer_trace_123');
+    const cmd = createCommand("outer.cmd", null, "outer_trace_123");
     await bus.send(cmd);
 
     expect(outerCorrelations.length).toBe(2);
     for (const c of outerCorrelations) {
-      expect(c).toBe('outer_trace_123');
+      expect(c).toBe("outer_trace_123");
     }
 
     expect(innerCorrelations.length).toBe(1);
-    expect(innerCorrelations[0]).toBe('inner_trace_456');
+    expect(innerCorrelations[0]).toBe("inner_trace_456");
   });
 
   // FR-008: getActiveCorrelationId returns undefined outside dispatch
-  it('getActiveCorrelationId returns undefined outside dispatch', () => {
+  it("getActiveCorrelationId returns undefined outside dispatch", () => {
     expect(bus.getActiveCorrelationId()).toBeUndefined();
   });
 });

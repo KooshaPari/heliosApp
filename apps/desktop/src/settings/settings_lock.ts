@@ -9,7 +9,7 @@ export interface SettingsLockOptions {
 }
 
 export class SettingsLock {
-  private isLocked: boolean = false;
+  private isLocked = false;
   private options: SettingsLockOptions;
   private lockTimeoutId?: NodeJS.Timeout;
   private lockedElements: Set<HTMLElement> = new Set();
@@ -22,7 +22,9 @@ export class SettingsLock {
   }
 
   lock(settingsContainer: HTMLElement): void {
-    if (this.isLocked) return;
+    if (this.isLocked) {
+      return;
+    }
 
     this.isLocked = true;
     this.applyLock(settingsContainer);
@@ -30,7 +32,9 @@ export class SettingsLock {
   }
 
   unlock(settingsContainer: HTMLElement): void {
-    if (!this.isLocked) return;
+    if (!this.isLocked) {
+      return;
+    }
 
     this.isLocked = false;
     this.removeLock(settingsContainer);
@@ -46,46 +50,45 @@ export class SettingsLock {
     const interactiveSelectors = 'input, button, [role="button"], [role="switch"]';
     const elements = container.querySelectorAll(interactiveSelectors) as NodeListOf<HTMLElement>;
 
-    elements.forEach((element) => {
-      element.setAttribute('aria-disabled', 'true');
+    elements.forEach(element => {
+      element.setAttribute("aria-disabled", "true");
       if (this.isFormControl(element)) {
         element.disabled = true;
       } else {
-        element.style.opacity = '0.6';
-        element.style.pointerEvents = 'none';
-        element.style.cursor = 'not-allowed';
-        element.setAttribute('title', 'Settings locked during renderer switch.');
+        element.style.opacity = "0.6";
+        element.style.pointerEvents = "none";
+        element.style.cursor = "not-allowed";
+        element.setAttribute("title", "Settings locked during renderer switch.");
       }
 
       this.lockedElements.add(element);
     });
 
     // Add visual overlay/grayed-out effect
-    container.style.opacity = '0.7';
-    container.style.pointerEvents = 'none';
+    container.style.opacity = "0.7";
+    container.style.pointerEvents = "none";
   }
 
   private removeLock(container: HTMLElement): void {
-    this.lockedElements.forEach((element) => {
-      element.removeAttribute('aria-disabled');
+    this.lockedElements.forEach(element => {
+      element.removeAttribute("aria-disabled");
       if (this.isFormControl(element)) {
         element.disabled = false;
       } else {
-        element.style.opacity = '';
-        element.style.pointerEvents = '';
-        element.style.cursor = '';
-        element.removeAttribute('title');
+        element.style.opacity = "";
+        element.style.pointerEvents = "";
+        element.style.cursor = "";
+        element.removeAttribute("title");
       }
     });
 
     this.lockedElements.clear();
-    container.style.opacity = '';
-    container.style.pointerEvents = '';
+    container.style.opacity = "";
+    container.style.pointerEvents = "";
   }
 
   private startAutoUnlockTimer(): void {
     this.lockTimeoutId = setTimeout(() => {
-      console.warn('Settings lock timeout: auto-unlocking settings');
       this.isLocked = false;
       if (this.options.onAutoUnlocked) {
         this.options.onAutoUnlocked();
@@ -106,7 +109,7 @@ export class SettingsLock {
   }
 
   private isFormControl(
-    element: HTMLElement,
+    element: HTMLElement
   ): element is HTMLInputElement | HTMLButtonElement | HTMLSelectElement | HTMLTextAreaElement {
     return (
       element instanceof HTMLInputElement ||

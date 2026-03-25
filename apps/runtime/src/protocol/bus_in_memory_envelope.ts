@@ -11,8 +11,8 @@ export function hasTopLevelDataField(envelope: LocalBusEnvelope): boolean {
 }
 
 export function buildOkResponse(
-  command: LocalBusEnvelope,
-  result: Record<string, unknown>,
+  _command: LocalBusEnvelope,
+  result: Record<string, unknown>
 ): LocalBusEnvelope {
   return {
     id: `res-${Date.now()}`,
@@ -24,9 +24,9 @@ export function buildOkResponse(
 }
 
 export function buildErrorResponse(
-  command: LocalBusEnvelope,
+  _command: LocalBusEnvelope,
   code: string,
-  message: string,
+  message: string
 ): LocalBusEnvelope {
   return {
     id: `res-${Date.now()}`,

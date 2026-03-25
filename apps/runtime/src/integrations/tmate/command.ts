@@ -1,5 +1,5 @@
-import { execCommand } from "../exec";
-import type { TmateAdapter } from "./adapter";
+import { execCommand } from "../exec.ts";
+import type { TmateAdapter } from "./adapter.ts";
 
 export class TmateCommandAdapter implements TmateAdapter {
   async startShare(terminalId: string): Promise<{ sshCommand: string; webUrl?: string }> {
@@ -9,7 +9,9 @@ export class TmateCommandAdapter implements TmateAdapter {
       "new-session",
       "-d",
     ]);
-    if (result.code !== 0) throw new Error(`tmate start share failed: ${result.stderr}`);
+    if (result.code !== 0) {
+      throw new Error(`tmate start share failed: ${result.stderr}`);
+    }
 
     const sshInfo = await execCommand("tmate", [
       "-S",
@@ -34,6 +36,8 @@ export class TmateCommandAdapter implements TmateAdapter {
 
   async stopShare(terminalId: string): Promise<void> {
     const result = await execCommand("tmate", ["-S", `/tmp/${terminalId}.sock`, "kill-server"]);
-    if (result.code !== 0) throw new Error(`tmate stop share failed: ${result.stderr}`);
+    if (result.code !== 0) {
+      throw new Error(`tmate stop share failed: ${result.stderr}`);
+    }
   }
 }

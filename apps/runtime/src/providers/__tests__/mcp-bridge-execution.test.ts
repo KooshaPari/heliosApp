@@ -38,9 +38,7 @@ describe("MCP Bridge Adapter - Execution", () => {
       correlationId
     );
 
-    const executeEvent = bus
-      .getEvents()
-      .find((e) => e.topic === "provider.mcp.tool.executed");
+    const executeEvent = bus.getEvents().find(e => e.topic === "provider.mcp.tool.executed");
     expect(executeEvent?.payload?.correlationId).toBe(correlationId);
   });
 
@@ -55,9 +53,7 @@ describe("MCP Bridge Adapter - Execution", () => {
       "corr-123"
     );
 
-    const completedEvent = bus
-      .getEvents()
-      .find((e) => e.topic === "provider.mcp.tool.executed");
+    const completedEvent = bus.getEvents().find(e => e.topic === "provider.mcp.tool.executed");
     expect(completedEvent).toBeDefined();
     expect(completedEvent?.payload?.toolName).toBe("read_file");
     expect(completedEvent?.payload?.duration).toBeGreaterThanOrEqual(0);
@@ -76,11 +72,9 @@ describe("MCP Bridge Adapter - Execution", () => {
       correlationId
     );
 
-    const toolEvents = bus
-      .getEvents()
-      .filter((e) => e.topic?.startsWith("provider.mcp.tool"));
+    const toolEvents = bus.getEvents().filter(e => e.topic?.startsWith("provider.mcp.tool"));
 
-    toolEvents.forEach((event) => {
+    toolEvents.forEach(event => {
       expect(event.payload?.correlationId).toBe(correlationId);
     });
   });
@@ -102,7 +96,7 @@ describe("MCP Bridge Adapter - Execution", () => {
     const results = await Promise.all(promises);
 
     expect(results).toHaveLength(5);
-    results.forEach((result) => {
+    results.forEach(result => {
       expect(result.isError).toBe(false);
       expect(result.result).toBeDefined();
     });

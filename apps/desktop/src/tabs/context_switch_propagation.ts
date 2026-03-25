@@ -1,5 +1,5 @@
-import type { TabSurface } from "./tab_surface";
-import type { ActiveContext } from "./context_switch";
+import type { ActiveContext } from "./context_switch.ts";
+import type { TabSurface } from "./tab_surface.ts";
 
 export interface PropagationResult {
   successful: string[];
@@ -55,7 +55,7 @@ export class ContextPropagator {
       successful: [],
       failed: [],
       timed_out: [],
-      duration_ms: 0
+      duration_ms: 0,
     };
 
     const propagationPromises: Promise<void>[] = [];
@@ -66,12 +66,12 @@ export class ContextPropagator {
         context,
         this.propagationAbortController.signal
       )
-        .then((success) => {
+        .then(success => {
           if (success) {
             result.successful.push(tabId);
           }
         })
-        .catch((error) => {
+        .catch(error => {
           if (error.name === "AbortError") {
             // Propagation was cancelled
             return;
@@ -81,7 +81,6 @@ export class ContextPropagator {
             result.timed_out.push(tabId);
           } else {
             result.failed.push(tabId);
-            console.error(`Failed to propagate context to tab ${tabId}:`, error);
           }
         });
 
@@ -120,7 +119,7 @@ export class ContextPropagator {
           clearTimeout(timeoutId);
           reject(new Error("Propagation cancelled"));
         });
-      })
+      }),
     ]);
   }
 

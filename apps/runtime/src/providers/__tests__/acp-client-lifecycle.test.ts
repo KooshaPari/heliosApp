@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { makeAdapter } from "./acp-client_test_helpers.js";
 
 describe("ACP Client Adapter: Task Cancellation and Termination", () => {
@@ -27,7 +27,7 @@ describe("ACP Client Adapter: Task Cancellation and Termination", () => {
       await adapter.cancel(taskId);
 
       const events = bus.getEvents();
-      const cancelledEvent = events.find((e) => e.topic === "provider.acp.execute.cancelled");
+      const cancelledEvent = events.find(e => e.topic === "provider.acp.execute.cancelled");
       expect(cancelledEvent).toBeDefined();
       expect(cancelledEvent?.payload?.taskId).toBe(taskId);
     });
@@ -37,7 +37,7 @@ describe("ACP Client Adapter: Task Cancellation and Termination", () => {
       await adapter.cancel("task-456");
 
       const events = bus.getEvents();
-      const cancelledEvent = events.find((e) => e.topic === "provider.acp.execute.cancelled");
+      const cancelledEvent = events.find(e => e.topic === "provider.acp.execute.cancelled");
       expect(cancelledEvent).toBeDefined();
     });
 
@@ -68,7 +68,7 @@ describe("ACP Client Adapter: Task Cancellation and Termination", () => {
       await adapter.terminate();
 
       const events = bus.getEvents();
-      const terminatedEvent = events.find((e) => e.topic === "provider.acp.terminated");
+      const terminatedEvent = events.find(e => e.topic === "provider.acp.terminated");
       expect(terminatedEvent).toBeDefined();
     });
 
@@ -81,9 +81,7 @@ describe("ACP Client Adapter: Task Cancellation and Termination", () => {
     it("should prevent execution after termination", async () => {
       await adapter.terminate();
 
-      await expect(adapter.execute({ prompt: "Test" }, "corr-123")).rejects.toThrow(
-        /unavailable/i
-      );
+      await expect(adapter.execute({ prompt: "Test" }, "corr-123")).rejects.toThrow(/unavailable/i);
     });
   });
 });

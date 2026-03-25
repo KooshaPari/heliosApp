@@ -1,5 +1,5 @@
-import type { AuditExportRecord, AuditFilter } from "../audit/sink";
-import { InMemoryLocalBus } from "../protocol/bus";
+import type { AuditExportRecord, AuditFilter } from "../audit/sink.ts";
+import type { InMemoryLocalBus } from "../protocol/bus.ts";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -7,7 +7,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function redactValue(value: unknown): unknown {
   if (Array.isArray(value)) {
-    return value.map((item) => redactValue(item));
+    return value.map(item => redactValue(item));
   }
   if (!isRecord(value)) {
     return value;
@@ -39,7 +39,7 @@ export function matchAuditFilter(record: AuditExportRecord, filter: AuditFilter)
 }
 
 export function toAuditBundleRecord(
-  record: Awaited<ReturnType<InMemoryLocalBus["getAuditRecords"]>>[number],
+  record: Awaited<ReturnType<InMemoryLocalBus["getAuditRecords"]>>[number]
 ): AuditExportRecord {
   const envelope = record.envelope;
   const payload = isRecord(envelope.payload) ? redactValue(envelope.payload) : envelope.payload;

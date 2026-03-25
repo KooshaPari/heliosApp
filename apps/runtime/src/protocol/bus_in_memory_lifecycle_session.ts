@@ -1,12 +1,12 @@
-import type { LocalBusEnvelope } from "./types.js";
 import {
+  type InMemoryBusContext,
   buildErrorResponse,
   buildOkResponse,
   emitMetricEvent,
   publishLifecycleEvent,
   recordMetric,
-  type InMemoryBusContext,
 } from "./bus_in_memory_support.js";
+import type { LocalBusEnvelope } from "./types.js";
 
 const DIAGNOSTICS = {
   preferred_transport: "cliproxy_harness",
@@ -19,11 +19,12 @@ export function handleSessionLifecycleRequest(
   context: InMemoryBusContext,
   command: LocalBusEnvelope,
   method: "session.attach" | "session.terminate",
-  startTime: number,
+  startTime: number
 ): LocalBusEnvelope {
-  const payload = command.payload && typeof command.payload === "object"
-    ? (command.payload as Record<string, unknown>)
-    : {};
+  const payload =
+    command.payload && typeof command.payload === "object"
+      ? (command.payload as Record<string, unknown>)
+      : {};
 
   switch (method) {
     case "session.attach": {
@@ -36,7 +37,7 @@ export function handleSessionLifecycleRequest(
         return buildErrorResponse(
           command,
           boundaryFailure ? "HARNESS_UNAVAILABLE" : "SESSION_ATTACH_FAILED",
-          boundaryFailure ? "harness unavailable" : "forced error",
+          boundaryFailure ? "harness unavailable" : "forced error"
         );
       }
 

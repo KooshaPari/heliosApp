@@ -1,15 +1,10 @@
 import type { ZellijCli } from "../cli.js";
-import type { MuxRegistry } from "../registry.js";
-import type { TopologyTracker } from "../topology.js";
+import { SessionNotFoundError } from "../errors.js";
 import type { MuxEventEmitter, SessionReattachedEvent } from "../events.js";
 import { MuxEventType } from "../events.js";
-import type {
-  MuxSession,
-  PaneRecord,
-  TabRecord,
-  PtyManagerInterface,
-} from "../types.js";
-import { SessionNotFoundError } from "../errors.js";
+import type { MuxRegistry } from "../registry.js";
+import type { TopologyTracker } from "../topology.js";
+import type { MuxSession, PaneRecord, PtyManagerInterface, TabRecord } from "../types.js";
 import { extractLaneId, queryPanes, queryTabs } from "./helpers.js";
 
 export async function reattachZellijSession(args: {
@@ -24,7 +19,7 @@ export async function reattachZellijSession(args: {
   const startMs = performance.now();
 
   const sessions = await cli.listSessions();
-  const target = sessions.find((s) => s.name === sessionName);
+  const target = sessions.find(s => s.name === sessionName);
   if (!target) {
     throw new SessionNotFoundError(sessionName);
   }
@@ -61,12 +56,7 @@ export async function reattachZellijSession(args: {
             });
             topology.bindPty(sessionName, paneTopo.paneId, ptyResult.ptyId);
             record.ptyId = ptyResult.ptyId;
-          } catch (error) {
-            console.warn(
-              `[zellij-session] PTY re-bind failed for pane ${paneTopo.paneId}:`,
-              error,
-            );
-          }
+          } catch (_error) {}
         }
       }
 
@@ -81,10 +71,7 @@ export async function reattachZellijSession(args: {
     tabs = await queryTabs(cli, sessionName);
   }
 
-  const durationMs = performance.now() - startMs;
-  console.debug(
-    `[zellij-session] reattachSession(${sessionName}) completed in ${durationMs.toFixed(1)}ms`,
-  );
+  const _durationMs = performance.now() - startMs;
 
   const muxSession: MuxSession = {
     sessionName,

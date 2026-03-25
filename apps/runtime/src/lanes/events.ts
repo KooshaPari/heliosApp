@@ -20,7 +20,7 @@ export async function publishLaneEvent(
   laneId: string,
   workspaceId: string,
   fromState: LaneState,
-  toState: LaneState,
+  toState: LaneState
 ): Promise<void> {
   const envelope: LocalBusEnvelope = {
     id: `${laneId}:${topic}:${Date.now()}`,
@@ -61,7 +61,7 @@ export async function publishReconciliationEvent(
     orphanedPtys: number;
     totalCleaned: number;
     timedOut: boolean;
-  },
+  }
 ): Promise<void> {
   const envelope: LocalBusEnvelope = {
     id: `reconciliation:${Date.now()}`,

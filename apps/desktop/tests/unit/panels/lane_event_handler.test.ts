@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { LaneEventHandler } from '../../../src/panels/lane_event_handler';
-import type { BusSubscriber, BusEvent } from '../../../src/panels/lane_event_handler';
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LaneEventHandler } from "../../../src/panels/lane_event_handler.ts";
+import type { BusEvent, BusSubscriber } from "../../../src/panels/lane_event_handler.ts";
 
-describe('LaneEventHandler', () => {
+describe("LaneEventHandler", () => {
   let handler: LaneEventHandler;
   let mockBus: BusSubscriber;
   let busHandlers: Map<string, (event: BusEvent) => void>;
@@ -13,7 +13,7 @@ describe('LaneEventHandler', () => {
       subscribe: vi.fn((topic, handler) => {
         busHandlers.set(topic, handler);
       }),
-      unsubscribe: vi.fn((topic) => {
+      unsubscribe: vi.fn(topic => {
         busHandlers.delete(topic);
       }),
     };
@@ -25,21 +25,15 @@ describe('LaneEventHandler', () => {
     }
   });
 
-  it('should subscribe to lane events on mount', () => {
+  it("should subscribe to lane events on mount", () => {
     handler = new LaneEventHandler({ bus: mockBus });
     handler.mount();
 
-    expect(mockBus.subscribe).toHaveBeenCalledWith(
-      'lane.state.changed',
-      expect.any(Function)
-    );
-    expect(mockBus.subscribe).toHaveBeenCalledWith(
-      'lane.created',
-      expect.any(Function)
-    );
+    expect(mockBus.subscribe).toHaveBeenCalledWith("lane.state.changed", expect.any(Function));
+    expect(mockBus.subscribe).toHaveBeenCalledWith("lane.created", expect.any(Function));
   });
 
-  it('should handle state changed events', async () => {
+  it("should handle state changed events", async () => {
     const onStateChanged = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
@@ -48,20 +42,20 @@ describe('LaneEventHandler', () => {
     handler.mount();
 
     const event: BusEvent = {
-      topic: 'lane.state.changed',
-      payload: { laneId: 'lane-1', state: 'running' },
+      topic: "lane.state.changed",
+      payload: { laneId: "lane-1", state: "running" },
       timestamp: Date.now(),
     };
 
-    const stateChangedHandler = busHandlers.get('lane.state.changed');
+    const stateChangedHandler = busHandlers.get("lane.state.changed");
     stateChangedHandler?.(event);
 
     // Wait for RAF
-    await new Promise((resolve) => setTimeout(resolve, 10));
-    expect(onStateChanged).toHaveBeenCalledWith('lane-1', 'running');
+    await new Promise(resolve => setTimeout(resolve, 10));
+    expect(onStateChanged).toHaveBeenCalledWith("lane-1", "running");
   });
 
-  it('should handle lane created events', () => {
+  it("should handle lane created events", () => {
     const onLaneCreated = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
@@ -70,18 +64,18 @@ describe('LaneEventHandler', () => {
     handler.mount();
 
     const event: BusEvent = {
-      topic: 'lane.created',
-      payload: { laneId: 'lane-new', name: 'New Lane' },
+      topic: "lane.created",
+      payload: { laneId: "lane-new", name: "New Lane" },
       timestamp: Date.now(),
     };
 
-    const createdHandler = busHandlers.get('lane.created');
+    const createdHandler = busHandlers.get("lane.created");
     createdHandler?.(event);
 
-    expect(onLaneCreated).toHaveBeenCalledWith('lane-new', 'New Lane');
+    expect(onLaneCreated).toHaveBeenCalledWith("lane-new", "New Lane");
   });
 
-  it('should handle lane cleanup events', () => {
+  it("should handle lane cleanup events", () => {
     const onLaneCleaned = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
@@ -90,18 +84,18 @@ describe('LaneEventHandler', () => {
     handler.mount();
 
     const event: BusEvent = {
-      topic: 'lane.cleaned',
-      payload: { laneId: 'lane-1' },
+      topic: "lane.cleaned",
+      payload: { laneId: "lane-1" },
       timestamp: Date.now(),
     };
 
-    const cleanedHandler = busHandlers.get('lane.cleaned');
+    const cleanedHandler = busHandlers.get("lane.cleaned");
     cleanedHandler?.(event);
 
-    expect(onLaneCleaned).toHaveBeenCalledWith('lane-1');
+    expect(onLaneCleaned).toHaveBeenCalledWith("lane-1");
   });
 
-  it('should batch rapid state changes with RAF', async () => {
+  it("should batch rapid state changes with RAF", async () => {
     const onStateChanged = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
@@ -109,35 +103,35 @@ describe('LaneEventHandler', () => {
     });
     handler.mount();
 
-    const stateChangedHandler = busHandlers.get('lane.state.changed');
+    const stateChangedHandler = busHandlers.get("lane.state.changed");
 
     // Send rapid updates
     stateChangedHandler?.({
-      topic: 'lane.state.changed',
-      payload: { laneId: 'lane-1', state: 'running' },
+      topic: "lane.state.changed",
+      payload: { laneId: "lane-1", state: "running" },
       timestamp: Date.now(),
     });
 
     stateChangedHandler?.({
-      topic: 'lane.state.changed',
-      payload: { laneId: 'lane-1', state: 'blocked' },
+      topic: "lane.state.changed",
+      payload: { laneId: "lane-1", state: "blocked" },
       timestamp: Date.now(),
     });
 
     stateChangedHandler?.({
-      topic: 'lane.state.changed',
-      payload: { laneId: 'lane-1', state: 'error' },
+      topic: "lane.state.changed",
+      payload: { laneId: "lane-1", state: "error" },
       timestamp: Date.now(),
     });
 
     // Wait for RAF
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await new Promise(resolve => setTimeout(resolve, 20));
 
     expect(onStateChanged).toHaveBeenCalled();
     // Should only render final state due to batching
   });
 
-  it('should discard out-of-order events', async () => {
+  it("should discard out-of-order events", async () => {
     const onStateChanged = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
@@ -145,30 +139,30 @@ describe('LaneEventHandler', () => {
     });
     handler.mount();
 
-    const stateChangedHandler = busHandlers.get('lane.state.changed');
+    const stateChangedHandler = busHandlers.get("lane.state.changed");
 
     // Send events with sequence numbers
     stateChangedHandler?.({
-      topic: 'lane.state.changed',
-      payload: { laneId: 'lane-1', state: 'running' },
+      topic: "lane.state.changed",
+      payload: { laneId: "lane-1", state: "running" },
       sequenceNumber: 2,
       timestamp: Date.now(),
     });
 
     stateChangedHandler?.({
-      topic: 'lane.state.changed',
-      payload: { laneId: 'lane-1', state: 'idle' },
+      topic: "lane.state.changed",
+      payload: { laneId: "lane-1", state: "idle" },
       sequenceNumber: 1, // Out of order
       timestamp: Date.now(),
     });
 
     // Wait for RAF
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await new Promise(resolve => setTimeout(resolve, 20));
     // The out-of-order event should be discarded
-    expect(onStateChanged).toHaveBeenCalledWith('lane-1', 'running');
+    expect(onStateChanged).toHaveBeenCalledWith("lane-1", "running");
   });
 
-  it('should monitor bus connectivity', async () => {
+  it("should monitor bus connectivity", async () => {
     const onBusConnectivityIssue = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
@@ -178,12 +172,12 @@ describe('LaneEventHandler', () => {
     handler.mount();
 
     // Simulate no events for timeout period
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await new Promise(resolve => setTimeout(resolve, 150));
 
     expect(onBusConnectivityIssue).toHaveBeenCalledWith(true);
   });
 
-  it('should recover connectivity after events resume', async () => {
+  it("should recover connectivity after events resume", async () => {
     const onBusConnectivityIssue = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
@@ -193,33 +187,30 @@ describe('LaneEventHandler', () => {
     handler.mount();
 
     // Wait for connectivity issue
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await new Promise(resolve => setTimeout(resolve, 150));
     expect(onBusConnectivityIssue).toHaveBeenCalledWith(true);
 
     // Receive an event
-    const stateChangedHandler = busHandlers.get('lane.state.changed');
+    const stateChangedHandler = busHandlers.get("lane.state.changed");
     stateChangedHandler?.({
-      topic: 'lane.state.changed',
-      payload: { laneId: 'lane-1', state: 'running' },
+      topic: "lane.state.changed",
+      payload: { laneId: "lane-1", state: "running" },
       timestamp: Date.now(),
     });
 
     expect(onBusConnectivityIssue).toHaveBeenCalledWith(false);
   });
 
-  it('should unsubscribe from events on unmount', () => {
+  it("should unsubscribe from events on unmount", () => {
     handler = new LaneEventHandler({ bus: mockBus });
     handler.mount();
 
     handler.unmount();
 
-    expect(mockBus.unsubscribe).toHaveBeenCalledWith(
-      'lane.state.changed',
-      expect.any(Function)
-    );
+    expect(mockBus.unsubscribe).toHaveBeenCalledWith("lane.state.changed", expect.any(Function));
   });
 
-  it('should handle orphan detection cycle events', () => {
+  it("should handle orphan detection cycle events", () => {
     const onOrphanStatusChanged = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
@@ -228,15 +219,15 @@ describe('LaneEventHandler', () => {
     handler.mount();
 
     const event: BusEvent = {
-      topic: 'orphan.detection.cycle_completed',
-      payload: { orphanedLanes: ['lane-1', 'lane-2'] },
+      topic: "orphan.detection.cycle_completed",
+      payload: { orphanedLanes: ["lane-1", "lane-2"] },
       timestamp: Date.now(),
     };
 
-    const orphanHandler = busHandlers.get('orphan.detection.cycle_completed');
+    const orphanHandler = busHandlers.get("orphan.detection.cycle_completed");
     orphanHandler?.(event);
 
-    expect(onOrphanStatusChanged).toHaveBeenCalledWith('lane-1', true);
-    expect(onOrphanStatusChanged).toHaveBeenCalledWith('lane-2', true);
+    expect(onOrphanStatusChanged).toHaveBeenCalledWith("lane-1", true);
+    expect(onOrphanStatusChanged).toHaveBeenCalledWith("lane-2", true);
   });
 });

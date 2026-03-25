@@ -1,8 +1,5 @@
 import { InMemoryLocalBus } from "../../../protocol/bus.js";
-import {
-  ShareSessionManager,
-  type PolicyGate,
-} from "../share-session.js";
+import { type PolicyGate, ShareSessionManager } from "../share-session.js";
 
 export class MockPolicyGate implements PolicyGate {
   private shouldDeny = false;
@@ -17,7 +14,7 @@ export class MockPolicyGate implements PolicyGate {
 
   async evaluate(
     _action: string,
-    _context: Record<string, unknown>,
+    _context: Record<string, unknown>
   ): Promise<{ allowed: boolean; reason?: string }> {
     if (this.shouldDeny) {
       return {

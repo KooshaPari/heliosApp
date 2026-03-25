@@ -60,7 +60,7 @@ export class MCPToolCatalog {
   }
 
   getTools(): MCPTool[] {
-    return this.list().map((tool) => ({
+    return this.list().map(tool => ({
       name: tool.name,
       description: tool.description,
       inputSchema: tool.inputSchema,

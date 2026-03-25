@@ -1,6 +1,6 @@
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 import type { MCPConfig } from "../adapter.js";
 import { MCPBridgeAdapter } from "../mcp-bridge.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
 
 export const defaultMcpConfig: MCPConfig = {
   serverPath: "stdio",

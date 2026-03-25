@@ -31,8 +31,14 @@ function stripJsonComments(input: string): string {
     if (ch === '"') {
       let j = i + 1;
       while (j < len) {
-        if (input[j] === '\\') { j += 2; continue; }
-        if (input[j] === '"') { j++; break; }
+        if (input[j] === "\\") {
+          j += 2;
+          continue;
+        }
+        if (input[j] === '"') {
+          j++;
+          break;
+        }
         j++;
       }
       result += input.slice(i, j);
@@ -40,14 +46,14 @@ function stripJsonComments(input: string): string {
       continue;
     }
     // Block comment
-    if (ch === '/' && next === '*') {
-      const end = input.indexOf('*/', i + 2);
+    if (ch === "/" && next === "*") {
+      const end = input.indexOf("*/", i + 2);
       i = end === -1 ? len : end + 2;
       continue;
     }
     // Line comment
-    if (ch === '/' && next === '/') {
-      const end = input.indexOf('\n', i + 2);
+    if (ch === "/" && next === "/") {
+      const end = input.indexOf("\n", i + 2);
       i = end === -1 ? len : end;
       continue;
     }
@@ -80,7 +86,7 @@ async function* walkTsFiles(dir: string): AsyncGenerator<string> {
 describe("workspace configuration", () => {
   test("root package.json declares both workspace paths", async () => {
     const pkg = await readJsonAsync("package.json");
-    const workspaces = pkg["workspaces"] as string[];
+    const workspaces = pkg.workspaces as string[];
     expect(workspaces).toContain("apps/desktop");
     expect(workspaces).toContain("apps/runtime");
   });
@@ -99,57 +105,57 @@ describe("workspace configuration", () => {
 describe("tsconfig strict mode", () => {
   test("tsconfig.base.json has strict mode enabled", async () => {
     const config = await readJsonAsync("tsconfig.base.json");
-    const opts = config["compilerOptions"] as Record<string, unknown>;
-    expect(opts["strict"]).toBe(true);
+    const opts = config.compilerOptions as Record<string, unknown>;
+    expect(opts.strict).toBe(true);
   });
 
   test("tsconfig.base.json has noUncheckedIndexedAccess", async () => {
     const config = await readJsonAsync("tsconfig.base.json");
-    const opts = config["compilerOptions"] as Record<string, unknown>;
-    expect(opts["noUncheckedIndexedAccess"]).toBe(true);
+    const opts = config.compilerOptions as Record<string, unknown>;
+    expect(opts.noUncheckedIndexedAccess).toBe(true);
   });
 
   test("tsconfig.base.json has exactOptionalPropertyTypes", async () => {
     const config = await readJsonAsync("tsconfig.base.json");
-    const opts = config["compilerOptions"] as Record<string, unknown>;
-    expect(opts["exactOptionalPropertyTypes"]).toBe(true);
+    const opts = config.compilerOptions as Record<string, unknown>;
+    expect(opts.exactOptionalPropertyTypes).toBe(true);
   });
 });
 
 describe("workspace tsconfig inheritance", () => {
   test("apps/runtime/tsconfig.json extends base", async () => {
     const config = await readJsonAsync("apps/runtime/tsconfig.json");
-    expect(config["extends"]).toBe("../../tsconfig.base.json");
+    expect(config.extends).toBe("../../tsconfig.base.json");
   });
 
   test("apps/desktop/tsconfig.json extends base", async () => {
     const config = await readJsonAsync("apps/desktop/tsconfig.json");
-    expect(config["extends"]).toBe("../../tsconfig.base.json");
+    expect(config.extends).toBe("../../tsconfig.base.json");
   });
 
   test("both workspace tsconfigs use composite mode", async () => {
     const runtime = await readJsonAsync("apps/runtime/tsconfig.json");
     const desktop = await readJsonAsync("apps/desktop/tsconfig.json");
-    const rOpts = runtime["compilerOptions"] as Record<string, unknown>;
-    const dOpts = desktop["compilerOptions"] as Record<string, unknown>;
-    expect(rOpts["composite"]).toBe(true);
-    expect(dOpts["composite"]).toBe(true);
+    const rOpts = runtime.compilerOptions as Record<string, unknown>;
+    const dOpts = desktop.compilerOptions as Record<string, unknown>;
+    expect(rOpts.composite).toBe(true);
+    expect(dOpts.composite).toBe(true);
   });
 });
 
 describe("path alias configuration", () => {
   test("tsconfig.base.json declares @helios/runtime path alias", async () => {
     const config = await readJsonAsync("tsconfig.base.json");
-    const opts = config["compilerOptions"] as Record<string, unknown>;
-    const paths = opts["paths"] as Record<string, string[]>;
+    const opts = config.compilerOptions as Record<string, unknown>;
+    const paths = opts.paths as Record<string, string[]>;
     expect(paths["@helios/runtime"]).toBeDefined();
     expect(paths["@helios/runtime/*"]).toBeDefined();
   });
 
   test("tsconfig.base.json declares @helios/desktop path alias", async () => {
     const config = await readJsonAsync("tsconfig.base.json");
-    const opts = config["compilerOptions"] as Record<string, unknown>;
-    const paths = opts["paths"] as Record<string, string[]>;
+    const opts = config.compilerOptions as Record<string, unknown>;
+    const paths = opts.paths as Record<string, string[]>;
     expect(paths["@helios/desktop"]).toBeDefined();
     expect(paths["@helios/desktop/*"]).toBeDefined();
   });
@@ -161,12 +167,12 @@ describe("workspace dependency graph", () => {
     const desktop = await readJsonAsync("apps/desktop/package.json");
 
     const runtimeDeps = {
-      ...(runtime["dependencies"] as Record<string, string> | undefined),
-      ...(runtime["devDependencies"] as Record<string, string> | undefined),
+      ...(runtime.dependencies as Record<string, string> | undefined),
+      ...(runtime.devDependencies as Record<string, string> | undefined),
     };
     const desktopDeps = {
-      ...(desktop["dependencies"] as Record<string, string> | undefined),
-      ...(desktop["devDependencies"] as Record<string, string> | undefined),
+      ...(desktop.dependencies as Record<string, string> | undefined),
+      ...(desktop.devDependencies as Record<string, string> | undefined),
     };
 
     // desktop depends on runtime, runtime must NOT depend on desktop
@@ -179,23 +185,22 @@ describe("lint suppression directives", () => {
   test("no @ts-ignore or @ts-expect-error in source files", async () => {
     const suppressionPattern = /@ts-ignore|@ts-expect-error/;
 
-    const srcDirs = [
-      resolve(ROOT, "apps/runtime/src"),
-      resolve(ROOT, "apps/desktop/src"),
-    ];
+    const srcDirs = [resolve(ROOT, "apps/runtime/src"), resolve(ROOT, "apps/desktop/src")];
 
     for (const dir of srcDirs) {
-      if (!existsSync(dir)) continue;
+      if (!existsSync(dir)) {
+        continue;
+      }
       for await (const path of walkTsFiles(dir)) {
         // Skip test files - they are allowed to have suppression directives
         if (path.includes("__tests__") || path.includes(".test.") || path.includes(".spec.")) {
           continue;
         }
         const content = readFileSync(path, "utf-8");
-        const relativePath = path.replace(ROOT + "/", "");
+        const relativePath = path.replace(`${ROOT}/`, "");
         expect(
           suppressionPattern.test(content),
-          `Found suppression directive in ${relativePath}`,
+          `Found suppression directive in ${relativePath}`
         ).toBe(false);
       }
     }

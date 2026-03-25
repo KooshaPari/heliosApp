@@ -14,8 +14,7 @@ export const MuxEventType = {
   TAB_SWITCHED: "mux.tab.switched",
 } as const;
 
-export type MuxEventTypeValue =
-  (typeof MuxEventType)[keyof typeof MuxEventType];
+export type MuxEventTypeValue = (typeof MuxEventType)[keyof typeof MuxEventType];
 
 export interface MuxEventBase {
   type: MuxEventTypeValue;

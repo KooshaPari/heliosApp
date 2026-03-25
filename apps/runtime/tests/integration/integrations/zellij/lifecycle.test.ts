@@ -5,21 +5,25 @@
  * the full create -> add panes -> resize -> close -> event pipeline.
  */
 
-import { describe, expect, it, mock, beforeEach } from "bun:test";
-import { ZellijSessionManager, sessionNameForLane } from "../../../../src/integrations/zellij/session.js";
-import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
-import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
-import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
-import { ZellijTabManager } from "../../../../src/integrations/zellij/tabs.js";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+import type { ZellijCli } from "../../../../src/integrations/zellij/cli.js";
 import {
-  MuxEventEmitter,
-  MuxEventType,
   type EventBus,
   type MuxEvent,
+  MuxEventEmitter,
+  MuxEventType,
 } from "../../../../src/integrations/zellij/events.js";
+import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
 import { reconcile } from "../../../../src/integrations/zellij/reconciliation.js";
-import type { ZellijCli } from "../../../../src/integrations/zellij/cli.js";
-import type { CliResult, ZellijSession, PtyManagerInterface } from "../../../../src/integrations/zellij/types.js";
+import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
+import { ZellijSessionManager } from "../../../../src/integrations/zellij/session.js";
+import { ZellijTabManager } from "../../../../src/integrations/zellij/tabs.js";
+import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
+import type {
+  CliResult,
+  PtyManagerInterface,
+  ZellijSession,
+} from "../../../../src/integrations/zellij/types.js";
 
 // ---------------------------------------------------------------------------
 // Fake CLI that tracks sessions in memory
@@ -49,7 +53,7 @@ class FakeCli {
         return { stdout: "", stderr: "", exitCode: 0 };
       }
       const lines = [...this.sessions.values()]
-        .map((s) => `${s.name}  2026-02-27 10:00:00`)
+        .map(s => `${s.name}  2026-02-27 10:00:00`)
         .join("\n");
       return { stdout: lines, stderr: "", exitCode: 0 };
     }
@@ -75,7 +79,9 @@ function makeEventBus(): EventBus & { events: MuxEvent[] } {
   const events: MuxEvent[] = [];
   return {
     events,
-    publish: mock(async (e: MuxEvent) => { events.push(e); }),
+    publish: mock(async (e: MuxEvent) => {
+      events.push(e);
+    }),
   };
 }
 
@@ -84,7 +90,7 @@ function makePtyManager(): PtyManagerInterface & { spawned: string[] } {
   let counter = 0;
   return {
     spawned,
-    spawn: mock(async (opts) => {
+    spawn: mock(async _opts => {
       const id = `pty-${++counter}`;
       spawned.push(id);
       return { ptyId: id, pid: 1000 + counter };
@@ -199,10 +205,8 @@ describe("Integration: reattach", () => {
     expect(registry.getBySession(session.sessionName)).toBeDefined();
 
     // Verify reattach event was emitted
-    await new Promise((r) => setTimeout(r, 20));
-    const reattachEvents = bus.events.filter(
-      (e) => e.type === MuxEventType.SESSION_REATTACHED,
-    );
+    await new Promise(r => setTimeout(r, 20));
+    const reattachEvents = bus.events.filter(e => e.type === MuxEventType.SESSION_REATTACHED);
     expect(reattachEvents).toHaveLength(1);
 
     // PTYs should have been re-bound (one default pane from refreshTopology)

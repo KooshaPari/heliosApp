@@ -1,7 +1,7 @@
-import type { LaneRegistry } from "./registry.js";
-import { transition, withLaneLock, recordTransition, type LaneState } from "./state_machine.js";
 import type { ExecResult, ParBinding, SpawnFn } from "./par_types.js";
 import { ExecTimeoutError, LaneNotReadyError, ParNotFoundError } from "./par_types.js";
+import type { LaneRegistry } from "./registry.js";
+import { type LaneState, recordTransition, transition, withLaneLock } from "./state_machine.js";
 
 type ExecuteCommandInLaneInput = {
   laneId: string;
@@ -14,7 +14,7 @@ type ExecuteCommandInLaneInput = {
     topic: string,
     laneId: string,
     workspaceId: string,
-    extra: Record<string, unknown>,
+    extra: Record<string, unknown>
   ) => Promise<void>;
 };
 
@@ -29,9 +29,7 @@ function restoreReadyState(registry: LaneRegistry, laneId: string): void {
   registry.update(laneId, { state: readyState });
 }
 
-export async function executeCommandInLane(
-  input: ExecuteCommandInLaneInput,
-): Promise<ExecResult> {
+export async function executeCommandInLane(input: ExecuteCommandInLaneInput): Promise<ExecResult> {
   const { laneId, command, registry, bindings, spawnFn, execTimeoutMs, emitParEvent } = input;
 
   return withLaneLock(laneId, async () => {
@@ -62,17 +60,18 @@ export async function executeCommandInLane(
     const start = performance.now();
 
     try {
-      const proc = spawnFn(
-        ["par", "exec", "--task", binding.parTaskId, "--", ...command],
-        { cwd: binding.worktreePath, stdout: "pipe", stderr: "pipe" },
-      );
+      const proc = spawnFn(["par", "exec", "--task", binding.parTaskId, "--", ...command], {
+        cwd: binding.worktreePath,
+        stdout: "pipe",
+        stderr: "pipe",
+      });
 
-      const timeoutPromise = new Promise<"timeout">((resolve) =>
-        setTimeout(() => resolve("timeout"), execTimeoutMs),
+      const timeoutPromise = new Promise<"timeout">(resolve =>
+        setTimeout(() => resolve("timeout"), execTimeoutMs)
       );
 
       const result = await Promise.race([
-        proc.exited.then((code) => ({ type: "done" as const, code })),
+        proc.exited.then(code => ({ type: "done" as const, code })),
         timeoutPromise.then(() => ({ type: "timeout" as const, code: -1 })),
       ]);
 

@@ -5,7 +5,10 @@ export class SimpleEvent {
   bubbles = false;
   cancelable: boolean;
 
-  constructor(public readonly type: string, options: { cancelable?: boolean; bubbles?: boolean } | boolean = {}) {
+  constructor(
+    public readonly type: string,
+    options: { cancelable?: boolean; bubbles?: boolean } | boolean = {}
+  ) {
     if (typeof options === "boolean") {
       this.cancelable = options;
       return;
@@ -15,7 +18,9 @@ export class SimpleEvent {
   }
 
   preventDefault(): void {
-    if (this.cancelable) this.defaultPrevented = true;
+    if (this.cancelable) {
+      this.defaultPrevented = true;
+    }
   }
 }
 
@@ -28,7 +33,14 @@ export class SimpleKeyboardEvent extends SimpleEvent {
 
   constructor(
     type: string,
-    init: { key?: string; ctrlKey?: boolean; metaKey?: boolean; altKey?: boolean; shiftKey?: boolean; bubbles?: boolean } = {}
+    init: {
+      key?: string;
+      ctrlKey?: boolean;
+      metaKey?: boolean;
+      altKey?: boolean;
+      shiftKey?: boolean;
+      bubbles?: boolean;
+    } = {}
   ) {
     super(type, { cancelable: true, bubbles: init.bubbles });
     this.key = init.key ?? "";
@@ -41,7 +53,10 @@ export class SimpleKeyboardEvent extends SimpleEvent {
 
 export class SimpleMouseEvent extends SimpleEvent {
   readonly button: number;
-  constructor(type: string, init: { button?: number; bubbles?: boolean; cancelable?: boolean } = {}) {
+  constructor(
+    type: string,
+    init: { button?: number; bubbles?: boolean; cancelable?: boolean } = {}
+  ) {
     super(type, init);
     this.button = init.button ?? 0;
   }
@@ -61,7 +76,9 @@ export class SimpleNode {
 
   removeChild<T extends SimpleNode>(node: T): T {
     const index = this.childNodes.indexOf(node);
-    if (index === -1) throw new Error("Node is not a child");
+    if (index === -1) {
+      throw new Error("Node is not a child");
+    }
     this.childNodes.splice(index, 1);
     node.parentNode = null;
     return node;
@@ -76,7 +93,7 @@ export class SimpleNode {
   }
 
   get textContent(): string {
-    return this.childNodes.map((child) => child.textContent).join("");
+    return this.childNodes.map(child => child.textContent).join("");
   }
 
   set textContent(value: string) {
@@ -104,4 +121,3 @@ export interface SimpleDocument extends SimpleNode {
   querySelector(selector: string): HTMLElement | null;
   querySelectorAll(selector: string): NodeListOf<HTMLElement>;
 }
-

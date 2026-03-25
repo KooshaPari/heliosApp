@@ -20,7 +20,7 @@ export interface ExecResult {
 
 export type SpawnFn = (
   cmd: string[],
-  opts: { cwd?: string; stdout?: "pipe"; stderr?: "pipe" },
+  opts: { cwd?: string; stdout?: "pipe"; stderr?: "pipe" }
 ) => SpawnResult;
 
 export interface SpawnResult {
@@ -51,7 +51,7 @@ export class ParNotFoundError extends Error {
 export class ParSpawnError extends Error {
   constructor(
     public readonly laneId: string,
-    public readonly reason: string,
+    public readonly reason: string
   ) {
     super(`Par spawn failed for lane ${laneId}: ${reason}`);
     this.name = "ParSpawnError";
@@ -61,7 +61,7 @@ export class ParSpawnError extends Error {
 export class LaneNotReadyError extends Error {
   constructor(
     public readonly laneId: string,
-    public readonly state: string,
+    public readonly state: string
   ) {
     super(`Lane ${laneId} is not ready for execution (state: ${state})`);
     this.name = "LaneNotReadyError";
@@ -71,7 +71,7 @@ export class LaneNotReadyError extends Error {
 export class ExecTimeoutError extends Error {
   constructor(
     public readonly laneId: string,
-    public readonly timeoutMs: number,
+    public readonly timeoutMs: number
   ) {
     super(`Command execution timed out in lane ${laneId} after ${timeoutMs}ms`);
     this.name = "ExecTimeoutError";
@@ -91,11 +91,14 @@ export function resetParIdCounter(): void {
 
 export function defaultSpawn(
   cmd: string[],
-  opts: { cwd?: string; stdout?: "pipe"; stderr?: "pipe" },
+  opts: { cwd?: string; stdout?: "pipe"; stderr?: "pipe" }
 ): SpawnResult {
   const bunRuntime = (globalThis as Record<string, unknown>).Bun as
     | {
-        spawn(command: string[], options: { cwd?: string; stdout?: "pipe"; stderr?: "pipe" }): SpawnResult;
+        spawn(
+          command: string[],
+          options: { cwd?: string; stdout?: "pipe"; stderr?: "pipe" }
+        ): SpawnResult;
       }
     | undefined;
   if (!bunRuntime) {

@@ -1,5 +1,5 @@
 import type { RendererState } from "../adapter.js";
-import { GhosttyMetrics } from "./metrics.js";
+import type { GhosttyMetrics } from "./metrics.js";
 
 type RenderEventHandler = (event: string, payload: unknown) => void;
 
@@ -15,7 +15,7 @@ export class GhosttyRenderLoopMonitor {
   constructor(
     private readonly metrics: GhosttyMetrics,
     private readonly getState: () => RendererState,
-    private readonly isProcessRunning: () => boolean,
+    private readonly isProcessRunning: () => boolean
   ) {}
 
   recordFrame(timestamp: number = Date.now()): void {
@@ -77,14 +77,15 @@ export class GhosttyRenderLoopMonitor {
   }
 
   private _checkRenderStall(): void {
-    if (this.getState() !== "running") return;
-    if (this._lastFrameTimestamp === 0) return;
+    if (this.getState() !== "running") {
+      return;
+    }
+    if (this._lastFrameTimestamp === 0) {
+      return;
+    }
 
     const elapsed = Date.now() - this._lastFrameTimestamp;
     if (elapsed > 500 && this.isProcessRunning()) {
-      console.warn(
-        `[ghostty] Render stall detected: no frames for ${elapsed}ms, but process is alive.`,
-      );
     }
   }
 }

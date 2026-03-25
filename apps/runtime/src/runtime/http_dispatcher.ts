@@ -1,8 +1,8 @@
-import { buildSpawnTerminalCommand, HarnessRouteSelector } from "../integrations/exec";
-import type { ProtocolMethod } from "../protocol/methods";
-import type { LocalBusEnvelope } from "../protocol/types";
-import { InMemorySessionRegistry, SessionRegistryError, type SessionTransport } from "../sessions/registry";
-import { LaneLifecycleError, LaneLifecycleService } from "../sessions/state_machine";
+import { type HarnessRouteSelector, buildSpawnTerminalCommand } from "../integrations/exec.ts";
+import type { ProtocolMethod } from "../protocol/methods.ts";
+import type { LocalBusEnvelope } from "../protocol/types.ts";
+import { type InMemorySessionRegistry, SessionRegistryError } from "../sessions/registry.ts";
+import { LaneLifecycleError, type LaneLifecycleService } from "../sessions/state_machine.ts";
 import {
   asString,
   attachLaneForHttpLifecycle,
@@ -12,7 +12,7 @@ import {
   parsePreferredTransport,
   requiredSegment,
   splitPath,
-} from "./http_utils";
+} from "./http_utils.ts";
 
 type BoundaryDispatcher = (command: LocalBusEnvelope) => Promise<LocalBusEnvelope>;
 
@@ -66,7 +66,7 @@ export function createRuntimeHttpHandler(options: RuntimeHttpDispatcherOptions) 
         segments[3] === "lanes"
       ) {
         const workspaceId = requiredSegment(segments, 2, "workspace_id");
-        const lanes = options.laneService.list(workspaceId).map((lane) => ({
+        const lanes = options.laneService.list(workspaceId).map(lane => ({
           lane_id: lane.lane_id,
           workspace_id: lane.workspace_id,
           status: lane.status,
@@ -244,7 +244,7 @@ export function createRuntimeHttpHandler(options: RuntimeHttpDispatcherOptions) 
             session_id: sessionId,
             terminal_id: terminalId,
             title: title ?? undefined,
-          }),
+          })
         );
 
         if (response.type !== "response") {

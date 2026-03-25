@@ -1,9 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import {
-  InMemorySessionRegistry,
-  SessionRegistryError,
-} from "../../../src/sessions/registry";
+import { InMemorySessionRegistry, SessionRegistryError } from "../../../src/sessions/registry.ts";
 
 describe("InMemorySessionRegistry", () => {
   test("creates and reuses lane sessions", () => {

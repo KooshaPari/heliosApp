@@ -1,11 +1,10 @@
-import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 
 const threshold = Number(process.env.COVERAGE_MIN ?? "85");
 const fixturePath = process.env.COVERAGE_REPORT_PATH;
 
-function fail(message) {
-  console.error(`Coverage gate failed: ${message}`);
+function fail(_message) {
   process.exit(1);
 }
 
@@ -22,7 +21,7 @@ if (fixturePath) {
   reportText = readFileSync(fixturePath, "utf8");
 } else {
   const run = spawnSync("bun", ["test", "apps/runtime/tests", "--coverage"], {
-    encoding: "utf8"
+    encoding: "utf8",
   });
 
   process.stdout.write(run.stdout ?? "");
@@ -43,5 +42,3 @@ if (linesPct === null) {
 if (linesPct < threshold) {
   fail(`lines coverage ${linesPct.toFixed(2)}% is below required ${threshold}%`);
 }
-
-console.log(`Coverage gate passed: lines coverage ${linesPct.toFixed(2)}% >= ${threshold}%.`);

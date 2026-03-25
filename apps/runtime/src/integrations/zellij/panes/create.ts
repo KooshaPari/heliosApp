@@ -1,4 +1,5 @@
 import type { ZellijCli } from "../cli.js";
+import { PtyBindingError, ZellijCliError } from "../errors.js";
 import type { TopologyTracker } from "../topology.js";
 import type {
   CreatePaneOptions,
@@ -6,7 +7,6 @@ import type {
   PaneRecord,
   PtyManagerInterface,
 } from "../types.js";
-import { PtyBindingError, ZellijCliError } from "../errors.js";
 import { buildCreatePaneArgs, closePaneRaw } from "./commands.js";
 
 export async function createZellijPane(args: {
@@ -18,31 +18,17 @@ export async function createZellijPane(args: {
   paneId: number;
   options?: CreatePaneOptions;
 }): Promise<PaneRecord> {
-  const {
-    cli,
-    topology,
-    ptyManager,
-    laneId,
-    sessionName,
-    paneId,
-    options,
-  } = args;
+  const { cli, topology, ptyManager, laneId, sessionName, paneId, options } = args;
   const startMs = performance.now();
   const direction = options?.direction ?? "vertical";
 
-  const result = await cli.run(
-    buildCreatePaneArgs(sessionName, direction, options?.cwd),
-  );
+  const result = await cli.run(buildCreatePaneArgs(sessionName, direction, options?.cwd));
   if (result.exitCode !== 0) {
-    throw new ZellijCliError(
-      `new-pane --session ${sessionName}`,
-      result.exitCode,
-      result.stderr,
-    );
+    throw new ZellijCliError(`new-pane --session ${sessionName}`, result.exitCode, result.stderr);
   }
 
   const refreshed = await topology.refreshTopology(sessionName);
-  const activeTab = refreshed.tabs.find((tab) => tab.tabId === refreshed.activeTabId);
+  const activeTab = refreshed.tabs.find(tab => tab.tabId === refreshed.activeTabId);
   const newPaneTopology = activeTab?.panes[activeTab.panes.length - 1];
   const dimensions: PaneDimensions = newPaneTopology?.dimensions ?? {
     cols: 80,
@@ -68,15 +54,8 @@ export async function createZellijPane(args: {
       ptyId = ptyResult.ptyId;
       topology.bindPty(sessionName, paneId, ptyId);
     } catch (error) {
-      console.error(
-        `[zellij-panes] PTY spawn failed for pane ${paneId}, closing pane`,
-        error,
-      );
       await closePaneRaw(cli, sessionName).catch(() => {});
-      throw new PtyBindingError(
-        paneId,
-        error instanceof Error ? error.message : String(error),
-      );
+      throw new PtyBindingError(paneId, error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -88,10 +67,7 @@ export async function createZellijPane(args: {
     createdAt: new Date(),
   };
 
-  const durationMs = performance.now() - startMs;
-  console.debug(
-    `[zellij-panes] createPane(${sessionName}) pane=${paneId} duration=${durationMs.toFixed(1)}ms`,
-  );
+  const _durationMs = performance.now() - startMs;
 
   return record;
 }

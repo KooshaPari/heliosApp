@@ -2,8 +2,8 @@
  * Share backend adapter tests.
  */
 
-import { describe, expect, it, beforeEach } from "vitest";
-import { UptermAdapter, TmateAdapter, getBackendAdapter } from "../adapters.js";
+import { beforeEach, describe, expect, it } from "vitest";
+import { TmateAdapter, UptermAdapter, getBackendAdapter } from "../adapters.js";
 
 describe("Upterm Backend Adapter", () => {
   let adapter: UptermAdapter;
@@ -26,13 +26,9 @@ describe("Upterm Backend Adapter", () => {
   });
 
   it("should validate inputs before starting share", async () => {
-    await expect(adapter.startShare("", "main-session")).rejects.toThrow(
-      /missing/i,
-    );
+    await expect(adapter.startShare("", "main-session")).rejects.toThrow(/missing/i);
 
-    await expect(adapter.startShare("terminal-123", "")).rejects.toThrow(
-      /missing/i,
-    );
+    await expect(adapter.startShare("terminal-123", "")).rejects.toThrow(/missing/i);
   });
 
   it("should stop share gracefully", async () => {
@@ -72,9 +68,7 @@ describe("Tmate Backend Adapter", () => {
   });
 
   it("should validate inputs before starting share", async () => {
-    await expect(adapter.startShare("", "main-session")).rejects.toThrow(
-      /missing/i,
-    );
+    await expect(adapter.startShare("", "main-session")).rejects.toThrow(/missing/i);
   });
 
   it("should stop share gracefully", async () => {

@@ -1,18 +1,18 @@
+import type { CommandBusOptions, LocalBus } from "./bus_contract.js";
 import type { MethodHandler } from "./methods.js";
 import type {
   CommandEnvelope,
   EventEnvelope,
-  ResponseEnvelope,
   LocalBusEnvelope,
+  ResponseEnvelope,
 } from "./types.js";
-import type { CommandBusOptions, LocalBus } from "./bus_contract.js";
 
 function makeErrorResponse(
   _id: string,
   correlationId: string | undefined,
   method: string,
   code: string,
-  message: string,
+  message: string
 ): ResponseEnvelope {
   return {
     id: `res_${Date.now()}`,
@@ -72,7 +72,13 @@ class CommandBusImpl implements LocalBus {
 
   async send(envelope: unknown): Promise<ResponseEnvelope> {
     if (this.destroyed) {
-      return makeErrorResponse(this.readId(envelope), this.readCorrelationId(envelope), "", "VALIDATION_ERROR", "Bus is destroyed");
+      return makeErrorResponse(
+        this.readId(envelope),
+        this.readCorrelationId(envelope),
+        "",
+        "VALIDATION_ERROR",
+        "Bus is destroyed"
+      );
     }
 
     if (!isCommandEnvelope(envelope)) {
@@ -80,7 +86,13 @@ class CommandBusImpl implements LocalBus {
       const correlationId = this.readCorrelationId(envelope);
       const type = (envelope as Record<string, unknown>)?.type;
       if (type === "event" || type === "response") {
-        return makeErrorResponse(id, correlationId, "", "VALIDATION_ERROR", "Expected a command envelope");
+        return makeErrorResponse(
+          id,
+          correlationId,
+          "",
+          "VALIDATION_ERROR",
+          "Expected a command envelope"
+        );
       }
       return makeErrorResponse(id, correlationId, "", "VALIDATION_ERROR", "Malformed envelope");
     }
@@ -92,7 +104,7 @@ class CommandBusImpl implements LocalBus {
         command.correlation_id,
         command.method,
         "HANDLER_ERROR",
-        `Re-entrant depth limit exceeded (max ${this.options.maxDepth})`,
+        `Re-entrant depth limit exceeded (max ${this.options.maxDepth})`
       );
     }
 
@@ -103,7 +115,7 @@ class CommandBusImpl implements LocalBus {
         command.correlation_id,
         command.method,
         "METHOD_NOT_FOUND",
-        `No handler registered for method: ${command.method}`,
+        `No handler registered for method: ${command.method}`
       );
     }
 
@@ -122,7 +134,7 @@ class CommandBusImpl implements LocalBus {
           command.correlation_id,
           command.method,
           "HANDLER_ERROR",
-          `Handler for "${command.method}" returned non-envelope value`,
+          `Handler for "${command.method}" returned non-envelope value`
         );
       }
       return result as ResponseEnvelope;
@@ -134,7 +146,7 @@ class CommandBusImpl implements LocalBus {
         command.correlation_id,
         command.method,
         "HANDLER_ERROR",
-        `Handler for "${command.method}" failed: ${message}`,
+        `Handler for "${command.method}" failed: ${message}`
       );
     } finally {
       this.currentDepth -= 1;
@@ -185,7 +197,7 @@ class CommandBusImpl implements LocalBus {
       return;
     }
 
-    const snapshot = subscribers.map((entry) => entry.handler);
+    const snapshot = subscribers.map(entry => entry.handler);
     for (const handler of snapshot) {
       try {
         await handler(event);

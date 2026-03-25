@@ -36,10 +36,7 @@ export class MCPConnectionManager {
     }
 
     try {
-      if (
-        config.serverPath.includes("localhost") ||
-        config.serverPath.includes("127.0.0.1")
-      ) {
+      if (config.serverPath.includes("localhost") || config.serverPath.includes("127.0.0.1")) {
         this.state.connected = true;
         this.state.reconnectAttempts = 0;
         return;
@@ -62,10 +59,7 @@ export class MCPConnectionManager {
     try {
       await this.connect(config);
     } catch (error) {
-      this.state.reconnectBackoffMs = Math.min(
-        this.state.reconnectBackoffMs * 2,
-        MAX_BACKOFF_MS
-      );
+      this.state.reconnectBackoffMs = Math.min(this.state.reconnectBackoffMs * 2, MAX_BACKOFF_MS);
       throw error;
     }
   }

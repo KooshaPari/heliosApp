@@ -29,7 +29,7 @@ export async function detectGpu(): Promise<GpuInfo> {
       // macOS always has Metal on supported hardware
       const proc = spawnReadableProcess(
         ["system_profiler", "SPDisplaysDataType"],
-        "Ghostty capability detection requires Bun runtime",
+        "Ghostty capability detection requires Bun runtime"
       );
       const text = await readStdoutText(proc);
       const hasMetal = text.includes("Metal");
@@ -39,7 +39,7 @@ export async function detectGpu(): Promise<GpuInfo> {
     // Linux: probe for OpenGL
     const proc = spawnReadableProcess(
       ["glxinfo"],
-      "Ghostty capability detection requires Bun runtime",
+      "Ghostty capability detection requires Bun runtime"
     );
     const text = await readStdoutText(proc);
     const versionMatch = text.match(/OpenGL version string:\s*(.+)/);
@@ -66,9 +66,7 @@ let cachedCapabilities: RendererCapabilities | undefined;
  *
  * @param forceRefresh - If true, discard the cache and re-detect.
  */
-export async function detectCapabilities(
-  forceRefresh = false,
-): Promise<RendererCapabilities> {
+export async function detectCapabilities(forceRefresh = false): Promise<RendererCapabilities> {
   if (cachedCapabilities !== undefined && !forceRefresh) {
     return cachedCapabilities;
   }

@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { rmSync } from "node:fs";
 import { join } from "node:path";
-import { ProtectedPathConfig } from "../protected-paths.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { ProtectedPathConfig } from "../protected-paths.js";
 import { makeProtectedPathDetector } from "./integration_helpers.js";
 import { makeTestTempDir } from "./tempdir.js";
 
@@ -21,7 +21,7 @@ describe("ProtectedPathDetector", () => {
     it("cat .env triggers warning", () => {
       const detector = makeProtectedPathDetector();
       const warnings: string[] = [];
-      detector.onWarning((m) => warnings.push(m.matchedPath));
+      detector.onWarning(m => warnings.push(m.matchedPath));
 
       const matches = detector.check("cat .env");
       expect(matches.length).toBeGreaterThan(0);
@@ -89,10 +89,10 @@ describe("ProtectedPathDetector", () => {
       const detector = makeProtectedPathDetector({ bus });
       detector.check("cat .env", { terminalId: "term-1", correlationId: "corr-1" });
 
-      await new Promise((r) => setTimeout(r, 0));
+      await new Promise(r => setTimeout(r, 0));
 
       const events = bus.getEvents();
-      const pathEvent = events.find((e) => e.topic === "secrets.protected_path.accessed");
+      const pathEvent = events.find(e => e.topic === "secrets.protected_path.accessed");
       expect(pathEvent).toBeDefined();
       expect(pathEvent?.payload?.matchedPath).toBe(".env");
       expect(pathEvent?.payload?.terminalId).toBe("term-1");
@@ -128,7 +128,7 @@ describe("ProtectedPathDetector", () => {
       const config2 = new ProtectedPathConfig({ configPath });
       await config2.loadFromDisk();
       const patterns = config2.listPatterns();
-      const customPattern = patterns.find((p) => p.pattern === "*.secret");
+      const customPattern = patterns.find(p => p.pattern === "*.secret");
       expect(customPattern).toBeDefined();
     });
 
@@ -166,10 +166,10 @@ describe("ProtectedPathDetector", () => {
       detector.check("cat .env");
       detector.acknowledge("dotenv", ".env", "corr-ack");
 
-      await new Promise((r) => setTimeout(r, 0));
+      await new Promise(r => setTimeout(r, 0));
 
       const events = bus.getEvents();
-      const ackEvent = events.find((e) => e.topic === "secrets.protected_path.acknowledged");
+      const ackEvent = events.find(e => e.topic === "secrets.protected_path.acknowledged");
       expect(ackEvent).toBeDefined();
       expect(ackEvent?.payload?.matchedPath).toBe(".env");
     });

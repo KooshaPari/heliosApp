@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
+import type { AuditSink } from "../audit/audit-sink.js"; // Used for type annotation
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
-import type { RedactionResult, RedactionContext } from "./redaction-engine.js";
-import type { AuditSink } from "../audit/audit-sink.js"; // Used for type annotation
+import type { RedactionContext, RedactionResult } from "./redaction-engine.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -38,8 +38,12 @@ export class RedactionAuditTrail {
     this.auditSink = opts?.auditSink ?? null;
   }
 
-  record(artifactId: string, result: RedactionResult, context: RedactionContext): RedactionAuditRecord {
-    const rulesApplied = [...new Set(result.matches.map((m) => m.ruleId))];
+  record(
+    artifactId: string,
+    result: RedactionResult,
+    context: RedactionContext
+  ): RedactionAuditRecord {
+    const rulesApplied = [...new Set(result.matches.map(m => m.ruleId))];
     const matchesByCategory: Record<string, number> = {};
     for (const match of result.matches) {
       matchesByCategory[match.category] = (matchesByCategory[match.category] ?? 0) + 1;
@@ -78,12 +82,12 @@ export class RedactionAuditTrail {
     let records = Array.from(this.records.values());
 
     if (filter?.artifactType !== undefined) {
-      records = records.filter((r) => r.artifactType === filter.artifactType);
+      records = records.filter(r => r.artifactType === filter.artifactType);
     }
 
     if (filter?.since !== undefined) {
       const since = filter.since;
-      records = records.filter((r) => new Date(r.timestamp) >= since);
+      records = records.filter(r => new Date(r.timestamp) >= since);
     }
 
     return records;
@@ -101,7 +105,9 @@ export class RedactionAuditTrail {
     if (this.auditSink) {
       await this.auditSink.ingest(envelope);
     }
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
     await this.bus.publish(envelope);
   }
 }

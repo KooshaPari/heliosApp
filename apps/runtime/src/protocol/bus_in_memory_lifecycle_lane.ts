@@ -1,12 +1,12 @@
-import type { LocalBusEnvelope } from "./types.js";
 import {
+  type InMemoryBusContext,
   buildErrorResponse,
   buildOkResponse,
   emitMetricEvent,
   publishLifecycleEvent,
   recordMetric,
-  type InMemoryBusContext,
 } from "./bus_in_memory_support.js";
+import type { LocalBusEnvelope } from "./types.js";
 
 const DIAGNOSTICS = {
   preferred_transport: "cliproxy_harness",
@@ -19,11 +19,12 @@ export function handleLaneLifecycleRequest(
   context: InMemoryBusContext,
   command: LocalBusEnvelope,
   method: "lane.attach" | "lane.create" | "lane.cleanup",
-  startTime: number,
+  startTime: number
 ): LocalBusEnvelope {
-  const payload = command.payload && typeof command.payload === "object"
-    ? (command.payload as Record<string, unknown>)
-    : {};
+  const payload =
+    command.payload && typeof command.payload === "object"
+      ? (command.payload as Record<string, unknown>)
+      : {};
 
   switch (method) {
     case "lane.attach": {

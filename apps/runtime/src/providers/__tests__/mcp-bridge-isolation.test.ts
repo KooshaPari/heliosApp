@@ -15,22 +15,16 @@ describe("MCP Bridge Adapter - Sandboxing and Isolation", () => {
 
   it("should support concurrent tool executions without interference", async () => {
     const results = await Promise.all([
-      adapter.execute(
-        { toolName: "read_file", arguments: { path: "/file1.txt" } },
-        "corr-1"
-      ),
+      adapter.execute({ toolName: "read_file", arguments: { path: "/file1.txt" } }, "corr-1"),
       adapter.execute(
         { toolName: "write_file", arguments: { path: "/file2.txt", content: "test" } },
         "corr-2"
       ),
-      adapter.execute(
-        { toolName: "list_directory", arguments: { path: "/tmp" } },
-        "corr-3"
-      ),
+      adapter.execute({ toolName: "list_directory", arguments: { path: "/tmp" } }, "corr-3"),
     ]);
 
     expect(results).toHaveLength(3);
-    results.forEach((result) => {
+    results.forEach(result => {
       expect(result.isError).toBe(false);
     });
   });
@@ -43,10 +37,7 @@ describe("MCP Bridge Adapter - Sandboxing and Isolation", () => {
     expect(success.isError).toBe(false);
 
     try {
-      await adapter.execute(
-        { toolName: "unknown_tool", arguments: {} },
-        "corr-2"
-      );
+      await adapter.execute({ toolName: "unknown_tool", arguments: {} }, "corr-2");
     } catch {
       // Expected.
     }

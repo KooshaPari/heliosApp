@@ -9,30 +9,16 @@ export function extractLaneId(sessionName: string): string {
   if (sessionName.startsWith(prefix)) {
     return sessionName.slice(prefix.length);
   }
-  console.warn(
-    `[zellij-session] Could not parse lane id from session name: ${sessionName}`,
-  );
   return sessionName;
 }
 
 /**
  * Query pane topology of a session.
  */
-export async function queryLayout(
-  cli: ZellijCli,
-  sessionName: string,
-): Promise<string> {
+export async function queryLayout(cli: ZellijCli, sessionName: string): Promise<string> {
   try {
-    const result = await cli.run([
-      "--session",
-      sessionName,
-      "action",
-      "dump-layout",
-    ]);
+    const result = await cli.run(["--session", sessionName, "action", "dump-layout"]);
     if (result.exitCode !== 0) {
-      console.warn(
-        `[zellij-session] Could not query layout for ${sessionName}: ${result.stderr}`,
-      );
       return "";
     }
     return result.stdout;
@@ -41,17 +27,11 @@ export async function queryLayout(
   }
 }
 
-export async function queryPanes(
-  cli: ZellijCli,
-  sessionName: string,
-): Promise<PaneRecord[]> {
+export async function queryPanes(cli: ZellijCli, sessionName: string): Promise<PaneRecord[]> {
   return parsePanesFromLayout(await queryLayout(cli, sessionName));
 }
 
-export async function queryTabs(
-  cli: ZellijCli,
-  sessionName: string,
-): Promise<TabRecord[]> {
+export async function queryTabs(cli: ZellijCli, sessionName: string): Promise<TabRecord[]> {
   return parseTabsFromLayout(await queryLayout(cli, sessionName));
 }
 

@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import {
   createBoundaryDispatcher,
-  getBoundaryDispatchDecision
-} from "../../../src/protocol/boundary_adapter";
-import type { LocalBusEnvelope } from "../../../src/protocol/types";
+  getBoundaryDispatchDecision,
+} from "../../../src/protocol/boundary_adapter.ts";
+import type { LocalBusEnvelope } from "../../../src/protocol/types.ts";
 
 function command(method: string): LocalBusEnvelope {
   return {
@@ -13,7 +13,7 @@ function command(method: string): LocalBusEnvelope {
     method: method as never,
     payload: {},
     correlation_id: "corr-1",
-    workspace_id: "ws-1"
+    workspace_id: "ws-1",
   };
 }
 
@@ -21,15 +21,15 @@ describe("boundary adapter mapping", () => {
   test("maps local, tool, and a2a methods to explicit boundary adapters", () => {
     expect(getBoundaryDispatchDecision("terminal.spawn")).toEqual({
       boundary: "local_control",
-      adapter: "local_bus"
+      adapter: "local_bus",
     });
     expect(getBoundaryDispatchDecision("share.upterm.start")).toEqual({
       boundary: "tool_interop",
-      adapter: "tool_bridge"
+      adapter: "tool_bridge",
     });
     expect(getBoundaryDispatchDecision("agent.run")).toEqual({
       boundary: "agent_delegation",
-      adapter: "a2a_bridge"
+      adapter: "a2a_bridge",
     });
   });
 
@@ -41,8 +41,8 @@ describe("boundary adapter mapping", () => {
         ts: "2026-02-27T00:00:00.000Z",
         method: "terminal.spawn",
         status: "ok",
-        result: { ok: true }
-      })
+        result: { ok: true },
+      }),
     });
 
     const response = await dispatcher(command("terminal.spawn"));
@@ -58,8 +58,8 @@ describe("boundary adapter mapping", () => {
         ts: "2026-02-27T00:00:00.000Z",
         method: "terminal.spawn",
         status: "ok",
-        result: {}
-      })
+        result: {},
+      }),
     });
 
     const response = await dispatcher(command("boundary.tool.dispatch"));
@@ -77,7 +77,7 @@ describe("boundary adapter mapping", () => {
         ts: "2026-02-27T00:00:00.000Z",
         method: "terminal.spawn",
         status: "ok",
-        result: {}
+        result: {},
       }),
       dispatchA2A: async () => ({
         id: "cmd-a2a",
@@ -85,8 +85,8 @@ describe("boundary adapter mapping", () => {
         ts: "2026-02-27T00:00:00.000Z",
         method: "agent.run",
         status: "ok",
-        result: { delegated: true }
-      })
+        result: { delegated: true },
+      }),
     });
 
     const response = await dispatcher(command("agent.run"));

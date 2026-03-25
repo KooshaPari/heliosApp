@@ -2,18 +2,18 @@
  * T016 - Stress and edge case tests.
  */
 
-import { describe, expect, it, mock, beforeEach } from "bun:test";
-import { ZellijSessionManager } from "../../../../src/integrations/zellij/session.js";
-import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
-import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
-import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
+import { describe, expect, it, mock } from "bun:test";
+import type { ZellijCli } from "../../../../src/integrations/zellij/cli.js";
 import {
-  MuxEventEmitter,
   type EventBus,
   type MuxEvent,
+  MuxEventEmitter,
 } from "../../../../src/integrations/zellij/events.js";
+import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
 import { reconcile } from "../../../../src/integrations/zellij/reconciliation.js";
-import type { ZellijCli } from "../../../../src/integrations/zellij/cli.js";
+import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
+import { ZellijSessionManager } from "../../../../src/integrations/zellij/session.js";
+import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
 import type { CliResult, ZellijSession } from "../../../../src/integrations/zellij/types.js";
 
 // Reuse the FakeCli pattern
@@ -31,8 +31,12 @@ class FakeCli {
       return { stdout: "", stderr: "", exitCode: 0 };
     }
     if (args[0] === "list-sessions") {
-      if (this.sessions.size === 0) return { stdout: "", stderr: "", exitCode: 0 };
-      const lines = [...this.sessions.values()].map((s) => `${s.name}  2026-02-27 10:00:00`).join("\n");
+      if (this.sessions.size === 0) {
+        return { stdout: "", stderr: "", exitCode: 0 };
+      }
+      const lines = [...this.sessions.values()]
+        .map(s => `${s.name}  2026-02-27 10:00:00`)
+        .join("\n");
       return { stdout: lines, stderr: "", exitCode: 0 };
     }
     return { stdout: "", stderr: "", exitCode: 0 };
@@ -117,7 +121,9 @@ describe("Stress: reattach with modified topology", () => {
     const topology = new TopologyTracker(cli as unknown as ZellijCli);
     const bus: EventBus & { events: MuxEvent[] } = {
       events: [],
-      publish: mock(async (e: MuxEvent) => { bus.events.push(e); }),
+      publish: mock(async (e: MuxEvent) => {
+        bus.events.push(e);
+      }),
     };
     const emitter = new MuxEventEmitter(bus);
     const sessionMgr = new ZellijSessionManager(cli as unknown as ZellijCli, registry, {
@@ -143,8 +149,8 @@ describe("Stress: reattach with modified topology", () => {
     expect(registry.getBySession(session.sessionName)).toBeDefined();
 
     // Verify reattach event
-    await new Promise((r) => setTimeout(r, 20));
-    expect(bus.events.some((e) => e.type === "mux.session.reattached")).toBe(true);
+    await new Promise(r => setTimeout(r, 20));
+    expect(bus.events.some(e => e.type === "mux.session.reattached")).toBe(true);
   });
 });
 

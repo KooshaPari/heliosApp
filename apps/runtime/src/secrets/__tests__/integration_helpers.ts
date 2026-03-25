@@ -1,11 +1,11 @@
 import { randomBytes } from "node:crypto";
-import { CredentialStore } from "../credential-store.js";
-import { EncryptionService } from "../encryption.js";
-import { RedactionEngine } from "../redaction-engine.js";
-import { getDefaultRules } from "../redaction-rules.js";
-import { ProtectedPathDetector } from "../protected-paths.js";
 import { AuditSink } from "../../audit/audit-sink.js";
 import type { LocalBus } from "../../protocol/bus.js";
+import { CredentialStore } from "../credential-store.js";
+import { EncryptionService } from "../encryption.js";
+import { ProtectedPathDetector } from "../protected-paths.js";
+import { RedactionEngine } from "../redaction-engine.js";
+import { getDefaultRules } from "../redaction-rules.js";
 
 export function makeFixedEncryption(): EncryptionService {
   const fixedKey = randomBytes(32);
@@ -35,6 +35,8 @@ export function makeAuditSink(engine: RedactionEngine): AuditSink {
   return new AuditSink({ redactFn: makeRedactFn(engine) });
 }
 
-export function makeProtectedPathDetector(options: ConstructorParameters<typeof ProtectedPathDetector>[0] = {}): ProtectedPathDetector {
+export function makeProtectedPathDetector(
+  options: ConstructorParameters<typeof ProtectedPathDetector>[0] = {}
+): ProtectedPathDetector {
   return new ProtectedPathDetector(options);
 }

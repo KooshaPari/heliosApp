@@ -1,7 +1,7 @@
+import { randomUUID } from "node:crypto";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
-import { randomUUID } from "crypto";
 
 export interface CrashRecord {
   timestamp: number;
@@ -13,11 +13,7 @@ export class CrashLoopDetector {
   private thresholdCount: number;
   private windowMs: number;
 
-  constructor(
-    crashDataDir: string,
-    thresholdCount: number = 3,
-    windowMs: number = 60000
-  ) {
+  constructor(crashDataDir: string, thresholdCount = 3, windowMs = 60000) {
     this.crashDataDir = crashDataDir;
     this.thresholdCount = thresholdCount;
     this.windowMs = windowMs;
@@ -40,9 +36,7 @@ export class CrashLoopDetector {
 
   private cleanOldCrashes(): void {
     const now = Date.now();
-    this.crashHistory = this.crashHistory.filter(
-      (ts) => now - ts < this.windowMs
-    );
+    this.crashHistory = this.crashHistory.filter(ts => now - ts < this.windowMs);
   }
 
   private async loadCrashHistory(): Promise<void> {
@@ -68,13 +62,8 @@ export class CrashLoopDetector {
       // Atomic write
       fs.writeFile(tempPath, JSON.stringify(this.crashHistory), { encoding: "utf-8" })
         .then(() => fs.rename(tempPath, historyPath))
-        .catch((err) => {
-          // Silently fail - don't let history persistence block operations
-          console.error("Failed to persist crash history:", err);
-        });
-    } catch (err) {
-      console.error("Failed to persist crash history:", err);
-    }
+        .catch(_err => {});
+    } catch (_err) {}
   }
 }
 
@@ -102,7 +91,9 @@ export class SafeMode {
   }
 
   async enter(): Promise<void> {
-    if (this.active) return;
+    if (this.active) {
+      return;
+    }
 
     this.active = true;
 
@@ -125,7 +116,9 @@ export class SafeMode {
   }
 
   async exit(): Promise<void> {
-    if (!this.active) return;
+    if (!this.active) {
+      return;
+    }
 
     this.active = false;
 
@@ -162,14 +155,14 @@ export class SafeMode {
 
   // Query methods for subsystems to check if they should be active
   isProvidersEnabled(): boolean {
-    return !this.active || !this.config.disableProviders;
+    return !(this.active && this.config.disableProviders);
   }
 
   isShareSessionsEnabled(): boolean {
-    return !this.active || !this.config.disableShareSessions;
+    return !(this.active && this.config.disableShareSessions);
   }
 
   isBackgroundCheckpointsEnabled(): boolean {
-    return !this.active || !this.config.disableBackgroundCheckpoints;
+    return !(this.active && this.config.disableBackgroundCheckpoints);
   }
 }

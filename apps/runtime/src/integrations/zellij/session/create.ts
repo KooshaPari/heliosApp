@@ -1,6 +1,6 @@
 import type { ZellijCli } from "../cli.js";
-import type { MuxRegistry } from "../registry.js";
 import { SessionAlreadyExistsError } from "../errors.js";
+import type { MuxRegistry } from "../registry.js";
 import type { MuxSession, SessionOptions } from "../types.js";
 
 export async function createZellijSession(args: {
@@ -14,33 +14,24 @@ export async function createZellijSession(args: {
   const startMs = performance.now();
 
   const existing = await cli.listSessions();
-  if (existing.some((s) => s.name === sessionName)) {
+  if (existing.some(s => s.name === sessionName)) {
     throw new SessionAlreadyExistsError(sessionName);
   }
 
   if (options?.cwd) {
-    console.debug(
-      `[zellij-session] session creation requested with cwd=${options.cwd}; ` +
-        "preserving in host-specific runtime",
-    );
   }
 
   const result = await cli.run(["attach", sessionName, "--create", "--force-run-client"], {
     timeout: 10_000,
   });
   if (result.exitCode !== 0) {
-    throw new Error(
-      `Failed to create zellij session ${sessionName}: ${result.stderr}`,
-    );
+    throw new Error(`Failed to create zellij session ${sessionName}: ${result.stderr}`);
   }
 
   const postSessions = await cli.listSessions();
-  const created = postSessions.find((s) => s.name === sessionName);
+  const created = postSessions.find(s => s.name === sessionName);
 
-  const durationMs = performance.now() - startMs;
-  console.debug(
-    `[zellij-session] createSession(${laneId}) completed in ${durationMs.toFixed(1)}ms`,
-  );
+  const _durationMs = performance.now() - startMs;
 
   const muxSession: MuxSession = {
     sessionName,
