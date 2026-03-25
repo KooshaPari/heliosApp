@@ -59,7 +59,7 @@ export class AuditRingBuffer {
     let evicted: AuditEvent | undefined;
 
     if (this.size === this.capacity) {
-      // Buffer is full; evict the oldest event at head
+      // Buffer is full; evict the oldest event at head and advance head
       evicted = this.buffer[this.head];
       this.totalEventsEvicted++;
       this.head = (this.head + 1) % this.capacity;
@@ -197,6 +197,10 @@ export class AuditRingBuffer {
       if (eventTime < filter.startTime) {
         return false;
       }
+    }
+
+    if (filter.correlationId && event.correlationId !== filter.correlationId) {
+      return false;
     }
 
     if (filter.endTime) {

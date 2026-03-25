@@ -42,7 +42,17 @@ describe("SLO validation - hot-swap", () => {
       const buffer = new SwitchBuffer();
 
       const terminals = new Map<string, TerminalContext>([
-        ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+        [
+          "pty-1",
+          {
+            ptyId: "pty-1",
+            scrollback: [],
+            cursorX: 0,
+            cursorY: 0,
+            env: {},
+            cwd: "/",
+          },
+        ],
       ]);
 
       const startTime = Date.now();
@@ -192,7 +202,17 @@ describe("SLO validation - rollback", () => {
       const buffer = new SwitchBuffer();
 
       const terminals = new Map<string, TerminalContext>([
-        ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+        [
+          "pty-1",
+          {
+            ptyId: "pty-1",
+            scrollback: [],
+            cursorX: 0,
+            cursorY: 0,
+            env: {},
+            cwd: "/",
+          },
+        ],
       ]);
 
       const startTime = Date.now();

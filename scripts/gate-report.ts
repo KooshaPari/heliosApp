@@ -96,11 +96,11 @@ export function writeGateReport(report: GateReport, outputPath: string): void {
   const fs = require("node:fs");
   const dir = require("node:path").dirname(outputPath);
 
-  // Ensure directory exists
-  fs.mkdirSync(dir, { recursive: true });
+	// Ensure directory exists
+	fs.mkdirSync(dir, { recursive: true });
 
-  // Write report as formatted JSON
-  fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
+	// Write report as formatted JSON
+	fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
 }
 
 /**
@@ -132,12 +132,12 @@ export function readGateReport(filePath: string): GateReport {
  * Pretty-print a gate report for human consumption.
  */
 export function formatGateReport(report: GateReport): string {
-  const lines: string[] = [];
+	const lines: string[] = [];
 
-  lines.push(`\nGate: ${report.gateName}`);
-  lines.push(`Status: ${report.status.toUpperCase()}`);
-  lines.push(`Duration: ${report.duration}ms`);
-  lines.push(`Timestamp: ${report.timestamp}`);
+	lines.push(`\nGate: ${report.gateName}`);
+	lines.push(`Status: ${report.status.toUpperCase()}`);
+	lines.push(`Duration: ${report.duration}ms`);
+	lines.push(`Timestamp: ${report.timestamp}`);
 
   if (report.summary) {
     lines.push(
@@ -171,7 +171,7 @@ export function formatGateReport(report: GateReport): string {
  * Pretty-print a pipeline summary.
  */
 export function formatPipelineSummary(summary: PipelineSummary): string {
-  const lines: string[] = [];
+	const lines: string[] = [];
 
   lines.push("\n========== QUALITY GATES SUMMARY ==========");
   lines.push(`Overall Status: ${summary.status.toUpperCase()}`);

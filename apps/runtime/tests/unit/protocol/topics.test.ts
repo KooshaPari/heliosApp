@@ -134,7 +134,7 @@ describe("LocalBus — event fan-out", () => {
 
   it("silently discards invalid event envelope", async () => {
     // Should not throw, just log
-    await bus.publish({ garbage: true });
+    await bus.publish({ garbage: true } as unknown as LocalBusEnvelope);
   });
 
   it("silently discards non-event envelope passed to publish", async () => {

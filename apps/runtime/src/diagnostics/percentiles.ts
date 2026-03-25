@@ -37,6 +37,6 @@ export function computePercentiles(input: PercentileInput): PercentileBucket | u
 
 /** Nearest-rank percentile on a pre-sorted Float64Array. */
 function percentileFromSorted(sorted: Float64Array, p: number): number {
-  const index = Math.ceil(p * sorted.length) - 1;
-  return sorted[Math.max(0, index)]!;
+  const index = Math.ceil(p * sorted.length);
+  return sorted[Math.min(index, sorted.length - 1)]!;
 }

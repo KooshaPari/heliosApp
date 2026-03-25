@@ -16,16 +16,17 @@ function parseLintLog(): GateFinding[] {
   const findings: GateFinding[] = [];
   const logPath = "/tmp/lint.log";
 
-  if (!existsSync(logPath)) {
-    return findings;
-  }
+	if (!existsSync(logPath)) {
+		return findings;
+	}
 
   const output = readFileSync(logPath, "utf-8");
   const lines = output.split("\n");
 
-  // Parse OXC error format: file.ts:line:col - error|warning|info: message (rule)
-  // or file.ts:line:col - error: message
-  const errorPattern = /^(.+?):(\d+):(\d+)\s+-\s+(error|warning|info):\s+(.+?)(?:\s+\((\w+)\))?$/i;
+	// Parse OXC error format: file.ts:line:col - error|warning|info: message (rule)
+	// or file.ts:line:col - error: message
+	const errorPattern =
+		/^(.+?):(\d+):(\d+)\s+-\s+(error|warning|info):\s+(.+?)(?:\s+\((\w+)\))?$/i;
 
   lines.forEach(line => {
     const match = line.match(errorPattern);
@@ -42,16 +43,16 @@ function parseLintLog(): GateFinding[] {
     }
   });
 
-  return findings;
+	return findings;
 }
 
 /**
  * Main entry point.
  */
 async function main(): Promise<void> {
-  const startTime = Date.now();
-  const findings = parseLintLog();
-  const duration = Date.now() - startTime;
+	const startTime = Date.now();
+	const findings = parseLintLog();
+	const duration = Date.now() - startTime;
 
   const report = createGateReport("lint", findings, duration);
   writeGateReport(report, REPORT_OUTPUT);

@@ -36,7 +36,10 @@ describe("GhosttyProcess", () => {
   });
 
   test("start with a real process returns pid", async () => {
-    const { pid } = await proc.start({ binaryPath: "sleep", extraArgs: ["10"] });
+    const { pid } = await proc.start({
+      binaryPath: "sleep",
+      extraArgs: ["10"],
+    });
     expect(typeof pid).toBe("number");
     expect(pid).toBeGreaterThan(0);
     expect(proc.isRunning()).toBe(true);

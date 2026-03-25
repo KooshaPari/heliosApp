@@ -8,18 +8,18 @@ const WARMUP = 1_000;
 const CI_FACTOR = 2;
 
 interface BenchResult {
-  name: string;
-  iterations: number;
-  p50_ms: number;
-  p95_ms: number;
-  p99_ms: number;
-  total_ms: number;
-  ops_per_sec: number;
+	name: string;
+	iterations: number;
+	p50_ms: number;
+	p95_ms: number;
+	p99_ms: number;
+	total_ms: number;
+	ops_per_sec: number;
 }
 
 function percentile(sorted: number[], p: number): number {
-  const idx = Math.ceil(sorted.length * p) - 1;
-  return sorted[Math.max(0, idx)];
+	const idx = Math.ceil(sorted.length * p) - 1;
+	return sorted[Math.max(0, idx)];
 }
 
 function bench(name: string, fn: () => void): BenchResult {
@@ -28,27 +28,27 @@ function bench(name: string, fn: () => void): BenchResult {
     fn();
   }
 
-  const timings: number[] = new Array(ITERATIONS);
-  const start = performance.now();
+	const timings: number[] = new Array(ITERATIONS);
+	const start = performance.now();
 
-  for (let i = 0; i < ITERATIONS; i++) {
-    const t0 = performance.now();
-    fn();
-    timings[i] = performance.now() - t0;
-  }
+	for (let i = 0; i < ITERATIONS; i++) {
+		const t0 = performance.now();
+		fn();
+		timings[i] = performance.now() - t0;
+	}
 
-  const total = performance.now() - start;
-  timings.sort((a, b) => a - b);
+	const total = performance.now() - start;
+	timings.sort((a, b) => a - b);
 
-  return {
-    name,
-    iterations: ITERATIONS,
-    p50_ms: percentile(timings, 0.5),
-    p95_ms: percentile(timings, 0.95),
-    p99_ms: percentile(timings, 0.99),
-    total_ms: total,
-    ops_per_sec: Math.round((ITERATIONS / total) * 1000),
-  };
+	return {
+		name,
+		iterations: ITERATIONS,
+		p50_ms: percentile(timings, 0.5),
+		p95_ms: percentile(timings, 0.95),
+		p99_ms: percentile(timings, 0.99),
+		total_ms: total,
+		ops_per_sec: Math.round((ITERATIONS / total) * 1000),
+	};
 }
 
 // Run benchmarks

@@ -101,8 +101,8 @@ describe("Bypass Detection Scanner", () => {
       });
     });
 
-    expect(findings).toBe(3);
-  });
+		expect(findings).toBe(3);
+	});
 
   test("test file with all marker types detected", () => {
     const lines = ["test.skip()", "test.only()", "test.todo()"];
@@ -122,8 +122,8 @@ describe("Bypass Detection Scanner", () => {
       });
     });
 
-    expect(findings).toBe(3);
-  });
+		expect(findings).toBe(3);
+	});
 
   test("valid TypeScript without suppression passes", () => {
     const line = "const x: number = 42;";

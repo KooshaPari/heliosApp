@@ -18,8 +18,8 @@ export interface WatchdogCheckpoint {
 export class CheckpointManager {
   private readonly checkpointPath: string;
 
-  constructor() {
-    const heliosDataDir = path.join(os.homedir(), ".helios", "data");
+  constructor(baseDir?: string) {
+    const heliosDataDir = baseDir ?? path.join(os.homedir(), ".helios", "data");
     this.checkpointPath = path.join(heliosDataDir, "watchdog_checkpoint.json");
   }
 

@@ -98,7 +98,12 @@ describe("PTY lifecycle integration", () => {
     pidsToCleanup.push(record.pid);
 
     // Register the external process for write operations.
-    mgr.registerProcess(record.ptyId, proc);
+    mgr.registerProcess(
+      record.ptyId,
+      proc as unknown as {
+        readonly stdin: { write(data: Uint8Array | string): number };
+      }
+    );
 
     // Write input.
     const input = new TextEncoder().encode("echo hello\n");
@@ -174,9 +179,24 @@ describe("PTY lifecycle integration", () => {
     const mgr = new PtyManager(10, bus);
 
     const records = await Promise.all([
-      mgr.spawn({ shell: "/bin/sh", laneId: "lane-1", sessionId: "sess-1", terminalId: "term-1" }),
-      mgr.spawn({ shell: "/bin/sh", laneId: "lane-1", sessionId: "sess-1", terminalId: "term-2" }),
-      mgr.spawn({ shell: "/bin/sh", laneId: "lane-2", sessionId: "sess-2", terminalId: "term-3" }),
+      mgr.spawn({
+        shell: "/bin/sh",
+        laneId: "lane-1",
+        sessionId: "sess-1",
+        terminalId: "term-1",
+      }),
+      mgr.spawn({
+        shell: "/bin/sh",
+        laneId: "lane-1",
+        sessionId: "sess-1",
+        terminalId: "term-2",
+      }),
+      mgr.spawn({
+        shell: "/bin/sh",
+        laneId: "lane-2",
+        sessionId: "sess-2",
+        terminalId: "term-3",
+      }),
     ]);
 
     for (const r of records) {

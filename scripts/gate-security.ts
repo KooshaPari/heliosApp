@@ -15,9 +15,9 @@ interface Vulnerability {
  * Parse security scan output (mocked for now).
  */
 function parseSecurityScan(): Vulnerability[] {
-  // In production, would run `npm audit --json` and parse output
-  // For now, return empty (no vulnerabilities)
-  return [];
+	// In production, would run `npm audit --json` and parse output
+	// For now, return empty (no vulnerabilities)
+	return [];
 }
 
 /**
@@ -39,10 +39,10 @@ function vulnerabilitiesToFindings(vulns: Vulnerability[]): GateFinding[] {
  * Main entry point.
  */
 async function main(): Promise<void> {
-  const startTime = Date.now();
-  const vulnerabilities = parseSecurityScan();
-  const findings = vulnerabilitiesToFindings(vulnerabilities);
-  const duration = Date.now() - startTime;
+	const startTime = Date.now();
+	const vulnerabilities = parseSecurityScan();
+	const findings = vulnerabilitiesToFindings(vulnerabilities);
+	const duration = Date.now() - startTime;
 
   const report = createGateReport("security", findings, duration);
   writeGateReport(report, REPORT_OUTPUT);

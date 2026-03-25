@@ -17,15 +17,31 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
     {
       provider: "Cloud",
       models: [
-        { id: "claude-sonnet-4-20250514", name: "Claude Sonnet 4", available: true },
-        { id: "claude-opus-4-20250514", name: "Claude Opus 4", available: true },
-        { id: "claude-haiku-4-20250514", name: "Claude Haiku 4", available: true },
+        {
+          id: "claude-sonnet-4-20250514",
+          name: "Claude Sonnet 4",
+          available: true,
+        },
+        {
+          id: "claude-opus-4-20250514",
+          name: "Claude Opus 4",
+          available: true,
+        },
+        {
+          id: "claude-haiku-4-20250514",
+          name: "Claude Haiku 4",
+          available: true,
+        },
       ],
     },
     {
       provider: "Local (MLX)",
       models: [
-        { id: "mlx-community/Llama-3.2-3B-Instruct", name: "Llama 3.2 3B", available: false },
+        {
+          id: "mlx-community/Llama-3.2-3B-Instruct",
+          name: "Llama 3.2 3B",
+          available: false,
+        },
       ],
     },
     {

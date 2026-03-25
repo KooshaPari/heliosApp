@@ -10,7 +10,11 @@ function makeEngine(): RedactionEngine {
   return engine;
 }
 
-const ctx = { artifactId: "art-1", artifactType: "log", correlationId: "corr-1" };
+const ctx = {
+  artifactId: "art-1",
+  artifactType: "log",
+  correlationId: "corr-1",
+};
 
 describe("RedactionAuditTrail: record creation", () => {
   it("creates a record and verify returns true", () => {

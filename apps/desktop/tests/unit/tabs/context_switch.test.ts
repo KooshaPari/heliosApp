@@ -209,7 +209,7 @@ describe("ActiveContextStore", () => {
       // Wait for debounce
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      expect(finalContext).toEqual(contexts[2]);
+      expect(finalContext!).toEqual(contexts[2]!);
     });
   });
 

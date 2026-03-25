@@ -115,7 +115,10 @@ export class StreamBindingManager {
     }
 
     // Collect binding data before unbinding
-    const entries: Array<{ ptyId: string; stream: ReadableStream<Uint8Array> }> = [];
+    const entries: Array<{
+      ptyId: string;
+      stream: ReadableStream<Uint8Array>;
+    }> = [];
     for (const [ptyId, binding] of this._bindings) {
       entries.push({ ptyId, stream: binding.stream });
       binding.renderer.unbindStream(ptyId);

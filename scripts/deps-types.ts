@@ -37,22 +37,22 @@ export interface DependencyEntry {
  * Metadata section of the registry tracking global state.
  */
 export interface RegistryMetadata {
-  /** ISO 8601 timestamp of the last status check operation */
-  lastStatusCheck: string;
-  /** Cache TTL duration as ISO 8601 duration (e.g., 'PT1H' for 1 hour) */
-  registryCacheMaxAge: string;
+	/** ISO 8601 timestamp of the last status check operation */
+	lastStatusCheck: string;
+	/** Cache TTL duration as ISO 8601 duration (e.g., 'PT1H' for 1 hour) */
+	registryCacheMaxAge: string;
 }
 
 /**
  * Root schema for deps-registry.json
  */
 export interface DepsRegistry {
-  /** Semantic version of the manifest schema for forward-compatible evolution */
-  schemaVersion: string;
-  /** Global metadata about the registry state */
-  metadata: RegistryMetadata;
-  /** Array of all tracked prerelease dependencies */
-  dependencies: DependencyEntry[];
+	/** Semantic version of the manifest schema for forward-compatible evolution */
+	schemaVersion: string;
+	/** Global metadata about the registry state */
+	metadata: RegistryMetadata;
+	/** Array of all tracked prerelease dependencies */
+	dependencies: DependencyEntry[];
 }
 
 /**
@@ -83,6 +83,6 @@ export interface ChangelogEntry {
  * Root schema for deps-changelog.json
  */
 export interface DepsChangelog {
-  /** Array of upgrade attempts in chronological order */
-  entries: ChangelogEntry[];
+	/** Array of upgrade attempts in chronological order */
+	entries: ChangelogEntry[];
 }

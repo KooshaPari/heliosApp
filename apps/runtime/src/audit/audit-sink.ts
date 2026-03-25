@@ -160,11 +160,7 @@ export class AuditSink {
   /**
    * Query stored audit records.
    */
-  query(filter?: {
-    topic?: string;
-    correlationId?: string;
-    since?: Date;
-  }): AuditRecord[] {
+  query(filter?: { topic?: string; correlationId?: string; since?: Date }): AuditRecord[] {
     let results = [...this.records];
 
     if (filter?.topic) {

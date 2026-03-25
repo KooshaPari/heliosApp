@@ -13,7 +13,10 @@ import type { PtyManagerInterface } from "../types.js";
 function makeMockCli(): ZellijCli {
   return {
     run: mock(async () => ({ stdout: "", stderr: "", exitCode: 0 })),
-    checkAvailability: mock(async () => ({ available: true, version: "0.41.2" })),
+    checkAvailability: mock(async () => ({
+      available: true,
+      version: "0.41.2",
+    })),
     listSessions: mock(async () => []),
   } as unknown as ZellijCli;
 }
@@ -38,7 +41,12 @@ describe("ZellijTabManager", () => {
     topology = new TopologyTracker(cli);
     ptyManager = makeMockPtyManager();
     paneManager = new ZellijPaneManager({ cli, topology, ptyManager });
-    tabManager = new ZellijTabManager({ cli, topology, paneManager, ptyManager });
+    tabManager = new ZellijTabManager({
+      cli,
+      topology,
+      paneManager,
+      ptyManager,
+    });
   });
 
   describe("createTab", () => {

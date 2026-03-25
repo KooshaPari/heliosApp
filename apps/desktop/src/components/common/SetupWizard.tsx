@@ -57,7 +57,13 @@ export const SetupWizard: Component<SetupWizardProps> = props => {
           </Show>
           <Show when={step() === 1}>
             <h2 style={{ color: "#cdd6f4", "margin-bottom": "12px" }}>API Key</h2>
-            <p style={{ color: "#a6adc8", "margin-bottom": "16px", "font-size": "14px" }}>
+            <p
+              style={{
+                color: "#a6adc8",
+                "margin-bottom": "16px",
+                "font-size": "14px",
+              }}
+            >
               Enter your Anthropic API key to enable cloud inference.
             </p>
             <input

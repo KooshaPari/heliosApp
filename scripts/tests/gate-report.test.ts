@@ -69,10 +69,10 @@ describe("Gate Report Generator", () => {
 
     const report = createGateReport("lint", findings, 150);
 
-    expect(report.summary?.errors).toBe(2);
-    expect(report.summary?.warnings).toBe(1);
-    expect(report.summary?.infos).toBe(1);
-  });
+		expect(report.summary?.errors).toBe(2);
+		expect(report.summary?.warnings).toBe(1);
+		expect(report.summary?.infos).toBe(1);
+	});
 
   test("aggregate gate reports into pipeline summary", () => {
     const report1 = createGateReport("typecheck", [], 100);
@@ -92,7 +92,7 @@ describe("Gate Report Generator", () => {
       summary: { errors: 1, warnings: 0, infos: 0 },
     };
 
-    const summary = aggregateGateReports([report1, report2, report3]);
+		const summary = aggregateGateReports([report1, report2, report3]);
 
     expect(summary.gates.length).toBe(3);
     expect(summary.status).toBe("fail");
@@ -104,7 +104,7 @@ describe("Gate Report Generator", () => {
     const report1 = createGateReport("typecheck", [], 100);
     const report2 = createGateReport("lint", [], 150);
 
-    const summary = aggregateGateReports([report1, report2]);
+		const summary = aggregateGateReports([report1, report2]);
 
     expect(summary.status).toBe("pass");
     expect(summary.failedGates.length).toBe(0);
@@ -148,8 +148,8 @@ describe("Gate Report Generator", () => {
       summary: { errors: 1, warnings: 0, infos: 0 },
     };
 
-    const summary = aggregateGateReports([report1, report2]);
-    const formatted = formatPipelineSummary(summary);
+		const summary = aggregateGateReports([report1, report2]);
+		const formatted = formatPipelineSummary(summary);
 
     expect(formatted).toContain("QUALITY GATES SUMMARY");
     expect(formatted).toContain("Status: FAIL");
@@ -203,7 +203,7 @@ describe("Gate Report Generator", () => {
       createGateReport("e2e", [], 300),
     ];
 
-    const summary = aggregateGateReports(reports);
+		const summary = aggregateGateReports(reports);
 
     expect(summary.gates.length).toBe(4);
     expect(summary.status).toBe("fail");

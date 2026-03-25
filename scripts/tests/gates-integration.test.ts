@@ -221,19 +221,19 @@ describe("Gate Integration Tests", () => {
       const findings: GateFinding[] = [];
       const report = createGateReport("coverage", findings, 100);
 
-      expect(report.gateName).toBeDefined();
-      expect(report.status).toBeDefined();
-      expect(report.findings).toBeDefined();
-      expect(report.duration).toBeDefined();
-      expect(report.timestamp).toBeDefined();
-    });
+			expect(report.gateName).toBeDefined();
+			expect(report.status).toBeDefined();
+			expect(report.findings).toBeDefined();
+			expect(report.duration).toBeDefined();
+			expect(report.timestamp).toBeDefined();
+		});
 
     test("gate report duration is accurate", () => {
       const duration = 12345;
       const report = createGateReport("test", [], duration);
 
-      expect(report.duration).toBe(duration);
-    });
+			expect(report.duration).toBe(duration);
+		});
 
     test("gate finding has all optional fields", () => {
       const findings: GateFinding[] = [
@@ -266,9 +266,9 @@ describe("Gate Integration Tests", () => {
 
       const report = createGateReport("test", findings, 100);
 
-      expect(report.summary?.errors).toBe(2);
-      expect(report.summary?.warnings).toBe(1);
-      expect(report.summary?.infos).toBe(0);
-    });
-  });
+			expect(report.summary?.errors).toBe(2);
+			expect(report.summary?.warnings).toBe(1);
+			expect(report.summary?.infos).toBe(0);
+		});
+	});
 });

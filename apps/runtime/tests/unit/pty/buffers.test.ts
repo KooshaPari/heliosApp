@@ -104,7 +104,9 @@ describe("RingBuffer", () => {
 describe("OutputBuffer", () => {
   it("writes data and tracks stats", () => {
     const bus = new InMemoryBusPublisher();
-    const ob = new OutputBuffer(bus, makeCorrelation(), { capacityBytes: 1024 });
+    const ob = new OutputBuffer(bus, makeCorrelation(), {
+      capacityBytes: 1024,
+    });
 
     ob.write(new Uint8Array(100));
     const stats = ob.getStats();
@@ -248,7 +250,9 @@ describe("OutputBuffer", () => {
     console.warn = () => undefined;
 
     try {
-      const ob = new OutputBuffer(bus, makeCorrelation(), { capacityBytes: 10 });
+      const ob = new OutputBuffer(bus, makeCorrelation(), {
+        capacityBytes: 10,
+      });
       ob.write(new Uint8Array(8));
       ob.write(new Uint8Array(5)); // 3 dropped
       ob.consume(10);

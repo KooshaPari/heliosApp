@@ -116,55 +116,86 @@
   },
   "allOf": [
     {
-      "if": { "properties": { "type": { "const": "command" } }, "required": ["type"] },
+      "if": {
+        "properties": { "type": { "const": "command" } },
+        "required": ["type"]
+      },
       "then": { "required": ["method", "payload"] }
     },
     {
-      "if": { "properties": { "type": { "const": "event" } }, "required": ["type"] },
+      "if": {
+        "properties": { "type": { "const": "event" } },
+        "required": ["type"]
+      },
       "then": { "required": ["topic", "payload"] }
     },
     {
-      "if": { "properties": { "type": { "const": "response" } }, "required": ["type"] },
+      "if": {
+        "properties": { "type": { "const": "response" } },
+        "required": ["type"]
+      },
       "then": { "required": ["status"] }
     },
     {
       "if": {
-        "properties": { "type": { "const": "command" }, "method": { "const": "lane.create" } },
+        "properties": {
+          "type": { "const": "command" },
+          "method": { "const": "lane.create" }
+        },
         "required": ["type", "method"]
       },
       "then": { "required": ["correlation_id", "workspace_id"] }
     },
     {
       "if": {
-        "properties": { "type": { "const": "command" }, "method": { "const": "session.attach" } },
+        "properties": {
+          "type": { "const": "command" },
+          "method": { "const": "session.attach" }
+        },
         "required": ["type", "method"]
       },
-      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
     },
     {
       "if": {
-        "properties": { "type": { "const": "command" }, "method": { "const": "terminal.spawn" } },
+        "properties": {
+          "type": { "const": "command" },
+          "method": { "const": "terminal.spawn" }
+        },
         "required": ["type", "method"]
       },
-      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
     },
     {
       "if": {
-        "properties": { "type": { "const": "event" }, "topic": { "const": "lane.create.started" } },
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "lane.create.started" }
+        },
         "required": ["type", "topic"]
       },
       "then": { "required": ["correlation_id", "workspace_id", "lane_id"] }
     },
     {
       "if": {
-        "properties": { "type": { "const": "event" }, "topic": { "const": "lane.created" } },
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "lane.created" }
+        },
         "required": ["type", "topic"]
       },
       "then": { "required": ["correlation_id", "workspace_id", "lane_id"] }
     },
     {
       "if": {
-        "properties": { "type": { "const": "event" }, "topic": { "const": "lane.create.failed" } },
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "lane.create.failed" }
+        },
         "required": ["type", "topic"]
       },
       "then": { "required": ["correlation_id", "workspace_id", "lane_id"] }
@@ -177,14 +208,21 @@
         },
         "required": ["type", "topic"]
       },
-      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
     },
     {
       "if": {
-        "properties": { "type": { "const": "event" }, "topic": { "const": "session.attached" } },
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "session.attached" }
+        },
         "required": ["type", "topic"]
       },
-      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
     },
     {
       "if": {
@@ -194,7 +232,9 @@
         },
         "required": ["type", "topic"]
       },
-      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
     },
     {
       "if": {
@@ -204,11 +244,16 @@
         },
         "required": ["type", "topic"]
       },
-      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
     },
     {
       "if": {
-        "properties": { "type": { "const": "event" }, "topic": { "const": "terminal.spawned" } },
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "terminal.spawned" }
+        },
         "required": ["type", "topic"]
       },
       "then": {
@@ -223,7 +268,9 @@
         },
         "required": ["type", "topic"]
       },
-      "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
     }
   ],
   "additionalProperties": false

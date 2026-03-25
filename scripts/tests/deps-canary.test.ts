@@ -14,11 +14,11 @@ describe("Dependency Canary Upgrade Process", () => {
     writeFileSync(CHANGELOG_PATH, JSON.stringify(empty, null, 2));
   });
 
-  afterEach(() => {
-    // Reset changelog after tests
-    const empty: DepsChangelog = { entries: [] };
-    writeFileSync(CHANGELOG_PATH, JSON.stringify(empty, null, 2));
-  });
+	afterEach(() => {
+		// Reset changelog after tests
+		const empty: DepsChangelog = { entries: [] };
+		writeFileSync(CHANGELOG_PATH, JSON.stringify(empty, null, 2));
+	});
 
   test("registry contains dependencies for canary to process", () => {
     const registry: DepsRegistry = JSON.parse(readFileSync(REGISTRY_PATH, "utf-8"));
@@ -114,10 +114,10 @@ describe("Dependency Canary Upgrade Process", () => {
       typecheck: true,
     };
 
-    expect(gateResults.lint).toBeDefined();
-    expect(gateResults.test).toBeDefined();
-    expect(gateResults.typecheck).toBeDefined();
-  });
+		expect(gateResults.lint).toBeDefined();
+		expect(gateResults.test).toBeDefined();
+		expect(gateResults.typecheck).toBeDefined();
+	});
 
   test("canary partial gate failure is captured", () => {
     const gateResults = {
@@ -147,10 +147,10 @@ describe("Dependency Canary Upgrade Process", () => {
     const conflict1 = `${baseBranch}-conflict-1`;
     const conflict2 = `${baseBranch}-conflict-2`;
 
-    // Verify we can generate unique names
-    expect(conflict1).not.toBe(conflict2);
-    expect(conflict1).toContain(baseBranch);
-  });
+		// Verify we can generate unique names
+		expect(conflict1).not.toBe(conflict2);
+		expect(conflict1).toContain(baseBranch);
+	});
 
   test("canary records actor as ci when run by CI system", () => {
     const entry: ChangelogEntry = {
@@ -224,8 +224,8 @@ describe("Dependency Canary Upgrade Process", () => {
       actor: "ci",
     };
 
-    changelog.entries.push(entry1);
-    changelog.entries.push(entry2);
+		changelog.entries.push(entry1);
+		changelog.entries.push(entry2);
 
     expect(changelog.entries.length).toBe(2);
     expect(changelog.entries[0].package).toBe("package1");
@@ -241,9 +241,9 @@ describe("Dependency Canary Upgrade Process", () => {
     const _targetPackage = registry.dependencies[1];
     // (would modify targetPackage but not dep1)
 
-    // Verify dep1 unchanged
-    expect(dep1.currentPin).toBe(dep1Pin);
-  });
+		// Verify dep1 unchanged
+		expect(dep1.currentPin).toBe(dep1Pin);
+	});
 
   test("canary detects no upgrades available and skips gracefully", () => {
     // When no upgrades are available

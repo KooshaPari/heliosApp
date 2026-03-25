@@ -8,37 +8,37 @@ import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 interface PackageCoverage {
-  name: string;
-  lines: number;
-  functions: number;
-  branches: number;
-  statements: number;
-  pass: boolean;
+	name: string;
+	lines: number;
+	functions: number;
+	branches: number;
+	statements: number;
+	pass: boolean;
 }
 
 interface CoverageManifest {
-  timestamp: string;
-  commitSha: string;
-  threshold: number;
-  packages: PackageCoverage[];
-  aggregate: {
-    lines: number;
-    functions: number;
-    branches: number;
-    statements: number;
-    pass: boolean;
-  };
-  metadata: {
-    totalTests: number;
-    totalDuration: number;
-  };
+	timestamp: string;
+	commitSha: string;
+	threshold: number;
+	packages: PackageCoverage[];
+	aggregate: {
+		lines: number;
+		functions: number;
+		branches: number;
+		statements: number;
+		pass: boolean;
+	};
+	metadata: {
+		totalTests: number;
+		totalDuration: number;
+	};
 }
 
 /**
  * Generate coverage manifest.
  */
 function generateManifest(): CoverageManifest {
-  const threshold = 85;
+	const threshold = 85;
 
   // Sample data (in production, would parse Vitest coverage output)
   const packages: PackageCoverage[] = [
@@ -60,13 +60,13 @@ function generateManifest(): CoverageManifest {
     },
   ];
 
-  const aggregate = {
-    lines: Math.round((92 + 88) / 2),
-    functions: Math.round((90 + 87) / 2),
-    branches: Math.round((85 + 84) / 2),
-    statements: Math.round((92 + 88) / 2),
-    pass: true,
-  };
+	const aggregate = {
+		lines: Math.round((92 + 88) / 2),
+		functions: Math.round((90 + 87) / 2),
+		branches: Math.round((85 + 84) / 2),
+		statements: Math.round((92 + 88) / 2),
+		pass: true,
+	};
 
   return {
     timestamp: new Date().toISOString(),

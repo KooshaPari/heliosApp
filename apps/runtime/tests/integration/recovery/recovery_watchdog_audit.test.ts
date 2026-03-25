@@ -56,7 +56,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     const unrecoverableCheckpoint = {
       ...checkpoint,
       sessions: [
-        ...checkpoint.sessions,
+        ...(checkpoint.sessions as Array<Record<string, unknown>>),
         {
           session_id: "session-orphan",
           workspace_id: "ws-1",
@@ -65,7 +65,9 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
         },
       ],
     };
-    const runtimeC = createRuntime({ recovery_metadata: unrecoverableCheckpoint });
+    const runtimeC = createRuntime({
+      recovery_metadata: unrecoverableCheckpoint,
+    });
     const brokenBootstrap = runtimeC.getBootstrapResult();
 
     expect(brokenBootstrap?.issues.some(issue => issue.state === "unrecoverable")).toBe(true);
@@ -166,14 +168,18 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     });
     expect(stillHealthy.status).toBe("ok");
 
-    const auditBundle = runtime.exportAuditBundle({ correlation_id: "corr-harness" });
+    const auditBundle = runtime.exportAuditBundle({
+      correlation_id: "corr-harness",
+    });
     expect(auditBundle.count).toBeGreaterThan(0);
     const redactedRecord = auditBundle.records.find(record => record.type === "command");
     expect(redactedRecord?.payload?.api_key).toBe("[REDACTED]");
 
     const allRecords = await runtime.getAuditRecords();
     for (let i = 1; i < allRecords.length; i += 1) {
-      expect(allRecords[i]?.recorded_at >= allRecords[i - 1]?.recorded_at).toBe(true);
+      expect(
+        (allRecords[i]?.recorded_at as string) >= (allRecords[i - 1]?.recorded_at as string)
+      ).toBe(true);
     }
 
     runtime.shutdown();

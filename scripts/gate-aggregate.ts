@@ -14,11 +14,11 @@ const SUMMARY_OUTPUT = join(REPORT_DIR, "pipeline-summary.json");
  * Read all gate reports from disk.
  */
 function loadGateReports(): GateReport[] {
-  const reports: GateReport[] = [];
+	const reports: GateReport[] = [];
 
-  if (!existsSync(REPORT_DIR)) {
-    return reports;
-  }
+	if (!existsSync(REPORT_DIR)) {
+		return reports;
+	}
 
   const files = readdirSync(REPORT_DIR);
   files
@@ -32,27 +32,27 @@ function loadGateReports(): GateReport[] {
       } catch (_e) {}
     });
 
-  return reports;
+	return reports;
 }
 
 /**
  * Main entry point.
  */
 async function main(): Promise<void> {
-  const reports = loadGateReports();
+	const reports = loadGateReports();
 
   if (reports.length === 0) {
     return;
   }
 
-  const summary = aggregateGateReports(reports);
-  writeGateReport(summary as unknown as GateReport, SUMMARY_OUTPUT);
+	const summary = aggregateGateReports(reports);
+	writeGateReport(summary as unknown as GateReport, SUMMARY_OUTPUT);
 
   if (summary.failedGates.length > 0) {
     process.exit(1);
   }
 
-  process.exit(0);
+	process.exit(0);
 }
 
 main().catch(_e => {

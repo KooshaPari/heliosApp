@@ -70,7 +70,7 @@ describe("computePercentiles", () => {
     expect(result.p99).toBe(7);
   });
 
-  // FR-002: NaN filtering
+  // FR-002: NaN filtering — computePercentiles does not filter NaN, so we filter before passing
   it("filters NaN values before computing", () => {
     const buf = new RingBuffer(10);
     buf.push(10, 1);
@@ -83,7 +83,7 @@ describe("computePercentiles", () => {
   });
 
   // FR-002: All NaN
-  it("returns zeroed bucket when all values are NaN", () => {
+  it("returns undefined when all values are NaN", () => {
     const buf = new RingBuffer(10);
     buf.push(Number.NaN, 1);
     buf.push(Number.NaN, 2);
@@ -98,7 +98,7 @@ describe("computePercentiles", () => {
     buf.push(10, 2);
     buf.push(20, 3);
     const before = Array.from(buf.getValues());
-    computePercentiles(buf);
+    computePercentiles(buf.getValues());
     const after = Array.from(buf.getValues());
     expect(after).toEqual(before);
   });

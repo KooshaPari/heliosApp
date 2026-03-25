@@ -35,7 +35,10 @@ describe("TopologyTracker", () => {
     });
 
     it("uses custom initial dimensions", () => {
-      const topo = tracker.initializeTopology("session-1", { cols: 120, rows: 40 });
+      const topo = tracker.initializeTopology("session-1", {
+        cols: 120,
+        rows: 40,
+      });
 
       expect(topo.tabs[0]?.panes[0]?.dimensions).toEqual({ cols: 120, rows: 40 });
     });

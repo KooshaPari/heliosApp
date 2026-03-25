@@ -12,8 +12,8 @@ import type {
 } from "./governance-types.ts";
 
 const GOVERNANCE_LOG_PATH = path.join(
-  path.dirname(path.dirname(import.meta.url)).replace('file://', ''),
-  'governance-log.jsonl'
+	path.dirname(path.dirname(import.meta.url)).replace("file://", ""),
+	"governance-log.jsonl",
 );
 
 /**
@@ -22,39 +22,39 @@ const GOVERNANCE_LOG_PATH = path.join(
  * Uses atomic write (temp file + rename) to prevent corruption.
  */
 export async function appendGovernanceEntry(
-  entry: GovernanceLogEntry
+	entry: GovernanceLogEntry,
 ): Promise<void> {
-  // Validate entry
-  validateEntry(entry);
-  
-  const jsonLine = JSON.stringify(entry);
-  const tempFile = `${GOVERNANCE_LOG_PATH}.tmp`;
-  
-  try {
-    // Read existing log
-    let content = '';
-    try {
-      content = await fs.readFile(GOVERNANCE_LOG_PATH, 'utf-8');
-    } catch {
-      // File doesn't exist yet, that's ok
-      content = '';
-    }
-    
-    // Append new entry
-    const newContent = content ? `${content}\n${jsonLine}\n` : `${jsonLine}\n`;
-    
-    // Write to temp file
-    await fs.writeFile(tempFile, newContent, 'utf-8');
-    
-    // Atomic rename
-    await fs.rename(tempFile, GOVERNANCE_LOG_PATH);
-  } catch (error) {
-    // Clean up temp file
-    try {
-      await fs.unlink(tempFile);
-    } catch {}
-    throw error;
-  }
+	// Validate entry
+	validateEntry(entry);
+
+	const jsonLine = JSON.stringify(entry);
+	const tempFile = `${GOVERNANCE_LOG_PATH}.tmp`;
+
+	try {
+		// Read existing log
+		let content = "";
+		try {
+			content = await fs.readFile(GOVERNANCE_LOG_PATH, "utf-8");
+		} catch {
+			// File doesn't exist yet, that's ok
+			content = "";
+		}
+
+		// Append new entry
+		const newContent = content ? `${content}\n${jsonLine}\n` : `${jsonLine}\n`;
+
+		// Write to temp file
+		await fs.writeFile(tempFile, newContent, "utf-8");
+
+		// Atomic rename
+		await fs.rename(tempFile, GOVERNANCE_LOG_PATH);
+	} catch (error) {
+		// Clean up temp file
+		try {
+			await fs.unlink(tempFile);
+		} catch {}
+		throw error;
+	}
 }
 
 /**
@@ -107,55 +107,59 @@ function validateEntry(entry: GovernanceLogEntry): void {
 /**
  * Get all self-merges in the past N days.
  */
-export async function getSelfMerges(days: number): Promise<GovernanceLogQueryResult> {
-  const entries = await readAllEntries();
-  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-  
-  const filtered = entries.filter(entry => {
-    const entryDate = new Date(entry.timestamp);
-    return entry.selfMerge && entryDate >= cutoff;
-  });
-  
-  return { entries: filtered, count: filtered.length };
+export async function getSelfMerges(
+	days: number,
+): Promise<GovernanceLogQueryResult> {
+	const entries = await readAllEntries();
+	const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+	const filtered = entries.filter((entry) => {
+		const entryDate = new Date(entry.timestamp);
+		return entry.selfMerge && entryDate >= cutoff;
+	});
+
+	return { entries: filtered, count: filtered.length };
 }
 
 /**
  * Get all merges that used exception ADRs.
  */
 export async function getExceptionADRs(): Promise<GovernanceLogQueryResult> {
-  const entries = await readAllEntries();
-  
-  const filtered = entries.filter(entry => entry.exceptionADRs.length > 0);
-  
-  return { entries: filtered, count: filtered.length };
+	const entries = await readAllEntries();
+
+	const filtered = entries.filter((entry) => entry.exceptionADRs.length > 0);
+
+	return { entries: filtered, count: filtered.length };
 }
 
 /**
  * Get all merges by a specific author.
  */
-export async function getEntriesByAuthor(author: string): Promise<GovernanceLogQueryResult> {
-  const entries = await readAllEntries();
-  
-  const filtered = entries.filter(entry => entry.author === author);
-  
-  return { entries: filtered, count: filtered.length };
+export async function getEntriesByAuthor(
+	author: string,
+): Promise<GovernanceLogQueryResult> {
+	const entries = await readAllEntries();
+
+	const filtered = entries.filter((entry) => entry.author === author);
+
+	return { entries: filtered, count: filtered.length };
 }
 
 /**
  * Get merges within a date range.
  */
 export async function getEntriesInRange(
-  from: Date,
-  to: Date
+	from: Date,
+	to: Date,
 ): Promise<GovernanceLogQueryResult> {
-  const entries = await readAllEntries();
-  
-  const filtered = entries.filter(entry => {
-    const entryDate = new Date(entry.timestamp);
-    return entryDate >= from && entryDate <= to;
-  });
-  
-  return { entries: filtered, count: filtered.length };
+	const entries = await readAllEntries();
+
+	const filtered = entries.filter((entry) => {
+		const entryDate = new Date(entry.timestamp);
+		return entryDate >= from && entryDate <= to;
+	});
+
+	return { entries: filtered, count: filtered.length };
 }
 
 /**
@@ -163,57 +167,63 @@ export async function getEntriesInRange(
  * Checks that all entries conform to the schema.
  */
 export async function validateGovernanceLog(): Promise<ValidationResult> {
-  try {
-    const content = await fs.readFile(GOVERNANCE_LOG_PATH, 'utf-8');
-    const lines = content.trim().split('\n').filter(line => line.length > 0);
-    
-    const invalidEntries: Array<{line: number; error: string}> = [];
-    
-    for (let i = 0; i < lines.length; i++) {
-      try {
-        const entry = JSON.parse(lines[i]) as GovernanceLogEntry;
-        validateEntry(entry);
-      } catch (error) {
-        invalidEntries.push({
-          line: i + 1,
-          error: error instanceof Error ? error.message : String(error)
-        });
-      }
-    }
-    
-    return {
-      valid: invalidEntries.length === 0,
-      totalEntries: lines.length,
-      invalidEntries
-    };
-  } catch (error) {
-    return {
-      valid: false,
-      totalEntries: 0,
-      invalidEntries: [
-        {
-          line: 0,
-          error: error instanceof Error ? error.message : 'Failed to read governance log'
-        }
-      ]
-    };
-  }
+	try {
+		const content = await fs.readFile(GOVERNANCE_LOG_PATH, "utf-8");
+		const lines = content
+			.trim()
+			.split("\n")
+			.filter((line) => line.length > 0);
+
+		const invalidEntries: Array<{ line: number; error: string }> = [];
+
+		for (let i = 0; i < lines.length; i++) {
+			try {
+				const entry = JSON.parse(lines[i]) as GovernanceLogEntry;
+				validateEntry(entry);
+			} catch (error) {
+				invalidEntries.push({
+					line: i + 1,
+					error: error instanceof Error ? error.message : String(error),
+				});
+			}
+		}
+
+		return {
+			valid: invalidEntries.length === 0,
+			totalEntries: lines.length,
+			invalidEntries,
+		};
+	} catch (error) {
+		return {
+			valid: false,
+			totalEntries: 0,
+			invalidEntries: [
+				{
+					line: 0,
+					error:
+						error instanceof Error
+							? error.message
+							: "Failed to read governance log",
+				},
+			],
+		};
+	}
 }
 
 /**
  * Read all entries from the governance log.
  */
 async function readAllEntries(): Promise<GovernanceLogEntry[]> {
-  try {
-    const content = await fs.readFile(GOVERNANCE_LOG_PATH, 'utf-8');
-    return content
-      .trim()
-      .split('\n')
-      .filter(line => line.length > 0)
-      .map(line => JSON.parse(line) as GovernanceLogEntry);
-  } catch {
-    return [];
-  }
+	try {
+		const content = await fs.readFile(GOVERNANCE_LOG_PATH, "utf-8");
+		return content
+			.trim()
+			.split("\n")
+			.filter((line) => line.length > 0)
+			.map((line) => JSON.parse(line) as GovernanceLogEntry);
+	} catch {
+		return [];
+	}
 }
 
 /**

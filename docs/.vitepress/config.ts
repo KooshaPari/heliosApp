@@ -29,7 +29,10 @@ export default defineConfig({
         },
       ],
       "/development/": [
-        { text: "Development Guide", items: [{ text: "Overview", link: "/development/" }] },
+        {
+          text: "Development Guide",
+          items: [{ text: "Overview", link: "/development/" }],
+        },
       ],
       "/index/": [
         {

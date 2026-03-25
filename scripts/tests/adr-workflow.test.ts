@@ -13,13 +13,13 @@ describe("ADR Exception Workflow", () => {
     await fs.mkdir(ADR_DIR, { recursive: true });
   });
 
-  afterAll(async () => {
-    try {
-      await fs.rm(ADR_DIR, { recursive: true });
-    } catch {
-      // Ignore cleanup errors
-    }
-  });
+	afterAll(async () => {
+		try {
+			await fs.rm(ADR_DIR, { recursive: true });
+		} catch {
+			// Ignore cleanup errors
+		}
+	});
 
   test("validates ADR with sunset date and 3 approvals", async () => {
     const adrContent = `# ADR-2026-001: Test Exception
@@ -44,8 +44,8 @@ Test exception for testing purposes.
 - @reviewer2
 - @reviewer3`;
 
-    const adrPath = `${ADR_DIR}/ADR-2026-001.md`;
-    await fs.writeFile(adrPath, adrContent);
+		const adrPath = `${ADR_DIR}/ADR-2026-001.md`;
+		await fs.writeFile(adrPath, adrContent);
 
     // Parse and validate
     const content = await fs.readFile(adrPath, "utf-8");
@@ -53,10 +53,10 @@ Test exception for testing purposes.
     const hasSunset = content.includes("Sunset Date");
     const approvals = (content.match(/@reviewer/g) || []).length;
 
-    expect(hasStatus).toBe(true);
-    expect(hasSunset).toBe(true);
-    expect(approvals).toBeGreaterThanOrEqual(3);
-  });
+		expect(hasStatus).toBe(true);
+		expect(hasSunset).toBe(true);
+		expect(approvals).toBeGreaterThanOrEqual(3);
+	});
 
   test("rejects ADR without sunset date", async () => {
     const adrContent = `# ADR-2026-002: No Sunset
@@ -78,8 +78,8 @@ Exception without sunset date - should be rejected.
 - @reviewer2
 - @reviewer3`;
 
-    const adrPath = `${ADR_DIR}/ADR-2026-002.md`;
-    await fs.writeFile(adrPath, adrContent);
+		const adrPath = `${ADR_DIR}/ADR-2026-002.md`;
+		await fs.writeFile(adrPath, adrContent);
 
     const content = await fs.readFile(adrPath, "utf-8");
     const hasSunset =
@@ -90,8 +90,8 @@ Exception without sunset date - should be rejected.
     const hasPermanence = content.includes("Permanence Justification");
     const isValid = hasSunset || hasPermanence;
 
-    expect(isValid).toBe(false);
-  });
+		expect(isValid).toBe(false);
+	});
 
   test("rejects ADR with insufficient approvals (< 3)", async () => {
     const adrContent = `# ADR-2026-003: Low Approvals
@@ -115,14 +115,14 @@ Exception with only 2 approvals - should be rejected.
 - @reviewer1
 - @reviewer2`;
 
-    const adrPath = `${ADR_DIR}/ADR-2026-003.md`;
-    await fs.writeFile(adrPath, adrContent);
+		const adrPath = `${ADR_DIR}/ADR-2026-003.md`;
+		await fs.writeFile(adrPath, adrContent);
 
     const content = await fs.readFile(adrPath, "utf-8");
     const approvals = (content.match(/@reviewer/g) || []).length;
 
-    expect(approvals).toBeLessThan(3);
-  });
+		expect(approvals).toBeLessThan(3);
+	});
 
   test("accepts ADR with permanence justification (no sunset)", async () => {
     const adrContent = `# ADR-2026-004: Permanent Exception
@@ -147,16 +147,16 @@ This file is auto-generated from schema definitions. Splitting would require cus
 - @reviewer2
 - @reviewer3`;
 
-    const adrPath = `${ADR_DIR}/ADR-2026-004.md`;
-    await fs.writeFile(adrPath, adrContent);
+		const adrPath = `${ADR_DIR}/ADR-2026-004.md`;
+		await fs.writeFile(adrPath, adrContent);
 
     const content = await fs.readFile(adrPath, "utf-8");
     const hasPermanence = content.includes("Permanence Justification");
     const approvals = (content.match(/@reviewer/g) || []).length;
 
-    expect(hasPermanence).toBe(true);
-    expect(approvals).toBeGreaterThanOrEqual(3);
-  });
+		expect(hasPermanence).toBe(true);
+		expect(approvals).toBeGreaterThanOrEqual(3);
+	});
 
   test("detects expired ADR (past sunset date)", async () => {
     const adrContent = `# ADR-2026-005: Expired
@@ -176,8 +176,8 @@ This ADR has expired.
 ## Sunset Date
 2026-01-31`;
 
-    const adrPath = `${ADR_DIR}/ADR-2026-005.md`;
-    await fs.writeFile(adrPath, adrContent);
+		const adrPath = `${ADR_DIR}/ADR-2026-005.md`;
+		await fs.writeFile(adrPath, adrContent);
 
     const content = await fs.readFile(adrPath, "utf-8");
     const sunsetMatch = content.match(/Sunset Date\n(\d{4}-\d{2}-\d{2})/);
@@ -187,18 +187,22 @@ This ADR has expired.
       const now = new Date();
       const isExpired = sunsetDate < now;
 
-      expect(isExpired).toBe(true);
-    }
-  });
+		if (sunsetMatch) {
+			const sunsetDate = new Date(sunsetMatch[1]);
+			const now = new Date();
+			const isExpired = sunsetDate < now;
 
   test("validates ADR file naming convention", async () => {
     const validNames = ["ADR-2026-001.md", "ADR-2026-042.md", "ADR-2027-100.md"];
 
-    const adrNameRegex = /^ADR-\d{4}-\d{3}\.md$/;
+	test("validates ADR file naming convention", async () => {
+		const validNames = [
+			"ADR-2026-001.md",
+			"ADR-2026-042.md",
+			"ADR-2027-100.md",
+		];
 
-    validNames.forEach(name => {
-      expect(adrNameRegex.test(name)).toBe(true);
-    });
+		const adrNameRegex = /^ADR-\d{4}-\d{3}\.md$/;
 
     const invalidNames = [
       "adr-2026-001.md", // lowercase
@@ -206,10 +210,11 @@ This ADR has expired.
       "ADR-26-001.md", // short year
     ];
 
-    invalidNames.forEach(name => {
-      expect(adrNameRegex.test(name)).toBe(false);
-    });
-  });
+		const invalidNames = [
+			"adr-2026-001.md", // lowercase
+			"ADR-2026-01.md", // single digit number
+			"ADR-26-001.md", // short year
+		];
 
   test("ADR with valid exception updates governance log", async () => {
     // Simulate a merge with ADR

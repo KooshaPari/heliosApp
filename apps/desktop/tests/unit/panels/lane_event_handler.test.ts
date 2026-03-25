@@ -167,7 +167,7 @@ describe("LaneEventHandler", () => {
     handler = new LaneEventHandler({
       bus: mockBus,
       onBusConnectivityIssue,
-      busTimeoutMs: 100, // Short timeout for testing
+      busTimeoutMs: 50, // Short timeout for testing
     });
     handler.mount();
 
@@ -182,7 +182,7 @@ describe("LaneEventHandler", () => {
     handler = new LaneEventHandler({
       bus: mockBus,
       onBusConnectivityIssue,
-      busTimeoutMs: 100,
+      busTimeoutMs: 50,
     });
     handler.mount();
 

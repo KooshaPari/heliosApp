@@ -43,7 +43,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/013-renderer-switch-transaction/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/013-renderer-switch-transaction/spec.md`
 - Renderer adapter interface: spec 010 (`apps/runtime/src/renderer/`)
@@ -195,3 +195,4 @@ Implementation command:
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:29:08Z – claude-haiku – shell_pid=53525 – lane=doing – Assigned agent via workflow command
 - 2026-03-01T13:30:57Z – claude-haiku – shell_pid=53525 – lane=done – Implemented: Switch state machine, capability matrix, PTY stream proxy, and lifecycle event emission with comprehensive unit tests (54 tests passing)
+- 2026-03-01T13:41:01Z – claude-haiku – shell_pid=53525 – lane=done – Merged

@@ -112,7 +112,10 @@ export class EncryptionService {
       // Fall back to file
       const dir = join(homedir(), ".helios");
       mkdirSync(dir, { recursive: true });
-      writeFileSync(keyPath, newKey.toString("hex"), { encoding: "utf8", mode: 0o600 });
+      writeFileSync(keyPath, newKey.toString("hex"), {
+        encoding: "utf8",
+        mode: 0o600,
+      });
       chmodSync(keyPath, 0o600);
     }
 

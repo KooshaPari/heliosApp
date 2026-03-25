@@ -23,18 +23,18 @@ function encodeTime(timestamp: number): string {
 }
 
 function randomValues(count: number): Uint8Array {
-  const buffer = new Uint8Array(count);
-  crypto.getRandomValues(buffer);
-  return buffer;
+	const buffer = new Uint8Array(count);
+	crypto.getRandomValues(buffer);
+	return buffer;
 }
 
 function generateRandomChars(): number[] {
-  const bytes = randomValues(RANDOM_LEN);
-  const chars: number[] = new Array(RANDOM_LEN);
-  for (let i = 0; i < RANDOM_LEN; i++) {
-    chars[i] = bytes[i] % ENCODING_LEN;
-  }
-  return chars;
+	const bytes = randomValues(RANDOM_LEN);
+	const chars: number[] = new Array(RANDOM_LEN);
+	for (let i = 0; i < RANDOM_LEN; i++) {
+		chars[i] = bytes[i] % ENCODING_LEN;
+	}
+	return chars;
 }
 
 function incrementRandom(random: number[]): number[] {
@@ -58,21 +58,21 @@ function encodeRandom(chars: number[]): string {
 }
 
 function generateUlid(): string {
-  let now = Date.now();
+	let now = Date.now();
 
-  // Handle backward clock — always move forward
-  if (now <= lastTimestamp) {
-    now = lastTimestamp;
-  }
+	// Handle backward clock — always move forward
+	if (now <= lastTimestamp) {
+		now = lastTimestamp;
+	}
 
-  if (now === lastTimestamp) {
-    lastRandom = incrementRandom(lastRandom);
-  } else {
-    lastTimestamp = now;
-    lastRandom = generateRandomChars();
-  }
+	if (now === lastTimestamp) {
+		lastRandom = incrementRandom(lastRandom);
+	} else {
+		lastTimestamp = now;
+		lastRandom = generateRandomChars();
+	}
 
-  return encodeTime(now) + encodeRandom(lastRandom);
+	return encodeTime(now) + encodeRandom(lastRandom);
 }
 
 function decodeTime(encoded: string): number {

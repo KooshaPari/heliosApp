@@ -93,15 +93,15 @@ describe("Dependency Status Command", () => {
       return Math.floor(ms / (1000 * 60 * 60 * 24));
     }
 
-    const now = new Date();
-    const oneDayAgo = new Date(now.getTime() - 86400000);
-    const days = daysSince(oneDayAgo.toISOString());
-    expect(days).toBe(1);
+		const now = new Date();
+		const oneDayAgo = new Date(now.getTime() - 86400000);
+		const days = daysSince(oneDayAgo.toISOString());
+		expect(days).toBe(1);
 
-    const thirtyDaysAgo = new Date(now.getTime() - 86400000 * 30);
-    const daysOld = daysSince(thirtyDaysAgo.toISOString());
-    expect(daysOld).toBe(30);
-  });
+		const thirtyDaysAgo = new Date(now.getTime() - 86400000 * 30);
+		const daysOld = daysSince(thirtyDaysAgo.toISOString());
+		expect(daysOld).toBe(30);
+	});
 
   test("status enum values are valid", () => {
     const validStatuses = ["up-to-date", "upgrade-available", "stale", "error"];
@@ -139,14 +139,14 @@ describe("Dependency Status Command", () => {
       { hasErrors: true, hasUpgrades: true, expectedCode: 2 },
     ];
 
-    testCases.forEach(({ hasErrors, hasUpgrades, expectedCode }) => {
-      let actualCode = 0;
-      if (hasErrors) {
-        actualCode = 2;
-      } else if (hasUpgrades) {
-        actualCode = 1;
-      }
-      expect(actualCode).toBe(expectedCode);
-    });
-  });
+		testCases.forEach(({ hasErrors, hasUpgrades, expectedCode }) => {
+			let actualCode = 0;
+			if (hasErrors) {
+				actualCode = 2;
+			} else if (hasUpgrades) {
+				actualCode = 1;
+			}
+			expect(actualCode).toBe(expectedCode);
+		});
+	});
 });

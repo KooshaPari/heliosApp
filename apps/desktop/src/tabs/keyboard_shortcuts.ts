@@ -45,7 +45,6 @@ export class KeyboardShortcuts {
   private handler: ShortcutHandler | null = null;
   private listeners: Set<(action: ShortcutAction) => void> = new Set();
   private configPath: string;
-  private isMac: boolean = typeof navigator !== "undefined" && /Mac/.test(navigator.platform);
 
   constructor(configDir?: string) {
     this.configPath = path.join(
@@ -102,7 +101,7 @@ export class KeyboardShortcuts {
    * Get shortcut for an action.
    */
   getShortcut(action: ShortcutAction): string {
-    return this.shortcuts[action] ?? DEFAULT_SHORTCUTS[action];
+    return this.shortcuts[action] ?? DEFAULT_SHORTCUTS[action] ?? "";
   }
 
   /**
@@ -183,8 +182,10 @@ export class KeyboardShortcuts {
   private eventToShortcut(event: KeyboardEvent): string {
     const parts: string[] = [];
 
-    if (event.ctrlKey || (this.isMac && event.metaKey)) {
-      parts.push(this.isMac ? "Cmd" : "Ctrl");
+    if (event.metaKey) {
+      parts.push("Cmd");
+    } else if (event.ctrlKey) {
+      parts.push("Ctrl");
     }
     if (event.altKey) {
       parts.push("Alt");
@@ -215,9 +216,7 @@ export class KeyboardShortcuts {
     this.reverseShortcuts.clear();
 
     for (const [action, shortcut] of Object.entries(this.shortcuts)) {
-      // Normalize Mac Cmd to Ctrl for matching
-      const normalizedShortcut = shortcut.replace(/Cmd/g, this.isMac ? "Cmd" : "Ctrl");
-      this.reverseShortcuts.set(normalizedShortcut, action as ShortcutAction);
+      this.reverseShortcuts.set(shortcut, action as ShortcutAction);
     }
   }
 

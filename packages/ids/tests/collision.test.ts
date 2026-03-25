@@ -32,23 +32,23 @@ describe("collision resistance", () => {
         })()
       );
 
-      const results = await Promise.all(batches);
-      const allIds = results.flat();
+			const results = await Promise.all(batches);
+			const allIds = results.flat();
 
-      expect(allIds.length).toBe(TOTAL_IDS);
+			expect(allIds.length).toBe(TOTAL_IDS);
 
-      // Check for collisions using a Set
-      const uniqueSet = new Set(allIds);
-      expect(uniqueSet.size).toBe(TOTAL_IDS);
+			// Check for collisions using a Set
+			const uniqueSet = new Set(allIds);
+			expect(uniqueSet.size).toBe(TOTAL_IDS);
 
-      // Validate a sample (validating all 10M would be slow)
-      const sampleSize = 10_000;
-      for (let i = 0; i < sampleSize; i++) {
-        const idx = Math.floor(Math.random() * allIds.length);
-        const result = validateId(allIds[idx]);
-        expect(result.valid).toBe(true);
-      }
-    },
-    { timeout: 60_000 }
-  );
+			// Validate a sample (validating all 10M would be slow)
+			const sampleSize = 10_000;
+			for (let i = 0; i < sampleSize; i++) {
+				const idx = Math.floor(Math.random() * allIds.length);
+				const result = validateId(allIds[idx]);
+				expect(result.valid).toBe(true);
+			}
+		},
+		{ timeout: 60_000 },
+	);
 });

@@ -39,7 +39,7 @@ describe("Dependency Changelog Utility", () => {
       actor: "ci",
     };
 
-    appendChangelogEntry(entry);
+		appendChangelogEntry(entry);
 
     const changelog = loadChangelog();
     expect(changelog.entries.length).toBe(1);
@@ -168,8 +168,8 @@ describe("Dependency Changelog Utility", () => {
       actor: "user",
     };
 
-    appendChangelogEntry(entry1);
-    appendChangelogEntry(entry2);
+		appendChangelogEntry(entry1);
+		appendChangelogEntry(entry2);
 
     const changelog = loadChangelog();
     expect(changelog.entries.length).toBe(2);
@@ -190,7 +190,7 @@ describe("Dependency Changelog Utility", () => {
       branchRef: "canary/electrobun-upgrade",
     };
 
-    appendChangelogEntry(entry);
+		appendChangelogEntry(entry);
 
     const changelog = loadChangelog();
     expect(changelog.entries[0].branchRef).toBe("canary/electrobun-upgrade");
@@ -208,11 +208,11 @@ describe("Dependency Changelog Utility", () => {
       actor: "ci",
     };
 
-    appendChangelogEntry(entry);
+		appendChangelogEntry(entry);
 
-    const changelog = loadChangelog();
-    expect(changelog.entries[0].branchRef).toBeUndefined();
-  });
+		const changelog = loadChangelog();
+		expect(changelog.entries[0].branchRef).toBeUndefined();
+	});
 
   test("loadChangelog initializes empty if file does not exist", () => {
     rmSync(CHANGELOG_PATH, { force: true });
@@ -234,12 +234,12 @@ describe("Dependency Changelog Utility", () => {
       actor: "ci",
     };
 
-    appendChangelogEntry(entry);
+		appendChangelogEntry(entry);
 
-    expect(existsSync(CHANGELOG_PATH)).toBe(true);
-    const changelog = loadChangelog();
-    expect(changelog.entries.length).toBe(1);
-  });
+		expect(existsSync(CHANGELOG_PATH)).toBe(true);
+		const changelog = loadChangelog();
+		expect(changelog.entries.length).toBe(1);
+	});
 
   test("atomic write prevents partial corruption on failure", () => {
     const entry1: ChangelogEntry = {
@@ -253,11 +253,11 @@ describe("Dependency Changelog Utility", () => {
       actor: "ci",
     };
 
-    appendChangelogEntry(entry1);
+		appendChangelogEntry(entry1);
 
-    // Verify first entry is intact
-    let changelog = loadChangelog();
-    expect(changelog.entries.length).toBe(1);
+		// Verify first entry is intact
+		let changelog = loadChangelog();
+		expect(changelog.entries.length).toBe(1);
 
     const entry2: ChangelogEntry = {
       timestamp: "2026-03-01T14:00:00Z",
@@ -270,7 +270,7 @@ describe("Dependency Changelog Utility", () => {
       actor: "ci",
     };
 
-    appendChangelogEntry(entry2);
+		appendChangelogEntry(entry2);
 
     // Verify both entries are intact
     changelog = loadChangelog();
@@ -294,9 +294,9 @@ describe("Dependency Changelog Utility", () => {
         actor: "user",
       };
 
-      expect(() => validateChangelogEntry(entry)).not.toThrow();
-    });
-  });
+			expect(() => validateChangelogEntry(entry)).not.toThrow();
+		});
+	});
 
   test("validateChangelogEntry accepts all valid outcome values", () => {
     const outcomes: Array<"success" | "failure" | "rollback"> = ["success", "failure", "rollback"];
@@ -313,9 +313,9 @@ describe("Dependency Changelog Utility", () => {
         actor: "user",
       };
 
-      expect(() => validateChangelogEntry(entry)).not.toThrow();
-    });
-  });
+			expect(() => validateChangelogEntry(entry)).not.toThrow();
+		});
+	});
 
   test("validateChangelogEntry accepts all valid actor values", () => {
     const actors: Array<"user" | "ci" | "canary"> = ["user", "ci", "canary"];
@@ -332,7 +332,7 @@ describe("Dependency Changelog Utility", () => {
         actor,
       };
 
-      expect(() => validateChangelogEntry(entry)).not.toThrow();
-    });
-  });
+			expect(() => validateChangelogEntry(entry)).not.toThrow();
+		});
+	});
 });

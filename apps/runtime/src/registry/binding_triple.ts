@@ -86,10 +86,6 @@ export function validateBindingTriple(
     );
   }
 
-  if (errors.length > 0) {
-    return { valid: false, errors };
-  }
-
   // Validate existence in registries
   if (!queryInterface.workspaceExists(triple.workspaceId)) {
     errors.push(`Workspace does not exist: ${triple.workspaceId}`);
@@ -99,10 +95,6 @@ export function validateBindingTriple(
   }
   if (!queryInterface.sessionExists(triple.sessionId)) {
     errors.push(`Session does not exist: ${triple.sessionId}`);
-  }
-
-  if (errors.length > 0) {
-    return { valid: false, errors };
   }
 
   // Validate cross-references
@@ -128,7 +120,7 @@ export function createBinding(terminalId: string, triple: BindingTriple): Termin
   return {
     terminalId,
     binding: triple,
-    state: BindingState.Bound,
+    state: BindingState.bound,
     createdAt: now,
     updatedAt: now,
   };

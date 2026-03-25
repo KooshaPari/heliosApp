@@ -16,15 +16,15 @@ function parseTypeCheckLog(): GateFinding[] {
   const findings: GateFinding[] = [];
   const logPath = "/tmp/typecheck.log";
 
-  if (!existsSync(logPath)) {
-    return findings;
-  }
+	if (!existsSync(logPath)) {
+		return findings;
+	}
 
   const output = readFileSync(logPath, "utf-8");
   const lines = output.split("\n");
 
-  // Parse tsc error format: file.ts(line,col): error TS####: message
-  const errorPattern = /^(.+?)\((\d+),(\d+)\):\s+error\s+(\w+):\s+(.+)$/;
+	// Parse tsc error format: file.ts(line,col): error TS####: message
+	const errorPattern = /^(.+?)\((\d+),(\d+)\):\s+error\s+(\w+):\s+(.+)$/;
 
   lines.forEach(line => {
     const match = line.match(errorPattern);
@@ -41,16 +41,16 @@ function parseTypeCheckLog(): GateFinding[] {
     }
   });
 
-  return findings;
+	return findings;
 }
 
 /**
  * Main entry point.
  */
 async function main(): Promise<void> {
-  const startTime = Date.now();
-  const findings = parseTypeCheckLog();
-  const duration = Date.now() - startTime;
+	const startTime = Date.now();
+	const findings = parseTypeCheckLog();
+	const duration = Date.now() - startTime;
 
   const report = createGateReport("typecheck", findings, duration);
   writeGateReport(report, REPORT_OUTPUT);

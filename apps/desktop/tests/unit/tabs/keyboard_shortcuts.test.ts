@@ -90,7 +90,7 @@ describe("KeyboardShortcuts", () => {
 
       shortcuts.handleKeyboardEvent(event);
 
-      expect(handledAction).toBe("select-terminal");
+      expect(handledAction!).toBe("select-terminal");
     });
 
     it("should support shortcut listeners", () => {

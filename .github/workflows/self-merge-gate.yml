@@ -4,7 +4,6 @@ on:
   pull_request:
     types: [synchronize, opened, reopened]
     branches: [main]
-  status: {}
 
 jobs:
   check-merge-readiness:
@@ -22,7 +21,15 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const { owner, repo, number } = context.issue;
+            // Check if we have a PR number
+            const number = context.issue?.number || context.payload?.pull_request?.number;
+            if (!number) {
+              console.log('No PR number found in context. Skipping self-merge check.');
+              core.setOutput('can-self-merge', 'false');
+              return;
+            }
+
+            const { owner, repo } = context.repo;
 
             // Get PR details
             const pr = await github.rest.pulls.get({
@@ -42,15 +49,12 @@ jobs:
             });
 
             // Track latest review state per reviewer to handle DISMISSED/CHANGES_REQUESTED
-            const latestReviewByUser = {};
+            const approvals = {};
             reviews.data.forEach(review => {
               if (review.state === 'APPROVED') {
-                approvals[review.user.login] = true;
+                latestReviewByUser[review.user.login] = true;
               }
             });
-            const approvals = Object.fromEntries(
-              Object.entries(latestReviewByUser).filter(([, state]) => state === 'APPROVED')
-            );
 
             // Get check runs using Check Runs API (not Status API)
             const commit = pr.data.head;
@@ -130,12 +134,13 @@ jobs:
             core.setOutput('missing-requirements', missing.join('; '));
       
       - name: Comment on missing requirements
-        if: steps.check.outputs.can-self-merge == 'false'
+        if: steps.check.outputs.can-self-merge == 'false' && (context.issue?.number || context.payload?.pull_request?.number)
         uses: actions/github-script@v7
         with:
           script: |
-            const { owner, repo, number } = context.issue;
-            const missingReqs = "${{ steps.check.outputs.missing-requirements }}".split(',');
+            const number = context.issue?.number || context.payload?.pull_request?.number;
+            const { owner, repo } = context.repo;
+            const missingReqs = "${{ steps.check.outputs.missing-requirements }}".split(';');
             
             let message = '⚠️ **Self-merge is blocked due to missing requirements:**\n\n';
             if (!${{ steps.check.outputs.all-checks-passed }}) {
@@ -157,11 +162,12 @@ jobs:
             });
 
       - name: Allow self-merge
-        if: steps.check.outputs.can-self-merge == 'true'
+        if: steps.check.outputs.can-self-merge == 'true' && (context.issue?.number || context.payload?.pull_request?.number)
         uses: actions/github-script@v7
         with:
           script: |
-            const { owner, repo, number } = context.issue;
+            const number = context.issue?.number || context.payload?.pull_request?.number;
+            const { owner, repo } = context.repo;
             github.rest.issues.createComment({
               owner,
               repo,

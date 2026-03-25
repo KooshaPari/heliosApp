@@ -173,10 +173,10 @@ async function benchSustainedThroughput(): Promise<
 
   bus.subscribe("bench.sustained", e => {
     received++;
-    if (e.sequence <= lastSeq) {
+    if ((e.sequence ?? 0) <= lastSeq) {
       violations++;
     }
-    lastSeq = e.sequence;
+    lastSeq = e.sequence ?? 0;
   });
 
   const targetRate = 10_000; // msg/s

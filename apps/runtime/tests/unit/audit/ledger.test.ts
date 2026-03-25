@@ -189,12 +189,12 @@ describe("AuditLedger", () => {
 
       ledger.notifyEvent(event);
 
-      // Wait for batched delivery
+      // Wait for batched delivery (100ms batch interval + setImmediate hop)
       setTimeout(() => {
         expect(callCount).toBe(1);
         unsubscribe();
         done();
-      }, 150);
+      }, 300);
     });
 
     it("should filter non-matching events", done => {

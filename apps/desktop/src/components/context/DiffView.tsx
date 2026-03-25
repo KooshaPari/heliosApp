@@ -72,7 +72,13 @@ export const DiffView: Component<DiffViewProps> = props => {
           </Show>
         </div>
       </div>
-      <div style={{ "font-family": "monospace", "font-size": "12px", "overflow-x": "auto" }}>
+      <div
+        style={{
+          "font-family": "monospace",
+          "font-size": "12px",
+          "overflow-x": "auto",
+        }}
+      >
         <For each={props.lines}>
           {line => {
             const style = lineColor(line.type);

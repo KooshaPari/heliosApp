@@ -15,7 +15,12 @@ describe("MetricsQuery", () => {
 
   // FR-007: getStats returns correct percentiles
   it("getStats returns correct percentiles for recorded data", () => {
-    registry.register({ name: "latency", type: "latency", unit: "ms", description: "test" });
+    registry.register({
+      name: "latency",
+      type: "latency",
+      unit: "ms",
+      description: "test",
+    });
     for (let i = 1; i <= 100; i++) {
       registry.record("latency", i);
     }
@@ -32,14 +37,29 @@ describe("MetricsQuery", () => {
 
   // FR-007: Registered but never recorded returns null (no buffer)
   it("getStats returns null for metric with no samples", () => {
-    registry.register({ name: "empty", type: "gauge", unit: "x", description: "test" });
+    registry.register({
+      name: "empty",
+      type: "gauge",
+      unit: "x",
+      description: "test",
+    });
     expect(query.getStats("empty")).toBeNull();
   });
 
   // FR-007: getAllStats
   it("getAllStats includes all registered metrics with samples", () => {
-    registry.register({ name: "a", type: "gauge", unit: "x", description: "a" });
-    registry.register({ name: "b", type: "gauge", unit: "x", description: "b" });
+    registry.register({
+      name: "a",
+      type: "gauge",
+      unit: "x",
+      description: "a",
+    });
+    registry.register({
+      name: "b",
+      type: "gauge",
+      unit: "x",
+      description: "b",
+    });
     registry.record("a", 10);
     registry.record("b", 20);
 
@@ -52,8 +72,18 @@ describe("MetricsQuery", () => {
 
   // FR-007: getAllStats excludes metrics without samples
   it("getAllStats excludes metrics without samples", () => {
-    registry.register({ name: "recorded", type: "gauge", unit: "x", description: "x" });
-    registry.register({ name: "empty", type: "gauge", unit: "x", description: "x" });
+    registry.register({
+      name: "recorded",
+      type: "gauge",
+      unit: "x",
+      description: "x",
+    });
+    registry.register({
+      name: "empty",
+      type: "gauge",
+      unit: "x",
+      description: "x",
+    });
     registry.record("recorded", 5);
 
     const all = query.getAllStats();

@@ -48,7 +48,9 @@ test("renderer switch failure rolls back and reports safe status", async ({ page
   controlPlane.setWorkspace("workspace_renderer");
 
   await controlPlane.createLane({ workspaceId: "workspace_renderer" });
-  const outcome = await controlPlane.switchRenderer("rio", { forceError: true });
+  const outcome = await controlPlane.switchRenderer("rio", {
+    forceError: true,
+  });
   await page.setContent(renderControlPlaneSnapshot(controlPlane));
 
   expect(outcome.committed).toBe(false);
@@ -61,7 +63,9 @@ test("lane lifecycle supports session restore after reconnect", async ({ page })
   const runtime = createRuntime();
   const controlPlane = bootDesktop({ bus: runtime.bus });
 
-  const lane = await controlPlane.createLane({ workspaceId: "workspace_restore" });
+  const lane = await controlPlane.createLane({
+    workspaceId: "workspace_restore",
+  });
   expect(lane.ok).toBe(true);
   expect(lane.laneId).not.toBeNull();
 

@@ -47,12 +47,7 @@ export {
   emitPtyEvent,
 } from "./events.js";
 
-export {
-  InvalidStateError,
-  type WriteResult,
-  type ProcessMap,
-  writeInput,
-} from "./io.js";
+export { InvalidStateError, type WriteResult, type ProcessMap, writeInput } from "./io.js";
 
 export { IdleMonitor, type IdleMonitorConfig } from "./idle_monitor.js";
 

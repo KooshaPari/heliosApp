@@ -61,15 +61,15 @@ export class BindingMiddleware {
     }
 
     // Check binding state
-    if (binding.state !== BindingState.Bound && binding.state !== BindingState.Rebound) {
+    if (binding.state !== BindingState.bound && binding.state !== BindingState.rebound) {
       return {
         valid: false,
         error: {
           code: "INVALID_BINDING_STATE",
           message: `Terminal binding is in ${binding.state} state, expected 'bound' or 'rebound'`,
           fatal:
-            binding.state === BindingState.ValidationFailed ||
-            binding.state === BindingState.Unbound,
+            binding.state === BindingState.validation_failed ||
+            binding.state === BindingState.unbound,
         },
         binding,
       };
@@ -78,16 +78,16 @@ export class BindingMiddleware {
     // Re-validate binding triple against current state
     const validation = validateBindingTriple(binding.binding, this.registryQueryInterface);
 
-    if (!validation.valid) {
+    if (isStale) {
       // Mark binding as validation failed
-      binding.state = BindingState.ValidationFailed;
+      binding.state = BindingState.validation_failed;
       binding.updatedAt = Date.now();
 
       return {
         valid: false,
         error: {
           code: "STALE_BINDING",
-          message: `Terminal binding validation failed: ${validation.errors.join("; ")}`,
+          message: `Terminal binding is stale: binding context no longer matches registry indexes`,
           fatal: true,
         },
         binding,

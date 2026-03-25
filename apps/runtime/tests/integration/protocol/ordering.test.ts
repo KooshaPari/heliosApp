@@ -97,7 +97,7 @@ describe("Event ordering — per-topic monotonic sequences", () => {
     const promises: Promise<void>[] = [];
     for (let i = 0; i < 100; i++) {
       for (const topic of topicNames) {
-        promises.push(bus.publish(createEvent(topic, { i })));
+        promises.push(bus.publish(createEvent(topic, { i }) as LocalBusEnvelope));
       }
     }
     await Promise.all(promises);

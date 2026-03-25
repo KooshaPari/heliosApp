@@ -16,9 +16,9 @@ function parseE2eLog(): GateFinding[] {
   const findings: GateFinding[] = [];
   const logPath = "/tmp/e2e.log";
 
-  if (!existsSync(logPath)) {
-    return findings;
-  }
+	if (!existsSync(logPath)) {
+		return findings;
+	}
 
   const output = readFileSync(logPath, "utf-8");
 
@@ -44,7 +44,7 @@ function parseE2eLog(): GateFinding[] {
     });
   }
 
-  return findings;
+	return findings;
 }
 
 /**

@@ -162,13 +162,21 @@ export class MockRendererAdapter implements RendererAdapter {
 
 export class MockGhosttyAdapter extends MockRendererAdapter {
   constructor(opts: MockAdapterOptions = {}, caps?: Partial<RendererCapabilities>) {
-    super("ghostty", "0.15.0", opts, { gpuAccelerated: true, sixelSupport: true, ...caps });
+    super("ghostty", "0.15.0", opts, {
+      gpuAccelerated: true,
+      sixelSupport: true,
+      ...caps,
+    });
   }
 }
 
 export class MockRioAdapter extends MockRendererAdapter {
   constructor(opts: MockAdapterOptions = {}, caps?: Partial<RendererCapabilities>) {
-    super("rio", "0.1.0", opts, { gpuAccelerated: true, sixelSupport: false, ...caps });
+    super("rio", "0.1.0", opts, {
+      gpuAccelerated: true,
+      sixelSupport: false,
+      ...caps,
+    });
   }
 }
 

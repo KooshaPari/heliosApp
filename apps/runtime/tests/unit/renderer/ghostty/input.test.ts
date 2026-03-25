@@ -186,7 +186,10 @@ describe("GhosttyInputRelay - metrics integration", () => {
 
     relay.setupInputRelay("pty-1", ghosttyProcess);
     relay.setFocus("pty-1");
-    relay.relayInput({ data: new Uint8Array([0x41]), timestamp: Date.now() - 10 });
+    relay.relayInput({
+      data: new Uint8Array([0x41]),
+      timestamp: Date.now() - 10,
+    });
 
     const snap = metrics.getSnapshot();
     // Input latency should have been recorded

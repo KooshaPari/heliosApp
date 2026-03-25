@@ -16,7 +16,7 @@ interface GateResult {
  * Run a single gate.
  */
 async function runGate(gateName: string): Promise<GateReport> {
-  const startTime = Date.now();
+	const startTime = Date.now();
 
   // Placeholder implementations - in production would run actual gate logic
   switch (gateName) {
@@ -62,8 +62,8 @@ async function main(): Promise<void> {
     "bypass-detect",
   ];
 
-  const gatesToRun = specificGate ? [specificGate] : gateNames;
-  const reports: GateReport[] = [];
+	const gatesToRun = specificGate ? [specificGate] : gateNames;
+	const reports: GateReport[] = [];
 
   for (const gateName of gatesToRun) {
     try {
@@ -85,7 +85,7 @@ async function main(): Promise<void> {
     process.exit(summary.status === "pass" ? 0 : 1);
   }
 
-  process.exit(0);
+	process.exit(0);
 }
 
 main().catch(_e => {

@@ -12,13 +12,13 @@ function parseLiteralArray(tsPath, constName) {
 }
 
 function readJson(path) {
-  return JSON.parse(readFileSync(path, "utf8"));
+	return JSON.parse(readFileSync(path, "utf8"));
 }
 
 function ensure(condition, errors, message) {
-  if (!condition) {
-    errors.push(message);
-  }
+	if (!condition) {
+		errors.push(message);
+	}
 }
 
 function collectNames(entries) {
@@ -88,7 +88,8 @@ function validateMatrixEntries(kind, formalEntries, matrixEntries, errors) {
 
 const args = process.argv.slice(2);
 const fixtureRootArgIndex = args.indexOf("--fixture-root");
-const fixtureRoot = fixtureRootArgIndex >= 0 ? args[fixtureRootArgIndex + 1] : ".";
+const fixtureRoot =
+	fixtureRootArgIndex >= 0 ? args[fixtureRootArgIndex + 1] : ".";
 const root = resolve(fixtureRoot ?? ".");
 
 const runtimeTopics = parseLiteralArray(
@@ -127,37 +128,45 @@ const formalOnlyContractMethods = formalMethods.filter(method => !contractMethod
 const formalOnlyContractTopics = formalTopics.filter(topic => !contractTopics.includes(topic));
 
 if (runtimeOnlyMethods.length > 0) {
-  errors.push(`Runtime-only methods missing from formal assets: ${runtimeOnlyMethods.join(", ")}`);
+	errors.push(
+		`Runtime-only methods missing from formal assets: ${runtimeOnlyMethods.join(", ")}`,
+	);
 }
 if (runtimeOnlyTopics.length > 0) {
-  errors.push(`Runtime-only topics missing from formal assets: ${runtimeOnlyTopics.join(", ")}`);
+	errors.push(
+		`Runtime-only topics missing from formal assets: ${runtimeOnlyTopics.join(", ")}`,
+	);
 }
 if (formalOnlyMethods.length > 0) {
-  errors.push(`Formal-only methods missing from runtime assets: ${formalOnlyMethods.join(", ")}`);
+	errors.push(
+		`Formal-only methods missing from runtime assets: ${formalOnlyMethods.join(", ")}`,
+	);
 }
 if (formalOnlyTopics.length > 0) {
-  errors.push(`Formal-only topics missing from runtime assets: ${formalOnlyTopics.join(", ")}`);
+	errors.push(
+		`Formal-only topics missing from runtime assets: ${formalOnlyTopics.join(", ")}`,
+	);
 }
 if (formalOnlyContractMethods.length > 0) {
-  errors.push(
-    `Formal methods missing from contract schema enum: ${formalOnlyContractMethods.join(", ")}`
-  );
+	errors.push(
+		`Formal methods missing from contract schema enum: ${formalOnlyContractMethods.join(", ")}`,
+	);
 }
 if (formalOnlyContractTopics.length > 0) {
-  errors.push(
-    `Formal topics missing from contract schema enum: ${formalOnlyContractTopics.join(", ")}`
-  );
+	errors.push(
+		`Formal topics missing from contract schema enum: ${formalOnlyContractTopics.join(", ")}`,
+	);
 }
 
 validateMatrixEntries("method", formalMethods, matrix.methods ?? [], errors);
 validateMatrixEntries("topic", formalTopics, matrix.topics ?? [], errors);
 
 if (errors.length > 0) {
-  process.stderr.write("Protocol parity gate failed.\n");
-  for (const message of errors) {
-    process.stderr.write(`- ${message}\n`);
-  }
-  process.exit(1);
+	process.stderr.write("Protocol parity gate failed.\n");
+	for (const message of errors) {
+		process.stderr.write(`- ${message}\n`);
+	}
+	process.exit(1);
 }
 
 process.stdout.write("Protocol parity gate passed.\n");

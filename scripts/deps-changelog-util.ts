@@ -49,9 +49,9 @@ export function validateChangelogEntry(entry: ChangelogEntry): void {
  * Load the current changelog, or initialize empty if it doesn't exist.
  */
 export function loadChangelog(): DepsChangelog {
-  if (!existsSync(CHANGELOG_PATH)) {
-    return { entries: [] };
-  }
+	if (!existsSync(CHANGELOG_PATH)) {
+		return { entries: [] };
+	}
 
   try {
     const data = JSON.parse(readFileSync(CHANGELOG_PATH, "utf-8"));
@@ -69,14 +69,14 @@ export function loadChangelog(): DepsChangelog {
  * Throws an error if validation fails or write fails.
  */
 export function appendChangelogEntry(entry: ChangelogEntry): void {
-  // Validate entry
-  validateChangelogEntry(entry);
+	// Validate entry
+	validateChangelogEntry(entry);
 
-  // Load current changelog
-  const changelog = loadChangelog();
+	// Load current changelog
+	const changelog = loadChangelog();
 
-  // Append new entry
-  changelog.entries.push(entry);
+	// Append new entry
+	changelog.entries.push(entry);
 
   // Write to temporary file, then atomically rename
   const tempFile = join(tmpdir(), `changelog-${Date.now()}.tmp.json`);

@@ -9,36 +9,38 @@ function fail(_message) {
 }
 
 function parseLinesPercent(report) {
-  const match = report.match(/All files\s*\|\s*([0-9.]+)\s*\|\s*([0-9.]+)/);
-  if (!match) {
-    return null;
-  }
-  return Number(match[2]);
+	const match = report.match(/All files\s*\|\s*([0-9.]+)\s*\|\s*([0-9.]+)/);
+	if (!match) {
+		return null;
+	}
+	return Number(match[2]);
 }
 
 let reportText = "";
 if (fixturePath) {
-  reportText = readFileSync(fixturePath, "utf8");
+	reportText = readFileSync(fixturePath, "utf8");
 } else {
   const run = spawnSync("bun", ["test", "apps/runtime/tests", "--coverage"], {
     encoding: "utf8",
   });
 
-  process.stdout.write(run.stdout ?? "");
-  process.stderr.write(run.stderr ?? "");
+	process.stdout.write(run.stdout ?? "");
+	process.stderr.write(run.stderr ?? "");
 
-  if (run.status !== 0) {
-    fail(`test command exited with code ${run.status ?? 1}`);
-  }
+	if (run.status !== 0) {
+		fail(`test command exited with code ${run.status ?? 1}`);
+	}
 
-  reportText = `${run.stdout ?? ""}\n${run.stderr ?? ""}`;
+	reportText = `${run.stdout ?? ""}\n${run.stderr ?? ""}`;
 }
 
 const linesPct = parseLinesPercent(reportText);
 if (linesPct === null) {
-  fail("unable to parse lines coverage from report output");
+	fail("unable to parse lines coverage from report output");
 }
 
 if (linesPct < threshold) {
-  fail(`lines coverage ${linesPct.toFixed(2)}% is below required ${threshold}%`);
+	fail(
+		`lines coverage ${linesPct.toFixed(2)}% is below required ${threshold}%`,
+	);
 }

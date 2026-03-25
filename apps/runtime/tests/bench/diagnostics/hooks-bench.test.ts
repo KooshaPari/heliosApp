@@ -86,7 +86,12 @@ describe("Instrumentation Overhead Benchmarks", () => {
 
     for (let i = 0; i < 10; i++) {
       const name = `bench-slo-${i}`;
-      registry.register({ name, type: "latency", unit: "ms", description: `SLO ${i}` });
+      registry.register({
+        name,
+        type: "latency",
+        unit: "ms",
+        description: `SLO ${i}`,
+      });
       for (let j = 0; j < 1000; j++) {
         registry.record(name, Math.random() * 100, j);
       }

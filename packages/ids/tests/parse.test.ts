@@ -6,11 +6,11 @@ import { parseId } from "../src/parse.js";
 describe("parseId", () => {
   const entities: EntityType[] = ["workspace", "lane", "session", "terminal", "run", "correlation"];
 
-  for (const entity of entities) {
-    it(`round-trips ${entity} ID`, () => {
-      const before = Date.now();
-      const id = generateId(entity);
-      const after = Date.now();
+	for (const entity of entities) {
+		it(`round-trips ${entity} ID`, () => {
+			const before = Date.now();
+			const id = generateId(entity);
+			const after = Date.now();
 
       const parsed = parseId(id);
       expect(parsed).not.toBeNull();
@@ -18,12 +18,12 @@ describe("parseId", () => {
         return;
       }
 
-      expect(parsed.entityType).toBe(entity);
-      expect(parsed.timestamp.getTime()).toBeGreaterThanOrEqual(before);
-      expect(parsed.timestamp.getTime()).toBeLessThanOrEqual(after);
-      expect(parsed.ulid).toHaveLength(26);
-    });
-  }
+			expect(parsed.entityType).toBe(entity);
+			expect(parsed.timestamp.getTime()).toBeGreaterThanOrEqual(before);
+			expect(parsed.timestamp.getTime()).toBeLessThanOrEqual(after);
+			expect(parsed.ulid).toHaveLength(26);
+		});
+	}
 
   it("returns null for invalid ID", () => {
     expect(parseId("")).toBeNull();

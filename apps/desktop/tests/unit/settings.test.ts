@@ -8,7 +8,9 @@ describe("renderer switch transaction", () => {
     const controlPlane = bootDesktop({ bus: runtime.bus });
     controlPlane.setWorkspace("ws_renderer");
 
-    const laneResult = await controlPlane.createLane({ workspaceId: "ws_renderer" });
+    const laneResult = await controlPlane.createLane({
+      workspaceId: "ws_renderer",
+    });
     const sessionResult = await controlPlane.ensureSession({
       workspaceId: "ws_renderer",
       laneId: laneResult.laneId as string,
@@ -20,7 +22,9 @@ describe("renderer switch transaction", () => {
     });
 
     const beforeSwitch = controlPlane.getActiveContext();
-    const outcome = await controlPlane.switchRenderer("rio", { forceError: true });
+    const outcome = await controlPlane.switchRenderer("rio", {
+      forceError: true,
+    });
     const afterSwitch = controlPlane.getActiveContext();
 
     expect(outcome.committed).toBe(false);

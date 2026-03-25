@@ -65,13 +65,23 @@ describe("checkSLO", () => {
 
   // FR-003: FPS inverse check
   it("passes when FPS is at or above threshold", () => {
-    const slo: SLODefinition = { metric: "fps", percentile: "p50", threshold: 60, unit: "fps" };
+    const slo: SLODefinition = {
+      metric: "fps",
+      percentile: "p50",
+      threshold: 60,
+      unit: "fps",
+    };
     const result = checkSLO(slo, makeBucket({ p50: 60 }));
     expect(result.passed).toBe(true);
   });
 
   it("fails when FPS is below threshold", () => {
-    const slo: SLODefinition = { metric: "fps", percentile: "p50", threshold: 60, unit: "fps" };
+    const slo: SLODefinition = {
+      metric: "fps",
+      percentile: "p50",
+      threshold: 60,
+      unit: "fps",
+    };
     const result = checkSLO(slo, makeBucket({ p50: 45 }));
     expect(result.passed).toBe(false);
   });
@@ -91,13 +101,23 @@ describe("checkSLO", () => {
 
   // FR-003: Memory SLO
   it("passes memory SLO when under threshold", () => {
-    const slo: SLODefinition = { metric: "memory", percentile: "p95", threshold: 500, unit: "MB" };
+    const slo: SLODefinition = {
+      metric: "memory",
+      percentile: "p95",
+      threshold: 500,
+      unit: "MB",
+    };
     const result = checkSLO(slo, makeBucket({ p95: 300 }));
     expect(result.passed).toBe(true);
   });
 
   it("fails memory SLO when over threshold", () => {
-    const slo: SLODefinition = { metric: "memory", percentile: "p95", threshold: 500, unit: "MB" };
+    const slo: SLODefinition = {
+      metric: "memory",
+      percentile: "p95",
+      threshold: 500,
+      unit: "MB",
+    };
     const result = checkSLO(slo, makeBucket({ p95: 600 }));
     expect(result.passed).toBe(false);
   });

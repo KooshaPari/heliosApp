@@ -57,7 +57,11 @@ export type ActiveContextAction =
   | { type: "operation.success"; operation: OperationKey }
   | { type: "operation.failure"; operation: OperationKey; error: string }
   | { type: "diagnostics.set"; diagnostics: TransportDiagnostics }
-  | { type: "renderer.switch.started"; previousEngine: string; targetEngine: string }
+  | {
+      type: "renderer.switch.started";
+      previousEngine: string;
+      targetEngine: string;
+    }
   | { type: "renderer.switch.succeeded"; targetEngine: string }
   | { type: "renderer.switch.failed"; message: string }
   | { type: "renderer.switch.rolled_back"; engine: string; message: string };

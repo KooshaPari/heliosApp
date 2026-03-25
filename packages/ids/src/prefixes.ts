@@ -12,16 +12,20 @@ export const PREFIX_MAP: Readonly<Record<EntityType, string>> = Object.freeze({
   correlation: "cor",
 });
 
-export const REVERSE_PREFIX_MAP: Readonly<Record<string, EntityType>> = Object.freeze(
-  Object.fromEntries(
-    Object.entries(PREFIX_MAP).map(([entity, prefix]) => [prefix, entity as EntityType])
-  ) as Record<string, EntityType>
-);
+export const REVERSE_PREFIX_MAP: Readonly<Record<string, EntityType>> =
+	Object.freeze(
+		Object.fromEntries(
+			Object.entries(PREFIX_MAP).map(([entity, prefix]) => [
+				prefix,
+				entity as EntityType,
+			]),
+		) as Record<string, EntityType>,
+	);
 
 export function getPrefix(entityType: EntityType): string {
-  return PREFIX_MAP[entityType];
+	return PREFIX_MAP[entityType];
 }
 
 export function getEntityType(prefix: string): EntityType | undefined {
-  return REVERSE_PREFIX_MAP[prefix];
+	return REVERSE_PREFIX_MAP[prefix];
 }

@@ -35,25 +35,25 @@ describe("format compliance", () => {
       }
     });
 
-    test(`${entityType}: IDs are URL-safe`, () => {
-      for (let i = 0; i < IDS_PER_TYPE; i++) {
-        const id = generateId(entityType);
-        expect(encodeURIComponent(id)).toBe(id);
-      }
-    });
+		test(`${entityType}: IDs are URL-safe`, () => {
+			for (let i = 0; i < IDS_PER_TYPE; i++) {
+				const id = generateId(entityType);
+				expect(encodeURIComponent(id)).toBe(id);
+			}
+		});
 
-    test(`${entityType}: IDs are filename-safe`, () => {
-      for (let i = 0; i < IDS_PER_TYPE; i++) {
-        const id = generateId(entityType);
-        expect(id).not.toMatch(UNSAFE_FILENAME_CHARS);
-      }
-    });
+		test(`${entityType}: IDs are filename-safe`, () => {
+			for (let i = 0; i < IDS_PER_TYPE; i++) {
+				const id = generateId(entityType);
+				expect(id).not.toMatch(UNSAFE_FILENAME_CHARS);
+			}
+		});
 
-    test(`${entityType}: IDs are JSON-safe`, () => {
-      for (let i = 0; i < IDS_PER_TYPE; i++) {
-        const id = generateId(entityType);
-        expect(JSON.parse(JSON.stringify(id))).toBe(id);
-      }
-    });
-  }
+		test(`${entityType}: IDs are JSON-safe`, () => {
+			for (let i = 0; i < IDS_PER_TYPE; i++) {
+				const id = generateId(entityType);
+				expect(JSON.parse(JSON.stringify(id))).toBe(id);
+			}
+		});
+	}
 });

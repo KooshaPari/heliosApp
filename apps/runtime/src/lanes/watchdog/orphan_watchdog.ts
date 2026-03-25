@@ -15,10 +15,11 @@ export interface WatchdogConfig {
   terminalRegistry: TerminalRegistry;
   laneRegistry: LaneRegistry;
   bus: LocalBus;
+  checkpointBaseDir?: string;
 }
 
 export class OrphanWatchdog {
-  private readonly checkpointManager = new CheckpointManager();
+  private readonly checkpointManager: CheckpointManager;
   private readonly resourceClassifier = new ResourceClassifier();
   private readonly worktreeDetector: WorktreeDetector;
   private readonly zellijDetector: ZellijDetector;
@@ -33,6 +34,7 @@ export class OrphanWatchdog {
   private lastClassifiedOrphans: ClassifiedOrphan[] = [];
 
   constructor(config: WatchdogConfig) {
+    this.checkpointManager = new CheckpointManager(config.checkpointBaseDir);
     this.detectionInterval = config.detectionInterval || 60000;
     this.bus = config.bus;
 
@@ -97,8 +99,8 @@ export class OrphanWatchdog {
     this.cycleNumber++;
 
     try {
-      // Run all three detectors in parallel
-      const [worktreeOrphans, zellijOrphans, ptyOrphans] = await Promise.all([
+      // Run all three detectors in parallel (allSettled tolerates individual failures)
+      const results = await Promise.allSettled([
         this.worktreeDetector.detect(),
         this.zellijDetector.detect(),
         this.ptyDetector.detect(),

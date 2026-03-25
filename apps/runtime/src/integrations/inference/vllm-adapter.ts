@@ -50,7 +50,10 @@ export class VllmInferenceEngine implements InferenceEngine {
     return {
       content: data.choices[0]?.message.content ?? "",
       model: data.model,
-      tokenUsage: { input: data.usage.prompt_tokens, output: data.usage.completion_tokens },
+      tokenUsage: {
+        input: data.usage.prompt_tokens,
+        output: data.usage.completion_tokens,
+      },
       finishReason: data.choices[0]?.finish_reason === "stop" ? "end_turn" : "max_tokens",
     };
   }

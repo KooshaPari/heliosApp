@@ -90,6 +90,56 @@ function assertValidTopicName(topic: string): void {
 // Registry
 // ---------------------------------------------------------------------------
 
+/** Canonical list of known topic names for validation. */
+export const TOPICS: readonly string[] = [
+  "workspace.opened",
+  "project.ready",
+  "session.created",
+  "session.restore.started",
+  "session.restore.completed",
+  "session.attach.started",
+  "session.attached",
+  "session.attach.failed",
+  "session.restore.started",
+  "session.restore.completed",
+  "session.terminated",
+  "lane.attach.started",
+  "lane.attach.failed",
+  "lane.cleanup.started",
+  "lane.cleanup.failed",
+  "terminal.spawn.started",
+  "terminal.spawned",
+  "terminal.spawn.failed",
+  "terminal.output",
+  "terminal.state.changed",
+  "renderer.switch.started",
+  "renderer.switch.succeeded",
+  "renderer.switch.failed",
+  "agent.run.started",
+  "agent.run.progress",
+  "agent.run.completed",
+  "agent.run.failed",
+  "approval.requested",
+  "approval.resolved",
+  "share.session.started",
+  "share.session.stopped",
+  "lane.create.started",
+  "lane.created",
+  "lane.create.failed",
+  "lane.attached",
+  "lane.cleaned",
+  "harness.status.changed",
+  "boundary.local.dispatched",
+  "boundary.tool.dispatched",
+  "boundary.a2a.delegated",
+  "boundary.dispatch.failed",
+  "audit.recorded",
+  "diagnostics.metric",
+] as const;
+
+/** Type for valid protocol topics. */
+export type ProtocolTopic = (typeof TOPICS)[number];
+
 export class TopicRegistry {
   private readonly subs = new Map<string, TopicSubscriber[]>();
   private readonly sequenceCounters = new Map<string, number>();

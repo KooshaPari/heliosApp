@@ -43,7 +43,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/017-lane-list-and-status-display/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/017-lane-list-and-status-display/spec.md`
 - Lane lifecycle: spec 008
@@ -215,3 +215,4 @@ Implementation command:
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:29:22Z – claude-haiku – shell_pid=54171 – lane=doing – Assigned agent via workflow command
 - 2026-03-01T13:32:34Z – claude-haiku – shell_pid=54171 – lane=done – Implemented
+- 2026-03-01T13:41:13Z – claude-haiku – shell_pid=54171 – lane=done – Merged

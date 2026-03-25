@@ -27,7 +27,7 @@ beforeEach(() => {
 
 afterEach(() => {
   try {
-    rmdirSync(tempDir, { recursive: true } as never);
+    rmSync(tempDir, { recursive: true });
   } catch {
     // cleanup best-effort
   }
@@ -113,7 +113,7 @@ describe("detectStaleProjects", () => {
   test("missing path becomes stale", async () => {
     const bound = bindLocalProject(ws, tempDir);
     // Remove the directory
-    rmdirSync(tempDir);
+    rmSync(tempDir);
     const checked = await detectStaleProjects(bound);
     expect(checked.projects[0]?.status).toBe("stale");
   });

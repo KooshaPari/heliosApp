@@ -16,14 +16,14 @@ describe("Compliance Checker", () => {
     await fs.mkdir(FIXTURE_DIR, { recursive: true });
   });
 
-  afterAll(async () => {
-    // Clean up fixtures
-    try {
-      await fs.rm(FIXTURE_DIR, { recursive: true });
-    } catch {
-      // Ignore cleanup errors
-    }
-  });
+	afterAll(async () => {
+		// Clean up fixtures
+		try {
+			await fs.rm(FIXTURE_DIR, { recursive: true });
+		} catch {
+			// Ignore cleanup errors
+		}
+	});
 
   test("detects file size violation (>500 lines)", async () => {
     // Create a large file
@@ -31,7 +31,7 @@ describe("Compliance Checker", () => {
     const filePath = `${FIXTURE_DIR}/large-file.ts`;
     await fs.writeFile(filePath, lines.join("\n"));
 
-    const result = await runComplianceChecks([filePath]);
+		const result = await runComplianceChecks([filePath]);
 
     expect(result.passed).toBe(false);
     expect(result.findings.length).toBeGreaterThan(0);
@@ -45,21 +45,21 @@ describe("Compliance Checker", () => {
     const filePath = `${FIXTURE_DIR}/small-file.ts`;
     await fs.writeFile(filePath, lines.join("\n"));
 
-    const result = await runComplianceChecks([filePath]);
+		const result = await runComplianceChecks([filePath]);
 
-    expect(result.passed).toBe(true);
-    expect(result.findings.length).toBe(0);
-  });
+		expect(result.passed).toBe(true);
+		expect(result.findings.length).toBe(0);
+	});
 
-  test('detects "any" type usage', async () => {
-    const content = `
+	test('detects "any" type usage', async () => {
+		const content = `
 export function test(value: any): void {
   console.log(value);
 }`;
-    const filePath = `${FIXTURE_DIR}/any-type.ts`;
-    await fs.writeFile(filePath, content);
+		const filePath = `${FIXTURE_DIR}/any-type.ts`;
+		await fs.writeFile(filePath, content);
 
-    const result = await runComplianceChecks([filePath]);
+		const result = await runComplianceChecks([filePath]);
 
     expect(result.passed).toBe(false);
     const anyTypeFinding = result.findings.find(f => f.check === "Type Safety");
@@ -71,10 +71,10 @@ export function test(value: any): void {
     const content = `
 const API_KEY = "sk-1234567890abcdef";
 export const token = API_KEY;`;
-    const filePath = `${FIXTURE_DIR}/secrets.ts`;
-    await fs.writeFile(filePath, content);
+		const filePath = `${FIXTURE_DIR}/secrets.ts`;
+		await fs.writeFile(filePath, content);
 
-    const result = await runComplianceChecks([filePath]);
+		const result = await runComplianceChecks([filePath]);
 
     expect(result.passed).toBe(false);
     const securityFinding = result.findings.find(f => f.check === "Security");
@@ -87,35 +87,35 @@ export const token = API_KEY;`;
 export function calculateSum(values: number[]): number {
   return values.reduce((sum, val) => sum + val, 0);
 }`;
-    const filePath = `${FIXTURE_DIR}/safe-code.ts`;
-    await fs.writeFile(filePath, content);
+		const filePath = `${FIXTURE_DIR}/safe-code.ts`;
+		await fs.writeFile(filePath, content);
 
-    const result = await runComplianceChecks([filePath]);
+		const result = await runComplianceChecks([filePath]);
 
-    expect(result.passed).toBe(true);
-    expect(result.findings.length).toBe(0);
-  });
+		expect(result.passed).toBe(true);
+		expect(result.findings.length).toBe(0);
+	});
 
   test("includes remediation hints in findings", async () => {
     const lines = new Array(501).fill("// line");
     const filePath = `${FIXTURE_DIR}/fixture-size.ts`;
     await fs.writeFile(filePath, lines.join("\n"));
 
-    const result = await runComplianceChecks([filePath]);
+		const result = await runComplianceChecks([filePath]);
 
-    expect(result.findings[0].remediationHint).toBeTruthy();
-    expect(result.findings[0].remediationHint.length).toBeGreaterThan(0);
-  });
+		expect(result.findings[0].remediationHint).toBeTruthy();
+		expect(result.findings[0].remediationHint.length).toBeGreaterThan(0);
+	});
 
   test("result includes timestamp", async () => {
     const filePath = `${FIXTURE_DIR}/empty.ts`;
     await fs.writeFile(filePath, "// empty file");
 
-    const result = await runComplianceChecks([filePath]);
+		const result = await runComplianceChecks([filePath]);
 
-    expect(result.timestamp).toBeTruthy();
-    expect(new Date(result.timestamp).getTime()).toBeGreaterThan(0);
-  });
+		expect(result.timestamp).toBeTruthy();
+		expect(new Date(result.timestamp).getTime()).toBeGreaterThan(0);
+	});
 
   test("handles multiple files", async () => {
     const file1 = `${FIXTURE_DIR}/multi-1.ts`;
@@ -124,9 +124,12 @@ export function calculateSum(values: number[]): number {
     await fs.writeFile(file1, new Array(501).fill("// line").join("\n"));
     await fs.writeFile(file2, "let x: any = 5;");
 
-    const result = await runComplianceChecks([file1, file2]);
+		await fs.writeFile(file1, Array(501).fill("// line").join("\n"));
+		await fs.writeFile(file2, "let x: any = 5;");
 
-    expect(result.passed).toBe(false);
-    expect(result.findings.length).toBeGreaterThanOrEqual(2);
-  });
+		const result = await runComplianceChecks([file1, file2]);
+
+		expect(result.passed).toBe(false);
+		expect(result.findings.length).toBeGreaterThanOrEqual(2);
+	});
 });

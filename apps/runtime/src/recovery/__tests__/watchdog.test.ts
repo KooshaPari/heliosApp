@@ -85,7 +85,7 @@ describe("Watchdog", () => {
   it("should write crash record to filesystem", async () => {
     watchdog.registerProcess("test-proc", 1234, 1000);
     vi.advanceTimersByTime(2100);
-    vi.runAllTimersAsync();
+    vi.runAllTimers();
 
     // Give async operations time to complete
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -106,7 +106,7 @@ describe("Watchdog", () => {
     await watchdog.handleProcessExit("test-proc", 1234, 1);
 
     expect(crashEvents.length).toBe(1);
-    expect(crashEvents[0].reason).toBe(CrashReason.ExitCode);
+    expect(crashEvents[0].reason).toBe(CrashReason.EXIT_CODE);
     expect(crashEvents[0].exitCode).toBe(1);
   });
 
@@ -138,7 +138,7 @@ describe("Watchdog", () => {
     await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGKILL");
 
     expect(crashEvents.length).toBe(1);
-    expect(crashEvents[0].reason).toBe(CrashReason.Signal);
+    expect(crashEvents[0].reason).toBe(CrashReason.SIGNAL);
   });
 
   it("should handle multiple process monitoring", async () => {

@@ -3,8 +3,8 @@ import { existsSync, readFileSync } from "node:fs";
 const specPath =
   process.env.TRACE_SPEC_PATH ?? "kitty-specs/001-colab-agent-terminal-control-plane/spec.md";
 const matrixPath =
-  process.env.TRACE_MATRIX_PATH ??
-  "kitty-specs/001-colab-agent-terminal-control-plane/traceability-matrix.json";
+	process.env.TRACE_MATRIX_PATH ??
+	"kitty-specs/001-colab-agent-terminal-control-plane/traceability-matrix.json";
 
 function extractRequirementIds(specText) {
   const matches = [...specText.matchAll(/\*\*((?:FR|NFR)-[0-9]+[a-z]?)\*\*/g)];
@@ -23,7 +23,7 @@ if (requirementIds.length === 0) {
 
 const matrix = JSON.parse(readFileSync(matrixPath, "utf8"));
 if (!Array.isArray(matrix.requirements)) {
-  fail(`matrix file ${matrixPath} must contain a requirements array`);
+	fail(`matrix file ${matrixPath} must contain a requirements array`);
 }
 
 const byId = new Map(matrix.requirements.map(entry => [entry.id, entry]));
@@ -34,21 +34,21 @@ if (missing.length > 0) {
 
 const broken = [];
 for (const id of requirementIds) {
-  const entry = byId.get(id);
-  if (!Array.isArray(entry.artifacts) || entry.artifacts.length === 0) {
-    broken.push(`${id} has no artifacts`);
-    continue;
-  }
+	const entry = byId.get(id);
+	if (!Array.isArray(entry.artifacts) || entry.artifacts.length === 0) {
+		broken.push(`${id} has no artifacts`);
+		continue;
+	}
 
-  for (const artifact of entry.artifacts) {
-    if (typeof artifact !== "string" || artifact.length === 0) {
-      broken.push(`${id} has invalid artifact entry`);
-      continue;
-    }
-    if (!existsSync(artifact)) {
-      broken.push(`${id} references missing artifact ${artifact}`);
-    }
-  }
+	for (const artifact of entry.artifacts) {
+		if (typeof artifact !== "string" || artifact.length === 0) {
+			broken.push(`${id} has invalid artifact entry`);
+			continue;
+		}
+		if (!existsSync(artifact)) {
+			broken.push(`${id} references missing artifact ${artifact}`);
+		}
+	}
 }
 
 if (broken.length > 0) {

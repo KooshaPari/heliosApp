@@ -16,9 +16,9 @@ function parseTestLog(): GateFinding[] {
   const findings: GateFinding[] = [];
   const logPath = "/tmp/test.log";
 
-  if (!existsSync(logPath)) {
-    return findings;
-  }
+	if (!existsSync(logPath)) {
+		return findings;
+	}
 
   const output = readFileSync(logPath, "utf-8");
   const lines = output.split("\n");
@@ -46,16 +46,16 @@ function parseTestLog(): GateFinding[] {
     });
   }
 
-  return findings;
+	return findings;
 }
 
 /**
  * Main entry point.
  */
 async function main(): Promise<void> {
-  const startTime = Date.now();
-  const findings = parseTestLog();
-  const duration = Date.now() - startTime;
+	const startTime = Date.now();
+	const findings = parseTestLog();
+	const duration = Date.now() - startTime;
 
   const report = createGateReport("test", findings, duration);
   writeGateReport(report, REPORT_OUTPUT);

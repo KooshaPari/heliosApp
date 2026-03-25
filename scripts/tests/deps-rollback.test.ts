@@ -132,28 +132,29 @@ describe("Dependency Rollback Integration", () => {
     expect(registry.metadata).toBeDefined();
     expect(registry.dependencies).toBeInstanceOf(Array);
 
-    // Verify we can read and re-serialize
-    const serialized = JSON.stringify(registry, null, 2);
-    const reparsed = JSON.parse(serialized);
-    expect(reparsed.schemaVersion).toBe(registry.schemaVersion);
-  });
+		// Verify we can read and re-serialize
+		const serialized = JSON.stringify(registry, null, 2);
+		const reparsed = JSON.parse(serialized);
+		expect(reparsed.schemaVersion).toBe(registry.schemaVersion);
+	});
 
   test("rollback simulated state change updates registry correctly", () => {
     const registry: DepsRegistry = JSON.parse(readFileSync(REGISTRY_PATH, "utf-8"));
     const dep = registry.dependencies[0];
     const originalPin = dep.currentPin;
 
-    // Simulate what rollback would do: update to previous version
-    if (dep.knownGoodHistory.length > 1) {
-      const previousVersion = dep.knownGoodHistory[dep.knownGoodHistory.length - 2];
-      dep.currentPin = previousVersion.version;
-      dep.lastUpdated = new Date().toISOString();
+		// Simulate what rollback would do: update to previous version
+		if (dep.knownGoodHistory.length > 1) {
+			const previousVersion =
+				dep.knownGoodHistory[dep.knownGoodHistory.length - 2];
+			dep.currentPin = previousVersion.version;
+			dep.lastUpdated = new Date().toISOString();
 
-      expect(dep.currentPin).toBe(previousVersion.version);
-      expect(dep.currentPin).not.toBe(originalPin);
-      expect(new Date(dep.lastUpdated).getTime()).toBeGreaterThan(0);
-    }
-  });
+			expect(dep.currentPin).toBe(previousVersion.version);
+			expect(dep.currentPin).not.toBe(originalPin);
+			expect(new Date(dep.lastUpdated).getTime()).toBeGreaterThan(0);
+		}
+	});
 
   test("backup and restore preserve file contents", () => {
     // Test the concept of backup/restore

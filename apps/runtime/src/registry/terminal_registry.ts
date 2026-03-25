@@ -123,7 +123,7 @@ export class TerminalRegistry implements RegistryQueryInterface {
 
     // Update binding
     binding.binding = newTriple;
-    binding.state = BindingState.Rebound;
+    binding.state = BindingState.rebound;
     binding.updatedAt = Date.now();
 
     // Add to new indexes
@@ -149,7 +149,7 @@ export class TerminalRegistry implements RegistryQueryInterface {
     const triple = binding.binding;
 
     // Transition state
-    binding.state = BindingState.Unbound;
+    binding.state = BindingState.unbound;
     binding.updatedAt = Date.now();
 
     // Remove from all indexes

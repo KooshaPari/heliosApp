@@ -14,9 +14,9 @@ const CACHE_DIR = join(REPO_ROOT, ".cache");
 const CACHE_FILE = join(CACHE_DIR, "deps-status-cache.json");
 
 interface CachedVersion {
-  package: string;
-  latest: string;
-  cachedAt: string;
+	package: string;
+	latest: string;
+	cachedAt: string;
 }
 
 interface StatusReport {
@@ -33,10 +33,10 @@ interface StatusReport {
  * Calculate days since the given ISO timestamp.
  */
 function daysSince(timestamp: string): number {
-  const then = new Date(timestamp);
-  const now = new Date();
-  const ms = now.getTime() - then.getTime();
-  return Math.floor(ms / (1000 * 60 * 60 * 24));
+	const then = new Date(timestamp);
+	const now = new Date();
+	const ms = now.getTime() - then.getTime();
+	return Math.floor(ms / (1000 * 60 * 60 * 24));
 }
 
 /**
@@ -178,21 +178,21 @@ async function generateReport(jsonFormat: boolean): Promise<void> {
     process.exit(2);
   }
 
-  const maxAgeMs = parseDuration(registry.metadata.registryCacheMaxAge);
-  const cache = loadCache(maxAgeMs);
-  const reports: StatusReport[] = [];
+	const maxAgeMs = parseDuration(registry.metadata.registryCacheMaxAge);
+	const cache = loadCache(maxAgeMs);
+	const reports: StatusReport[] = [];
 
-  // Process each dependency
-  for (const dep of registry.dependencies) {
-    let latest: string | null = cache.get(dep.name) || null;
+	// Process each dependency
+	for (const dep of registry.dependencies) {
+		let latest: string | null = cache.get(dep.name) || null;
 
-    // If not in cache or cache is stale, try to fetch
-    if (!cache.has(dep.name)) {
-      latest = await fetchLatestVersion(dep.name, dep.upstreamSource);
-      if (latest) {
-        cache.set(dep.name, latest);
-      }
-    }
+		// If not in cache or cache is stale, try to fetch
+		if (!cache.has(dep.name)) {
+			latest = await fetchLatestVersion(dep.name, dep.upstreamSource);
+			if (latest) {
+				cache.set(dep.name, latest);
+			}
+		}
 
     const daysSince = daysSince(dep.lastUpdated);
     let status: "up-to-date" | "upgrade-available" | "stale" | "error";
@@ -209,18 +209,18 @@ async function generateReport(jsonFormat: boolean): Promise<void> {
       status = "stale";
     }
 
-    reports.push({
-      package: dep.name,
-      currentPin: dep.currentPin,
-      latestAvailable: latest,
-      channel: dep.channel,
-      daysSinceUpdate: daysSince,
-      status,
-    });
-  }
+		reports.push({
+			package: dep.name,
+			currentPin: dep.currentPin,
+			latestAvailable: latest,
+			channel: dep.channel,
+			daysSinceUpdate: daysSince,
+			status,
+		});
+	}
 
-  // Save updated cache
-  saveCache(cache);
+	// Save updated cache
+	saveCache(cache);
 
   // Output
   if (jsonFormat) {
@@ -253,13 +253,13 @@ async function generateReport(jsonFormat: boolean): Promise<void> {
   const hasUpgrades = reports.some(r => r.status === "upgrade-available");
   const hasErrors = reports.some(r => r.status === "error");
 
-  if (hasErrors) {
-    process.exit(2);
-  } else if (hasUpgrades) {
-    process.exit(1);
-  } else {
-    process.exit(0);
-  }
+	if (hasErrors) {
+		process.exit(2);
+	} else if (hasUpgrades) {
+		process.exit(1);
+	} else {
+		process.exit(0);
+	}
 }
 
 // Main entry point

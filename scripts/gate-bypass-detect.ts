@@ -33,9 +33,9 @@ const _TEST_MARKERS = [
 ];
 
 interface ScannerOptions {
-  root?: string;
-  exclude?: string[];
-  json?: boolean;
+	root?: string;
+	exclude?: string[];
+	json?: boolean;
 }
 
 /**
@@ -77,8 +77,8 @@ export function scanBypassDirectives(options: ScannerOptions = {}): GateFinding[
     const lines = content.split("\n");
     const relativePath = filePath.replace(process.cwd(), "");
 
-    lines.forEach((line, index) => {
-      const lineNum = index + 1;
+		lines.forEach((line, index) => {
+			const lineNum = index + 1;
 
       // Skip lines that are entirely within comments (lazy check)
       if (line.trim().startsWith("//") || line.trim().startsWith("*")) {
@@ -120,9 +120,9 @@ async function main(): Promise<void> {
 
   const report = createGateReport("bypass-detect", findings, duration);
 
-  if (jsonFlag) {
-    writeGateReport(report, REPORT_OUTPUT);
-  }
+	if (jsonFlag) {
+		writeGateReport(report, REPORT_OUTPUT);
+	}
 
   process.exit(report.status === "pass" ? 0 : 1);
 }

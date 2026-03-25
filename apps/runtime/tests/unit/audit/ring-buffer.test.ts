@@ -175,7 +175,9 @@ describe("AuditRingBuffer", () => {
         buffer.push(event);
       }
 
-      const results = buffer.query({ eventType: AUDIT_EVENT_TYPES.SESSION_CREATED });
+      const results = buffer.query({
+        eventType: AUDIT_EVENT_TYPES.SESSION_CREATED,
+      });
       expect(results.length).toBe(2);
     });
   });

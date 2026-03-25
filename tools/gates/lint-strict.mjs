@@ -14,12 +14,12 @@ const blocked = [
 ];
 
 for (const file of files) {
-  const source = readFileSync(file, "utf8");
-  for (const rule of blocked) {
-    if (rule.pattern.test(source)) {
-      failures.push(`${file}: ${rule.message}`);
-    }
-  }
+	const source = readFileSync(file, "utf8");
+	for (const rule of blocked) {
+		if (rule.pattern.test(source)) {
+			failures.push(`${file}: ${rule.message}`);
+		}
+	}
 }
 
 if (failures.length > 0) {
@@ -29,23 +29,23 @@ if (failures.length > 0) {
 }
 
 function collectTsFiles(paths) {
-  const output = [];
-  for (const path of paths) {
-    walk(path, output);
-  }
-  return output;
+	const output = [];
+	for (const path of paths) {
+		walk(path, output);
+	}
+	return output;
 }
 
 function walk(path, output) {
-  for (const entry of readdirSync(path)) {
-    const absolute = join(path, entry);
-    const stats = statSync(absolute);
-    if (stats.isDirectory()) {
-      walk(absolute, output);
-      continue;
-    }
-    if (absolute.endsWith(".ts")) {
-      output.push(absolute);
-    }
-  }
+	for (const entry of readdirSync(path)) {
+		const absolute = join(path, entry);
+		const stats = statSync(absolute);
+		if (stats.isDirectory()) {
+			walk(absolute, output);
+			continue;
+		}
+		if (absolute.endsWith(".ts")) {
+			output.push(absolute);
+		}
+	}
 }

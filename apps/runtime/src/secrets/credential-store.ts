@@ -60,11 +60,7 @@ export class CredentialStore {
    * @param bus      Optional LocalBus for emitting audit events.
    * @param encryption  Optional EncryptionService (allows injection in tests).
    */
-  constructor(opts: {
-    dataDir: string;
-    bus?: LocalBus;
-    encryption?: EncryptionService;
-  }) {
+  constructor(opts: { dataDir: string; bus?: LocalBus; encryption?: EncryptionService }) {
     this.dataDir = opts.dataDir;
     this.bus = opts.bus ?? null;
     this.encryption = opts.encryption ?? new EncryptionService();

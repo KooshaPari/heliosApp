@@ -14,13 +14,13 @@ describe("generateId", () => {
     ["correlation", "cor"],
   ];
 
-  for (const [entity, prefix] of cases) {
-    it(`generates correct format for ${entity} (prefix: ${prefix})`, () => {
-      const id = generateId(entity);
-      expect(id).toMatch(FORMAT_REGEX);
-      expect(id.startsWith(`${prefix}_`)).toBe(true);
-    });
-  }
+	for (const [entity, prefix] of cases) {
+		it(`generates correct format for ${entity} (prefix: ${prefix})`, () => {
+			const id = generateId(entity);
+			expect(id).toMatch(FORMAT_REGEX);
+			expect(id.startsWith(`${prefix}_`)).toBe(true);
+		});
+	}
 
   // FR-005: Uniqueness
   it("generates 10,000 unique IDs", () => {

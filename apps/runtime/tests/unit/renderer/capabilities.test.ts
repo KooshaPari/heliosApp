@@ -71,8 +71,14 @@ describe("compareCapabilities", () => {
   });
 
   it("order-independent inputModes comparison", () => {
-    const a = { ...CAPS_A, inputModes: ["cooked", "raw"] as ("raw" | "cooked" | "application")[] };
-    const b = { ...CAPS_A, inputModes: ["raw", "cooked"] as ("raw" | "cooked" | "application")[] };
+    const a = {
+      ...CAPS_A,
+      inputModes: ["cooked", "raw"] as ("raw" | "cooked" | "application")[],
+    };
+    const b = {
+      ...CAPS_A,
+      inputModes: ["raw", "cooked"] as ("raw" | "cooked" | "application")[],
+    };
     const diff = compareCapabilities(a, b);
     expect(diff.equal).toBe(true);
   });

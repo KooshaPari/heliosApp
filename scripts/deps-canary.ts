@@ -14,29 +14,32 @@ const REGISTRY_PATH = join(REPO_ROOT, "deps-registry.json");
 const _PACKAGE_JSON_PATH = join(REPO_ROOT, "package.json");
 
 interface UpgradeCandidate {
-  package: string;
-  currentPin: string;
-  availableVersion: string;
-  channel: string;
+	package: string;
+	currentPin: string;
+	availableVersion: string;
+	channel: string;
 }
 
 /**
  * Query for available upgrades (simulated for now).
  */
-function findUpgradeCandidates(registry: DepsRegistry, targetPackage?: string): UpgradeCandidate[] {
-  const candidates: UpgradeCandidate[] = [];
+function findUpgradeCandidates(
+	registry: DepsRegistry,
+	targetPackage?: string,
+): UpgradeCandidate[] {
+	const candidates: UpgradeCandidate[] = [];
 
   registry.dependencies.forEach(dep => {
     if (targetPackage && dep.name !== targetPackage) {
       return;
     }
 
-    // In a real scenario, you would query the registry for latest version
-    // For demo, we'll just note that checking would happen
-    // Simulate: no upgrades available for demo
-  });
+		// In a real scenario, you would query the registry for latest version
+		// For demo, we'll just note that checking would happen
+		// Simulate: no upgrades available for demo
+	});
 
-  return candidates;
+	return candidates;
 }
 
 /**
@@ -51,8 +54,8 @@ async function runCanary(targetPackage?: string, dryRun = false): Promise<void> 
     process.exit(2);
   }
 
-  // Find upgrade candidates
-  const candidates = findUpgradeCandidates(registry, targetPackage);
+	// Find upgrade candidates
+	const candidates = findUpgradeCandidates(registry, targetPackage);
 
   if (candidates.length === 0) {
     // Record skip entry if target was specified
@@ -147,7 +150,7 @@ const dryRun = args.includes("--dry-run");
 const packageName = args.find(a => !a.startsWith("--") && a !== "log");
 
 if (logCommand) {
-  printChangelog();
+	printChangelog();
 } else {
-  runCanary(packageName, dryRun);
+	runCanary(packageName, dryRun);
 }

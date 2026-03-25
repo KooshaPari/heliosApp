@@ -10,11 +10,11 @@ describe("Dependency Manifest", () => {
     const content = readFileSync(REGISTRY_PATH, "utf-8");
     const registry: DepsRegistry = JSON.parse(content);
 
-    expect(registry).toBeDefined();
-    expect(registry.schemaVersion).toBeDefined();
-    expect(registry.metadata).toBeDefined();
-    expect(registry.dependencies).toBeInstanceOf(Array);
-  });
+		expect(registry).toBeDefined();
+		expect(registry.schemaVersion).toBeDefined();
+		expect(registry.metadata).toBeDefined();
+		expect(registry.dependencies).toBeInstanceOf(Array);
+	});
 
   test("manifest has required top-level fields", () => {
     const content = readFileSync(REGISTRY_PATH, "utf-8");
@@ -41,11 +41,11 @@ describe("Dependency Manifest", () => {
       expect(dep.upstreamSource).toBeDefined();
       expect(typeof dep.upstreamSource).toBe("string");
 
-      expect(Array.isArray(dep.knownGoodHistory)).toBe(true);
+			expect(Array.isArray(dep.knownGoodHistory)).toBe(true);
 
-      expect(dep.lastUpdated).toMatch(/^\d{4}-\d{2}-\d{2}T/);
-    });
-  });
+			expect(dep.lastUpdated).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+		});
+	});
 
   test("known-good history is ordered chronologically", () => {
     const content = readFileSync(REGISTRY_PATH, "utf-8");
@@ -54,11 +54,11 @@ describe("Dependency Manifest", () => {
     registry.dependencies.forEach(dep => {
       const timestamps = dep.knownGoodHistory.map(entry => new Date(entry.timestamp).getTime());
 
-      for (let i = 1; i < timestamps.length; i++) {
-        expect(timestamps[i]).toBeGreaterThanOrEqual(timestamps[i - 1]);
-      }
-    });
-  });
+			for (let i = 1; i < timestamps.length; i++) {
+				expect(timestamps[i]).toBeGreaterThanOrEqual(timestamps[i - 1]);
+			}
+		});
+	});
 
   test("each known-good entry has required fields", () => {
     const content = readFileSync(REGISTRY_PATH, "utf-8");
@@ -69,7 +69,7 @@ describe("Dependency Manifest", () => {
         expect(entry.version).toBeDefined();
         expect(typeof entry.version).toBe("string");
 
-        expect(entry.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+				expect(entry.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 
         expect(["pass", "fail"]).toContain(entry.gateResult);
       });

@@ -15,6 +15,11 @@ describe("PtyDetector", () => {
     };
     detector = new PtyDetector(terminalRegistry);
   });
+  beforeEach(() => {
+    mock.module("../../../../src/integrations/exec.js", () => ({
+      execCommand: () => Promise.resolve({ code: 0, stdout: "", stderr: "" }),
+    }));
+  });
 
   it("should initialize without error", () => {
     expect(detector).toBeDefined();

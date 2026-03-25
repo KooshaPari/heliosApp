@@ -175,7 +175,7 @@ export class ACPClientAdapter
       }
 
       const abortController = new AbortController();
-      const timeoutMs = this.config.timeoutMs || 30000;
+      const timeoutMs = this.config.timeout || 30000;
       const timeoutHandle = setTimeout(() => abortController.abort(), timeoutMs);
       this.inFlightTasks.set(correlationId, abortController);
 
@@ -205,7 +205,7 @@ export class ACPClientAdapter
       if (error instanceof Error && error.name === "AbortError") {
         const normalized = new NormalizedProviderError(
           "PROVIDER_TIMEOUT",
-          `ACP execution timeout after ${this.config.timeoutMs || 30000}ms`,
+          `ACP execution timeout after ${this.config.timeout || 30000}ms`,
           "acp",
           true,
           correlationId

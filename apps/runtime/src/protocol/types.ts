@@ -1,3 +1,15 @@
+export class ProtocolValidationError extends Error {
+  readonly code: string;
+  readonly details?: Record<string, unknown>;
+
+  constructor(code: string, message: string, details?: Record<string, unknown>) {
+    super(message);
+    this.name = "ProtocolValidationError";
+    this.code = code;
+    this.details = details;
+  }
+}
+
 export type EnvelopeType = "command" | "response" | "event";
 
 export type ErrorCode = string;
@@ -51,6 +63,7 @@ export type Envelope = CommandEnvelope | ResponseEnvelope | EventEnvelope;
 export type LocalBusEnvelope = EnvelopeBase & {
   method?: string;
   topic?: string;
+  sequence?: number;
   payload?: Record<string, unknown>;
   status?: "ok" | "error";
   result?: Record<string, unknown> | null;

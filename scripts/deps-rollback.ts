@@ -16,8 +16,8 @@ const PACKAGE_JSON_PATH = join(REPO_ROOT, "package.json");
 const BACKUP_DIR = join(REPO_ROOT, ".deps-rollback-backup");
 
 interface BackupFiles {
-  lockfile?: string;
-  packageJson?: string;
+	lockfile?: string;
+	packageJson?: string;
 }
 
 /**
@@ -88,11 +88,12 @@ async function rollback(packageName: string): Promise<void> {
     process.exit(1);
   }
 
-  // Find known-good version different from current
-  let rollbackVersion: string | null = null;
-  if (dep.knownGoodHistory.length > 1) {
-    rollbackVersion = dep.knownGoodHistory[dep.knownGoodHistory.length - 2].version;
-  }
+	// Find known-good version different from current
+	let rollbackVersion: string | null = null;
+	if (dep.knownGoodHistory.length > 1) {
+		rollbackVersion =
+			dep.knownGoodHistory[dep.knownGoodHistory.length - 2].version;
+	}
 
   if (!rollbackVersion) {
     process.exit(1);

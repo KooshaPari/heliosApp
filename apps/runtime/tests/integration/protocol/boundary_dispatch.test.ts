@@ -22,7 +22,10 @@ describe("protocol boundary dispatch", () => {
     );
 
     expect(response.status).toBe(200);
-    const body = (await response.json()) as { active_engine: string; hot_swap_supported: boolean };
+    const body = (await response.json()) as {
+      active_engine: string;
+      hot_swap_supported: boolean;
+    };
     expect(body.active_engine).toBe("ghostty");
     expect(body.hot_swap_supported).toBeTrue();
   });
