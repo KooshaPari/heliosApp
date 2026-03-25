@@ -1,6 +1,6 @@
-import type { ActiveContextStore } from "./context_store.ts";
-import { selectActiveContext } from "./context_store.ts";
-import type { DesktopRuntimeClient } from "./runtime_client.ts";
+import type { ActiveContextStore } from "./context_store";
+import { selectActiveContext } from "./context_store";
+import type { DesktopRuntimeClient } from "./runtime_client";
 
 export type RendererEngine = "ghostty" | "rio";
 

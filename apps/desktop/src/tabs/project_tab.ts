@@ -1,4 +1,4 @@
-import { type ActiveContext, type TabState, TabSurface } from "./tab_surface.ts";
+import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
 
 export interface LaneInfo {
   laneId: string;
@@ -119,7 +119,9 @@ export class ProjectTab extends TabSurface {
       retryBtn.style.borderRadius = "3px";
       retryBtn.style.cursor = "pointer";
       retryBtn.style.fontSize = "12px";
-      retryBtn.addEventListener("click", () => {});
+      retryBtn.addEventListener("click", () => {
+        console.log("Retry workspace load");
+      });
 
       errorEl.appendChild(titleEl);
       errorEl.appendChild(msgEl);
@@ -366,7 +368,9 @@ export class ProjectTab extends TabSurface {
     createBtn.style.cursor = "pointer";
     createBtn.style.fontSize = "12px";
     createBtn.style.width = "100%";
-    createBtn.addEventListener("click", () => {});
+    createBtn.addEventListener("click", () => {
+      console.log("Create lane action triggered");
+    });
 
     const openBtn = document.createElement("button");
     openBtn.textContent = "Open in File Manager";
@@ -378,7 +382,9 @@ export class ProjectTab extends TabSurface {
     openBtn.style.cursor = "pointer";
     openBtn.style.fontSize = "12px";
     openBtn.style.width = "100%";
-    openBtn.addEventListener("click", () => {});
+    openBtn.addEventListener("click", () => {
+      console.log("Open workspace in file manager");
+    });
 
     bodyEl.appendChild(createBtn);
     bodyEl.appendChild(openBtn);

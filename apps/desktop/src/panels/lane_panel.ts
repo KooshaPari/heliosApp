@@ -68,9 +68,7 @@ export class LanePanel {
   }
 
   private render(): void {
-    if (!this.container) {
-      return;
-    }
+    if (!this.container) return;
 
     this.container.innerHTML = "";
     const panel = this.createPanelElement();
@@ -247,9 +245,7 @@ export class LanePanel {
   }
 
   private attachEventListeners(): void {
-    if (!this.container) {
-      return;
-    }
+    if (!this.container) return;
 
     const createBtn = this.container.querySelector('[data-action="create-lane"]');
     if (createBtn) {
@@ -264,9 +260,7 @@ export class LanePanel {
   }
 
   private detachEventListeners(): void {
-    if (!this.container) {
-      return;
-    }
+    if (!this.container) return;
 
     const keyboardHandler = this.keyboardListeners.get("keyboard");
     if (keyboardHandler) {
@@ -278,9 +272,7 @@ export class LanePanel {
   private handleKeyboardNavigation(event: KeyboardEvent): void {
     const filteredLanes = this.lanes.filter(lane => lane.workspaceId === this.activeWorkspaceId);
 
-    if (filteredLanes.length === 0) {
-      return;
-    }
+    if (filteredLanes.length === 0) return;
 
     const currentIndex = filteredLanes.findIndex(lane => lane.id === this.selectedLaneId);
     let newIndex = currentIndex >= 0 ? currentIndex : 0;
@@ -315,7 +307,6 @@ export class LanePanel {
           this.props.onLaneDelete(filteredLanes[currentIndex].id);
         }
         return;
-      }
       default:
         return;
     }

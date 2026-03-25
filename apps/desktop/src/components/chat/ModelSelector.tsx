@@ -1,4 +1,4 @@
-import { type Component, For, Show, createSignal } from "solid-js";
+import { type Component, createSignal, For, Show } from "solid-js";
 
 type ModelGroup = {
   provider: string;
@@ -53,16 +53,14 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
   const activeModelName = () => {
     for (const group of modelGroups) {
       const found = group.models.find(m => m.id === props.activeModel);
-      if (found) {
-        return found.name;
-      }
+      if (found) return found.name;
     }
     return props.activeModel.split("/").pop() ?? props.activeModel;
   };
 
   return (
     <div style={{ position: "relative" }}>
-      <button type="button"
+      <button
         onClick={() => setIsOpen(!isOpen())}
         style={{
           background: "none",
@@ -109,7 +107,7 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
                 </div>
                 <For each={group.models}>
                   {model => (
-                    <button type="button"
+                    <button
                       type="button"
                       onClick={() => {
                         if (model.available) {

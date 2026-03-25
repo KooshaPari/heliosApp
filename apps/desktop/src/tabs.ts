@@ -1,5 +1,5 @@
-import type { ActiveContextState, ActiveTab } from "./context_store.ts";
-import { selectActiveContext } from "./context_store.ts";
+import type { ActiveContextState, ActiveTab } from "./context_store";
+import { selectActiveContext } from "./context_store";
 
 export type TabViewState = "empty" | "loading" | "ready" | "error";
 
@@ -34,7 +34,7 @@ function deriveTabState(state: ActiveContextState): TabViewState {
   ) {
     return "loading";
   }
-  if (!(state.workspaceId && state.laneId && state.sessionId)) {
+  if (!state.workspaceId || !state.laneId || !state.sessionId) {
     return "empty";
   }
   return "ready";

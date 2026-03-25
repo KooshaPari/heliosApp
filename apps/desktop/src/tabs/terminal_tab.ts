@@ -1,4 +1,4 @@
-import { type ActiveContext, type TabState, TabSurface } from "./tab_surface.ts";
+import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
 
 export interface TerminalTabState extends TabState {
   terminalId?: string;
@@ -18,7 +18,7 @@ export interface TerminalTabState extends TabState {
  */
 export class TerminalTab extends TabSurface {
   private terminalId: string | null = null;
-  private rendererSwitchInProgress = false;
+  private rendererSwitchInProgress: boolean = false;
   private contentEl: HTMLElement | null = null;
   private outputBuffer: string[] = [];
 
@@ -99,7 +99,10 @@ export class TerminalTab extends TabSurface {
       actionEl.style.cursor = "pointer";
       actionEl.style.fontSize = "13px";
 
-      actionEl.addEventListener("click", () => {});
+      actionEl.addEventListener("click", () => {
+        // Would trigger terminal creation via event bus
+        console.log("Create terminal action triggered");
+      });
 
       emptyEl.appendChild(messageEl);
       emptyEl.appendChild(actionEl);
