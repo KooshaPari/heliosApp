@@ -17,7 +17,7 @@ export function createMcpBridgeFixture() {
 export async function initMcpBridge(adapter: MCPBridgeAdapter): Promise<void> {
   await adapter.init({
     ...MCP_BRIDGE_CONFIG,
-    args: [...MCP_BRIDGE_CONFIG.args],
+    args: [...MCP_BRIDGE_CONFIG.args] as string[],
   });
 }
 

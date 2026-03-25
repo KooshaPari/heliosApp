@@ -3,8 +3,8 @@
 // FR-004: Root path validation
 // FR-009: Stale binding detection
 
-import { describe, test, expect, mock, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, mkdirSync, rmdirSync, symlinkSync, realpathSync } from "node:fs";
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { mkdtempSync, mkdirSync, symlinkSync, realpathSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -27,14 +27,13 @@ beforeEach(() => {
 
 afterEach(() => {
   try {
-    rmdirSync(tempDir, { recursive: true } as never);
+    rmSync(tempDir, { recursive: true });
   } catch {
     // cleanup best-effort
   }
 });
 
 // ── bindLocalProject ────────────────────────────────────────────────
-
 describe("bindLocalProject", () => {
   // FR-003
   test("binds an accessible absolute path", () => {
@@ -113,7 +112,7 @@ describe("detectStaleProjects", () => {
   test("missing path becomes stale", async () => {
     const bound = bindLocalProject(ws, tempDir);
     // Remove the directory
-    rmdirSync(tempDir);
+    rmSync(tempDir);
     const checked = await detectStaleProjects(bound);
     expect(checked.projects[0]!.status).toBe("stale");
   });

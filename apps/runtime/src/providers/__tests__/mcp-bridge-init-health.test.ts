@@ -23,6 +23,7 @@ describe("MCP Bridge Adapter - Init and Health", () => {
       adapter.init({
         ...MCP_BRIDGE_CONFIG,
         serverPath: "",
+        args: [] as string[],
       })
     ).rejects.toThrow(/init failed/i);
   });

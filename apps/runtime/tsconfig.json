@@ -10,7 +10,8 @@
 			"@helios/runtime/*": ["apps/runtime/src/*"],
 			"@helios/desktop": ["apps/desktop/src/index.ts"],
 			"@helios/desktop/*": ["apps/desktop/src/*"]
-		}
+		},
+		"types": ["vitest"]
 	},
 	"include": ["src/**/*.ts", "tests/**/*.ts"]
 }
