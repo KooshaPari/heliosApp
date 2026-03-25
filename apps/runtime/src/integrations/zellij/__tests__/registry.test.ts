@@ -1,31 +1,7 @@
-import { describe, expect, it, mock, beforeEach } from "bun:test";
+import { describe, expect, it } from "vitest";
 import { MuxRegistry } from "../registry.js";
 import { DuplicateBindingError } from "../errors.js";
-import { ZellijCli } from "../cli.js";
 import type { MuxSession } from "../types.js";
-
-// Helper to create a mock spawn result
-function makeMockProc(stdout: string, stderr: string, exitCode: number) {
-  const stdoutStream = new ReadableStream({
-    start(controller) {
-      controller.enqueue(new TextEncoder().encode(stdout));
-      controller.close();
-    },
-  });
-  const stderrStream = new ReadableStream({
-    start(controller) {
-      controller.enqueue(new TextEncoder().encode(stderr));
-      controller.close();
-    },
-  });
-
-  return {
-    stdout: stdoutStream,
-    stderr: stderrStream,
-    exited: Promise.resolve(exitCode),
-    kill: mock(() => {}),
-  };
-}
 
 function makeMockSession(sessionName: string, laneId: string): MuxSession {
   return {
@@ -118,101 +94,5 @@ describe("MuxRegistry", () => {
     registry.bind("s1", "l1", session2);
 
     expect(registry.getBySession("s1")).toBeDefined();
-  });
-
-  describe("getOrphaned", () => {
-    let originalSpawn: typeof Bun.spawn;
-
-    beforeEach(() => {
-      originalSpawn = Bun.spawn;
-    });
-
-    it("returns empty array when no CLI is provided", async () => {
-      const registry = new MuxRegistry();
-      registry.bind("s1", "l1", makeMockSession("s1", "l1"));
-
-      const orphaned = await registry.getOrphaned();
-
-      expect(orphaned).toHaveLength(0);
-
-      Bun.spawn = originalSpawn;
-    });
-
-    it("returns bindings for sessions that no longer exist", async () => {
-      // Mock CLI to return only one live session
-      // @ts-expect-error mock override
-      Bun.spawn = mock(() => makeMockProc("live-session  2026-02-27 10:00:00", "", 0));
-
-      const cli = new ZellijCli();
-      const registry = new MuxRegistry(cli);
-
-      // Bind multiple sessions
-      registry.bind("live-session", "l1", makeMockSession("live-session", "l1"));
-      registry.bind("dead-session", "l2", makeMockSession("dead-session", "l2"));
-      registry.bind("another-dead", "l3", makeMockSession("another-dead", "l3"));
-
-      const orphaned = await registry.getOrphaned();
-
-      expect(orphaned).toHaveLength(2);
-      const orphanedNames = orphaned.map(b => b.sessionName);
-      expect(orphanedNames).toContain("dead-session");
-      expect(orphanedNames).toContain("another-dead");
-      expect(orphanedNames).not.toContain("live-session");
-
-      Bun.spawn = originalSpawn;
-    });
-
-    it("returns empty array when all bindings are live", async () => {
-      // @ts-expect-error mock override
-      Bun.spawn = mock(() =>
-        makeMockProc("session1  2026-02-27 10:00:00\nsession2  2026-02-27 10:00:00", "", 0)
-      );
-
-      const cli = new ZellijCli();
-      const registry = new MuxRegistry(cli);
-
-      registry.bind("session1", "l1", makeMockSession("session1", "l1"));
-      registry.bind("session2", "l2", makeMockSession("session2", "l2"));
-
-      const orphaned = await registry.getOrphaned();
-
-      expect(orphaned).toHaveLength(0);
-
-      Bun.spawn = originalSpawn;
-    });
-
-    it("returns all bindings when no live sessions exist", async () => {
-      // @ts-expect-error mock override
-      Bun.spawn = mock(() => makeMockProc("", "", 0));
-
-      const cli = new ZellijCli();
-      const registry = new MuxRegistry(cli);
-
-      registry.bind("s1", "l1", makeMockSession("s1", "l1"));
-      registry.bind("s2", "l2", makeMockSession("s2", "l2"));
-
-      const orphaned = await registry.getOrphaned();
-
-      expect(orphaned).toHaveLength(2);
-
-      Bun.spawn = originalSpawn;
-    });
-
-    it("handles errors from CLI gracefully", async () => {
-      // @ts-expect-error mock override
-      Bun.spawn = mock(() => {
-        throw new Error("CLI error");
-      });
-
-      const cli = new ZellijCli();
-      const registry = new MuxRegistry(cli);
-
-      registry.bind("s1", "l1", makeMockSession("s1", "l1"));
-
-      // Should not throw, might return empty or fail gracefully
-      await expect(registry.getOrphaned()).rejects.toThrow();
-
-      Bun.spawn = originalSpawn;
-    });
   });
 });

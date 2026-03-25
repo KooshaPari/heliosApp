@@ -120,4 +120,4 @@ As a developer requesting an exception to a constitution rule, I must create an 
 - GCA and CodeRabbit are available as GitHub integrations and can be configured as required status checks.
 - The CI quality gates from spec 021 are operational and produce structured pass/fail results consumable by the review process.
 - Agent reviewers are available (other agents in the project or automated review agents) to provide approvals.
-- The constitution is the authoritative source for review checklist items and is version-controlled at `.kittify/memory/constitution.md`.
+- The constitution is the authoritative source for review checklist items and is version-controlled at `docs/reference/constitution.md`.

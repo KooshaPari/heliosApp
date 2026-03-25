@@ -1,12 +1,12 @@
 ---
 work_package_id: WP02
 title: Remediation UI, Recovery Suppression, and Tests
-lane: "planned"
+lane: "done"
 dependencies:
 - WP01
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 015-lane-orphan-detection-and-remediation-WP01
+base_commit: f89fa0e1acc75074dedcfee0d26f175325c18ba1
+created_at: '2026-03-01T13:32:33.216956+00:00'
 subtasks:
 - T007
 - T008
@@ -15,10 +15,10 @@ subtasks:
 - T011
 phase: Phase 2 - Remediation and Hardening
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: "claude-haiku"
+shell_pid: "67031"
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -46,7 +46,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/015-lane-orphan-detection-and-remediation/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/015-lane-orphan-detection-and-remediation/spec.md`
 - Watchdog and detectors: `apps/runtime/src/lanes/watchdog/` (WP01)
@@ -220,3 +220,5 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-03-01T13:32:33Z – claude-haiku – shell_pid=67031 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T13:41:09Z – claude-haiku – shell_pid=67031 – lane=done – Merged

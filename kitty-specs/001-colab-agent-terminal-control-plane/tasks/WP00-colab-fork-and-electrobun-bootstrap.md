@@ -1,7 +1,7 @@
 ---
 work_package_id: WP00
 title: "Co(Lab) Fork and ElectroBun Bootstrap"
-lane: planned
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: ''
@@ -19,8 +19,8 @@ phase: Phase 0 - Foundation
 assignee: ''
 agent: ''
 shell_pid: ''
-review_status: ''
-reviewed_by: ''
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -49,7 +49,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/001-colab-agent-terminal-control-plane/plan.md`
 - Architecture docs: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/001-colab-agent-terminal-control-plane/`
 
@@ -210,3 +210,4 @@ This matrix governs which co(lab) subsystems survive the fork:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z – system – lane=planned – Prompt created as Phase 0 prerequisite.
+- 2026-03-01T13:42:02Z – unknown – lane=done – Bootstrap complete

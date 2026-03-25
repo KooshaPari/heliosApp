@@ -1,11 +1,11 @@
 ---
 work_package_id: WP01
 title: Settings Panel, Capability Display, and Switch Trigger
-lane: "planned"
+lane: "done"
 dependencies: []
 base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00+00:00'
+base_commit: 4e5826451eb1856b4d5f201af0d08d0286bcbf81
+created_at: '2026-03-01T13:34:22.014495+00:00'
 subtasks:
 - T001
 - T002
@@ -15,10 +15,10 @@ subtasks:
 - T006
 phase: Phase 1 - Settings Foundation
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: "claude-haiku"
+shell_pid: "74567"
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -45,7 +45,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/018-renderer-engine-settings-control/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/018-renderer-engine-settings-control/spec.md`
 - Renderer capabilities: spec 010, `apps/runtime/src/renderer/capability_matrix.ts` (spec 013 WP01)
@@ -239,3 +239,5 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-03-01T13:34:22Z – claude-haiku – shell_pid=74567 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T13:36:23Z – claude-haiku – shell_pid=74567 – lane=done – Implemented

@@ -1,12 +1,12 @@
 ---
 work_package_id: WP02
 title: Constitution Compliance Checker, ADR Exception Workflow, and Tests
-lane: "planned"
+lane: "done"
 dependencies:
 - WP01
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00.000000+00:00'
+base_branch: 022-code-review-and-governance-process-WP01
+base_commit: bfa4895dec9e139137b85cab60b5c307a37ac4ac
+created_at: '2026-03-01T13:32:34.859567+00:00'
 subtasks:
 - T007
 - T008
@@ -16,10 +16,10 @@ subtasks:
 - T012
 phase: Phase 2 - Governance Enforcement
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: "claude-haiku"
+shell_pid: "67174"
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -47,7 +47,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/022-code-review-and-governance-process/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/022-code-review-and-governance-process/spec.md`
 - WP01 output: branch protection, GCA/CodeRabbit configs, governance log.
@@ -68,7 +68,7 @@ Implementation command:
 - Purpose: Validate every PR changeset against the full constitution review checklist to catch violations before merge.
 - Steps:
   1. Create `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/scripts/compliance-checker.ts`.
-  2. Read the constitution from `.kittify/memory/constitution.md` at runtime (not hardcoded) so amendments are reflected immediately.
+  2. Read the constitution from `docs/reference/constitution.md` at runtime (not hardcoded) so amendments are reflected immediately.
   3. Parse the review checklist sections from the constitution. Map each section to a programmable check:
      - **Correctness**: verify new functions have return type annotations; verify no unreachable code.
      - **Tests**: verify every new/modified source file has a corresponding test file or test additions.
@@ -98,7 +98,7 @@ Implementation command:
   1. Parse the constitution markdown to extract section headings and their line numbers.
   2. Map each compliance check to its corresponding constitution section by heading match.
   3. Include in each finding: `constitutionSection` (heading text), `constitutionLine` (line number in constitution file).
-  4. Format the reference as a clickable link in GitHub PR comments: `[Constitution: Section Name](.kittify/memory/constitution.md#L<line>)`.
+  4. Format the reference as a clickable link in GitHub PR comments: `[Constitution: Section Name](docs/reference/constitution.md#L<line>)`.
   5. Handle constitution amendments: if a mapped section heading changes, log a warning and fall back to "Section not found" rather than crashing.
   6. Test: verify each check produces a valid section reference.
   7. Test: rename a constitution section, verify the checker handles it gracefully.
@@ -226,3 +226,5 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z – system – lane=planned – Prompt created.
+- 2026-03-01T13:32:35Z – claude-haiku – shell_pid=67174 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T13:34:02Z – claude-haiku – shell_pid=67174 – lane=done – Implemented
