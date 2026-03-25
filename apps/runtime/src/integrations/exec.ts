@@ -175,9 +175,13 @@ export async function execCommand(command: string, args: string[]): Promise<Exec
   });
 
   const [stdoutBuf, stderrBuf, code] = await Promise.all([
-    new Response(proc.stdout).arrayBuffer(),
-    new Response(proc.stderr).arrayBuffer(),
-    proc.exited,
+    proc.stdout
+      ? new Response(proc.stdout).arrayBuffer()
+      : Promise.resolve(new ArrayBuffer(0)),
+    proc.stderr
+      ? new Response(proc.stderr).arrayBuffer()
+      : Promise.resolve(new ArrayBuffer(0)),
+    proc.exited
   ]);
 
   return {

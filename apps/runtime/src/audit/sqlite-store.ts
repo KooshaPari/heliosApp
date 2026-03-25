@@ -1,8 +1,8 @@
-import { Database } from "bun:sqlite";
-import type { AuditEvent } from "./event";
-import type { AuditFilter } from "./ring-buffer";
-import fs from "fs";
-import path from "path";
+import { Database } from 'bun:sqlite';
+import type { AuditEvent } from './event';
+import type { AuditFilter } from './ring-buffer';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * SQLite-backed persistent storage for audit events.

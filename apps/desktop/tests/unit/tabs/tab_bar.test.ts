@@ -4,7 +4,7 @@ import { createMockTabSurface } from "../../../src/tabs/tab_surface";
 
 describe("TabBar", () => {
   let tabBar: TabBar;
-  let mockTabs: ReturnType<typeof createMockTabSurface>[] = [];
+  let mockTabs: Array<ReturnType<typeof createMockTabSurface>> = [];
 
   beforeEach(() => {
     mockTabs = [

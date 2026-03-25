@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { RendererPreferencesManager } from "../../../src/settings/renderer_preferences";
-import { writeFileSync, unlinkSync, mkdirSync } from "fs";
-import { resolve } from "path";
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { RendererPreferencesManager } from '../../../src/settings/renderer_preferences';
+import { writeFileSync, unlinkSync, mkdirSync } from 'fs';
+import { resolve } from 'path';
 
 describe("RendererPreferencesManager", () => {
   let tempPath: string;

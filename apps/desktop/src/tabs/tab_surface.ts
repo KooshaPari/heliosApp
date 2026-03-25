@@ -2,6 +2,8 @@ import { type ActiveContext, getActiveContextStore } from "./context_switch";
 
 export type { ActiveContext };
 
+export type { ActiveContext } from "./context_switch";
+
 export type TabType = "terminal" | "agent" | "session" | "chat" | "project";
 
 /**

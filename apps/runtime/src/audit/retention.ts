@@ -1,4 +1,4 @@
-import type { AuditEvent } from "./event";
+import type { AuditEvent } from './event';
 
 /**
  * Retention policy for workspace audit events.

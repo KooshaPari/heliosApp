@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { ConfirmationDialog } from "../../../src/panels/confirmation_dialog";
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { ConfirmationDialog } from '../../../src/panels/confirmation_dialog';
 
 describe("ConfirmationDialog", () => {
   let container: HTMLDivElement;
@@ -17,9 +17,9 @@ describe("ConfirmationDialog", () => {
     document.body.removeChild(container);
   });
 
-  it("should mount to container", () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+  it('should mount to container', () => {
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: "Delete Lane",
@@ -33,9 +33,9 @@ describe("ConfirmationDialog", () => {
     expect(container).toBeTruthy();
   });
 
-  it("should open dialog with title and message", async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+  it('should open dialog with title and message', async () => {
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: "Delete Lane",
@@ -59,9 +59,9 @@ describe("ConfirmationDialog", () => {
     expect(message?.textContent).toContain("Are you sure");
   });
 
-  it("should call onConfirm when confirm button is clicked", async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+  it('should call onConfirm when confirm button is clicked', async () => {
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: "Delete",
@@ -82,9 +82,9 @@ describe("ConfirmationDialog", () => {
     expect(onConfirm).toHaveBeenCalled();
   });
 
-  it("should call onCancel when cancel button is clicked", async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+  it('should call onCancel when cancel button is clicked', async () => {
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: "Delete",
@@ -105,9 +105,9 @@ describe("ConfirmationDialog", () => {
     expect(onCancel).toHaveBeenCalled();
   });
 
-  it("should close dialog when Escape is pressed", async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+  it('should close dialog when Escape is pressed', async () => {
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: "Delete",
@@ -128,9 +128,9 @@ describe("ConfirmationDialog", () => {
     expect(onCancel).toHaveBeenCalled();
   });
 
-  it("should confirm when Enter is pressed", async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+  it('should confirm when Enter is pressed', async () => {
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: "Delete",
@@ -151,9 +151,9 @@ describe("ConfirmationDialog", () => {
     expect(onConfirm).toHaveBeenCalled();
   });
 
-  it("should trap focus within dialog", async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+  it('should trap focus within dialog', async () => {
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: "Delete",
@@ -186,9 +186,9 @@ describe("ConfirmationDialog", () => {
     // This tests the focus trap logic
   });
 
-  it("should apply danger styling when isDangerous is true", async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+  it('should apply danger styling when isDangerous is true', async () => {
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: "Delete",
@@ -210,9 +210,9 @@ describe("ConfirmationDialog", () => {
     expect(bgColor).toMatch(/244|ef4444/); // RGB for red #ef4444
   });
 
-  it("should use custom button labels", async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+  it('should use custom button labels', async () => {
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: "Action",
@@ -235,9 +235,9 @@ describe("ConfirmationDialog", () => {
     expect(cancelBtn?.textContent).toBe("No, Cancel");
   });
 
-  it("should have proper ARIA attributes", async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+  it('should have proper ARIA attributes', async () => {
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: "Delete",
@@ -256,9 +256,9 @@ describe("ConfirmationDialog", () => {
     expect(dialogElement?.getAttribute("aria-modal")).toBe("true");
   });
 
-  it("should close dialog with fade-out animation", async () => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
+  it('should close dialog with fade-out animation', async () => {
+    const onConfirm = mock();
+    const onCancel = mock();
 
     dialog = new ConfirmationDialog({
       title: "Delete",

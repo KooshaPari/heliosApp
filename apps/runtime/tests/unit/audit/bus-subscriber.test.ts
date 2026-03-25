@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, mock } from "bun:test";
-import { BusAuditSubscriber } from "../../../src/audit/bus-subscriber";
-import type { BusEvent } from "../../../src/audit/bus-subscriber";
-import { DefaultAuditSink, NoOpAuditStorage } from "../../../src/audit/sink";
-import { AUDIT_EVENT_TYPES } from "../../../src/audit/event";
+import { describe, it, expect, beforeEach, mock } from 'bun:test';
+import { BusAuditSubscriber } from '../../../src/audit/bus-subscriber';
+import type { BusEvent } from '../../../src/audit/bus-subscriber';
+import { DefaultAuditSink, NoOpAuditStorage } from '../../../src/audit/sink';
+import { AUDIT_EVENT_TYPES } from '../../../src/audit/event';
 
 describe("BusAuditSubscriber", () => {
   let subscriber: BusAuditSubscriber;

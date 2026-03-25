@@ -209,7 +209,13 @@ describe("ActiveContextStore", () => {
       // Wait for debounce
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      expect(finalContext!).toEqual(contexts[2]!);
+      expect(finalContext).not.toBeNull();
+      if (finalContext === null) {
+        throw new Error("Expected final context to be emitted");
+      }
+      const emittedContext = finalContext;
+
+      expect<ActiveContext>(emittedContext).toEqual(contexts[2]);
     });
   });
 
@@ -234,6 +240,7 @@ describe("ActiveContextStore", () => {
       await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(validated).toBe(true);
+      expect(store.getContext()).not.toBeNull();
       expect(store.getContext()).toEqual(validContext);
     });
 

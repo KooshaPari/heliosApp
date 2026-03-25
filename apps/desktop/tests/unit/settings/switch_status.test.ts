@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { SwitchStatus } from "../../../src/settings/switch_status";
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { SwitchStatus } from '../../../src/settings/switch_status';
 
 describe("SwitchStatus", () => {
   let container: HTMLDivElement;

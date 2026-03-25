@@ -1,16 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { LaneListItem } from "../../../src/panels/lane_list_item";
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { LaneListItem } from '../../../src/panels/lane_list_item';
 
 describe("LaneListItem", () => {
   let container: HTMLDivElement;
   let item: LaneListItem;
 
   const mockProps = {
-    laneId: "lane-1",
-    laneName: "Test Lane",
-    state: "running",
-    onSelect: vi.fn(),
-    onContextMenu: vi.fn(),
+    laneId: 'lane-1',
+    laneName: 'Test Lane',
+    state: 'running',
+    onSelect: mock(),
+    onContextMenu: mock(),
   };
 
   beforeEach(() => {
@@ -105,8 +105,8 @@ describe("LaneListItem", () => {
     expect(nameSpan?.getAttribute("title")).toBe(longName);
   });
 
-  it("should call onSelect when clicked", () => {
-    const onSelect = vi.fn();
+  it('should call onSelect when clicked', () => {
+    const onSelect = mock();
     item = new LaneListItem({ ...mockProps, onSelect });
     item.mount(container);
 
@@ -116,8 +116,8 @@ describe("LaneListItem", () => {
     expect(onSelect).toHaveBeenCalledWith("lane-1");
   });
 
-  it("should call onContextMenu when right-clicked", () => {
-    const onContextMenu = vi.fn();
+  it('should call onContextMenu when right-clicked', () => {
+    const onContextMenu = mock();
     item = new LaneListItem({ ...mockProps, onContextMenu });
     item.mount(container);
 
@@ -129,8 +129,8 @@ describe("LaneListItem", () => {
     expect(onContextMenu).toHaveBeenCalledWith("lane-1", expect.any(MouseEvent));
   });
 
-  it("should call onSelect when Enter is pressed", () => {
-    const onSelect = vi.fn();
+  it('should call onSelect when Enter is pressed', () => {
+    const onSelect = mock();
     item = new LaneListItem({ ...mockProps, onSelect });
     item.mount(container);
 

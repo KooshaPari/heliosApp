@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { CapabilityDisplay } from "../../../src/settings/capability_display";
-import type { Capability } from "../../../src/settings/capability_display";
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { CapabilityDisplay } from '../../../src/settings/capability_display';
+import type { Capability } from '../../../src/settings/capability_display';
 
 describe("CapabilityDisplay", () => {
   let container: HTMLDivElement;
@@ -24,8 +24,8 @@ describe("CapabilityDisplay", () => {
     document.body.removeChild(container);
   });
 
-  it("should render collapsed by default", () => {
-    const onToggle = vi.fn();
+  it('should render collapsed by default', () => {
+    const onToggle = mock();
     display = new CapabilityDisplay({
       capability: mockCapability,
       onToggleExpanded: onToggle,
@@ -37,8 +37,8 @@ describe("CapabilityDisplay", () => {
     expect(content).toBeFalsy();
   });
 
-  it("should expand when toggle clicked", async () => {
-    const onToggle = vi.fn();
+  it('should expand when toggle clicked', async () => {
+    const onToggle = mock();
     display = new CapabilityDisplay({
       capability: mockCapability,
       onToggleExpanded: onToggle,

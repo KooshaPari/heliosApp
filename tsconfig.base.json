@@ -33,7 +33,7 @@
       "@helios/desktop/*": ["apps/desktop/src/*"]
     },
 
-    /* Bun types */
-    "types": ["bun-types"]
+    /* Bun and test runner types */
+    "types": ["bun-types", "vitest/globals"]
   }
 }

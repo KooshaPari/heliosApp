@@ -24,7 +24,7 @@ export class MetricsQuery {
     if (entry === undefined) {
       return null;
     }
-    return computePercentiles(entry.buffer.getValues()) ?? null;
+    return computePercentiles(entry.buffer.getValues());
   }
 
   /** Compute percentile statistics for all registered metrics with samples. */
@@ -33,10 +33,7 @@ export class MetricsQuery {
     for (const name of this.registry.listMetrics()) {
       const entry = this.registry.getMetric(name);
       if (entry !== undefined) {
-        const stats = computePercentiles(entry.buffer.getValues());
-        if (stats !== undefined) {
-          result[name] = stats;
-        }
+        result[name] = computePercentiles(entry.buffer.getValues());
       }
     }
     return result;

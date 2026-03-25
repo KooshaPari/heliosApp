@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { RendererSettings } from "../../../src/settings/renderer_settings";
-import type { Renderer } from "../../../src/settings/renderer_settings";
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { RendererSettings } from '../../../src/settings/renderer_settings';
+import type { Renderer } from '../../../src/settings/renderer_settings';
 
 describe("RendererSettings", () => {
   let container: HTMLDivElement;
@@ -23,8 +23,8 @@ describe("RendererSettings", () => {
     document.body.removeChild(container);
   });
 
-  it("should render settings section with header", () => {
-    const onRendererSelect = vi.fn();
+  it('should render settings section with header', () => {
+    const onRendererSelect = mock();
     settings = new RendererSettings({
       renderers: mockRenderers,
       onRendererSelect,
@@ -36,8 +36,8 @@ describe("RendererSettings", () => {
     expect(header?.textContent).toBe("Renderer Engine");
   });
 
-  it("should render settings section with description", () => {
-    const onRendererSelect = vi.fn();
+  it('should render settings section with description', () => {
+    const onRendererSelect = mock();
     settings = new RendererSettings({
       renderers: mockRenderers,
       onRendererSelect,
@@ -49,8 +49,8 @@ describe("RendererSettings", () => {
     expect(description?.textContent).toContain("Choose your terminal renderer");
   });
 
-  it("should render all available renderers", () => {
-    const onRendererSelect = vi.fn();
+  it('should render all available renderers', () => {
+    const onRendererSelect = mock();
     settings = new RendererSettings({
       renderers: mockRenderers,
       onRendererSelect,
@@ -62,8 +62,8 @@ describe("RendererSettings", () => {
     expect(options.length).toBe(2);
   });
 
-  it("should display active renderer indicator", () => {
-    const onRendererSelect = vi.fn();
+  it('should display active renderer indicator', () => {
+    const onRendererSelect = mock();
     settings = new RendererSettings({
       renderers: mockRenderers,
       onRendererSelect,
@@ -84,7 +84,7 @@ describe("RendererSettings", () => {
       { id: "rio", name: "Rio", isAvailable: false, isActive: false },
     ];
 
-    const onRendererSelect = vi.fn();
+    const onRendererSelect = mock();
     settings = new RendererSettings({
       renderers,
       onRendererSelect,
@@ -99,8 +99,8 @@ describe("RendererSettings", () => {
     expect(radio?.disabled).toBeTruthy();
   });
 
-  it("should call onRendererSelect when renderer is clicked", () => {
-    const onRendererSelect = vi.fn();
+  it('should call onRendererSelect when renderer is clicked', () => {
+    const onRendererSelect = mock();
     settings = new RendererSettings({
       renderers: mockRenderers,
       onRendererSelect,
@@ -114,8 +114,8 @@ describe("RendererSettings", () => {
     expect(onRendererSelect).toHaveBeenCalledWith("rio");
   });
 
-  it("should display loading state", () => {
-    const onRendererSelect = vi.fn();
+  it('should display loading state', () => {
+    const onRendererSelect = mock();
     settings = new RendererSettings({
       renderers: [],
       onRendererSelect,
@@ -128,8 +128,8 @@ describe("RendererSettings", () => {
     expect(loadingDiv?.textContent).toContain("Loading renderer options");
   });
 
-  it("should display error state", () => {
-    const onRendererSelect = vi.fn();
+  it('should display error state', () => {
+    const onRendererSelect = mock();
     settings = new RendererSettings({
       renderers: [],
       onRendererSelect,
@@ -142,8 +142,8 @@ describe("RendererSettings", () => {
     expect(errorDiv?.textContent).toContain("Failed to load renderers");
   });
 
-  it("should update renderers when update() is called", () => {
-    const onRendererSelect = vi.fn();
+  it('should update renderers when update() is called', () => {
+    const onRendererSelect = mock();
     settings = new RendererSettings({
       renderers: [mockRenderers[0]],
       onRendererSelect,
@@ -160,8 +160,8 @@ describe("RendererSettings", () => {
     expect(options.length).toBe(2);
   });
 
-  it("should update active indicator when active renderer changes", () => {
-    const onRendererSelect = vi.fn();
+  it('should update active indicator when active renderer changes', () => {
+    const onRendererSelect = mock();
     const renderers = [...mockRenderers];
     settings = new RendererSettings({
       renderers,
@@ -184,8 +184,8 @@ describe("RendererSettings", () => {
     expect(activeOption?.getAttribute("data-renderer")).toBe("rio");
   });
 
-  it("should render radio buttons for each renderer", () => {
-    const onRendererSelect = vi.fn();
+  it('should render radio buttons for each renderer', () => {
+    const onRendererSelect = mock();
     settings = new RendererSettings({
       renderers: mockRenderers,
       onRendererSelect,
