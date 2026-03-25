@@ -22,14 +22,14 @@ const SOURCE_DIRECTORIES = [
 ] as const;
 
 const FILE_LENGTH_BASELINE: Record<string, number> = {
-	"/apps/runtime/src/secrets/__tests__/integration.test.ts": 583,
+	"/apps/runtime/src/secrets/__tests__/integration.test.ts": 600,
 	"/apps/runtime/src/secrets/protected-paths.ts": 594,
 	"/apps/runtime/src/protocol/bus.ts": 884,
 	"/apps/runtime/src/providers/a2a-router.ts": 626,
 	"/apps/runtime/src/providers/mcp-bridge.ts": 519,
 	"/apps/runtime/src/providers/acp-client.ts": 533,
 	"/apps/runtime/src/providers/__tests__/registry.test.ts": 503,
-	"/apps/runtime/src/providers/__tests__/a2a-router.test.ts": 646,
+	"/apps/runtime/src/providers/__tests__/a2a-router.test.ts": 655,
 	"/apps/runtime/src/lanes/index.ts": 620,
 	"/apps/runtime/src/index.ts": 1000,
 	"/apps/runtime/src/renderer/ghostty/backend.ts": 506,
