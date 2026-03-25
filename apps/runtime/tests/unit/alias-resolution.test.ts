@@ -16,7 +16,7 @@ describe.skip("path alias resolution (requires external project setup)", () => {
   test("@helios/runtime resolves and exports VERSION", async () => {
     // @ts-ignore
     const runtime = await import("@helios/runtime");
-    expect(runtime.VERSION).toBe("0.0.1");
+    expect(runtime.VERSION).toBe("0.1.1");
   });
 
   // @ts-ignore

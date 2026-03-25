@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-03-25
+
+### Fixed
+
+- Unified stabilization for runtime audit sink and desktop component imports.
+- Resolved vitest matcher type errors in `mcp-bridge` test suite.
+- Fixed SLO check logic and percentile calculation in runtime diagnostics.
+- Stabilized keyboard shortcuts and session sharing integration tests.
+- Cleaned up Oxlint configuration and resolved merge conflicts.
+
+## [0.1.1] - 2026-03-25
+
 ### Added
 
 - Aligned CI Bun usage with the `packageManager` field in `package.json`, and documented local development troubleshooting in [Troubleshooting local development](docs/guides/troubleshooting-local-dev.md).

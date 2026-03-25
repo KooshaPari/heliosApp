@@ -10,7 +10,7 @@ export { InMemoryAuditSink } from "./audit/sink.js";
 export { InMemoryLocalBus } from "./protocol/bus.js";
 export type { LocalBus } from "./protocol/bus.js";
 
-export const VERSION = "0.0.1" as const;
+export const VERSION = "0.1.1" as const;
 
 export interface HealthCheckResult {
   readonly ok: boolean;
