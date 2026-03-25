@@ -89,7 +89,7 @@ export function appendChangelogEntry(entry: ChangelogEntry): void {
 		if (existsSync(tempFile)) {
 			try {
 				require("fs").unlinkSync(tempFile);
-			} catch (unlinkErr) {
+			} catch  {
 				// Ignore cleanup errors
 			}
 		}

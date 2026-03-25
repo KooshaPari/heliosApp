@@ -5,25 +5,15 @@ import { randomUUID } from "crypto";
 
 export enum RecoveryStage {
   CRASHED = "CRASHED",
-  Crashed = "CRASHED",
   DETECTING = "DETECTING",
-  Detecting = "DETECTING",
   INVENTORYING = "INVENTORYING",
-  Inventorying = "INVENTORYING",
   RESTORING = "RESTORING",
-  Restoring = "RESTORING",
   RECONCILING = "RECONCILING",
-  Reconciling = "RECONCILING",
   LIVE = "LIVE",
-  Live = "LIVE",
   DETECTION_FAILED = "DETECTION_FAILED",
-  DetectionFailed = "DETECTION_FAILED",
   INVENTORY_FAILED = "INVENTORY_FAILED",
-  InventoryFailed = "INVENTORY_FAILED",
   RESTORATION_FAILED = "RESTORATION_FAILED",
-  RestorationFailed = "RESTORATION_FAILED",
   RECONCILIATION_FAILED = "RECONCILIATION_FAILED",
-  ReconciliationFailed = "RECONCILIATION_FAILED",
 }
 
 export interface RecoveryState {
