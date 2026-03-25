@@ -45,9 +45,9 @@ describe("PtyRegistry", () => {
     for (let i = 0; i < 5; i++) {
       registry.register(makeRecord({ ptyId: `pty-${i}` }));
     }
-    expect(() =>
-      registry.register(makeRecord({ ptyId: "pty-overflow" })),
-    ).toThrow(RegistryCapacityError);
+    expect(() => registry.register(makeRecord({ ptyId: "pty-overflow" }))).toThrow(
+      RegistryCapacityError
+    );
   });
 
   it("getByLane returns correct records", () => {
@@ -57,7 +57,7 @@ describe("PtyRegistry", () => {
 
     const l1 = registry.getByLane("L1");
     expect(l1).toHaveLength(2);
-    expect(l1.map((r) => r.ptyId).sort()).toEqual(["a", "b"]);
+    expect(l1.map(r => r.ptyId).sort()).toEqual(["a", "b"]);
 
     expect(registry.getByLane("L2")).toHaveLength(1);
     expect(registry.getByLane("L3")).toHaveLength(0);

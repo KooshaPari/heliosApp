@@ -22,7 +22,7 @@ describe("AgentTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -42,7 +42,7 @@ describe("AgentTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -55,7 +55,7 @@ describe("AgentTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -70,7 +70,7 @@ describe("AgentTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -78,7 +78,7 @@ describe("AgentTab", () => {
       const buttons = el.querySelectorAll("button");
 
       expect(buttons.length).toBeGreaterThan(0);
-      expect(Array.from(buttons).some((b) => b.textContent?.includes("Restart"))).toBe(true);
+      expect(Array.from(buttons).some(b => b.textContent?.includes("Restart"))).toBe(true);
     });
   });
 
@@ -87,7 +87,7 @@ describe("AgentTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -101,7 +101,7 @@ describe("AgentTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);

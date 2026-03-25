@@ -43,10 +43,7 @@ export class BindingEventEmitter {
   /**
    * Emit event for a terminal binding state change.
    */
-  private async emitEvent(
-    topic: BindingEventTopic,
-    payload: BindingEventPayload,
-  ): Promise<void> {
+  private async emitEvent(topic: BindingEventTopic, payload: BindingEventPayload): Promise<void> {
     const event = {
       id: randomUUID(),
       type: "event" as const,

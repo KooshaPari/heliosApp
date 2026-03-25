@@ -36,7 +36,7 @@ export const METHODS = [
 export type ProtocolMethod = (typeof METHODS)[number];
 
 export type MethodHandler = (
-  command: CommandEnvelope,
+  command: CommandEnvelope
 ) => ResponseEnvelope | Promise<ResponseEnvelope>;
 
 const METHOD_NAME_RE = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
@@ -44,7 +44,7 @@ const METHOD_NAME_RE = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
 function assertValidMethodName(method: string): void {
   if (!METHOD_NAME_RE.test(method)) {
     throw new Error(
-      `Invalid method name "${method}": must be non-empty, alphanumeric segments separated by dots`,
+      `Invalid method name "${method}": must be non-empty, alphanumeric segments separated by dots`
     );
   }
 }

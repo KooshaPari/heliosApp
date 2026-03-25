@@ -1,5 +1,5 @@
 /**
- * A2A Federation Router, Health Monitoring, and Failover
+ * A2A Federation Router and Failover
  *
  * Implements the A2A protocol client adapter for external agent delegation
  * with endpoint registration, failover routing, and failure isolation.
@@ -9,11 +9,16 @@
  */
 
 import type { LocalBus } from "../protocol/bus.js";
-import type { ProviderAdapter, ProviderHealthStatus, A2AConfig, A2AExecuteInput, A2AExecuteOutput } from "./adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-} from "./errors.js";
+import type {
+  ProviderAdapter,
+  ProviderHealthStatus,
+  A2AConfig,
+  A2AExecuteInput,
+  A2AExecuteOutput,
+} from "./adapter.js";
+import { NormalizedProviderError, normalizeError } from "./errors.js";
+
+export { HealthMonitoringCoordinator } from "./health-monitor.js";
 
 /**
  * A2A endpoint configuration.
@@ -53,7 +58,12 @@ export interface A2AResult {
  */
 // biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
 export interface A2ARouterConfig extends A2AConfig {
-  endpoints?: Array<{ id: string; url: string; priority: number; capabilities: string[] }>;
+  endpoints?: Array<{
+    id: string;
+    url: string;
+    priority: number;
+    capabilities: string[];
+  }>;
 }
 
 /**
@@ -68,13 +78,11 @@ export interface A2ARouterConfig extends A2AConfig {
  * FR-025-005: A2A federation with external agent delegation.
  */
 // biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
-export class A2ARouterAdapter
-  implements
-    ProviderAdapter<
-      A2ARouterConfig,
-      A2ADelegation & { correlationId?: string },
-      A2AResult
-    > {
+export class A2ARouterAdapter implements ProviderAdapter<
+  A2ARouterConfig,
+  A2ADelegation & { correlationId?: string },
+  A2AResult
+> {
   private config: A2ARouterConfig | null = null;
   private bus: LocalBus | null = null;
   private endpoints: A2AEndpoint[] = [];
@@ -108,7 +116,7 @@ export class A2ARouterAdapter
 
       // Initialize endpoints sorted by priority
       this.endpoints = config.endpoints
-        .map((ep) => ({
+        .map(ep => ({
           id: ep.id,
           url: ep.url,
           priority: ep.priority,
@@ -173,7 +181,7 @@ export class A2ARouterAdapter
 
     try {
       // Check if any endpoint is healthy
-      const healthyEndpoints = this.endpoints.filter((ep) => ep.healthStatus?.state === "healthy");
+      const healthyEndpoints = this.endpoints.filter(ep => ep.healthStatus?.state === "healthy");
 
       if (healthyEndpoints.length > 0) {
         this.healthStatus = {
@@ -183,8 +191,7 @@ export class A2ARouterAdapter
         };
       } else {
         this.healthStatus.failureCount++;
-        const newState =
-          this.healthStatus.failureCount >= 5 ? "unavailable" : "degraded";
+        const newState = this.healthStatus.failureCount >= 5 ? "unavailable" : "degraded";
         this.healthStatus = {
           state: newState,
           lastCheck: new Date(),
@@ -358,7 +365,7 @@ export class A2ARouterAdapter
    * @param status New health status
    */
   updateEndpointHealth(endpointId: string, status: ProviderHealthStatus): void {
-    const endpoint = this.endpoints.find((ep) => ep.id === endpointId);
+    const endpoint = this.endpoints.find(ep => ep.id === endpointId);
     if (endpoint) {
       endpoint.healthStatus = status;
     }
@@ -378,25 +385,20 @@ export class A2ARouterAdapter
   private selectEndpoint(requiredCapabilities: string[]): A2AEndpoint | undefined {
     // First pass: look for healthy endpoint with matching capabilities
     let selected = this.endpoints.find(
-      (ep) =>
-        ep.healthStatus?.state === "healthy" &&
-        this.hasCapabilities(ep, requiredCapabilities)
+      ep => ep.healthStatus?.state === "healthy" && this.hasCapabilities(ep, requiredCapabilities)
     );
 
     // Second pass: look for degraded endpoint (for failover)
     if (!selected) {
       selected = this.endpoints.find(
-        (ep) =>
-          ep.healthStatus?.state === "degraded" &&
-          this.hasCapabilities(ep, requiredCapabilities)
+        ep =>
+          ep.healthStatus?.state === "degraded" && this.hasCapabilities(ep, requiredCapabilities)
       );
     }
 
     // Final fallback: any endpoint with matching capabilities
     if (!selected) {
-      selected = this.endpoints.find((ep) =>
-        this.hasCapabilities(ep, requiredCapabilities)
-      );
+      selected = this.endpoints.find(ep => this.hasCapabilities(ep, requiredCapabilities));
     }
 
     return selected;
@@ -409,16 +411,13 @@ export class A2ARouterAdapter
    * @param requiredCapabilities Required capabilities
    * @returns true if endpoint has all required capabilities
    */
-  private hasCapabilities(
-    endpoint: A2AEndpoint,
-    requiredCapabilities: string[]
-  ): boolean {
+  private hasCapabilities(endpoint: A2AEndpoint, requiredCapabilities: string[]): boolean {
     if (requiredCapabilities.length === 0) {
       return true;
     }
 
     const endpointCaps = new Set(endpoint.capabilities);
-    return requiredCapabilities.every((cap) => endpointCaps.has(cap));
+    return requiredCapabilities.every(cap => endpointCaps.has(cap));
   }
 
   /**
@@ -486,148 +485,11 @@ export class A2ARouterAdapter
         topic,
         payload,
       });
-    } catch (_error) {
-      // Best-effort event publishing should not fail delegation flow.
+    } catch (error) {
+      console.warn(`Failed to publish A2A event ${topic}:`, error);
     }
   }
 }
 
-/**
- * Health Monitoring Coordinator
- *
- * Manages health state for all registered providers across all types (ACP, MCP, A2A).
- * Publishes state transitions on the bus and coordinates failover decisions.
- *
- * FR-025-009: Health monitoring for all providers.
- * FR-025-010: Failover routing based on health state.
- */
-export class HealthMonitoringCoordinator {
-  private providerHealthMap = new Map<string, ProviderHealthStatus>();
-  private healthCheckIntervals = new Map<string, NodeJS.Timeout>();
-  private bus: LocalBus | null = null;
-
-  constructor(bus?: LocalBus) {
-    this.bus = bus || null;
-  }
-
-  /**
-   * Register a provider for health monitoring.
-   *
-   * @param providerId Provider ID
-   * @param interval Health check interval in milliseconds
-   * @param checkFunction Async function that returns health status
-   */
-  registerProvider(
-    providerId: string,
-    interval: number,
-    checkFunction: () => Promise<ProviderHealthStatus>
-  ): void {
-    // Store initial health
-    this.providerHealthMap.set(providerId, {
-      state: "unavailable",
-      lastCheck: new Date(),
-      failureCount: 0,
-    });
-
-    // Schedule periodic health checks
-    const intervalId = setInterval(async () => {
-      try {
-        const status = await checkFunction();
-        const previousStatus = this.providerHealthMap.get(providerId);
-
-        // Update health
-        this.providerHealthMap.set(providerId, status);
-
-        // Publish transition if state changed
-        if (previousStatus?.state !== status.state) {
-          await this.publishEvent("provider.health.transitioned", {
-            providerId,
-            previousState: previousStatus?.state,
-            newState: status.state,
-            failureCount: status.failureCount,
-          });
-        }
-      } catch (_error) {
-        // Health polling errors are intentionally isolated per interval tick.
-      }
-    }, interval);
-
-    this.healthCheckIntervals.set(providerId, intervalId);
-  }
-
-  /**
-   * Unregister a provider from health monitoring.
-   *
-   * @param providerId Provider ID
-   */
-  unregisterProvider(providerId: string): void {
-    const intervalId = this.healthCheckIntervals.get(providerId);
-    if (intervalId) {
-      clearInterval(intervalId);
-      this.healthCheckIntervals.delete(providerId);
-    }
-    this.providerHealthMap.delete(providerId);
-  }
-
-  /**
-   * Get health status for a provider.
-   *
-   * @param providerId Provider ID
-   * @returns Health status or undefined if not found
-   */
-  getProviderHealth(providerId: string): ProviderHealthStatus | undefined {
-    return this.providerHealthMap.get(providerId);
-  }
-
-  /**
-   * Get all healthy providers of a given type.
-   *
-   * @param type Provider type
-   * @returns Array of provider IDs
-   */
-  getHealthyProvidersByType(type: string): string[] {
-    const providers: string[] = [];
-    for (const [providerId, status] of this.providerHealthMap) {
-      // Filter by type (mock: assume ID prefix indicates type)
-      if (providerId.startsWith(type) && status.state === "healthy") {
-        providers.push(providerId);
-      }
-    }
-    return providers;
-  }
-
-  /**
-   * Cleanup and stop monitoring.
-   */
-  shutdown(): void {
-    for (const intervalId of this.healthCheckIntervals.values()) {
-      clearInterval(intervalId);
-    }
-    this.healthCheckIntervals.clear();
-    this.providerHealthMap.clear();
-  }
-
-  /**
-   * Publish event on the protocol bus.
-   *
-   * @param topic Event topic
-   * @param payload Event payload
-   */
-  private async publishEvent(topic: string, payload: Record<string, unknown>): Promise<void> {
-    if (!this.bus) {
-      return;
-    }
-
-    try {
-      await this.bus.publish({
-        id: `health-${Date.now()}-${Math.random()}`,
-        type: "event",
-        ts: new Date().toISOString(),
-        topic,
-        payload,
-      });
-    } catch (_error) {
-      // Best-effort event publishing should not fail coordinator flow.
-    }
-  }
-}
+// Re-export HealthMonitoringCoordinator from its own module for backward compatibility.
+export { HealthMonitoringCoordinator } from "./health-monitor.js";

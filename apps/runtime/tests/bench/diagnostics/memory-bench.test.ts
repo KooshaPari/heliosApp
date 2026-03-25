@@ -52,7 +52,7 @@ describe("Memory Overhead", () => {
         metricCount: METRIC_COUNT,
         bufferSize: BUFFER_SIZE,
         expectedMinMB: 3.2,
-      }),
+      })
     );
 
     expect(totalMB).toBeLessThan(10);
@@ -88,7 +88,7 @@ describe("Memory Overhead", () => {
       JSON.stringify({
         benchmark: "empty-buffers",
         totalKB: Number(totalKB.toFixed(2)),
-      }),
+      })
     );
 
     // Empty (lazy) buffers should use very little memory.

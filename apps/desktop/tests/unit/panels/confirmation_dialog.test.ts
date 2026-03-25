@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { ConfirmationDialog } from '../../../src/panels/confirmation_dialog';
 
-describe('ConfirmationDialog', () => {
+describe("ConfirmationDialog", () => {
   let container: HTMLDivElement;
   let dialog: ConfirmationDialog;
 
   beforeEach(() => {
-    container = document.createElement('div');
+    container = document.createElement("div");
     document.body.appendChild(container);
   });
 
@@ -22,8 +22,8 @@ describe('ConfirmationDialog', () => {
     const onCancel = mock();
 
     dialog = new ConfirmationDialog({
-      title: 'Delete Lane',
-      message: 'Are you sure?',
+      title: "Delete Lane",
+      message: "Are you sure?",
       onConfirm,
       onCancel,
     });
@@ -38,8 +38,8 @@ describe('ConfirmationDialog', () => {
     const onCancel = mock();
 
     dialog = new ConfirmationDialog({
-      title: 'Delete Lane',
-      message: 'Are you sure you want to delete this lane?',
+      title: "Delete Lane",
+      message: "Are you sure you want to delete this lane?",
       onConfirm,
       onCancel,
     });
@@ -47,16 +47,16 @@ describe('ConfirmationDialog', () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    const dialogElement = container.querySelector('.confirmation-dialog');
+    const dialogElement = container.querySelector(".confirmation-dialog");
     expect(dialogElement).toBeTruthy();
 
-    const title = container.querySelector('.confirmation-title');
-    expect(title?.textContent).toBe('Delete Lane');
+    const title = container.querySelector(".confirmation-title");
+    expect(title?.textContent).toBe("Delete Lane");
 
-    const message = container.querySelector('.confirmation-message');
-    expect(message?.textContent).toContain('Are you sure');
+    const message = container.querySelector(".confirmation-message");
+    expect(message?.textContent).toContain("Are you sure");
   });
 
   it('should call onConfirm when confirm button is clicked', async () => {
@@ -64,9 +64,9 @@ describe('ConfirmationDialog', () => {
     const onCancel = mock();
 
     dialog = new ConfirmationDialog({
-      title: 'Delete',
-      message: 'Continue?',
-      confirmLabel: 'Delete',
+      title: "Delete",
+      message: "Continue?",
+      confirmLabel: "Delete",
       onConfirm,
       onCancel,
     });
@@ -74,9 +74,9 @@ describe('ConfirmationDialog', () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    const confirmBtn = container.querySelector('.confirmation-confirm') as HTMLButtonElement;
+    const confirmBtn = container.querySelector(".confirmation-confirm") as HTMLButtonElement;
     confirmBtn?.click();
 
     expect(onConfirm).toHaveBeenCalled();
@@ -87,9 +87,9 @@ describe('ConfirmationDialog', () => {
     const onCancel = mock();
 
     dialog = new ConfirmationDialog({
-      title: 'Delete',
-      message: 'Continue?',
-      cancelLabel: 'Cancel',
+      title: "Delete",
+      message: "Continue?",
+      cancelLabel: "Cancel",
       onConfirm,
       onCancel,
     });
@@ -97,9 +97,9 @@ describe('ConfirmationDialog', () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    const cancelBtn = container.querySelector('.confirmation-cancel') as HTMLButtonElement;
+    const cancelBtn = container.querySelector(".confirmation-cancel") as HTMLButtonElement;
     cancelBtn?.click();
 
     expect(onCancel).toHaveBeenCalled();
@@ -110,8 +110,8 @@ describe('ConfirmationDialog', () => {
     const onCancel = mock();
 
     dialog = new ConfirmationDialog({
-      title: 'Delete',
-      message: 'Continue?',
+      title: "Delete",
+      message: "Continue?",
       onConfirm,
       onCancel,
     });
@@ -119,10 +119,10 @@ describe('ConfirmationDialog', () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    const dialogElement = container.querySelector('.confirmation-dialog');
-    const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+    const dialogElement = container.querySelector(".confirmation-dialog");
+    const escapeEvent = new KeyboardEvent("keydown", { key: "Escape" });
     dialogElement?.dispatchEvent(escapeEvent);
 
     expect(onCancel).toHaveBeenCalled();
@@ -133,8 +133,8 @@ describe('ConfirmationDialog', () => {
     const onCancel = mock();
 
     dialog = new ConfirmationDialog({
-      title: 'Delete',
-      message: 'Continue?',
+      title: "Delete",
+      message: "Continue?",
       onConfirm,
       onCancel,
     });
@@ -142,10 +142,10 @@ describe('ConfirmationDialog', () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    const dialogElement = container.querySelector('.confirmation-dialog');
-    const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+    const dialogElement = container.querySelector(".confirmation-dialog");
+    const enterEvent = new KeyboardEvent("keydown", { key: "Enter" });
     dialogElement?.dispatchEvent(enterEvent);
 
     expect(onConfirm).toHaveBeenCalled();
@@ -156,10 +156,10 @@ describe('ConfirmationDialog', () => {
     const onCancel = mock();
 
     dialog = new ConfirmationDialog({
-      title: 'Delete',
-      message: 'Continue?',
-      confirmLabel: 'Delete',
-      cancelLabel: 'Keep',
+      title: "Delete",
+      message: "Continue?",
+      confirmLabel: "Delete",
+      cancelLabel: "Keep",
       onConfirm,
       onCancel,
     });
@@ -167,17 +167,20 @@ describe('ConfirmationDialog', () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    const buttons = container.querySelectorAll('button') as NodeListOf<HTMLButtonElement>;
+    const buttons = container.querySelectorAll("button") as NodeListOf<HTMLButtonElement>;
     expect(buttons.length).toBeGreaterThanOrEqual(2);
 
     // Focus should be on first button
-    const confirmBtn = container.querySelector('.confirmation-confirm') as HTMLButtonElement;
+    const confirmBtn = container.querySelector(".confirmation-confirm") as HTMLButtonElement;
     confirmBtn?.focus();
 
     // Tab should move to next button
-    const tabEvent = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true });
+    const tabEvent = new KeyboardEvent("keydown", {
+      key: "Tab",
+      bubbles: true,
+    });
     confirmBtn?.dispatchEvent(tabEvent);
 
     // This tests the focus trap logic
@@ -188,8 +191,8 @@ describe('ConfirmationDialog', () => {
     const onCancel = mock();
 
     dialog = new ConfirmationDialog({
-      title: 'Delete',
-      message: 'Continue?',
+      title: "Delete",
+      message: "Continue?",
       isDangerous: true,
       onConfirm,
       onCancel,
@@ -198,13 +201,13 @@ describe('ConfirmationDialog', () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    const confirmBtn = container.querySelector('.confirmation-confirm') as HTMLElement;
+    const confirmBtn = container.querySelector(".confirmation-confirm") as HTMLElement;
     const bgColor = confirmBtn?.style.backgroundColor;
 
     // Red color for dangerous action
-    expect(bgColor).toContain('244'); // RGB for red #ef4444
+    expect(bgColor).toMatch(/244|ef4444/); // RGB for red #ef4444
   });
 
   it('should use custom button labels', async () => {
@@ -212,10 +215,10 @@ describe('ConfirmationDialog', () => {
     const onCancel = mock();
 
     dialog = new ConfirmationDialog({
-      title: 'Action',
-      message: 'Message',
-      confirmLabel: 'Yes, Do It',
-      cancelLabel: 'No, Cancel',
+      title: "Action",
+      message: "Message",
+      confirmLabel: "Yes, Do It",
+      cancelLabel: "No, Cancel",
       onConfirm,
       onCancel,
     });
@@ -223,13 +226,13 @@ describe('ConfirmationDialog', () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    const confirmBtn = container.querySelector('.confirmation-confirm');
-    const cancelBtn = container.querySelector('.confirmation-cancel');
+    const confirmBtn = container.querySelector(".confirmation-confirm");
+    const cancelBtn = container.querySelector(".confirmation-cancel");
 
-    expect(confirmBtn?.textContent).toBe('Yes, Do It');
-    expect(cancelBtn?.textContent).toBe('No, Cancel');
+    expect(confirmBtn?.textContent).toBe("Yes, Do It");
+    expect(cancelBtn?.textContent).toBe("No, Cancel");
   });
 
   it('should have proper ARIA attributes', async () => {
@@ -237,8 +240,8 @@ describe('ConfirmationDialog', () => {
     const onCancel = mock();
 
     dialog = new ConfirmationDialog({
-      title: 'Delete',
-      message: 'Are you sure?',
+      title: "Delete",
+      message: "Are you sure?",
       onConfirm,
       onCancel,
     });
@@ -246,11 +249,11 @@ describe('ConfirmationDialog', () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    const dialogElement = container.querySelector('.confirmation-dialog');
-    expect(dialogElement?.getAttribute('role')).toBe('alertdialog');
-    expect(dialogElement?.getAttribute('aria-modal')).toBe('true');
+    const dialogElement = container.querySelector(".confirmation-dialog");
+    expect(dialogElement?.getAttribute("role")).toBe("alertdialog");
+    expect(dialogElement?.getAttribute("aria-modal")).toBe("true");
   });
 
   it('should close dialog with fade-out animation', async () => {
@@ -258,8 +261,8 @@ describe('ConfirmationDialog', () => {
     const onCancel = mock();
 
     dialog = new ConfirmationDialog({
-      title: 'Delete',
-      message: 'Continue?',
+      title: "Delete",
+      message: "Continue?",
       onConfirm,
       onCancel,
     });
@@ -267,18 +270,18 @@ describe('ConfirmationDialog', () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    let dialogElement = container.querySelector('.confirmation-dialog');
+    let dialogElement = container.querySelector(".confirmation-dialog");
     expect(dialogElement).toBeTruthy();
 
-    const confirmBtn = container.querySelector('.confirmation-confirm') as HTMLButtonElement;
+    const confirmBtn = container.querySelector(".confirmation-confirm") as HTMLButtonElement;
     confirmBtn?.click();
 
     // Wait for fade-out animation
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    dialogElement = container.querySelector('.confirmation-dialog');
+    dialogElement = container.querySelector(".confirmation-dialog");
     expect(dialogElement).toBeFalsy();
   });
 });

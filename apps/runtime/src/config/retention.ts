@@ -17,7 +17,7 @@ export function createRetentionPolicyConfig(
   return {
     retention_days: retentionDays,
     exempt_topics: [...(input.exempt_topics ?? ["audit.retention.deleted"])],
-    redacted_fields: [...(input.redacted_fields ?? defaultRedactedFields())]
+    redacted_fields: [...(input.redacted_fields ?? defaultRedactedFields())],
   };
 }
 
@@ -29,7 +29,6 @@ export function defaultRedactedFields(): string[] {
     "secret",
     "password",
     "access_token",
-    "refresh_token"
+    "refresh_token",
   ];
 }
-

@@ -79,7 +79,11 @@ interface ACPResponse {
  *
  * FR-025-003: ACP protocol client for Claude.
  */
-export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput> {
+export class ACPClientAdapter implements ProviderAdapter<
+  ACPConfig,
+  ACPExecuteInput,
+  ACPExecuteOutput
+> {
   private config: ACPConfig | null = null;
   private bus: LocalBus | null = null;
   private policyGate: PolicyGate;
@@ -293,10 +297,10 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
 
     try {
       // Check policy gate
-      const policyDecision = await this.policyGate.evaluate(
-        "provider.acp.execute",
-        { correlationId, prompt: input.prompt }
-      );
+      const policyDecision = await this.policyGate.evaluate("provider.acp.execute", {
+        correlationId,
+        prompt: input.prompt,
+      });
 
       if (!policyDecision.allowed) {
         const reason = policyDecision.reason || "Policy denied";
@@ -493,10 +497,7 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
    * @param signal Abort signal
    * @returns ACP response
    */
-  private async sendACPRequest(
-    request: ACPRequest,
-    signal: AbortSignal
-  ): Promise<ACPResponse> {
+  private async sendACPRequest(request: ACPRequest, signal: AbortSignal): Promise<ACPResponse> {
     // Check for abort
     if (signal.aborted) {
       const aborted = new Error("Request aborted");

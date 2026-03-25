@@ -50,16 +50,18 @@ function toCommandEnvelope(
     lane_id: laneId ?? undefined,
     session_id: sessionId ?? undefined,
     terminal_id: terminalId ?? undefined,
-    payload
+    payload,
   };
 }
 
-function toResponse<T extends Record<string, unknown>>(response: LocalBusEnvelope): RuntimeResponse<T> {
+function toResponse<T extends Record<string, unknown>>(
+  response: LocalBusEnvelope
+): RuntimeResponse<T> {
   if (response.status === "error") {
     return {
       ok: false,
       result: null,
-      error: response.error?.message ?? "runtime request failed"
+      error: response.error?.message ?? "runtime request failed",
     };
   }
 
@@ -73,14 +75,17 @@ function toResponse<T extends Record<string, unknown>>(response: LocalBusEnvelop
 function normalizeDiagnostics(result: Record<string, unknown> | null): TransportDiagnostics {
   const diagnostics = (result?.diagnostics as Record<string, unknown> | undefined) ?? {};
   return {
-    preferredTransport: typeof diagnostics.preferred_transport === "string"
-      ? diagnostics.preferred_transport
-      : "cliproxy_harness",
-    resolvedTransport: typeof diagnostics.resolved_transport === "string"
-      ? diagnostics.resolved_transport
-      : "cliproxy_harness",
-    degradedReason: typeof diagnostics.degraded_reason === "string" ? diagnostics.degraded_reason : null,
-    degradedAt: typeof diagnostics.degraded_at === "string" ? diagnostics.degraded_at : null
+    preferredTransport:
+      typeof diagnostics.preferred_transport === "string"
+        ? diagnostics.preferred_transport
+        : "cliproxy_harness",
+    resolvedTransport:
+      typeof diagnostics.resolved_transport === "string"
+        ? diagnostics.resolved_transport
+        : "cliproxy_harness",
+    degradedReason:
+      typeof diagnostics.degraded_reason === "string" ? diagnostics.degraded_reason : null,
+    degradedAt: typeof diagnostics.degraded_at === "string" ? diagnostics.degraded_at : null,
   };
 }
 
@@ -102,7 +107,7 @@ export class DesktopRuntimeClient {
           lane_id: requestedLaneId,
           preferred_transport: input.preferredTransport ?? "cliproxy_harness",
           simulate_degrade: input.simulateDegrade === true,
-          force_error: input.forceError === true
+          force_error: input.forceError === true,
         },
         input.workspaceId,
         requestedLaneId,
@@ -116,7 +121,7 @@ export class DesktopRuntimeClient {
       runtimeState: (parsed.result?.state as RuntimeState | undefined) ?? null,
       id: typeof parsed.result?.lane_id === "string" ? parsed.result.lane_id : null,
       diagnostics: normalizeDiagnostics(parsed.result),
-      error: parsed.error
+      error: parsed.error,
     };
   }
 
@@ -150,7 +155,7 @@ export class DesktopRuntimeClient {
       runtimeState: (parsed.result?.state as RuntimeState | undefined) ?? null,
       id: typeof parsed.result?.session_id === "string" ? parsed.result.session_id : null,
       diagnostics: normalizeDiagnostics(parsed.result),
-      error: parsed.error
+      error: parsed.error,
     };
   }
 
@@ -169,7 +174,7 @@ export class DesktopRuntimeClient {
           lane_id: input.laneId,
           session_id: input.sessionId,
           terminal_id: requestedTerminalId,
-          force_error: input.forceError === true
+          force_error: input.forceError === true,
         },
         input.workspaceId,
         input.laneId,
@@ -183,7 +188,7 @@ export class DesktopRuntimeClient {
       runtimeState: (parsed.result?.state as RuntimeState | undefined) ?? null,
       id: typeof parsed.result?.terminal_id === "string" ? parsed.result.terminal_id : null,
       diagnostics: normalizeDiagnostics(parsed.result),
-      error: parsed.error
+      error: parsed.error,
     };
   }
 
@@ -201,7 +206,7 @@ export class DesktopRuntimeClient {
     return {
       activeEngine,
       availableEngines: available,
-      hotSwapSupported: parsed.result?.hot_swap_supported !== false
+      hotSwapSupported: parsed.result?.hot_swap_supported !== false,
     };
   }
 
@@ -215,7 +220,7 @@ export class DesktopRuntimeClient {
         "renderer.switch",
         {
           target_engine: input.targetEngine,
-          force_error: input.forceError === true
+          force_error: input.forceError === true,
         },
         input.workspaceId,
         null,
@@ -228,7 +233,7 @@ export class DesktopRuntimeClient {
       ok: parsed.ok,
       activeEngine: parsed.result?.active_engine === "rio" ? "rio" : "ghostty",
       previousEngine: parsed.result?.previous_engine === "rio" ? "rio" : "ghostty",
-      error: parsed.error
+      error: parsed.error,
     };
   }
 }

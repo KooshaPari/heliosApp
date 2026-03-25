@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import type { BindingTriple } from "../../../src/registry/binding_triple.js";
 
@@ -100,7 +100,7 @@ describe("Lane/Session Lifecycle Integration", () => {
 
       const remaining = registry.getAll();
       expect(remaining).toHaveLength(3);
-      expect(remaining.every((b) => b.binding.laneId === "lane-2")).toBe(true);
+      expect(remaining.every(b => b.binding.laneId === "lane-2")).toBe(true);
     });
   });
 

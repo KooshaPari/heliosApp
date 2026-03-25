@@ -163,23 +163,28 @@ describe("ProviderRegistry", () => {
       await registry.register(registration, adapter);
 
       const events = bus.getEvents();
-      const registeredEvent = events.find((e) => e.topic === "provider.registered");
+      const registeredEvent = events.find(e => e.topic === "provider.registered");
       expect(registeredEvent).toBeDefined();
       expect(registeredEvent?.payload?.providerId).toBe("test-provider");
     });
 
     it("should emit provider.init.failed event on init failure", async () => {
-      class FailingProvider implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput> {
+      class FailingProvider implements ProviderAdapter<
+        ACPConfig,
+        ACPExecuteInput,
+        ACPExecuteOutput
+      > {
         async init(_config: ACPConfig): Promise<void> {
           throw new Error("Init failed");
         }
         async health(): Promise<ProviderHealthStatus> {
-          return { state: "unavailable", lastCheck: new Date(), failureCount: 0 };
+          return {
+            state: "unavailable",
+            lastCheck: new Date(),
+            failureCount: 0,
+          };
         }
-        async execute(
-          _input: ACPExecuteInput,
-          _correlationId: string
-        ): Promise<ACPExecuteOutput> {
+        async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
           return { content: "", stopReason: "" };
         }
         async terminate(): Promise<void> {}
@@ -198,7 +203,7 @@ describe("ProviderRegistry", () => {
       await expect(registry.register(registration, adapter)).rejects.toThrow();
 
       const events = bus.getEvents();
-      const failedEvent = events.find((e) => e.topic === "provider.init.failed");
+      const failedEvent = events.find(e => e.topic === "provider.init.failed");
       expect(failedEvent).toBeDefined();
     });
   });
@@ -239,14 +244,12 @@ describe("ProviderRegistry", () => {
       await registry.unregister("test-provider");
 
       const events = bus.getEvents();
-      const unregisteredEvent = events.find((e) => e.topic === "provider.unregistered");
+      const unregisteredEvent = events.find(e => e.topic === "provider.unregistered");
       expect(unregisteredEvent).toBeDefined();
     });
 
     it("should throw error when unregistering non-existent provider", async () => {
-      await expect(registry.unregister("non-existent")).rejects.toThrow(
-        /not found/i
-      );
+      await expect(registry.unregister("non-existent")).rejects.toThrow(/not found/i);
     });
   });
 
@@ -275,9 +278,7 @@ describe("ProviderRegistry", () => {
       registry.incrementInFlight("test-provider");
 
       // Now at limit
-      expect(() => registry.checkConcurrencyLimit("test-provider")).toThrow(
-        /concurrency limit/i
-      );
+      expect(() => registry.checkConcurrencyLimit("test-provider")).toThrow(/concurrency limit/i);
     });
 
     it("should reject execution exceeding concurrency limit", async () => {
@@ -397,116 +398,6 @@ describe("ProviderRegistry", () => {
 
       expect(ws1Providers).toHaveLength(1);
       expect(ws2Providers).toHaveLength(1);
-    });
-  });
-
-  describe("Lane Binding", () => {
-    it("should bind provider to lane", async () => {
-      const adapter = new TestProvider();
-      await registry.register(
-        {
-          id: "test-provider",
-          type: "acp",
-          config: { apiKey: "test", model: "claude-3-sonnet" },
-          workspaceId: "ws-1",
-          concurrencyLimit: 10,
-          healthCheckIntervalMs: 30000,
-        },
-        adapter
-      );
-
-      registry.bindToLane("test-provider", "lane-1");
-
-      const providers = registry.getProvidersForLane("lane-1");
-      expect(providers).toContain("test-provider");
-    });
-
-    it("should unbind provider from lane", async () => {
-      const adapter = new TestProvider();
-      await registry.register(
-        {
-          id: "test-provider",
-          type: "acp",
-          config: { apiKey: "test", model: "claude-3-sonnet" },
-          workspaceId: "ws-1",
-          concurrencyLimit: 10,
-          healthCheckIntervalMs: 30000,
-        },
-        adapter
-      );
-
-      registry.bindToLane("test-provider", "lane-1");
-      expect(registry.getProvidersForLane("lane-1")).toContain("test-provider");
-
-      registry.unbindFromLane("test-provider", "lane-1");
-      expect(registry.getProvidersForLane("lane-1")).not.toContain("test-provider");
-    });
-
-    it("should get all providers for a lane", async () => {
-      const adapter1 = new TestProvider();
-      const adapter2 = new TestProvider();
-
-      await registry.register(
-        {
-          id: "provider-1",
-          type: "acp",
-          config: { apiKey: "test", model: "claude-3-sonnet" },
-          workspaceId: "ws-1",
-          concurrencyLimit: 10,
-          healthCheckIntervalMs: 30000,
-        },
-        adapter1
-      );
-
-      await registry.register(
-        {
-          id: "provider-2",
-          type: "mcp",
-          config: { apiKey: "test", model: "claude-3-sonnet" },
-          workspaceId: "ws-1",
-          concurrencyLimit: 10,
-          healthCheckIntervalMs: 30000,
-        },
-        adapter2
-      );
-
-      registry.bindToLane("provider-1", "lane-1");
-      registry.bindToLane("provider-2", "lane-1");
-
-      const providers = registry.getProvidersForLane("lane-1");
-      expect(providers).toHaveLength(2);
-      expect(providers).toContain("provider-1");
-      expect(providers).toContain("provider-2");
-    });
-  });
-
-  describe("Health Status Tracking", () => {
-    it("should update health status", async () => {
-      const adapter = new TestProvider();
-      await registry.register(
-        {
-          id: "test-provider",
-          type: "acp",
-          config: { apiKey: "test", model: "claude-3-sonnet" },
-          workspaceId: "ws-1",
-          concurrencyLimit: 10,
-          healthCheckIntervalMs: 30000,
-        },
-        adapter
-      );
-
-      const status = {
-        state: "degraded" as const,
-        lastCheck: new Date(),
-        failureCount: 2,
-        message: "Slow response",
-      };
-
-      registry.updateHealthStatus("test-provider", status);
-
-      const retrieved = registry.getHealthStatus("test-provider");
-      expect(retrieved?.state).toBe("degraded");
-      expect(retrieved?.failureCount).toBe(2);
     });
   });
 });

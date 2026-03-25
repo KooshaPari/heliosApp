@@ -14,7 +14,7 @@ describe("TerminalRegistry", () => {
     });
 
     expect(terminal.state).toBe("spawning");
-    expect(registry.get("t-1")?.sessionId).toBe("sess-1");
+    expect(registry.get("t-1")?.session_id).toBe("sess-1");
     expect(registry.listBySession("sess-1")).toHaveLength(1);
   });
 
@@ -29,16 +29,16 @@ describe("TerminalRegistry", () => {
 
     expect(
       registry.isOwnedBy("t-2", {
-        workspaceId: "ws-1",
-        laneId: "lane-1",
-        sessionId: "sess-1",
+        workspace_id: "ws-1",
+        lane_id: "lane-1",
+        session_id: "sess-1",
       })
     ).toBe(true);
     expect(
       registry.isOwnedBy("t-2", {
-        workspaceId: "ws-1",
-        laneId: "lane-2",
-        sessionId: "sess-1",
+        workspace_id: "ws-1",
+        lane_id: "lane-2",
+        session_id: "sess-1",
       })
     ).toBe(false);
   });
@@ -82,6 +82,6 @@ describe("TerminalRegistry", () => {
 
     expect(registry.listBySession("sess-1")).toHaveLength(0);
     expect(registry.listBySession("sess-2")).toHaveLength(1);
-    expect(registry.listBySession("sess-2")[0]?.laneId).toBe("lane-2");
+    expect(registry.listBySession("sess-2")[0]?.lane_id).toBe("lane-2");
   });
 });

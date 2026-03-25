@@ -43,7 +43,7 @@ export class HarnessRouteSelector {
   private status: HarnessStatus = {
     status: "unavailable",
     fallback_transport: "native_openai",
-    degrade_reason: "harness_not_checked"
+    degrade_reason: "harness_not_checked",
   };
 
   private monitorTimer: ReturnType<typeof setInterval> | null = null;
@@ -66,22 +66,25 @@ export class HarnessRouteSelector {
         ? {
             status: "healthy",
             fallback_transport: "native_openai",
-            degrade_reason: null
+            degrade_reason: null,
           }
         : {
             status: "unavailable",
             fallback_transport: "native_openai",
-            degrade_reason: probeResult.reason ?? "cliproxy_healthcheck_failed"
+            degrade_reason: probeResult.reason ?? "cliproxy_healthcheck_failed",
           };
     } catch (error) {
       this.status = {
         status: "degraded",
         fallback_transport: "native_openai",
-        degrade_reason: this.errorReason(error)
+        degrade_reason: this.errorReason(error),
       };
     }
 
-    if (this.status.status !== previous.status || this.status.degrade_reason !== previous.degrade_reason) {
+    if (
+      this.status.status !== previous.status ||
+      this.status.degrade_reason !== previous.degrade_reason
+    ) {
       await this.emitStatusChange(previous, this.status, source);
     }
 
@@ -95,8 +98,8 @@ export class HarnessRouteSelector {
         diagnostics: {
           selected_transport: "native_openai",
           degrade_reason: "preferred_transport_native_openai",
-          harness_status: this.status.status
-        }
+          harness_status: this.status.status,
+        },
       };
     }
 
@@ -106,8 +109,8 @@ export class HarnessRouteSelector {
         diagnostics: {
           selected_transport: "cliproxy_harness",
           degrade_reason: null,
-          harness_status: this.status.status
-        }
+          harness_status: this.status.status,
+        },
       };
     }
 
@@ -116,16 +119,19 @@ export class HarnessRouteSelector {
       diagnostics: {
         selected_transport: "native_openai",
         degrade_reason: this.status.degrade_reason ?? "cliproxy_route_degraded",
-        harness_status: this.status.status
-      }
+        harness_status: this.status.status,
+      },
     };
   }
 
   startMonitoring(intervalMs = 5_000): void {
     this.stopMonitoring();
-    this.monitorTimer = setInterval(() => {
-      void this.refreshHealth("interval");
-    }, Math.max(intervalMs, this.cooldownMs));
+    this.monitorTimer = setInterval(
+      () => {
+        void this.refreshHealth("interval");
+      },
+      Math.max(intervalMs, this.cooldownMs)
+    );
   }
 
   stopMonitoring(): void {
@@ -149,8 +155,8 @@ export class HarnessRouteSelector {
         source,
         previous,
         current,
-        degrade_reason: current.degrade_reason
-      }
+        degrade_reason: current.degrade_reason,
+      },
     });
   }
 
@@ -165,7 +171,7 @@ export class HarnessRouteSelector {
 export async function execCommand(command: string, args: string[]): Promise<ExecResult> {
   const proc = Bun.spawn([command, ...args], {
     stdout: "pipe",
-    stderr: "pipe"
+    stderr: "pipe",
   });
 
   const [stdoutBuf, stderrBuf, code] = await Promise.all([
@@ -181,7 +187,7 @@ export async function execCommand(command: string, args: string[]): Promise<Exec
   return {
     code,
     stdout: new TextDecoder().decode(stdoutBuf),
-    stderr: new TextDecoder().decode(stderrBuf)
+    stderr: new TextDecoder().decode(stderrBuf),
   };
 }
 
@@ -244,8 +250,8 @@ export function buildSpawnTerminalCommand(input: SpawnTerminalInput) {
     payload: {
       session_id: input.session_id,
       terminal_id: input.terminal_id,
-      title: input.title
-    }
+      title: input.title,
+    },
   };
 }
 
@@ -271,8 +277,8 @@ export function buildInputTerminalCommand(input: InputTerminalInput) {
     payload: {
       terminal_id: input.terminal_id,
       session_id: input.session_id,
-      data: input.data
-    }
+      data: input.data,
+    },
   };
 }
 
@@ -301,7 +307,7 @@ export function buildResizeTerminalCommand(input: ResizeTerminalInput) {
       terminal_id: input.terminal_id,
       session_id: input.session_id,
       cols: input.cols,
-      rows: input.rows
-    }
+      rows: input.rows,
+    },
   };
 }

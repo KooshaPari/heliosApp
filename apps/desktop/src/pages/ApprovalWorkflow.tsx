@@ -18,11 +18,11 @@ export function ApprovalWorkflowPage() {
   onMount(async () => {
     setRequests([]);
     setWorkflow({
-      userId: 'current-user',
+      userId: "current-user",
       totalRequests: 0,
       pendingRequests: 0,
       approvedRequests: 0,
-      rejectedRequests: 0
+      rejectedRequests: 0,
     });
     setLoading(false);
   });
@@ -71,11 +71,7 @@ export function ApprovalWorkflowPage() {
             </div>
           )}
 
-          <ApprovalPanel
-            requests={requests()}
-            onApprove={handleApprove}
-            onReject={handleReject}
-          />
+          <ApprovalPanel requests={requests()} onApprove={handleApprove} onReject={handleReject} />
         </div>
       )}
 

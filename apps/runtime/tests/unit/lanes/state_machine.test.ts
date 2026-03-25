@@ -84,7 +84,7 @@ describe("Lane State Machine (FR-008-001)", () => {
       const order: number[] = [];
 
       const p1 = withLaneLock("lane-ser", async () => {
-        await new Promise((r) => setTimeout(r, 50));
+        await new Promise(r => setTimeout(r, 50));
         order.push(1);
       });
 
@@ -100,7 +100,7 @@ describe("Lane State Machine (FR-008-001)", () => {
       const order: string[] = [];
 
       const p1 = withLaneLock("lane-cx", async () => {
-        await new Promise((r) => setTimeout(r, 50));
+        await new Promise(r => setTimeout(r, 50));
         order.push("x");
       });
 
@@ -130,11 +130,11 @@ describe("Lane State Machine (FR-008-001)", () => {
     it("serializes three sequential operations", async () => {
       const order: number[] = [];
       const p1 = withLaneLock("lane-3seq", async () => {
-        await new Promise((r) => setTimeout(r, 30));
+        await new Promise(r => setTimeout(r, 30));
         order.push(1);
       });
       const p2 = withLaneLock("lane-3seq", async () => {
-        await new Promise((r) => setTimeout(r, 10));
+        await new Promise(r => setTimeout(r, 10));
         order.push(2);
       });
       const p3 = withLaneLock("lane-3seq", async () => {

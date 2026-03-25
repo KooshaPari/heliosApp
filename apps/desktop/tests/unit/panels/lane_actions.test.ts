@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { LaneActions } from '../../../src/panels/lane_actions';
 import type { RuntimeAPI } from '../../../src/panels/lane_actions';
 
-describe('LaneActions', () => {
+describe("LaneActions", () => {
   let actions: LaneActions;
   let mockAPI: RuntimeAPI;
 
@@ -30,20 +30,20 @@ describe('LaneActions', () => {
       onLaneCreated,
     });
 
-    await actions.createLane('ws-1');
+    await actions.createLane("ws-1");
 
-    expect(mockAPI.createLane).toHaveBeenCalledWith('ws-1');
-    expect(onLaneCreated).toHaveBeenCalledWith('lane-new');
+    expect(mockAPI.createLane).toHaveBeenCalledWith("ws-1");
+    expect(onLaneCreated).toHaveBeenCalledWith("lane-new");
   });
 
-  it('should call optimistic callback on create', async () => {
+  it("should call optimistic callback on create", async () => {
     actions = new LaneActions({
       runtimeAPI: mockAPI,
     });
 
     const optimisticCallback = mock();
 
-    await actions.createLane('ws-1', optimisticCallback);
+    await actions.createLane("ws-1", optimisticCallback);
 
     expect(optimisticCallback).toHaveBeenCalled();
   });
@@ -58,11 +58,11 @@ describe('LaneActions', () => {
       onError,
     });
 
-    await actions.createLane('ws-1');
+    await actions.createLane("ws-1");
 
     expect(onError).toHaveBeenCalled();
     const errorArg = (onError as any).mock.calls[0][0];
-    expect(errorArg.code).toBe('CREATE_FAILED');
+    expect(errorArg.code).toBe("CREATE_FAILED");
   });
 
   it('should attach lane successfully', async () => {
@@ -72,10 +72,10 @@ describe('LaneActions', () => {
       onLaneAttached,
     });
 
-    await actions.attachLane('lane-1');
+    await actions.attachLane("lane-1");
 
-    expect(mockAPI.attachLane).toHaveBeenCalledWith('lane-1');
-    expect(onLaneAttached).toHaveBeenCalledWith('lane-1');
+    expect(mockAPI.attachLane).toHaveBeenCalledWith("lane-1");
+    expect(onLaneAttached).toHaveBeenCalledWith("lane-1");
   });
 
   it('should handle attach lane error', async () => {
@@ -87,11 +87,11 @@ describe('LaneActions', () => {
       onError,
     });
 
-    await actions.attachLane('lane-1');
+    await actions.attachLane("lane-1");
 
     expect(onError).toHaveBeenCalled();
     const errorArg = (onError as any).mock.calls[0][0];
-    expect(errorArg.code).toBe('ATTACH_FAILED');
+    expect(errorArg.code).toBe("ATTACH_FAILED");
   });
 
   it('should detach lane successfully', async () => {
@@ -101,10 +101,10 @@ describe('LaneActions', () => {
       onLaneDetached,
     });
 
-    await actions.detachLane('lane-1');
+    await actions.detachLane("lane-1");
 
-    expect(mockAPI.detachLane).toHaveBeenCalledWith('lane-1');
-    expect(onLaneDetached).toHaveBeenCalledWith('lane-1');
+    expect(mockAPI.detachLane).toHaveBeenCalledWith("lane-1");
+    expect(onLaneDetached).toHaveBeenCalledWith("lane-1");
   });
 
   it('should handle detach lane error', async () => {
@@ -116,7 +116,7 @@ describe('LaneActions', () => {
       onError,
     });
 
-    await actions.detachLane('lane-1');
+    await actions.detachLane("lane-1");
 
     expect(onError).toHaveBeenCalled();
   });
@@ -128,10 +128,10 @@ describe('LaneActions', () => {
       onLaneCleaned,
     });
 
-    const result = await actions.cleanupLane('lane-1', false);
+    const result = await actions.cleanupLane("lane-1", false);
 
-    expect(mockAPI.cleanupLane).toHaveBeenCalledWith('lane-1');
-    expect(onLaneCleaned).toHaveBeenCalledWith('lane-1');
+    expect(mockAPI.cleanupLane).toHaveBeenCalledWith("lane-1");
+    expect(onLaneCleaned).toHaveBeenCalledWith("lane-1");
     expect(result).toBe(true);
   });
 
@@ -144,7 +144,7 @@ describe('LaneActions', () => {
       onError,
     });
 
-    const result = await actions.cleanupLane('lane-1', false);
+    const result = await actions.cleanupLane("lane-1", false);
 
     expect(onError).toHaveBeenCalled();
     expect(result).toBe(false);
@@ -163,7 +163,7 @@ describe('LaneActions', () => {
 
     expect(onError).toHaveBeenCalled();
 
-    actions.dismissError('CREATE_FAILED');
+    actions.dismissError("CREATE_FAILED");
     // Error should be dismissed (test passes if no exception thrown)
   });
 
@@ -197,7 +197,7 @@ describe('LaneActions', () => {
       onError,
     });
 
-    await actions.attachLane('lane-1', revertCallback);
+    await actions.attachLane("lane-1", revertCallback);
 
     expect(revertCallback).toHaveBeenCalled();
   });

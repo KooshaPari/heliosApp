@@ -3,7 +3,12 @@
  */
 
 import { describe, test, expect, beforeEach } from "bun:test";
-import { GhosttyBackend, GhosttyNotInitializedError, GhosttyNotRunningError, GhosttyAlreadyInitializedError } from "../backend.js";
+import {
+  GhosttyBackend,
+  GhosttyNotInitializedError,
+  GhosttyNotRunningError,
+  GhosttyAlreadyInitializedError,
+} from "../backend.js";
 import type { RendererConfig, RenderSurface } from "../../adapter.js";
 
 const TEST_CONFIG: RendererConfig = {
@@ -88,7 +93,7 @@ describe("GhosttyBackend", () => {
 
   test("handleInput when not running throws", () => {
     expect(() => backend.handleInput("pty-1", new Uint8Array([0x41]))).toThrow(
-      GhosttyNotRunningError,
+      GhosttyNotRunningError
     );
   });
 

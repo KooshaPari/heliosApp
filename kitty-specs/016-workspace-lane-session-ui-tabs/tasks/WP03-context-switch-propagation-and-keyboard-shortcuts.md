@@ -45,7 +45,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/016-workspace-lane-session-ui-tabs/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/016-workspace-lane-session-ui-tabs/spec.md`
 - Tab surfaces: `apps/desktop/src/tabs/` (WP01/WP02)
@@ -202,3 +202,4 @@ Implementation command:
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:35:33Z – claude-haiku – shell_pid=80432 – lane=doing – Assigned agent via workflow command
 - 2026-03-01T13:37:09Z – claude-haiku – shell_pid=80432 – lane=done – Implemented WP03
+- 2026-03-01T13:41:12Z – claude-haiku – shell_pid=80432 – lane=done – Merged

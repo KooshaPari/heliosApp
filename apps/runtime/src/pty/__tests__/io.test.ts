@@ -67,9 +67,9 @@ describe("writeInput", () => {
     const processMap: ProcessMap = new Map();
     const bus = new InMemoryBusPublisher();
 
-    expect(() =>
-      writeInput(record, new Uint8Array([65]), processMap, bus),
-    ).toThrow(InvalidStateError);
+    expect(() => writeInput(record, new Uint8Array([65]), processMap, bus)).toThrow(
+      InvalidStateError
+    );
   });
 
   it("rejects writes to spawning PTY", () => {
@@ -77,9 +77,9 @@ describe("writeInput", () => {
     const processMap: ProcessMap = new Map();
     const bus = new InMemoryBusPublisher();
 
-    expect(() =>
-      writeInput(record, new Uint8Array([65]), processMap, bus),
-    ).toThrow(InvalidStateError);
+    expect(() => writeInput(record, new Uint8Array([65]), processMap, bus)).toThrow(
+      InvalidStateError
+    );
   });
 
   it("allows writes to throttled PTY", () => {
@@ -111,7 +111,7 @@ describe("writeInput", () => {
     expect(() =>
       writeInput(record, new Uint8Array([65]), processMap, bus, () => {
         errorCalled = true;
-      }),
+      })
     ).toThrow("Broken pipe");
 
     expect(errorCalled).toBe(true);

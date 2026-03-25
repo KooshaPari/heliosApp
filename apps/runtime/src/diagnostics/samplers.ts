@@ -34,7 +34,7 @@ export class MemorySampler {
 
     if (this.intervalMs < 500) {
       console.warn(
-        `[samplers] Memory sampler interval ${this.intervalMs}ms is very short; may cause overhead.`,
+        `[samplers] Memory sampler interval ${this.intervalMs}ms is very short; may cause overhead.`
       );
     }
 

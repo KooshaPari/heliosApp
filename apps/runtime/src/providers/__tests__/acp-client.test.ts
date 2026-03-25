@@ -6,7 +6,7 @@
  * FR-025-012: Policy gate integration.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { NormalizedProviderError } from "../errors.js";
@@ -120,7 +120,7 @@ describe("ACP Client Adapter", () => {
       await adapter.init(config);
 
       const events = bus.getEvents();
-      const initEvent = events.find((e) => e.topic === "provider.acp.initialized");
+      const initEvent = events.find(e => e.topic === "provider.acp.initialized");
       expect(initEvent).toBeDefined();
       expect(initEvent?.payload?.endpoint).toBe(config.baseUrl);
     });
@@ -207,15 +207,12 @@ describe("ACP Client Adapter", () => {
     it("should propagate correlation ID in response", async () => {
       const correlationId = "unique-corr-id-456";
 
-      const result = await adapter.execute(
-        { prompt: "Test" },
-        correlationId
-      );
+      const result = await adapter.execute({ prompt: "Test" }, correlationId);
 
       expect(result).toBeDefined();
 
       const events = bus.getEvents();
-      const completedEvent = events.find((e) => e.topic === "provider.acp.execute.completed");
+      const completedEvent = events.find(e => e.topic === "provider.acp.execute.completed");
       expect(completedEvent?.payload?.correlationId).toBe(correlationId);
     });
 
@@ -225,7 +222,7 @@ describe("ACP Client Adapter", () => {
       await adapter.execute({ prompt: "Test" }, "corr-123");
 
       const events = bus.getEvents();
-      const completedEvent = events.find((e) => e.topic === "provider.acp.execute.completed");
+      const completedEvent = events.find(e => e.topic === "provider.acp.execute.completed");
       expect(completedEvent).toBeDefined();
       expect(completedEvent?.payload?.duration).toBeGreaterThanOrEqual(0);
     });
@@ -233,9 +230,9 @@ describe("ACP Client Adapter", () => {
     it("should reject execution before init", async () => {
       const freshAdapter = new ACPClientAdapter(bus, policyGate);
 
-      await expect(
-        freshAdapter.execute({ prompt: "Test" }, "corr-123")
-      ).rejects.toThrow(/unavailable/i);
+      await expect(freshAdapter.execute({ prompt: "Test" }, "corr-123")).rejects.toThrow(
+        /unavailable/i
+      );
     });
 
     it("should include token usage in response", async () => {
@@ -263,9 +260,9 @@ describe("ACP Client Adapter", () => {
     it("should deny execution when policy gate denies", async () => {
       policyGate.setShouldDeny(true, "Access denied");
 
-      await expect(
-        adapter.execute({ prompt: "Test" }, "corr-123")
-      ).rejects.toThrow(/policy denied/i);
+      await expect(adapter.execute({ prompt: "Test" }, "corr-123")).rejects.toThrow(
+        /policy denied/i
+      );
     });
 
     it("should emit policy denied event", async () => {
@@ -279,7 +276,7 @@ describe("ACP Client Adapter", () => {
       }
 
       const events = bus.getEvents();
-      const policyEvent = events.find((e) => e.topic === "provider.acp.policy.denied");
+      const policyEvent = events.find(e => e.topic === "provider.acp.policy.denied");
       expect(policyEvent).toBeDefined();
       expect(policyEvent?.payload?.reason).toContain("Access denied");
     });
@@ -329,7 +326,7 @@ describe("ACP Client Adapter", () => {
       await adapter.cancel(taskId);
 
       const events = bus.getEvents();
-      const cancelledEvent = events.find((e) => e.topic === "provider.acp.execute.cancelled");
+      const cancelledEvent = events.find(e => e.topic === "provider.acp.execute.cancelled");
       expect(cancelledEvent).toBeDefined();
       expect(cancelledEvent?.payload?.taskId).toBe(taskId);
     });
@@ -340,7 +337,7 @@ describe("ACP Client Adapter", () => {
       await adapter.cancel("task-456");
 
       const events = bus.getEvents();
-      const cancelledEvent = events.find((e) => e.topic === "provider.acp.execute.cancelled");
+      const cancelledEvent = events.find(e => e.topic === "provider.acp.execute.cancelled");
       expect(cancelledEvent).toBeDefined();
     });
 
@@ -352,9 +349,7 @@ describe("ACP Client Adapter", () => {
     it("should reject cancel before init", async () => {
       const freshAdapter = new ACPClientAdapter(bus, policyGate);
 
-      await expect(freshAdapter.cancel("task-123")).rejects.toThrow(
-        /unavailable/i
-      );
+      await expect(freshAdapter.cancel("task-123")).rejects.toThrow(/unavailable/i);
     });
   });
 
@@ -388,7 +383,7 @@ describe("ACP Client Adapter", () => {
       await adapter.terminate();
 
       const events = bus.getEvents();
-      const terminatedEvent = events.find((e) => e.topic === "provider.acp.terminated");
+      const terminatedEvent = events.find(e => e.topic === "provider.acp.terminated");
       expect(terminatedEvent).toBeDefined();
     });
 
@@ -407,9 +402,7 @@ describe("ACP Client Adapter", () => {
     it("should prevent execution after termination", async () => {
       await adapter.terminate();
 
-      await expect(
-        adapter.execute({ prompt: "Test" }, "corr-123")
-      ).rejects.toThrow(/unavailable/i);
+      await expect(adapter.execute({ prompt: "Test" }, "corr-123")).rejects.toThrow(/unavailable/i);
     });
   });
 
@@ -419,9 +412,7 @@ describe("ACP Client Adapter", () => {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
         model: "claude-3-sonnet",
-        timeoutMs: 30000,
-        maxRetries: 3,
-        healthCheckIntervalMs: 30000,
+        timeout: 30000,
       };
       await adapter.init(config);
     });
@@ -432,9 +423,7 @@ describe("ACP Client Adapter", () => {
       await adapter.execute({ prompt: "Test" }, correlationId);
 
       const events = bus.getEvents();
-      const relevantEvents = events.filter((e) =>
-        e.topic?.startsWith("provider.acp.execute")
-      );
+      const relevantEvents = events.filter(e => e.topic?.startsWith("provider.acp.execute"));
 
       for (const event of relevantEvents) {
         expect(event.payload?.correlationId).toBe(correlationId);
@@ -455,7 +444,7 @@ describe("ACP Client Adapter", () => {
       }
 
       const events = bus.getEvents();
-      const policyEvent = events.find((e) => e.topic === "provider.acp.policy.denied");
+      const policyEvent = events.find(e => e.topic === "provider.acp.policy.denied");
       expect(policyEvent?.payload?.correlationId).toBe(correlationId);
     });
   });
@@ -463,8 +452,9 @@ describe("ACP Client Adapter", () => {
   describe("Error Handling", () => {
     beforeEach(async () => {
       const config = {
-        endpoint: "http://localhost:8080/acp",
-        apiKeyRef: "acp-key",
+        baseUrl: "http://localhost:8080/acp",
+        apiKey: "acp-key",
+
         model: "claude-3-sonnet",
         timeout: 100, // Short timeout for timeout tests
         maxRetries: 3,
@@ -476,9 +466,7 @@ describe("ACP Client Adapter", () => {
     it("should throw NormalizedProviderError on policy denial", async () => {
       policyGate.setShouldDeny(true);
 
-      const error = await adapter
-        .execute({ prompt: "Test" }, "corr-123")
-        .catch((e) => e);
+      const error = await adapter.execute({ prompt: "Test" }, "corr-123").catch(e => e);
 
       expect(error).toBeInstanceOf(NormalizedProviderError);
       expect((error as NormalizedProviderError).code).toBe("PROVIDER_POLICY_DENIED");
@@ -496,7 +484,7 @@ describe("ACP Client Adapter", () => {
       }
 
       const events = bus.getEvents();
-      const errorEvent = events.find((e) => e.topic === "provider.acp.execute.failed");
+      const errorEvent = events.find(e => e.topic === "provider.acp.execute.failed");
       expect(errorEvent).toBeDefined();
       expect(errorEvent?.payload?.retryable).toBeDefined();
     });

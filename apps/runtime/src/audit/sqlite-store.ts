@@ -18,13 +18,13 @@ export class SQLiteAuditStore {
    *
    * @param dbPath - Path to SQLite database file
    */
-  constructor(dbPath: string = ':memory:') {
+  constructor(dbPath: string = ":memory:") {
     this.dbPath = dbPath;
     this.db = new Database(dbPath);
 
     // Enable WAL mode for concurrent reads/writes
-    this.db.exec('PRAGMA journal_mode = WAL');
-    this.db.exec('PRAGMA synchronous = NORMAL');
+    this.db.exec("PRAGMA journal_mode = WAL");
+    this.db.exec("PRAGMA synchronous = NORMAL");
 
     // Initialize schema
     this.initializeSchema();
@@ -63,7 +63,7 @@ export class SQLiteAuditStore {
           event.laneId || null,
           event.sessionId || null,
           event.correlationId,
-          JSON.stringify(event.metadata),
+          JSON.stringify(event.metadata)
         );
       }
     });
@@ -81,51 +81,51 @@ export class SQLiteAuditStore {
   query(filter: AuditFilter, options: { limit?: number; offset?: number } = {}): AuditEvent[] {
     const { limit = 100, offset = 0 } = options;
 
-    let query = 'SELECT * FROM audit_events WHERE 1=1';
+    let query = "SELECT * FROM audit_events WHERE 1=1";
     const params: any[] = [];
 
     if (filter.workspaceId) {
-      query += ' AND workspace_id = ?';
+      query += " AND workspace_id = ?";
       params.push(filter.workspaceId);
     }
 
     if (filter.laneId) {
-      query += ' AND lane_id = ?';
+      query += " AND lane_id = ?";
       params.push(filter.laneId);
     }
 
     if (filter.sessionId) {
-      query += ' AND session_id = ?';
+      query += " AND session_id = ?";
       params.push(filter.sessionId);
     }
 
     if (filter.actor) {
-      query += ' AND actor = ?';
+      query += " AND actor = ?";
       params.push(filter.actor);
     }
 
     if (filter.eventType) {
-      query += ' AND event_type = ?';
+      query += " AND event_type = ?";
       params.push(filter.eventType);
     }
 
     if (filter.startTime) {
-      query += ' AND timestamp >= ?';
+      query += " AND timestamp >= ?";
       params.push(filter.startTime.toISOString());
     }
 
     if (filter.endTime) {
-      query += ' AND timestamp <= ?';
+      query += " AND timestamp <= ?";
       params.push(filter.endTime.toISOString());
     }
 
-    query += ' ORDER BY timestamp DESC LIMIT ? OFFSET ?';
+    query += " ORDER BY timestamp DESC LIMIT ? OFFSET ?";
     params.push(limit, offset);
 
     const stmt = this.db.prepare(query);
     const rows = stmt.all(...params) as any[];
 
-    return rows.map((row) => this.rowToEvent(row));
+    return rows.map(row => this.rowToEvent(row));
   }
 
   /**
@@ -136,11 +136,11 @@ export class SQLiteAuditStore {
    */
   getByCorrelationChain(correlationId: string): AuditEvent[] {
     const stmt = this.db.prepare(
-      'SELECT * FROM audit_events WHERE correlation_id = ? ORDER BY timestamp ASC',
+      "SELECT * FROM audit_events WHERE correlation_id = ? ORDER BY timestamp ASC"
     );
     const rows = stmt.all(correlationId) as any[];
 
-    return rows.map((row) => this.rowToEvent(row));
+    return rows.map(row => this.rowToEvent(row));
   }
 
   /**
@@ -152,41 +152,41 @@ export class SQLiteAuditStore {
   count(filter?: AuditFilter): number {
     const { filter: actualFilter = {} } = { filter: filter || {} };
 
-    let query = 'SELECT COUNT(*) as count FROM audit_events WHERE 1=1';
+    let query = "SELECT COUNT(*) as count FROM audit_events WHERE 1=1";
     const params: any[] = [];
 
     if (actualFilter.workspaceId) {
-      query += ' AND workspace_id = ?';
+      query += " AND workspace_id = ?";
       params.push(actualFilter.workspaceId);
     }
 
     if (actualFilter.laneId) {
-      query += ' AND lane_id = ?';
+      query += " AND lane_id = ?";
       params.push(actualFilter.laneId);
     }
 
     if (actualFilter.sessionId) {
-      query += ' AND session_id = ?';
+      query += " AND session_id = ?";
       params.push(actualFilter.sessionId);
     }
 
     if (actualFilter.actor) {
-      query += ' AND actor = ?';
+      query += " AND actor = ?";
       params.push(actualFilter.actor);
     }
 
     if (actualFilter.eventType) {
-      query += ' AND event_type = ?';
+      query += " AND event_type = ?";
       params.push(actualFilter.eventType);
     }
 
     if (actualFilter.startTime) {
-      query += ' AND timestamp >= ?';
+      query += " AND timestamp >= ?";
       params.push(actualFilter.startTime.toISOString());
     }
 
     if (actualFilter.endTime) {
-      query += ' AND timestamp <= ?';
+      query += " AND timestamp <= ?";
       params.push(actualFilter.endTime.toISOString());
     }
 
@@ -203,14 +203,14 @@ export class SQLiteAuditStore {
    */
   getStorageSize(): number {
     try {
-      if (this.dbPath === ':memory:') {
+      if (this.dbPath === ":memory:") {
         return 0;
       }
 
       const stats = fs.statSync(this.dbPath);
       return stats.size;
     } catch (err) {
-      console.error('[SQLiteAuditStore] Error getting storage size:', err);
+      console.error("[SQLiteAuditStore] Error getting storage size:", err);
       return 0;
     }
   }
@@ -229,9 +229,7 @@ export class SQLiteAuditStore {
     try {
       // Check if table exists
       const tableExists = this.db
-        .prepare(
-          "SELECT name FROM sqlite_master WHERE type='table' AND name='audit_events'",
-        )
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='audit_events'")
         .get();
 
       if (!tableExists) {
@@ -267,7 +265,7 @@ export class SQLiteAuditStore {
         `);
       }
     } catch (err) {
-      console.error('[SQLiteAuditStore] Schema initialization failed:', err);
+      console.error("[SQLiteAuditStore] Schema initialization failed:", err);
       throw err;
     }
   }

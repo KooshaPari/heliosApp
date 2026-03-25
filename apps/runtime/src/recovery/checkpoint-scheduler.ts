@@ -68,14 +68,14 @@ export class CheckpointScheduler {
 
     // Check if activity threshold exceeded
     if (this.activityCounter >= ACTIVITY_THRESHOLD) {
-      this.triggerNow().catch((err) => {
+      this.triggerNow().catch(err => {
         console.error("Activity-triggered checkpoint failed:", err);
       });
     }
   }
 
   private onTimer(): void {
-    this.triggerNow().catch((err) => {
+    this.triggerNow().catch(err => {
       console.error("Periodic checkpoint failed:", err);
     });
   }
@@ -83,10 +83,7 @@ export class CheckpointScheduler {
   private adjustInterval(): void {
     if (this.lastWriteDurationMs > MIN_WRITE_TIME_FOR_BACKOFF) {
       // Backoff: increase interval
-      this.currentInterval = Math.min(
-        this.currentInterval * 2,
-        MAX_INTERVAL_MS
-      );
+      this.currentInterval = Math.min(this.currentInterval * 2, MAX_INTERVAL_MS);
     } else if (this.lastWriteDurationMs < MAX_WRITE_TIME_FOR_RESTORE) {
       // Restore: decrease interval back to default
       this.currentInterval = DEFAULT_CHECKPOINT_INTERVAL_MS;
@@ -114,7 +111,7 @@ export class CheckpointScheduler {
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Checkpoint timeout")), FINAL_CHECKPOINT_TIMEOUT)
       ),
-    ]).catch((err) => {
+    ]).catch(err => {
       console.error("Final checkpoint on shutdown failed:", err);
     });
 

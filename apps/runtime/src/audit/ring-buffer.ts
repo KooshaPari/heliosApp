@@ -59,20 +59,17 @@ export class AuditRingBuffer {
     let evicted: AuditEvent | undefined;
 
     if (this.size === this.capacity) {
-      // Buffer is full; evict the oldest event at head
+      // Buffer is full; evict the oldest event at head and advance head
       evicted = this.buffer[this.head];
       this.totalEventsEvicted++;
-    } else {
-      this.size++;
-    }
-
-    // Insert at tail
-    this.buffer[this.tail] = event;
-    this.tail = (this.tail + 1) % this.capacity;
-
-    // Move head if buffer is full
-    if (this.size === this.capacity) {
+      this.buffer[this.tail] = event;
+      this.tail = (this.tail + 1) % this.capacity;
       this.head = (this.head + 1) % this.capacity;
+    } else {
+      // Buffer not yet full; append and grow
+      this.buffer[this.tail] = event;
+      this.tail = (this.tail + 1) % this.capacity;
+      this.size++;
     }
 
     return evicted;
@@ -199,6 +196,10 @@ export class AuditRingBuffer {
       if (eventTime < filter.startTime) {
         return false;
       }
+    }
+
+    if (filter.correlationId && event.correlationId !== filter.correlationId) {
+      return false;
     }
 
     if (filter.endTime) {

@@ -179,7 +179,13 @@ export class LaneManager {
           worktreePath: result.worktreePath,
         });
 
-        await this.emitEvent("lane.worktree.provisioned", laneId, lane.workspaceId, fromState, toState);
+        await this.emitEvent(
+          "lane.worktree.provisioned",
+          laneId,
+          lane.workspaceId,
+          fromState,
+          toState
+        );
         await this.emitEvent("lane.state.changed", laneId, lane.workspaceId, fromState, toState);
         return this.registry.get(laneId)!;
       } catch (err) {
@@ -222,7 +228,7 @@ export class LaneManager {
         laneId,
         lane?.workspaceId ?? "",
         result.fromState,
-        result.toState,
+        result.toState
       );
     }
   }
@@ -238,7 +244,7 @@ export class LaneManager {
         laneId,
         lane?.workspaceId ?? "",
         result.fromState,
-        result.toState,
+        result.toState
       );
     }
   }
@@ -279,7 +285,13 @@ export class LaneManager {
           const cleaningState = transition(midState, "request_cleanup", laneId);
           recordTransition(laneId, midState, "request_cleanup", cleaningState);
           this.registry.update(laneId, { state: cleaningState });
-          await this.emitEvent("lane.cleaning", laneId, lane.workspaceId, lane.state, cleaningState);
+          await this.emitEvent(
+            "lane.cleaning",
+            laneId,
+            lane.workspaceId,
+            lane.state,
+            cleaningState
+          );
         } else {
           throw new SharedLaneCleanupError(laneId, lane.attachedAgents.length);
         }
@@ -304,7 +316,13 @@ export class LaneManager {
           const worktreeParent = path.dirname(currentLane.worktreePath);
           const workspaceRepoPath = path.dirname(worktreeParent);
           await removeWorktree(currentLane.worktreePath, workspaceRepoPath);
-          await this.emitEvent("lane.worktree.removed", laneId, lane.workspaceId, "cleaning", "cleaning");
+          await this.emitEvent(
+            "lane.worktree.removed",
+            laneId,
+            lane.workspaceId,
+            "cleaning",
+            "cleaning"
+          );
         } catch {
           // Best-effort: worktree may already be removed
         }
@@ -337,10 +355,10 @@ export class LaneManager {
     if (ptys.length === 0) return;
 
     let forceKilled = 0;
-    const terminationPromises = ptys.map(async (pty) => {
+    const terminationPromises = ptys.map(async pty => {
       try {
-        const timeout = new Promise<"timeout">((resolve) =>
-          setTimeout(() => resolve("timeout"), this.ptyTerminationTimeoutMs),
+        const timeout = new Promise<"timeout">(resolve =>
+          setTimeout(() => resolve("timeout"), this.ptyTerminationTimeoutMs)
         );
         const termination = this.ptyManager!.terminate(pty.ptyId).then(() => "done" as const);
         const result = await Promise.race([termination, timeout]);
@@ -361,7 +379,7 @@ export class LaneManager {
 
   async reconcileOrphans(
     workspaceRepoPath: string,
-    options?: { timeoutMs?: number },
+    options?: { timeoutMs?: number }
   ): Promise<FullReconciliationResult> {
     const timeoutMs = options?.timeoutMs ?? 30_000;
     const startTime = Date.now();
@@ -396,7 +414,7 @@ export class LaneManager {
             } catch {
               // Lane may not exist in registry
             }
-          },
+          }
         );
         result.orphanedWorktrees = worktreeResult.orphanedWorktrees;
         result.cleaned += worktreeResult.cleaned;
@@ -411,7 +429,10 @@ export class LaneManager {
           if (lane.worktreePath && !fsModule.existsSync(lane.worktreePath)) {
             result.orphanedRecords++;
             result.totalCleaned++;
-            this.registry.update(lane.laneId, { state: "closed", worktreePath: null });
+            this.registry.update(lane.laneId, {
+              state: "closed",
+              worktreePath: null,
+            });
           }
         }
       }
@@ -437,9 +458,7 @@ export class LaneManager {
 
       // Phase 3: Orphaned PTYs - delegate to ptyManager if available
       if (!isTimedOut() && this.ptyManager) {
-        const closedLanes = this.registry
-          .list()
-          .filter((l) => l.state === "closed");
+        const closedLanes = this.registry.list().filter(l => l.state === "closed");
         for (const lane of closedLanes) {
           if (isTimedOut()) break;
           try {
@@ -504,7 +523,7 @@ export class LaneManager {
     laneId: string,
     workspaceId: string,
     fromState: LaneState,
-    toState: LaneState,
+    toState: LaneState
   ): Promise<void> {
     if (!this.bus) return;
 
@@ -535,7 +554,12 @@ export class LaneManager {
 // Re-export public types
 export { LaneRegistry, type LaneRecord, LaneNotFoundError } from "./registry.js";
 export type { LaneState, LaneEvent } from "./state_machine.js";
-export { InvalidLaneTransitionError, transition, withLaneLock, getTransitionHistory } from "./state_machine.js";
+export {
+  InvalidLaneTransitionError,
+  transition,
+  withLaneLock,
+  getTransitionHistory,
+} from "./state_machine.js";
 export { LaneClosedError, SharedLaneCleanupError } from "./sharing.js";
 export {
   provisionWorktree,

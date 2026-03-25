@@ -74,14 +74,14 @@ describe("KeyboardShortcuts", () => {
     it("should handle keyboard events", () => {
       let handledAction: ShortcutAction | null = null;
 
-      shortcuts.setHandler((action) => {
+      shortcuts.setHandler(action => {
         handledAction = action;
       });
 
       const event = new KeyboardEvent("keydown", {
         key: "1",
         metaKey: true,
-        bubbles: true
+        bubbles: true,
       });
 
       shortcuts.handleKeyboardEvent(event);
@@ -97,14 +97,14 @@ describe("KeyboardShortcuts", () => {
     it("should support shortcut listeners", () => {
       let actions: ShortcutAction[] = [];
 
-      shortcuts.onShortcut((action) => {
+      shortcuts.onShortcut(action => {
         actions.push(action);
       });
 
       const event = new KeyboardEvent("keydown", {
         key: "2",
         metaKey: true,
-        bubbles: true
+        bubbles: true,
       });
 
       shortcuts.handleKeyboardEvent(event);
@@ -122,7 +122,7 @@ describe("KeyboardShortcuts", () => {
       const event = new KeyboardEvent("keydown", {
         key: "1",
         metaKey: true,
-        bubbles: true
+        bubbles: true,
       });
 
       shortcuts.handleKeyboardEvent(event);

@@ -17,7 +17,7 @@ async function runGit(args: string[], cwd: string): Promise<string> {
 async function createTempRepo(): Promise<string> {
   const tmpDir = path.join(
     (await import("node:os")).tmpdir(),
-    `helios-recon-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    `helios-recon-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
   );
   fs.mkdirSync(tmpDir, { recursive: true });
   await runGit(["init"], tmpDir);
@@ -105,7 +105,7 @@ describe("Orphan Reconciliation Integration (FR-008-008, SC-008-004)", () => {
     await mgr.reconcileOrphans(repoDir);
 
     const events = bus.getEvents();
-    const reconEvent = events.find((e) => e.topic === "reconciliation.completed");
+    const reconEvent = events.find(e => e.topic === "reconciliation.completed");
     expect(reconEvent).toBeDefined();
     expect(reconEvent!.payload!["orphanedWorktrees"]).toBe(1);
     expect(reconEvent!.payload!["totalCleaned"]).toBeGreaterThanOrEqual(1);
@@ -161,10 +161,10 @@ describe("Orphan Reconciliation Integration (FR-008-008, SC-008-004)", () => {
     const worktreeRoot = path.join(repoDir, ".helios-worktrees");
     if (fs.existsSync(worktreeRoot)) {
       const entries = fs.readdirSync(worktreeRoot);
-      const activeLaneIds = new Set(active.map((l) => l.laneId));
+      const activeLaneIds = new Set(active.map(l => l.laneId));
       for (const entry of entries) {
         expect(activeLaneIds.has(entry)).toBe(true);
       }
     }
   });
-}, { timeout: 60_000 });
+});

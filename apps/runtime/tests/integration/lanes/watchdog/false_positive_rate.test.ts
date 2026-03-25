@@ -68,7 +68,7 @@ describe("False Positive Rate", () => {
 
     // If somehow these lanes appear as orphans (shouldn't happen),
     // they should not get suggestions due to registry check
-    const orphans: ClassifiedOrphan[] = activeLanes.map((laneId) => ({
+    const orphans: ClassifiedOrphan[] = activeLanes.map(laneId => ({
       type: "worktree",
       path: `/tmp/${laneId}`,
       age: 100,

@@ -67,6 +67,13 @@ export type AuditExportRecord = {
 export class DefaultAuditSink implements AuditSink {
   private buffer: AuditEvent[] = [];
   private ringBuffer: AuditRingBuffer;
+  private storage: AuditStorage;
+  readonly records: AuditRecord[] = [];
+  retentionPolicy: RetentionPolicyConfig = {
+    retention_days: 90,
+    redacted_fields: [],
+    exempt_topics: [],
+  };
   private readonly MAX_BUFFER_SIZE = 10_000;
   private readonly RETRY_BACKOFF_MS = 100;
   private readonly MAX_RETRIES = 5;
@@ -87,11 +94,34 @@ export class DefaultAuditSink implements AuditSink {
   private overflowQueue: AuditEvent[] = [];
 
   constructor(
-    private storage: AuditStorage,
-    ringBufferCapacity: number = 10_000,
+    storageOrConfig?: AuditStorage | Record<string, unknown>,
+    ringBufferCapacity: number = 10_000
   ) {
+    if (storageOrConfig && typeof (storageOrConfig as AuditStorage).persist === "function") {
+      this.storage = storageOrConfig as AuditStorage;
+    } else {
+      this.storage = new NoOpAuditStorage();
+      if (
+        storageOrConfig &&
+        typeof storageOrConfig === "object" &&
+        "retention_days" in storageOrConfig
+      ) {
+        this.retentionPolicy = {
+          ...this.retentionPolicy,
+          retention_days: storageOrConfig.retention_days as number,
+        };
+      }
+    }
     this.ringBuffer = new AuditRingBuffer(ringBufferCapacity);
     this.startPeriodicFlush();
+  }
+
+  async append(record: AuditRecord): Promise<void> {
+    this.records.push(record);
+  }
+
+  getRecords(): AuditRecord[] {
+    return this.records;
   }
 
   async write(event: AuditEvent): Promise<void> {
@@ -124,7 +154,10 @@ export class DefaultAuditSink implements AuditSink {
     }
 
     let retries = 0;
-    while ((this.buffer.length > 0 || this.overflowQueue.length > 0) && retries < this.MAX_RETRIES) {
+    while (
+      (this.buffer.length > 0 || this.overflowQueue.length > 0) &&
+      retries < this.MAX_RETRIES
+    ) {
       try {
         if (this.overflowQueue.length > 0) {
           await this.persistOverflow();
@@ -213,8 +246,8 @@ export class DefaultAuditSink implements AuditSink {
   private startPeriodicFlush(): void {
     this.flushTimer = setInterval(() => {
       if (this.buffer.length > 0 || this.overflowQueue.length > 0) {
-        this.persistWithRetry().catch((err) => {
-          console.error('[AuditSink] Periodic flush failed:', err);
+        this.persistWithRetry().catch(err => {
+          console.error("[AuditSink] Periodic flush failed:", err);
         });
       }
     }, this.FLUSH_INTERVAL_MS) as unknown as number;
@@ -305,7 +338,7 @@ export class InMemoryAuditSink {
   }
 
   async exportRecords(): Promise<AuditExportRecord[]> {
-    return this.records.map((record) => toExportRecord(record, this.retentionPolicy));
+    return this.records.map(record => toExportRecord(record, this.retentionPolicy));
   }
 }
 

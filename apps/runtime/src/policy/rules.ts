@@ -46,8 +46,8 @@ class PatternMatcher {
    */
   private globMatch(text: string, pattern: string): boolean {
     const regexPattern = pattern
-      .replace(/[.+^${}()|[\]\\]/g, '\\$&') // Escape regex chars
-      .replace(/\*/g, '.*'); // * becomes .*
+      .replace(/[.+^${}()|[\]\\]/g, "\\$&") // Escape regex chars
+      .replace(/\*/g, ".*"); // * becomes .*
     const regex = new RegExp(`^${regexPattern}$`);
     return regex.test(text);
   }
@@ -103,11 +103,7 @@ export class PolicyRuleSet {
     // Iterate rules in priority order
     for (const rule of this.rules) {
       // Check if pattern matches
-      const patternMatches = this.patternMatcher.matches(
-        command,
-        rule.pattern,
-        rule.patternType
-      );
+      const patternMatches = this.patternMatcher.matches(command, rule.pattern, rule.patternType);
 
       if (!patternMatches) {
         continue;
@@ -166,7 +162,7 @@ export class PolicyRuleSet {
       classification,
       matchedRules,
       evaluationMs,
-      deniedByDefault
+      deniedByDefault,
     };
   }
 

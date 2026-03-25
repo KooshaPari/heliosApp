@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { BindingMiddleware } from "../../../src/registry/binding_middleware.js";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import {
@@ -141,7 +141,7 @@ describe("BindingMiddleware", () => {
       const handler = async () => "success";
 
       await expect(middleware.wrapOperation("terminal-nonexistent", handler)).rejects.toThrow(
-        /TERMINAL_NOT_FOUND/,
+        /TERMINAL_NOT_FOUND/
       );
     });
 
@@ -191,7 +191,7 @@ describe("BindingMiddleware", () => {
       const handler = () => "success";
 
       expect(() => middleware.wrapOperationSync("terminal-nonexistent", handler)).toThrow(
-        /TERMINAL_NOT_FOUND/,
+        /TERMINAL_NOT_FOUND/
       );
     });
   });

@@ -233,6 +233,6 @@ describe("SwitchBuffer", () => {
     buf.write("pty-1", new Uint8Array(3));
     buf.write("pty-1", new Uint8Array(4)); // total 7 > 5
 
-    expect(events.some((e) => e.droppedBytes > 0)).toBe(true);
+    expect(events.some(e => e.droppedBytes > 0)).toBe(true);
   });
 });

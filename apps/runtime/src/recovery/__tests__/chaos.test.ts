@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { RestorationPipeline } from "../restoration.js";
 import { RecoveryStateMachine, RecoveryStage } from "../state-machine.js";
 import { CrashLoopDetector, SafeMode } from "../safe-mode.js";
@@ -69,7 +69,10 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       await writer.write(checkpoint);
 
       const tempPath = `${writer.getCheckpointPath()}.tmp`;
-      const tempExists = await fs.access(tempPath).then(() => true).catch(() => false);
+      const tempExists = await fs
+        .access(tempPath)
+        .then(() => true)
+        .catch(() => false);
       expect(tempExists).toBe(false);
     });
   });
@@ -124,9 +127,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const result = await reconciler.cleanup(report);
 
       expect(result).toBeDefined();
-      expect(result.terminated + result.removed).toBeLessThanOrEqual(
-        report.safeToTerminate.length
-      );
+      expect(result.terminated + result.removed).toBeLessThanOrEqual(report.safeToTerminate.length);
     });
 
     it("should flag needs-review orphans without terminating them", async () => {
@@ -145,7 +146,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       await reconciler.cleanup(report);
 
       const events = bus.getEvents();
-      const cleanupEvent = events.find((e) => e.topic === "recovery.orphans.cleaned");
+      const cleanupEvent = events.find(e => e.topic === "recovery.orphans.cleaned");
       expect(cleanupEvent).toBeDefined();
     });
   });
@@ -160,21 +161,21 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const startTime = Date.now();
 
       // Full cycle
-      await stateMachine.transition(RecoveryStage.Detecting);
-      await stateMachine.transition(RecoveryStage.Inventorying);
-      await stateMachine.transition(RecoveryStage.Restoring);
+      await stateMachine.transition(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.INVENTORYING);
+      await stateMachine.transition(RecoveryStage.RESTORING);
 
       const result = await pipeline.restore(checkpoint);
 
       const reconciler = new OrphanReconciler(
-        result.restored.map((s) => s.sessionId),
+        result.restored.map(s => s.sessionId),
         bus
       );
       const report = await reconciler.scan();
       await reconciler.cleanup(report);
 
-      await stateMachine.transition(RecoveryStage.Reconciling);
-      await stateMachine.transition(RecoveryStage.Live);
+      await stateMachine.transition(RecoveryStage.RECONCILING);
+      await stateMachine.transition(RecoveryStage.LIVE);
 
       const totalDuration = Date.now() - startTime;
 
@@ -190,13 +191,13 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const stateMachine = new RecoveryStateMachine(tempDir, bus);
       await stateMachine.initialize();
 
-      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.DETECTING);
 
       // Simulate concurrent activity
       const activityPromises = [];
       for (let i = 0; i < 5; i++) {
         activityPromises.push(
-          new Promise((resolve) => {
+          new Promise(resolve => {
             setTimeout(async () => {
               // Simulate user activity
               resolve(undefined);
@@ -205,7 +206,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
         );
       }
 
-      await stateMachine.transition(RecoveryStage.Inventorying);
+      await stateMachine.transition(RecoveryStage.INVENTORYING);
       const result = await Promise.all([pipeline.restore(checkpoint), ...activityPromises]);
 
       expect(result[0].restored.length).toBeGreaterThan(0);
@@ -228,8 +229,8 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       }
 
       // All cycles should have consistent results
-      expect(results.every((r) => r.restored.length === 3)).toBe(true);
-      expect(results.every((r) => r.failed.length === 0)).toBe(true);
+      expect(results.every(r => r.restored.length === 3)).toBe(true);
+      expect(results.every(r => r.failed.length === 0)).toBe(true);
     });
   });
 
@@ -238,29 +239,29 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const stateMachine = new RecoveryStateMachine(tempDir, bus);
       await stateMachine.initialize();
 
-      await stateMachine.transition(RecoveryStage.Detecting);
-      await stateMachine.transition(RecoveryStage.DetectionFailed);
+      await stateMachine.transition(RecoveryStage.DETECTING);
+      await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
 
       // Should be able to retry
-      await stateMachine.transition(RecoveryStage.Detecting);
-      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.DETECTING);
+      expect(stateMachine.getCurrentStage()).toBe(RecoveryStage.DETECTING);
     });
 
     it("should enforce max retry limit", async () => {
       const stateMachine = new RecoveryStateMachine(tempDir, bus);
       await stateMachine.initialize();
 
-      await stateMachine.transition(RecoveryStage.Detecting);
+      await stateMachine.transition(RecoveryStage.DETECTING);
 
       // Try 3 times
       for (let i = 0; i < 3; i++) {
-        await stateMachine.transition(RecoveryStage.DetectionFailed);
-        await stateMachine.transition(RecoveryStage.Detecting);
+        await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
+        await stateMachine.transition(RecoveryStage.DETECTING);
       }
 
       // Fourth attempt should fail
-      await stateMachine.transition(RecoveryStage.DetectionFailed);
-      await expect(stateMachine.transition(RecoveryStage.Detecting)).rejects.toThrow("Max retries");
+      await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
+      await expect(stateMachine.transition(RecoveryStage.DETECTING)).rejects.toThrow("Max retries");
     });
   });
 });

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import {
   CheckpointWriter,
   CheckpointReader,
@@ -50,7 +50,10 @@ describe("CheckpointWriter and CheckpointReader", () => {
       await writer.write(checkpoint);
 
       const checkpointPath = writer.getCheckpointPath();
-      const exists = await fs.access(checkpointPath).then(() => true).catch(() => false);
+      const exists = await fs
+        .access(checkpointPath)
+        .then(() => true)
+        .catch(() => false);
       expect(exists).toBe(true);
 
       const content = await fs.readFile(checkpointPath, "utf-8");
@@ -82,12 +85,18 @@ describe("CheckpointWriter and CheckpointReader", () => {
 
       // Temp file should not exist after write
       const tempPath = `${writer.getCheckpointPath()}.tmp`;
-      const tempExists = await fs.access(tempPath).then(() => true).catch(() => false);
+      const tempExists = await fs
+        .access(tempPath)
+        .then(() => true)
+        .catch(() => false);
       expect(tempExists).toBe(false);
 
       // Final file should exist
       const checkpointPath = writer.getCheckpointPath();
-      const exists = await fs.access(checkpointPath).then(() => true).catch(() => false);
+      const exists = await fs
+        .access(checkpointPath)
+        .then(() => true)
+        .catch(() => false);
       expect(exists).toBe(true);
     });
 
@@ -123,7 +132,10 @@ describe("CheckpointWriter and CheckpointReader", () => {
       });
 
       const backupPath = `${writer.getCheckpointPath()}.backup`;
-      const backupExists = await fs.access(backupPath).then(() => true).catch(() => false);
+      const backupExists = await fs
+        .access(backupPath)
+        .then(() => true)
+        .catch(() => false);
       expect(backupExists).toBe(true);
 
       const backupContent = await fs.readFile(backupPath, "utf-8");
@@ -282,7 +294,10 @@ describe("CheckpointWriter and CheckpointReader", () => {
       });
 
       // Stale temp file should be cleaned
-      const stillExists = await fs.access(tempPath).then(() => true).catch(() => false);
+      const stillExists = await fs
+        .access(tempPath)
+        .then(() => true)
+        .catch(() => false);
       expect(stillExists).toBe(false);
     });
   });

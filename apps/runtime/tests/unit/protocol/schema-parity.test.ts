@@ -5,10 +5,10 @@
  * Uses a lightweight JSON Schema draft-07 validator (inline, no deps).
  */
 
-import { describe, expect, it } from 'bun:test';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { createCommand, createResponse, createEvent } from '../../../src/protocol/envelope.js';
+import { describe, expect, it } from "bun:test";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { createCommand, createResponse, createEvent } from "../../../src/protocol/envelope.js";
 
 // ---------------------------------------------------------------------------
 // Minimal JSON Schema draft-07 validator (subset needed for envelope schema)
@@ -40,44 +40,70 @@ function validateSchema(data: unknown, schema: JsonSchema, path = ""): Validatio
   const errors: ValidationError[] = [];
 
   if (schema.type !== undefined) {
-    const actualType = data === null ? 'null' : Array.isArray(data) ? 'array' : typeof data;
-    if (schema.type === 'integer') {
-      if (typeof data !== 'number' || !Number.isInteger(data)) {
+    const actualType = data === null ? "null" : Array.isArray(data) ? "array" : typeof data;
+    if (schema.type === "integer") {
+      if (typeof data !== "number" || !Number.isInteger(data)) {
         errors.push({ path, message: `Expected integer, got ${actualType}` });
         return errors;
       }
     } else if (actualType !== schema.type) {
-      errors.push({ path, message: `Expected ${schema.type}, got ${actualType}` });
+      errors.push({
+        path,
+        message: `Expected ${schema.type}, got ${actualType}`,
+      });
       return errors;
     }
   }
 
   if (schema.const !== undefined && data !== schema.const) {
-    errors.push({ path, message: `Expected const ${String(schema.const)}, got ${String(data)}` });
+    errors.push({
+      path,
+      message: `Expected const ${String(schema.const)}, got ${String(data)}`,
+    });
   }
 
   if (schema.enum !== undefined && !schema.enum.includes(data)) {
-    errors.push({ path, message: `Value ${String(data)} not in enum [${schema.enum.map(String).join(', ')}]` });
+    errors.push({
+      path,
+      message: `Value ${String(data)} not in enum [${schema.enum.map(String).join(", ")}]`,
+    });
   }
 
-  if (schema.minLength !== undefined && typeof data === 'string' && data.length < schema.minLength) {
-    errors.push({ path, message: `String length ${String(data.length)} < minLength ${String(schema.minLength)}` });
+  if (
+    schema.minLength !== undefined &&
+    typeof data === "string" &&
+    data.length < schema.minLength
+  ) {
+    errors.push({
+      path,
+      message: `String length ${String(data.length)} < minLength ${String(schema.minLength)}`,
+    });
   }
 
-  if (schema.exclusiveMinimum !== undefined && typeof data === 'number' && data <= schema.exclusiveMinimum) {
-    errors.push({ path, message: `Number ${String(data)} <= exclusiveMinimum ${String(schema.exclusiveMinimum)}` });
+  if (
+    schema.exclusiveMinimum !== undefined &&
+    typeof data === "number" &&
+    data <= schema.exclusiveMinimum
+  ) {
+    errors.push({
+      path,
+      message: `Number ${String(data)} <= exclusiveMinimum ${String(schema.exclusiveMinimum)}`,
+    });
   }
 
-  if (schema.required !== undefined && typeof data === 'object' && data !== null) {
+  if (schema.required !== undefined && typeof data === "object" && data !== null) {
     const obj = data as Record<string, unknown>;
     for (const key of schema.required) {
       if (!(key in obj)) {
-        errors.push({ path: `${path}.${key}`, message: `Missing required field "${key}"` });
+        errors.push({
+          path: `${path}.${key}`,
+          message: `Missing required field "${key}"`,
+        });
       }
     }
   }
 
-  if (schema.properties !== undefined && typeof data === 'object' && data !== null) {
+  if (schema.properties !== undefined && typeof data === "object" && data !== null) {
     const obj = data as Record<string, unknown>;
     for (const [key, propSchema] of Object.entries(schema.properties)) {
       if (key in obj) {
@@ -87,11 +113,14 @@ function validateSchema(data: unknown, schema: JsonSchema, path = ""): Validatio
   }
 
   if (schema.oneOf !== undefined) {
-    const matches = schema.oneOf.filter((sub) => validateSchema(data, sub, path).length === 0);
+    const matches = schema.oneOf.filter(sub => validateSchema(data, sub, path).length === 0);
     if (matches.length === 0) {
-      errors.push({ path, message: 'Does not match any oneOf schema' });
+      errors.push({ path, message: "Does not match any oneOf schema" });
     } else if (matches.length > 1) {
-      errors.push({ path, message: `Matches ${String(matches.length)} oneOf schemas (expected exactly 1)` });
+      errors.push({
+        path,
+        message: `Matches ${String(matches.length)} oneOf schemas (expected exactly 1)`,
+      });
     }
   }
 
@@ -104,107 +133,107 @@ function validateSchema(data: unknown, schema: JsonSchema, path = ""): Validatio
 
 const schemaPath = resolve(
   import.meta.dir,
-  '../../../../../specs/protocol/v1/envelope.schema.json',
+  "../../../../../specs/protocol/v1/envelope.schema.json"
 );
-const schema: JsonSchema = JSON.parse(readFileSync(schemaPath, 'utf-8')) as JsonSchema;
+const schema: JsonSchema = JSON.parse(readFileSync(schemaPath, "utf-8")) as JsonSchema;
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('JSON Schema parity — runtime envelopes match canonical schema', () => {
-  it('createCommand produces a schema-valid envelope', () => {
-    const cmd = createCommand('test.method', { key: 'value' });
+describe("JSON Schema parity — runtime envelopes match canonical schema", () => {
+  it("createCommand produces a schema-valid envelope", () => {
+    const cmd = createCommand("test.method", { key: "value" });
     const errors = validateSchema(cmd, schema);
     expect(errors).toEqual([]);
   });
 
-  it('createResponse produces a schema-valid envelope', () => {
-    const cmd = createCommand('test.method', null);
+  it("createResponse produces a schema-valid envelope", () => {
+    const cmd = createCommand("test.method", {});
     const res = createResponse(cmd, { result: 42 });
     const errors = validateSchema(res, schema);
     expect(errors).toEqual([]);
   });
 
-  it('createResponse with error produces a schema-valid envelope', () => {
-    const cmd = createCommand('test.method', null);
+  it("createResponse with error produces a schema-valid envelope", () => {
+    const cmd = createCommand("test.method", {});
     const res = createResponse(cmd, null, {
-      code: 'HANDLER_ERROR',
-      message: 'Something went wrong',
+      code: "HANDLER_ERROR",
+      message: "Something went wrong",
     });
     const errors = validateSchema(res, schema);
     expect(errors).toEqual([]);
   });
 
-  it('createEvent produces a schema-valid envelope', () => {
-    const evt = createEvent('test.topic', { data: true });
+  it("createEvent produces a schema-valid envelope", () => {
+    const evt = createEvent("test.topic", { data: true });
     const errors = validateSchema(evt, schema);
     expect(errors).toEqual([]);
   });
 
-  it('rejects envelope with missing id', () => {
+  it("rejects envelope with missing id", () => {
     const bad = {
       // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
       correlation_id: "cor_123",
       timestamp: 1,
-      type: 'command',
-      method: 'test',
+      type: "command",
+      method: "test",
       payload: null,
     };
     const errors = validateSchema(bad, schema);
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors.some((e) => e.message.includes('id'))).toBe(true);
+    expect(errors.some(e => e.message.includes("id"))).toBe(true);
   });
 
-  it('rejects envelope with empty id', () => {
+  it("rejects envelope with empty id", () => {
     const bad = {
       id: "",
       // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
       correlation_id: "cor_123",
       timestamp: 1,
-      type: 'command',
-      method: 'test',
+      type: "command",
+      method: "test",
       payload: null,
     };
     const errors = validateSchema(bad, schema);
     expect(errors.length).toBeGreaterThan(0);
   });
 
-  it('rejects envelope with invalid type', () => {
+  it("rejects envelope with invalid type", () => {
     const bad = {
       id: "cmd_123",
       // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
       correlation_id: "cor_123",
       timestamp: 1,
-      type: 'invalid',
-      method: 'test',
+      type: "invalid",
+      method: "test",
       payload: null,
     };
     const errors = validateSchema(bad, schema);
     expect(errors.length).toBeGreaterThan(0);
   });
 
-  it('rejects event without sequence', () => {
+  it("rejects event without sequence", () => {
     const bad = {
       id: "evt_123",
       // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
       correlation_id: "cor_123",
       timestamp: 1,
-      type: 'event',
-      topic: 'test',
+      type: "event",
+      topic: "test",
       payload: null,
     };
     const errors = validateSchema(bad, schema);
     expect(errors.length).toBeGreaterThan(0);
   });
 
-  it('rejects event without topic', () => {
+  it("rejects event without topic", () => {
     const bad = {
       id: "evt_123",
       // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
       correlation_id: "cor_123",
       timestamp: 1,
-      type: 'event',
+      type: "event",
       payload: null,
       sequence: 1,
     };
@@ -212,12 +241,12 @@ describe('JSON Schema parity — runtime envelopes match canonical schema', () =
     expect(errors.length).toBeGreaterThan(0);
   });
 
-  it('required fields in JSON schema match TypeScript type requirements', () => {
+  it("required fields in JSON schema match TypeScript type requirements", () => {
     // Base required fields
-    expect(schema.required).toContain('id');
-    expect(schema.required).toContain('correlation_id');
-    expect(schema.required).toContain('timestamp');
-    expect(schema.required).toContain('type');
+    expect(schema.required).toContain("id");
+    expect(schema.required).toContain("correlation_id");
+    expect(schema.required).toContain("timestamp");
+    expect(schema.required).toContain("type");
 
     // oneOf branches
     const commandSchema = schema.oneOf?.find(s => s.title === "CommandEnvelope");

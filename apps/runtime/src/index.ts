@@ -16,7 +16,80 @@ export interface HealthCheckResult {
   readonly uptimeMs: number;
 }
 
+export type RuntimeAuditRecord = {
+  recorded_at: string;
+  type: "command" | "response" | "event";
+  method?: string;
+  topic?: string;
+  correlation_id?: string;
+  payload: Record<string, unknown>;
+  error?: { code: string; message: string; retryable?: boolean } | null;
+};
+
+export type RuntimeAuditBundle = {
+  count: number;
+  records: RuntimeAuditRecord[];
+  exported_at: string;
+};
+
+export type RuntimeOptions = {
+  recovery_metadata?: RecoveryMetadata;
+};
+
+type RuntimeInstance = ReturnType<typeof createRuntime>;
+
 const startTime = performance.now();
+const METHOD_SET = new Set<string>(METHODS);
+
+function normalizePayload(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+  return { ...(value as Record<string, unknown>) };
+}
+
+function redactStructuredValue(value: unknown, key?: string): unknown {
+  const normalizedKey = key?.toLowerCase() ?? "";
+  const shouldRedactKey =
+    normalizedKey.includes("api_key") ||
+    normalizedKey.includes("token") ||
+    normalizedKey.includes("secret") ||
+    normalizedKey.includes("password");
+
+  if (shouldRedactKey && typeof value === "string" && value.length > 0) {
+    return "[REDACTED]";
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(item => redactStructuredValue(item));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([entryKey, entryValue]) => [
+        entryKey,
+        redactStructuredValue(entryValue, entryKey),
+      ])
+    );
+  }
+
+  return value;
+}
+
+function redactPayload(
+  engine: RedactionEngine,
+  payload: Record<string, unknown>,
+  correlationId: string
+): Record<string, unknown> {
+  const structured = redactStructuredValue(payload) as Record<string, unknown>;
+  const serialized = JSON.stringify(structured);
+  const result = engine.redact(serialized, {
+    artifactId: `audit-${correlationId}`,
+    artifactType: "audit",
+    correlationId,
+  });
+  return JSON.parse(result.redacted) as Record<string, unknown>;
+}
 
 export function healthCheck(): HealthCheckResult {
   return {

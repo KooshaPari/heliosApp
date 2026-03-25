@@ -51,7 +51,7 @@ const TOPIC_NAME_RE = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
 function assertValidTopicName(topic: string): void {
   if (!TOPIC_NAME_RE.test(topic)) {
     throw new Error(
-      `Invalid topic name "${topic}": must be non-empty, alphanumeric segments separated by dots`,
+      `Invalid topic name "${topic}": must be non-empty, alphanumeric segments separated by dots`
     );
   }
 }

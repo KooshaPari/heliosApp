@@ -57,8 +57,17 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
       const glob = new Bun.Glob("**/*.gguf");
       const models: ModelInfo[] = [];
       for await (const path of glob.scan(this.modelDir)) {
-        const name = path.replace(/\.gguf$/, "").split("/").pop() ?? path;
-        models.push({ id: `${this.modelDir}/${path}`, name, contextWindow: 4096, providerId: "llamacpp" });
+        const name =
+          path
+            .replace(/\.gguf$/, "")
+            .split("/")
+            .pop() ?? path;
+        models.push({
+          id: `${this.modelDir}/${path}`,
+          name,
+          contextWindow: 4096,
+          providerId: "llamacpp",
+        });
       }
       return models;
     } catch {
