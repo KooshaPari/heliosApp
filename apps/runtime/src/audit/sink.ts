@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-export * from "./sink-types";
-export * from "./default-audit-sink";
-export * from "./in-memory-audit-sink";
-=======
 import type { AuditEvent } from "./event";
 import { AuditRingBuffer } from "./ring-buffer";
 import type { AuditFilter } from "./ring-buffer";
@@ -366,4 +361,3 @@ export class NoOpAuditStorage implements AuditStorage {
 
 /** @deprecated Use DefaultAuditSink. Alias retained for backward compatibility. */
 export { DefaultAuditSink as InMemoryAuditSink };
->>>>>>> origin/main

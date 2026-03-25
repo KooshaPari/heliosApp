@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-export * from "./binding_triple_types.js";
-export * from "./binding_triple_validation.js";
-=======
 /**
  * Terminal Binding Triple Type System
  *
@@ -125,4 +121,3 @@ export function createBinding(terminalId: string, triple: BindingTriple): Termin
     updatedAt: now,
   };
 }
->>>>>>> origin/main

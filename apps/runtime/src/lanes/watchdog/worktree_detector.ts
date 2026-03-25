@@ -33,11 +33,7 @@ export class WorktreeDetector {
 
         // Exclude transient states
         if (lane) {
-<<<<<<< HEAD
-          if (lane.state === "cleaning") {
-=======
           if (lane.state === "cleaning" || (lane.state as string) === "recovering") {
->>>>>>> origin/main
             continue; // Not orphaned, just in transient state
           }
           // Lane is active and not in transient state

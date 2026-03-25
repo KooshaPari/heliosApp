@@ -1,54 +1,15 @@
 import { describe, it, expect } from "bun:test";
 import {
-<<<<<<< HEAD
-=======
   type AuditEvent,
->>>>>>> origin/main
   createAuditEvent,
   validateAuditEvent,
   AUDIT_EVENT_TYPES,
   AUDIT_EVENT_RESULTS,
-<<<<<<< HEAD
-  type AuditEvent,
-} from '../../../src/audit/event';
-
-type CustomMetadata = {
-  nested: {
-    value: number;
-  };
-};
-
-const isCustomMetadata = (
-  value: unknown
-): value is CustomMetadata => {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return false;
-  }
-
-  if (!("nested" in value)) {
-    return false;
-  }
-
-  const nested = (value as { nested?: unknown }).nested;
-
-  return (
-    typeof nested === "object" &&
-    nested !== null &&
-    !Array.isArray(nested) &&
-    typeof nested["value"] === "number"
-  );
-};
-
-describe('AuditEvent Schema', () => {
-  describe('createAuditEvent', () => {
-    it('should create a valid event with all required fields', () => {
-=======
 } from "../../../src/audit/event";
 
 describe("AuditEvent Schema", () => {
   describe("createAuditEvent", () => {
     it("should create a valid event with all required fields", () => {
->>>>>>> origin/main
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
         actor: "agent-1",
@@ -152,13 +113,6 @@ describe("AuditEvent Schema", () => {
 
       expect(event.metadata.exitCode).toBe(0);
       expect(event.metadata.duration).toBe(250);
-<<<<<<< HEAD
-      const customMetadata = (event.metadata as Record<string, unknown>)["custom"];
-      expect(isCustomMetadata(customMetadata)).toBe(true);
-      if (isCustomMetadata(customMetadata)) {
-        expect(customMetadata.nested.value).toBe(42);
-      }
-=======
       expect(
         (
           event.metadata.custom as Record<string, unknown> & {
@@ -166,7 +120,6 @@ describe("AuditEvent Schema", () => {
           }
         ).nested.value
       ).toBe(42);
->>>>>>> origin/main
     });
   });
 
@@ -254,15 +207,9 @@ describe("AuditEvent Schema", () => {
       expect(validateAuditEvent(event)).toBe(false);
     });
 
-<<<<<<< HEAD
-    it('should reject events with invalid metadata (array)', () => {
-      const event = {
-        id: 'id-1',
-=======
     it("should reject events with invalid metadata (array)", () => {
       const event: any = {
         id: "id-1",
->>>>>>> origin/main
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
         actor: "agent-1",
         action: "execute",
@@ -272,7 +219,7 @@ describe("AuditEvent Schema", () => {
         workspaceId: "workspace-1",
         correlationId: "corr-1",
         metadata: [], // Invalid: should be object
-      } as unknown as AuditEvent;
+      };
 
       expect(validateAuditEvent(event)).toBe(false);
     });

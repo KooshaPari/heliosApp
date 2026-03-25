@@ -69,8 +69,6 @@ export type LaneBusEventTopic =
   // Core lane lifecycle
   | "lane.created"
   | "lane.state.changed"
-  | "lane.worktree.provisioned"
-  | "lane.worktree.removed"
   | "lane.shared"
   | "lane.cleaning"
   | "lane.closed"

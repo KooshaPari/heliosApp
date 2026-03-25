@@ -56,15 +56,9 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-<<<<<<< HEAD
-        model: "claude-3-sonnet",
-        timeout: 30000,
-        maxRetries: 3,
-=======
 
         model: "claude-3-sonnet",
         timeout: 30000,
->>>>>>> origin/main
       };
 
       await adapter.init(config);
@@ -76,17 +70,10 @@ describe("ACP Client Adapter", () => {
     it("should reject missing endpoint", async () => {
       const config = {
         baseUrl: "",
-<<<<<<< HEAD
-        apiKey: "acp-key",
-        model: "claude-3-sonnet",
-        timeout: 30000,
-        maxRetries: 3,
-=======
         apiKey: "",
 
         model: "claude-3-sonnet",
         timeout: 30000,
->>>>>>> origin/main
       };
 
       await expect(adapter.init(config)).rejects.toThrow(/init failed/i);
@@ -95,17 +82,10 @@ describe("ACP Client Adapter", () => {
     it("should reject missing apiKeyRef", async () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
-<<<<<<< HEAD
-        apiKey: "",
-        model: "claude-3-sonnet",
-        timeout: 30000,
-        maxRetries: 3,
-=======
         apiKey: "acp-key",
 
         model: "claude-3-sonnet",
         timeout: 30000,
->>>>>>> origin/main
       };
 
       await expect(adapter.init(config)).rejects.toThrow(/init failed/i);
@@ -115,15 +95,9 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-<<<<<<< HEAD
-        model: "",
-        timeout: 30000,
-        maxRetries: 3,
-=======
 
         model: "",
         timeout: 30000,
->>>>>>> origin/main
       };
 
       await expect(adapter.init(config)).rejects.toThrow(/init failed/i);
@@ -133,15 +107,9 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-<<<<<<< HEAD
-        model: "claude-3-sonnet",
-        timeout: 30000,
-        maxRetries: 3,
-=======
 
         model: "claude-3-sonnet",
         timeout: 30000,
->>>>>>> origin/main
       };
 
       await adapter.init(config);
@@ -149,11 +117,7 @@ describe("ACP Client Adapter", () => {
       const events = bus.getEvents();
       const initEvent = events.find(e => e.topic === "provider.acp.initialized");
       expect(initEvent).toBeDefined();
-<<<<<<< HEAD
-      expect(initEvent?.payload?.baseUrl).toBe(config.baseUrl);
-=======
       expect(initEvent?.payload?.endpoint).toBe(config.baseUrl);
->>>>>>> origin/main
     });
   });
 
@@ -162,15 +126,9 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-<<<<<<< HEAD
-        model: "claude-3-sonnet",
-        timeout: 30000,
-        maxRetries: 3,
-=======
 
         model: "claude-3-sonnet",
         timeout: 30000,
->>>>>>> origin/main
       };
       await adapter.init(config);
     });
@@ -190,15 +148,9 @@ describe("ACP Client Adapter", () => {
       await brokenAdapter.init({
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-<<<<<<< HEAD
-        model: "claude-3-sonnet",
-        timeout: 30000,
-        maxRetries: 3,
-=======
 
         model: "claude-3-sonnet",
         timeout: 30000,
->>>>>>> origin/main
       });
 
       health = await brokenAdapter.health();
@@ -225,15 +177,9 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-<<<<<<< HEAD
-        model: "claude-3-sonnet",
-        timeout: 30000,
-        maxRetries: 3,
-=======
 
         model: "claude-3-sonnet",
         timeout: 30000,
->>>>>>> origin/main
       };
       await adapter.init(config);
     });
@@ -295,15 +241,9 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-<<<<<<< HEAD
-        model: "claude-3-sonnet",
-        timeout: 30000,
-        maxRetries: 3,
-=======
 
         model: "claude-3-sonnet",
         timeout: 30000,
->>>>>>> origin/main
       };
       await adapter.init(config);
     });
@@ -362,15 +302,9 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-<<<<<<< HEAD
-        model: "claude-3-sonnet",
-        timeout: 30000,
-        maxRetries: 3,
-=======
 
         model: "claude-3-sonnet",
         timeout: 30000,
->>>>>>> origin/main
       };
       await adapter.init(config);
     });
@@ -414,15 +348,9 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-<<<<<<< HEAD
-        model: "claude-3-sonnet",
-        timeout: 30000,
-        maxRetries: 3,
-=======
 
         model: "claude-3-sonnet",
         timeout: 30000,
->>>>>>> origin/main
       };
       await adapter.init(config);
     });
@@ -472,15 +400,9 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-<<<<<<< HEAD
-        model: "claude-3-sonnet",
-        timeout: 30000,
-        maxRetries: 3,
-=======
 
         model: "claude-3-sonnet",
         timeout: 30000,
->>>>>>> origin/main
       };
       await adapter.init(config);
     });
@@ -522,15 +444,9 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-<<<<<<< HEAD
-        model: "claude-3-sonnet",
-        timeout: 100, // Short timeout for timeout tests
-        maxRetries: 3,
-=======
 
         model: "claude-3-sonnet",
         timeoutMs: 100, // Short timeout for timeout tests
->>>>>>> origin/main
       };
       await adapter.init(config);
     });

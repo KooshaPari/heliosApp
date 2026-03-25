@@ -277,21 +277,13 @@ export class ZellijSessionManager {
     return [{ index: 0, name: "Tab #1", panes: [{ id: 0, title: "default" }] }];
   }
 
-<<<<<<< HEAD
-  /** Query pane records from current session layout. */
-=======
   /** Query panes for a session by dumping layout and parsing. */
->>>>>>> origin/main
   private async queryPanes(sessionName: string): Promise<PaneRecord[]> {
     const layout = await this.queryLayout(sessionName);
     return this.parsePanesFromLayout(layout);
   }
 
-<<<<<<< HEAD
-  /** Query tab records from current session layout. */
-=======
   /** Query tabs for a session by dumping layout and parsing. */
->>>>>>> origin/main
   private async queryTabs(sessionName: string): Promise<TabRecord[]> {
     const layout = await this.queryLayout(sessionName);
     return this.parseTabsFromLayout(layout);
