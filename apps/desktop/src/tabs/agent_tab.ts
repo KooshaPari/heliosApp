@@ -26,7 +26,7 @@ export interface AgentTabState extends TabState {
 export class AgentTab extends TabSurface {
   private agentStatus: "idle" | "running" | "error" = "idle";
   private actions: AgentAction[] = [];
-  private errorMessage: string | null = null;
+  protected errorMessage: string | null = null;
   private contentEl: HTMLElement | null = null;
 
   constructor() {
@@ -269,7 +269,7 @@ export class AgentTab extends TabSurface {
     if (state.agentStatus) {
       this.agentStatus = state.agentStatus;
     }
-    if (this.contentEl && state.scrollPosition) {
+    if (this.contentEl && state.scrollPosition !== undefined && state.scrollPosition !== null) {
       this.contentEl.scrollTop = state.scrollPosition;
     }
   }

@@ -1,12 +1,15 @@
 // T007-T009 - Remediation engine with confirmation gates and recovery suppression
 
 import { promises as fs } from "fs";
-import { execCommand } from "../../integrations/exec.js";
 import path from "path";
 import os from "os";
-import { type ClassifiedOrphan, type ResourceType } from "./resource_classifier.js";
+import { type ClassifiedOrphan } from "./resource_classifier.js";
 import type { LocalBus } from "../../protocol/bus.js";
 import type { LaneRegistry } from "../registry.js";
+import {
+  CleanupExecutor,
+  type CleanupResult,
+} from "./cleanup_executor.js";
 
 export interface RemediationSuggestion {
   id: string;
@@ -14,13 +17,6 @@ export interface RemediationSuggestion {
   suggestedAction: string;
   requiresConfirmation: boolean;
   createdAt: string;
-}
-
-export interface CleanupResult {
-  resourceId: string;
-  success: boolean;
-  message: string;
-  resourceType: ResourceType;
 }
 
 interface CooldownEntry {
@@ -31,6 +27,7 @@ interface CooldownEntry {
 export class RemediationEngine {
   private suggestions = new Map<string, RemediationSuggestion>();
   private cooldownMap = new Map<string, CooldownEntry>();
+  private readonly cleanupExecutor = new CleanupExecutor();
   private readonly cooldownDurationMs = 24 * 60 * 60 * 1000; // 24 hours
   private readonly cooldownPath = path.join(
     os.homedir(),
@@ -61,12 +58,11 @@ export class RemediationEngine {
         continue; // Skip resources in cooldown
       }
 
-      // Check if owning lane is recovering
+      // Suppress suggestions while the owning lane is in a transient cleanup state.
       if (orphan.estimatedOwner !== "unknown") {
         try {
           const lane = this.laneRegistry.get(orphan.estimatedOwner);
-          if (lane && lane.state === "recovering") {
-            // Suppress suggestion for recovering lanes
+          if (lane && lane.state === "cleaning") {
             continue;
           }
         } catch {
@@ -133,7 +129,7 @@ export class RemediationEngine {
     });
 
     // Execute cleanup based on resource type
-    const result = await this.executeCleanup(suggestion.resource);
+    const result = await this.cleanupExecutor.executeCleanup(suggestion.resource);
 
     // Remove suggestion after cleanup
     this.suggestions.delete(suggestionId);
@@ -186,210 +182,6 @@ export class RemediationEngine {
         ).toISOString(),
       },
     });
-  }
-
-  private async executeCleanup(orphan: ClassifiedOrphan): Promise<CleanupResult> {
-    try {
-      switch (orphan.type) {
-        case "worktree":
-          return await this.cleanupWorktree(orphan);
-        case "zellij_session":
-          return await this.cleanupZellijSession(orphan);
-        case "pty_process":
-          return await this.cleanupPtyProcess(orphan);
-        default:
-          return {
-            resourceId: orphan.path || String(orphan.pid),
-            success: false,
-            message: `Unknown resource type: ${orphan.type}`,
-            resourceType: orphan.type,
-          };
-      }
-    } catch (error) {
-      return {
-        resourceId: orphan.path || String(orphan.pid),
-        success: false,
-        message: `Cleanup failed: ${error instanceof Error ? error.message : String(error)}`,
-        resourceType: orphan.type,
-      };
-    }
-  }
-
-  private async cleanupWorktree(orphan: ClassifiedOrphan): Promise<CleanupResult> {
-    if (!orphan.path) {
-      return {
-        resourceId: "unknown",
-        success: false,
-        message: "Worktree path not available",
-        resourceType: "worktree",
-      };
-    }
-
-    try {
-      // Take snapshot before deletion
-      await this.snapshotWorktree(orphan);
-
-      // Remove worktree using git
-      const result = await execCommand("git", ["worktree", "remove", orphan.path]);
-
-      if (result.code === 0) {
-        return {
-          resourceId: orphan.path,
-          success: true,
-          message: "Worktree removed successfully",
-          resourceType: "worktree",
-        };
-      } else {
-        return {
-          resourceId: orphan.path,
-          success: false,
-          message: `git worktree remove failed: ${result.stderr}`,
-          resourceType: "worktree",
-        };
-      }
-    } catch (error) {
-      return {
-        resourceId: orphan.path,
-        success: false,
-        message: `Worktree cleanup failed: ${error instanceof Error ? error.message : String(error)}`,
-        resourceType: "worktree",
-      };
-    }
-  }
-
-  private async snapshotWorktree(orphan: ClassifiedOrphan): Promise<void> {
-    if (!orphan.path) return;
-
-    const snapshotDir = path.join(
-      os.homedir(),
-      ".helios",
-      "data",
-      "worktree_snapshots"
-    );
-    await fs.mkdir(snapshotDir, { recursive: true });
-
-    const snapshotName = `${Date.now()}-${orphan.estimatedOwner}.json`;
-    const snapshotPath = path.join(snapshotDir, snapshotName);
-
-    const snapshot = {
-      timestamp: new Date().toISOString(),
-      path: orphan.path,
-      estimatedOwner: orphan.estimatedOwner,
-      metadata: orphan.metadata,
-      age: orphan.age,
-    };
-
-    await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2));
-  }
-
-  private async cleanupZellijSession(
-    orphan: ClassifiedOrphan
-  ): Promise<CleanupResult> {
-    if (!orphan.path) {
-      return {
-        resourceId: "unknown",
-        success: false,
-        message: "Session name not available",
-        resourceType: "zellij_session",
-      };
-    }
-
-    try {
-      const result = await execCommand("zellij", [
-        "kill-session",
-        orphan.path,
-      ]);
-
-      if (result.code === 0) {
-        return {
-          resourceId: orphan.path,
-          success: true,
-          message: "Zellij session terminated",
-          resourceType: "zellij_session",
-        };
-      } else {
-        return {
-          resourceId: orphan.path,
-          success: false,
-          message: `zellij kill-session failed: ${result.stderr}`,
-          resourceType: "zellij_session",
-        };
-      }
-    } catch (error) {
-      return {
-        resourceId: orphan.path,
-        success: false,
-        message: `Session cleanup failed: ${error instanceof Error ? error.message : String(error)}`,
-        resourceType: "zellij_session",
-      };
-    }
-  }
-
-  private async cleanupPtyProcess(orphan: ClassifiedOrphan): Promise<CleanupResult> {
-    if (!orphan.pid) {
-      return {
-        resourceId: String(orphan.pid),
-        success: false,
-        message: "Process PID not available",
-        resourceType: "pty_process",
-      };
-    }
-
-    try {
-      // Send SIGTERM
-      const killResult = await execCommand("kill", ["-TERM", String(orphan.pid)]);
-
-      if (killResult.code === 0 || killResult.code === 1) {
-        // Wait up to 5 seconds for graceful exit
-        await this.sleep(1000);
-
-        // Check if process still exists
-        const checkResult = await execCommand("kill", ["-0", String(orphan.pid)]);
-
-        if (checkResult.code !== 0) {
-          // Process already terminated
-          return {
-            resourceId: String(orphan.pid),
-            success: true,
-            message: "Process terminated gracefully",
-            resourceType: "pty_process",
-          };
-        }
-
-        // Still alive, send SIGKILL
-        const killResult2 = await execCommand("kill", ["-KILL", String(orphan.pid)]);
-
-        if (killResult2.code === 0 || killResult2.code === 1) {
-          return {
-            resourceId: String(orphan.pid),
-            success: true,
-            message: "Process killed forcefully",
-            resourceType: "pty_process",
-          };
-        } else {
-          return {
-            resourceId: String(orphan.pid),
-            success: false,
-            message: "Failed to terminate process",
-            resourceType: "pty_process",
-          };
-        }
-      } else {
-        return {
-          resourceId: String(orphan.pid),
-          success: false,
-          message: "SIGTERM failed",
-          resourceType: "pty_process",
-        };
-      }
-    } catch (error) {
-      return {
-        resourceId: String(orphan.pid),
-        success: false,
-        message: `Process cleanup failed: ${error instanceof Error ? error.message : String(error)}`,
-        resourceType: "pty_process",
-      };
-    }
   }
 
   private getSuggestedAction(orphan: ClassifiedOrphan): string {
@@ -460,7 +252,4 @@ export class RemediationEngine {
     }
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
 }

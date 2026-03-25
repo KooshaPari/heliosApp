@@ -119,7 +119,7 @@ describe("TabPersistence", () => {
 
       // Mock fs.writeFile to count writes
       const originalWriteFile = fs.writeFile;
-      fs.writeFile = async (...args: any) => {
+      fs.writeFile = async (...args: Parameters<typeof originalWriteFile>) => {
         writeCount++;
         return originalWriteFile(...args);
       };

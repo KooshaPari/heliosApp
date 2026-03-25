@@ -8,10 +8,10 @@
 import type { ZellijCli } from "./cli.js";
 import type {
   LayoutTopology,
-  TabTopology,
   PaneTopology,
   PaneDimensions,
 } from "./types.js";
+import { refreshSessionTopology } from "./topology/refresh.js";
 
 /**
  * Manages layout topology for all tracked sessions.
@@ -191,56 +191,11 @@ export class TopologyTracker {
    * Rebuilds the topology from scratch based on zellij's current state.
    */
   async refreshTopology(sessionName: string): Promise<LayoutTopology> {
-    const result = await this.cli.run([
-      "--session",
+    const topology = await refreshSessionTopology(
+      this.cli,
       sessionName,
-      "action",
-      "dump-layout",
-    ]);
-
-    // Preserve existing PTY bindings before refresh
-    const existingTopology = this.topologies.get(sessionName);
-    const ptyBindings = new Map<number, string>();
-    if (existingTopology) {
-      for (const tab of existingTopology.tabs) {
-        for (const pane of tab.panes) {
-          if (pane.ptyId) {
-            ptyBindings.set(pane.paneId, pane.ptyId);
-          }
-        }
-      }
-    }
-
-    let topology: LayoutTopology;
-
-    if (result.exitCode !== 0 || !result.stdout.trim()) {
-      // If we cannot query zellij, return a minimal topology
-      topology = {
-        sessionName,
-        tabs: [
-          {
-            tabId: 0,
-            name: "Tab #1",
-            panes: [{ paneId: 0, dimensions: { cols: 80, rows: 24 }, focused: true }],
-            layout: "horizontal",
-          },
-        ],
-        activeTabId: 0,
-      };
-    } else {
-      topology = this.parseLayoutDump(sessionName, result.stdout);
-    }
-
-    // Restore PTY bindings
-    for (const tab of topology.tabs) {
-      for (const pane of tab.panes) {
-        const ptyId = ptyBindings.get(pane.paneId);
-        if (ptyId) {
-          pane.ptyId = ptyId;
-        }
-      }
-    }
-
+      this.topologies.get(sessionName),
+    );
     this.topologies.set(sessionName, topology);
     return topology;
   }
@@ -284,82 +239,4 @@ export class TopologyTracker {
     return bindings;
   }
 
-  /**
-   * Parse zellij dump-layout output into a LayoutTopology.
-   * Zellij dump-layout returns KDL format; we do a best-effort parse.
-   */
-  private parseLayoutDump(sessionName: string, output: string): LayoutTopology {
-    const tabs: TabTopology[] = [];
-    let activeTabId = 0;
-
-    // Simple line-based parse for KDL layout output
-    const lines = output.split("\n");
-    let currentTabId = 0;
-    let currentTabName = "Tab #1";
-    let panes: PaneTopology[] = [];
-    let paneCounter = 0;
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-
-      // Detect tab boundaries
-      const tabMatch = trimmed.match(/tab\s+name="([^"]*)"(?:\s+focus=true)?/);
-      if (tabMatch) {
-        // Save previous tab if it had panes
-        if (panes.length > 0) {
-          tabs.push({
-            tabId: currentTabId,
-            name: currentTabName,
-            panes: [...panes],
-            layout: "horizontal",
-          });
-        }
-        currentTabId = tabs.length;
-        currentTabName = tabMatch[1] ?? `Tab #${currentTabId + 1}`;
-        if (trimmed.includes("focus=true")) {
-          activeTabId = currentTabId;
-        }
-        panes = [];
-      }
-
-      // Detect pane entries
-      const paneMatch = trimmed.match(/pane\s+/);
-      if (paneMatch) {
-        const colsMatch = trimmed.match(/size_cols\s*=?\s*(\d+)/);
-        const rowsMatch = trimmed.match(/size_rows\s*=?\s*(\d+)/);
-        const focusMatch = trimmed.includes("focus=true");
-
-        panes.push({
-          paneId: paneCounter++,
-          dimensions: {
-            cols: colsMatch ? parseInt(colsMatch[1]!, 10) : 80,
-            rows: rowsMatch ? parseInt(rowsMatch[1]!, 10) : 24,
-          },
-          focused: focusMatch,
-        });
-      }
-    }
-
-    // Push the last tab
-    if (panes.length > 0) {
-      tabs.push({
-        tabId: currentTabId,
-        name: currentTabName,
-        panes,
-        layout: "horizontal",
-      });
-    }
-
-    // If nothing was parsed, return minimal topology
-    if (tabs.length === 0) {
-      tabs.push({
-        tabId: 0,
-        name: "Tab #1",
-        panes: [{ paneId: 0, dimensions: { cols: 80, rows: 24 }, focused: true }],
-        layout: "horizontal",
-      });
-    }
-
-    return { sessionName, tabs, activeTabId };
-  }
 }

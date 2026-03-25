@@ -6,18 +6,20 @@
  * FR-026-004: Tmate backend adapter.
  */
 
-import type { ChildProcess } from "bun";
-
 /**
  * Share backend adapter interface.
  */
+export interface ShareProcessHandle {
+  pid: number;
+}
+
 export interface ShareBackendAdapter {
   checkAvailability(): Promise<boolean>;
   startShare(
     terminalId: string,
     zellijSessionName: string
-  ): Promise<{ link: string; process: any }>;
-  stopShare(process: any): Promise<void>;
+  ): Promise<{ link: string; process: ShareProcessHandle }>;
+  stopShare(process: ShareProcessHandle): Promise<void>;
 }
 
 /**
@@ -59,7 +61,7 @@ export class UptermAdapter implements ShareBackendAdapter {
   async startShare(
     terminalId: string,
     zellijSessionName: string
-  ): Promise<{ link: string; process: any }> {
+  ): Promise<{ link: string; process: ShareProcessHandle }> {
     try {
       // Validate inputs
       if (!terminalId || !zellijSessionName) {
@@ -92,7 +94,7 @@ export class UptermAdapter implements ShareBackendAdapter {
    *
    * @param process Process handle
    */
-  async stopShare(process: any): Promise<void> {
+  async stopShare(process: ShareProcessHandle): Promise<void> {
     // Mock implementation: just mark as stopped
     if (!process) {
       throw new Error("Invalid process");
@@ -139,7 +141,7 @@ export class TmateAdapter implements ShareBackendAdapter {
   async startShare(
     terminalId: string,
     zellijSessionName: string
-  ): Promise<{ link: string; process: any }> {
+  ): Promise<{ link: string; process: ShareProcessHandle }> {
     try {
       // Validate inputs
       if (!terminalId || !zellijSessionName) {
@@ -173,7 +175,7 @@ export class TmateAdapter implements ShareBackendAdapter {
    *
    * @param process Process handle
    */
-  async stopShare(process: any): Promise<void> {
+  async stopShare(process: ShareProcessHandle): Promise<void> {
     // Mock implementation: just mark as stopped
     if (!process) {
       throw new Error("Invalid process");
@@ -191,7 +193,7 @@ export class TmateAdapter implements ShareBackendAdapter {
  */
 export function getBackendAdapter(
   backend: string,
-  config?: any
+  config?: UptermConfig | TmateConfig
 ): ShareBackendAdapter {
   switch (backend) {
     case "upterm":

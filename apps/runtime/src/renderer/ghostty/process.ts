@@ -5,11 +5,61 @@
  * ghostty terminal emulator process.
  */
 
-import type { Subprocess } from "bun";
-
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+type GhosttySpawn = {
+  pid: number;
+  stdout: ReadableStream<Uint8Array> | null;
+  stderr: ReadableStream<Uint8Array> | null;
+  exited: Promise<number>;
+  kill(signal?: string): void;
+};
+
+function spawnGhosttyProcess(
+  command: string[],
+  options: {
+    env?: Record<string, string>;
+    stdout: "pipe";
+    stderr: "pipe";
+  },
+): GhosttySpawn {
+  const bunRuntime = (globalThis as Record<string, unknown>).Bun as
+    | {
+        spawn(
+          cmd: string[],
+          opts: {
+            env?: Record<string, string>;
+            stdout: "pipe";
+            stderr: "pipe";
+          },
+        ): GhosttySpawn;
+      }
+    | undefined;
+  if (!bunRuntime) {
+    throw new Error("Ghostty process management requires Bun runtime");
+  }
+  return bunRuntime.spawn(command, options);
+}
+
+function toSpawnEnv(
+  env: NodeJS.ProcessEnv,
+  overrides?: Record<string, string> | undefined,
+): Record<string, string> {
+  const merged: Record<string, string> = {};
+  for (const [key, value] of Object.entries(env)) {
+    if (typeof value === "string") {
+      merged[key] = value;
+    }
+  }
+  if (overrides !== undefined) {
+    for (const [key, value] of Object.entries(overrides)) {
+      merged[key] = value;
+    }
+  }
+  return merged;
+}
 
 export interface GhosttyOptions {
   /** Path to the ghostty binary. Defaults to "ghostty". */
@@ -50,7 +100,7 @@ export class GhosttyProcessError extends Error {
 const SIGTERM_TIMEOUT_MS = 5_000;
 
 export class GhosttyProcess {
-  private _proc: Subprocess | undefined;
+  private _proc: GhosttySpawn | undefined;
   private _pid: number | undefined;
   private _running = false;
   private _intentionalStop = false;
@@ -97,12 +147,12 @@ export class GhosttyProcess {
 
     // Verify binary exists
     try {
-      const which = Bun.spawn(["which", binaryPath], {
+      const which = spawnGhosttyProcess(["which", binaryPath], {
         stdout: "pipe",
-        stderr: "ignore",
+        stderr: "pipe",
       });
-      await which.exited;
-      if (which.exitCode !== 0) {
+      const exitCode = await which.exited;
+      if (exitCode !== 0) {
         throw new GhosttyBinaryNotFoundError(binaryPath);
       }
     } catch (e) {
@@ -119,10 +169,10 @@ export class GhosttyProcess {
       args.push(...options.extraArgs);
     }
 
-    const proc = Bun.spawn(args, {
+    const proc = spawnGhosttyProcess(args, {
       stdout: "pipe",
       stderr: "pipe",
-      env: { ...process.env, ...options.env },
+      env: toSpawnEnv(process.env, options.env),
     });
 
     this._proc = proc;

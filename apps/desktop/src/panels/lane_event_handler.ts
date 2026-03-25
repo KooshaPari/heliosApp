@@ -34,12 +34,20 @@ export class LaneEventHandler {
   private rafId?: number | undefined;
   private lastSequenceNumbers: Map<string, number> = new Map();
   private isConnected: boolean = true;
+  private readonly scheduleFrame: (callback: FrameRequestCallback) => number;
+  private readonly cancelFrame: (handle: number) => void;
 
   constructor(options: LaneEventHandlerOptions) {
     this.options = {
       busTimeoutMs: 30000,
       ...options,
     };
+    this.scheduleFrame = globalThis.requestAnimationFrame
+      ? globalThis.requestAnimationFrame.bind(globalThis)
+      : (callback) => setTimeout(() => callback(Date.now()), 0) as unknown as number;
+    this.cancelFrame = globalThis.cancelAnimationFrame
+      ? globalThis.cancelAnimationFrame.bind(globalThis)
+      : (handle) => clearTimeout(handle);
   }
 
   mount(): void {
@@ -51,7 +59,7 @@ export class LaneEventHandler {
     this.unsubscribeFromEvents();
     this.stopConnectivityMonitoring();
     if (this.rafId) {
-      cancelAnimationFrame(this.rafId);
+      this.cancelFrame(this.rafId);
     }
   }
 
@@ -74,12 +82,12 @@ export class LaneEventHandler {
 
     this.subscriptions.set('lane.state.changed', stateChangedHandler);
     this.subscriptions.set('lane.created', laneCreatedHandler);
-    this.subscriptions.set('lane.cleaned_up', laneCleanedHandler);
+    this.subscriptions.set('lane.cleaned', laneCleanedHandler);
     this.subscriptions.set('orphan.detection.cycle_completed', orphanCycleHandler);
 
     this.options.bus.subscribe('lane.state.changed', stateChangedHandler);
     this.options.bus.subscribe('lane.created', laneCreatedHandler);
-    this.options.bus.subscribe('lane.cleaned_up', laneCleanedHandler);
+    this.options.bus.subscribe('lane.cleaned', laneCleanedHandler);
     this.options.bus.subscribe('orphan.detection.cycle_completed', orphanCycleHandler);
   }
 
@@ -148,7 +156,7 @@ export class LaneEventHandler {
     if (this.options.onOrphanStatusChanged) {
       for (const laneId of orphanedLanes) {
         this.options.onOrphanStatusChanged?.(laneId, true);
-      });
+      }
     }
   }
 
@@ -185,13 +193,13 @@ export class LaneEventHandler {
       if (this.options.onBusConnectivityIssue) {
         this.options.onBusConnectivityIssue(true);
       }
-    }, this.options.busTimeoutMs);
+    }, this.options.busTimeoutMs ?? 30000);
   }
 
   private scheduleRender(): void {
     if (this.rafId) return;
 
-    this.rafId = requestAnimationFrame(() => {
+    this.rafId = this.scheduleFrame(() => {
       this.rafId = undefined;
       this.processPendingUpdates();
     });

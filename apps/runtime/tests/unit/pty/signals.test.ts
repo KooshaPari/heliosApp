@@ -12,6 +12,8 @@ import type { PtyRecord } from "../../../src/pty/registry.js";
 import { PtyLifecycle } from "../../../src/pty/state_machine.js";
 import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 
+const pidsToCleanup: number[] = [];
+
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   return {
     ptyId: "pty-test-1",

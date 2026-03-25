@@ -1,9 +1,9 @@
 import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
-import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
 import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
-import type { LocalBus } from "../../runtime/src/protocol/bus";
 import type { RendererEngine } from "./settings";
 import type { TransportDiagnostics } from "./context_store";
+
+type RuntimeBus = Pick<import("../../runtime/src/protocol/bus").LocalBus, "request">;
 
 type RuntimeResponse<T extends Record<string, unknown>> = {
   ok: boolean;
@@ -44,6 +44,7 @@ function toCommandEnvelope(
   return {
     id: correlationId,
     type: "command",
+    timestamp: Date.now(),
     ts: new Date().toISOString(),
     correlation_id: correlationId,
     method,
@@ -66,7 +67,7 @@ function toResponse<T extends Record<string, unknown>>(response: LocalBusEnvelop
 
   return {
     ok: true,
-    result: (response.result as T | null) ?? {},
+    result: (response.result as T | null) ?? null,
     error: null
   };
 }
@@ -86,7 +87,7 @@ function normalizeDiagnostics(result: Record<string, unknown> | null): Transport
 }
 
 export class DesktopRuntimeClient {
-  constructor(private readonly bus: LocalBus) {}
+  constructor(private readonly bus: RuntimeBus) {}
 
   async createLane(input: {
     workspaceId: string;
@@ -134,10 +135,10 @@ export class DesktopRuntimeClient {
         "session.attach",
         {
           id: requestedSessionId,
-          laneId: input.laneId,
-          sessionId: requestedSessionId,
+          lane_id: input.laneId,
+          session_id: requestedSessionId,
           restore: input.restore === true,
-          forceError: input.forceError === true,
+          force_error: input.forceError === true,
         },
         input.workspaceId,
         input.laneId,
@@ -195,10 +196,10 @@ export class DesktopRuntimeClient {
     const parsed = toResponse<Record<string, unknown>>(response);
     const activeEngine = parsed.result?.active_engine === "rio" ? "rio" : "ghostty";
     const available = Array.isArray(parsed.result?.available_engines)
-      ? (parsed.result.available_engines.filter(
+      ? parsed.result.available_engines.filter(
         (value): value is RendererEngine => value === "ghostty" || value === "rio"
-      ))
-      : ["ghostty", "rio"];
+      )
+      : (["ghostty", "rio"] as RendererEngine[]);
     return {
       activeEngine,
       availableEngines: available,

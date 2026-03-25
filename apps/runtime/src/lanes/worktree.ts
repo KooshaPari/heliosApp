@@ -90,7 +90,7 @@ async function runGit(
   args: string[],
   cwd: string,
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-  const proc = Bun.spawn(["git", ...args], {
+  const proc = spawn(["git", ...args], {
     cwd,
     stdout: "pipe",
     stderr: "pipe",

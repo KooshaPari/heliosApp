@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { TabBar } from "../../../src/tabs/tab_bar";
-import { createMockTabSurface } from "../../../src/tabs/tab_surface";
+import { createMockTabSurface, type TabSurface } from "../../../src/tabs/tab_surface";
 
 describe("TabBar", () => {
   let tabBar: TabBar;
-  let mockTabs = [];
+  let mockTabs: TabSurface[] = [];
 
   beforeEach(() => {
     mockTabs = [
@@ -84,7 +84,7 @@ describe("TabBar", () => {
     });
 
     it("should call onTabReordered callback", () => {
-      let reorderedTabs = [];
+      let reorderedTabs: string[] = [];
 
       tabBar = new TabBar(mockTabs, {
         onTabReordered: (ids) => {

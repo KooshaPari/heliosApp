@@ -157,8 +157,19 @@ describe("PtyManager", () => {
 
   it("reconcileOrphans completes without error", async () => {
     const mgr = new PtyManager();
-    const summary = await mgr.reconcileOrphans();
-    expect(summary.durationMs).toBeGreaterThanOrEqual(0);
-    expect(summary.found).toBeGreaterThanOrEqual(0);
+    const originalSpawn = Bun.spawn;
+    try {
+      (Bun as typeof Bun & { spawn: typeof Bun.spawn }).spawn = () =>
+        ({
+          stdout: new Response("PID PPID COMM\n").body!,
+          exited: Promise.resolve(0),
+        }) as ReturnType<typeof Bun.spawn>;
+
+      const summary = await mgr.reconcileOrphans();
+      expect(summary.durationMs).toBeGreaterThanOrEqual(0);
+      expect(summary.found).toBe(0);
+    } finally {
+      (Bun as typeof Bun & { spawn: typeof Bun.spawn }).spawn = originalSpawn;
+    }
   });
 });

@@ -33,7 +33,7 @@ describe("Watchdog", () => {
     vi.advanceTimersByTime(4100); // 2 * 2000 + 100ms
 
     expect(crashEvents.length).toBe(1);
-    expect(crashEvents[0].reason).toBe(CrashReason.HEARTBEAT_TIMEOUT);
+    expect(crashEvents[0].reason).toBe(CrashReason.HeartbeatTimeout);
     expect(crashEvents[0].name).toBe("test-proc");
     expect(crashEvents[0].pid).toBe(1234);
   });

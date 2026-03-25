@@ -7,8 +7,24 @@ import * as path from "node:path";
 import { LaneManager, _resetIdCounter } from "../../../src/lanes/index.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 
+type SpawnProc = {
+  stdout: ReadableStream<Uint8Array> | null;
+  stderr: ReadableStream<Uint8Array> | null;
+  exited: Promise<number>;
+};
+
+function spawnGit(command: string[], cwd: string): SpawnProc {
+  const bunRuntime = (globalThis as Record<string, unknown>).Bun as
+    | { spawn(cmd: string[], opts: { cwd: string; stdout: "pipe"; stderr: "pipe" }): SpawnProc }
+    | undefined;
+  if (!bunRuntime) {
+    throw new Error("lane reconciliation tests require Bun runtime");
+  }
+  return bunRuntime.spawn(command, { cwd, stdout: "pipe", stderr: "pipe" });
+}
+
 async function runGit(args: string[], cwd: string): Promise<string> {
-  const proc = Bun.spawn(["git", ...args], { cwd, stdout: "pipe", stderr: "pipe" });
+  const proc = spawnGit(["git", ...args], cwd);
   const stdout = await new Response(proc.stdout).text();
   await proc.exited;
   return stdout.trim();
@@ -167,4 +183,4 @@ describe("Orphan Reconciliation Integration (FR-008-008, SC-008-004)", () => {
       }
     }
   });
-}, { timeout: 60_000 });
+});

@@ -4,7 +4,7 @@
  */
 
 import { createSignal, For } from 'solid-js';
-import type { ApprovalRequest } from '../../types';
+import type { ApprovalRequest } from '../../types/approval';
 
 interface ApprovalPanelProps {
   requests: ApprovalRequest[];

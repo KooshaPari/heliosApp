@@ -21,7 +21,8 @@ export type BusErrorCode =
 export interface BusError {
   readonly code: BusErrorCode;
   readonly message: string;
-  readonly details?: unknown;
+  readonly retryable: boolean;
+  readonly details?: Record<string, unknown> | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -29,8 +30,11 @@ export interface BusError {
 // ---------------------------------------------------------------------------
 
 /** Create a VALIDATION_ERROR for malformed envelopes or payloads. */
-export function validationError(message: string, details?: unknown): Readonly<BusError> {
-  return Object.freeze({ code: 'VALIDATION_ERROR' as const, message, details });
+export function validationError(
+  message: string,
+  details?: Record<string, unknown> | null,
+): Readonly<BusError> {
+  return Object.freeze({ code: 'VALIDATION_ERROR' as const, message, retryable: false, details });
 }
 
 /** Create a METHOD_NOT_FOUND error when no handler is registered. */
@@ -38,6 +42,7 @@ export function methodNotFound(method: string): Readonly<BusError> {
   return Object.freeze({
     code: 'METHOD_NOT_FOUND' as const,
     message: `No handler registered for method: ${method}`,
+    retryable: false,
   });
 }
 
@@ -52,6 +57,7 @@ export function handlerError(method: string, cause: unknown): Readonly<BusError>
   return Object.freeze({
     code: 'HANDLER_ERROR' as const,
     message: `Handler for "${method}" failed: ${safeMessage}`,
+    retryable: false,
     details: cause instanceof Error ? { name: cause.name } : undefined,
   });
 }
@@ -61,6 +67,7 @@ export function timeoutError(method: string, timeoutMs: number): Readonly<BusErr
   return Object.freeze({
     code: 'TIMEOUT' as const,
     message: `Method "${method}" timed out after ${timeoutMs}ms`,
+    retryable: true,
   });
 }
 
@@ -69,5 +76,6 @@ export function backpressureError(topic: string): Readonly<BusError> {
   return Object.freeze({
     code: 'BACKPRESSURE' as const,
     message: `Backpressure on topic "${topic}": consumer cannot keep up`,
+    retryable: true,
   });
 }

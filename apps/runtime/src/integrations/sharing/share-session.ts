@@ -7,16 +7,12 @@
  */
 
 import type { LocalBus } from "../../protocol/bus.js";
+import { ShareWorker, type ShareBackend } from "./share-worker.js";
 
 /**
  * Share session state.
  */
 export type ShareSessionState = "pending" | "active" | "expired" | "revoked" | "failed";
-
-/**
- * Share backend type.
- */
-export type ShareBackend = "upterm" | "tmate";
 
 /**
  * Share session entity.
@@ -33,80 +29,6 @@ export interface ShareSession {
   workerPid: number | null;
   correlationId: string;
   message?: string;
-}
-
-/**
- * Share worker configuration.
- */
-export interface ShareWorkerConfig {
-  backend: ShareBackend;
-  terminalId: string;
-  correlationId: string;
-  ttlMs: number;
-}
-
-/**
- * Share worker result.
- */
-export interface ShareWorkerResult {
-  pid: number;
-  link: string;
-}
-
-/**
- * Share Worker Process Manager
- *
- * Spawns and manages the lifecycle of share worker processes.
- */
-export class ShareWorker {
-  private process: any = null;
-  private hearbeat: NodeJS.Timeout | null = null;
-
-  /**
-   * Spawn a share worker process.
-   *
-   * @param config Share worker configuration
-   * @returns Worker PID and generated share link
-   * @throws Error if spawn fails
-   */
-  async spawn(config: ShareWorkerConfig): Promise<ShareWorkerResult> {
-    try {
-      // Mock implementation: simulate worker spawn and link generation
-      const link = this.generateMockLink(config.backend, config.terminalId);
-      const pid = Math.floor(Math.random() * 100000) + 1000;
-
-      // Set up heartbeat monitoring (mock)
-      this.hearbeat = setInterval(() => {
-        // Heartbeat check would happen here
-        // In mock, always healthy
-      }, 5000);
-
-      return { pid, link };
-    } catch (error) {
-      throw new Error(`Failed to spawn share worker: ${String(error)}`);
-    }
-  }
-
-  /**
-   * Kill the share worker process.
-   */
-  async kill(): Promise<void> {
-    if (this.hearbeat) {
-      clearInterval(this.hearbeat);
-      this.hearbeat = null;
-    }
-    // In real implementation, would send SIGTERM/SIGKILL
-    this.process = null;
-  }
-
-  /**
-   * Generate mock share link.
-   */
-  private generateMockLink(backend: ShareBackend, terminalId: string): string {
-    const timestamp = Date.now();
-    const baseUrl = backend === "upterm" ? "https://upterm.io" : "https://tmate.io";
-    return `${baseUrl}/${terminalId}-${timestamp}`;
-  }
 }
 
 /**
@@ -148,6 +70,10 @@ export class ShareSessionManager {
     this.policyGate = policyGate || new DefaultPolicyGate();
   }
 
+  private createSessionId(): string {
+    return `share-${crypto.randomUUID()}`;
+  }
+
   /**
    * Create a new share session.
    *
@@ -175,7 +101,7 @@ export class ShareSessionManager {
 
     if (!policyDecision.allowed) {
       const session: ShareSession = {
-        id: `share-${Date.now()}`,
+        id: this.createSessionId(),
         terminalId,
         backend,
         shareLink: null,
@@ -198,7 +124,7 @@ export class ShareSessionManager {
 
     // Create session in pending state
     const session: ShareSession = {
-      id: `share-${Date.now()}`,
+      id: this.createSessionId(),
       terminalId,
       backend,
       shareLink: null,

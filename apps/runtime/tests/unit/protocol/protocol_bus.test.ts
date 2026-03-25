@@ -90,7 +90,7 @@ describe("protocol validator", () => {
       payload: {}
     });
 
-    expect(envelope.timestamp).toBe("2026-02-26T00:00:00+00:00");
+    expect(String(envelope.timestamp)).toBe("2026-02-26T00:00:00+00:00");
   });
 
   test("rejects timestamps without RFC3339 timezone", () => {
@@ -140,7 +140,7 @@ describe("protocol validator", () => {
       payload: {}
     });
 
-    expect(envelope.timestamp).toBe("2026-02-26T00:00:00+00:00");
+    expect(String(envelope.timestamp)).toBe("2026-02-26T00:00:00+00:00");
   });
 });
 

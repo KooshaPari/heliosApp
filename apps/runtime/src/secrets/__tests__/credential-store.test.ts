@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, rmSync, existsSync, statSync, readFileSync } from "node:fs";
+import { rmSync, existsSync, statSync, readFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { EncryptionService } from "../encryption.js";
 import { CredentialStore, CredentialNotFoundError, CredentialAlreadyExistsError } from "../credential-store.js";
+import { makeTestTempDir } from "./tempdir.js";
 
 function makeStore(dataDir: string): CredentialStore {
   const fixedKey = randomBytes(32);
@@ -19,7 +19,7 @@ describe("CredentialStore: store and retrieve", () => {
   let store: CredentialStore;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "helios-cred-test-"));
+    tmpDir = makeTestTempDir("helios-cred-test-");
     store = makeStore(tmpDir);
   });
 
@@ -142,7 +142,7 @@ describe("CredentialStore: rotate preserves file permissions", () => {
   let store: CredentialStore;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "helios-cred-rotate-"));
+    tmpDir = makeTestTempDir("helios-cred-rotate-");
     store = makeStore(tmpDir);
   });
 

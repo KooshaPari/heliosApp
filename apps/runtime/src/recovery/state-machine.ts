@@ -4,16 +4,16 @@ import path from "path";
 import { randomUUID } from "crypto";
 
 export enum RecoveryStage {
-  CRASHED = "CRASHED",
-  DETECTING = "DETECTING",
-  INVENTORYING = "INVENTORYING",
-  RESTORING = "RESTORING",
-  RECONCILING = "RECONCILING",
-  LIVE = "LIVE",
-  DETECTION_FAILED = "DETECTION_FAILED",
-  INVENTORY_FAILED = "INVENTORY_FAILED",
-  RESTORATION_FAILED = "RESTORATION_FAILED",
-  RECONCILIATION_FAILED = "RECONCILIATION_FAILED",
+  Crashed = "CRASHED",
+  Detecting = "DETECTING",
+  Inventorying = "INVENTORYING",
+  Restoring = "RESTORING",
+  Reconciling = "RECONCILING",
+  Live = "LIVE",
+  DetectionFailed = "DETECTION_FAILED",
+  InventoryFailed = "INVENTORY_FAILED",
+  RestorationFailed = "RESTORATION_FAILED",
+  ReconciliationFailed = "RECONCILIATION_FAILED",
 }
 
 export interface RecoveryState {
@@ -92,7 +92,7 @@ export class RecoveryStateMachine {
           `Max retries (${MAX_RETRIES_PER_STAGE}) exceeded for stage ${from}`
         );
       }
-    } else if (from !== to) {
+    } else if (from !== to && !this.isFailureState(to)) {
       // New stage - reset attempt count
       this.currentState.attemptCount = 0;
     }
@@ -148,7 +148,7 @@ export class RecoveryStateMachine {
   }
 
   private isFailureState(stage: RecoveryStage): boolean {
-    return stage.includes("FAILED");
+    return typeof stage === "string" && stage.includes("FAILED");
   }
 
   private async loadState(): Promise<void> {
@@ -156,8 +156,14 @@ export class RecoveryStateMachine {
       const statePath = path.join(this.recoveryDataDir, "recovery", "recovery-state.json");
       const data = await fs.readFile(statePath, "utf-8");
       const state = JSON.parse(data) as RecoveryState;
-      this.currentStage = state.stage;
-      this.currentState = state;
+      const stageValues = new Set(Object.values(RecoveryStage));
+      if (typeof state.stage === "string" && stageValues.has(state.stage)) {
+        this.currentStage = state.stage;
+        this.currentState = state;
+        return;
+      }
+
+      throw new Error("Invalid persisted recovery state");
     } catch {
       // No persisted state - start fresh
       this.currentStage = RecoveryStage.Crashed;

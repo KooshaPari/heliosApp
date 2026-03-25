@@ -15,5 +15,5 @@ export { PtyDetector, type TerminalRegistry } from "./pty_detector.js";
 export {
   RemediationEngine,
   type RemediationSuggestion,
-  type CleanupResult,
 } from "./remediation.js";
+export type { CleanupResult } from "./cleanup_executor.js";

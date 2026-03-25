@@ -9,11 +9,11 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
-import { join, resolve, sep } from "node:path";
 import { randomBytes } from "node:crypto";
 import { EncryptionService } from "./encryption.js";
 import type { LocalBus } from "../protocol/bus.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
+import { credentialDir, credentialPath, validateId } from "./credential-store.paths.js";
+import { emitCredentialEvent } from "./credential-store.events.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -48,29 +48,6 @@ export class CredentialNotFoundError extends Error {
     this.name = "CredentialNotFoundError";
   }
 }
-
-// ---------------------------------------------------------------------------
-// Path validation
-// ---------------------------------------------------------------------------
-
-const FORBIDDEN_PATTERNS = ["..", "/", "\\", "\0"];
-
-function validateId(label: string, value: string): void {
-  for (const pat of FORBIDDEN_PATTERNS) {
-    if (value.includes(pat)) {
-      throw new Error(
-        `Invalid ${label}: contains forbidden character sequence '${pat}'`
-      );
-    }
-  }
-  if (value.length === 0) {
-    throw new Error(`Invalid ${label}: must not be empty`);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// CredentialStore
-// ---------------------------------------------------------------------------
 
 export class CredentialStore {
   private readonly encryption: EncryptionService;
@@ -111,13 +88,13 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
     validateId("name", name);
 
-    const dir = this.credentialDir(providerId, workspaceId);
+    const dir = credentialDir(this.dataDir, providerId, workspaceId);
     mkdirSync(dir, { recursive: true });
 
     const payload = await this.encryption.encrypt(value, providerId);
     const data = JSON.stringify(payload);
 
-    const finalPath = this.credentialPath(providerId, workspaceId, name);
+    const finalPath = credentialPath(this.dataDir, providerId, workspaceId, name);
     const tmpPath = `${finalPath}.tmp.${randomBytes(4).toString("hex")}`;
 
     writeFileSync(tmpPath, data, { encoding: "utf8", mode: 0o600 });
@@ -138,7 +115,7 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
     validateId("name", name);
 
-    const path = this.credentialPath(providerId, workspaceId, name);
+    const path = credentialPath(this.dataDir, providerId, workspaceId, name);
     if (!existsSync(path)) {
       throw new CredentialNotFoundError(name);
     }
@@ -155,7 +132,7 @@ export class CredentialStore {
     validateId("providerId", providerId);
     validateId("workspaceId", workspaceId);
 
-    const dir = this.credentialDir(providerId, workspaceId);
+    const dir = credentialDir(this.dataDir, providerId, workspaceId);
     if (!existsSync(dir)) return [];
 
     return readdirSync(dir)
@@ -176,7 +153,7 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
     validateId("name", name);
 
-    const path = this.credentialPath(providerId, workspaceId, name);
+    const path = credentialPath(this.dataDir, providerId, workspaceId, name);
     if (!existsSync(path)) {
       throw new CredentialNotFoundError(name);
     }
@@ -213,13 +190,13 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
     validateId("name", name);
 
-    const path = this.credentialPath(providerId, workspaceId, name);
+    const path = credentialPath(this.dataDir, providerId, workspaceId, name);
     if (existsSync(path)) {
       throw new CredentialAlreadyExistsError(name);
     }
 
     await this.store(providerId, workspaceId, name, value);
-    await this.emit("secrets.credential.created", {
+    await emitCredentialEvent(this.bus, "secrets.credential.created", {
       providerId,
       workspaceId,
       name,
@@ -241,7 +218,7 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
     validateId("name", name);
 
-    const path = this.credentialPath(providerId, workspaceId, name);
+    const path = credentialPath(this.dataDir, providerId, workspaceId, name);
     if (!existsSync(path)) {
       throw new CredentialNotFoundError(name);
     }
@@ -259,7 +236,7 @@ export class CredentialStore {
 
     // Now write the new value
     await this.store(providerId, workspaceId, name, newValue);
-    await this.emit("secrets.credential.rotated", {
+    await emitCredentialEvent(this.bus, "secrets.credential.rotated", {
       providerId,
       workspaceId,
       name,
@@ -281,7 +258,7 @@ export class CredentialStore {
     validateId("name", name);
 
     await this.delete(providerId, workspaceId, name);
-    await this.emit("secrets.credential.revoked", {
+    await emitCredentialEvent(this.bus, "secrets.credential.revoked", {
       providerId,
       workspaceId,
       name,
@@ -302,7 +279,7 @@ export class CredentialStore {
     this.checkAccess(ctx, targetProviderId, workspaceId);
 
     const value = await this.retrieve(targetProviderId, workspaceId, name);
-    await this.emit("secrets.credential.accessed", {
+    await emitCredentialEvent(this.bus, "secrets.credential.accessed", {
       providerId: targetProviderId,
       workspaceId,
       name,
@@ -331,7 +308,7 @@ export class CredentialStore {
       ctx.requestingWorkspaceId !== targetWorkspaceId
     ) {
       // Fire-and-forget the denied event; we throw synchronously
-      void this.emit("secrets.credential.access.denied", {
+      void emitCredentialEvent(this.bus, "secrets.credential.access.denied", {
         requestingProviderId: ctx.requestingProviderId,
         requestingWorkspaceId: ctx.requestingWorkspaceId,
         targetProviderId,
@@ -342,51 +319,5 @@ export class CredentialStore {
         `Provider '${ctx.requestingProviderId}' is not allowed to access credentials of provider '${targetProviderId}'`
       );
     }
-  }
-
-  // -------------------------------------------------------------------------
-  // Path helpers
-  // -------------------------------------------------------------------------
-
-  private secretsRoot(): string {
-    return join(this.dataDir, "secrets");
-  }
-
-  private credentialDir(providerId: string, workspaceId: string): string {
-    const dir = resolve(join(this.secretsRoot(), providerId, workspaceId));
-    const root = resolve(this.secretsRoot());
-    // Require trailing separator so that a root like /foo/bar does not
-    // incorrectly accept /foo/bar-evil as a child path.
-    if (!dir.startsWith(root + sep) && dir !== root) {
-      throw new Error("Path traversal detected");
-    }
-    return dir;
-  }
-
-  private credentialPath(
-    providerId: string,
-    workspaceId: string,
-    name: string
-  ): string {
-    return join(this.credentialDir(providerId, workspaceId), `${name}.enc`);
-  }
-
-  // -------------------------------------------------------------------------
-  // Bus helpers
-  // -------------------------------------------------------------------------
-
-  private async emit(
-    topic: string,
-    payload: Record<string, unknown>
-  ): Promise<void> {
-    if (this.bus === null) return;
-    const envelope: LocalBusEnvelope = {
-      id: `secrets:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
-      type: "event",
-      ts: new Date().toISOString(),
-      topic,
-      payload,
-    };
-    await this.bus.publish(envelope);
   }
 }

@@ -131,6 +131,7 @@ describe('JSON Schema parity — runtime envelopes match canonical schema', () =
     const res = createResponse(cmd, null, {
       code: 'HANDLER_ERROR',
       message: 'Something went wrong',
+      retryable: false,
     });
     const errors = validateSchema(res, schema);
     expect(errors).toEqual([]);

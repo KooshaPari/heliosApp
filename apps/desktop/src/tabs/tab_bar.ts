@@ -1,4 +1,9 @@
 import type { TabSurface } from "./tab_surface";
+import {
+  focusTabElement,
+  getOrderedTabs,
+  renderTabHeader,
+} from "./tab_bar_helpers";
 
 export interface TabBarConfig {
   onTabSelected?: (tabId: string) => void;
@@ -74,6 +79,13 @@ export class TabBar {
   }
 
   /**
+   * Return tabs in their current display order, respecting pinning.
+   */
+  private getOrderedTabs(): TabSurface[] {
+    return getOrderedTabs(this.tabs, this.tabOrder, this.pinnedTabIds);
+  }
+
+  /**
    * Reorder tabs.
    */
   reorderTabs(newOrder: string[]): void {
@@ -106,6 +118,10 @@ export class TabBar {
       this.pinnedTabIds.delete(tabId);
     }
 
+    this.tabOrder = [
+      ...this.tabOrder.filter((id) => this.pinnedTabIds.has(id)),
+      ...this.tabOrder.filter((id) => !this.pinnedTabIds.has(id))
+    ];
     this.config.onTabPinned(tabId, pinned);
   }
 
@@ -131,117 +147,28 @@ export class TabBar {
 
     this.container = container;
 
-    // Get ordered tabs (pinned first)
     const orderedTabs = this.getOrderedTabs();
 
-    // Render each tab header
     orderedTabs.forEach((tab, index) => {
-      const tabEl = this.renderTabHeader(tab, index);
-      container.appendChild(tabEl);
+      container.appendChild(
+        renderTabHeader(tab, index, {
+          selectedTabId: this.selectedTabId,
+          focusedTabIndex: this.focusedTabIndex,
+          pinnedTabIds: this.pinnedTabIds,
+          onTabSelected: (tabId) => this.selectTab(tabId),
+          onTabKeydown: (event, tabId) => this.handleTabKeydown(event, tabId),
+          onTabDrop: (targetTabId) => this.handleTabDrop(targetTabId),
+          onDragStart: (tabId) => {
+            this.draggedTabId = tabId;
+          },
+          onDragEnd: () => {
+            this.draggedTabId = null;
+          },
+        })
+      );
     });
 
     return container;
-  }
-
-  /**
-   * Get tabs in display order (pinned first).
-   */
-  private getOrderedTabs(): TabSurface[] {
-    const tabMap = new Map(this.tabs.map((t) => [t.getTabId(), t]));
-    const pinned = this.tabOrder.filter((id) => this.pinnedTabIds.has(id));
-    const unpinned = this.tabOrder.filter((id) => !this.pinnedTabIds.has(id));
-
-    return [...pinned, ...unpinned]
-      .map((id) => tabMap.get(id))
-      .filter((t): t is TabSurface => t !== undefined);
-  }
-
-  /**
-   * Render a single tab header.
-   */
-  private renderTabHeader(tab: TabSurface, index: number): HTMLElement {
-    const isSelected = tab.getTabId() === this.selectedTabId;
-    const hasStaleContext = tab.hasStaleContext();
-
-    const headerEl = document.createElement("button");
-    headerEl.className = "tab-header";
-    headerEl.setAttribute("data-tab-id", tab.getTabId());
-    headerEl.setAttribute("tabindex", this.focusedTabIndex === index ? "0" : "-1");
-    headerEl.style.flex = "1";
-    headerEl.style.padding = "12px 16px";
-    headerEl.style.border = "none";
-    headerEl.style.backgroundColor = isSelected ? "#ffffff" : "#f5f5f5";
-    headerEl.style.borderBottom = isSelected ? "2px solid #1976d2" : "2px solid transparent";
-    headerEl.style.cursor = "pointer";
-    headerEl.style.fontSize = "14px";
-    headerEl.style.fontWeight = isSelected ? "600" : "400";
-    headerEl.style.color = isSelected ? "#1976d2" : "#666";
-    headerEl.style.transition = "all 0.2s ease";
-    headerEl.style.display = "flex";
-    headerEl.style.alignItems = "center";
-    headerEl.style.gap = "8px";
-    headerEl.style.whiteSpace = "nowrap";
-
-    // Label
-    const labelEl = document.createElement("span");
-    labelEl.textContent = tab.getLabel();
-    headerEl.appendChild(labelEl);
-
-    // Stale context indicator
-    if (hasStaleContext) {
-      const indicatorEl = document.createElement("span");
-      indicatorEl.style.width = "8px";
-      indicatorEl.style.height = "8px";
-      indicatorEl.style.borderRadius = "50%";
-      indicatorEl.style.backgroundColor = "#ff9800";
-      indicatorEl.style.display = "inline-block";
-      indicatorEl.title = "This tab may be showing stale data";
-      headerEl.appendChild(indicatorEl);
-    }
-
-    // Pin indicator
-    if (this.pinnedTabIds.has(tab.getTabId())) {
-      const pinEl = document.createElement("span");
-      pinEl.textContent = "📌";
-      pinEl.style.fontSize = "10px";
-      pinEl.title = "Tab is pinned";
-      headerEl.appendChild(pinEl);
-    }
-
-    // Event listeners
-    headerEl.addEventListener("click", () => {
-      this.selectTab(tab.getTabId());
-    });
-
-    headerEl.addEventListener("keydown", (e) => {
-      this.handleTabKeydown(e, tab.getTabId());
-    });
-
-    headerEl.addEventListener("dragstart", () => {
-      this.draggedTabId = tab.getTabId();
-    });
-
-    headerEl.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      if (this.draggedTabId && this.draggedTabId !== tab.getTabId()) {
-        this.handleTabDrop(tab.getTabId());
-      }
-    });
-
-    headerEl.addEventListener("drop", () => {
-      e.preventDefault();
-      if (this.draggedTabId && this.draggedTabId !== tab.getTabId()) {
-        this.handleTabDrop(tab.getTabId());
-      }
-    });
-
-    headerEl.addEventListener("dragend", () => {
-      this.draggedTabId = null;
-    });
-
-    headerEl.draggable = true;
-
-    return headerEl;
   }
 
   /**
@@ -263,7 +190,7 @@ export class TabBar {
         if (currentIndex < orderedTabs.length - 1) {
           const nextTab = orderedTabs[currentIndex + 1];
           this.focusedTabIndex = currentIndex + 1;
-          this.focusTab(nextTab.getTabId());
+          focusTabElement(this.container, nextTab.getTabId());
         }
         break;
 
@@ -272,7 +199,7 @@ export class TabBar {
         if (currentIndex > 0) {
           const prevTab = orderedTabs[currentIndex - 1];
           this.focusedTabIndex = currentIndex - 1;
-          this.focusTab(prevTab.getTabId());
+          focusTabElement(this.container, prevTab.getTabId());
         }
         break;
 
@@ -282,30 +209,6 @@ export class TabBar {
 
       default:
         break;
-    }
-  }
-
-  /**
-   * Focus a tab by ID.
-   */
-  private focusTab(tabId: string): void {
-    if (!this.container) return;
-
-    const tabEl = this.container.querySelector(
-      `[data-tab-id="${tabId}"]`
-    ) as HTMLElement;
-
-    if (tabEl) {
-      tabEl.setAttribute("tabindex", "0");
-      tabEl.focus();
-
-      // Update other tabs' tabindex
-      const allTabs = this.container.querySelectorAll("[data-tab-id]");
-      allTabs.forEach((el) => {
-        if (el !== tabEl) {
-          (el as HTMLElement).setAttribute("tabindex", "-1");
-        }
-      });
     }
   }
 

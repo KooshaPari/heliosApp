@@ -1,4 +1,4 @@
-import { AuditEvent } from './event';
+import type { AuditEvent } from './event';
 
 /**
  * Filter options for ring buffer queries.
@@ -9,6 +9,7 @@ export interface AuditFilter {
   sessionId?: string;
   actor?: string;
   eventType?: string;
+  correlationId?: string;
   startTime?: Date;
   endTime?: Date;
 }
@@ -61,6 +62,7 @@ export class AuditRingBuffer {
       // Buffer is full; evict the oldest event at head
       evicted = this.buffer[this.head];
       this.totalEventsEvicted++;
+      this.head = (this.head + 1) % this.capacity;
     } else {
       this.size++;
     }
@@ -68,11 +70,6 @@ export class AuditRingBuffer {
     // Insert at tail
     this.buffer[this.tail] = event;
     this.tail = (this.tail + 1) % this.capacity;
-
-    // Move head if buffer is full
-    if (this.size === this.capacity) {
-      this.head = (this.head + 1) % this.capacity;
-    }
 
     return evicted;
   }
@@ -186,6 +183,10 @@ export class AuditRingBuffer {
     }
 
     if (filter.eventType && event.eventType !== filter.eventType) {
+      return false;
+    }
+
+    if (filter.correlationId && event.correlationId !== filter.correlationId) {
       return false;
     }
 

@@ -1,14 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
+import { rmSync } from "node:fs";
 import { randomBytes } from "node:crypto";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { EncryptionService } from "../encryption.js";
 import {
   CredentialStore,
   CredentialAccessDeniedError,
 } from "../credential-store.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { makeTestTempDir } from "./tempdir.js";
 
 function makeStore(dataDir: string, bus: InMemoryLocalBus): CredentialStore {
   const fixedKey = randomBytes(32);
@@ -24,7 +23,7 @@ describe("CredentialStore: cross-provider isolation", () => {
   let store: CredentialStore;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "helios-isolation-test-"));
+    tmpDir = makeTestTempDir("helios-isolation-test-");
     bus = new InMemoryLocalBus();
     store = makeStore(tmpDir, bus);
   });

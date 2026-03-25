@@ -18,10 +18,11 @@ import type {
 } from "./types.js";
 import {
   PaneTooSmallError,
-  PaneNotFoundError,
-  PtyBindingError,
-  ZellijCliError,
 } from "./errors.js";
+import { createZellijPane } from "./panes/create.js";
+import { closeZellijPane } from "./panes/close.js";
+import { resizeZellijPane } from "./panes/resize.js";
+import { validatePaneDimensions } from "./panes/dimensions.js";
 
 /** Default minimum pane dimensions. */
 const DEFAULT_MIN_DIMENSIONS: MinPaneDimensions = {
@@ -61,7 +62,6 @@ export class ZellijPaneManager {
     laneId: string,
     options?: CreatePaneOptions,
   ): Promise<PaneRecord> {
-    const startMs = performance.now();
     const direction = options?.direction ?? "vertical";
 
     // T009: Check minimum dimension enforcement before split
@@ -77,89 +77,16 @@ export class ZellijPaneManager {
         this.validateSplit(focusedPane.dimensions, direction);
       }
     }
-
-    // T006: Execute zellij pane creation
-    const args = ["--session", sessionName, "action", "new-pane"];
-    if (direction === "horizontal") {
-      args.push("--direction", "down");
-    } else {
-      args.push("--direction", "right");
-    }
-    if (options?.cwd) {
-      args.push("--cwd", options.cwd);
-    }
-
-    const result = await this.cli.run(args);
-    if (result.exitCode !== 0) {
-      throw new ZellijCliError(
-        `new-pane --session ${sessionName}`,
-        result.exitCode,
-        result.stderr,
-      );
-    }
-
-    // Assign a pane ID
     const paneId = ++this.paneCounter;
-
-    // Query dimensions after creation (refresh topology)
-    const refreshed = await this.topology.refreshTopology(sessionName);
-    const activeTab = refreshed.tabs.find(
-      (t) => t.tabId === refreshed.activeTabId,
-    );
-    const newPaneTopology = activeTab?.panes[activeTab.panes.length - 1];
-    const dimensions: PaneDimensions = newPaneTopology?.dimensions ?? {
-      cols: 80,
-      rows: 24,
-    };
-
-    // Update topology with the new pane
-    this.topology.addPane(sessionName, paneId, dimensions);
-
-    // T008: Spawn PTY for the pane
-    let ptyId: string | undefined;
-    if (this.ptyManager) {
-      try {
-        const spawnOpts: Parameters<PtyManagerInterface["spawn"]>[0] = {
-          laneId,
-          sessionId: sessionName,
-          terminalId: String(paneId),
-          cols: dimensions.cols,
-          rows: dimensions.rows,
-        };
-        if (options?.cwd) {
-          spawnOpts.cwd = options.cwd;
-        }
-        const ptyResult = await this.ptyManager.spawn(spawnOpts);
-        ptyId = ptyResult.ptyId;
-        this.topology.bindPty(sessionName, paneId, ptyId);
-      } catch (err) {
-        // PTY spawn failed after pane create; close the pane and report
-        console.error(
-          `[zellij-panes] PTY spawn failed for pane ${paneId}, closing pane`,
-          err,
-        );
-        await this.closePaneRaw(sessionName, paneId).catch(() => {});
-        throw new PtyBindingError(
-          paneId,
-          err instanceof Error ? err.message : String(err),
-        );
-      }
-    }
-
-    const record: PaneRecord = {
-      id: paneId,
-      title: `pane-${paneId}`,
-      dimensions,
-      ptyId,
-      createdAt: new Date(),
-    };
-
-    const durationMs = performance.now() - startMs;
-    console.debug(
-      `[zellij-panes] createPane(${sessionName}) pane=${paneId} duration=${durationMs.toFixed(1)}ms`,
-    );
-
-    return record;
+    return createZellijPane({
+      cli: this.cli,
+      topology: this.topology,
+      ptyManager: this.ptyManager,
+      laneId,
+      sessionName,
+      paneId,
+      options,
+    });
   }
 
   /**
@@ -167,30 +94,13 @@ export class ZellijPaneManager {
    * T008 - Terminates the PTY before closing the pane.
    */
   async closePane(sessionName: string, paneId: number): Promise<void> {
-    // T008: Terminate PTY first if bound
-    if (this.ptyManager) {
-      const paneTopology = this.topology.findPane(sessionName, paneId);
-      if (paneTopology?.ptyId) {
-        try {
-          await this.ptyManager.terminate(paneTopology.ptyId);
-        } catch (err) {
-          // PTY may already be stopped; log and continue
-          console.warn(
-            `[zellij-panes] PTY terminate for pane ${paneId} failed (may already be stopped):`,
-            err,
-          );
-        }
-      }
-    }
-
-    await this.closePaneRaw(sessionName, paneId);
-
-    // Remove from topology
-    this.topology.removePane(sessionName, paneId);
-
-    console.debug(
-      `[zellij-panes] mux.pane.closed: session=${sessionName} pane=${paneId}`,
-    );
+    await closeZellijPane({
+      cli: this.cli,
+      topology: this.topology,
+      ptyManager: this.ptyManager,
+      sessionName,
+      paneId,
+    });
   }
 
   /**
@@ -204,55 +114,17 @@ export class ZellijPaneManager {
     direction: "left" | "right" | "up" | "down",
     amount: number,
   ): Promise<void> {
-    const startMs = performance.now();
-
-    // T009: Pre-validate that resulting dimensions won't violate minimums
-    const paneTopology = this.topology.findPane(sessionName, paneId);
-    if (paneTopology) {
-      const resultingDimensions = this.calculateResizedDimensions(
-        paneTopology.dimensions,
-        direction,
-        amount,
-      );
-      this.validateDimensions(resultingDimensions);
-    }
-
-    const result = await this.cli.run([
-      "--session",
+    await resizeZellijPane({
+      cli: this.cli,
+      topology: this.topology,
+      ptyManager: this.ptyManager,
       sessionName,
-      "action",
-      "resize",
+      paneId,
       direction,
-      String(amount),
-    ]);
-
-    if (result.exitCode !== 0) {
-      throw new ZellijCliError(
-        `resize --session ${sessionName}`,
-        result.exitCode,
-        result.stderr,
-      );
-    }
-
-    // Refresh topology to get actual dimensions after resize
-    await this.topology.refreshTopology(sessionName);
-
-    // T008: Relay new dimensions to PTY
-    if (this.ptyManager) {
-      const updatedPane = this.topology.findPane(sessionName, paneId);
-      if (updatedPane?.ptyId) {
-        this.ptyManager.resize(
-          updatedPane.ptyId,
-          updatedPane.dimensions.cols,
-          updatedPane.dimensions.rows,
-        );
-      }
-    }
-
-    const durationMs = performance.now() - startMs;
-    console.debug(
-      `[zellij-panes] resizePane(${sessionName}, ${paneId}) duration=${durationMs.toFixed(1)}ms`,
-    );
+      amount,
+      validateDimensions: (dimensions) =>
+        this.validateDimensions(dimensions),
+    });
   }
 
   /**
@@ -283,15 +155,7 @@ export class ZellijPaneManager {
    * T009 - Validate that dimensions meet minimum requirements.
    */
   validateDimensions(dimensions: PaneDimensions): void {
-    const { minCols, minRows } = this.minDimensions;
-    if (dimensions.cols < minCols || dimensions.rows < minRows) {
-      throw new PaneTooSmallError(
-        dimensions.cols,
-        dimensions.rows,
-        minCols,
-        minRows,
-      );
-    }
+    validatePaneDimensions(dimensions, this.minDimensions);
   }
 
   /**
@@ -299,57 +163,5 @@ export class ZellijPaneManager {
    */
   getMinDimensions(): MinPaneDimensions {
     return { ...this.minDimensions };
-  }
-
-  /**
-   * Close a pane via zellij CLI without PTY cleanup or topology update.
-   */
-  private async closePaneRaw(
-    sessionName: string,
-    _paneId: number,
-  ): Promise<void> {
-    const result = await this.cli.run([
-      "--session",
-      sessionName,
-      "action",
-      "close-pane",
-    ]);
-
-    if (result.exitCode !== 0) {
-      // If pane doesn't exist, treat as success (idempotent)
-      if (!result.stderr.includes("no pane") && !result.stderr.includes("not found")) {
-        throw new ZellijCliError(
-          `close-pane --session ${sessionName}`,
-          result.exitCode,
-          result.stderr,
-        );
-      }
-    }
-  }
-
-  /**
-   * Calculate resulting dimensions after a resize operation.
-   */
-  private calculateResizedDimensions(
-    current: PaneDimensions,
-    direction: "left" | "right" | "up" | "down",
-    amount: number,
-  ): PaneDimensions {
-    const result = { ...current };
-    switch (direction) {
-      case "left":
-        result.cols = Math.max(1, result.cols - amount);
-        break;
-      case "right":
-        result.cols = result.cols + amount;
-        break;
-      case "up":
-        result.rows = Math.max(1, result.rows - amount);
-        break;
-      case "down":
-        result.rows = result.rows + amount;
-        break;
-    }
-    return result;
   }
 }

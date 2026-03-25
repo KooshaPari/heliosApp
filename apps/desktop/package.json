@@ -9,7 +9,7 @@
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun --minify --sourcemap=external",
     "typecheck": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test --preload ./tests/setup.ts"
   },
   "dependencies": {
     "@helios/runtime": "workspace:*"

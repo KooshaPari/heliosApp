@@ -204,7 +204,7 @@ describe('ConfirmationDialog', () => {
     const bgColor = confirmBtn?.style.backgroundColor;
 
     // Red color for dangerous action
-    expect(bgColor).toContain('244'); // RGB for red #ef4444
+    expect(bgColor).toBe('rgb(239, 68, 68)');
   });
 
   it('should use custom button labels', async () => {

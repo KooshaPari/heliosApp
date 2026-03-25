@@ -15,6 +15,38 @@ export interface RioOptions {
 
 type ExitHandler = (code: number) => void;
 
+type RioStdin = {
+  write(data: Uint8Array): number;
+};
+
+type RioSpawn = {
+  pid: number;
+  stdin: RioStdin | null;
+  stdout: ReadableStream<Uint8Array> | null;
+  stderr: ReadableStream<Uint8Array> | null;
+  exited: Promise<number>;
+  kill(signal?: string): void;
+};
+
+function spawnRioProcess(command: string[]): RioSpawn {
+  const bunRuntime = (globalThis as Record<string, unknown>).Bun as
+    | {
+        spawn(
+          cmd: string[],
+          opts: { stdin: "pipe"; stdout: "pipe"; stderr: "pipe" },
+        ): RioSpawn;
+      }
+    | undefined;
+  if (!bunRuntime) {
+    throw new Error("Rio process management requires Bun runtime");
+  }
+  return bunRuntime.spawn(command, {
+    stdin: "pipe",
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Process
 // ---------------------------------------------------------------------------
@@ -22,7 +54,7 @@ type ExitHandler = (code: number) => void;
 const SIGKILL_TIMEOUT_MS = 3000;
 
 export class RioProcess {
-  private _proc: ReturnType<typeof Bun.spawn> | undefined;
+  private _proc: RioSpawn | undefined;
   private _pid: number | undefined;
   private _running = false;
   private _startedAt: number | undefined;
@@ -47,18 +79,15 @@ export class RioProcess {
         args.push("--no-gpu");
       }
 
-      this._proc = Bun.spawn(args, {
-        stdin: "pipe",
-        stdout: "pipe",
-        stderr: "pipe",
-      });
-
-      this._pid = this._proc.pid;
+      const proc = spawnRioProcess(args);
+      const pid = proc.pid;
+      this._proc = proc;
+      this._pid = pid;
       this._running = true;
       this._startedAt = Date.now();
 
       // Monitor for unexpected exit.
-      this._proc.exited.then((code) => {
+      void proc.exited.then((code) => {
         this._running = false;
         for (const handler of this._exitHandlers) {
           try {
@@ -69,7 +98,7 @@ export class RioProcess {
         }
       });
 
-      return { pid: this._pid };
+      return { pid };
     } catch (err) {
       this._running = false;
       this._startLock = false;
@@ -135,8 +164,8 @@ export class RioProcess {
     if (!this._proc || !this._running) return;
     try {
       const stdin = this._proc.stdin;
-      if (stdin && typeof stdin === "object" && "write" in stdin) {
-        (stdin as { write(data: Uint8Array): number }).write(data);
+      if (stdin !== null) {
+        stdin.write(data);
       }
     } catch {
       // Process may have died between the check and the write.

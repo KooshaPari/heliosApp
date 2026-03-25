@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, mock, beforeEach, afterEach } from "bun:test";
 import { MuxRegistry } from "../registry.js";
 import { DuplicateBindingError } from "../errors.js";
 import type { MuxSession } from "../types.js";
@@ -16,7 +16,23 @@ function makeMockSession(
   };
 }
 
+function makeMockCli(liveSessions: Array<{ name: string }>) {
+  return {
+    listSessions: mock(async () => liveSessions),
+  };
+}
+
 describe("MuxRegistry", () => {
+  let warnSpy: ReturnType<typeof mock>;
+
+  beforeEach(() => {
+    warnSpy = mock(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore?.();
+  });
+
   it("binds and retrieves by session name", () => {
     const registry = new MuxRegistry();
     const session = makeMockSession("helios-lane-abc", "abc");
@@ -101,5 +117,33 @@ describe("MuxRegistry", () => {
     registry.bind("s1", "l1", session2);
 
     expect(registry.getBySession("s1")).toBeDefined();
+  });
+
+  it("returns orphaned bindings when live sessions no longer include them", async () => {
+    const cli = makeMockCli([{ name: "live-session" }]);
+    const registry = new MuxRegistry(cli as never);
+
+    registry.bind("live-session", "lane-live", makeMockSession("live-session", "lane-live"));
+    registry.bind("stale-session", "lane-stale", makeMockSession("stale-session", "lane-stale"));
+
+    const orphaned = await registry.getOrphaned();
+
+    expect(orphaned).toHaveLength(1);
+    expect(orphaned[0]!.sessionName).toBe("stale-session");
+    expect(cli.listSessions).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns empty orphaned list without a cli", async () => {
+    const registry = new MuxRegistry();
+
+    const originalWarn = console.warn;
+    console.warn = warnSpy as unknown as typeof console.warn;
+
+    try {
+      await expect(registry.getOrphaned()).resolves.toEqual([]);
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+    } finally {
+      console.warn = originalWarn;
+    }
   });
 });

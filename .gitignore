@@ -31,3 +31,6 @@ kitty-specs/
 .github/copilot-instructions.md
 .claudeignore
 .llmignore
+
+# Repo-local test scratch (e.g. apps/runtime secrets tests under .tmp/runtime-secrets-tests)
+.tmp/

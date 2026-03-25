@@ -112,10 +112,12 @@ export interface ProviderAdapter<TConfig, TExecuteInput, TExecuteOutput> {
 
 /** ACP provider configuration input */
 export interface ACPConfig {
-  apiKey: string;
+  endpoint: string;
+  apiKeyRef: string;
   model: string;
-  baseUrl?: string;
-  timeout?: number;
+  timeoutMs?: number;
+  maxRetries?: number;
+  healthCheckIntervalMs?: number;
 }
 
 /** ACP execute input */
@@ -174,7 +176,7 @@ export interface A2AConfig {
   agentId: string;
   endpoint: string;
   apiKey?: string;
-  timeout?: number;
+  timeoutMs?: number;
 }
 
 /** A2A execute input */

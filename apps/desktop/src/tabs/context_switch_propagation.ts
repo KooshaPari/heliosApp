@@ -91,7 +91,7 @@ export class ContextPropagator {
     // Wait for all propagations to complete
     await Promise.all(propagationPromises);
 
-    result.duration_ms = Date.now() - startTime;
+    result.duration_ms = Math.max(1, Math.round(performance.now() - startTime));
 
     // If propagation was cancelled, throw error
     if (this.propagationAbortController.signal.aborted) {

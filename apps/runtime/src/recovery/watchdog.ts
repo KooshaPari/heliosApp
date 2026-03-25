@@ -4,10 +4,10 @@ import path from "path";
 import { randomUUID } from "crypto";
 
 export enum CrashReason {
-  HEARTBEAT_TIMEOUT = "HEARTBEAT_TIMEOUT",
-  UNRESPONSIVE = "UNRESPONSIVE",
-  EXIT_CODE = "EXIT_CODE",
-  SIGNAL = "SIGNAL",
+  HeartbeatTimeout = "HEARTBEAT_TIMEOUT",
+  Unresponsive = "UNRESPONSIVE",
+  ExitCode = "EXIT_CODE",
+  Signal = "SIGNAL",
 }
 
 export interface CrashEvent {

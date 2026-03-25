@@ -67,7 +67,7 @@ describe('createResponse', () => {
 
   it('carries the originating command correlation_id', () => {
     const res = createResponse(cmd, { ok: true });
-    expect(res.correlation_id).toBe(cmd.correlation_id);
+    expect(res.correlation_id ?? "").toBe(cmd.correlation_id ?? "");
   });
 
   it('carries the originating command method', () => {
@@ -90,6 +90,7 @@ describe('createResponse', () => {
     const res = createResponse(cmd, null, {
       code: 'HANDLER_ERROR',
       message: 'oops',
+      retryable: false,
     });
     expect(res.error).toBeDefined();
     expect(res.error?.code).toBe('HANDLER_ERROR');

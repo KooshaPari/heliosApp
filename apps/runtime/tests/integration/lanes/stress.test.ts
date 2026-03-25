@@ -8,8 +8,24 @@ import { LaneManager, _resetIdCounter } from "../../../src/lanes/index.js";
 import { LaneCapacityExceededError } from "../../../src/lanes/registry.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 
+type SpawnProc = {
+  stdout: ReadableStream<Uint8Array> | null;
+  stderr: ReadableStream<Uint8Array> | null;
+  exited: Promise<number>;
+};
+
+function spawnGit(command: string[], cwd: string): SpawnProc {
+  const bunRuntime = (globalThis as Record<string, unknown>).Bun as
+    | { spawn(cmd: string[], opts: { cwd: string; stdout: "pipe"; stderr: "pipe" }): SpawnProc }
+    | undefined;
+  if (!bunRuntime) {
+    throw new Error("lane stress tests require Bun runtime");
+  }
+  return bunRuntime.spawn(command, { cwd, stdout: "pipe", stderr: "pipe" });
+}
+
 async function runGit(args: string[], cwd: string): Promise<string> {
-  const proc = Bun.spawn(["git", ...args], { cwd, stdout: "pipe", stderr: "pipe" });
+  const proc = spawnGit(["git", ...args], cwd);
   const stdout = await new Response(proc.stdout).text();
   await proc.exited;
   return stdout.trim();
@@ -141,4 +157,4 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
     const newLane = await mgr.create("ws-free", "main");
     expect(newLane.laneId).toBeTruthy();
   });
-}, { timeout: 120_000 });
+});

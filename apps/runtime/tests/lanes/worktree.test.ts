@@ -18,6 +18,20 @@ import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
 import type { PtyManager, PtyHandle } from "../../src/lanes/index.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
 
+type SpawnSyncResult = { stdout?: Uint8Array | ArrayBuffer | string };
+
+function runGitSync(args: string[], cwd: string): SpawnSyncResult {
+  const bunRuntime = (globalThis as Record<string, unknown>).Bun as
+    | {
+        spawnSync(cmd: string[], opts: { cwd: string }): SpawnSyncResult;
+      }
+    | undefined;
+  if (!bunRuntime) {
+    throw new Error("worktree tests require Bun runtime");
+  }
+  return bunRuntime.spawnSync(args, { cwd });
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 let tmpDirs: string[] = [];
@@ -27,12 +41,12 @@ function createTempGitRepo(): string {
   tmpDirs.push(dir);
 
   // Initialize a git repo with an initial commit
-  Bun.spawnSync(["git", "init"], { cwd: dir });
-  Bun.spawnSync(["git", "config", "user.email", "test@test.com"], { cwd: dir });
-  Bun.spawnSync(["git", "config", "user.name", "Test"], { cwd: dir });
+  runGitSync(["git", "init"], dir);
+  runGitSync(["git", "config", "user.email", "test@test.com"], dir);
+  runGitSync(["git", "config", "user.name", "Test"], dir);
   fs.writeFileSync(path.join(dir, "README.md"), "# test repo\n");
-  Bun.spawnSync(["git", "add", "."], { cwd: dir });
-  Bun.spawnSync(["git", "commit", "-m", "initial"], { cwd: dir });
+  runGitSync(["git", "add", "."], dir);
+  runGitSync(["git", "commit", "-m", "initial"], dir);
 
   return dir;
 }
@@ -41,7 +55,7 @@ function cleanup(): void {
   for (const dir of tmpDirs) {
     try {
       // Prune worktrees first to avoid locked file issues
-      Bun.spawnSync(["git", "worktree", "prune"], { cwd: dir });
+      runGitSync(["git", "worktree", "prune"], dir);
     } catch {
       // ignore
     }
@@ -87,8 +101,11 @@ describe("T006 - provisionWorktree", () => {
     expect(fs.existsSync(result.worktreePath)).toBe(true);
 
     // Verify branch exists
-    const branches = Bun.spawnSync(["git", "branch", "--list", result.branchName], { cwd: repo });
-    const branchOutput = new TextDecoder().decode(branches.stdout).trim();
+    const branches = runGitSync(["git", "branch", "--list", result.branchName], repo);
+    const branchOutput =
+      typeof branches.stdout === "string"
+        ? branches.stdout.trim()
+        : new TextDecoder().decode(branches.stdout ?? new Uint8Array()).trim();
     expect(branchOutput).toContain("helios/lane/lane_test_1");
   });
 

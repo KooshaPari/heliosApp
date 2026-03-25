@@ -116,6 +116,7 @@ export class RendererSettings {
   private createRendererOption(renderer: Renderer): HTMLElement {
     const option = document.createElement('div');
     option.className = `renderer-option ${renderer.isActive ? 'active' : ''} ${renderer.isAvailable ? 'available' : 'unavailable'}`;
+    option.setAttribute('data-renderer', renderer.id);
     option.style.padding = '12px';
     option.style.backgroundColor = 'white';
     option.style.borderRadius = '6px';
@@ -182,6 +183,7 @@ export class RendererSettings {
     indicator.type = 'radio';
     indicator.name = 'renderer-select';
     indicator.value = renderer.id;
+    indicator.setAttribute('data-renderer', renderer.id);
     indicator.checked = renderer.isActive;
     indicator.disabled = !renderer.isAvailable;
     indicator.style.cursor = renderer.isAvailable ? 'pointer' : 'not-allowed';

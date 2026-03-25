@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'bun:test';
-import { createBus, LocalBus } from '../../../src/protocol/bus.js';
+import { createBus, type LocalBus } from '../../../src/protocol/bus.js';
 import { createCommand, createResponse } from '../../../src/protocol/envelope.js';
 import type { CommandEnvelope, ResponseEnvelope } from '../../../src/protocol/types.js';
 
@@ -23,7 +23,7 @@ describe('LocalBus — command dispatch', () => {
     const res = await bus.send(cmd);
 
     expect(res.type).toBe('response');
-    expect(res.correlation_id).toBe(cmd.correlation_id);
+    expect(res.correlation_id ?? "").toBe(cmd.correlation_id ?? "");
     expect(res.error).toBeUndefined();
     expect((res.payload as { echo: unknown }).echo).toBe('hello');
   });

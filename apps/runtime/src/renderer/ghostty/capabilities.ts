@@ -6,6 +6,7 @@
  */
 
 import type { RendererCapabilities } from "../capabilities.js";
+import { readStdoutText, spawnReadableProcess } from "./readable_spawn.js";
 
 // ---------------------------------------------------------------------------
 // GPU detection
@@ -26,18 +27,21 @@ export async function detectGpu(): Promise<GpuInfo> {
   try {
     if (process.platform === "darwin") {
       // macOS always has Metal on supported hardware
-      const proc = Bun.spawn(["system_profiler", "SPDisplaysDataType"], {
-        stdout: "pipe",
-        stderr: "ignore",
-      });
-      const text = await new Response(proc.stdout).text();
+      const proc = spawnReadableProcess(
+        ["system_profiler", "SPDisplaysDataType"],
+        "Ghostty capability detection requires Bun runtime",
+      );
+      const text = await readStdoutText(proc);
       const hasMetal = text.includes("Metal");
       return { available: hasMetal, driverVersion: hasMetal ? "metal" : undefined };
     }
 
     // Linux: probe for OpenGL
-    const proc = Bun.spawn(["glxinfo"], { stdout: "pipe", stderr: "ignore" });
-    const text = await new Response(proc.stdout).text();
+    const proc = spawnReadableProcess(
+      ["glxinfo"],
+      "Ghostty capability detection requires Bun runtime",
+    );
+    const text = await readStdoutText(proc);
     const versionMatch = text.match(/OpenGL version string:\s*(.+)/);
     return {
       available: versionMatch !== null,

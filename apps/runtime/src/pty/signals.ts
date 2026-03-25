@@ -1,118 +1,22 @@
-/**
- * PTY signal handling — resize, terminate, and signal delivery with audit records.
- *
- * All signal deliveries produce auditable {@link SignalEnvelope} records
- * published to the local bus.
- *
- * @module
- */
-
 import type { PtyRecord } from "./registry.js";
 import { PtyRegistry } from "./registry.js";
 import { PtyLifecycle } from "./state_machine.js";
 import type { BusPublisher, PtyEventCorrelation } from "./events.js";
 import { emitPtyEvent } from "./events.js";
-
-// ── Signal Envelope ──────────────────────────────────────────────────────────
-
-/** Auditable record of a signal delivery. */
-export interface SignalEnvelope {
-  readonly ptyId: string;
-  readonly signal: string;
-  readonly timestamp: number;
-  readonly outcome: "delivered" | "failed" | "escalated";
-  readonly pid: number;
-  readonly error?: string;
-}
-
-/** Per-PTY bounded signal history. */
-export class SignalHistory {
-  private readonly records: SignalEnvelope[] = [];
-  private readonly maxRecords: number;
-
-  constructor(maxRecords = 50) {
-    this.maxRecords = maxRecords;
-  }
-
-  add(envelope: SignalEnvelope): void {
-    this.records.push(envelope);
-    if (this.records.length > this.maxRecords) {
-      this.records.shift();
-    }
-  }
-
-  getAll(): readonly SignalEnvelope[] {
-    return this.records;
-  }
-
-  get length(): number {
-    return this.records.length;
-  }
-}
-
-/** Map from ptyId to signal history. */
-export type SignalHistoryMap = Map<string, SignalHistory>;
-
-/**
- * Record a signal delivery and publish it to the bus.
- */
-function recordSignal(
-  envelope: SignalEnvelope,
-  historyMap: SignalHistoryMap,
-  bus: BusPublisher,
-  correlation: PtyEventCorrelation,
-): void {
-  let history = historyMap.get(envelope.ptyId);
-  if (!history) {
-    history = new SignalHistory();
-    historyMap.set(envelope.ptyId, history);
-  }
-  history.add(envelope);
-
-  emitPtyEvent(bus, "pty.signal.delivered", correlation, {
-    signal: envelope.signal,
-    outcome: envelope.outcome,
-    pid: envelope.pid,
-    error: envelope.error,
-  });
-}
-
-/**
- * Deliver a POSIX signal to a process and record the outcome.
- */
-function deliverSignal(
-  pid: number,
-  signal: string,
-  ptyId: string,
-  historyMap: SignalHistoryMap,
-  bus: BusPublisher,
-  correlation: PtyEventCorrelation,
-): SignalEnvelope {
-  const timestamp = Date.now();
-  try {
-    process.kill(pid, signal);
-    const envelope: SignalEnvelope = {
-      ptyId,
-      signal,
-      timestamp,
-      outcome: "delivered",
-      pid,
-    };
-    recordSignal(envelope, historyMap, bus, correlation);
-    return envelope;
-  } catch (error) {
-    const envelope: SignalEnvelope = {
-      ptyId,
-      signal,
-      timestamp,
-      outcome: "failed",
-      pid,
-      error: error instanceof Error ? error.message : String(error),
-    };
-    recordSignal(envelope, historyMap, bus, correlation);
-    return envelope;
-  }
-}
+import {
+  createSignalCorrelation,
+  deliverSignal,
+  recordSignal,
+} from "./signals/delivery.js";
+export { SignalHistory } from "./signals/history.js";
+export type {
+  SignalEnvelope,
+  SignalHistoryMap,
+} from "./signals/history.js";
+import type {
+  SignalEnvelope,
+  SignalHistoryMap,
+} from "./signals/history.js";
 
 // ── Resize ───────────────────────────────────────────────────────────────────
 
@@ -166,13 +70,7 @@ export function resize(
   // Update registry dimensions.
   registry.update(record.ptyId, { dimensions: { cols, rows } });
 
-  const correlation: PtyEventCorrelation = {
-    ptyId: record.ptyId,
-    laneId: record.laneId,
-    sessionId: record.sessionId,
-    terminalId: record.terminalId,
-    correlationId: crypto.randomUUID(),
-  };
+  const correlation: PtyEventCorrelation = createSignalCorrelation(record);
 
   // Deliver SIGWINCH to child process.
   deliverSignal(
@@ -237,13 +135,7 @@ export async function terminate(
     return;
   }
 
-  const correlation: PtyEventCorrelation = {
-    ptyId: record.ptyId,
-    laneId: record.laneId,
-    sessionId: record.sessionId,
-    terminalId: record.terminalId,
-    correlationId: crypto.randomUUID(),
-  };
+  const correlation: PtyEventCorrelation = createSignalCorrelation(record);
 
   const checkAlive =
     isAlive ??

@@ -1,10 +1,7 @@
-/**
- * In-memory PTY process registry with secondary indexes for lane and session lookups.
- *
- * @module
- */
-
 import type { PtyState } from "./state_machine.js";
+import {
+  reconcileRegistryOrphans,
+} from "./registry_reconciliation.js";
 
 /** Dimensions of a PTY viewport. */
 export interface PtyDimensions {
@@ -178,59 +175,11 @@ export class PtyRegistry {
     return this.primary.size;
   }
 
-  /**
-   * Detect and reconcile orphaned PTY processes on startup.
-   *
-   * Scans running processes for children matching the shell pattern,
-   * compares against the registry, and terminates unrecoverable orphans.
-   *
-   * @param shellPatterns - Shell binary names to search for (default: common shells).
-   * @param gracePeriodMs - Time to wait after SIGTERM before SIGKILL (default 5000).
-   * @returns A reconciliation summary.
-   */
   async reconcileOrphans(
     shellPatterns: string[] = ["bash", "zsh", "sh", "fish"],
     gracePeriodMs = 5000,
   ): Promise<ReconciliationSummary> {
-    const start = performance.now();
-    let found = 0;
-    let reattached = 0;
-    let terminated = 0;
-    let errors = 0;
-
-    try {
-      const orphanPids = await this.scanForOrphans(shellPatterns);
-      found = orphanPids.length;
-
-      for (const pid of orphanPids) {
-        try {
-          // Check if any existing record already has this PID
-          const existingRecord = this.list().find((r) => r.pid === pid);
-          if (existingRecord) {
-            // Already tracked, not actually orphaned
-            reattached++;
-            continue;
-          }
-
-          // Cannot reattach — terminate it
-          await this.terminateOrphan(pid, gracePeriodMs);
-          terminated++;
-        } catch {
-          errors++;
-        }
-      }
-    } catch {
-      // Permission errors or platform issues scanning the process table
-      errors++;
-    }
-
-    return {
-      found,
-      reattached,
-      terminated,
-      errors,
-      durationMs: performance.now() - start,
-    };
+    return reconcileRegistryOrphans(this, shellPatterns, gracePeriodMs);
   }
 
   // ── Private helpers ──────────────────────────────────────────────────
@@ -276,83 +225,4 @@ export class PtyRegistry {
     return records;
   }
 
-  /**
-   * Scan the process table for shell processes that are not in the registry.
-   * Uses platform-appropriate commands (ps on macOS/Linux).
-   */
-  private async scanForOrphans(shellPatterns: string[]): Promise<number[]> {
-    const currentPid = process.pid;
-    try {
-      const proc = Bun.spawn(["ps", "-eo", "pid,ppid,comm"], {
-        stdout: "pipe",
-        stderr: "pipe",
-      });
-
-      const output = await new Response(proc.stdout).text();
-      await proc.exited;
-
-      const orphanPids: number[] = [];
-      const lines = output.trim().split("\n").slice(1); // skip header
-
-      for (const line of lines) {
-        const parts = line.trim().split(/\s+/);
-        if (parts.length < 3) continue;
-
-        const pid = parseInt(parts[0]!, 10);
-        const ppid = parseInt(parts[1]!, 10);
-        const comm = parts.slice(2).join(" ");
-
-        if (isNaN(pid) || isNaN(ppid)) continue;
-
-        // Only consider processes whose parent is this runtime
-        // or whose parent has exited (ppid=1 on Linux, launchd on macOS)
-        if (ppid !== currentPid && ppid !== 1) continue;
-
-        const basename = comm.split("/").pop() ?? "";
-        const isShell = shellPatterns.some(
-          (pattern) =>
-            basename === pattern || basename === `-${pattern}`,
-        );
-
-        if (isShell) {
-          // Check if this PID is already in our registry
-          const tracked = this.list().some((r) => r.pid === pid);
-          if (!tracked) {
-            orphanPids.push(pid);
-          }
-        }
-      }
-
-      return orphanPids;
-    } catch {
-      return [];
-    }
-  }
-
-  /**
-   * Terminate an orphaned process: SIGTERM first, then SIGKILL after grace period.
-   */
-  private async terminateOrphan(
-    pid: number,
-    gracePeriodMs: number,
-  ): Promise<void> {
-    try {
-      process.kill(pid, "SIGTERM");
-    } catch {
-      // Process may have already exited
-      return;
-    }
-
-    // Wait for grace period, then check if still alive
-    await new Promise((resolve) => setTimeout(resolve, gracePeriodMs));
-
-    try {
-      // Signal 0 checks existence without sending a signal
-      process.kill(pid, 0);
-      // Still alive — escalate to SIGKILL
-      process.kill(pid, "SIGKILL");
-    } catch {
-      // Process already exited after SIGTERM — good
-    }
-  }
 }

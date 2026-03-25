@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { ContextPropagator, resetContextPropagator } from "../../../src/tabs/context_switch_propagation";
-import { createMockTabSurface } from "../../../src/tabs/tab_surface";
+import { createMockTabSurface, type TabSurface } from "../../../src/tabs/tab_surface";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
 
 describe("ContextPropagator", () => {
   let propagator: ContextPropagator;
-  let mockTabs = [];
+  let mockTabs: TabSurface[] = [];
 
   beforeEach(() => {
     resetContextPropagator();

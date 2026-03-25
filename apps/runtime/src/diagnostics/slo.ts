@@ -7,6 +7,33 @@ import { computePercentiles } from "./percentiles.js";
 /** Function signature for publishing events to the bus. */
 export type BusPublishFn = (topic: string, payload: unknown) => void | Promise<void>;
 
+export const SLO_DEFINITIONS: readonly SLODefinition[] = Object.freeze([
+  { metric: "input-to-echo", percentile: "p50", threshold: 30, unit: "ms" },
+  { metric: "input-to-echo", percentile: "p95", threshold: 100, unit: "ms" },
+  { metric: "render", percentile: "p95", threshold: 16, unit: "ms" },
+  { metric: "memory", percentile: "p95", threshold: 500, unit: "MB" },
+  { metric: "startup", percentile: "p95", threshold: 1500, unit: "ms" },
+  { metric: "fps", percentile: "p50", threshold: 60, unit: "fps" },
+  { metric: "event-loop", percentile: "p95", threshold: 50, unit: "ms" },
+]);
+
+export function getSLOsForMetric(metric: string): readonly SLODefinition[] {
+  return SLO_DEFINITIONS.filter((definition) => definition.metric === metric);
+}
+
+export function checkSLO(
+  definition: SLODefinition,
+  stats: { count: number; p50: number; p95: number; p99: number },
+): { passed: boolean; actual: number } {
+  if (stats.count === 0) {
+    return { passed: true, actual: 0 };
+  }
+  const actual = stats[definition.percentile];
+  const passed =
+    definition.unit === "fps" ? actual >= definition.threshold : actual <= definition.threshold;
+  return { passed, actual };
+}
+
 /**
  * Monitors registered metrics against SLO definitions, emitting rate-limited
  * violation events when thresholds are breached.

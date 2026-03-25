@@ -47,10 +47,10 @@ export class SettingsLock {
     const elements = container.querySelectorAll(interactiveSelectors) as NodeListOf<HTMLElement>;
 
     elements.forEach((element) => {
-      if (element instanceof HTMLInputElement || element instanceof HTMLButtonElement) {
+      element.setAttribute('aria-disabled', 'true');
+      if (this.isFormControl(element)) {
         element.disabled = true;
       } else {
-        element.setAttribute('aria-disabled', 'true');
         element.style.opacity = '0.6';
         element.style.pointerEvents = 'none';
         element.style.cursor = 'not-allowed';
@@ -67,10 +67,10 @@ export class SettingsLock {
 
   private removeLock(container: HTMLElement): void {
     this.lockedElements.forEach((element) => {
-      if (element instanceof HTMLInputElement || element instanceof HTMLButtonElement) {
+      element.removeAttribute('aria-disabled');
+      if (this.isFormControl(element)) {
         element.disabled = false;
       } else {
-        element.removeAttribute('aria-disabled');
         element.style.opacity = '';
         element.style.pointerEvents = '';
         element.style.cursor = '';
@@ -103,6 +103,17 @@ export class SettingsLock {
   destroy(): void {
     this.stopAutoUnlockTimer();
     this.lockedElements.clear();
+  }
+
+  private isFormControl(
+    element: HTMLElement,
+  ): element is HTMLInputElement | HTMLButtonElement | HTMLSelectElement | HTMLTextAreaElement {
+    return (
+      element instanceof HTMLInputElement ||
+      element instanceof HTMLButtonElement ||
+      element instanceof HTMLSelectElement ||
+      element instanceof HTMLTextAreaElement
+    );
   }
 }
 

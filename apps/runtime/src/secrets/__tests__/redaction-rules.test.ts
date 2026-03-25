@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { rmSync } from "node:fs";
 import { join } from "node:path";
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules, RedactionRuleManager } from "../redaction-rules.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { makeTestTempDir } from "./tempdir.js";
 
 const ctx = { artifactId: "art-1", artifactType: "log", correlationId: "corr-1" };
 
@@ -151,7 +151,7 @@ describe("RedactionRuleManager: enable/disable", () => {
 
 describe("RedactionRuleManager: persistence", () => {
   let tmpDir: string;
-  beforeEach(() => { tmpDir = mkdtempSync(join(tmpdir(), "helios-rules-test-")); });
+  beforeEach(() => { tmpDir = makeTestTempDir("helios-rules-test-"); });
   afterEach(() => { rmSync(tmpDir, { recursive: true, force: true }); });
 
   it("exports and imports rules", () => {

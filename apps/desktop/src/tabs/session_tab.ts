@@ -49,8 +49,7 @@ export class SessionTab extends TabSurface {
       createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
       lifecycleState: "active",
       harnessTransport: "cliproxy_harness",
-      terminalCount: 2,
-      degradationReason: null
+      terminalCount: 2
     };
   }
 

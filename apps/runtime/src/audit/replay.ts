@@ -1,5 +1,6 @@
-import { AuditEvent } from './event';
-import { SessionSnapshot } from './snapshot';
+import type { AuditEvent } from './event';
+import { AUDIT_EVENT_TYPES } from './event';
+import type { SessionSnapshot } from './snapshot';
 
 /**
  * Timeline entry for significant events.
@@ -120,14 +121,15 @@ export class ReplayEngine {
    */
   getTimeline(stream: ReplayStream): TimelineEntry[] {
     const entries: TimelineEntry[] = [];
+    const significantEvents = new Set<string>([
+      AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+      AUDIT_EVENT_TYPES.POLICY_EVALUATION,
+      AUDIT_EVENT_TYPES.APPROVAL_RESOLVED,
+    ]);
 
     // Add significant events (commands, errors, approvals)
     for (const event of stream.events) {
-      if (
-        ['COMMAND_EXECUTED', 'POLICY_EVALUATION', 'APPROVAL_RESOLVED'].includes(
-          event.eventType as any,
-        )
-      ) {
+      if (significantEvents.has(event.eventType)) {
         entries.push({
           timestamp: new Date(event.timestamp),
           label: `${event.action}: ${event.target}`,

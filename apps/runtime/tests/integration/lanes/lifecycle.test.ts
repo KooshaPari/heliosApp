@@ -8,8 +8,24 @@ import { LaneManager, _resetIdCounter } from "../../../src/lanes/index.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 import { computeWorktreePath, computeBranchName } from "../../../src/lanes/worktree.js";
 
+type SpawnProc = {
+  stdout: ReadableStream<Uint8Array> | null;
+  stderr: ReadableStream<Uint8Array> | null;
+  exited: Promise<number>;
+};
+
+function spawnGit(command: string[], cwd: string): SpawnProc {
+  const bunRuntime = (globalThis as Record<string, unknown>).Bun as
+    | { spawn(cmd: string[], opts: { cwd: string; stdout: "pipe"; stderr: "pipe" }): SpawnProc }
+    | undefined;
+  if (!bunRuntime) {
+    throw new Error("lane lifecycle tests require Bun runtime");
+  }
+  return bunRuntime.spawn(command, { cwd, stdout: "pipe", stderr: "pipe" });
+}
+
 async function runGit(args: string[], cwd: string): Promise<string> {
-  const proc = Bun.spawn(["git", ...args], { cwd, stdout: "pipe", stderr: "pipe" });
+  const proc = spawnGit(["git", ...args], cwd);
   const stdout = await new Response(proc.stdout).text();
   const exitCode = await proc.exited;
   if (exitCode !== 0) {
@@ -156,4 +172,4 @@ describe("Lane Lifecycle Integration (FR-008-001, FR-008-002)", () => {
     await mgr.cleanup(lane.laneId);
     expect(mgr.getRegistry().get(lane.laneId)!.state).toBe("closed");
   });
-}, { timeout: 60_000 });
+});

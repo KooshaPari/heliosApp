@@ -164,6 +164,8 @@ export function normalizeError(
 
   // Handle Error objects
   if (error instanceof Error) {
+    const normalizedMessage = error.message.toLowerCase();
+
     // Check for known error codes in custom error objects
     if ("code" in error && typeof (error as any).code === "string") {
       const code = (error as any).code as ProviderErrorCode;
@@ -180,7 +182,7 @@ export function normalizeError(
     }
 
     // Check for specific error patterns
-    if (error.message.includes("timeout") || error.message.includes("TIMEOUT")) {
+    if (normalizedMessage.includes("timeout")) {
       return new NormalizedProviderError(
         "PROVIDER_TIMEOUT",
         error.message,
@@ -191,7 +193,7 @@ export function normalizeError(
       );
     }
 
-    if (error.message.includes("init") || error.message.includes("initialization")) {
+    if (normalizedMessage.includes("init") || normalizedMessage.includes("initialization")) {
       return new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
         error.message,
@@ -202,7 +204,14 @@ export function normalizeError(
       );
     }
 
-    if (error.message.includes("crash") || error.message.includes("exit")) {
+    if (
+      normalizedMessage.includes("crash") ||
+      normalizedMessage.includes("exit") ||
+      normalizedMessage.includes("signal") ||
+      normalizedMessage.includes("killed") ||
+      normalizedMessage.includes("sigterm") ||
+      normalizedMessage.includes("sigkill")
+    ) {
       return new NormalizedProviderError(
         "PROVIDER_CRASHED",
         error.message,
@@ -213,7 +222,7 @@ export function normalizeError(
       );
     }
 
-    if (error.message.includes("unavailable")) {
+    if (normalizedMessage.includes("unavailable")) {
       return new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
         error.message,

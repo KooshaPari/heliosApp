@@ -15,31 +15,11 @@ import type {
   MCPConfig,
   MCPExecuteInput,
   MCPExecuteOutput,
-  MCPTool,
 } from "./adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-} from "./errors.js";
-
-/**
- * MCP server connection state.
- */
-interface MCPConnection {
-  connected: boolean;
-  lastConnectionAttempt: Date;
-  reconnectAttempts: number;
-  reconnectBackoffMs: number;
-}
-
-/**
- * Tool catalog entry.
- */
-interface ToolEntry {
-  name: string;
-  description: string;
-  inputSchema: Record<string, unknown>;
-}
+import { NormalizedProviderError, normalizeError } from "./errors.js";
+import { BestEffortEventPublisher } from "./mcp-bridge/events.js";
+import { MCPConnectionManager } from "./mcp-bridge/connection.js";
+import { MCPToolCatalog } from "./mcp-bridge/tool-catalog.js";
 
 /**
  * MCP Bridge Adapter
@@ -51,47 +31,31 @@ interface ToolEntry {
  */
 export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteInput, MCPExecuteOutput> {
   private config: MCPConfig | null = null;
-  private bus: LocalBus | null = null;
-  private connection: MCPConnection = {
-    connected: false,
-    lastConnectionAttempt: new Date(),
-    reconnectAttempts: 0,
-    reconnectBackoffMs: 1000,
-  };
-  private toolCatalog = new Map<string, ToolEntry>();
+  private terminated = false;
+  private connection = new MCPConnectionManager();
+  private toolCatalog = new MCPToolCatalog();
   private inFlightTools = new Map<string, AbortController>();
   private healthStatus: ProviderHealthStatus = {
     state: "unavailable",
     lastCheck: new Date(),
     failureCount: 0,
   };
+  private readonly events: BestEffortEventPublisher;
 
   constructor(bus?: LocalBus) {
-    this.bus = bus || null;
+    this.events = new BestEffortEventPublisher(bus || null);
   }
 
-  /**
-   * Initialize MCP bridge with configuration.
-   *
-   * FR-025-004: MCP bridge initialization.
-   *
-   * @param config MCP configuration
-   * @throws NormalizedProviderError if init fails
-   */
   async init(config: MCPConfig): Promise<void> {
     try {
-      // Validate config
       if (!config.serverPath || typeof config.serverPath !== "string") {
         throw new Error("Missing or invalid serverPath");
       }
 
       this.config = config;
-
-      // Connect to MCP server
-      await this.connectToServer();
-
-      // Discover and register tools
-      await this.discoverTools();
+      this.terminated = false;
+      await this.connection.connect(config);
+      await this.toolCatalog.discover(this.events);
 
       this.healthStatus = {
         state: "healthy",
@@ -99,13 +63,12 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
         failureCount: 0,
       };
 
-      await this.publishEvent("provider.mcp.initialized", {
+      await this.events.publish("provider.mcp.initialized", {
         serverPath: config.serverPath,
-        toolCount: this.toolCatalog.size,
+        toolCount: this.toolCatalog.list().length,
       });
     } catch (error) {
       const normalized = normalizeError(error, "mcp");
-
       throw new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
         `MCP bridge init failed: ${normalized.message}`,
@@ -115,12 +78,16 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
     }
   }
 
-  /**
-   * Get current health status.
-   *
-   * @returns Current health status
-   */
   async health(): Promise<ProviderHealthStatus> {
+    if (this.terminated) {
+      return {
+        state: "unavailable",
+        lastCheck: new Date(),
+        failureCount: 0,
+        message: "Terminated",
+      };
+    }
+
     if (!this.config) {
       return {
         state: "unavailable",
@@ -131,35 +98,30 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
     }
 
     try {
-      // Check connection
-      if (!this.connection.connected) {
-        // Attempt reconnection with exponential backoff
-        await this.reconnectToServer();
+      if (!this.connection.isConnected()) {
+        await this.connection.reconnect(this.config);
       }
 
-      if (this.connection.connected) {
+      if (this.connection.isConnected()) {
         this.healthStatus = {
           state: "healthy",
           lastCheck: new Date(),
           failureCount: 0,
         };
       } else {
-        this.healthStatus.failureCount++;
-        const newState =
-          this.healthStatus.failureCount >= 5 ? "unavailable" : "degraded";
         this.healthStatus = {
-          state: newState,
+          state:
+            this.healthStatus.failureCount + 1 >= 5 ? "unavailable" : "degraded",
           lastCheck: new Date(),
-          failureCount: this.healthStatus.failureCount,
+          failureCount: this.healthStatus.failureCount + 1,
           message: "MCP server disconnected",
         };
       }
     } catch (error) {
-      this.healthStatus.failureCount++;
       this.healthStatus = {
         state: "unavailable",
         lastCheck: new Date(),
-        failureCount: this.healthStatus.failureCount,
+        failureCount: this.healthStatus.failureCount + 1,
         message: `Health check failed: ${normalizeError(error, "mcp").message}`,
       };
     }
@@ -167,33 +129,21 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
     return { ...this.healthStatus };
   }
 
-  /**
-   * Execute a tool invocation.
-   *
-   * FR-025-004: Tool invocation with result capture.
-   *
-   * @param input Tool invocation input
-   * @param correlationId Correlation ID for tracing
-   * @returns Tool result
-   * @throws NormalizedProviderError on failure
-   */
   async execute(input: MCPExecuteInput, correlationId: string): Promise<MCPExecuteOutput> {
-    if (!this.config || !this.connection.connected) {
+    if (!this.config || this.terminated || !this.connection.isConnected()) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        "MCP bridge not initialized or disconnected",
+        "MCP bridge unavailable or not initialized",
         "mcp"
       );
     }
 
     try {
-      // Check tool exists
-      const tool = this.toolCatalog.get(input.toolName);
+      const tool = this.toolCatalog.getTool(input.toolName);
       if (!tool) {
         throw new Error(`Tool not found: ${input.toolName}`);
       }
 
-      // Create abort controller for timeout
       const abortController = new AbortController();
       const timeoutMs = this.config.timeout || 30000;
       const timeoutHandle = setTimeout(() => abortController.abort(), timeoutMs);
@@ -201,18 +151,14 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
 
       try {
         const startTime = Date.now();
-
-        // Execute tool (mock implementation)
         const result = await this.invokeTool(
           input.toolName,
           input.arguments,
           abortController.signal
         );
-
         const duration = Date.now() - startTime;
 
-        // Publish success event
-        await this.publishEvent("provider.mcp.tool.executed", {
+        await this.events.publish("provider.mcp.tool.executed", {
           correlationId,
           toolName: input.toolName,
           duration,
@@ -227,7 +173,6 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
         this.inFlightTools.delete(correlationId);
       }
     } catch (error) {
-      // Handle timeout
       if (error instanceof Error && error.name === "AbortError") {
         const normalized = new NormalizedProviderError(
           "PROVIDER_TIMEOUT",
@@ -237,29 +182,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
           correlationId
         );
 
-        await this.publishEvent("provider.mcp.tool.failed", {
-          correlationId,
-          toolName: input.toolName,
-          code: normalized.code,
-          message: normalized.message,
-        });
-
-        throw normalized;
-      }
-
-      // Handle disconnection
-      if (error instanceof Error && error.message.includes("disconnected")) {
-        this.connection.connected = false;
-
-        const normalized = new NormalizedProviderError(
-          "PROVIDER_UNAVAILABLE",
-          `MCP server disconnected: ${normalizeError(error, "mcp").message}`,
-          "mcp",
-          true,
-          correlationId
-        );
-
-        await this.publishEvent("provider.mcp.tool.failed", {
+        await this.events.publish("provider.mcp.tool.failed", {
           correlationId,
           toolName: input.toolName,
           code: normalized.code,
@@ -269,10 +192,29 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
         throw normalized;
       }
 
-      // Handle other errors
+      if (error instanceof Error && error.message.includes("disconnected")) {
+        this.connection.markDisconnected();
+        const normalized = new NormalizedProviderError(
+          "PROVIDER_UNAVAILABLE",
+          `MCP server disconnected: ${normalizeError(error, "mcp").message}`,
+          "mcp",
+          true,
+          correlationId
+        );
+
+        await this.events.publish("provider.mcp.tool.failed", {
+          correlationId,
+          toolName: input.toolName,
+          code: normalized.code,
+          retryable: true,
+        });
+
+        throw normalized;
+      }
+
       const normalized = normalizeError(error, "mcp", correlationId);
 
-      await this.publishEvent("provider.mcp.tool.failed", {
+      await this.events.publish("provider.mcp.tool.failed", {
         correlationId,
         toolName: input.toolName,
         code: normalized.code,
@@ -283,25 +225,17 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
     }
   }
 
-  /**
-   * Terminate MCP bridge and cleanup resources.
-   */
   async terminate(): Promise<void> {
     try {
-      // Cancel all in-flight tools
       for (const controller of this.inFlightTools.values()) {
         controller.abort();
       }
       this.inFlightTools.clear();
 
-      // Disconnect from server
-      this.connection.connected = false;
-
-      // Clear tool catalog
+      this.connection.markDisconnected();
       this.toolCatalog.clear();
-
       this.config = null;
-
+      this.terminated = true;
       this.healthStatus = {
         state: "unavailable",
         lastCheck: new Date(),
@@ -309,10 +243,9 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
         message: "Terminated",
       };
 
-      await this.publishEvent("provider.mcp.terminated", {});
+      await this.events.publish("provider.mcp.terminated", {});
     } catch (error) {
       const normalized = normalizeError(error, "mcp");
-
       throw new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
         `Failed to terminate MCP bridge: ${normalized.message}`,
@@ -322,191 +255,44 @@ export class MCPBridgeAdapter implements ProviderAdapter<MCPConfig, MCPExecuteIn
     }
   }
 
-  /**
-   * Get registered tools.
-   *
-   * @returns Array of registered tools
-   */
-  getTools(): MCPTool[] {
-    const tools: MCPTool[] = [];
-    for (const tool of this.toolCatalog.values()) {
-      tools.push({
-        name: tool.name,
-        description: tool.description,
-        inputSchema: tool.inputSchema,
-      });
-    }
-    return tools;
+  getTools() {
+    return this.toolCatalog.getTools();
   }
 
-  /**
-   * Connect to MCP server.
-   *
-   * @throws Error if connection fails
-   */
-  private async connectToServer(): Promise<void> {
-    if (!this.config) {
-      throw new Error("Config not set");
-    }
-
-    try {
-      // Mock implementation: always succeeds for localhost
-      if (
-        this.config.serverPath.includes("localhost") ||
-        this.config.serverPath.includes("127.0.0.1")
-      ) {
-        this.connection.connected = true;
-        this.connection.reconnectAttempts = 0;
-        return;
-      }
-
-      this.connection.connected = true;
-    } catch (error) {
-      this.connection.lastConnectionAttempt = new Date();
-      this.connection.reconnectAttempts++;
-      throw error;
-    }
-  }
-
-  /**
-   * Reconnect to MCP server with exponential backoff.
-   *
-   * @throws Error if reconnection fails
-   */
-  private async reconnectToServer(): Promise<void> {
-    if (!this.config) {
-      throw new Error("Config not set");
-    }
-
-    const timeSinceLastAttempt = Date.now() - this.connection.lastConnectionAttempt.getTime();
-    if (timeSinceLastAttempt < this.connection.reconnectBackoffMs) {
-      throw new Error("Reconnection backoff active");
-    }
-
-    try {
-      await this.connectToServer();
-    } catch (error) {
-      // Exponential backoff: 1s, 2s, 4s, 8s, etc. (max 30s)
-      this.connection.reconnectBackoffMs = Math.min(
-        this.connection.reconnectBackoffMs * 2,
-        30000
-      );
-      throw error;
-    }
-  }
-
-  /**
-   * Discover tools from MCP server.
-   *
-   * @throws Error if discovery fails
-   */
-  private async discoverTools(): Promise<void> {
-    if (!this.connection.connected) {
-      throw new Error("Not connected");
-    }
-
-    // Mock implementation: discover some standard tools
-    const mockTools = [
-      {
-        name: "read_file",
-        description: "Read contents of a file",
-        inputSchema: {
-          type: "object",
-          properties: {
-            path: { type: "string", description: "File path" },
-          },
-          required: ["path"],
-        },
-      },
-      {
-        name: "write_file",
-        description: "Write contents to a file",
-        inputSchema: {
-          type: "object",
-          properties: {
-            path: { type: "string", description: "File path" },
-            content: { type: "string", description: "File content" },
-          },
-          required: ["path", "content"],
-        },
-      },
-      {
-        name: "list_directory",
-        description: "List contents of a directory",
-        inputSchema: {
-          type: "object",
-          properties: {
-            path: { type: "string", description: "Directory path" },
-          },
-          required: ["path"],
-        },
-      },
-    ];
-
-    // Register all discovered tools
-    for (const tool of mockTools) {
-      this.toolCatalog.set(tool.name, {
-        name: tool.name,
-        description: tool.description,
-        inputSchema: tool.inputSchema,
-      });
-
-      await this.publishEvent("provider.mcp.tool.discovered", {
-        toolName: tool.name,
-        description: tool.description,
-      });
-    }
-  }
-
-  /**
-   * Invoke a tool.
-   *
-   * @param toolName Tool name
-   * @param arguments Tool arguments
-   * @param signal Abort signal
-   * @returns Tool result
-   */
   private async invokeTool(
     toolName: string,
     toolArguments: Record<string, unknown>,
     signal: AbortSignal
   ): Promise<unknown> {
-    // Check for abort
     if (signal.aborted) {
-      throw new Error("Tool invocation cancelled");
+      const abortError = new Error("Tool invocation cancelled");
+      abortError.name = "AbortError";
+      throw abortError;
     }
 
-    // Mock implementation: return simulated results
     const results: Record<string, unknown> = {
       read_file: { content: "File contents go here" },
       write_file: { success: true, bytesWritten: 100 },
       list_directory: { entries: ["file1.txt", "file2.txt", "subdir/"] },
     };
 
-    return results[toolName] || { message: `Mock result for ${toolName}` };
-  }
+    void toolArguments;
 
-  /**
-   * Publish event on the protocol bus.
-   *
-   * @param topic Event topic
-   * @param payload Event payload
-   */
-  private async publishEvent(topic: string, payload: Record<string, unknown>): Promise<void> {
-    if (!this.bus) {
-      return;
-    }
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        resolve(results[toolName] || { message: `Mock result for ${toolName}` });
+      }, 10);
 
-    try {
-      await this.bus.publish({
-        id: `mcp-${Date.now()}-${Math.random()}`,
-        type: "event",
-        ts: new Date().toISOString(),
-        topic,
-        payload,
-      });
-    } catch (error) {
-      console.warn(`Failed to publish MCP event ${topic}:`, error);
-    }
+      signal.addEventListener(
+        "abort",
+        () => {
+          clearTimeout(timeout);
+          const abortError = new Error("Tool invocation cancelled");
+          abortError.name = "AbortError";
+          reject(abortError);
+        },
+        { once: true }
+      );
+    });
   }
 }

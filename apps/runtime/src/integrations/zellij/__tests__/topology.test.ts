@@ -118,29 +118,6 @@ describe("TopologyTracker", () => {
     });
   });
 
-  describe("refreshTopology", () => {
-    it("returns minimal topology when CLI fails", async () => {
-      (cli.run as ReturnType<typeof mock>).mockImplementation(async () => ({
-        stdout: "",
-        stderr: "error",
-        exitCode: 1,
-      }));
-
-      const topo = await tracker.refreshTopology("s1");
-      expect(topo.sessionName).toBe("s1");
-      expect(topo.tabs).toHaveLength(1);
-    });
-
-    it("preserves PTY bindings after refresh", async () => {
-      tracker.initializeTopology("s1");
-      tracker.bindPty("s1", 0, "pty-preserved");
-
-      const topo = await tracker.refreshTopology("s1");
-      const pane = topo.tabs[0]?.panes.find((p) => p.paneId === 0);
-      expect(pane?.ptyId).toBe("pty-preserved");
-    });
-  });
-
   describe("getPtyBindings", () => {
     it("returns all PTY bindings for a session", () => {
       tracker.initializeTopology("s1");

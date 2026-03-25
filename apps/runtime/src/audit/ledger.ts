@@ -1,5 +1,6 @@
-import { AuditEvent } from './event';
-import { AuditRingBuffer, AuditFilter as RingBufferFilter } from './ring-buffer';
+import type { AuditEvent } from './event';
+import { AuditRingBuffer } from './ring-buffer';
+import type { AuditFilter as RingBufferFilter } from './ring-buffer';
 import { SQLiteAuditStore } from './sqlite-store';
 
 /**
@@ -130,6 +131,13 @@ export class AuditLedger {
 
     this.traverseCorrelationChain(correlationId, visited, chain);
 
+    // Include any current ring-buffer events for the same correlation ID.
+    for (const event of this.ringBuffer.getByCorrelationId(correlationId)) {
+      if (!chain.find((candidate) => candidate.id === event.id)) {
+        chain.push(event);
+      }
+    }
+
     // Sort chronologically
     chain.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
@@ -221,8 +229,10 @@ export class AuditLedger {
 
     visited.add(correlationId);
 
-    // Get all events with this correlation ID
-    const events = this.store.getByCorrelationChain(correlationId);
+    const events = [
+      ...this.ringBuffer.getByCorrelationId(correlationId),
+      ...this.store.getByCorrelationChain(correlationId),
+    ];
 
     if (events.length === 0) {
       console.warn(`[AuditLedger] No events found for correlation ID: ${correlationId}`);

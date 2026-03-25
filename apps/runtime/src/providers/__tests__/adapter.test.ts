@@ -9,8 +9,11 @@ import type {
   ProviderAdapter,
   ProviderHealthStatus,
   ProviderRegistration,
+  ACPConfig,
+  ACPExecuteInput,
+  ACPExecuteOutput,
 } from "../adapter.js";
-import { BaseProviderAdapter, ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import { BaseProviderAdapter } from "../adapter.js";
 
 /**
  * Mock provider implementation for testing.
@@ -126,7 +129,8 @@ describe("ProviderAdapter Interface", () => {
       const provider = new MockProvider();
 
       const config: ACPConfig = {
-        apiKey: "test-key",
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
         model: "claude-3-sonnet",
       };
 
@@ -143,7 +147,8 @@ describe("ProviderAdapter Interface", () => {
       const provider = new MockProvider();
 
       const config: ACPConfig = {
-        apiKey: "test-key",
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
         model: "claude-3-sonnet",
       };
 
@@ -163,7 +168,8 @@ describe("ProviderAdapter Interface", () => {
       const provider = new MockProvider();
 
       const config: ACPConfig = {
-        apiKey: "test-key",
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
         model: "claude-3-sonnet",
       };
 
@@ -187,7 +193,8 @@ describe("ProviderAdapter Interface", () => {
       const provider = new MockProvider({ failInit: true });
 
       const config: ACPConfig = {
-        apiKey: "test-key",
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
         model: "claude-3-sonnet",
       };
 
@@ -198,7 +205,8 @@ describe("ProviderAdapter Interface", () => {
       const provider = new MockProvider({ failHealth: true });
 
       const config: ACPConfig = {
-        apiKey: "test-key",
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
         model: "claude-3-sonnet",
       };
 
@@ -213,7 +221,8 @@ describe("ProviderAdapter Interface", () => {
       const provider = new MockProvider({ failExecute: true });
 
       const config: ACPConfig = {
-        apiKey: "test-key",
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
         model: "claude-3-sonnet",
       };
 
@@ -306,7 +315,8 @@ describe("ProviderAdapter Interface", () => {
       const provider = new MockProvider();
 
       const config: ACPConfig = {
-        apiKey: "test-key",
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
         model: "claude-3-sonnet",
       };
 
@@ -331,7 +341,8 @@ describe("ProviderAdapter Interface", () => {
       const provider = new MockProvider();
 
       const config: ACPConfig = {
-        apiKey: "test-key",
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
         model: "claude-3-sonnet",
       };
 
@@ -348,7 +359,8 @@ describe("ProviderAdapter Interface", () => {
       const provider = new MockProvider();
 
       const config: ACPConfig = {
-        apiKey: "test-key",
+        endpoint: "http://localhost:8080/acp",
+        apiKeyRef: "acp-key",
         model: "claude-3-sonnet",
       };
 

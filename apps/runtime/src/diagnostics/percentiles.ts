@@ -2,13 +2,20 @@
 
 import type { PercentileBucket } from "./types.js";
 
+type PercentileInput = Float64Array | { getValues(): Float64Array };
+
+function toValues(input: PercentileInput): Float64Array {
+  return input instanceof Float64Array ? input : input.getValues();
+}
+
 /**
  * Compute percentile statistics from a Float64Array of values.
  * Uses the nearest-rank method. Returns undefined if values is empty.
  *
  * The input array is **not** mutated — a sorted copy is created internally.
  */
-export function computePercentiles(values: Float64Array): PercentileBucket | undefined {
+export function computePercentiles(input: PercentileInput): PercentileBucket | undefined {
+  const values = toValues(input).filter((value) => !Number.isNaN(value));
   const count = values.length;
   if (count === 0) {
     return undefined;

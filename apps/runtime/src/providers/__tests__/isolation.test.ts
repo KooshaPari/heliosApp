@@ -11,12 +11,14 @@ import type {
   ProviderAdapter,
   ProviderHealthStatus,
   ProviderRegistration,
+  ACPConfig,
+  ACPExecuteInput,
+  ACPExecuteOutput,
 } from "../adapter.js";
 import {
   NormalizedProviderError,
   normalizeError,
 } from "../errors.js";
-import { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 
 /**
  * Mock isolated provider for testing lane isolation behavior.
@@ -86,8 +88,8 @@ describe("Process-Level Isolation", () => {
       const laneProviderB = new MockIsolatedProvider("lane-b");
 
       // Initialize both providers
-      await laneProviderA.init({ apiKey: "test", model: "claude-3-sonnet" });
-      await laneProviderB.init({ apiKey: "test", model: "claude-3-sonnet" });
+      await laneProviderA.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
+      await laneProviderB.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
 
       // Lane A provider crashes
       laneProviderA.setCrash(true);
@@ -104,8 +106,8 @@ describe("Process-Level Isolation", () => {
       const laneProviderA = new MockIsolatedProvider("lane-a");
       const laneProviderB = new MockIsolatedProvider("lane-b");
 
-      await laneProviderA.init({ apiKey: "test", model: "claude-3-sonnet" });
-      await laneProviderB.init({ apiKey: "test", model: "claude-3-sonnet" });
+      await laneProviderA.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
+      await laneProviderB.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
 
       // Crash lane A provider multiple times
       laneProviderA.setCrash(true);
@@ -132,7 +134,7 @@ describe("Process-Level Isolation", () => {
     it("should prevent memory leaks from crashed provider", async () => {
       const provider = new MockIsolatedProvider("lane-1");
 
-      await provider.init({ apiKey: "test", model: "claude-3-sonnet" });
+      await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
 
       // Simulate multiple executions
       for (let i = 0; i < 100; i++) {
@@ -154,7 +156,7 @@ describe("Process-Level Isolation", () => {
     it("should handle graceful termination", async () => {
       const provider = new MockIsolatedProvider("lane-1");
 
-      await provider.init({ apiKey: "test", model: "claude-3-sonnet" });
+      await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
 
       let health = await provider.health();
       expect(health.state).toBe("healthy");
@@ -203,7 +205,7 @@ describe("Process-Level Isolation", () => {
       // Create providers for each lane
       for (let i = 0; i < laneCount; i++) {
         const provider = new MockIsolatedProvider(`lane-${i}`);
-        await provider.init({ apiKey: "test", model: "claude-3-sonnet" });
+        await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
         providers.push(provider);
       }
 
@@ -227,7 +229,7 @@ describe("Process-Level Isolation", () => {
       // Create 5 providers
       for (let i = 0; i < 5; i++) {
         const provider = new MockIsolatedProvider(`lane-${i}`);
-        await provider.init({ apiKey: "test", model: "claude-3-sonnet" });
+        await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
         providers.push(provider);
       }
 
@@ -268,7 +270,7 @@ describe("Process-Level Isolation", () => {
 
       // Initialize all
       for (const provider of providers) {
-        await provider.init({ apiKey: "test", model: "claude-3-sonnet" });
+        await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
       }
 
       // Get initial health
@@ -302,7 +304,7 @@ describe("Process-Level Isolation", () => {
     it("should cleanup resources on terminate", async () => {
       const provider = new MockIsolatedProvider("lane-1");
 
-      await provider.init({ apiKey: "test", model: "claude-3-sonnet" });
+      await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
 
       // Execute some operations
       const result = await provider.execute({ prompt: "test" }, "corr-123");
@@ -319,7 +321,7 @@ describe("Process-Level Isolation", () => {
     it("should handle termination of crashed provider", async () => {
       const provider = new MockIsolatedProvider("lane-1");
 
-      await provider.init({ apiKey: "test", model: "claude-3-sonnet" });
+      await provider.init({ endpoint: "http://localhost:8080/acp", apiKeyRef: "acp-key", model: "claude-3-sonnet" });
 
       // Cause a crash
       provider.setCrash(true);

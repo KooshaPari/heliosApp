@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { LaneEventHandler, BusSubscriber, BusEvent } from '../../../src/panels/lane_event_handler';
+import { LaneEventHandler } from '../../../src/panels/lane_event_handler';
+import type { BusSubscriber, BusEvent } from '../../../src/panels/lane_event_handler';
 
 describe('LaneEventHandler', () => {
   let handler: LaneEventHandler;
@@ -38,7 +39,7 @@ describe('LaneEventHandler', () => {
     );
   });
 
-  it('should handle state changed events', () => {
+  it('should handle state changed events', async () => {
     const onStateChanged = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
@@ -56,9 +57,8 @@ describe('LaneEventHandler', () => {
     stateChangedHandler?.(event);
 
     // Wait for RAF
-    setTimeout(() => {
-      expect(onStateChanged).toHaveBeenCalledWith('lane-1', 'running');
-    }, 10);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(onStateChanged).toHaveBeenCalledWith('lane-1', 'running');
   });
 
   it('should handle lane created events', () => {
@@ -90,12 +90,12 @@ describe('LaneEventHandler', () => {
     handler.mount();
 
     const event: BusEvent = {
-      topic: 'lane.cleaned_up',
+      topic: 'lane.cleaned',
       payload: { laneId: 'lane-1' },
       timestamp: Date.now(),
     };
 
-    const cleanedHandler = busHandlers.get('lane.cleaned_up');
+    const cleanedHandler = busHandlers.get('lane.cleaned');
     cleanedHandler?.(event);
 
     expect(onLaneCleaned).toHaveBeenCalledWith('lane-1');
@@ -137,7 +137,7 @@ describe('LaneEventHandler', () => {
     // Should only render final state due to batching
   });
 
-  it('should discard out-of-order events', () => {
+  it('should discard out-of-order events', async () => {
     const onStateChanged = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
@@ -163,10 +163,9 @@ describe('LaneEventHandler', () => {
     });
 
     // Wait for RAF
-    setTimeout(() => {
-      // The out-of-order event should be discarded
-      expect(onStateChanged).toHaveBeenCalledWith('lane-1', 'running');
-    }, 20);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    // The out-of-order event should be discarded
+    expect(onStateChanged).toHaveBeenCalledWith('lane-1', 'running');
   });
 
   it('should monitor bus connectivity', async () => {

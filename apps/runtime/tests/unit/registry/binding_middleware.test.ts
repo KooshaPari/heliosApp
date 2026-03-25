@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { BindingMiddleware } from "../../../src/registry/binding_middleware.js";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import { BindingState, type BindingTriple } from "../../../src/registry/binding_triple.js";
+import type { TerminalBinding } from "../../../src/registry/binding_triple.js";
 
 describe("BindingMiddleware", () => {
   let registry: TerminalRegistry;

@@ -7,6 +7,7 @@
 
 import type { RendererRegistry } from "../registry.js";
 import { GhosttyBackend } from "./backend.js";
+import { readStdoutText, spawnReadableProcess } from "./readable_spawn.js";
 
 // ---------------------------------------------------------------------------
 // Re-exports
@@ -45,12 +46,12 @@ export type { PtyWriter, GhosttyInputEvent, InputEventListener } from "./input.j
  */
 export async function isGhosttyAvailable(binaryPath = "ghostty"): Promise<boolean> {
   try {
-    const proc = Bun.spawn(["which", binaryPath], {
-      stdout: "ignore",
-      stderr: "ignore",
-    });
-    await proc.exited;
-    return proc.exitCode === 0;
+    const proc = spawnReadableProcess(
+      ["which", binaryPath],
+      "Ghostty renderer registration requires Bun runtime",
+    );
+    const exitCode = await proc.exited;
+    return exitCode === 0;
   } catch {
     return false;
   }
@@ -63,11 +64,11 @@ export async function isGhosttyAvailable(binaryPath = "ghostty"): Promise<boolea
  */
 export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<string> {
   try {
-    const proc = Bun.spawn([binaryPath, "--version"], {
-      stdout: "pipe",
-      stderr: "ignore",
-    });
-    const text = await new Response(proc.stdout).text();
+    const proc = spawnReadableProcess(
+      [binaryPath, "--version"],
+      "Ghostty renderer registration requires Bun runtime",
+    );
+    const text = await readStdoutText(proc);
     await proc.exited;
     const trimmed = text.trim();
     return trimmed.length > 0 ? trimmed : "unknown";

@@ -13,7 +13,7 @@ describe("Performance", () => {
 
   beforeEach(() => {
     bus = new InMemoryLocalBus();
-    laneRegistry = new LaneRegistry();
+    laneRegistry = new LaneRegistry(100);
     engine = new RemediationEngine(laneRegistry, bus);
   });
 
@@ -24,7 +24,7 @@ describe("Performance", () => {
       laneRegistry.register({
         laneId,
         workspaceId: `ws-${i}`,
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -110,7 +110,7 @@ describe("Performance", () => {
     // Create 50 lanes with various states
     for (let i = 0; i < 50; i++) {
       const laneId = `lane-state-${i}`;
-      const state = i % 4 === 0 ? "recovering" : "active";
+      const state = i % 4 === 0 ? "cleaning" : "running";
 
       laneRegistry.register({
         laneId,
@@ -167,7 +167,7 @@ describe("Performance", () => {
 
     // Decline it (triggers cooldown save)
     const startTime = Date.now();
-    engine.declineCleanup(suggestions[0].id);
+    await engine.declineCleanup(suggestions[0].id);
     const declineTime = Date.now() - startTime;
 
     // Decline should be fast (< 100ms)

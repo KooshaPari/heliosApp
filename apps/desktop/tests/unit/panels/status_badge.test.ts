@@ -115,7 +115,7 @@ describe('StatusBadge', () => {
     const scheme = DEFAULT_COLOR_SCHEME.running;
 
     expect(badgeElement?.style.color).toBe(scheme.color);
-    expect(badgeElement?.style.backgroundColor).toBe(scheme.bgColor);
+    expect(badgeElement?.style.backgroundColor).toBe('rgb(220, 252, 231)');
   });
 
   it('should update badge state when update() is called', () => {

@@ -97,7 +97,7 @@ export class AuditSink {
 
     const record: AuditRecord = {
       id: `audit:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
-      timestamp: envelope.ts,
+      timestamp: envelope.ts ?? new Date().toISOString(),
       topic,
       payload: parsedPayload,
       correlationId,
@@ -131,12 +131,27 @@ export class AuditSink {
   wrapBus(bus: LocalBus): LocalBus {
     const sink = this;
     return {
+      registerMethod(method, handler) {
+        bus.registerMethod(method, handler);
+      },
       async publish(event: LocalBusEnvelope): Promise<void> {
         await sink.ingest(event);
         await bus.publish(event);
       },
       async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
         return bus.request(command);
+      },
+      async send(envelope: unknown): Promise<import("../protocol/types.js").ResponseEnvelope> {
+        return bus.send(envelope);
+      },
+      subscribe(topic, handler) {
+        return bus.subscribe(topic, handler);
+      },
+      destroy() {
+        bus.destroy();
+      },
+      getActiveCorrelationId() {
+        return bus.getActiveCorrelationId();
       },
     };
   }

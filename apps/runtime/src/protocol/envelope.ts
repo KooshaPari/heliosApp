@@ -142,7 +142,7 @@ type ValidationSuccess = { valid: true; envelope: Envelope };
 type ValidationFailure = { valid: false; error: Readonly<BusError> };
 type ValidationResult = ValidationSuccess | ValidationFailure;
 
-function fail(message: string, details?: unknown): ValidationFailure {
+function fail(message: string, details?: Record<string, unknown> | null): ValidationFailure {
   return { valid: false, error: validationError(message, details) };
 }
 

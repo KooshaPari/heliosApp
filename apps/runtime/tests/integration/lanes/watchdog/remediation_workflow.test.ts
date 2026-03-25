@@ -59,7 +59,7 @@ describe("Remediation Workflow", () => {
     laneRegistry.register({
       laneId: "lane-recovering",
       workspaceId: "ws1",
-      state: "recovering",
+      state: "cleaning",
       worktreePath: "/tmp/lane-recovering",
       parTaskPid: null,
       attachedAgents: [],
@@ -99,7 +99,7 @@ describe("Remediation Workflow", () => {
     expect(suggestions.length).toBe(1);
 
     const suggestionId = suggestions[0].id;
-    engine.declineCleanup(suggestionId);
+    await engine.declineCleanup(suggestionId);
 
     // Generate suggestions again - should not include declined resource
     suggestions = await engine.generateSuggestions(orphans);
@@ -141,7 +141,7 @@ describe("Remediation Workflow", () => {
     ];
 
     const suggestions = await engine.generateSuggestions(orphans);
-    engine.declineCleanup(suggestions[0].id);
+    await engine.declineCleanup(suggestions[0].id);
 
     const events = bus.getEvents();
     const declineEvent = events.find((e) => e.topic === "orphan.remediation.declined");
@@ -164,7 +164,7 @@ describe("Remediation Workflow", () => {
     expect(suggestions.length).toBe(1);
 
     // Decline the suggestion
-    engine.declineCleanup(suggestions[0].id);
+    await engine.declineCleanup(suggestions[0].id);
 
     // Try to generate suggestions again
     suggestions = await engine.generateSuggestions(orphans);

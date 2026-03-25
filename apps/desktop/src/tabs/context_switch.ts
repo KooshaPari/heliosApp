@@ -1,4 +1,4 @@
-import type { LocalBus } from "../../runtime/src/protocol/bus";
+import type { LocalBus } from "@helios/runtime";
 
 export interface ActiveContext {
   workspaceId: string;

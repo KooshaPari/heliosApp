@@ -12,8 +12,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome check apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
     "format": "biome format --write apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
-    "test": "bun test apps/runtime apps/desktop/tests/unit scripts/tests/",
-    "test:coverage": "bun test --coverage apps/runtime apps/desktop/tests/unit",
+    "test": "find apps/runtime apps/desktop/tests/unit scripts/tests -type f \\( -name '*.test.ts' -o -name '*.test.tsx' \\) -not -path '*/worktrees/*' -print0 | xargs -0 bun test --preload ./apps/desktop/tests/setup.ts",
+    "test:coverage": "find apps/runtime apps/desktop/tests/unit -type f \\( -name '*.test.ts' -o -name '*.test.tsx' \\) -not -path '*/worktrees/*' -print0 | xargs -0 bun test --coverage --preload ./apps/desktop/tests/setup.ts",
     "test:e2e": "playwright test",
     "gates": "bun scripts/gates.ts",
     "docs:index": "bash docs/scripts/generate-doc-index.sh",
@@ -31,15 +31,6 @@
     "@xterm/xterm": "^5.5.0",
     "solid-js": "^1.9.11"
   },
-  "dependencies": {
-    "solid-js": "^1.9.0"
-  },
-  "dependencies": {
-    "@xterm/addon-fit": "^0.10.0",
-    "@xterm/addon-web-links": "^0.11.0",
-    "@xterm/xterm": "^5.5.0",
-    "solid-js": "^1.9.11"
-  },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@playwright/test": "1.51.1",
@@ -48,9 +39,7 @@
     "esbuild": "^0.27.3",
     "esbuild-plugin-solid": "^0.6.0",
     "typescript": "5.8.2",
+    "vitest": "^3.2.4",
     "vitepress": "1.6.3"
-  },
-  "dependencies": {
-    "solid-js": "^1.9.11"
   }
 }

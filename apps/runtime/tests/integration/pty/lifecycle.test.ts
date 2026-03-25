@@ -8,6 +8,33 @@ import { describe, expect, it, afterEach } from "bun:test";
 import { PtyManager } from "../../../src/pty/index.js";
 import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 
+type SpawnProc = {
+  pid: number;
+  stdin: { write(data: Uint8Array | string): number };
+  stdout: ReadableStream<Uint8Array> | null;
+  stderr: ReadableStream<Uint8Array> | null;
+  exited: Promise<number>;
+};
+
+function spawnShell(command: string[]): SpawnProc {
+  const bunRuntime = (globalThis as Record<string, unknown>).Bun as
+    | {
+        spawn(
+          cmd: string[],
+          opts: { stdin: "pipe"; stdout: "pipe"; stderr: "pipe" },
+        ): SpawnProc;
+      }
+    | undefined;
+  if (!bunRuntime) {
+    throw new Error("PTY lifecycle tests require Bun runtime");
+  }
+  return bunRuntime.spawn(command, {
+    stdin: "pipe",
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+}
+
 const pidsToCleanup: number[] = [];
 
 afterEach(() => {
@@ -58,11 +85,7 @@ describe("PTY lifecycle integration", () => {
     const mgr = new PtyManager(10, bus);
 
     // Spawn a shell.
-    const proc = Bun.spawn(["/bin/sh"], {
-      stdin: "pipe",
-      stdout: "pipe",
-      stderr: "pipe",
-    });
+    const proc = spawnShell(["/bin/sh"]);
     pidsToCleanup.push(proc.pid);
 
     const record = await mgr.spawn({

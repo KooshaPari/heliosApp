@@ -4,6 +4,26 @@ import type { Workspace, ProjectBinding } from './types.js';
 import { existsSync, realpathSync, accessSync, constants } from 'node:fs';
 import { isAbsolute } from 'node:path';
 
+type SpawnProc = {
+  stdout: ReadableStream<Uint8Array> | null;
+  stderr: ReadableStream<Uint8Array> | null;
+  exited: Promise<number>;
+  kill(signal?: string): void;
+};
+
+function spawnProcess(
+  cmd: string[],
+  options: { stdout: "pipe"; stderr: "pipe" },
+): SpawnProc {
+  const bunRuntime = (globalThis as Record<string, unknown>).Bun as
+    | { spawn(command: string[], opts: { stdout: "pipe"; stderr: "pipe" }): SpawnProc }
+    | undefined;
+  if (!bunRuntime) {
+    throw new Error("workspace project operations require Bun runtime");
+  }
+  return bunRuntime.spawn(cmd, options);
+}
+
 // Stub ID generator — uses spec 005 format proj_{ulid}
 function generateProjectId(): string {
   const timestamp = Date.now().toString(36);
@@ -163,12 +183,12 @@ export async function gitClone(
 ): Promise<void> {
   // Check git availability
   try {
-    const versionProc = Bun.spawn(['git', '--version'], {
+    const versionProc = spawnProcess(['git', '--version'], {
       stdout: 'pipe',
       stderr: 'pipe',
     });
-    await versionProc.exited;
-    if (versionProc.exitCode !== 0) {
+    const versionExitCode = await versionProc.exited;
+    if (versionExitCode !== 0) {
       throw new Error('git binary not functional');
     }
   } catch {
@@ -177,7 +197,7 @@ export async function gitClone(
     );
   }
 
-  const proc = Bun.spawn(['git', 'clone', url, targetDir], {
+  const proc = spawnProcess(['git', 'clone', url, targetDir], {
     stdout: 'pipe',
     stderr: 'pipe',
   });

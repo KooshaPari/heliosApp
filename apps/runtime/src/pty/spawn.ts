@@ -9,6 +9,34 @@ import { PtyLifecycle } from "./state_machine.js";
 import type { PtyRecord, PtyDimensions } from "./registry.js";
 import { PtyRegistry } from "./registry.js";
 
+type SpawnHandle = {
+  pid: number;
+  stdout: ReadableStream<Uint8Array> | null;
+  stderr: ReadableStream<Uint8Array> | null;
+  exited: Promise<number>;
+};
+
+function bunSpawn(
+  cmd: string[],
+  options: {
+    cwd?: string;
+    env?: Record<string, string>;
+    stdin?: "pipe";
+    stdout?: "pipe";
+    stderr?: "pipe";
+  },
+): SpawnHandle {
+  const bunRuntime = (globalThis as Record<string, unknown>).Bun as
+    | {
+        spawn(command: string[], opts: typeof options): SpawnHandle;
+      }
+    | undefined;
+  if (!bunRuntime) {
+    throw new Error("PTY spawning requires Bun runtime");
+  }
+  return bunRuntime.spawn(cmd, options);
+}
+
 /** Options for spawning a new PTY. */
 export interface SpawnOptions {
   /** Path to the shell binary (default: /bin/bash). */
@@ -71,7 +99,7 @@ export async function spawnPty(
   lifecycle.apply("spawn_requested");
 
   try {
-    const proc = Bun.spawn([shell], {
+    const proc = bunSpawn([shell], {
       cwd,
       env: {
         ...env,

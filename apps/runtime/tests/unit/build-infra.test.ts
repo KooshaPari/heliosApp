@@ -5,14 +5,15 @@
  * tsconfig strict mode, config inheritance, and lint suppression checks.
  */
 import { describe, expect, test } from "bun:test";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dir, "../../../..");
 
 function readJson(relativePath: string): unknown {
   const fullPath = resolve(ROOT, relativePath);
-  return JSON.parse(Bun.file(fullPath).text() as unknown as string);
+  return JSON.parse(readFileSync(fullPath, "utf-8"));
 }
 
 /**
@@ -58,8 +59,22 @@ function stripJsonComments(input: string): string {
 
 async function readJsonAsync(relativePath: string): Promise<Record<string, unknown>> {
   const fullPath = resolve(ROOT, relativePath);
-  const text = await Bun.file(fullPath).text();
+  const text = await readFile(fullPath, "utf-8");
   return JSON.parse(stripJsonComments(text)) as Record<string, unknown>;
+}
+
+async function* walkTsFiles(dir: string): AsyncGenerator<string> {
+  const entries = await readdir(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const path = resolve(dir, entry.name);
+    if (entry.isDirectory()) {
+      yield* walkTsFiles(path);
+      continue;
+    }
+    if (entry.isFile() && path.endsWith(".ts")) {
+      yield path;
+    }
+  }
 }
 
 describe("workspace configuration", () => {
@@ -71,7 +86,7 @@ describe("workspace configuration", () => {
   });
 
   test("bunfig.toml exists and contains install settings", async () => {
-    const content = await Bun.file(resolve(ROOT, "bunfig.toml")).text();
+    const content = readFileSync(resolve(ROOT, "bunfig.toml"), "utf-8");
     expect(content).toContain("[install]");
     expect(content).toContain("exact = true");
   });
@@ -162,7 +177,6 @@ describe("workspace dependency graph", () => {
 
 describe("lint suppression directives", () => {
   test("no @ts-ignore or @ts-expect-error in source files", async () => {
-    const glob = new Bun.Glob("**/*.ts");
     const suppressionPattern = /@ts-ignore|@ts-expect-error/;
 
     const srcDirs = [
@@ -172,12 +186,12 @@ describe("lint suppression directives", () => {
 
     for (const dir of srcDirs) {
       if (!existsSync(dir)) continue;
-      for await (const path of glob.scan({ cwd: dir, absolute: true })) {
+      for await (const path of walkTsFiles(dir)) {
         // Skip test files - they are allowed to have suppression directives
         if (path.includes("__tests__") || path.includes(".test.") || path.includes(".spec.")) {
           continue;
         }
-        const content = await Bun.file(path).text();
+        const content = readFileSync(path, "utf-8");
         const relativePath = path.replace(ROOT + "/", "");
         expect(
           suppressionPattern.test(content),

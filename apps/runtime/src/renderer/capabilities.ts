@@ -19,6 +19,8 @@ export interface CapabilityDiff {
   to: unknown;
 }
 
+export type CapabilityDiffEntry = CapabilityDiff;
+
 export interface CapabilityComparison {
   equal: boolean;
   differences: CapabilityDiff[];

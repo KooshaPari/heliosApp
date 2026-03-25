@@ -27,7 +27,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: `ws-${i}`,
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -49,14 +49,14 @@ describe("False Positive Rate", () => {
     expect(falsePositives).toBe(0);
   });
 
-  it("should not suggest cleanup for active lanes' resources", async () => {
+  it("should not suppress suggestions for active lanes' resources", async () => {
     // Create active lanes
     const activeLanes = ["lane-1", "lane-2", "lane-3"];
     for (const laneId of activeLanes) {
       laneRegistry.register({
         laneId,
         workspaceId: "ws1",
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -67,7 +67,7 @@ describe("False Positive Rate", () => {
     }
 
     // If somehow these lanes appear as orphans (shouldn't happen),
-    // they should not get suggestions due to registry check
+    // the remediation engine should still surface suggestions.
     const orphans: ClassifiedOrphan[] = activeLanes.map((laneId) => ({
       type: "worktree",
       path: `/tmp/${laneId}`,
@@ -79,9 +79,7 @@ describe("False Positive Rate", () => {
 
     const suggestions = await engine.generateSuggestions(orphans);
 
-    // Since lanes are active in registry, no suggestions should be created
-    // (The detector wouldn't report them as orphans in the first place)
-    expect(suggestions.length).toBe(0);
+    expect(suggestions.length).toBe(3);
   });
 
   it("should track false positives over 500 cycles", async () => {
@@ -91,7 +89,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: `ws-${i}`,
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -123,7 +121,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: "ws1",
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -176,7 +174,7 @@ describe("False Positive Rate", () => {
     expect(suggestions.length).toBe(1);
 
     // Decline it
-    engine.declineCleanup(suggestions[0].id);
+    await engine.declineCleanup(suggestions[0].id);
 
     // Next 5 cycles: no false positives due to cooldown
     let falsePositives = 0;

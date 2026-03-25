@@ -22,7 +22,7 @@ describe("Recovery Suppression", () => {
     laneRegistry.register({
       laneId: "lane-abc123",
       workspaceId: "ws1",
-      state: "recovering",
+      state: "cleaning",
       worktreePath: "/tmp/lane-abc123",
       parTaskPid: null,
       attachedAgents: [],
@@ -55,7 +55,7 @@ describe("Recovery Suppression", () => {
     laneRegistry.register({
       laneId,
       workspaceId: "ws2",
-      state: "recovering",
+      state: "cleaning",
       worktreePath: "/tmp/lane-xyz",
       parTaskPid: null,
       attachedAgents: [],
@@ -132,7 +132,7 @@ describe("Recovery Suppression", () => {
     laneRegistry.register({
       laneId: "lane-active",
       workspaceId: "ws1",
-      state: "active",
+      state: "running",
       worktreePath: "/tmp/lane-active",
       parTaskPid: null,
       attachedAgents: [],
@@ -144,7 +144,7 @@ describe("Recovery Suppression", () => {
     laneRegistry.register({
       laneId: "lane-recovering",
       workspaceId: "ws2",
-      state: "recovering",
+      state: "cleaning",
       worktreePath: "/tmp/lane-recovering",
       parTaskPid: null,
       attachedAgents: [],

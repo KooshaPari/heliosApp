@@ -3,12 +3,19 @@
 import { describe, it, expect } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 
+type BunGcRuntime = { gc?: (force?: boolean) => void };
+
+function maybeGc(): void {
+  const bunRuntime = (globalThis as typeof globalThis & { Bun?: BunGcRuntime }).Bun;
+  if (bunRuntime && typeof bunRuntime.gc === "function") {
+    bunRuntime.gc(true);
+  }
+}
+
 describe("Memory Overhead", () => {
   it("20 metrics x 10k samples stays under 10 MB", () => {
     // Force GC before measurement if available.
-    if (typeof globalThis.Bun !== "undefined" && typeof Bun.gc === "function") {
-      Bun.gc(true);
-    }
+    maybeGc();
 
     const heapBefore = process.memoryUsage().heapUsed;
 
@@ -33,9 +40,7 @@ describe("Memory Overhead", () => {
       }
     }
 
-    if (typeof globalThis.Bun !== "undefined" && typeof Bun.gc === "function") {
-      Bun.gc(true);
-    }
+    maybeGc();
 
     const heapAfter = process.memoryUsage().heapUsed;
     const totalBytes = heapAfter - heapBefore;
@@ -59,9 +64,7 @@ describe("Memory Overhead", () => {
   });
 
   it("empty buffers have near-zero overhead", () => {
-    if (typeof globalThis.Bun !== "undefined" && typeof Bun.gc === "function") {
-      Bun.gc(true);
-    }
+    maybeGc();
 
     const heapBefore = process.memoryUsage().heapUsed;
 
@@ -77,9 +80,7 @@ describe("Memory Overhead", () => {
     }
     // No samples recorded — buffers are lazily allocated.
 
-    if (typeof globalThis.Bun !== "undefined" && typeof Bun.gc === "function") {
-      Bun.gc(true);
-    }
+    maybeGc();
 
     const heapAfter = process.memoryUsage().heapUsed;
     const totalKB = (heapAfter - heapBefore) / 1024;

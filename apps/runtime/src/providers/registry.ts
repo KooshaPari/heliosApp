@@ -11,24 +11,12 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type { ProviderAdapter, ProviderRegistration, ProviderHealthStatus } from "./adapter.js";
+import { ProviderRegistryStore, type RegisteredProvider } from "./registry_store.js";
+import { validateProviderRegistration } from "./registry_validation.js";
 import {
   NormalizedProviderError,
   normalizeError,
-  PROVIDER_ERROR_CODES,
 } from "./errors.js";
-
-/**
- * Registered provider instance with metadata.
- */
-interface RegisteredProvider {
-  id: string;
-  type: "acp" | "mcp" | "a2a";
-  adapter: ProviderAdapter<any, any, any>;
-  registration: ProviderRegistration<any>;
-  healthStatus: ProviderHealthStatus;
-  inFlightCount: number;
-  laneIds: Set<string>; // Lanes this provider is bound to
-}
 
 /**
  * Provider Registry
@@ -40,8 +28,8 @@ interface RegisteredProvider {
  * FR-025-002: Configuration validation, credential binding, lifecycle tracking.
  */
 export class ProviderRegistry {
-  /** Map of provider ID to registered provider instance */
-  private providers = new Map<string, RegisteredProvider>();
+  /** Provider state/query store */
+  private readonly store = new ProviderRegistryStore();
 
   /** Reference to the protocol bus for event publishing */
   private bus: LocalBus | null = null;
@@ -71,7 +59,7 @@ export class ProviderRegistry {
     adapter: ProviderAdapter<TConfig, TInput, TOutput>
   ): Promise<void> {
     // Validate registration configuration
-    this.validateRegistration(registration);
+    validateProviderRegistration(registration);
 
     try {
       // Initialize adapter with validated config
@@ -92,7 +80,7 @@ export class ProviderRegistry {
       };
 
       // Add to registry
-      this.providers.set(registration.id, registeredProvider);
+      this.store.set(registeredProvider);
 
       // Emit lifecycle event
       await this.publishEvent("provider.registered", {
@@ -134,7 +122,7 @@ export class ProviderRegistry {
    * @throws NormalizedProviderError if provider not found or terminate fails
    */
   async unregister(providerId: string): Promise<void> {
-    const provider = this.providers.get(providerId);
+    const provider = this.store.getRecord(providerId);
 
     if (!provider) {
       throw new NormalizedProviderError(
@@ -149,7 +137,7 @@ export class ProviderRegistry {
       await provider.adapter.terminate();
 
       // Remove from registry
-      this.providers.delete(providerId);
+      this.store.delete(providerId);
 
       // Emit lifecycle event
       await this.publishEvent("provider.unregistered", {
@@ -161,7 +149,7 @@ export class ProviderRegistry {
       const normalized = normalizeError(error, "internal");
 
       // Log error but still remove from registry (force cleanup)
-      this.providers.delete(providerId);
+      this.store.delete(providerId);
 
       throw new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
@@ -179,8 +167,7 @@ export class ProviderRegistry {
    * @returns Registered provider or undefined if not found
    */
   get(providerId: string): ProviderAdapter<any, any, any> | undefined {
-    const provider = this.providers.get(providerId);
-    return provider?.adapter;
+    return this.store.getAdapter(providerId);
   }
 
   /**
@@ -190,15 +177,7 @@ export class ProviderRegistry {
    * @returns Array of adapters matching the type
    */
   listByType(type: "acp" | "mcp" | "a2a"): ProviderAdapter<any, any, any>[] {
-    const result: ProviderAdapter<any, any, any>[] = [];
-
-    for (const provider of this.providers.values()) {
-      if (provider.type === type) {
-        result.push(provider.adapter);
-      }
-    }
-
-    return result;
+    return this.store.listAdaptersByType(type);
   }
 
   /**
@@ -208,15 +187,7 @@ export class ProviderRegistry {
    * @returns Array of adapters bound to the workspace
    */
   listByWorkspace(workspaceId: string): ProviderAdapter<any, any, any>[] {
-    const result: ProviderAdapter<any, any, any>[] = [];
-
-    for (const provider of this.providers.values()) {
-      if (provider.registration.workspaceId === workspaceId) {
-        result.push(provider.adapter);
-      }
-    }
-
-    return result;
+    return this.store.listAdaptersByWorkspace(workspaceId);
   }
 
   /**
@@ -228,17 +199,14 @@ export class ProviderRegistry {
    * @param laneId Lane ID
    */
   bindToLane(providerId: string, laneId: string): void {
-    const provider = this.providers.get(providerId);
-
-    if (!provider) {
+    const bound = this.store.bindToLane(providerId, laneId);
+    if (!bound) {
       throw new NormalizedProviderError(
         "PROVIDER_UNKNOWN",
         `Provider ${providerId} not found in registry`,
         "internal"
       );
     }
-
-    provider.laneIds.add(laneId);
   }
 
   /**
@@ -248,11 +216,7 @@ export class ProviderRegistry {
    * @param laneId Lane ID
    */
   unbindFromLane(providerId: string, laneId: string): void {
-    const provider = this.providers.get(providerId);
-
-    if (provider) {
-      provider.laneIds.delete(laneId);
-    }
+    this.store.unbindFromLane(providerId, laneId);
   }
 
   /**
@@ -262,15 +226,7 @@ export class ProviderRegistry {
    * @returns Array of provider IDs bound to the lane
    */
   getProvidersForLane(laneId: string): string[] {
-    const result: string[] = [];
-
-    for (const provider of this.providers.values()) {
-      if (provider.laneIds.has(laneId)) {
-        result.push(provider.id);
-      }
-    }
-
-    return result;
+    return this.store.getProvidersForLane(laneId);
   }
 
   /**
@@ -282,7 +238,7 @@ export class ProviderRegistry {
    * @throws NormalizedProviderError if limit exceeded
    */
   checkConcurrencyLimit(providerId: string): void {
-    const provider = this.providers.get(providerId);
+    const provider = this.store.getRecord(providerId);
 
     if (!provider) {
       throw new NormalizedProviderError(
@@ -307,11 +263,7 @@ export class ProviderRegistry {
    * @param providerId Provider ID
    */
   incrementInFlight(providerId: string): void {
-    const provider = this.providers.get(providerId);
-
-    if (provider) {
-      provider.inFlightCount++;
-    }
+    this.store.incrementInFlight(providerId);
   }
 
   /**
@@ -320,11 +272,7 @@ export class ProviderRegistry {
    * @param providerId Provider ID
    */
   decrementInFlight(providerId: string): void {
-    const provider = this.providers.get(providerId);
-
-    if (provider && provider.inFlightCount > 0) {
-      provider.inFlightCount--;
-    }
+    this.store.decrementInFlight(providerId);
   }
 
   /**
@@ -334,11 +282,7 @@ export class ProviderRegistry {
    * @param status New health status
    */
   updateHealthStatus(providerId: string, status: ProviderHealthStatus): void {
-    const provider = this.providers.get(providerId);
-
-    if (provider) {
-      provider.healthStatus = status;
-    }
+    this.store.updateHealthStatus(providerId, status);
   }
 
   /**
@@ -348,68 +292,7 @@ export class ProviderRegistry {
    * @returns Health status or undefined if not found
    */
   getHealthStatus(providerId: string): ProviderHealthStatus | undefined {
-    const provider = this.providers.get(providerId);
-    return provider?.healthStatus;
-  }
-
-  /**
-   * Validate provider registration configuration.
-   *
-   * FR-025-002: Configuration validation.
-   *
-   * @param registration Registration to validate
-   * @throws NormalizedProviderError if validation fails
-   */
-  private validateRegistration<TConfig>(registration: ProviderRegistration<TConfig>): void {
-    // Check required fields
-    if (!registration.id || typeof registration.id !== "string") {
-      throw new NormalizedProviderError(
-        "PROVIDER_INIT_FAILED",
-        "Registration missing required field: id",
-        "internal"
-      );
-    }
-
-    if (!registration.type || !["acp", "mcp", "a2a"].includes(registration.type)) {
-      throw new NormalizedProviderError(
-        "PROVIDER_INIT_FAILED",
-        "Registration missing or invalid required field: type",
-        "internal"
-      );
-    }
-
-    if (!registration.workspaceId || typeof registration.workspaceId !== "string") {
-      throw new NormalizedProviderError(
-        "PROVIDER_INIT_FAILED",
-        "Registration missing required field: workspaceId",
-        "internal"
-      );
-    }
-
-    // Validate concurrency limit (1-100)
-    if (
-      typeof registration.concurrencyLimit !== "number" ||
-      registration.concurrencyLimit < 1 ||
-      registration.concurrencyLimit > 100
-    ) {
-      throw new NormalizedProviderError(
-        "PROVIDER_INIT_FAILED",
-        `Invalid concurrency limit: ${registration.concurrencyLimit} (must be 1-100)`,
-        "internal"
-      );
-    }
-
-    // Validate health check interval (minimum 5000ms)
-    if (
-      typeof registration.healthCheckIntervalMs !== "number" ||
-      registration.healthCheckIntervalMs < 5000
-    ) {
-      throw new NormalizedProviderError(
-        "PROVIDER_INIT_FAILED",
-        `Invalid health check interval: ${registration.healthCheckIntervalMs} (minimum 5000ms)`,
-        "internal"
-      );
-    }
+    return this.store.getHealthStatus(providerId);
   }
 
   /**

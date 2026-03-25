@@ -4,11 +4,11 @@
  */
 
 import {
-  PolicyRule,
   PolicyClassification,
   PolicyPatternType,
-  CommandContext,
-  PolicyEvaluationResult
+  type PolicyRule,
+  type CommandContext,
+  type PolicyEvaluationResult
 } from './types';
 
 /**

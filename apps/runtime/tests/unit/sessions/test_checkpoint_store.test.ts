@@ -4,9 +4,8 @@ import { Slice1CheckpointStorePlaceholder } from "../../../src/sessions/checkpoi
 describe("checkpoint store placeholder", () => {
   test("stays non-operational in slice-1", async () => {
     const store = new Slice1CheckpointStorePlaceholder();
-    await expect(store.save({} as never)).rejects.toThrow("slice_2_durability_not_implemented");
-    await expect(store.latest("session-1")).resolves.toBeNull();
-    await expect(store.list("session-1")).resolves.toEqual([]);
+    await expect(store.save()).rejects.toThrow("slice_2_durability_not_implemented");
+    await expect(store.latest()).resolves.toBeNull();
+    await expect(store.list()).resolves.toEqual([]);
   });
 });
-

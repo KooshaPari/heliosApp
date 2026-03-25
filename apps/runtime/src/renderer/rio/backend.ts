@@ -18,6 +18,7 @@ import { RioSurface } from "./surface.js";
 import { RioCapabilities } from "./capabilities.js";
 import { RioMetrics } from "./metrics.js";
 import { RioInputRelay } from "./input.js";
+import { RioFallbackController } from "./fallback_controller.js";
 
 // ---------------------------------------------------------------------------
 // Error
@@ -48,18 +49,47 @@ export class RioBackend implements RendererAdapter {
   private _crashHandlers: Array<(error: Error) => void> = [];
   private _enabled = true;
   private _registry: RendererRegistry | undefined;
-  private _fallbackInProgress = false;
-  private _crashCount = 0;
 
   private readonly _streamBindings = new Map<
     string,
     { reader: ReadableStreamDefaultReader<Uint8Array>; aborted: boolean }
   >();
 
+  private readonly _fallbackController: RioFallbackController;
+
   constructor() {
     this._capabilities = new RioCapabilities();
     this._metrics = new RioMetrics();
     this._inputRelay = new RioInputRelay();
+    this._fallbackController = new RioFallbackController({
+      getRegistry: () => this._registry,
+      setRegistry: (registry) => {
+        this._registry = registry;
+      },
+      getConfig: () => this._config,
+      getState: () => this._state,
+      setState: (state) => {
+        this._state = state;
+      },
+      getProcess: () => this._process,
+      clearProcess: () => {
+        this._process = undefined;
+      },
+      getSurface: () => this._surface,
+      clearSurface: () => {
+        if (this._surface) {
+          this._surface.unbind();
+          this._surface = undefined;
+        }
+      },
+      stopMetrics: () => {
+        this._metrics.stop();
+      },
+      getStreamBindings: () => this._streamBindings,
+      clearStreamBindings: () => {
+        this._streamBindings.clear();
+      },
+    });
   }
 
   // -----------------------------------------------------------------------
@@ -68,17 +98,17 @@ export class RioBackend implements RendererAdapter {
 
   /** Bind a registry reference so fallback can find ghostty. */
   setRegistry(registry: RendererRegistry): void {
-    this._registry = registry;
+    this._fallbackController.setRegistry(registry);
   }
 
   /** Get current crash count (for testing). */
   getCrashCount(): number {
-    return this._crashCount;
+    return this._fallbackController.getCrashCount();
   }
 
   /** Check if fallback is in progress. */
   isFallbackInProgress(): boolean {
-    return this._fallbackInProgress;
+    return this._fallbackController.isFallbackInProgress();
   }
 
   // -----------------------------------------------------------------------
@@ -138,7 +168,7 @@ export class RioBackend implements RendererAdapter {
     // Set up crash detection forwarding with fallback.
     this._process!.onExit((code) => {
       if (this._state === "running") {
-        this._crashCount++;
+        this._fallbackController.incrementCrashCount();
         const error = new Error(`Rio process exited unexpectedly with code ${code}`);
         this._state = "errored";
 
@@ -152,7 +182,7 @@ export class RioBackend implements RendererAdapter {
         }
 
         // Attempt automatic fallback to ghostty.
-        this._attemptFallback(error).catch(() => {
+        this._fallbackController.attemptFallback(error).catch(() => {
           // fallback errors are already handled inside _attemptFallback
         });
       }
@@ -265,97 +295,8 @@ export class RioBackend implements RendererAdapter {
     this._crashHandlers.push(handler);
   }
 
-  // -----------------------------------------------------------------------
-  // Fallback logic (T007)
-  // -----------------------------------------------------------------------
-
-  private static readonly FALLBACK_TIMEOUT_MS = 5000;
-
-  /**
-   * Attempt to fall back from rio to ghostty.
-   *
-   * Uses the renderer registry to find ghostty and switch to it.
-   * If ghostty is unavailable or the switch fails, transitions to errored.
-   */
   async _attemptFallback(crashError: Error): Promise<void> {
-    if (this._fallbackInProgress) return;
-    this._fallbackInProgress = true;
-
-    try {
-      if (!this._registry) {
-        // No registry — cannot fallback.
-        this._state = "errored";
-        return;
-      }
-
-      const ghostty = this._registry.get("ghostty");
-      if (!ghostty) {
-        // Ghostty not available — escalate to errored.
-        this._state = "errored";
-        return;
-      }
-
-      // Collect current stream bindings for transfer.
-      const boundPtyIds = [...this._streamBindings.keys()];
-
-      // Stop rio (clean up remaining resources).
-      this._metrics.stop();
-      for (const [, binding] of this._streamBindings) {
-        binding.aborted = true;
-        try {
-          binding.reader.cancel().catch(() => {});
-        } catch {
-          // ignore
-        }
-      }
-      this._streamBindings.clear();
-      if (this._surface) {
-        this._surface.unbind();
-        this._surface = undefined;
-      }
-      if (this._process) {
-        // Process already exited (crash), just clean ref.
-        this._process = undefined;
-      }
-
-      // Switch to ghostty with timeout.
-      const switchPromise = this._switchToGhostty(ghostty, boundPtyIds);
-      const timeout = new Promise<"timeout">((resolve) =>
-        setTimeout(() => resolve("timeout"), RioBackend.FALLBACK_TIMEOUT_MS),
-      );
-
-      const result = await Promise.race([switchPromise, timeout]);
-      if (result === "timeout") {
-        this._state = "errored";
-        return;
-      }
-
-      // Success — ghostty is now active.
-      this._registry.setActive("ghostty");
-      this._state = "stopped";
-    } catch {
-      this._state = "errored";
-    } finally {
-      this._fallbackInProgress = false;
-    }
-  }
-
-  private async _switchToGhostty(
-    ghostty: RendererAdapter,
-    _boundPtyIds: string[],
-  ): Promise<void> {
-    const ghosttyState = ghostty.getState();
-    if (ghosttyState === "uninitialized" || ghosttyState === "stopped" || ghosttyState === "errored") {
-      // Use stored config or sensible defaults.
-      const config: RendererConfig = this._config ?? {
-        gpuAcceleration: false,
-        colorDepth: 24,
-        maxDimensions: { cols: 200, rows: 50 },
-      };
-      await ghostty.init(config);
-    }
-    // Note: actual PTY stream rebinding depends on the orchestration layer
-    // (spec 010 switch transaction). The adapter signals readiness here.
+    await this._fallbackController.attemptFallback(crashError);
   }
 
   // -----------------------------------------------------------------------
