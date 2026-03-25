@@ -52,7 +52,7 @@ jobs:
             const approvals = {};
             reviews.data.forEach(review => {
               if (review.state === 'APPROVED') {
-                latestReviewByUser[review.user.login] = true;
+                approvals[review.user.login] = true;
               }
             });
 
@@ -143,13 +143,13 @@ jobs:
             const missingReqs = "${{ steps.check.outputs.missing-requirements }}".split(';');
             
             let message = '⚠️ **Self-merge is blocked due to missing requirements:**\n\n';
-            if (!${{ steps.check.outputs.all-checks-passed }}) {
+            if ("${{ steps.check.outputs.all-checks-passed }}" !== "true") {
               message += '- ❌ Not all quality gates have passed\n';
             }
-            if (!${{ steps.check.outputs.has-approval }}) {
+            if ("${{ steps.check.outputs.has-approval }}" !== "true") {
               message += '- ❌ PR does not have required review approval\n';
             }
-            if (!${{ steps.check.outputs.is-author }}) {
+            if ("${{ steps.check.outputs.is-author }}" !== "true") {
               message += '- ℹ️ Only the PR author can self-merge\n';
             }
             message += '\nPlease ensure all checks pass before merging.';
