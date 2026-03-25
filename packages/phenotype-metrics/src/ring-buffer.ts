@@ -41,7 +41,7 @@ export class RingBuffer<T extends number = number> {
    * @throws {RangeError} if capacity is not a positive number
    */
   constructor(options: RingBufferOptions | number = {}) {
-    const capacity = typeof options === 'number' ? options : (options.capacity ?? DEFAULT_CAPACITY);
+    const capacity = typeof options === "number" ? options : (options.capacity ?? DEFAULT_CAPACITY);
     if (capacity <= 0 || !Number.isFinite(capacity)) {
       throw new RangeError("RingBuffer capacity must be a positive number");
     }
@@ -67,7 +67,7 @@ export class RingBuffer<T extends number = number> {
    * @param value - The numeric value to record
    * @param timestamp - Optional timestamp (defaults to 0)
    */
-  push(value: T, timestamp: number = 0): void {
+  push(value: T, timestamp = 0): void {
     if (this._count >= this._capacity) {
       this._overflow++;
     }

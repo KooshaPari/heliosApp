@@ -4,7 +4,7 @@
  * TDD approach: Write failing tests first, then implement.
  */
 
-import { describe, expect, it, beforeEach } from "vitest";
+import { describe, expect, it } from "vitest";
 import { RingBuffer } from "../ring-buffer.js";
 
 describe("RingBuffer", () => {
@@ -121,7 +121,7 @@ describe("RingBuffer", () => {
   describe("fill with callback", () => {
     it("should fill buffer using index callback", () => {
       const buffer = new RingBuffer<number>(3);
-      buffer.fill((i) => i * 10);
+      buffer.fill(i => i * 10);
       expect(buffer.toArray()).toEqual([0, 10, 20]);
     });
   });

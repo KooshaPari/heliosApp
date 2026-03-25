@@ -5,13 +5,8 @@
  * Uses the Given-When-Then pattern for clarity.
  */
 
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import {
-  MetricsRegistry,
-  registerMetric,
-  recordMetric,
-  getMetric,
-} from "../index.js";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { MetricsRegistry } from "../index.js";
 
 describe("MetricsRegistry", () => {
   let registry: MetricsRegistry;
@@ -66,7 +61,7 @@ describe("MetricsRegistry", () => {
 
       const stats = registry.get("test.gauge");
       expect(stats).not.toBeNull();
-      expect(stats!.count).toBe(0);
+      expect(stats?.count).toBe(0);
     });
 
     it("should support custom buffer size", () => {
@@ -94,8 +89,8 @@ describe("MetricsRegistry", () => {
       registry.record("response.size", 1024);
 
       const stats = registry.get("response.size");
-      expect(stats!.count).toBe(1);
-      expect(stats!.value).toBe(1024);
+      expect(stats?.count).toBe(1);
+      expect(stats?.value).toBe(1024);
     });
 
     it("should record multiple values", () => {
@@ -112,10 +107,10 @@ describe("MetricsRegistry", () => {
       registry.record("request.latency", 30);
 
       const stats = registry.get("request.latency");
-      expect(stats!.count).toBe(3);
-      expect(stats!.mean).toBe(20);
-      expect(stats!.min).toBe(10);
-      expect(stats!.max).toBe(30);
+      expect(stats?.count).toBe(3);
+      expect(stats?.mean).toBe(20);
+      expect(stats?.min).toBe(10);
+      expect(stats?.max).toBe(30);
     });
 
     it("should respect min/max bounds", () => {
@@ -130,7 +125,7 @@ describe("MetricsRegistry", () => {
 
       registry.record("bounded.value", 150);
       const stats = registry.get("bounded.value");
-      expect(stats!.value).toBe(100); // Capped at max
+      expect(stats?.value).toBe(100); // Capped at max
     });
 
     it("should auto-register on first record if not exists", () => {
@@ -139,7 +134,7 @@ describe("MetricsRegistry", () => {
 
       expect(registry.has("auto.registered")).toBe(true);
       const stats = registry.get("auto.registered");
-      expect(stats!.value).toBe(42);
+      expect(stats?.value).toBe(42);
     });
   });
 
@@ -156,7 +151,7 @@ describe("MetricsRegistry", () => {
       registry.increment("requests.total", 5);
 
       const stats = registry.get("requests.total");
-      expect(stats!.value).toBe(6); // Sum of increments
+      expect(stats?.value).toBe(6); // Sum of increments
     });
 
     it("should decrement counter", () => {
@@ -171,7 +166,7 @@ describe("MetricsRegistry", () => {
       registry.decrement("connections.active", 3);
 
       const stats = registry.get("connections.active");
-      expect(stats!.value).toBe(7);
+      expect(stats?.value).toBe(7);
     });
   });
 
@@ -189,7 +184,7 @@ describe("MetricsRegistry", () => {
 
       const stats = registry.get("memory.used");
       // Gauge value is the last reading
-      expect(stats!.value).toBe(2 * 1024 * 1024);
+      expect(stats?.value).toBe(2 * 1024 * 1024);
     });
   });
 
@@ -210,8 +205,8 @@ describe("MetricsRegistry", () => {
       registry.recordLatency("operation.duration", start);
 
       const stats = registry.get("operation.duration");
-      expect(stats!.count).toBe(1);
-      expect(stats!.value).toBeGreaterThan(0);
+      expect(stats?.count).toBe(1);
+      expect(stats?.value).toBeGreaterThan(0);
     });
   });
 
@@ -231,9 +226,9 @@ describe("MetricsRegistry", () => {
       }
 
       const stats = registry.get("latency.histogram");
-      expect(stats!.p50).toBeCloseTo(50.5, 0);
-      expect(stats!.p90).toBeCloseTo(90.5, 0);
-      expect(stats!.p99).toBeGreaterThan(99);
+      expect(stats?.p50).toBeCloseTo(50.5, 0);
+      expect(stats?.p90).toBeCloseTo(90.5, 0);
+      expect(stats?.p99).toBeGreaterThan(99);
     });
   });
 

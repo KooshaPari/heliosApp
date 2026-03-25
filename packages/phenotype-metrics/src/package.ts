@@ -14,7 +14,7 @@ export {
   getAllMetrics,
   metricsSnapshot,
   metricsToPrometheus,
-  metricsToJSON,
+  metricsToJson,
 } from "./index.js";
 
 export { RingBuffer } from "./ring-buffer.js";

@@ -30,8 +30,8 @@
  * ```
  */
 
+import { aggregate } from "./aggregator.js";
 import { RingBuffer } from "./ring-buffer.js";
-import { Aggregator, aggregate } from "./aggregator.js";
 
 /**
  * Metric type enumeration.
@@ -41,14 +41,7 @@ export type MetricType = "counter" | "gauge" | "histogram" | "latency";
 /**
  * Unit of measurement for metrics.
  */
-export type MetricUnit =
-  | "bytes"
-  | "ms"
-  | "percent"
-  | "requests"
-  | "errors"
-  | "count"
-  | string;
+export type MetricUnit = "bytes" | "ms" | "percent" | "requests" | "errors" | "count" | string;
 
 /**
  * Configuration for registering a new metric.
@@ -139,8 +132,6 @@ export class MetricsRegistry {
   private readonly metrics: Map<string, Metric> = new Map();
   private readonly lock: Map<string, boolean> = new Map();
 
-  constructor() {}
-
   /**
    * Get the global metrics registry instance.
    * Creates one if it doesn't exist.
@@ -206,7 +197,9 @@ export class MetricsRegistry {
    */
   get(name: string): MetricStats | null {
     const metric = this.metrics.get(name);
-    if (!metric) return null;
+    if (!metric) {
+      return null;
+    }
 
     const samples = metric.buffer.toArray();
     if (samples.length === 0) {
@@ -289,14 +282,15 @@ export class MetricsRegistry {
     }
 
     // Apply min/max bounds if configured
-    if (metric.config.min !== undefined && value < metric.config.min) {
-      value = metric.config.min;
+    let boundedValue = value;
+    if (metric.config.min !== undefined && boundedValue < metric.config.min) {
+      boundedValue = metric.config.min;
     }
-    if (metric.config.max !== undefined && value > metric.config.max) {
-      value = metric.config.max;
+    if (metric.config.max !== undefined && boundedValue > metric.config.max) {
+      boundedValue = metric.config.max;
     }
 
-    metric.buffer.push(value);
+    metric.buffer.push(boundedValue);
     metric.lastUpdated = timestamp ?? Date.now();
   }
 
@@ -308,17 +302,17 @@ export class MetricsRegistry {
    */
   increment(name: string, amount = 1): void {
     const metric = this.metrics.get(name);
-    if (!metric) {
+    if (metric) {
+      metric.buffer.push(amount);
+      metric.lastUpdated = Date.now();
+    } else {
       this.register({
         name,
         type: "counter",
         unit: "count",
         description: `Counter: ${name}`,
       });
-      this.metrics.get(name)!.buffer.push(amount);
-    } else {
-      metric.buffer.push(amount);
-      metric.lastUpdated = Date.now();
+      this.metrics.get(name)?.buffer.push(amount);
     }
   }
 
@@ -374,7 +368,7 @@ export class MetricsRegistry {
    * Get all metric configurations.
    */
   listMetrics(): MetricConfig[] {
-    return Array.from(this.metrics.values()).map((m) => m.config);
+    return Array.from(this.metrics.values()).map(m => m.config);
   }
 
   /**
@@ -437,9 +431,7 @@ export class MetricsRegistry {
     for (const [name, stats] of this.getAll()) {
       const fullName = `${prefix}${name.replace(/\./g, "_")}`;
       const labels = Object.entries(stats)
-        .filter(
-          ([k]) => !["name", "type", "unit", "lastUpdated"].includes(k)
-        )
+        .filter(([k]) => !["name", "type", "unit", "lastUpdated"].includes(k))
         .map(([k, v]) => `${k}="${v}"`)
         .join(",");
 
@@ -508,11 +500,9 @@ export const registerMetric = (config: MetricConfig) =>
 export const recordMetric = (name: string, value: number, timestamp?: number) =>
   MetricsRegistry.getInstance().record(name, value, timestamp);
 
-export const getMetric = (name: string) =>
-  MetricsRegistry.getInstance().get(name);
+export const getMetric = (name: string) => MetricsRegistry.getInstance().get(name);
 
-export const getAllMetrics = () =>
-  MetricsRegistry.getInstance().getAll();
+export const getAllMetrics = () => MetricsRegistry.getInstance().getAll();
 
 export const metricsSnapshot = (includeSystem?: boolean) =>
   MetricsRegistry.getInstance().snapshot(includeSystem);
@@ -520,5 +510,4 @@ export const metricsSnapshot = (includeSystem?: boolean) =>
 export const metricsToPrometheus = (prefix?: string) =>
   MetricsRegistry.getInstance().toPrometheus(prefix);
 
-export const metricsToJSON = () =>
-  MetricsRegistry.getInstance().toJSON();
+export const metricsToJson = () => MetricsRegistry.getInstance().toJSON();

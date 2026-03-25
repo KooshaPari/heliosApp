@@ -23,16 +23,8 @@
     "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": [
-    "metrics",
-    "observability",
-    "performance",
-    "telemetry",
-    "phenotype"
-  ],
-  "files": [
-    "dist"
-  ],
+  "keywords": ["metrics", "observability", "performance", "telemetry", "phenotype"],
+  "files": ["dist"],
   "devDependencies": {
     "vitest": "^2.0.0"
   }

@@ -74,7 +74,9 @@ export class Aggregator {
    * Get the mean (average) of all samples.
    */
   getMean(): number {
-    if (this.samples.length === 0) return 0;
+    if (this.samples.length === 0) {
+      return 0;
+    }
     return this.getSum() / this.samples.length;
   }
 
@@ -82,10 +84,14 @@ export class Aggregator {
    * Get the minimum value.
    */
   getMin(): number {
-    if (this.samples.length === 0) return 0;
+    if (this.samples.length === 0) {
+      return 0;
+    }
     let min = this.samples[0];
     for (let i = 1; i < this.samples.length; i++) {
-      if (this.samples[i] < min) min = this.samples[i];
+      if (this.samples[i] < min) {
+        min = this.samples[i];
+      }
     }
     return min;
   }
@@ -94,10 +100,14 @@ export class Aggregator {
    * Get the maximum value.
    */
   getMax(): number {
-    if (this.samples.length === 0) return 0;
+    if (this.samples.length === 0) {
+      return 0;
+    }
     let max = this.samples[0];
     for (let i = 1; i < this.samples.length; i++) {
-      if (this.samples[i] > max) max = this.samples[i];
+      if (this.samples[i] > max) {
+        max = this.samples[i];
+      }
     }
     return max;
   }
@@ -163,7 +173,9 @@ export class Aggregator {
    * Get standard deviation.
    */
   getStdDev(): number {
-    if (this.samples.length === 0) return 0;
+    if (this.samples.length === 0) {
+      return 0;
+    }
     const mean = this.getMean();
     let sumSquaredDiff = 0;
     for (let i = 0; i < this.samples.length; i++) {
