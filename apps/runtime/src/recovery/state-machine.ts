@@ -90,7 +90,7 @@ export class RecoveryStateMachine {
       if (this.currentState.attemptCount > MAX_RETRIES_PER_STAGE) {
         throw new Error(`Max retries (${MAX_RETRIES_PER_STAGE}) exceeded for stage ${from}`);
       }
-    } else if (from !== to) {
+    } else if (from !== to && !this.isFailureState(to)) {
       // New stage - reset attempt count
       this.currentState.attemptCount = 0;
     }
@@ -146,7 +146,7 @@ export class RecoveryStateMachine {
   }
 
   private isFailureState(stage: RecoveryStage): boolean {
-    return stage.includes("FAILED");
+    return typeof stage === "string" && stage.includes("FAILED");
   }
 
   private async loadState(): Promise<void> {
@@ -154,8 +154,14 @@ export class RecoveryStateMachine {
       const statePath = path.join(this.recoveryDataDir, "recovery", "recovery-state.json");
       const data = await fs.readFile(statePath, "utf-8");
       const state = JSON.parse(data) as RecoveryState;
-      this.currentStage = state.stage;
-      this.currentState = state;
+      const stageValues = new Set(Object.values(RecoveryStage));
+      if (typeof state.stage === "string" && stageValues.has(state.stage)) {
+        this.currentStage = state.stage;
+        this.currentState = state;
+        return;
+      }
+
+      throw new Error("Invalid persisted recovery state");
     } catch {
       // No persisted state - start fresh
       this.currentStage = RecoveryStage.CRASHED;

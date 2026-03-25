@@ -4,6 +4,10 @@
   "private": true,
   "type": "module",
   "packageManager": "bun@1.2.20",
+  "engines": {
+    "node": ">=20.0.0",
+    "bun": ">=1.2.20"
+  },
   "workspaces": [
     "apps/runtime",
     "apps/desktop"
