@@ -1,5 +1,5 @@
-import { promises as fs } from "fs";
-import path from "path";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import type { RecoveryState } from "./state-machine-types.js";
 
 export function getRecoveryStatePath(recoveryDataDir: string): string {
@@ -28,9 +28,7 @@ export async function persistRecoveryState(
     const tempPath = `${statePath}.tmp`;
     await fs.writeFile(tempPath, JSON.stringify(state, null, 2));
     await fs.rename(tempPath, statePath);
-  } catch (err) {
-    console.error("Failed to persist recovery state:", err);
-  }
+  } catch (_err) {}
 }
 
 export async function deleteRecoveryState(recoveryDataDir: string): Promise<void> {

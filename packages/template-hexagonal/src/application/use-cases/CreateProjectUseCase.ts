@@ -4,15 +4,12 @@
  * Use cases orchestrate domain logic and coordinate between input ports
  * (called by driving adapters) and output ports (called to access infrastructure).
  */
-import {
-  type ICreateProjectInputPort,
-  type CreateProjectInput,
-  type CreateProjectOutput,
+import type {
+  CreateProjectInput,
+  CreateProjectOutput,
+  ICreateProjectInputPort,
 } from "../../domain/ports/input";
-import {
-  type IProjectRepository,
-  type ProjectEntity,
-} from "../../domain/ports/output";
+import type { IProjectRepository, ProjectEntity } from "../../domain/ports/output";
 import { ProjectDomainService } from "../../domain/services";
 
 /**

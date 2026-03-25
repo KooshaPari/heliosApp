@@ -132,8 +132,8 @@ describe("GhosttyInputRelay - byte passthrough", () => {
     relay.setFocus("pty-1");
     relay.relayInput(makeEvent([0x41, 0x42, 0x43]));
     expect(writes.length).toBe(1);
-    expect(writes[0]!.ptyId).toBe("pty-1");
-    expect(writes[0]!.data).toEqual(new Uint8Array([0x41, 0x42, 0x43]));
+    expect(writes[0]?.ptyId).toBe("pty-1");
+    expect(writes[0]?.data).toEqual(new Uint8Array([0x41, 0x42, 0x43]));
   });
 
   test("input not routed to unfocused PTY", () => {
@@ -143,7 +143,7 @@ describe("GhosttyInputRelay - byte passthrough", () => {
     relay.relayInput(makeEvent([0x41]));
     // Only pty-1 receives input
     expect(writes.length).toBe(1);
-    expect(writes[0]!.ptyId).toBe("pty-1");
+    expect(writes[0]?.ptyId).toBe("pty-1");
   });
 
   test("focus switch routes input to new target", () => {
@@ -157,8 +157,8 @@ describe("GhosttyInputRelay - byte passthrough", () => {
     relay.relayInput(makeEvent([0x42]));
 
     expect(writes.length).toBe(2);
-    expect(writes[0]!.ptyId).toBe("pty-1");
-    expect(writes[1]!.ptyId).toBe("pty-2");
+    expect(writes[0]?.ptyId).toBe("pty-1");
+    expect(writes[1]?.ptyId).toBe("pty-2");
   });
 
   test("escape sequences pass through unmodified", () => {
@@ -166,7 +166,7 @@ describe("GhosttyInputRelay - byte passthrough", () => {
     relay.setFocus("pty-1");
     // ESC [ A = cursor up
     relay.relayInput(makeEvent([0x1b, 0x5b, 0x41]));
-    expect(writes[0]!.data).toEqual(new Uint8Array([0x1b, 0x5b, 0x41]));
+    expect(writes[0]?.data).toEqual(new Uint8Array([0x1b, 0x5b, 0x41]));
   });
 });
 

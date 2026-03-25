@@ -47,7 +47,9 @@ describe("CredentialStore: store and retrieve", () => {
   });
 
   it("stores file with 0600 permissions on unix", async () => {
-    if (process.platform === "win32") return;
+    if (process.platform === "win32") {
+      return;
+    }
     await store.store("providerA", "ws1", "myKey", "secret");
     const filePath = join(tmpDir, "secrets", "providerA", "ws1", "myKey.enc");
     const mode = statSync(filePath).mode & 0o777;
@@ -141,7 +143,9 @@ describe("CredentialStore: rotate preserves file permissions", () => {
   });
 
   it("file permissions are 0600 after rotate (unix only)", async () => {
-    if (process.platform === "win32") return;
+    if (process.platform === "win32") {
+      return;
+    }
     await store.store("providerA", "ws1", "rotKey", "original");
     await store.rotate("providerA", "ws1", "rotKey", "rotated", "corr-1");
     const filePath = join(tmpDir, "secrets", "providerA", "ws1", "rotKey.enc");

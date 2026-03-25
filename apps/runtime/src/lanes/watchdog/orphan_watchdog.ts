@@ -45,7 +45,6 @@ export class OrphanWatchdog {
 
   async start(): Promise<void> {
     if (this.isRunning) {
-      console.warn("Watchdog is already running");
       return;
     }
 
@@ -55,14 +54,8 @@ export class OrphanWatchdog {
     const checkpoint = await this.checkpointManager.load();
     if (checkpoint) {
       this.cycleNumber = checkpoint.cycleNumber;
-      console.log(
-        `[Watchdog] Resumed from checkpoint: cycle ${this.cycleNumber}, last run: ${checkpoint.lastCycleTimestamp}`
-      );
     } else {
-      console.log("[Watchdog] Starting fresh with no checkpoint");
     }
-
-    console.log(`[Watchdog] Started with ${this.detectionInterval}ms interval`);
 
     // Run first cycle immediately
     this.scheduleNextCycle();
@@ -78,8 +71,6 @@ export class OrphanWatchdog {
       clearTimeout(this.detectionTimer);
       this.detectionTimer = null;
     }
-
-    console.log("[Watchdog] Stopped");
   }
 
   getLastDetectionDuration(): number {
@@ -91,7 +82,9 @@ export class OrphanWatchdog {
   }
 
   private scheduleNextCycle(): void {
-    if (!this.isRunning) return;
+    if (!this.isRunning) {
+      return;
+    }
 
     this.detectionTimer = setTimeout(() => {
       this.runDetectionCycle();
@@ -177,10 +170,6 @@ export class OrphanWatchdog {
         },
       };
       await this.checkpointManager.save(checkpoint);
-
-      console.log(
-        `[Watchdog] Cycle ${this.cycleNumber} completed: ${this.lastDetectionDuration}ms, ${this.lastClassifiedOrphans.length} orphans found`
-      );
     } catch (error) {
       // biome-ignore lint/suspicious/noConsole: Checkpoint save failures are intentionally emitted for operational visibility.
       console.error("Orphan watchdog detection cycle failed", error);

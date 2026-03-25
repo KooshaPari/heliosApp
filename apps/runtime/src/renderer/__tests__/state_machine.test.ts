@@ -106,7 +106,7 @@ describe("RendererStateMachine", () => {
     }
     expect(sm.history.length).toBe(10);
     // First two (init, init_failure) should have been evicted
-    expect(sm.history[0]!.event).toBe("recovery_attempt");
+    expect(sm.history[0]?.event).toBe("recovery_attempt");
   });
 });
 

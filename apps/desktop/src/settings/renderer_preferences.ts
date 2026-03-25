@@ -3,9 +3,9 @@
  * Persists renderer settings across sessions
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from "fs";
-import { homedir } from "os";
-import { dirname, resolve } from "path";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { dirname, resolve } from "node:path";
 
 export interface RendererPreferences {
   activeRenderer: string;
@@ -42,17 +42,12 @@ export class RendererPreferencesManager {
         // Validate loaded preferences
         if (this.isValidPreferences(loaded)) {
           this.preferences = loaded;
-          const loadTime = performance.now() - startTime;
-          console.log(`Renderer preferences loaded in ${loadTime.toFixed(2)}ms`);
+          const _loadTime = performance.now() - startTime;
           return { ...this.preferences };
-        } else {
-          console.warn("Invalid preferences file, using defaults");
-          return { ...DEFAULT_PREFERENCES };
         }
+        return { ...DEFAULT_PREFERENCES };
       }
-    } catch (error) {
-      console.warn("Failed to load renderer preferences, using defaults", error);
-    }
+    } catch (_error) {}
 
     this.preferences = { ...DEFAULT_PREFERENCES };
     return { ...this.preferences };
@@ -67,10 +62,7 @@ export class RendererPreferencesManager {
       writeFileSync(this.preferencesPath, content, "utf-8");
 
       this.isDirty = false;
-      console.log("Renderer preferences saved");
-    } catch (error) {
-      console.error("Failed to save renderer preferences", error);
-    }
+    } catch (_error) {}
   }
 
   getActiveRenderer(): string {
@@ -120,9 +112,7 @@ export class RendererPreferencesManager {
     const dir = dirname(this.preferencesPath);
     try {
       mkdirSync(dir, { recursive: true });
-    } catch (error) {
-      console.error("Failed to create preferences directory", error);
-    }
+    } catch (_error) {}
   }
 
   private isValidPreferences(obj: any): boolean {

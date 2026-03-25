@@ -125,7 +125,7 @@ describe("Fault injection - restart-with-restore failures", () => {
 
     expect(result.success).toBe(true);
     expect(result.checkpoints.length).toBe(1);
-    expect(result.checkpoints[0]!.ptyId).toBe("pty-1");
+    expect(result.checkpoints[0]?.ptyId).toBe("pty-1");
   });
 
   it("target renderer init failure during restart triggers rollback", async () => {
@@ -309,7 +309,7 @@ describe("Fault injection - buffer overflow handling", () => {
 
   it("buffer still captures data after overflow", async () => {
     const buffer = new SwitchBuffer(10);
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
 
     buffer.startBuffering();
     buffer.write("pty-1", new Uint8Array(6));

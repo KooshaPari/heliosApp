@@ -46,18 +46,7 @@ describe("Memory Overhead", () => {
     const totalMb = totalBytes / (1024 * 1024);
 
     // Expected: 20 * 10k * 16 bytes = ~3.2 MB + overhead
-    const perMetricKb = totalBytes / metricCount / 1024;
-
-    console.log(
-      JSON.stringify({
-        benchmark: "memory-overhead",
-        totalMB: Number(totalMb.toFixed(2)),
-        perMetricKB: Number(perMetricKb.toFixed(2)),
-        metricCount: metricCount,
-        bufferSize: bufferSize,
-        expectedMinMB: 3.2,
-      })
-    );
+    const _perMetricKb = totalBytes / metricCount / 1024;
 
     expect(totalMb).toBeLessThan(10);
   });
@@ -91,13 +80,6 @@ describe("Memory Overhead", () => {
 
     const heapAfter = process.memoryUsage().heapUsed;
     const totalKb = (heapAfter - heapBefore) / 1024;
-
-    console.log(
-      JSON.stringify({
-        benchmark: "empty-buffers",
-        totalKB: Number(totalKb.toFixed(2)),
-      })
-    );
 
     // Empty (lazy) buffers should use very little memory.
     expect(totalKb).toBeLessThan(100);

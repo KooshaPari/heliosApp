@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "fs";
-import { tmpdir } from "os";
-import * as path from "path";
+import { promises as fs } from "node:fs";
+import { tmpdir } from "node:os";
+import * as path from "node:path";
 import {
   KeyboardShortcuts,
   type ShortcutAction,

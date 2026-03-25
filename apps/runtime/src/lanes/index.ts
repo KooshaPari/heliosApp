@@ -139,7 +139,9 @@ export class LaneManager {
   async provision(laneId: string, workspaceRepoPath: string): Promise<LaneRecord> {
     return withLaneLock(laneId, async () => {
       const lane = this.registry.get(laneId);
-      if (!lane) throw new LaneNotFoundError(laneId);
+      if (!lane) {
+        throw new LaneNotFoundError(laneId);
+      }
       if (lane.state !== "provisioning") {
         throw new Error(`Cannot provision lane in state ${lane.state}`);
       }
@@ -323,7 +325,9 @@ export class LaneManager {
   // ── T008: Graceful PTY termination before worktree removal ───────────────
 
   private async terminateLanePtys(laneId: string, workspaceId: string): Promise<void> {
-    if (!this.ptyManager) return;
+    if (!this.ptyManager) {
+      return;
+    }
 
     let ptys: PtyHandle[];
     try {
@@ -333,21 +337,23 @@ export class LaneManager {
       return;
     }
 
-    if (ptys.length === 0) return;
+    if (ptys.length === 0) {
+      return;
+    }
 
-    let forceKilled = 0;
+    let _forceKilled = 0;
     const terminationPromises = ptys.map(async pty => {
       try {
         const timeout = new Promise<"timeout">(resolve =>
           setTimeout(() => resolve("timeout"), this.ptyTerminationTimeoutMs)
         );
-        const termination = this.ptyManager!.terminate(pty.ptyId).then(() => "done" as const);
+        const termination = this.ptyManager?.terminate(pty.ptyId).then(() => "done" as const);
         const result = await Promise.race([termination, timeout]);
         if (result === "timeout") {
-          forceKilled++;
+          _forceKilled++;
         }
       } catch {
-        forceKilled++;
+        _forceKilled++;
       }
     });
 
@@ -406,7 +412,9 @@ export class LaneManager {
       if (!isTimedOut()) {
         const fsModule = await import("node:fs");
         for (const lane of activeLanes) {
-          if (isTimedOut()) break;
+          if (isTimedOut()) {
+            break;
+          }
           if (lane.worktreePath && !fsModule.existsSync(lane.worktreePath)) {
             result.orphanedRecords++;
             result.totalCleaned++;
@@ -422,7 +430,9 @@ export class LaneManager {
       if (!isTimedOut()) {
         const allLanes = this.registry.list();
         for (const lane of allLanes) {
-          if (isTimedOut()) break;
+          if (isTimedOut()) {
+            break;
+          }
           if (lane.parTaskPid !== null && lane.state !== "closed") {
             // Check if the process is still alive
             try {
@@ -441,7 +451,9 @@ export class LaneManager {
       if (!isTimedOut() && this.ptyManager) {
         const closedLanes = this.registry.list().filter(l => l.state === "closed");
         for (const lane of closedLanes) {
-          if (isTimedOut()) break;
+          if (isTimedOut()) {
+            break;
+          }
           try {
             const ptys = this.ptyManager.getByLane(lane.laneId);
             for (const pty of ptys) {
@@ -473,7 +485,9 @@ export class LaneManager {
   }
 
   private async emitReconciliationEvent(result: FullReconciliationResult): Promise<void> {
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
 
     const envelope: LocalBusEnvelope = {
       id: `reconciliation:${Date.now()}`,
@@ -506,7 +520,9 @@ export class LaneManager {
     fromState: LaneState,
     toState: LaneState
   ): Promise<void> {
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
 
     const envelope: LocalBusEnvelope = {
       id: `${laneId}:${topic}:${Date.now()}`,

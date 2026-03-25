@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 
 /**
  * Audit event type constants to prevent typos and enable type safety.
@@ -174,7 +174,7 @@ export function validateAuditEvent(event: AuditEvent): boolean {
 
   // Validate timestamp is valid ISO 8601
   const ts = new Date(event.timestamp);
-  if (isNaN(ts.getTime())) {
+  if (Number.isNaN(ts.getTime())) {
     return false;
   }
 

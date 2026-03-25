@@ -34,7 +34,7 @@ function deriveTabState(state: ActiveContextState): TabViewState {
   ) {
     return "loading";
   }
-  if (!state.workspaceId || !state.laneId || !state.sessionId) {
+  if (!(state.workspaceId && state.laneId && state.sessionId)) {
     return "empty";
   }
   return "ready";

@@ -69,7 +69,7 @@ function createMockGhostty(): RendererAdapter & { _state: RendererState } {
   return adapter;
 }
 
-const DEFAULT_CONFIG: RendererConfig = {
+const _DEFAULT_CONFIG: RendererConfig = {
   gpuAcceleration: false,
   colorDepth: 24,
   maxDimensions: { cols: 200, rows: 50 },
@@ -96,7 +96,6 @@ describe("Rio registration — feature flag off", () => {
 describe("Rio registration — feature flag on", () => {
   it("registers when flag enabled and binary available", async () => {
     if (!rioAvailable) {
-      console.log("SKIP: rio binary not available");
       return;
     }
     const registry = new RendererRegistry();

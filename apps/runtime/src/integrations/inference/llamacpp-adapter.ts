@@ -28,7 +28,9 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
     const prompt = request.messages.map(m => `${m.role}: ${m.content}`).join("\n");
     const args = [this.binaryPath, "-m", request.model, "-p", prompt, "--no-display-prompt"];
-    if (request.maxTokens) args.push("-n", String(request.maxTokens));
+    if (request.maxTokens) {
+      args.push("-n", String(request.maxTokens));
+    }
 
     const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
     const output = proc.stdout ? await new Response(proc.stdout).text() : "";

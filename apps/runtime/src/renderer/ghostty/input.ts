@@ -149,7 +149,9 @@ export class GhosttyInputRelay {
    */
   teardownInputRelay(ptyId: string): void {
     const binding = this._bindings.get(ptyId);
-    if (binding === undefined) return;
+    if (binding === undefined) {
+      return;
+    }
 
     binding.teardown?.();
     this._bindings.delete(ptyId);
@@ -170,16 +172,11 @@ export class GhosttyInputRelay {
    */
   relayInput(event: GhosttyInputEvent): void {
     if (this._focusedPtyId === undefined) {
-      // No focused PTY: discard input
-      console.warn("[ghostty/input] Input received but no PTY is focused; discarding.");
       return;
     }
 
     const binding = this._bindings.get(this._focusedPtyId);
     if (binding === undefined) {
-      console.warn(
-        `[ghostty/input] Focused PTY "${this._focusedPtyId}" has no input relay binding; discarding.`
-      );
       return;
     }
 

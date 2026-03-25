@@ -65,9 +65,8 @@ export class InMemorySessionRegistry {
         active.transport = input.transport;
         active.last_heartbeat_at = nowIso;
         return { session: { ...active }, created: false };
-      } else {
-        this.activeLaneSessions.delete(input.lane_id);
       }
+      this.activeLaneSessions.delete(input.lane_id);
     }
 
     const codexSessionId = input.codex_session_id ?? this.generateCodexSessionId();
@@ -150,21 +149,26 @@ export class RecoveryRegistry {
 
   apply(method: string, input: RecoveryLifecycleInput): void {
     switch (method) {
-      case "lane.create":
+      case "lane.create": {
         this.onLaneCreate(input);
         return;
-      case "lane.cleanup":
+      }
+      case "lane.cleanup": {
         this.onLaneCleanup(input);
         return;
-      case "session.attach":
+      }
+      case "session.attach": {
         this.onSessionAttach(input);
         return;
-      case "session.terminate":
+      }
+      case "session.terminate": {
         this.onSessionTerminate(input);
         return;
-      case "terminal.spawn":
+      }
+      case "terminal.spawn": {
         this.onTerminalSpawn(input);
         return;
+      }
       default:
         return;
     }
@@ -200,7 +204,7 @@ export class RecoveryRegistry {
         continue;
       }
 
-      if (!session.lane_id || !this.lanes.has(session.lane_id)) {
+      if (!(session.lane_id && this.lanes.has(session.lane_id))) {
         session.status = "detached";
         issues.push({
           artifact_type: "session",
@@ -287,7 +291,7 @@ export class RecoveryRegistry {
     }
 
     for (const terminal of this.terminals.values()) {
-      if (!terminal.session_id || !this.sessions.has(terminal.session_id)) {
+      if (!(terminal.session_id && this.sessions.has(terminal.session_id))) {
         issues.push({
           artifact_type: "terminal",
           artifact_id: terminal.terminal_id,
@@ -314,7 +318,7 @@ export class RecoveryRegistry {
   }
 
   private onLaneCreate(input: RecoveryLifecycleInput): void {
-    if (!input.lane_id || !input.workspace_id) {
+    if (!(input.lane_id && input.workspace_id)) {
       return;
     }
 
@@ -346,7 +350,7 @@ export class RecoveryRegistry {
   }
 
   private onSessionAttach(input: RecoveryLifecycleInput): void {
-    if (!input.session_id || !input.workspace_id) {
+    if (!(input.session_id && input.workspace_id)) {
       return;
     }
 
@@ -383,7 +387,7 @@ export class RecoveryRegistry {
   }
 
   private onTerminalSpawn(input: RecoveryLifecycleInput): void {
-    if (!input.terminal_id || !input.workspace_id) {
+    if (!(input.terminal_id && input.workspace_id)) {
       return;
     }
 

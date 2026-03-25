@@ -11,7 +11,7 @@ export const EMPTY_PERCENTILE_BUCKET: PercentileBucket = {
   count: 0,
 };
 
-type ValueBufferLike = Float64Array | ReadonlyArray<number> | { getValues: () => Float64Array };
+type ValueBufferLike = Float64Array | readonly number[] | { getValues: () => Float64Array };
 
 /**
  * Compute percentile statistics from a Float64Array of values.

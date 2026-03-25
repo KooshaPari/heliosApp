@@ -1,5 +1,5 @@
-import { describe, it, expect } from "bun:test";
-import { HeliosAppError, ErrorCode } from "../src/index";
+import { describe, expect, it } from "bun:test";
+import { ErrorCode, HeliosAppError } from "../src/index";
 
 describe("HeliosAppError", () => {
   it("should create an error with code and message", () => {

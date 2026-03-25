@@ -143,7 +143,9 @@ export class EncryptionService {
   }
 
   private readFromKeychain(): Buffer | null {
-    if (process.platform !== "darwin") return null;
+    if (process.platform !== "darwin") {
+      return null;
+    }
     try {
       const hex = execFileSync(
         "security",
@@ -162,7 +164,9 @@ export class EncryptionService {
   }
 
   private writeToKeychain(key: Buffer): boolean {
-    if (process.platform !== "darwin") return false;
+    if (process.platform !== "darwin") {
+      return false;
+    }
     try {
       execFileSync(
         "security",

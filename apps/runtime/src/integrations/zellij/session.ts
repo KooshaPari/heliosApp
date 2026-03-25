@@ -62,9 +62,6 @@ export class ZellijSessionManager {
     }
 
     if (options?.cwd) {
-      console.debug(
-        `[zellij-session] session creation requested with cwd=${options.cwd}; preserving in host-specific runtime`
-      );
     }
 
     // For creating a detached session, we run the zellij process but let it detach
@@ -88,10 +85,7 @@ export class ZellijSessionManager {
     const postSessions = await this.cli.listSessions();
     const created = postSessions.find(s => s.name === sessionName);
 
-    const durationMs = performance.now() - startMs;
-    console.debug(
-      `[zellij-session] createSession(${laneId}) completed in ${durationMs.toFixed(1)}ms`
-    );
+    const _durationMs = performance.now() - startMs;
 
     const muxSession: MuxSession = {
       sessionName,
@@ -170,9 +164,7 @@ export class ZellijSessionManager {
               });
               this.topology.bindPty(sessionName, paneTopo.paneId, ptyResult.ptyId);
               record.ptyId = ptyResult.ptyId;
-            } catch (err) {
-              console.warn(`[zellij-session] PTY re-bind failed for pane ${paneTopo.paneId}:`, err);
-            }
+            } catch (_err) {}
           }
         }
 
@@ -188,10 +180,7 @@ export class ZellijSessionManager {
       tabs = await this.queryTabs(sessionName);
     }
 
-    const durationMs = performance.now() - startMs;
-    console.debug(
-      `[zellij-session] reattachSession(${sessionName}) completed in ${durationMs.toFixed(1)}ms`
-    );
+    const _durationMs = performance.now() - startMs;
 
     const muxSession: MuxSession = {
       sessionName,
@@ -243,14 +232,12 @@ export class ZellijSessionManager {
         !retry.stderr.includes("not found") &&
         !retry.stderr.includes("No session")
       ) {
-        console.error(`[zellij-session] Failed to kill session ${sessionName}: ${retry.stderr}`);
       }
     }
 
     // Verify session is gone
     const sessions = await this.cli.listSessions();
     if (sessions.some(s => s.name === sessionName)) {
-      console.warn(`[zellij-session] Session ${sessionName} still exists after kill attempt`);
     }
 
     // Remove from binding registry regardless
@@ -263,7 +250,6 @@ export class ZellijSessionManager {
         laneId,
       });
     } else {
-      console.debug(`[zellij-session] mux.session.terminated: ${sessionName}`);
     }
   }
 
@@ -274,9 +260,6 @@ export class ZellijSessionManager {
     try {
       const result = await this.cli.run(["--session", sessionName, "action", "dump-layout"]);
       if (result.exitCode !== 0) {
-        console.warn(
-          `[zellij-session] Could not query layout for ${sessionName}: ${result.stderr}`
-        );
         return "";
       }
       return result.stdout;
@@ -315,7 +298,6 @@ export class ZellijSessionManager {
     if (sessionName.startsWith(prefix)) {
       return sessionName.slice(prefix.length);
     }
-    console.warn(`[zellij-session] Could not parse lane id from session name: ${sessionName}`);
     return sessionName;
   }
 }

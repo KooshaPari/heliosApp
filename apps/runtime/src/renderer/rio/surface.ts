@@ -43,9 +43,13 @@ export class RioSurface {
     width: number;
     height: number;
   }): void {
-    if (!this._surface) return;
+    if (!this._surface) {
+      return;
+    }
     // Handle zero-size surface (e.g. minimized window).
-    if (bounds.width <= 0 || bounds.height <= 0) return;
+    if (bounds.width <= 0 || bounds.height <= 0) {
+      return;
+    }
     this._surface = {
       ...this._surface,
       bounds,

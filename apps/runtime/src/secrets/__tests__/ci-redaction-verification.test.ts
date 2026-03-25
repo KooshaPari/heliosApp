@@ -253,13 +253,13 @@ describe("CI Redaction Verification (T014) [FR-028-011]", () => {
   describe("Partial match handling", () => {
     it("redacts secret at beginning of string", () => {
       const key = knownSecrets.aws_access_keys[0];
-      const result = engine.redact(key + " is the access key", makeContext("boundary-start"));
+      const result = engine.redact(`${key} is the access key`, makeContext("boundary-start"));
       expect(result.redacted).not.toContain(key);
     });
 
     it("redacts secret at end of string", () => {
       const key = knownSecrets.aws_access_keys[0];
-      const result = engine.redact("Access key: " + key, makeContext("boundary-end"));
+      const result = engine.redact(`Access key: ${key}`, makeContext("boundary-end"));
       expect(result.redacted).not.toContain(key);
     });
 

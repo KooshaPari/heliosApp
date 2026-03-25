@@ -116,6 +116,6 @@ describe("writeInput", () => {
 
     expect(errorCalled).toBe(true);
     expect(bus.events).toHaveLength(1);
-    expect(bus.events[0]!.topic).toBe("pty.error");
+    expect(bus.events[0]?.topic).toBe("pty.error");
   });
 });

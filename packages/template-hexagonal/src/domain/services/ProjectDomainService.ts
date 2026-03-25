@@ -10,7 +10,7 @@
  * - They should have no dependencies on infrastructure
  * - They are part of the domain layer
  */
-import { ProjectEntity } from "../ports/output/index";
+import type { ProjectEntity } from "../ports/output/index";
 
 /**
  * Example domain service for project operations

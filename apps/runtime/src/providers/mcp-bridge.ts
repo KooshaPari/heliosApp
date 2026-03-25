@@ -176,7 +176,7 @@ export class MCPBridgeAdapter
    * @throws NormalizedProviderError on failure
    */
   async execute(input: MCPExecuteInput, correlationId: string): Promise<MCPExecuteOutput> {
-    if (!this.config || !this.connection.connected) {
+    if (!(this.config && this.connection.connected)) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
         "MCP bridge not initialized or disconnected",
@@ -463,7 +463,7 @@ export class MCPBridgeAdapter
    */
   private async invokeTool(
     toolName: string,
-    toolArguments: Record<string, unknown>,
+    _toolArguments: Record<string, unknown>,
     signal: AbortSignal
   ): Promise<unknown> {
     // Check for abort
@@ -500,8 +500,6 @@ export class MCPBridgeAdapter
         topic,
         payload,
       });
-    } catch (error) {
-      console.warn(`Failed to publish MCP event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }

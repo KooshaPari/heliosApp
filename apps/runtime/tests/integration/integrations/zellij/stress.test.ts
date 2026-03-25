@@ -31,7 +31,9 @@ class FakeCli {
       return { stdout: "", stderr: "", exitCode: 0 };
     }
     if (args[0] === "list-sessions") {
-      if (this.sessions.size === 0) return { stdout: "", stderr: "", exitCode: 0 };
+      if (this.sessions.size === 0) {
+        return { stdout: "", stderr: "", exitCode: 0 };
+      }
       const lines = [...this.sessions.values()]
         .map(s => `${s.name}  2026-02-27 10:00:00`)
         .join("\n");

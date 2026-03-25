@@ -78,8 +78,6 @@ describe("Audit Search Performance", () => {
     }
 
     const p95 = percentile(latencies, 95);
-
-    console.log(`Workspace filter search p95: ${p95}ms`);
     expect(p95).toBeLessThan(500);
   });
 
@@ -117,7 +115,7 @@ describe("Audit Search Performance", () => {
 
     for (let i = 0; i < 20; i++) {
       const startTime = Date.now();
-      const results = ledger.search({
+      const _results = ledger.search({
         timeRange: { from: oneHourAgo, to: now2 },
         limit: 100,
       });
@@ -127,8 +125,6 @@ describe("Audit Search Performance", () => {
     }
 
     const p95 = percentile(latencies, 95);
-
-    console.log(`Time range filter search p95: ${p95}ms`);
     expect(p95).toBeLessThan(500);
   });
 
@@ -158,7 +154,7 @@ describe("Audit Search Performance", () => {
 
     for (let i = 0; i < 20; i++) {
       const startTime = Date.now();
-      const results = ledger.search({
+      const _results = ledger.search({
         workspaceId: "ws-0",
         actor: "actor-0",
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
@@ -170,8 +166,6 @@ describe("Audit Search Performance", () => {
     }
 
     const p95 = percentile(latencies, 95);
-
-    console.log(`Combined filter search p95: ${p95}ms`);
     expect(p95).toBeLessThan(500);
   });
 
@@ -214,8 +208,6 @@ describe("Audit Search Performance", () => {
     }
 
     const p95 = percentile(latencies, 95);
-
-    console.log(`Correlation chain traversal p95: ${p95}ms`);
     expect(p95).toBeLessThan(500);
   });
 
@@ -245,14 +237,10 @@ describe("Audit Search Performance", () => {
 
     const count = store.count();
     const size = store.getStorageSize();
-    const sizePerEvent = size / count;
-
-    console.log(`Storage efficiency: ${sizePerEvent.toFixed(2)} bytes per event`);
-    console.log(`100k events: ${(size / 1024 / 1024).toFixed(2)} MB`);
+    const _sizePerEvent = size / count;
 
     // 3M events should be < 500MB
     const projectedSize = (3_000_000 / count) * size;
-    console.log(`Projected 3M events: ${(projectedSize / 1024 / 1024).toFixed(2)} MB`);
 
     expect(projectedSize).toBeLessThan(500 * 1024 * 1024);
   });

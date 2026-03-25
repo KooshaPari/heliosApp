@@ -79,10 +79,11 @@ export class BindingMiddleware {
     const boundWorkspace = this.registry.getByWorkspace(binding.binding.workspaceId);
     const boundLane = this.registry.getByLane(binding.binding.laneId);
     const boundSession = this.registry.getBySession(binding.binding.sessionId);
-    const isStale =
-      !boundWorkspace.some(b => b.terminalId === terminalId) ||
-      !boundLane.some(b => b.terminalId === terminalId) ||
-      !boundSession.some(b => b.terminalId === terminalId);
+    const isStale = !(
+      boundWorkspace.some(b => b.terminalId === terminalId) &&
+      boundLane.some(b => b.terminalId === terminalId) &&
+      boundSession.some(b => b.terminalId === terminalId)
+    );
 
     if (isStale) {
       // Mark binding as validation failed
@@ -93,7 +94,7 @@ export class BindingMiddleware {
         valid: false,
         error: {
           code: "STALE_BINDING",
-          message: `Terminal binding is stale: binding context no longer matches registry indexes`,
+          message: "Terminal binding is stale: binding context no longer matches registry indexes",
           fatal: true,
         },
         binding,

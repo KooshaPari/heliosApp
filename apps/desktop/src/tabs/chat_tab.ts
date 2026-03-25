@@ -231,7 +231,9 @@ export class ChatTab extends TabSurface {
   }
 
   private sendMessage(text: string): void {
-    if (!text.trim()) return;
+    if (!text.trim()) {
+      return;
+    }
 
     // Add user message
     const userMsg: ChatMessage = {
@@ -251,9 +253,6 @@ export class ChatTab extends TabSurface {
         timestamp: new Date().toISOString(),
       };
       this.messages.push(agentMsg);
-
-      // In real implementation, would emit event on bus for agent to handle
-      console.log("Message sent:", text);
     }, 500);
   }
 
@@ -280,7 +279,7 @@ export class ChatTab extends TabSurface {
   /**
    * Generate mock chat history for demonstration.
    */
-  private generateMockChatHistory(context: ActiveContext): void {
+  private generateMockChatHistory(_context: ActiveContext): void {
     const baseTime = Date.now();
     this.messages = [
       {
@@ -306,7 +305,8 @@ export class ChatTab extends TabSurface {
       {
         id: "msg-4",
         role: "agent",
-        content: `Summary of recent changes:\n\n1. Tab UI framework implementation\n2. Context store integration\n3. Terminal rendering updates\n\nAll changes look good and follow the project patterns.`,
+        content:
+          "Summary of recent changes:\n\n1. Tab UI framework implementation\n2. Context store integration\n3. Terminal rendering updates\n\nAll changes look good and follow the project patterns.",
         timestamp: new Date(baseTime - 200000).toISOString(),
       },
     ];

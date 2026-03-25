@@ -11,7 +11,7 @@
 import { describe, expect, test } from "bun:test";
 
 // @ts-ignore - These tests require @helios/runtime alias configured externally
-describe.skip("path alias resolution (requires external project setup)", () => {
+describe("path alias resolution (requires external project setup)", () => {
   // @ts-ignore
   test("@helios/runtime resolves and exports VERSION", async () => {
     // @ts-ignore

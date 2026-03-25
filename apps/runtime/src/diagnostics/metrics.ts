@@ -115,7 +115,6 @@ export class MetricsRegistry {
   record(name: string, value: number, timestamp?: number): void {
     const entry = this.metrics.get(name);
     if (entry === undefined) {
-      console.warn(`[metrics] Attempted to record to unregistered metric "${name}"`);
       return;
     }
     // Lazy buffer allocation.

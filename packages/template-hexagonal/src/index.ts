@@ -37,15 +37,15 @@ export { DomainEvent, BaseDomainEvent } from "./domain/events";
 export { ProjectDomainService, type ValidationResult } from "./domain/services";
 
 // Port exports
-export {
-  type ICreateProjectInputPort,
-  type CreateProjectInput,
-  type CreateProjectOutput,
+export type {
+  ICreateProjectInputPort,
+  CreateProjectInput,
+  CreateProjectOutput,
 } from "./domain/ports/input";
-export {
-  type IProjectRepository,
-  type ProjectFilter,
-  type ProjectEntity,
+export type {
+  IProjectRepository,
+  ProjectFilter,
+  ProjectEntity,
 } from "./domain/ports/output";
 
 // Application layer exports

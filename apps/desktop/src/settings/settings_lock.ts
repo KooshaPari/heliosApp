@@ -22,7 +22,9 @@ export class SettingsLock {
   }
 
   lock(settingsContainer: HTMLElement): void {
-    if (this.isLocked) return;
+    if (this.isLocked) {
+      return;
+    }
 
     this.isLocked = true;
     this.applyLock(settingsContainer);
@@ -30,7 +32,9 @@ export class SettingsLock {
   }
 
   unlock(settingsContainer: HTMLElement): void {
-    if (!this.isLocked) return;
+    if (!this.isLocked) {
+      return;
+    }
 
     this.isLocked = false;
     this.removeLock(settingsContainer);
@@ -85,7 +89,6 @@ export class SettingsLock {
 
   private startAutoUnlockTimer(): void {
     this.lockTimeoutId = setTimeout(() => {
-      console.warn("Settings lock timeout: auto-unlocking settings");
       this.isLocked = false;
       if (this.options.onAutoUnlocked) {
         this.options.onAutoUnlocked();

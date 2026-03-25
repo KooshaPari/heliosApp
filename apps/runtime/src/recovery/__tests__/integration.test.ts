@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "fs";
-import os from "os";
-import path from "path";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import type { Checkpoint, CheckpointSession } from "../checkpoint.js";
 import { RestorationPipeline } from "../restoration.js";
@@ -117,7 +117,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
       await stateMachine.transition(RecoveryStage.RESTORING);
 
       // Get current stage
-      const checkpoint = createMockCheckpoint(5);
+      const _checkpoint = createMockCheckpoint(5);
       const beforeCrash = stateMachine.getCurrentStage();
 
       // Simulate second recovery after crash - should resume from RESTORING

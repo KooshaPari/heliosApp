@@ -74,7 +74,7 @@ export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Pr
       // @ts-ignore
       env: {
         ...env,
-        TERM: env["TERM"] ?? "xterm-256color",
+        TERM: env.TERM ?? "xterm-256color",
         COLUMNS: String(cols),
         LINES: String(rows),
       },

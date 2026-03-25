@@ -48,7 +48,7 @@ export const ToolResultBlock: Component<ToolResultBlockProps> = props => {
             "overflow-y": "auto",
           }}
         >
-          <>{output() ?? ""}</>
+          {output() ?? ""}
         </div>
       </Show>
     </div>

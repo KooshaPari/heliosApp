@@ -30,7 +30,9 @@ function createMockGhostty(opts?: {
 
     async init(_config: RendererConfig): Promise<void> {
       adapter._initCalled = true;
-      if (opts?.failInit) throw new Error("ghostty init failed");
+      if (opts?.failInit) {
+        throw new Error("ghostty init failed");
+      }
       adapter._state = "running";
     },
     async start(_surface: RenderSurface): Promise<void> {

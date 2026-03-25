@@ -1,9 +1,9 @@
 // Unit tests for CheckpointManager
 
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "fs";
-import os from "os";
-import path from "path";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import {
   CheckpointManager,
   type WatchdogCheckpoint,

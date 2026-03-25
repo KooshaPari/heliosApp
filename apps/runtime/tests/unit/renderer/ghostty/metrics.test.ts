@@ -204,7 +204,7 @@ describe("GhosttyMetrics - publisher", () => {
 
     metrics.disable();
     expect(published.length).toBeGreaterThanOrEqual(1);
-    expect(published[0]!.rendererId).toBe("ghostty");
+    expect(published[0]?.rendererId).toBe("ghostty");
   });
 
   test("clearPublisher stops publishing", () => {

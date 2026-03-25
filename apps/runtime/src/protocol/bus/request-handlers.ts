@@ -113,7 +113,7 @@ export function handleLaneCreate(
 
 export function handleSessionAttach(
   command: LocalBusEnvelope,
-  startTime: number,
+  _startTime: number,
   ctx: RequestHandlerContext
 ): LocalBusEnvelope {
   const correlationId = command.correlation_id;

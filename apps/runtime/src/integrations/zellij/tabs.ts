@@ -61,11 +61,7 @@ export class ZellijTabManager {
       createdAt: new Date(),
     };
 
-    const durationMs = performance.now() - startMs;
-    console.debug(
-      `[zellij-tabs] createTab(${sessionName}) tab=${tabId} name="${tabName}" duration=${durationMs.toFixed(1)}ms`
-    );
-    console.debug(`[zellij-tabs] mux.tab.created: session=${sessionName} tab=${tabId}`);
+    const _durationMs = performance.now() - startMs;
 
     return record;
   }
@@ -91,12 +87,7 @@ export class ZellijTabManager {
         if (pane.ptyId) {
           try {
             await this.ptyManager.terminate(pane.ptyId);
-          } catch (err) {
-            console.warn(
-              `[zellij-tabs] PTY terminate for pane ${pane.paneId} in tab ${tabId} failed:`,
-              err
-            );
-          }
+          } catch (_err) {}
         }
       }
     }
@@ -114,16 +105,13 @@ export class ZellijTabManager {
 
     // Ignore switch errors if tab is already active
     if (switchResult.exitCode !== 0) {
-      console.warn(
-        `[zellij-tabs] Could not switch to tab ${tabId} before close: ${switchResult.stderr}`
-      );
     }
 
     const result = await this.cli.run(["--session", sessionName, "action", "close-tab"]);
 
     if (result.exitCode !== 0) {
       // If tab doesn't exist, treat as success (idempotent)
-      if (!result.stderr.includes("not found") && !result.stderr.includes("no tab")) {
+      if (!(result.stderr.includes("not found") || result.stderr.includes("no tab"))) {
         throw new ZellijCliError(
           `close-tab --session ${sessionName}`,
           result.exitCode,
@@ -134,8 +122,6 @@ export class ZellijTabManager {
 
     // Update topology
     this.topology.removeTab(sessionName, tabId);
-
-    console.debug(`[zellij-tabs] mux.tab.closed: session=${sessionName} tab=${tabId}`);
   }
 
   /**
@@ -172,8 +158,6 @@ export class ZellijTabManager {
 
     // Update topology
     this.topology.switchTab(sessionName, tabId);
-
-    console.debug(`[zellij-tabs] mux.tab.switched: session=${sessionName} tab=${tabId}`);
   }
 
   /**

@@ -24,7 +24,7 @@ export class CapabilityDisplay {
 
   constructor(props: CapabilityDisplayProps) {
     this.props = props;
-    this.isExpanded = props.isExpanded || false;
+    this.isExpanded = props.isExpanded ?? false;
   }
 
   mount(container: HTMLElement): void {
@@ -45,7 +45,9 @@ export class CapabilityDisplay {
   }
 
   private render(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
@@ -252,7 +254,9 @@ export class CapabilityDisplay {
   }
 
   private attachEventListeners(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     const header = this.container.querySelector(".capability-header") as HTMLElement;
     const toggleBtn = this.container.querySelector(".capability-toggle-btn") as HTMLElement;

@@ -62,7 +62,9 @@ export class MuxRegistry {
    */
   unbind(sessionName: string): void {
     const binding = this.bySession.get(sessionName);
-    if (!binding) return;
+    if (!binding) {
+      return;
+    }
 
     this.bySession.delete(sessionName);
     this.byLane.delete(binding.laneId);
@@ -118,9 +120,6 @@ export class MuxRegistry {
    */
   async getOrphaned(): Promise<MuxBinding[]> {
     if (!this.cli) {
-      console.warn(
-        "[zellij-registry] getOrphaned() called without a cli; returning cached bindings only"
-      );
       return [];
     }
 

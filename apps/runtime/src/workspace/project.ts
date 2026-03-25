@@ -121,14 +121,18 @@ export async function detectStaleProjects(workspace: Workspace): Promise<Workspa
       return binding.status === "active" ? binding : { ...binding, status: "active" };
     } catch {
       // Inaccessible — mark stale
-      if (binding.status === "stale") return binding;
+      if (binding.status === "stale") {
+        return binding;
+      }
       return { ...binding, status: "stale" };
     }
   });
 
-  const changed = updatedProjects.some((p, i) => p.status !== workspace.projects[i]!.status);
+  const changed = updatedProjects.some((p, i) => p.status !== workspace.projects[i]?.status);
 
-  if (!changed) return workspace;
+  if (!changed) {
+    return workspace;
+  }
 
   return {
     ...workspace,

@@ -64,7 +64,9 @@ export class LaneRegistry {
 
   getByWorkspace(workspaceId: string): LaneRecord[] {
     const laneIds = this.workspaceIndex.get(workspaceId);
-    if (!laneIds) return [];
+    if (!laneIds) {
+      return [];
+    }
     return [...laneIds]
       .map(id => this.lanes.get(id))
       .filter((r): r is LaneRecord => r !== undefined)

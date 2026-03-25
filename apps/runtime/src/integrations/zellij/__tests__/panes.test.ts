@@ -93,7 +93,7 @@ describe("ZellijPaneManager", () => {
       });
 
       const runMock = cli.run as ReturnType<typeof mock>;
-      const firstCall = runMock.mock.calls[0]![0] as string[];
+      const firstCall = runMock.mock.calls[0]?.[0] as string[];
       expect(firstCall).toContain("--direction");
       expect(firstCall).toContain("down");
       expect(firstCall).toContain("--cwd");

@@ -11,13 +11,13 @@ describe("False Positive Rate", () => {
   let engine: RemediationEngine;
   let bus: InMemoryLocalBus;
   let laneRegistry: LaneRegistry;
-  let classifier: ResourceClassifier;
+  let _classifier: ResourceClassifier;
 
   beforeEach(() => {
     bus = new InMemoryLocalBus();
     laneRegistry = new LaneRegistry();
     engine = new RemediationEngine(laneRegistry, bus);
-    classifier = new ResourceClassifier();
+    _classifier = new ResourceClassifier();
   });
 
   it("should have zero false positives with healthy system", async () => {

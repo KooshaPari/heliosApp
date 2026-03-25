@@ -63,7 +63,7 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = props => {
             "overflow-y": "auto",
           }}
         >
-          <>{JSON.stringify(input(), null, 2)}</>
+          {JSON.stringify(input(), null, 2)}
         </div>
       </Show>
     </div>

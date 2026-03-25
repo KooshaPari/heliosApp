@@ -27,7 +27,7 @@ export class SnapshotCapture {
    */
   start(
     sessionId: string,
-    intervalMs = 30_000,
+    intervalMs: number,
     onSnapshot: (snapshot: SessionSnapshot) => void
   ): void {
     if (this.isRunning) {
@@ -72,9 +72,7 @@ export class SnapshotCapture {
       };
 
       onSnapshot(snapshot);
-    } catch (err) {
-      console.error("[SnapshotCapture] Failed to capture snapshot:", err);
-    }
+    } catch (_err) {}
   }
 
   /**

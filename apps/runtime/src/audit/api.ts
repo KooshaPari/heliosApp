@@ -176,16 +176,15 @@ export class AuditLedgerAPI {
       const from = queryParams.from ? new Date(queryParams.from) : new Date(0);
       const to = queryParams.to ? new Date(queryParams.to) : new Date();
 
-      if (!isNaN(from.getTime()) && !isNaN(to.getTime())) {
-        filter.timeRange = { from, to };
-      } else {
+      if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
         throw new Error("Invalid time range parameters");
       }
+      filter.timeRange = { from, to };
     }
 
     if (queryParams.limit) {
       const limit = Number.parseInt(queryParams.limit, 10);
-      if (isNaN(limit) || limit < 1 || limit > 1000) {
+      if (Number.isNaN(limit) || limit < 1 || limit > 1000) {
         throw new Error("Limit must be between 1 and 1000");
       }
       filter.limit = limit;
@@ -193,7 +192,7 @@ export class AuditLedgerAPI {
 
     if (queryParams.offset) {
       const offset = Number.parseInt(queryParams.offset, 10);
-      if (isNaN(offset) || offset < 0) {
+      if (Number.isNaN(offset) || offset < 0) {
         throw new Error("Offset must be >= 0");
       }
       filter.offset = offset;

@@ -105,7 +105,9 @@ export class RedactionAuditTrail {
     if (this.auditSink) {
       await this.auditSink.ingest(envelope);
     }
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
     await this.bus.publish(envelope);
   }
 }

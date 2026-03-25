@@ -32,7 +32,9 @@ export function extractFilePaths(command: string): string[] {
   const paths: string[] = [];
   const tokens = tokenizeCommand(command);
 
-  if (tokens.length === 0) return paths;
+  if (tokens.length === 0) {
+    return paths;
+  }
 
   const cmd = tokens[0];
 
@@ -42,7 +44,9 @@ export function extractFilePaths(command: string): string[] {
       const tok = tokens[i];
       if ((tok === "-d" || tok === "--data" || tok === "--data-binary") && i + 1 < tokens.length) {
         const next = tokens[i + 1];
-        if (next.startsWith("@")) paths.push(next.slice(1));
+        if (next.startsWith("@")) {
+          paths.push(next.slice(1));
+        }
         i++;
       } else if (tok.startsWith("@")) {
         paths.push(tok.slice(1));
@@ -55,9 +59,13 @@ export function extractFilePaths(command: string): string[] {
   if (cmd === "scp") {
     for (let i = 1; i < tokens.length; i++) {
       const tok = tokens[i];
-      if (tok.startsWith("-")) continue;
+      if (tok.startsWith("-")) {
+        continue;
+      }
       // Skip remote:path patterns (contain colon)
-      if (tok.includes(":")) continue;
+      if (tok.includes(":")) {
+        continue;
+      }
       paths.push(tok);
     }
     return paths;
@@ -109,7 +117,9 @@ export function tokenizeCommand(command: string): string[] {
       current += ch;
     }
   }
-  if (current.length > 0) tokens.push(current);
+  if (current.length > 0) {
+    tokens.push(current);
+  }
   return tokens;
 }
 

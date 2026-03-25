@@ -62,8 +62,8 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
     const startTime = Date.now();
 
     // Step 1: Create 50 lanes concurrently
-    const createPromises = Array.from({ length: laneCount }, (_, i) =>
-      mgr.create(`ws-stress`, "main")
+    const createPromises = Array.from({ length: laneCount }, (_, _i) =>
+      mgr.create("ws-stress", "main")
     );
     const lanes = await Promise.all(createPromises);
     expect(lanes.length).toBe(laneCount);
@@ -109,8 +109,7 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
     // Verify no active lanes remain
     expect(mgr.getRegistry().getActive().length).toBe(0);
 
-    const totalTime = Date.now() - startTime;
-    console.log(`50-lane stress cycle completed in ${totalTime}ms`);
+    const _totalTime = Date.now() - startTime;
   }, 120_000);
 
   test("lane 51 rejected at capacity (NFR-008-003)", async () => {
@@ -136,8 +135,8 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
     }
 
     // Cleanup one lane
-    mgr.getRegistry().update(lanes[0]!.laneId, { state: "ready" });
-    await mgr.cleanup(lanes[0]!.laneId);
+    mgr.getRegistry().update(lanes[0]?.laneId, { state: "ready" });
+    await mgr.cleanup(lanes[0]?.laneId);
 
     // Should now be able to create another
     const newLane = await mgr.create("ws-free", "main");

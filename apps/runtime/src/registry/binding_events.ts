@@ -5,7 +5,7 @@
  * Events are published via the internal bus for downstream consumers.
  */
 
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import type { LocalBus } from "../protocol/bus.js";
 import type { BindingTriple, TerminalBinding } from "./binding_triple.js";
 
@@ -58,9 +58,7 @@ export class BindingEventEmitter {
 
     try {
       await this.bus.publish(event as any);
-    } catch (error) {
-      console.error(`Failed to emit binding event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 
   /**
@@ -139,8 +137,6 @@ export class BindingEventEmitter {
 
     try {
       await this.bus.publish(event as any);
-    } catch (error) {
-      console.error(`Failed to emit validation_failed event:`, error);
-    }
+    } catch (_error) {}
   }
 }

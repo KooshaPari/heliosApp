@@ -114,7 +114,9 @@ export class AuditRingBuffer {
       const index = (this.head + i) % this.capacity;
       const event = this.buffer[index];
 
-      if (!event) continue;
+      if (!event) {
+        continue;
+      }
 
       if (!this.matchesFilter(event, filter)) {
         continue;

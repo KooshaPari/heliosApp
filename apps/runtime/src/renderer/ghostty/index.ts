@@ -120,7 +120,6 @@ export async function registerGhostty(
   const available = await isGhosttyAvailable(binaryPath);
 
   if (!available) {
-    console.warn("[ghostty] Ghostty binary not found; skipping registration.");
     return;
   }
 

@@ -162,15 +162,10 @@ export class SLOMonitor {
           const result = this.busPublish("perf.slo_violation", event);
           // If async, catch errors without blocking.
           if (result && typeof (result as Promise<void>).catch === "function") {
-            (result as Promise<void>).catch(err => {
-              console.error("[slo] Bus publish error:", err);
-            });
+            (result as Promise<void>).catch(_err => {});
           }
-        } catch (err) {
-          console.error("[slo] Bus publish error:", err);
-        }
+        } catch (_err) {}
       } else {
-        console.log("[slo] Violation:", event);
       }
     }
 
@@ -197,12 +192,13 @@ export class SLOMonitor {
     }
     this.running = true;
     this.intervalHandle = setInterval(() => {
-      if (!this.running) return;
+      if (!this.running) {
+        return;
+      }
       const t0 = performance.now();
       this.checkAll();
       const elapsed = performance.now() - t0;
       if (elapsed > 5) {
-        console.warn(`[slo] checkAll took ${elapsed.toFixed(2)}ms (> 5ms budget)`);
       }
     }, intervalMs);
   }

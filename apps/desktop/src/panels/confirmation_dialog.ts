@@ -34,7 +34,9 @@ export class ConfirmationDialog {
   }
 
   open(): void {
-    if (this.isOpen || !this.container) return;
+    if (this.isOpen || !this.container) {
+      return;
+    }
 
     // Store previous focus to restore on close
     this.previousFocus = document.activeElement as HTMLElement;
@@ -45,7 +47,9 @@ export class ConfirmationDialog {
   }
 
   close(): void {
-    if (!this.isOpen || !this.dialogElement) return;
+    if (!(this.isOpen && this.dialogElement)) {
+      return;
+    }
 
     this.isOpen = false;
     this.detachEventListeners();
@@ -66,7 +70,9 @@ export class ConfirmationDialog {
   }
 
   private createAndShowDialog(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     // Backdrop
     const backdrop = document.createElement("div");
@@ -184,7 +190,9 @@ export class ConfirmationDialog {
   }
 
   private attachEventListeners(): void {
-    if (!this.dialogElement) return;
+    if (!this.dialogElement) {
+      return;
+    }
 
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -217,13 +225,17 @@ export class ConfirmationDialog {
   }
 
   private detachEventListeners(): void {
-    if (!this.dialogElement) return;
+    if (!this.dialogElement) {
+      return;
+    }
 
     // Event listeners are automatically removed when element is removed
   }
 
   private handleTabKey(event: KeyboardEvent): void {
-    if (!this.dialogElement) return;
+    if (!this.dialogElement) {
+      return;
+    }
 
     const buttons = this.dialogElement.querySelectorAll("button") as NodeListOf<HTMLButtonElement>;
     const focusedButton = document.activeElement as HTMLButtonElement;

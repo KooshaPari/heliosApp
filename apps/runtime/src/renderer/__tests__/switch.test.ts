@@ -41,15 +41,21 @@ function createMockAdapter(
     id,
     version: "1.0.0",
     init: async () => {
-      if (opts?.initFail) throw new Error(`${id} init failed`);
+      if (opts?.initFail) {
+        throw new Error(`${id} init failed`);
+      }
       state = "initializing";
     },
     start: async () => {
-      if (opts?.startFail) throw new Error(`${id} start failed`);
+      if (opts?.startFail) {
+        throw new Error(`${id} start failed`);
+      }
       state = "running";
     },
     stop: async () => {
-      if (opts?.stopFail) throw new Error(`${id} stop failed`);
+      if (opts?.stopFail) {
+        throw new Error(`${id} stop failed`);
+      }
       state = "stopped";
     },
     bindStream: () => {},
@@ -95,7 +101,7 @@ describe("switchRenderer", () => {
     expect(reg.getActive()?.id).toBe("rio");
     expect(sm.state).toBe("running");
     expect(events.length).toBe(1);
-    expect(events[0]!.type).toBe("renderer.switched");
+    expect(events[0]?.type).toBe("renderer.switched");
   });
 
   it("throws for same renderer", async () => {

@@ -153,7 +153,7 @@ export function resize(
   if (cols < 1 || cols > 10000 || rows < 1 || rows > 10000) {
     throw new InvalidDimensionsError(cols, rows);
   }
-  if (!Number.isInteger(cols) || !Number.isInteger(rows)) {
+  if (!(Number.isInteger(cols) && Number.isInteger(rows))) {
     throw new InvalidDimensionsError(cols, rows);
   }
 
@@ -264,7 +264,7 @@ export async function terminate(
   });
 
   // Step 1: Send SIGTERM.
-  const termEnvelope = deliverSignal(
+  const _termEnvelope = deliverSignal(
     record.pid,
     "SIGTERM",
     record.ptyId,

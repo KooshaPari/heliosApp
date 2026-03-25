@@ -90,7 +90,7 @@ export async function executeRollback(
     }
 
     // ===== Phase 3: Re-attach original renderer =====
-    for (const [ptyId, context] of terminals) {
+    for (const [ptyId, _context] of terminals) {
       try {
         // In real implementation, would restore full context:
         // - scrollback history

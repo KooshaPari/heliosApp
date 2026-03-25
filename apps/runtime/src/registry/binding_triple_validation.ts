@@ -11,8 +11,12 @@ export type BindingTripleValidationOptions = {
 };
 
 function isValidIdFormat(id: string): boolean {
-  if (!id || typeof id !== "string") return false;
-  if (id.length < 1 || id.length > 36) return false;
+  if (!id || typeof id !== "string") {
+    return false;
+  }
+  if (id.length === 0 || id.length > 36) {
+    return false;
+  }
   return /^[a-z0-9-]+$/.test(id);
 }
 

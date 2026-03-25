@@ -67,7 +67,9 @@ class Mutex {
     return new Promise<() => void>((resolve, reject) => {
       const timer = setTimeout(() => {
         const idx = this.queue.findIndex(e => e.resolve === resolve);
-        if (idx !== -1) this.queue.splice(idx, 1);
+        if (idx !== -1) {
+          this.queue.splice(idx, 1);
+        }
         reject(new Error("Write lock timeout: could not acquire lock within 5 seconds"));
       }, LOCK_TIMEOUT_MS);
 
@@ -86,7 +88,9 @@ class Mutex {
   private createRelease(): () => void {
     let released = false;
     return () => {
-      if (released) return;
+      if (released) {
+        return;
+      }
       released = true;
       const next = this.queue.shift();
       if (next) {
@@ -136,7 +140,7 @@ export class JsonWorkspaceStore implements WorkspaceStore {
     if (
       typeof parsed !== "object" ||
       parsed === null ||
-      !Array.isArray((parsed as Record<string, unknown>)["workspaces"])
+      !Array.isArray((parsed as Record<string, unknown>).workspaces)
     ) {
       await this.attemptRecovery();
       return;
@@ -148,7 +152,6 @@ export class JsonWorkspaceStore implements WorkspaceStore {
     if (typeof envelope._checksum === "string") {
       const expected = computeChecksum(envelope.workspaces);
       if (envelope._checksum !== expected) {
-        console.warn("[workspace-store] Checksum mismatch in primary file, attempting recovery");
         await this.attemptRecovery();
         return;
       }
@@ -162,21 +165,16 @@ export class JsonWorkspaceStore implements WorkspaceStore {
   private async attemptRecovery(): Promise<void> {
     const corruption = await detectCorruption(this.dataDir);
     if (corruption.corrupted) {
-      console.warn(`[workspace-store] Primary file corrupted: ${corruption.reason}`);
     }
 
     const recovered = await recoverFromSnapshot(this.dataDir);
     if (recovered !== null) {
-      console.warn("[workspace-store] Recovered from snapshot");
       for (const ws of recovered) {
         this.data.set(ws.id, ws);
       }
       // Immediately flush to fix primary file
       await this.flushInternal();
     } else {
-      console.error(
-        "[workspace-store] Recovery failed — both primary and snapshot corrupted. Starting empty."
-      );
     }
   }
 

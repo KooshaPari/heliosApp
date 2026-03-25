@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import fs from "fs";
+import fs from "node:fs";
 import type { AuditEvent } from "./event";
 import type { AuditFilter } from "./ring-buffer";
 
@@ -208,8 +208,7 @@ export class SQLiteAuditStore {
 
       const stats = fs.statSync(this.dbPath);
       return stats.size;
-    } catch (err) {
-      console.error("[SQLiteAuditStore] Error getting storage size:", err);
+    } catch (_err) {
       return 0;
     }
   }
@@ -225,15 +224,14 @@ export class SQLiteAuditStore {
    * Initialize the database schema on first run.
    */
   private initializeSchema(): void {
-    try {
-      // Check if table exists
-      const tableExists = this.db
-        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='audit_events'")
-        .get();
+    // Check if table exists
+    const tableExists = this.db
+      .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='audit_events'")
+      .get();
 
-      if (!tableExists) {
-        // Create table
-        this.db.exec(`
+    if (!tableExists) {
+      // Create table
+      this.db.exec(`
           CREATE TABLE audit_events (
             id TEXT PRIMARY KEY,
             event_type TEXT NOT NULL,
@@ -251,8 +249,8 @@ export class SQLiteAuditStore {
           )
         `);
 
-        // Create indexes for efficient querying
-        this.db.exec(`
+      // Create indexes for efficient querying
+      this.db.exec(`
           CREATE INDEX idx_workspace_id ON audit_events(workspace_id);
           CREATE INDEX idx_lane_id ON audit_events(lane_id);
           CREATE INDEX idx_session_id ON audit_events(session_id);
@@ -262,10 +260,6 @@ export class SQLiteAuditStore {
           CREATE INDEX idx_timestamp ON audit_events(timestamp);
           CREATE INDEX idx_workspace_timestamp ON audit_events(workspace_id, timestamp);
         `);
-      }
-    } catch (err) {
-      console.error("[SQLiteAuditStore] Schema initialization failed:", err);
-      throw err;
     }
   }
 

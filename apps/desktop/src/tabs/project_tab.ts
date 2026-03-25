@@ -119,9 +119,7 @@ export class ProjectTab extends TabSurface {
       retryBtn.style.borderRadius = "3px";
       retryBtn.style.cursor = "pointer";
       retryBtn.style.fontSize = "12px";
-      retryBtn.addEventListener("click", () => {
-        console.log("Retry workspace load");
-      });
+      retryBtn.addEventListener("click", () => {});
 
       errorEl.appendChild(titleEl);
       errorEl.appendChild(msgEl);
@@ -368,9 +366,7 @@ export class ProjectTab extends TabSurface {
     createBtn.style.cursor = "pointer";
     createBtn.style.fontSize = "12px";
     createBtn.style.width = "100%";
-    createBtn.addEventListener("click", () => {
-      console.log("Create lane action triggered");
-    });
+    createBtn.addEventListener("click", () => {});
 
     const openBtn = document.createElement("button");
     openBtn.textContent = "Open in File Manager";
@@ -382,9 +378,7 @@ export class ProjectTab extends TabSurface {
     openBtn.style.cursor = "pointer";
     openBtn.style.fontSize = "12px";
     openBtn.style.width = "100%";
-    openBtn.addEventListener("click", () => {
-      console.log("Open workspace in file manager");
-    });
+    openBtn.addEventListener("click", () => {});
 
     bodyEl.appendChild(createBtn);
     bodyEl.appendChild(openBtn);

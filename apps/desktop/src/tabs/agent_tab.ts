@@ -152,7 +152,6 @@ export class AgentTab extends TabSurface {
     restartBtn.style.fontSize = "12px";
     restartBtn.addEventListener("click", () => {
       this.agentStatus = "running";
-      console.log("Restart agent action triggered");
     });
 
     const logBtn = document.createElement("button");
@@ -164,9 +163,7 @@ export class AgentTab extends TabSurface {
     logBtn.style.borderRadius = "3px";
     logBtn.style.cursor = "pointer";
     logBtn.style.fontSize = "12px";
-    logBtn.addEventListener("click", () => {
-      console.log("View full log action triggered");
-    });
+    logBtn.addEventListener("click", () => {});
 
     const copyBtn = document.createElement("button");
     copyBtn.textContent = "Copy";
@@ -181,9 +178,7 @@ export class AgentTab extends TabSurface {
       const text = this.actions.map(a => `[${a.timestamp}] ${a.action}: ${a.output}`).join("\n");
       try {
         await navigator.clipboard.writeText(text);
-      } catch {
-        console.error("Failed to copy to clipboard");
-      }
+      } catch {}
     });
 
     footerEl.appendChild(restartBtn);

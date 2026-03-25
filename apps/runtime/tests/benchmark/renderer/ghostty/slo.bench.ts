@@ -50,16 +50,12 @@ interface BenchmarkResult {
 }
 
 function reportResults(results: BenchmarkResult[]): void {
-  const report = {
+  const _report = {
     timestamp: new Date().toISOString(),
     renderer: "ghostty",
     results,
     allPassed: results.every(r => r.passed),
   };
-  // Output structured JSON for CI tracking
-  console.log("\n=== SLO BENCHMARK RESULTS ===");
-  console.log(JSON.stringify(report, null, 2));
-  console.log("=== END RESULTS ===\n");
 }
 
 // ---------------------------------------------------------------------------
@@ -72,7 +68,6 @@ const benchResults: BenchmarkResult[] = [];
 beforeAll(async () => {
   ghosttyAvailable = await isGhosttyAvailable();
   if (!ghosttyAvailable) {
-    console.warn("[T014] Ghostty binary not found -- SLO benchmarks will use synthetic data.");
   }
 });
 

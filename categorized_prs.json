@@ -1,25 +1,10 @@
 {
   "CLEAN+MERGEABLE": [
-    [
-      "phenotype-go-kit",
-      23
-    ],
-    [
-      "claude-code-flow",
-      10
-    ],
-    [
-      "BytePort-TestPortfolio",
-      2
-    ],
-    [
-      "agentapi-deprec",
-      1
-    ],
-    [
-      "Byteportfolio-2",
-      1
-    ]
+    ["phenotype-go-kit", 23],
+    ["claude-code-flow", 10],
+    ["BytePort-TestPortfolio", 2],
+    ["agentapi-deprec", 1],
+    ["Byteportfolio-2", 1]
   ],
   "DIRTY/CONFLICTING": [
     {

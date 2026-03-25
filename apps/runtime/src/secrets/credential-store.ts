@@ -145,7 +145,9 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
 
     const dir = this.credentialDir(providerId, workspaceId);
-    if (!existsSync(dir)) return [];
+    if (!existsSync(dir)) {
+      return [];
+    }
 
     return readdirSync(dir)
       .filter(f => f.endsWith(".enc"))
@@ -357,7 +359,9 @@ export class CredentialStore {
   // -------------------------------------------------------------------------
 
   private async emit(topic: string, payload: Record<string, unknown>): Promise<void> {
-    if (this.bus === null) return;
+    if (this.bus === null) {
+      return;
+    }
     const envelope: LocalBusEnvelope = {
       id: `secrets:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
       type: "event",

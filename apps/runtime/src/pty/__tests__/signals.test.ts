@@ -61,7 +61,7 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(history.length).toBe(2);
-    expect(history.getAll()[0]!.signal).toBe("SIGTERM");
+    expect(history.getAll()[0]?.signal).toBe("SIGTERM");
   });
 
   it("bounds history to maxRecords", () => {
@@ -88,7 +88,7 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(history.length).toBe(2);
-    expect(history.getAll()[0]!.signal).toBe("SIGTERM");
+    expect(history.getAll()[0]?.signal).toBe("SIGTERM");
   });
 });
 
@@ -115,11 +115,11 @@ describe("resize", () => {
 
     // Check resize event payload includes old/new dimensions.
     const resizeEvt = bus.events.find(e => e.topic === "pty.resized");
-    expect(resizeEvt?.payload["oldDimensions"]).toEqual({
+    expect(resizeEvt?.payload.oldDimensions).toEqual({
       cols: 80,
       rows: 24,
     });
-    expect(resizeEvt?.payload["newDimensions"]).toEqual({
+    expect(resizeEvt?.payload.newDimensions).toEqual({
       cols: 120,
       rows: 40,
     });

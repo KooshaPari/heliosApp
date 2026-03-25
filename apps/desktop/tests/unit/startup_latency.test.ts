@@ -28,15 +28,5 @@ test("startup latency stays within the local interactive target", async () => {
   const sorted = [...timings].sort((a, b) => a - b);
   const p95 = percentile(sorted, 0.95);
 
-  console.log(
-    JSON.stringify({
-      benchmark: "desktop-startup-latency",
-      iterations: ITERATIONS,
-      p50_ms: percentile(sorted, 0.5),
-      p95_ms: p95,
-      max_ms: sorted[sorted.length - 1],
-    })
-  );
-
   expect(p95).toBeLessThan(STARTUP_P95_MS);
 });

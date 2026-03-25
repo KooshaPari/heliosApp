@@ -174,7 +174,7 @@ export class AuditLedger {
           this.batchedNotifications.set(subscription.callback, []);
         }
 
-        this.batchedNotifications.get(subscription.callback)!.push(event);
+        this.batchedNotifications.get(subscription.callback)?.push(event);
 
         // Start batch timer if not already running
         if (this.batchTimer === null) {
@@ -196,9 +196,7 @@ export class AuditLedger {
         events.forEach(event => {
           try {
             callback(event);
-          } catch (err) {
-            console.error("[AuditLedger] Subscription callback error:", err);
-          }
+          } catch (_err) {}
         });
       });
     });
@@ -216,9 +214,6 @@ export class AuditLedger {
     chain: AuditEvent[]
   ): void {
     if (visited.has(correlationId)) {
-      console.warn(
-        `[AuditLedger] Circular reference detected for correlation ID: ${correlationId}`
-      );
       return;
     }
 
@@ -228,12 +223,15 @@ export class AuditLedger {
     const ringEvents = this.ringBuffer.getByCorrelationId(correlationId);
     const storeEvents = this.store.getByCorrelationChain(correlationId);
     const eventMap = new Map<string, AuditEvent>();
-    for (const event of ringEvents) eventMap.set(event.id, event);
-    for (const event of storeEvents) eventMap.set(event.id, event);
+    for (const event of ringEvents) {
+      eventMap.set(event.id, event);
+    }
+    for (const event of storeEvents) {
+      eventMap.set(event.id, event);
+    }
     const events = Array.from(eventMap.values());
 
     if (events.length === 0) {
-      console.warn(`[AuditLedger] No events found for correlation ID: ${correlationId}`);
       return;
     }
 

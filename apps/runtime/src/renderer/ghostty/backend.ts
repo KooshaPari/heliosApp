@@ -400,16 +400,17 @@ export class GhosttyBackend implements RendererAdapter {
   }
 
   private _checkRenderStall(): void {
-    if (this._state !== "running") return;
-    if (this._lastFrameTimestamp === 0) return;
+    if (this._state !== "running") {
+      return;
+    }
+    if (this._lastFrameTimestamp === 0) {
+      return;
+    }
 
     const elapsed = Date.now() - this._lastFrameTimestamp;
     if (elapsed > 500) {
       // Check if the process is alive
       if (this._process.isRunning()) {
-        console.warn(
-          `[ghostty] Render stall detected: no frames for ${elapsed}ms, but process is alive.`
-        );
       }
       // If process is dead, crash detection in WP01 T002 handles it.
     }

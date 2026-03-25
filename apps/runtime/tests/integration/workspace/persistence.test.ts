@@ -154,7 +154,7 @@ describe("Corruption recovery", () => {
     // Tamper with the primary file's checksum
     const raw = await readFile(join(dataDir, "workspaces.json"), "utf-8");
     const data = JSON.parse(raw) as Record<string, unknown>;
-    data["_checksum"] = "badhash";
+    data._checksum = "badhash";
     await writeFile(join(dataDir, "workspaces.json"), JSON.stringify(data));
 
     const store2 = await createJsonStore(dataDir);

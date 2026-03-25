@@ -37,8 +37,8 @@ describe("Rollback integration", () => {
 
     expect(result.success).toBe(true);
     expect(result.terminalStatuses.length).toBe(1);
-    expect(result.terminalStatuses[0]!.restored).toBe(true);
-    expect(result.terminalStatuses[0]!.degraded).toBe(false);
+    expect(result.terminalStatuses[0]?.restored).toBe(true);
+    expect(result.terminalStatuses[0]?.degraded).toBe(false);
   });
 
   it("restores multiple terminals on rollback", async () => {

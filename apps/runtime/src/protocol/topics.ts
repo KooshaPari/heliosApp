@@ -81,10 +81,14 @@ export class TopicRegistry {
 
     let removed = false;
     return () => {
-      if (removed) return;
+      if (removed) {
+        return;
+      }
       removed = true;
       const current = this.subs.get(topic);
-      if (!current) return;
+      if (!current) {
+        return;
+      }
       const idx = current.indexOf(entry);
       if (idx !== -1) {
         current.splice(idx, 1);
@@ -109,7 +113,6 @@ export class TopicRegistry {
     const current = this.sequenceCounters.get(topic) ?? 0;
     let next = current + 1;
     if (current >= Number.MAX_SAFE_INTEGER) {
-      console.warn(`[topics] Sequence counter overflow for topic "${topic}" - resetting to 1`);
       next = 1;
     }
     this.sequenceCounters.set(topic, next);

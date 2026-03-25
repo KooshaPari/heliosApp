@@ -9,7 +9,7 @@ import { createJsonStore } from "../../../src/workspace/store.js";
 import type { Workspace } from "../../../src/workspace/types.js";
 
 // CI machines may be slower — 2x factor
-const CI_FACTOR = process.env["CI"] ? 2 : 1;
+const CI_FACTOR = process.env.CI ? 2 : 1;
 
 function makeWorkspace(i: number): Workspace {
   return {
@@ -64,7 +64,6 @@ describe("Workspace persistence benchmarks", () => {
     }, 20);
 
     const p95Val = p95(times);
-    console.log(`Create p95: ${p95Val.toFixed(2)}ms`);
     expect(p95Val).toBeLessThan(100 * CI_FACTOR);
   });
 
@@ -80,7 +79,6 @@ describe("Workspace persistence benchmarks", () => {
     }, 20);
 
     const p95Val = p95(times);
-    console.log(`Flush (50 ws) p95: ${p95Val.toFixed(2)}ms`);
     expect(p95Val).toBeLessThan(200 * CI_FACTOR);
   });
 
@@ -96,7 +94,6 @@ describe("Workspace persistence benchmarks", () => {
     }, 20);
 
     const p95Val = p95(times);
-    console.log(`Restore (50 ws) p95: ${p95Val.toFixed(2)}ms`);
     expect(p95Val).toBeLessThan(500 * CI_FACTOR);
   });
 });

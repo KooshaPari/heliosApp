@@ -14,7 +14,9 @@ export interface HardwareCapabilities {
 let cached: HardwareCapabilities | null = null;
 
 export async function detectHardware(): Promise<HardwareCapabilities> {
-  if (cached) return cached;
+  if (cached) {
+    return cached;
+  }
 
   const platform = process.platform;
   const arch = process.arch;

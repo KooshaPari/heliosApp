@@ -102,11 +102,6 @@ describe("Buffer stress test — 50MB into 4MB buffer", () => {
 
       // 7. Completed in reasonable time (< 10 seconds for 50MB).
       expect(elapsedMs).toBeLessThan(10_000);
-
-      console.log(
-        `Stress test complete: ${(totalData / 1024 / 1024).toFixed(0)}MB processed in ${elapsedMs.toFixed(0)}ms, ` +
-          `${totalDropped} bytes dropped, ${overflowEvts.length} overflow events`
-      );
     } finally {
       console.warn = origWarn;
     }

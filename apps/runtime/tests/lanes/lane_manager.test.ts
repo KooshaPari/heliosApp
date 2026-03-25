@@ -27,7 +27,7 @@ describe("LaneManager", () => {
     const events = bus.getEvents();
     const created = events.find(e => e.topic === "lane.created");
     expect(created).toBeDefined();
-    expect(created!.workspace_id).toBe("ws-1");
+    expect(created?.workspace_id).toBe("ws-1");
   });
 
   test("list returns all lanes", async () => {
@@ -82,9 +82,9 @@ describe("LaneManager", () => {
     const events = bus.getEvents();
     const created = events.find(e => e.topic === "lane.created");
     expect(created).toBeDefined();
-    expect(created!.payload).toBeDefined();
-    expect(created!.payload!["fromState"]).toBeDefined();
-    expect(created!.payload!["toState"]).toBeDefined();
+    expect(created?.payload).toBeDefined();
+    expect(created?.payload?.fromState).toBeDefined();
+    expect(created?.payload?.toState).toBeDefined();
   });
 
   test("capacity limit rejects create", async () => {
@@ -136,7 +136,7 @@ describe("LaneManager sharing", () => {
     }
     await mgr.share(lane.laneId);
     const updated = reg.get(lane.laneId);
-    expect(updated!.state).toBe("shared");
+    expect(updated?.state).toBe("shared");
   });
 
   test("share emits lane.shared event", async () => {
@@ -207,6 +207,6 @@ describe("LaneManager sharing", () => {
     const reg = mgr.getRegistry();
     reg.update(lane.laneId, { state: "shared" });
     await mgr.share(lane.laneId); // should not throw
-    expect(reg.get(lane.laneId)!.state).toBe("shared");
+    expect(reg.get(lane.laneId)?.state).toBe("shared");
   });
 });

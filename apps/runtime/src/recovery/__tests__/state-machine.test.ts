@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { promises as fs } from "fs";
-import os from "os";
-import path from "path";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { RecoveryStage, type RecoveryState, RecoveryStateMachine } from "../state-machine.js";
 
@@ -33,7 +33,7 @@ describe("RecoveryStateMachine", () => {
     it("should progress through all stages in order", async () => {
       const stages: RecoveryStage[] = [];
 
-      stateMachine.onStageChange((from, to) => {
+      stateMachine.onStageChange((_from, to) => {
         stages.push(to);
       });
 
@@ -216,7 +216,7 @@ describe("RecoveryStateMachine", () => {
 
   describe("listener notifications", () => {
     it("should notify listeners on stage change", async () => {
-      const changes: Array<[string, string, number]> = [];
+      const changes: [string, string, number][] = [];
 
       stateMachine.onStageChange((from, to, attemptCount) => {
         changes.push([from, to, attemptCount]);

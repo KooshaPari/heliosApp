@@ -133,7 +133,7 @@ export async function executeRestartWithRestore(
   config: RendererConfig,
   surface: RenderSurface,
   onRollback: (error: Error) => Promise<void>,
-  eventBus?: RendererEventBus
+  _eventBus?: RendererEventBus
 ): Promise<RestartRestoreResult> {
   const startTime = Date.now();
   let currentPhase = "checkpoint";

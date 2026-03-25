@@ -42,7 +42,9 @@ export class LaneListItem {
   }
 
   private render(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
@@ -57,7 +59,7 @@ export class LaneListItem {
     item.className = `lane-list-item ${this.props.isActive ? "active" : ""} ${this.props.isSelected ? "selected" : ""}`;
     item.setAttribute("data-lane-item", this.props.laneId);
     item.setAttribute("role", "option");
-    item.setAttribute("aria-selected", String(this.props.isSelected || false));
+    item.setAttribute("aria-selected", String(this.props.isSelected));
     item.setAttribute("tabindex", "0");
 
     // Badge container
@@ -122,14 +124,18 @@ export class LaneListItem {
     if (name.length <= maxLength) {
       return name;
     }
-    return name.substring(0, maxLength - 3) + "...";
+    return `${name.substring(0, maxLength - 3)}...`;
   }
 
   private attachEventListeners(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     const item = this.container.querySelector(".lane-list-item");
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     item.addEventListener("click", () => {
       this.props.onSelect(this.props.laneId);
@@ -150,10 +156,14 @@ export class LaneListItem {
   }
 
   private detachEventListeners(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     const item = this.container.querySelector(".lane-list-item");
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     // Event listeners are automatically removed when element is removed
   }

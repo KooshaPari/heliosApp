@@ -154,7 +154,7 @@ describe("SessionTab", () => {
 
       await tab.onContextChange(context);
       const state = tab.getState();
-      const originalExpandedSections = state.expandedSections ?? [];
+      const _originalExpandedSections = state.expandedSections ?? [];
 
       expect(state.tabType).toBe("session");
       expect(state.expandedSections).toBeDefined();

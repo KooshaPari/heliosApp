@@ -219,14 +219,13 @@ export class SwitchTransactionOrchestrator {
         request.onProgress?.("committed");
 
         return transaction;
-      } else {
-        // Hot-swap failed, rollback was triggered
-        this._transitionState(transaction, "rolled-back");
-        request.onProgress?.("rolled-back");
-
-        transaction.error = result.error;
-        return transaction;
       }
+      // Hot-swap failed, rollback was triggered
+      this._transitionState(transaction, "rolled-back");
+      request.onProgress?.("rolled-back");
+
+      transaction.error = result.error;
+      return transaction;
     } catch (error: unknown) {
       // Unexpected error during hot-swap
       this._transitionState(transaction, "failed");
@@ -282,14 +281,13 @@ export class SwitchTransactionOrchestrator {
         request.onProgress?.("committed");
 
         return transaction;
-      } else {
-        // Restart-with-restore failed, rollback was triggered
-        this._transitionState(transaction, "rolled-back");
-        request.onProgress?.("rolled-back");
-
-        transaction.error = result.error;
-        return transaction;
       }
+      // Restart-with-restore failed, rollback was triggered
+      this._transitionState(transaction, "rolled-back");
+      request.onProgress?.("rolled-back");
+
+      transaction.error = result.error;
+      return transaction;
     } catch (error: unknown) {
       // Unexpected error during restart-with-restore
       this._transitionState(transaction, "failed");

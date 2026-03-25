@@ -61,7 +61,7 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(h.length).toBe(2);
-    expect(h.getAll()[0]!.signal).toBe("SIGTERM");
+    expect(h.getAll()[0]?.signal).toBe("SIGTERM");
   });
 
   it("bounds history to maxRecords", () => {
@@ -88,7 +88,7 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(h.length).toBe(2);
-    expect(h.getAll()[0]!.signal).toBe("SIGTERM");
+    expect(h.getAll()[0]?.signal).toBe("SIGTERM");
   });
 });
 

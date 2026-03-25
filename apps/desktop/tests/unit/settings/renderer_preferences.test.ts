@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { unlinkSync, writeFileSync } from "fs";
-import { resolve } from "path";
+import { unlinkSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { RendererPreferencesManager } from "../../../src/settings/renderer_preferences";
 
 describe("RendererPreferencesManager", () => {

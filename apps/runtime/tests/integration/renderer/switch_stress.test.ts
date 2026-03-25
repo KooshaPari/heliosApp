@@ -52,7 +52,7 @@ describe("Switch stress tests", () => {
 
     // Now try rapid switches - sequential since state machine prevents concurrent
     let successCount = 0;
-    let failCount = 0;
+    let _failCount = 0;
     for (let i = 0; i < 10; i++) {
       try {
         const fromId = i % 2 === 0 ? "rio" : "ghostty";
@@ -67,7 +67,7 @@ describe("Switch stress tests", () => {
         });
         successCount++;
       } catch {
-        failCount++;
+        _failCount++;
       }
     }
     // All sequential switches should succeed
@@ -200,13 +200,8 @@ describe("Switch stress tests", () => {
       latencies.push(performance.now() - start);
     }
 
-    const avg = latencies.reduce((s, l) => s + l, 0) / latencies.length;
+    const _avg = latencies.reduce((s, l) => s + l, 0) / latencies.length;
     const max = Math.max(...latencies);
-
-    // Report
-    console.log(
-      `Switch latency: avg=${avg.toFixed(2)}ms, max=${max.toFixed(2)}ms, p50=${latencies.sort()[2]!.toFixed(2)}ms`
-    );
     // All should be well under 3 seconds
     expect(max).toBeLessThan(3000);
   });

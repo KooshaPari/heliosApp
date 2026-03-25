@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "fs";
-import { tmpdir } from "os";
-import * as path from "path";
+import { promises as fs } from "node:fs";
+import { tmpdir } from "node:os";
+import * as path from "node:path";
 import { type TabPersistedState, TabPersistence } from "../../../src/tabs/tab_persistence";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
 
@@ -85,7 +85,7 @@ describe("TabPersistence", () => {
 
       const startTime = Date.now();
       await persistence.load();
-      const duration = Date.now() - startTime;
+      const _duration = Date.now() - startTime;
 
       expect(persistence.getLastLoadTime()).toBeLessThan(100);
     });
@@ -348,7 +348,7 @@ describe("TabPersistence", () => {
       };
 
       // Will not throw
-      const loadedState = persistence["validateState"](testState);
+      const loadedState = persistence.validateState(testState);
       expect(loadedState).toBe(true);
     });
 
@@ -362,7 +362,7 @@ describe("TabPersistence", () => {
         savedAt: new Date().toISOString(),
       };
 
-      const isValid = persistence["validateState"](testState);
+      const isValid = persistence.validateState(testState);
       expect(isValid).toBe(true); // null is allowed
     });
   });

@@ -39,7 +39,7 @@ describe("RedactionAuditTrail: record creation", () => {
     expect(record.artifactType).toBe("log");
     expect(record.correlationId).toBe("corr-1");
     expect(record.rulesApplied.length).toBeGreaterThan(0);
-    expect(record.matchesByCategory["AWS_ACCESS_KEY"]).toBeGreaterThan(0);
+    expect(record.matchesByCategory.AWS_ACCESS_KEY).toBeGreaterThan(0);
     expect(record.timestamp).toBeTruthy();
     expect(record.latencyMs).toBeGreaterThanOrEqual(0);
   });

@@ -120,9 +120,7 @@ export class SettingsManager {
       // Hot-reloadable → publish on bus if available.
       try {
         this.busPublish?.("settings.changed", event);
-      } catch {
-        console.warn("[settings] Bus publish failed, skipping event emission.");
-      }
+      } catch {}
     }
 
     // Always notify direct subscribers regardless of reload policy.

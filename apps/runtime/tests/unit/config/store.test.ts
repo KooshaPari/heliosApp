@@ -32,7 +32,7 @@ describe("JsonSettingsStore", () => {
     const values = { theme: "dark", "telemetry.enabled": true };
     await store.save(values);
     const loaded = await store.load();
-    expect(loaded["theme"]).toBe("dark");
+    expect(loaded.theme).toBe("dark");
     expect(loaded["telemetry.enabled"]).toBe(true);
   });
 
@@ -82,6 +82,6 @@ describe("JsonSettingsStore", () => {
     await rm(filePath);
     await store.save({ theme: "dark" });
     const raw = JSON.parse(await readFile(filePath, "utf-8")) as Record<string, unknown>;
-    expect(raw["theme"]).toBe("dark");
+    expect(raw.theme).toBe("dark");
   });
 });

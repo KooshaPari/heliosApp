@@ -131,9 +131,7 @@ export class DefaultAuditSink implements AuditSink {
     if (evicted) {
       this.metrics.eventsOverflowed = (this.metrics.eventsOverflowed ?? 0) + 1;
       this.overflowQueue.push(evicted);
-      this.persistOverflow().catch(err => {
-        console.error("[AuditSink] Overflow persistence failed:", err);
-      });
+      this.persistOverflow().catch(_err => {});
     }
 
     this.buffer.push(event);
@@ -142,9 +140,7 @@ export class DefaultAuditSink implements AuditSink {
     }
 
     if (this.buffer.length >= this.MAX_BUFFER_SIZE) {
-      this.persistWithRetry().catch(err => {
-        console.error("[AuditSink] Persistence failed, events retained in buffer:", err);
-      });
+      this.persistWithRetry().catch(_err => {});
     }
   }
 
@@ -208,7 +204,7 @@ export class DefaultAuditSink implements AuditSink {
           retries += 1;
           if (retries < this.MAX_RETRIES) {
             await new Promise(resolve =>
-              setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1))
+              setTimeout(resolve, this.RETRY_BACKOFF_MS * 2 ** (retries - 1))
             );
           }
         }
@@ -236,7 +232,7 @@ export class DefaultAuditSink implements AuditSink {
         retries += 1;
         if (retries < this.MAX_RETRIES) {
           await new Promise(resolve =>
-            setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1))
+            setTimeout(resolve, this.RETRY_BACKOFF_MS * 2 ** (retries - 1))
           );
         }
       }
@@ -246,9 +242,7 @@ export class DefaultAuditSink implements AuditSink {
   private startPeriodicFlush(): void {
     this.flushTimer = setInterval(() => {
       if (this.buffer.length > 0 || this.overflowQueue.length > 0) {
-        this.persistWithRetry().catch(err => {
-          console.error("[AuditSink] Periodic flush failed:", err);
-        });
+        this.persistWithRetry().catch(_err => {});
       }
     }, this.FLUSH_INTERVAL_MS) as unknown as number;
   }

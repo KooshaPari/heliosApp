@@ -72,7 +72,7 @@ describe("AuditEvent Schema", () => {
       });
 
       const ts = new Date(event.timestamp);
-      expect(isNaN(ts.getTime())).toBe(false);
+      expect(Number.isNaN(ts.getTime())).toBe(false);
       expect(event.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     });
 

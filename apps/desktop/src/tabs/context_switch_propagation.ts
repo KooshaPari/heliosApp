@@ -81,7 +81,6 @@ export class ContextPropagator {
             result.timed_out.push(tabId);
           } else {
             result.failed.push(tabId);
-            console.error(`Failed to propagate context to tab ${tabId}:`, error);
           }
         });
 

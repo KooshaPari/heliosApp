@@ -107,11 +107,11 @@ describe("ActiveContextStore", () => {
 
       const calls: any[] = [];
 
-      store.onContextChange(event => {
+      store.onContextChange(_event => {
         calls.push("listener1");
       });
 
-      store.onContextChange(event => {
+      store.onContextChange(_event => {
         calls.push("listener2");
       });
 
@@ -130,7 +130,7 @@ describe("ActiveContextStore", () => {
 
       let callCount = 0;
 
-      const unsubscribe = store.onContextChange(event => {
+      const unsubscribe = store.onContextChange(_event => {
         callCount++;
       });
 
@@ -229,7 +229,7 @@ describe("ActiveContextStore", () => {
 
       let validated = false;
 
-      store.setValidator(async ctx => {
+      store.setValidator(async _ctx => {
         validated = true;
         return true;
       });

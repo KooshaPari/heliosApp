@@ -8,7 +8,7 @@ import { createMockTabSurface } from "../../../src/tabs/tab_surface";
 
 describe("ContextPropagator", () => {
   let propagator: ContextPropagator;
-  let mockTabs: Array<ReturnType<typeof createMockTabSurface>> = [];
+  let mockTabs: ReturnType<typeof createMockTabSurface>[] = [];
 
   beforeEach(() => {
     resetContextPropagator();
@@ -122,10 +122,10 @@ describe("ContextPropagator", () => {
   describe("Propagation Cancellation", () => {
     it("should cancel previous propagation on new context", async () => {
       const slowTab = mockTabs[0];
-      let callCount = 0;
+      let _callCount = 0;
 
       slowTab.onContextChange = async () => {
-        callCount++;
+        _callCount++;
         await new Promise(resolve => setTimeout(resolve, 200));
       };
 
@@ -142,7 +142,7 @@ describe("ContextPropagator", () => {
       };
 
       // Start first propagation
-      const promise1 = propagator.propagateContext(context1);
+      const _promise1 = propagator.propagateContext(context1);
 
       // Immediately start second propagation (should cancel first)
       await new Promise(resolve => setTimeout(resolve, 50));

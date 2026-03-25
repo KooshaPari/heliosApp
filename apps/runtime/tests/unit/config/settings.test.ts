@@ -123,7 +123,7 @@ describe("SettingsManager — hot-reload", () => {
     await mgr.init();
     await mgr.set("theme", "dark");
     expect(events).toHaveLength(1);
-    expect(events[0]!.key).toBe("theme");
+    expect(events[0]?.key).toBe("theme");
     mgr.dispose();
   });
 
@@ -173,7 +173,7 @@ describe("SettingsManager — getAll", () => {
     const mgr = createManager();
     await mgr.init();
     const all = mgr.getAll();
-    expect(all["theme"]).toBe("system");
+    expect(all.theme).toBe("system");
     expect(Object.keys(all).length).toBeGreaterThanOrEqual(4);
     mgr.dispose();
   });

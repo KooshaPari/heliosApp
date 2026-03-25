@@ -46,9 +46,7 @@ export class DefaultAuditSink implements AuditSink {
     if (evicted) {
       this.metrics.eventsOverflowed!++;
       this.overflowQueue.push(evicted);
-      this.persistOverflow().catch(err => {
-        console.error("[AuditSink] Overflow persistence failed:", err);
-      });
+      this.persistOverflow().catch(_err => {});
     }
 
     this.buffer.push(event);
@@ -58,9 +56,7 @@ export class DefaultAuditSink implements AuditSink {
     }
 
     if (this.buffer.length >= MAX_BUFFER_SIZE) {
-      this.persistWithRetry().catch(err => {
-        console.error("[AuditSink] Persistence failed, events retained in buffer:", err);
-      });
+      this.persistWithRetry().catch(_err => {});
     }
   }
 
@@ -123,15 +119,12 @@ export class DefaultAuditSink implements AuditSink {
           this.metrics.retryCount++;
           retries++;
           if (retries < MAX_RETRIES) {
-            await sleep(RETRY_BACKOFF_MS * Math.pow(2, retries - 1));
+            await sleep(RETRY_BACKOFF_MS * 2 ** (retries - 1));
           }
         }
       }
 
       if (this.buffer.length > 0) {
-        console.warn(
-          "[AuditSink] Events retained in buffer after retries; will retry on next write"
-        );
       }
     } finally {
       this.persistenceInProgress = false;
@@ -155,7 +148,7 @@ export class DefaultAuditSink implements AuditSink {
         this.metrics.sqliteRetryCount!++;
         retries++;
         if (retries < MAX_RETRIES) {
-          await sleep(RETRY_BACKOFF_MS * Math.pow(2, retries - 1));
+          await sleep(RETRY_BACKOFF_MS * 2 ** (retries - 1));
         }
       }
     }
@@ -164,9 +157,7 @@ export class DefaultAuditSink implements AuditSink {
   private startPeriodicFlush(): void {
     this.flushTimer = setInterval(() => {
       if (this.buffer.length > 0 || this.overflowQueue.length > 0) {
-        this.persistWithRetry().catch(err => {
-          console.error("[AuditSink] Periodic flush failed:", err);
-        });
+        this.persistWithRetry().catch(_err => {});
       }
     }, FLUSH_INTERVAL_MS) as unknown as number;
   }

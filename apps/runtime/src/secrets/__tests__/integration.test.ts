@@ -464,8 +464,8 @@ describe("Integration Tests (T015)", () => {
       const bus = new InMemoryLocalBus();
       const store = makeStore(tmpDir, bus);
 
-      const oldValue = "old-secret-" + randomBytes(8).toString("hex");
-      const newValue = "new-secret-" + randomBytes(8).toString("hex");
+      const oldValue = `old-secret-${randomBytes(8).toString("hex")}`;
+      const newValue = `new-secret-${randomBytes(8).toString("hex")}`;
 
       await store.create("prov", "ws", "apiKey", oldValue, "corr-create");
 

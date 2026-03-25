@@ -31,7 +31,9 @@ export class ProtectedPathDetector {
     opts?: { terminalId?: string; correlationId?: string }
   ): ProtectedPathMatch[] {
     const filePaths = extractFilePaths(command);
-    if (filePaths.length === 0) return [];
+    if (filePaths.length === 0) {
+      return [];
+    }
 
     const enabledPatterns = this.config.getEnabledPatterns();
     const matches: ProtectedPathMatch[] = [];
@@ -41,10 +43,14 @@ export class ProtectedPathDetector {
       for (const pattern of enabledPatterns) {
         if (matchesPattern(filePath, pattern.pattern)) {
           const dedupeKey = `${pattern.id}:${filePath}`;
-          if (seen.has(dedupeKey)) continue;
+          if (seen.has(dedupeKey)) {
+            continue;
+          }
           seen.add(dedupeKey);
 
-          if (this._isDebounced(pattern.id, filePath)) continue;
+          if (this._isDebounced(pattern.id, filePath)) {
+            continue;
+          }
 
           const redactedCommand = redactCommandForAudit(command);
 
@@ -52,12 +58,7 @@ export class ProtectedPathDetector {
             patternId: pattern.id,
             pattern: pattern.pattern,
             matchedPath: filePath,
-            warningMessage:
-              "Command accesses protected path '" +
-              `${filePath}` +
-              "' matching pattern '" +
-              `${pattern.description}` +
-              "'",
+            warningMessage: `Command accesses protected path '${filePath}' matching pattern '${pattern.description}'`,
             command: redactedCommand,
           };
           matches.push(match);
@@ -104,12 +105,16 @@ export class ProtectedPathDetector {
   private _isDebounced(patternId: string, matchedPath: string): boolean {
     const key = `${patternId}:${matchedPath}`;
     const ack = this.acknowledgments.get(key);
-    if (!ack) return false;
+    if (!ack) {
+      return false;
+    }
     return Date.now() - ack.acknowledgedAt < DEBOUNCE_MS;
   }
 
   private async _emit(topic: string, payload: Record<string, unknown>): Promise<void> {
-    if (!this.bus) return;
+    if (!this.bus) {
+      return;
+    }
     const envelope: LocalBusEnvelope = {
       id: `protected-paths:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
       type: "event",

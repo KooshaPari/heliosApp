@@ -16,7 +16,9 @@ export const TerminalPanel: Component<TerminalPanelProps> = props => {
   let resizeObserver: ResizeObserver | undefined;
 
   onMount(() => {
-    if (!ref) return;
+    if (!ref) {
+      return;
+    }
 
     terminal = new Terminal({
       theme: {

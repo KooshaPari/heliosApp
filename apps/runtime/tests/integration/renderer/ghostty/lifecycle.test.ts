@@ -19,7 +19,7 @@ const TEST_CONFIG: RendererConfig = {
   maxDimensions: { cols: 200, rows: 50 },
 };
 
-const TEST_SURFACE: RenderSurface = {
+const _TEST_SURFACE: RenderSurface = {
   windowId: "integration-test-window",
   bounds: { x: 0, y: 0, width: 800, height: 600 },
 };
@@ -29,7 +29,6 @@ let ghosttyAvailable = false;
 beforeAll(async () => {
   ghosttyAvailable = await isGhosttyAvailable();
   if (!ghosttyAvailable) {
-    console.warn("[T013] Ghostty binary not found -- integration tests will be skipped.");
   }
 });
 
@@ -64,7 +63,9 @@ describe("Ghostty integration - lifecycle (T013)", () => {
   });
 
   test("bind mock PTY stream and verify consumption", async () => {
-    if (skipUnlessGhostty()) return;
+    if (skipUnlessGhostty()) {
+      return;
+    }
 
     backend = new GhosttyBackend("integration");
     await backend.init(TEST_CONFIG);
@@ -76,7 +77,9 @@ describe("Ghostty integration - lifecycle (T013)", () => {
 
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
-        for (const c of chunks) controller.enqueue(c);
+        for (const c of chunks) {
+          controller.enqueue(c);
+        }
         controller.close();
       },
     });

@@ -228,14 +228,27 @@ export class InMemoryLocalBus implements LocalBus {
       const startTime = Date.now();
       const ctx = this.getHandlerContext();
 
-      if (command.method === "lane.create") return handleLaneCreate(command, startTime, ctx);
-      if (command.method === "lane.attach") return handleLaneAttach(command, ctx);
-      if (command.method === "session.attach") return handleSessionAttach(command, startTime, ctx);
-      if (command.method === "terminal.spawn") return handleTerminalSpawn(command, startTime, ctx);
-      if (command.method === "terminal.input") return handleTerminalInput(command);
-      if (command.method === "renderer.capabilities")
+      if (command.method === "lane.create") {
+        return handleLaneCreate(command, startTime, ctx);
+      }
+      if (command.method === "lane.attach") {
+        return handleLaneAttach(command, ctx);
+      }
+      if (command.method === "session.attach") {
+        return handleSessionAttach(command, startTime, ctx);
+      }
+      if (command.method === "terminal.spawn") {
+        return handleTerminalSpawn(command, startTime, ctx);
+      }
+      if (command.method === "terminal.input") {
+        return handleTerminalInput(command);
+      }
+      if (command.method === "renderer.capabilities") {
         return handleRendererCapabilities(this.rendererEngine);
-      if (command.method === "renderer.switch") return handleRendererSwitch(command, ctx);
+      }
+      if (command.method === "renderer.switch") {
+        return handleRendererSwitch(command, ctx);
+      }
     }
 
     return {
@@ -248,11 +261,11 @@ export class InMemoryLocalBus implements LocalBus {
   }
 
   // Implement LocalBus interface (stub methods)
-  registerMethod(method: string, handler: MethodHandler): void {
+  registerMethod(_method: string, _handler: MethodHandler): void {
     // Stub for interface compliance
   }
 
-  async send(envelope: unknown): Promise<ResponseEnvelope> {
+  async send(_envelope: unknown): Promise<ResponseEnvelope> {
     return {
       id: "stub",
       type: "response",
@@ -261,7 +274,7 @@ export class InMemoryLocalBus implements LocalBus {
     };
   }
 
-  subscribe(topic: string, handler: (evt: EventEnvelope) => void | Promise<void>): () => void {
+  subscribe(_topic: string, _handler: (evt: EventEnvelope) => void | Promise<void>): () => void {
     return () => {};
   }
 

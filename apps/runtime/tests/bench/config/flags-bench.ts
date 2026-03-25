@@ -16,7 +16,7 @@ import { SettingsManager } from "../../../src/config/settings.js";
 import { JsonSettingsStore } from "../../../src/config/store.js";
 
 // CI slowdown factor — 2x threshold multiplier
-const CI_FACTOR = process.env["CI"] ? 2 : 1;
+const CI_FACTOR = process.env.CI ? 2 : 1;
 
 interface BenchResult {
   name: string;
@@ -225,25 +225,15 @@ async function main() {
   results.push(await benchHotReloadPropagation());
   results.push(await benchFlagReadMemory());
 
-  // Structured JSON output for CI
-  console.log(JSON.stringify({ benchmarks: results }, null, 2));
-
   // Assert thresholds
   const failures = results.filter(r => !r.pass);
   if (failures.length > 0) {
-    console.error("\nBenchmark threshold breaches:");
-    for (const f of failures) {
-      console.error(
-        `  FAIL: ${f.name} — p95=${f.p95_ms.toFixed(4)} > threshold=${f.threshold_p95_ms}`
-      );
+    for (const _f of failures) {
     }
     process.exit(1);
   }
-
-  console.log("\nAll benchmarks passed.");
 }
 
-main().catch(err => {
-  console.error(err);
+main().catch(_err => {
   process.exit(1);
 });

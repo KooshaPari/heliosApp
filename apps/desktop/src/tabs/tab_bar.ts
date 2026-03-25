@@ -50,7 +50,9 @@ export class TabBar {
    */
   selectTab(tabId: string): void {
     const tab = this.tabs.find(t => t.getTabId() === tabId);
-    if (!tab) return;
+    if (!tab) {
+      return;
+    }
 
     // Deactivate previous tab
     if (this.selectedTabId) {
@@ -82,7 +84,6 @@ export class TabBar {
     const newOrderSet = new Set(newOrder);
 
     if (newOrder.length !== this.tabs.length || ![...tabIds].every(id => newOrderSet.has(id))) {
-      console.error("Invalid tab order: missing or extra tab IDs");
       return;
     }
 
@@ -95,7 +96,9 @@ export class TabBar {
    */
   pinTab(tabId: string, pinned = true): void {
     const tab = this.tabs.find(t => t.getTabId() === tabId);
-    if (!tab) return;
+    if (!tab) {
+      return;
+    }
 
     if (pinned) {
       this.pinnedTabIds.add(tabId);
@@ -250,12 +253,13 @@ export class TabBar {
 
     switch (event.key) {
       case "Enter":
-      case " ":
+      case " ": {
         event.preventDefault();
         this.selectTab(tabId);
         break;
+      }
 
-      case "ArrowRight":
+      case "ArrowRight": {
         event.preventDefault();
         if (currentIndex < orderedTabs.length - 1) {
           const nextTab = orderedTabs[currentIndex + 1];
@@ -263,8 +267,9 @@ export class TabBar {
           this.focusTab(nextTab.getTabId());
         }
         break;
+      }
 
-      case "ArrowLeft":
+      case "ArrowLeft": {
         event.preventDefault();
         if (currentIndex > 0) {
           const prevTab = orderedTabs[currentIndex - 1];
@@ -272,6 +277,7 @@ export class TabBar {
           this.focusTab(prevTab.getTabId());
         }
         break;
+      }
 
       case "Tab":
         // Allow natural Tab behavior to move focus out of tab bar
@@ -286,7 +292,9 @@ export class TabBar {
    * Focus a tab by ID.
    */
   private focusTab(tabId: string): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     const tabEl = this.container.querySelector(`[data-tab-id="${tabId}"]`) as HTMLElement;
 

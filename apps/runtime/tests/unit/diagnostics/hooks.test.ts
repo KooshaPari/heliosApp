@@ -177,7 +177,7 @@ describe("createInstrumentationHooks", () => {
     hooks.markEnd("render", h);
 
     expect(samples).toHaveLength(1);
-    expect(samples[0]!.metric).toBe("render");
-    expect(samples[0]!.value).toBe(7);
+    expect(samples[0]?.metric).toBe("render");
+    expect(samples[0]?.value).toBe(7);
   });
 });

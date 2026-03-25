@@ -1,15 +1,12 @@
+import { CreateProjectUseCase } from "../application/use-cases";
 /**
  * Composition Root / Dependency Injection Container
  *
  * This module wires up all the dependencies and creates the application.
  * It is the entry point that assembles the hexagonal architecture.
  */
-import {
-  type IProjectRepository,
-  type ProjectEntity,
-} from "../domain/ports/output";
+import type { IProjectRepository } from "../domain/ports/output";
 import { ProjectDomainService } from "../domain/services";
-import { CreateProjectUseCase } from "../application/use-cases";
 
 /**
  * Dependency Container

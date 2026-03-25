@@ -141,11 +141,11 @@ describe("RendererStateMachine", () => {
     sm.transition("init_success");
 
     expect(sm.history.length).toBe(2);
-    expect(sm.history[0]!.from).toBe("uninitialized");
-    expect(sm.history[0]!.to).toBe("initializing");
-    expect(sm.history[0]!.event).toBe("init");
-    expect(sm.history[1]!.from).toBe("initializing");
-    expect(sm.history[1]!.to).toBe("running");
+    expect(sm.history[0]?.from).toBe("uninitialized");
+    expect(sm.history[0]?.to).toBe("initializing");
+    expect(sm.history[0]?.event).toBe("init");
+    expect(sm.history[1]?.from).toBe("initializing");
+    expect(sm.history[1]?.to).toBe("running");
   });
 
   it("limits history to 10 entries", () => {
@@ -184,8 +184,8 @@ describe("RendererStateMachine", () => {
     sm.transition("init");
     const after = Date.now();
 
-    expect(sm.history[0]!.timestamp).toBeGreaterThanOrEqual(before);
-    expect(sm.history[0]!.timestamp).toBeLessThanOrEqual(after);
+    expect(sm.history[0]?.timestamp).toBeGreaterThanOrEqual(before);
+    expect(sm.history[0]?.timestamp).toBeLessThanOrEqual(after);
   });
 });
 

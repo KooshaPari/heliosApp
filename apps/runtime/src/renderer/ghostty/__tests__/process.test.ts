@@ -83,7 +83,7 @@ describe("GhosttyProcess", () => {
     await new Promise(r => setTimeout(r, 100));
 
     expect(crashError).toBeDefined();
-    expect(crashError!.message).toContain("unexpectedly");
+    expect(crashError?.message).toContain("unexpectedly");
   });
 
   test("restart cycles cleanly", async () => {

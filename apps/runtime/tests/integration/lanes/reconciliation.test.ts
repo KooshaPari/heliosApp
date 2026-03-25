@@ -83,7 +83,7 @@ describe("Orphan Reconciliation Integration (FR-008-008, SC-008-004)", () => {
 
     expect(result.orphanedRecords).toBe(1);
     // Lane should now be closed
-    expect(mgr.getRegistry().get(lane.laneId)!.state).toBe("closed");
+    expect(mgr.getRegistry().get(lane.laneId)?.state).toBe("closed");
   });
 
   test("handles both orphan types simultaneously", async () => {
@@ -112,8 +112,8 @@ describe("Orphan Reconciliation Integration (FR-008-008, SC-008-004)", () => {
     const events = bus.getEvents();
     const reconEvent = events.find(e => e.topic === "reconciliation.completed");
     expect(reconEvent).toBeDefined();
-    expect(reconEvent!.payload!["orphanedWorktrees"]).toBe(1);
-    expect(reconEvent!.payload!["totalCleaned"]).toBeGreaterThanOrEqual(1);
+    expect(reconEvent?.payload?.orphanedWorktrees).toBe(1);
+    expect(reconEvent?.payload?.totalCleaned).toBeGreaterThanOrEqual(1);
   });
 
   test("completes within 30 seconds (SC-008-004)", async () => {

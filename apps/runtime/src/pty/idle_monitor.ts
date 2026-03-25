@@ -118,7 +118,9 @@ export class IdleMonitor {
    * Start the periodic idle check.
    */
   start(): void {
-    if (this.timer !== null) return;
+    if (this.timer !== null) {
+      return;
+    }
     this.timer = setInterval(() => {
       this.checkIdle();
     }, this.pollIntervalMs);
@@ -143,8 +145,12 @@ export class IdleMonitor {
     const allRecords = this.registry.list();
 
     for (const record of allRecords) {
-      if (record.state !== "active") continue;
-      if (this.disabledPtys.has(record.ptyId)) continue;
+      if (record.state !== "active") {
+        continue;
+      }
+      if (this.disabledPtys.has(record.ptyId)) {
+        continue;
+      }
 
       const lastOutput = this.lastOutputTs.get(record.ptyId);
       // If we have no record of output, use the record creation time.

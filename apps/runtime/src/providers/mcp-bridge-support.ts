@@ -218,9 +218,7 @@ export async function publishEvent(
       topic,
       payload,
     });
-  } catch (error) {
-    console.warn(`Failed to publish MCP event ${topic}:`, error);
-  }
+  } catch (_error) {}
 }
 
 export function createHealthyStatus(): ProviderHealthStatus {

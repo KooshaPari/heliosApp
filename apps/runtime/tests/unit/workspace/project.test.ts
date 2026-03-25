@@ -39,9 +39,9 @@ describe("bindLocalProject", () => {
   test("binds an accessible absolute path", () => {
     const updated = bindLocalProject(ws, tempDir);
     expect(updated.projects).toHaveLength(1);
-    expect(updated.projects[0]!.status).toBe("active");
-    expect(updated.projects[0]!.id).toMatch(/^proj_/);
-    expect(updated.projects[0]!.workspaceId).toBe(ws.id);
+    expect(updated.projects[0]?.status).toBe("active");
+    expect(updated.projects[0]?.id).toMatch(/^proj_/);
+    expect(updated.projects[0]?.workspaceId).toBe(ws.id);
   });
 
   // FR-004
@@ -66,14 +66,14 @@ describe("bindLocalProject", () => {
     symlinkSync(realDir, linkPath);
 
     const updated = bindLocalProject(ws, linkPath);
-    expect(updated.projects[0]!.rootPath).toBe(realpathSync(realDir));
+    expect(updated.projects[0]?.rootPath).toBe(realpathSync(realDir));
   });
 
   test("path with spaces works", () => {
     const spacePath = join(tempDir, "path with spaces");
     mkdirSync(spacePath);
     const updated = bindLocalProject(ws, spacePath);
-    expect(updated.projects[0]!.rootPath).toContain("path with spaces");
+    expect(updated.projects[0]?.rootPath).toContain("path with spaces");
   });
 
   test("does not mutate original workspace", () => {
@@ -88,7 +88,7 @@ describe("bindLocalProject", () => {
 describe("unbindProject", () => {
   test("removes existing binding", () => {
     const bound = bindLocalProject(ws, tempDir);
-    const projectId = bound.projects[0]!.id;
+    const projectId = bound.projects[0]?.id;
     const unbound = unbindProject(bound, projectId);
     expect(unbound.projects).toHaveLength(0);
   });
@@ -105,7 +105,7 @@ describe("detectStaleProjects", () => {
   test("accessible path stays active", async () => {
     const bound = bindLocalProject(ws, tempDir);
     const checked = await detectStaleProjects(bound);
-    expect(checked.projects[0]!.status).toBe("active");
+    expect(checked.projects[0]?.status).toBe("active");
   });
 
   // FR-009
@@ -114,7 +114,7 @@ describe("detectStaleProjects", () => {
     // Remove the directory
     rmSync(tempDir);
     const checked = await detectStaleProjects(bound);
-    expect(checked.projects[0]!.status).toBe("stale");
+    expect(checked.projects[0]?.status).toBe("stale");
   });
 
   // FR-009
@@ -127,7 +127,7 @@ describe("detectStaleProjects", () => {
     };
     // Path still exists, so it should heal
     const healed = await detectStaleProjects(staleWs);
-    expect(healed.projects[0]!.status).toBe("active");
+    expect(healed.projects[0]?.status).toBe("active");
   });
 
   test("returns same workspace if nothing changed", async () => {

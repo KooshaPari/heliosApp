@@ -33,7 +33,7 @@ describe("getSLOsForMetric", () => {
   it("returns single SLO for fps", () => {
     const slos = getSLOsForMetric("fps");
     expect(slos.length).toBe(1);
-    expect(slos[0]!.threshold).toBe(60);
+    expect(slos[0]?.threshold).toBe(60);
   });
 });
 

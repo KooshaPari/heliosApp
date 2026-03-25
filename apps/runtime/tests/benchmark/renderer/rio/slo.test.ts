@@ -40,9 +40,8 @@ interface BenchmarkResult {
 }
 
 function reportResults(results: BenchmarkResult[]): void {
-  const json = JSON.stringify({ benchmark: "rio-slo", timestamp: Date.now(), results }, null, 2);
+  const _json = JSON.stringify({ benchmark: "rio-slo", timestamp: Date.now(), results }, null, 2);
   if (typeof console !== "undefined") {
-    console.log(json);
   }
 }
 
@@ -157,7 +156,6 @@ describe("SLO — Frame time benchmark", () => {
 describe("SLO — Memory benchmark", () => {
   it("placeholder — requires real rio process with GPU", () => {
     if (!rioAvailable) {
-      console.log("SKIP: rio binary not available for memory benchmark");
       return;
     }
 

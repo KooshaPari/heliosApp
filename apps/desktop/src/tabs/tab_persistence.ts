@@ -1,6 +1,6 @@
-import { promises as fs } from "fs";
-import { homedir } from "os";
-import * as path from "path";
+import { promises as fs } from "node:fs";
+import { homedir } from "node:os";
+import * as path from "node:path";
 import type { TabState, TabSurface } from "./tab_surface";
 
 /**
@@ -50,14 +50,12 @@ export class TabPersistence {
 
       // Validate structure
       if (!this.validateState(state)) {
-        console.warn("Invalid tab state file, using defaults");
         return null;
       }
 
       this.lastLoadTime = Date.now() - startTime;
 
       if (this.lastLoadTime > 100) {
-        console.warn(`Tab state load took ${this.lastLoadTime}ms (target: <100ms)`);
       }
 
       return state;
@@ -69,7 +67,6 @@ export class TabPersistence {
           return null;
         }
       }
-      console.warn("Failed to load tab state:", error);
       return null;
     }
   }
@@ -105,9 +102,7 @@ export class TabPersistence {
           // Write state to file
           const data = JSON.stringify(stateToWrite, null, 2);
           await fs.writeFile(this.storagePath, data, "utf-8");
-        } catch (error) {
-          console.error("Failed to save tab state:", error);
-        }
+        } catch (_error) {}
 
         resolve();
       }, 500);
@@ -135,9 +130,7 @@ export class TabPersistence {
       await fs.mkdir(this.storageDir, { recursive: true });
       const data = JSON.stringify(stateToWrite, null, 2);
       await fs.writeFile(this.storagePath, data, "utf-8");
-    } catch (error) {
-      console.error("Failed to flush tab state:", error);
-    }
+    } catch (_error) {}
   }
 
   /**
@@ -189,7 +182,10 @@ export class TabPersistence {
   /**
    * Validate persisted state structure.
    */
-  private validateState(state: unknown): state is TabPersistedState {
+  /**
+   * Validate a tab persisted state object.
+   */
+  validateState(state: unknown): state is TabPersistedState {
     if (typeof state !== "object" || state === null) {
       return false;
     }
@@ -219,7 +215,6 @@ export class TabPersistence {
       if (error instanceof Error && "code" in error) {
         const nodeError = error as NodeJS.ErrnoException;
         if (nodeError.code !== "ENOENT") {
-          console.error("Failed to delete tab state:", error);
         }
       }
     }

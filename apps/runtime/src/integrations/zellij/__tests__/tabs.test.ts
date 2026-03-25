@@ -72,7 +72,7 @@ describe("ZellijTabManager", () => {
       await tabManager.createTab("test-session", "work");
 
       const runMock = cli.run as ReturnType<typeof mock>;
-      const callArgs = runMock.mock.calls[0]![0] as string[];
+      const callArgs = runMock.mock.calls[0]?.[0] as string[];
       expect(callArgs).toContain("new-tab");
       expect(callArgs).toContain("--name");
       expect(callArgs).toContain("work");

@@ -45,7 +45,7 @@ describe("switchRenderer", () => {
 
     expect(reg.getActive()?.id).toBe("rio");
     expect(sm.state).toBe("running");
-    expect(events[0]!.type).toBe("renderer.switched");
+    expect(events[0]?.type).toBe("renderer.switched");
   });
 
   it("throws SwitchSameRendererError for same renderer", async () => {

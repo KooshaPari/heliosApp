@@ -90,7 +90,7 @@ function makePtyManager(): PtyManagerInterface & { spawned: string[] } {
   let counter = 0;
   return {
     spawned,
-    spawn: mock(async opts => {
+    spawn: mock(async _opts => {
       const id = `pty-${++counter}`;
       spawned.push(id);
       return { ptyId: id, pid: 1000 + counter };

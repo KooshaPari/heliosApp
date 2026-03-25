@@ -66,9 +66,7 @@ export class HealthMonitoringCoordinator {
             failureCount: status.failureCount,
           });
         }
-      } catch (error) {
-        console.warn(`Health check failed for provider ${providerId}:`, error);
-      }
+      } catch (_error) {}
     }, interval);
 
     this.healthCheckIntervals.set(providerId, intervalId);
@@ -145,8 +143,6 @@ export class HealthMonitoringCoordinator {
         topic,
         payload,
       });
-    } catch (error) {
-      console.warn(`Failed to publish health event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }

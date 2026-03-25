@@ -119,8 +119,6 @@ export class ZellijPaneManager {
         ptyId = ptyResult.ptyId;
         this.topology.bindPty(sessionName, paneId, ptyId);
       } catch (err) {
-        // PTY spawn failed after pane create; close the pane and report
-        console.error(`[zellij-panes] PTY spawn failed for pane ${paneId}, closing pane`, err);
         await this.closePaneRaw(sessionName, paneId).catch(() => {});
         throw new PtyBindingError(paneId, err instanceof Error ? err.message : String(err));
       }
@@ -134,10 +132,7 @@ export class ZellijPaneManager {
       createdAt: new Date(),
     };
 
-    const durationMs = performance.now() - startMs;
-    console.debug(
-      `[zellij-panes] createPane(${sessionName}) pane=${paneId} duration=${durationMs.toFixed(1)}ms`
-    );
+    const _durationMs = performance.now() - startMs;
 
     return record;
   }
@@ -153,13 +148,7 @@ export class ZellijPaneManager {
       if (paneTopology?.ptyId) {
         try {
           await this.ptyManager.terminate(paneTopology.ptyId);
-        } catch (err) {
-          // PTY may already be stopped; log and continue
-          console.warn(
-            `[zellij-panes] PTY terminate for pane ${paneId} failed (may already be stopped):`,
-            err
-          );
-        }
+        } catch (_err) {}
       }
     }
 
@@ -167,8 +156,6 @@ export class ZellijPaneManager {
 
     // Remove from topology
     this.topology.removePane(sessionName, paneId);
-
-    console.debug(`[zellij-panes] mux.pane.closed: session=${sessionName} pane=${paneId}`);
   }
 
   /**
@@ -223,10 +210,7 @@ export class ZellijPaneManager {
       }
     }
 
-    const durationMs = performance.now() - startMs;
-    console.debug(
-      `[zellij-panes] resizePane(${sessionName}, ${paneId}) duration=${durationMs.toFixed(1)}ms`
-    );
+    const _durationMs = performance.now() - startMs;
   }
 
   /**
@@ -275,7 +259,7 @@ export class ZellijPaneManager {
 
     if (result.exitCode !== 0) {
       // If pane doesn't exist, treat as success (idempotent)
-      if (!result.stderr.includes("no pane") && !result.stderr.includes("not found")) {
+      if (!(result.stderr.includes("no pane") || result.stderr.includes("not found"))) {
         throw new ZellijCliError(
           `close-pane --session ${sessionName}`,
           result.exitCode,
@@ -299,13 +283,13 @@ export class ZellijPaneManager {
         result.cols = Math.max(1, result.cols - amount);
         break;
       case "right":
-        result.cols = result.cols + amount;
+        result.cols += amount;
         break;
       case "up":
         result.rows = Math.max(1, result.rows - amount);
         break;
       case "down":
-        result.rows = result.rows + amount;
+        result.rows += amount;
         break;
     }
     return result;

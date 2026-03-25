@@ -15,8 +15,7 @@ export class ZellijNotFoundError extends Error {
 export class ZellijVersionError extends Error {
   constructor(actual: string, required: string) {
     super(
-      `zellij version ${actual} is below the minimum required ${required}. ` +
-        "Please upgrade: https://zellij.dev/documentation/installation"
+      `zellij version ${actual} is below the minimum required ${required}. Please upgrade: https://zellij.dev/documentation/installation`
     );
     this.name = "ZellijVersionError";
   }

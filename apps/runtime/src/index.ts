@@ -229,7 +229,9 @@ export function createRuntime(options: RuntimeOptions = {}): RuntimeHandle {
 
   function ensureBuffer(terminalId: string): TerminalBuffer {
     const existing = terminalBuffers.get(terminalId);
-    if (existing) return existing;
+    if (existing) {
+      return existing;
+    }
     const created: TerminalBuffer = {
       entries: [],
       total_bytes: 0,
@@ -256,7 +258,9 @@ export function createRuntime(options: RuntimeOptions = {}): RuntimeHandle {
     let overflowed = false;
     while (buffer.total_bytes > cap && buffer.entries.length > 0) {
       const dropped = buffer.entries.shift();
-      if (!dropped) break;
+      if (!dropped) {
+        break;
+      }
       buffer.total_bytes -= dropped.data.length;
       buffer.dropped_bytes += dropped.data.length;
       overflowed = true;

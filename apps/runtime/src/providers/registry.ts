@@ -366,7 +366,7 @@ export class ProviderRegistry {
       );
     }
 
-    if (!registration.type || !["acp", "mcp", "a2a"].includes(registration.type)) {
+    if (!(registration.type && ["acp", "mcp", "a2a"].includes(registration.type))) {
       throw new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
         "Registration missing or invalid required field: type",
@@ -427,9 +427,6 @@ export class ProviderRegistry {
         topic,
         payload,
       });
-    } catch (error) {
-      // Log error but don't throw (event publishing is best-effort)
-      console.warn(`Failed to publish provider event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }

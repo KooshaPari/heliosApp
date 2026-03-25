@@ -29,8 +29,7 @@ export interface GhosttyOptions {
 export class GhosttyBinaryNotFoundError extends Error {
   constructor(path: string) {
     super(
-      `Ghostty binary not found at "${path}". ` +
-        "Ensure ghostty is installed and the path is correct."
+      `Ghostty binary not found at "${path}". Ensure ghostty is installed and the path is correct.`
     );
     this.name = "GhosttyBinaryNotFoundError";
   }
@@ -74,7 +73,9 @@ export class GhosttyProcess {
 
   /** Uptime in milliseconds, or 0 if not running. */
   getUptime(): number {
-    if (this._startedAt === undefined) return 0;
+    if (this._startedAt === undefined) {
+      return 0;
+    }
     return Date.now() - this._startedAt;
   }
 
@@ -111,7 +112,9 @@ export class GhosttyProcess {
         throw new GhosttyBinaryNotFoundError(binaryPath);
       }
     } catch (e) {
-      if (e instanceof GhosttyBinaryNotFoundError) throw e;
+      if (e instanceof GhosttyBinaryNotFoundError) {
+        throw e;
+      }
       throw new GhosttyBinaryNotFoundError(binaryPath);
     }
 
