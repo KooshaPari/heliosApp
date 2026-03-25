@@ -2,31 +2,25 @@ import type { MethodHandler } from "../methods.js";
 import type { LocalBusEnvelope } from "../types.js";
 import { ProtocolValidationError } from "../types.js";
 import { validateEnvelope } from "../validator.js";
-import {
-	isStartTopic,
-	isTerminalTopic,
-	resolveExpectedStartTopic,
-} from "./lifecycle.js";
+import { isStartTopic, isTerminalTopic, resolveExpectedStartTopic } from "./lifecycle.js";
 import { MetricsRecorder } from "./metrics.js";
 import {
-	type RequestHandlerContext,
-	handleLaneAttach,
-	handleLaneCreate,
-	handleRendererCapabilities,
-	handleRendererSwitch,
-	handleSessionAttach,
-	handleTerminalInput,
-	handleTerminalSpawn,
+  type RequestHandlerContext,
+  handleLaneAttach,
+  handleLaneCreate,
+  handleRendererCapabilities,
+  handleRendererSwitch,
+  handleSessionAttach,
+  handleTerminalInput,
+  handleTerminalSpawn,
 } from "./request-handlers.js";
 import type {
-	AuditRecord,
-	BusState,
-	CommandBusOptions,
-	CommandEnvelope,
-	EventEnvelope,
-	LocalBus,
-	LocalBusEnvelopeWithSequence,
-	ResponseEnvelope,
+  AuditRecord,
+  BusState,
+  EventEnvelope,
+  LocalBus,
+  LocalBusEnvelopeWithSequence,
+  ResponseEnvelope,
 } from "./types.js";
 
 export { CommandBusImpl, createBus } from "./command-bus.js";
@@ -36,259 +30,246 @@ export { CommandBusImpl, createBus } from "./command-bus.js";
 // ---------------------------------------------------------------------------
 
 export class InMemoryLocalBus implements LocalBus {
-	private readonly eventLog: LocalBusEnvelope[] = [];
-	private readonly auditLog: AuditRecord[] = [];
-	private readonly metricsRecorder: MetricsRecorder = new MetricsRecorder();
-	private state: BusState = { session: "detached" };
-	private readonly lifecycleProgress: Map<string, Set<string>> = new Map();
-	private rendererEngine: "ghostty" | "rio" = "ghostty";
+  private readonly eventLog: LocalBusEnvelope[] = [];
+  private readonly auditLog: AuditRecord[] = [];
+  private readonly metricsRecorder: MetricsRecorder = new MetricsRecorder();
+  private state: BusState = { session: "detached" };
+  private readonly lifecycleProgress: Map<string, Set<string>> = new Map();
+  private rendererEngine: "ghostty" | "rio" = "ghostty";
 
-	getEvents(): LocalBusEnvelope[] {
-		return [...this.eventLog];
-	}
+  getEvents(): LocalBusEnvelope[] {
+    return [...this.eventLog];
+  }
 
-	/**
-	 * Push an event directly to the event log without validation.
-	 * Used by HTTP routing layer for events that don't follow protocol lifecycle ordering.
-	 */
-	pushEvent(event: LocalBusEnvelope): void {
-		const sequencedEvent = event as LocalBusEnvelopeWithSequence;
-		if (sequencedEvent.sequence === undefined) {
-			sequencedEvent.sequence = this.getSequence() + 1;
-		}
-		this.auditLog.push({ envelope: event, outcome: "accepted" });
-		this.eventLog.push(event);
-	}
+  /**
+   * Push an event directly to the event log without validation.
+   * Used by HTTP routing layer for events that don't follow protocol lifecycle ordering.
+   */
+  pushEvent(event: LocalBusEnvelope): void {
+    const sequencedEvent = event as LocalBusEnvelopeWithSequence;
+    if (sequencedEvent.sequence === undefined) {
+      sequencedEvent.sequence = this.getSequence() + 1;
+    }
+    this.auditLog.push({ envelope: event, outcome: "accepted" });
+    this.eventLog.push(event);
+  }
 
-	getAuditRecords(): Promise<AuditRecord[]> {
-		return Promise.resolve([...this.auditLog]);
-	}
+  getAuditRecords(): Promise<AuditRecord[]> {
+    return Promise.resolve([...this.auditLog]);
+  }
 
-	getMetricsReport() {
-		return this.metricsRecorder.getMetricsReport();
-	}
+  getMetricsReport() {
+    return this.metricsRecorder.getMetricsReport();
+  }
 
-	getState(): BusState {
-		return { ...this.state };
-	}
+  getState(): BusState {
+    return { ...this.state };
+  }
 
-	private getSequence(): number {
-		return this.eventLog.filter((e) => e.type === "event").length;
-	}
+  private getSequence(): number {
+    return this.eventLog.filter(e => e.type === "event").length;
+  }
 
-	// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Publish behavior intentionally mirrors protocol lifecycle matrix.
-	async publish(event: LocalBusEnvelope): Promise<void> {
-		await Promise.resolve();
-		// Validate the envelope
-		try {
-			validateEnvelope(event);
-		} catch (err: unknown) {
-			const auditErr =
-				err instanceof ProtocolValidationError ? err.message : String(err);
-			this.auditLog.push({
-				envelope: event,
-				outcome: "rejected",
-				error: auditErr,
-			});
-			throw err;
-		}
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Publish behavior intentionally mirrors protocol lifecycle matrix.
+  async publish(event: LocalBusEnvelope): Promise<void> {
+    await Promise.resolve();
+    // Validate the envelope
+    try {
+      validateEnvelope(event);
+    } catch (err: unknown) {
+      const auditErr = err instanceof ProtocolValidationError ? err.message : String(err);
+      this.auditLog.push({
+        envelope: event,
+        outcome: "rejected",
+        error: auditErr,
+      });
+      throw err;
+    }
 
-		// Check ordering: start topics must appear before terminal topics for same correlation
-		const topic = event.topic;
-		const correlationId = event.correlation_id ?? "";
+    // Check ordering: start topics must appear before terminal topics for same correlation
+    const topic = event.topic;
+    const correlationId = event.correlation_id ?? "";
 
-		if (topic) {
-			const isTerminal = isTerminalTopic(topic);
-			const isStart = isStartTopic(topic);
+    if (topic) {
+      const isTerminal = isTerminalTopic(topic);
+      const isStart = isStartTopic(topic);
 
-			if (isStart) {
-				if (!this.lifecycleProgress.has(correlationId)) {
-					this.lifecycleProgress.set(correlationId, new Set());
-				}
-				const progress = this.lifecycleProgress.get(correlationId);
-				if (!progress) {
-					throw new ProtocolValidationError(
-						"ORDERING_VIOLATION",
-						`Missing lifecycle progress for correlation "${correlationId}"`,
-					);
-				}
-				if (progress.has(topic)) {
-					const err = new ProtocolValidationError(
-						"ORDERING_VIOLATION",
-						`Duplicate start topic "${topic}" for correlation "${correlationId}"`,
-					);
-					this.auditLog.push({
-						envelope: event,
-						outcome: "rejected",
-						error: err.message,
-					});
-					throw err;
-				}
-				progress.add(topic);
-				this.auditLog.push({ envelope: event, outcome: "accepted" });
-				this.eventLog.push(event);
-				return;
-			}
+      if (isStart) {
+        if (!this.lifecycleProgress.has(correlationId)) {
+          this.lifecycleProgress.set(correlationId, new Set());
+        }
+        const progress = this.lifecycleProgress.get(correlationId);
+        if (!progress) {
+          throw new ProtocolValidationError(
+            "ORDERING_VIOLATION",
+            `Missing lifecycle progress for correlation "${correlationId}"`
+          );
+        }
+        if (progress.has(topic)) {
+          const err = new ProtocolValidationError(
+            "ORDERING_VIOLATION",
+            `Duplicate start topic "${topic}" for correlation "${correlationId}"`
+          );
+          this.auditLog.push({
+            envelope: event,
+            outcome: "rejected",
+            error: err.message,
+          });
+          throw err;
+        }
+        progress.add(topic);
+        this.auditLog.push({ envelope: event, outcome: "accepted" });
+        this.eventLog.push(event);
+        return;
+      }
 
-			if (isTerminal) {
-				const seen = this.lifecycleProgress.get(correlationId);
-				const expectedStart = resolveExpectedStartTopic(topic);
+      if (isTerminal) {
+        const seen = this.lifecycleProgress.get(correlationId);
+        const expectedStart = resolveExpectedStartTopic(topic);
 
-				if (!seen?.has(expectedStart) && expectedStart !== topic) {
-					const err = new ProtocolValidationError(
-						"ORDERING_VIOLATION",
-						`Topic '${topic}' cannot be published before '${expectedStart}'`,
-					);
-					this.auditLog.push({
-						envelope: event,
-						outcome: "rejected",
-						error: err.message,
-					});
-					throw err;
-				}
+        if (!seen?.has(expectedStart) && expectedStart !== topic) {
+          const err = new ProtocolValidationError(
+            "ORDERING_VIOLATION",
+            `Topic '${topic}' cannot be published before '${expectedStart}'`
+          );
+          this.auditLog.push({
+            envelope: event,
+            outcome: "rejected",
+            error: err.message,
+          });
+          throw err;
+        }
 
-				this.lifecycleProgress.delete(correlationId);
-			}
+        this.lifecycleProgress.delete(correlationId);
+      }
 
-			// Handle terminal.output metrics
-			if (topic === "terminal.output") {
-				const backlogDepth =
-					typeof event.payload?.backlog_depth === "number"
-						? event.payload.backlog_depth
-						: undefined;
-				const tags: Record<string, string> = {};
-				if (event.session_id) {
-					tags.session_id = event.session_id;
-				}
-				if (event.lane_id) {
-					tags.lane_id = event.lane_id;
-				}
-				if (event.terminal_id) {
-					tags.terminal_id = event.terminal_id;
-				}
-				this.metricsRecorder.recordMetric(
-					"terminal_output_backlog_depth",
-					backlogDepth,
-					Object.keys(tags).length > 0 ? tags : undefined,
-				);
-				this.metricsRecorder.emitMetricEvent(
-					"terminal_output_backlog_depth",
-					backlogDepth,
-					this.eventLog,
-					this.auditLog,
-				);
-			}
-		}
+      // Handle terminal.output metrics
+      if (topic === "terminal.output") {
+        const backlogDepth =
+          typeof event.payload?.backlog_depth === "number"
+            ? event.payload.backlog_depth
+            : undefined;
+        const tags: Record<string, string> = {};
+        if (event.session_id) {
+          tags.session_id = event.session_id;
+        }
+        if (event.lane_id) {
+          tags.lane_id = event.lane_id;
+        }
+        if (event.terminal_id) {
+          tags.terminal_id = event.terminal_id;
+        }
+        this.metricsRecorder.recordMetric(
+          "terminal_output_backlog_depth",
+          backlogDepth,
+          Object.keys(tags).length > 0 ? tags : undefined
+        );
+        this.metricsRecorder.emitMetricEvent(
+          "terminal_output_backlog_depth",
+          backlogDepth,
+          this.eventLog,
+          this.auditLog
+        );
+      }
+    }
 
-		// Assign sequence if not already set
-		const sequencedEvent = event as LocalBusEnvelopeWithSequence;
-		if (sequencedEvent.sequence === undefined) {
-			sequencedEvent.sequence = this.getSequence() + 1;
-		}
-		this.auditLog.push({ envelope: event, outcome: "accepted" });
-		this.eventLog.push(event);
-	}
+    // Assign sequence if not already set
+    const sequencedEvent = event as LocalBusEnvelopeWithSequence;
+    if (sequencedEvent.sequence === undefined) {
+      sequencedEvent.sequence = this.getSequence() + 1;
+    }
+    this.auditLog.push({ envelope: event, outcome: "accepted" });
+    this.eventLog.push(event);
+  }
 
-	private getHandlerContext(): RequestHandlerContext {
-		return {
-			state: this.state,
-			lifecycleProgress: this.lifecycleProgress,
-			eventLog: this.eventLog,
-			auditLog: this.auditLog,
-			metricsRecorder: this.metricsRecorder,
-			rendererEngine: this.rendererEngine,
-			setState: (newState: BusState) => {
-				this.state = newState;
-			},
-			setRendererEngine: (engine: "ghostty" | "rio") => {
-				this.rendererEngine = engine;
-			},
-		};
-	}
+  private getHandlerContext(): RequestHandlerContext {
+    return {
+      state: this.state,
+      lifecycleProgress: this.lifecycleProgress,
+      eventLog: this.eventLog,
+      auditLog: this.auditLog,
+      metricsRecorder: this.metricsRecorder,
+      rendererEngine: this.rendererEngine,
+      setState: (newState: BusState) => {
+        this.state = newState;
+      },
+      setRendererEngine: (engine: "ghostty" | "rio") => {
+        this.rendererEngine = engine;
+      },
+    };
+  }
 
-	// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Request semantics require explicit branch coverage.
-	async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
-		await Promise.resolve();
-		if (command.method) {
-			const needsCorrelation = [
-				"lane.create",
-				"lane.attach",
-				"session.attach",
-				"terminal.spawn",
-				"terminal.input",
-				"terminal.resize",
-			];
-			if (
-				needsCorrelation.includes(command.method) &&
-				!command.correlation_id
-			) {
-				return {
-					id: `res-${Date.now()}`,
-					type: "response",
-					ts: new Date().toISOString(),
-					status: "error",
-					error: {
-						code: "MISSING_CORRELATION_ID",
-						message: "correlation_id is required",
-						retryable: false,
-					},
-				};
-			}
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Request semantics require explicit branch coverage.
+  async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+    await Promise.resolve();
+    if (command.method) {
+      const needsCorrelation = [
+        "lane.create",
+        "lane.attach",
+        "session.attach",
+        "terminal.spawn",
+        "terminal.input",
+        "terminal.resize",
+      ];
+      if (needsCorrelation.includes(command.method) && !command.correlation_id) {
+        return {
+          id: `res-${Date.now()}`,
+          type: "response",
+          ts: new Date().toISOString(),
+          status: "error",
+          error: {
+            code: "MISSING_CORRELATION_ID",
+            message: "correlation_id is required",
+            retryable: false,
+          },
+        };
+      }
 
-			const startTime = Date.now();
-			const ctx = this.getHandlerContext();
+      const startTime = Date.now();
+      const ctx = this.getHandlerContext();
 
-			if (command.method === "lane.create")
-				return handleLaneCreate(command, startTime, ctx);
-			if (command.method === "lane.attach")
-				return handleLaneAttach(command, ctx);
-			if (command.method === "session.attach")
-				return handleSessionAttach(command, startTime, ctx);
-			if (command.method === "terminal.spawn")
-				return handleTerminalSpawn(command, startTime, ctx);
-			if (command.method === "terminal.input")
-				return handleTerminalInput(command);
-			if (command.method === "renderer.capabilities")
-				return handleRendererCapabilities(this.rendererEngine);
-			if (command.method === "renderer.switch")
-				return handleRendererSwitch(command, ctx);
-		}
+      if (command.method === "lane.create") return handleLaneCreate(command, startTime, ctx);
+      if (command.method === "lane.attach") return handleLaneAttach(command, ctx);
+      if (command.method === "session.attach") return handleSessionAttach(command, startTime, ctx);
+      if (command.method === "terminal.spawn") return handleTerminalSpawn(command, startTime, ctx);
+      if (command.method === "terminal.input") return handleTerminalInput(command);
+      if (command.method === "renderer.capabilities")
+        return handleRendererCapabilities(this.rendererEngine);
+      if (command.method === "renderer.switch") return handleRendererSwitch(command, ctx);
+    }
 
-		return {
-			id: command.id,
-			type: "response",
-			ts: new Date().toISOString(),
-			status: "ok",
-			result: {},
-		};
-	}
+    return {
+      id: command.id,
+      type: "response",
+      ts: new Date().toISOString(),
+      status: "ok",
+      result: {},
+    };
+  }
 
-	// Implement LocalBus interface (stub methods)
-	registerMethod(method: string, handler: MethodHandler): void {
-		// Stub for interface compliance
-	}
+  // Implement LocalBus interface (stub methods)
+  registerMethod(method: string, handler: MethodHandler): void {
+    // Stub for interface compliance
+  }
 
-	async send(envelope: unknown): Promise<ResponseEnvelope> {
-		return {
-			id: "stub",
-			type: "response",
-			ts: new Date().toISOString(),
-			status: "ok",
-		};
-	}
+  async send(envelope: unknown): Promise<ResponseEnvelope> {
+    return {
+      id: "stub",
+      type: "response",
+      ts: new Date().toISOString(),
+      status: "ok",
+    };
+  }
 
-	subscribe(
-		topic: string,
-		handler: (evt: EventEnvelope) => void | Promise<void>,
-	): () => void {
-		return () => {};
-	}
+  subscribe(topic: string, handler: (evt: EventEnvelope) => void | Promise<void>): () => void {
+    return () => {};
+  }
 
-	destroy(): void {
-		// Stub for interface compliance
-	}
+  destroy(): void {
+    // Stub for interface compliance
+  }
 
-	getActiveCorrelationId(): string | undefined {
-		return undefined;
-	}
+  getActiveCorrelationId(): string | undefined {
+    return undefined;
+  }
 }

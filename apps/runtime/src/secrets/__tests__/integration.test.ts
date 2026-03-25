@@ -17,15 +17,9 @@ import { join } from "node:path";
 import { AuditSink } from "../../audit/audit-sink.js";
 import { InMemoryLocalBus, type LocalBus } from "../../protocol/bus.js";
 import { RedactionAuditTrail } from "../audit-trail.js";
-import {
-	CredentialAccessDeniedError,
-	CredentialStore,
-} from "../credential-store.js";
+import { CredentialAccessDeniedError, CredentialStore } from "../credential-store.js";
 import { EncryptionService } from "../encryption.js";
-import {
-	ProtectedPathConfig,
-	ProtectedPathDetector,
-} from "../protected-paths.js";
+import { ProtectedPathConfig, ProtectedPathDetector } from "../protected-paths.js";
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules } from "../redaction-rules.js";
 
@@ -34,31 +28,31 @@ import { getDefaultRules } from "../redaction-rules.js";
 // ---------------------------------------------------------------------------
 
 function makeFixedEncryption(): EncryptionService {
-	const fixedKey = randomBytes(32);
-	return new EncryptionService({ masterKeyOverride: async () => fixedKey });
+  const fixedKey = randomBytes(32);
+  return new EncryptionService({ masterKeyOverride: async () => fixedKey });
 }
 
 function makeStore(dataDir: string, bus: LocalBus): CredentialStore {
-	return new CredentialStore({
-		dataDir,
-		bus,
-		encryption: makeFixedEncryption(),
-	});
+  return new CredentialStore({
+    dataDir,
+    bus,
+    encryption: makeFixedEncryption(),
+  });
 }
 
 function makeEngine(): RedactionEngine {
-	const engine = new RedactionEngine();
-	engine.loadRules(getDefaultRules());
-	return engine;
+  const engine = new RedactionEngine();
+  engine.loadRules(getDefaultRules());
+  return engine;
 }
 
 function makeRedactFn(engine: RedactionEngine): (text: string) => string {
-	return (text: string) =>
-		engine.redact(text, {
-			artifactId: `redact:${Date.now()}`,
-			artifactType: "audit_payload",
-			correlationId: "integration-test",
-		}).redacted;
+  return (text: string) =>
+    engine.redact(text, {
+      artifactId: `redact:${Date.now()}`,
+      artifactType: "audit_payload",
+      correlationId: "integration-test",
+    }).redacted;
 }
 
 // ---------------------------------------------------------------------------
@@ -300,7 +294,7 @@ describe("Integration Tests (T015)", () => {
           "ws1",
           "key"
         );
-      } catch  {
+      } catch {
         /* expected */
       }
 

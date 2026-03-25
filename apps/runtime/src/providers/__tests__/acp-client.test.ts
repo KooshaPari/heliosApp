@@ -15,29 +15,29 @@ import { NormalizedProviderError } from "../errors.js";
  * Mock policy gate for testing.
  */
 class MockPolicyGate implements PolicyGate {
-	private shouldDeny = false;
-	private denialReason = "Test denial";
+  private shouldDeny = false;
+  private denialReason = "Test denial";
 
-	setShouldDeny(deny: boolean, reason?: string): void {
-		this.shouldDeny = deny;
-		if (reason) {
-			this.denialReason = reason;
-		}
-	}
+  setShouldDeny(deny: boolean, reason?: string): void {
+    this.shouldDeny = deny;
+    if (reason) {
+      this.denialReason = reason;
+    }
+  }
 
-	async evaluate(
-		_action: string,
-		_context: Record<string, unknown>,
-	): Promise<{ allowed: boolean; reason?: string }> {
-		await Promise.resolve();
-		if (this.shouldDeny) {
-			return {
-				allowed: false,
-				reason: this.denialReason,
-			};
-		}
-		return { allowed: true };
-	}
+  async evaluate(
+    _action: string,
+    _context: Record<string, unknown>
+  ): Promise<{ allowed: boolean; reason?: string }> {
+    await Promise.resolve();
+    if (this.shouldDeny) {
+      return {
+        allowed: false,
+        reason: this.denialReason,
+      };
+    }
+    return { allowed: true };
+  }
 }
 
 describe("ACP Client Adapter", () => {
@@ -270,7 +270,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch  {
+      } catch {
         // Expected
       }
 
@@ -478,7 +478,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch  {
+      } catch {
         // Expected
       }
 

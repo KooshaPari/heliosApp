@@ -10,38 +10,34 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { InMemoryLocalBus } from "../../../protocol/bus.js";
 import { TmateAdapter, UptermAdapter, getBackendAdapter } from "../adapters.js";
-import {
-	type PolicyGate,
-	type ShareSession,
-	ShareSessionManager,
-} from "../share-session.js";
+import { type PolicyGate, ShareSessionManager } from "../share-session.js";
 
 /**
  * Mock policy gate for testing.
  */
 class MockPolicyGate implements PolicyGate {
-	private shouldDeny = false;
-	private denialReason = "Test denial";
+  private shouldDeny = false;
+  private denialReason = "Test denial";
 
-	setShouldDeny(deny: boolean, reason?: string): void {
-		this.shouldDeny = deny;
-		if (reason) {
-			this.denialReason = reason;
-		}
-	}
+  setShouldDeny(deny: boolean, reason?: string): void {
+    this.shouldDeny = deny;
+    if (reason) {
+      this.denialReason = reason;
+    }
+  }
 
-	async evaluate(
-		_action: string,
-		_context: Record<string, unknown>,
-	): Promise<{ allowed: boolean; reason?: string }> {
-		if (this.shouldDeny) {
-			return {
-				allowed: false,
-				reason: this.denialReason,
-			};
-		}
-		return { allowed: true };
-	}
+  async evaluate(
+    _action: string,
+    _context: Record<string, unknown>
+  ): Promise<{ allowed: boolean; reason?: string }> {
+    if (this.shouldDeny) {
+      return {
+        allowed: false,
+        reason: this.denialReason,
+      };
+    }
+    return { allowed: true };
+  }
 }
 
 describe("Share Session Management", () => {
@@ -138,7 +134,7 @@ describe("Share Session Management", () => {
 
       try {
         await manager.create("terminal-123", "upterm", 60000, "corr-001");
-      } catch  {
+      } catch {
         // Expected
       }
 
@@ -153,7 +149,7 @@ describe("Share Session Management", () => {
 
       try {
         await manager.create("terminal-123", "upterm", 60000, "corr-001");
-      } catch  {
+      } catch {
         // Expected
       }
 
@@ -322,112 +318,103 @@ describe("Share Session Management", () => {
 });
 
 describe("Upterm Backend Adapter", () => {
-	let adapter: UptermAdapter;
+  let adapter: UptermAdapter;
 
-	beforeEach(() => {
-		adapter = new UptermAdapter();
-	});
+  beforeEach(() => {
+    adapter = new UptermAdapter();
+  });
 
-	it("should report availability", async () => {
-		const available = await adapter.checkAvailability();
+  it("should report availability", async () => {
+    const available = await adapter.checkAvailability();
 
-		expect(typeof available).toBe("boolean");
-	});
+    expect(typeof available).toBe("boolean");
+  });
 
-	it("should start share with upterm command", async () => {
-		const result = await adapter.startShare("terminal-123", "main-session");
+  it("should start share with upterm command", async () => {
+    const result = await adapter.startShare("terminal-123", "main-session");
 
-		expect(result.link).toBeTruthy();
-		expect(result.link).toContain("upterm.io");
-		expect(result.process).toBeDefined();
-	});
+    expect(result.link).toBeTruthy();
+    expect(result.link).toContain("upterm.io");
+    expect(result.process).toBeDefined();
+  });
 
-	it("should validate inputs before starting share", async () => {
-		await expect(adapter.startShare("", "main-session")).rejects.toThrow(
-			/missing/i,
-		);
+  it("should validate inputs before starting share", async () => {
+    await expect(adapter.startShare("", "main-session")).rejects.toThrow(/missing/i);
 
-		await expect(adapter.startShare("terminal-123", "")).rejects.toThrow(
-			/missing/i,
-		);
-	});
+    await expect(adapter.startShare("terminal-123", "")).rejects.toThrow(/missing/i);
+  });
 
-	it("should stop share gracefully", async () => {
-		const result = await adapter.startShare("terminal-123", "main-session");
+  it("should stop share gracefully", async () => {
+    const result = await adapter.startShare("terminal-123", "main-session");
 
-		// Should not throw
-		await adapter.stopShare(result.process);
-	});
+    // Should not throw
+    await adapter.stopShare(result.process);
+  });
 
-	it("should support custom upterm server", async () => {
-		const customAdapter = new UptermAdapter({
-			server: "custom.upterm.io",
-		});
+  it("should support custom upterm server", async () => {
+    const customAdapter = new UptermAdapter({
+      server: "custom.upterm.io",
+    });
 
-		const result = await customAdapter.startShare(
-			"terminal-123",
-			"main-session",
-		);
+    const result = await customAdapter.startShare("terminal-123", "main-session");
 
-		expect(result.link).toBeTruthy();
-	});
+    expect(result.link).toBeTruthy();
+  });
 });
 
 describe("Tmate Backend Adapter", () => {
-	let adapter: TmateAdapter;
+  let adapter: TmateAdapter;
 
-	beforeEach(() => {
-		adapter = new TmateAdapter();
-	});
+  beforeEach(() => {
+    adapter = new TmateAdapter();
+  });
 
-	it("should report availability", async () => {
-		const available = await adapter.checkAvailability();
+  it("should report availability", async () => {
+    const available = await adapter.checkAvailability();
 
-		expect(typeof available).toBe("boolean");
-	});
+    expect(typeof available).toBe("boolean");
+  });
 
-	it("should start share with tmate command", async () => {
-		const result = await adapter.startShare("terminal-123", "main-session");
+  it("should start share with tmate command", async () => {
+    const result = await adapter.startShare("terminal-123", "main-session");
 
-		expect(result.link).toBeTruthy();
-		expect(result.link).toContain("tmate.io");
-		expect(result.process).toBeDefined();
-	});
+    expect(result.link).toBeTruthy();
+    expect(result.link).toContain("tmate.io");
+    expect(result.process).toBeDefined();
+  });
 
-	it("should validate inputs before starting share", async () => {
-		await expect(adapter.startShare("", "main-session")).rejects.toThrow(
-			/missing/i,
-		);
-	});
+  it("should validate inputs before starting share", async () => {
+    await expect(adapter.startShare("", "main-session")).rejects.toThrow(/missing/i);
+  });
 
-	it("should stop share gracefully", async () => {
-		const result = await adapter.startShare("terminal-123", "main-session");
+  it("should stop share gracefully", async () => {
+    const result = await adapter.startShare("terminal-123", "main-session");
 
-		// Should not throw
-		await adapter.stopShare(result.process);
-	});
+    // Should not throw
+    await adapter.stopShare(result.process);
+  });
 });
 
 describe("Backend Adapter Factory", () => {
-	it("should get upterm adapter", () => {
-		const adapter = getBackendAdapter("upterm");
+  it("should get upterm adapter", () => {
+    const adapter = getBackendAdapter("upterm");
 
-		expect(adapter).toBeInstanceOf(UptermAdapter);
-	});
+    expect(adapter).toBeInstanceOf(UptermAdapter);
+  });
 
-	it("should get tmate adapter", () => {
-		const adapter = getBackendAdapter("tmate");
+  it("should get tmate adapter", () => {
+    const adapter = getBackendAdapter("tmate");
 
-		expect(adapter).toBeInstanceOf(TmateAdapter);
-	});
+    expect(adapter).toBeInstanceOf(TmateAdapter);
+  });
 
-	it("should throw for unknown backend", () => {
-		expect(() => getBackendAdapter("unknown")).toThrow(/unknown backend/i);
-	});
+  it("should throw for unknown backend", () => {
+    expect(() => getBackendAdapter("unknown")).toThrow(/unknown backend/i);
+  });
 
-	it("should accept backend-specific config", () => {
-		const adapter = getBackendAdapter("upterm", { server: "custom.io" });
+  it("should accept backend-specific config", () => {
+    const adapter = getBackendAdapter("upterm", { server: "custom.io" });
 
-		expect(adapter).toBeInstanceOf(UptermAdapter);
-	});
+    expect(adapter).toBeInstanceOf(UptermAdapter);
+  });
 });

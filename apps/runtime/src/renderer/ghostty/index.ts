@@ -14,41 +14,41 @@ import { GhosttyBackend } from "./backend.js";
 
 export { GhosttyBackend } from "./backend.js";
 export {
-	GhosttyNotInitializedError,
-	GhosttyNotRunningError,
-	GhosttyAlreadyInitializedError,
+  GhosttyNotInitializedError,
+  GhosttyNotRunningError,
+  GhosttyAlreadyInitializedError,
 } from "./backend.js";
 export {
-	GhosttyProcess,
-	GhosttyBinaryNotFoundError,
-	GhosttyProcessError,
+  GhosttyProcess,
+  GhosttyBinaryNotFoundError,
+  GhosttyProcessError,
 } from "./process.js";
 export type { GhosttyOptions } from "./process.js";
 export { GhosttySurface, SurfaceBindingError } from "./surface.js";
 export type {
-	GpuRenderingMode,
-	GpuSurfaceStatus,
-	SurfaceEventHandler,
+  GpuRenderingMode,
+  GpuSurfaceStatus,
+  SurfaceEventHandler,
 } from "./surface.js";
 export {
-	detectCapabilities,
-	getCachedCapabilities,
-	clearCapabilityCache,
-	detectGpu,
+  detectCapabilities,
+  getCachedCapabilities,
+  clearCapabilityCache,
+  detectGpu,
 } from "./capabilities.js";
 export { GhosttyMetrics } from "./metrics.js";
 export type {
-	FrameSample,
-	InputLatencySample,
-	MetricsSnapshot,
-	MetricsConfig,
-	MetricsPublisher,
+  FrameSample,
+  InputLatencySample,
+  MetricsSnapshot,
+  MetricsConfig,
+  MetricsPublisher,
 } from "./metrics.js";
 export { GhosttyInputRelay, InputRelayError } from "./input.js";
 export type {
-	PtyWriter,
-	GhosttyInputEvent,
-	InputEventListener,
+  PtyWriter,
+  GhosttyInputEvent,
+  InputEventListener,
 } from "./input.js";
 
 // ---------------------------------------------------------------------------
@@ -61,22 +61,20 @@ export type {
  * @param binaryPath - Override the binary name/path. Defaults to "ghostty".
  * @returns `true` if the binary is found.
  */
-export async function isGhosttyAvailable(
-	binaryPath = "ghostty",
-): Promise<boolean> {
-	try {
-		const proc = Bun.spawn(["which", binaryPath], {
-			// @ts-ignore
-			stdout: "ignore",
-			// @ts-ignore
-			stderr: "ignore",
-		});
-		const exitCode = await proc.exited;
-		// @ts-ignore - exitCode exists at runtime
-		return exitCode === 0;
-	} catch {
-		return false;
-	}
+export async function isGhosttyAvailable(binaryPath = "ghostty"): Promise<boolean> {
+  try {
+    const proc = Bun.spawn(["which", binaryPath], {
+      // @ts-ignore
+      stdout: "ignore",
+      // @ts-ignore
+      stderr: "ignore",
+    });
+    const exitCode = await proc.exited;
+    // @ts-ignore - exitCode exists at runtime
+    return exitCode === 0;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -84,24 +82,22 @@ export async function isGhosttyAvailable(
  *
  * @returns The version string, or "unknown" if detection fails.
  */
-export async function detectGhosttyVersion(
-	binaryPath = "ghostty",
-): Promise<string> {
-	try {
-		const proc = Bun.spawn([binaryPath, "--version"], {
-			stdout: "pipe",
-			// @ts-ignore
-			stderr: "ignore",
-		});
-		const text = await new Response(
-			proc.stdout instanceof ReadableStream ? proc.stdout : null,
-		).text();
-		await proc.exited;
-		const trimmed = text.trim();
-		return trimmed.length > 0 ? trimmed : "unknown";
-	} catch {
-		return "unknown";
-	}
+export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<string> {
+  try {
+    const proc = Bun.spawn([binaryPath, "--version"], {
+      stdout: "pipe",
+      // @ts-ignore
+      stderr: "ignore",
+    });
+    const text = await new Response(
+      proc.stdout instanceof ReadableStream ? proc.stdout : null
+    ).text();
+    await proc.exited;
+    const trimmed = text.trim();
+    return trimmed.length > 0 ? trimmed : "unknown";
+  } catch {
+    return "unknown";
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -118,17 +114,17 @@ export async function detectGhosttyVersion(
  * @param binaryPath - Optional override for the ghostty binary path.
  */
 export async function registerGhostty(
-	registry: RendererRegistry,
-	binaryPath?: string | undefined,
+  registry: RendererRegistry,
+  binaryPath?: string | undefined
 ): Promise<void> {
-	const available = await isGhosttyAvailable(binaryPath);
+  const available = await isGhosttyAvailable(binaryPath);
 
-	if (!available) {
-		console.warn("[ghostty] Ghostty binary not found; skipping registration.");
-		return;
-	}
+  if (!available) {
+    console.warn("[ghostty] Ghostty binary not found; skipping registration.");
+    return;
+  }
 
-	const version = await detectGhosttyVersion(binaryPath);
-	const backend = new GhosttyBackend(version);
-	registry.register(backend);
+  const version = await detectGhosttyVersion(binaryPath);
+  const backend = new GhosttyBackend(version);
+  registry.register(backend);
 }
