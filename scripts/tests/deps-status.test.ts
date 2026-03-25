@@ -11,7 +11,7 @@ describe("Dependency Status Command", () => {
 		// Clean up cache before each test
 		try {
 			rmSync(CACHE_DIR, { recursive: true, force: true });
-		} catch (e) {
+		} catch  {
 			// Ignore
 		}
 	});
@@ -20,7 +20,7 @@ describe("Dependency Status Command", () => {
 		// Clean up cache after each test
 		try {
 			rmSync(CACHE_DIR, { recursive: true, force: true });
-		} catch (e) {
+		} catch  {
 			// Ignore
 		}
 	});
@@ -39,7 +39,7 @@ describe("Dependency Status Command", () => {
 		try {
 			mkdirSync(CACHE_DIR, { recursive: true });
 			expect(true).toBe(true);
-		} catch (e) {
+		} catch  {
 			expect(false).toBe(true);
 		}
 	});

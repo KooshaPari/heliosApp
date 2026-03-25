@@ -79,7 +79,7 @@ function cleanupBackup(backup: BackupFiles): void {
 		if (backup.packageJson && existsSync(backup.packageJson)) {
 			unlinkSync(backup.packageJson);
 		}
-	} catch (e) {
+	} catch  {
 		// Ignore cleanup errors
 	}
 }

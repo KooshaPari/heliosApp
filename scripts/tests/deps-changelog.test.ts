@@ -22,7 +22,7 @@ describe("Dependency Changelog Utility", () => {
 		// Clean up test changelog
 		try {
 			rmSync(CHANGELOG_PATH, { force: true });
-		} catch (e) {
+		} catch  {
 			// Ignore
 		}
 	});
