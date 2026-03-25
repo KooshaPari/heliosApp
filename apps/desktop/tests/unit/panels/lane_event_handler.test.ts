@@ -1,5 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { LaneEventHandler, type BusSubscriber, type BusEvent } from "../../../src/panels/lane_event_handler";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  type BusEvent,
+  type BusSubscriber,
+  LaneEventHandler,
+} from "../../../src/panels/lane_event_handler.ts";
 
 describe("LaneEventHandler", () => {
   let handler: LaneEventHandler;
@@ -125,7 +129,7 @@ describe("LaneEventHandler", () => {
     });
 
     // Wait for RAF
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await new Promise(resolve => setTimeout(resolve, 20));
 
     expect(onStateChanged).toHaveBeenCalled();
     // Should only render final state due to batching
@@ -173,7 +177,7 @@ describe("LaneEventHandler", () => {
     handler.mount();
 
     // Simulate no events for timeout period
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await new Promise(resolve => setTimeout(resolve, 150));
 
     expect(onBusConnectivityIssue).toHaveBeenCalledWith(true);
   });
@@ -188,7 +192,7 @@ describe("LaneEventHandler", () => {
     handler.mount();
 
     // Wait for connectivity issue
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await new Promise(resolve => setTimeout(resolve, 150));
     expect(onBusConnectivityIssue).toHaveBeenCalledWith(true);
 
     // Receive an event

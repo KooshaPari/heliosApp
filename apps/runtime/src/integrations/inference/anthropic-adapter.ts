@@ -1,5 +1,5 @@
-import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
-import type { InferenceEngine } from "./engine";
+import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference.ts";
+import type { InferenceEngine } from "./engine.ts";
 
 export class AnthropicInferenceEngine implements InferenceEngine {
   readonly id = "anthropic";
@@ -16,7 +16,7 @@ export class AnthropicInferenceEngine implements InferenceEngine {
   async init(): Promise<void> {
     if (!this.apiKey) {
       throw new Error(
-        "Anthropic API key not configured. Set ANTHROPIC_API_KEY or HELIOS_ACP_API_KEY environment variable.",
+        "Anthropic API key not configured. Set ANTHROPIC_API_KEY or HELIOS_ACP_API_KEY environment variable."
       );
     }
   }
@@ -32,7 +32,7 @@ export class AnthropicInferenceEngine implements InferenceEngine {
       body: JSON.stringify({
         model: request.model || "claude-sonnet-4-20250514",
         max_tokens: request.maxTokens ?? 4096,
-        messages: request.messages.map((m) => ({ role: m.role, content: m.content })),
+        messages: request.messages.map(m => ({ role: m.role, content: m.content })),
       }),
     });
 
@@ -91,7 +91,9 @@ export class AnthropicInferenceEngine implements InferenceEngine {
   }
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
-    if (!this.apiKey) return "unavailable";
+    if (!this.apiKey) {
+      return "unavailable";
+    }
     try {
       const response = await fetch(`${this.endpoint}/v1/messages`, {
         method: "POST",

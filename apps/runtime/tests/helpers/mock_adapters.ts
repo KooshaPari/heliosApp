@@ -6,9 +6,9 @@
  */
 
 import type {
+  RenderSurface,
   RendererAdapter,
   RendererConfig,
-  RenderSurface,
   RendererState,
 } from "../../src/renderer/adapter.js";
 import type { RendererCapabilities } from "../../src/renderer/capabilities.js";
@@ -75,7 +75,7 @@ export class BaseMockAdapter implements RendererAdapter {
     handleInput: 0,
   };
 
-  constructor(id: string, version: string = "1.0.0", opts: MockAdapterOptions = {}) {
+  constructor(id: string, version = "1.0.0", opts: MockAdapterOptions = {}) {
     this.id = id;
     this.version = version;
     this._opts = opts;
@@ -88,7 +88,7 @@ export class BaseMockAdapter implements RendererAdapter {
 
   private async _delay(ms?: number): Promise<void> {
     if (ms && ms > 0) {
-      await new Promise((r) => setTimeout(r, ms));
+      await new Promise(r => setTimeout(r, ms));
     }
   }
 
@@ -245,7 +245,7 @@ export function createOpenPtyStream(): ReadableStream<Uint8Array> {
 }
 
 /** Create a Uint8Array filled with a pattern for easy identification. */
-export function createTestData(size: number, fillByte: number = 0xaa): Uint8Array {
+export function createTestData(size: number, fillByte = 0xaa): Uint8Array {
   const data = new Uint8Array(size);
   data.fill(fillByte);
   return data;

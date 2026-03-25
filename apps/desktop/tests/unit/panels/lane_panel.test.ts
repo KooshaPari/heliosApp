@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { LanePanel, type Lane } from "../../../src/panels/lane_panel";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { type Lane, LanePanel } from "../../../src/panels/lane_panel.ts";
 
 describe("LanePanel", () => {
   let container: HTMLDivElement;
@@ -116,7 +116,7 @@ describe("LanePanel", () => {
     const event = new KeyboardEvent("keydown", { key: "ArrowDown" });
     container.dispatchEvent(event);
 
-    let selectedItems = container.querySelectorAll(".lane-list-item.selected");
+    const selectedItems = container.querySelectorAll(".lane-list-item.selected");
     expect(selectedItems.length).toBeGreaterThan(0);
   });
 

@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { createRetentionPolicyConfig } from "../../../src/config/retention";
-import { InMemoryAuditSink } from "../../../src/audit/sink";
+import { InMemoryAuditSink } from "../../../src/audit/sink.ts";
+import { createRetentionPolicyConfig } from "../../../src/config/retention.ts";
 
 describe("retention policy", () => {
   test("enforces minimum retention days", () => {
     expect(() => createRetentionPolicyConfig({ retention_days: 7 })).toThrow(
-      "retention_days must be an integer >= 30",
+      "retention_days must be an integer >= 30"
     );
   });
 
@@ -43,7 +43,7 @@ describe("retention policy", () => {
 
     const records = sink.getRecords();
     expect(records).toHaveLength(2);
-    const proof = records.find((record) => {
+    const proof = records.find(record => {
       const envelope = record.envelope as Record<string, unknown>;
       return envelope.topic === "audit.retention.deleted";
     });

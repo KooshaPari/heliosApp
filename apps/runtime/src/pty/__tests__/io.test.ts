@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { writeInput, InvalidStateError } from "../io.js";
+import { InMemoryBusPublisher } from "../events.js";
+import { InvalidStateError, writeInput } from "../io.js";
 import type { ProcessMap } from "../io.js";
 import type { PtyRecord } from "../registry.js";
-import { InMemoryBusPublisher } from "../events.js";
 
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   return {
@@ -68,7 +68,7 @@ describe("writeInput", () => {
     const bus = new InMemoryBusPublisher();
 
     expect(() => writeInput(record, new Uint8Array([65]), processMap, bus)).toThrow(
-      InvalidStateError,
+      InvalidStateError
     );
   });
 
@@ -78,7 +78,7 @@ describe("writeInput", () => {
     const bus = new InMemoryBusPublisher();
 
     expect(() => writeInput(record, new Uint8Array([65]), processMap, bus)).toThrow(
-      InvalidStateError,
+      InvalidStateError
     );
   });
 
@@ -111,11 +111,11 @@ describe("writeInput", () => {
     expect(() =>
       writeInput(record, new Uint8Array([65]), processMap, bus, () => {
         errorCalled = true;
-      }),
+      })
     ).toThrow("Broken pipe");
 
     expect(errorCalled).toBe(true);
     expect(bus.events).toHaveLength(1);
-    expect(bus.events[0]!.topic).toBe("pty.error");
+    expect(bus.events[0]?.topic).toBe("pty.error");
   });
 });

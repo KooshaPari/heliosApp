@@ -5,22 +5,13 @@
  * Cross-workspace import from @helios/runtime validates path alias resolution.
  */
 
-import { healthCheck, VERSION } from "@helios/runtime";
+import { healthCheck } from "@helios/runtime";
 import type { HealthCheckResult } from "@helios/runtime";
-import type { LocalBus } from "../../runtime/src/protocol/bus";
-import { DesktopRuntimeClient, type LifecycleResult, type RendererSwitchResult } from "./runtime_client";
+import type { LocalBus } from "../../runtime/src/protocol/bus.ts";
+import { DesktopRuntimeClient, type LifecycleResult } from "./runtime_client.ts";
 
 function main(): void {
-  const health: HealthCheckResult = healthCheck();
-
-  console.log(`[helios-desktop] runtime v${VERSION}`);
-  console.log(
-    `[helios-desktop] health: ok=${String(health.ok)} uptime=${health.uptimeMs.toFixed(1)}ms`,
-  );
-
-  // ElectroBun window creation will be wired in spec 001 WP00.
-  // For now, confirm the monorepo cross-workspace import works.
-  console.log("[helios-desktop] monorepo workspace resolution: OK");
+  const _health: HealthCheckResult = healthCheck();
 }
 
 main();
@@ -48,9 +39,20 @@ export interface ControlPlaneState {
 }
 
 export interface ControlPlane {
-  createLane(input: { workspaceId: string; simulateDegrade?: boolean; forceError?: boolean }): Promise<LifecycleResult & { laneId: string | null }>;
-  ensureSession(input: { workspaceId: string; laneId: string; forceError?: boolean }): Promise<LifecycleResult & { sessionId: string | null }>;
-  spawnTerminal(input: { workspaceId: string; laneId: string; sessionId: string; forceError?: boolean }): Promise<LifecycleResult & { terminalId: string | null }>;
+  createLane(input: {
+    workspaceId: string;
+    simulateDegrade?: boolean;
+    forceError?: boolean;
+  }): Promise<LifecycleResult & { laneId: string | null }>;
+  ensureSession(input: { workspaceId: string; laneId: string; forceError?: boolean }): Promise<
+    LifecycleResult & { sessionId: string | null }
+  >;
+  spawnTerminal(input: {
+    workspaceId: string;
+    laneId: string;
+    sessionId: string;
+    forceError?: boolean;
+  }): Promise<LifecycleResult & { terminalId: string | null }>;
   setActiveTab(tab: string): void;
   setWorkspace(workspaceId: string): void;
   switchRenderer(engine: string, opts?: { forceError?: boolean }): Promise<RendererSwitchOutcome>;
@@ -78,17 +80,23 @@ export function bootDesktop(config: { bus: LocalBus }): ControlPlane {
   return {
     async createLane(input) {
       const result = await client.createLane(input);
-      if (result.id) currentLaneId = result.id;
+      if (result.id) {
+        currentLaneId = result.id;
+      }
       return { ...result, laneId: result.id };
     },
     async ensureSession(input) {
       const result = await client.ensureSession(input);
-      if (result.id) currentSessionId = result.id;
+      if (result.id) {
+        currentSessionId = result.id;
+      }
       return { ...result, sessionId: result.id };
     },
     async spawnTerminal(input) {
       const result = await client.spawnTerminal(input);
-      if (result.id) currentTerminalId = result.id;
+      if (result.id) {
+        currentTerminalId = result.id;
+      }
       return { ...result, terminalId: result.id };
     },
     setActiveTab(_tab: string) {
@@ -117,7 +125,12 @@ export function bootDesktop(config: { bus: LocalBus }): ControlPlane {
     },
     getTabs() {
       const ctx: TabContextSnapshot = {
-        context: { workspaceId: currentWorkspace, laneId: currentLaneId, sessionId: currentSessionId, terminalId: currentTerminalId },
+        context: {
+          workspaceId: currentWorkspace,
+          laneId: currentLaneId,
+          sessionId: currentSessionId,
+          terminalId: currentTerminalId,
+        },
         diagnostics: { resolvedTransport: "cliproxy_harness", degradedReason: null },
       };
       return { terminal: ctx, agent: ctx, session: ctx, chat: ctx, project: ctx };

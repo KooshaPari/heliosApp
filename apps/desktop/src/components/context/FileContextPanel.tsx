@@ -11,7 +11,7 @@ type FileContextPanelProps = {
   isVisible: boolean;
 };
 
-export const FileContextPanel: Component<FileContextPanelProps> = (props) => {
+export const FileContextPanel: Component<FileContextPanelProps> = props => {
   return (
     <Show when={props.isVisible && props.files.length > 0}>
       <div
@@ -35,7 +35,7 @@ export const FileContextPanel: Component<FileContextPanelProps> = (props) => {
           Files
         </h3>
         <For each={props.files}>
-          {(file) => (
+          {file => (
             <div
               style={{
                 padding: "6px 8px",

@@ -9,13 +9,7 @@
  */
 
 import type { LocalBus } from "../protocol/bus.js";
-import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
-  A2AConfig,
-  A2AExecuteInput,
-  A2AExecuteOutput,
-} from "./adapter.js";
+import type { A2AConfig, ProviderAdapter, ProviderHealthStatus } from "./adapter.js";
 import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
@@ -67,11 +61,9 @@ export interface A2ARouterConfig extends A2AConfig {
  *
  * FR-025-005: A2A federation with external agent delegation.
  */
-export class A2ARouterAdapter implements ProviderAdapter<
-  A2ARouterConfig,
-  A2ADelegation & { correlationId?: string },
-  A2AResult
-> {
+export class A2ARouterAdapter
+  implements ProviderAdapter<A2ARouterConfig, A2ADelegation & { correlationId?: string }, A2AResult>
+{
   private config: A2ARouterConfig | null = null;
   private bus: LocalBus | null = null;
   private endpoints: A2AEndpoint[] = [];
@@ -97,7 +89,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
   async init(config: A2ARouterConfig): Promise<void> {
     try {
       // Validate config
-      if (!config.endpoints || !Array.isArray(config.endpoints) || config.endpoints.length === 0) {
+      if (!(config.endpoints && Array.isArray(config.endpoints)) || config.endpoints.length === 0) {
         throw new Error("Missing or invalid endpoints");
       }
 
@@ -105,7 +97,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
 
       // Initialize endpoints sorted by priority
       this.endpoints = config.endpoints
-        .map((ep) => ({
+        .map(ep => ({
           id: ep.id,
           url: ep.url,
           priority: ep.priority,
@@ -148,7 +140,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
         "PROVIDER_INIT_FAILED",
         `A2A router init failed: ${normalized.message}`,
         "a2a",
-        false,
+        false
       );
     }
   }
@@ -170,7 +162,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
 
     try {
       // Check if any endpoint is healthy
-      const healthyEndpoints = this.endpoints.filter((ep) => ep.healthStatus?.state === "healthy");
+      const healthyEndpoints = this.endpoints.filter(ep => ep.healthStatus?.state === "healthy");
 
       if (healthyEndpoints.length > 0) {
         this.healthStatus = {
@@ -214,13 +206,13 @@ export class A2ARouterAdapter implements ProviderAdapter<
    */
   async execute(
     input: A2ADelegation & { correlationId?: string },
-    correlationId: string,
+    correlationId: string
   ): Promise<A2AResult> {
     if (!this.config || this.endpoints.length === 0) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
         "A2A router not initialized or no endpoints configured",
-        "a2a",
+        "a2a"
       );
     }
 
@@ -230,7 +222,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
 
       if (!selectedEndpoint) {
         throw new Error(
-          `No endpoint found with required capabilities: ${input.requiredCapabilities.join(", ")}`,
+          `No endpoint found with required capabilities: ${input.requiredCapabilities.join(", ")}`
         );
       }
 
@@ -248,7 +240,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
           selectedEndpoint,
           input,
           correlationId,
-          abortController.signal,
+          abortController.signal
         );
 
         const duration = Date.now() - startTime;
@@ -278,7 +270,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
           `A2A delegation timeout after ${this.config?.timeoutMs || 30000}ms`,
           "a2a",
           true,
-          correlationId,
+          correlationId
         );
 
         await this.publishEvent("provider.a2a.delegation.failed", {
@@ -333,7 +325,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
         "PROVIDER_INIT_FAILED",
         `Failed to terminate A2A router: ${normalized.message}`,
         "a2a",
-        false,
+        false
       );
     }
   }
@@ -354,7 +346,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
    * @param status New health status
    */
   updateEndpointHealth(endpointId: string, status: ProviderHealthStatus): void {
-    const endpoint = this.endpoints.find((ep) => ep.id === endpointId);
+    const endpoint = this.endpoints.find(ep => ep.id === endpointId);
     if (endpoint) {
       endpoint.healthStatus = status;
     }
@@ -374,21 +366,20 @@ export class A2ARouterAdapter implements ProviderAdapter<
   private selectEndpoint(requiredCapabilities: string[]): A2AEndpoint | undefined {
     // First pass: look for healthy endpoint with matching capabilities
     let selected = this.endpoints.find(
-      (ep) =>
-        ep.healthStatus?.state === "healthy" && this.hasCapabilities(ep, requiredCapabilities),
+      ep => ep.healthStatus?.state === "healthy" && this.hasCapabilities(ep, requiredCapabilities)
     );
 
     // Second pass: look for degraded endpoint (for failover)
     if (!selected) {
       selected = this.endpoints.find(
-        (ep) =>
-          ep.healthStatus?.state === "degraded" && this.hasCapabilities(ep, requiredCapabilities),
+        ep =>
+          ep.healthStatus?.state === "degraded" && this.hasCapabilities(ep, requiredCapabilities)
       );
     }
 
     // Final fallback: any endpoint with matching capabilities
     if (!selected) {
-      selected = this.endpoints.find((ep) => this.hasCapabilities(ep, requiredCapabilities));
+      selected = this.endpoints.find(ep => this.hasCapabilities(ep, requiredCapabilities));
     }
 
     return selected;
@@ -407,7 +398,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
     }
 
     const endpointCaps = new Set(endpoint.capabilities);
-    return requiredCapabilities.every((cap) => endpointCaps.has(cap));
+    return requiredCapabilities.every(cap => endpointCaps.has(cap));
   }
 
   /**
@@ -436,10 +427,10 @@ export class A2ARouterAdapter implements ProviderAdapter<
    * @returns Delegation result
    */
   private async sendDelegation(
-    endpoint: A2AEndpoint,
+    _endpoint: A2AEndpoint,
     delegation: A2ADelegation & { correlationId?: string },
-    correlationId: string,
-    signal: AbortSignal,
+    _correlationId: string,
+    signal: AbortSignal
   ): Promise<unknown> {
     // Check for abort
     if (signal.aborted) {
@@ -473,9 +464,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
         topic,
         payload,
       });
-    } catch (error) {
-      console.warn(`Failed to publish A2A event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }
 
@@ -507,7 +496,7 @@ export class HealthMonitoringCoordinator {
   registerProvider(
     providerId: string,
     interval: number,
-    checkFunction: () => Promise<ProviderHealthStatus>,
+    checkFunction: () => Promise<ProviderHealthStatus>
   ): void {
     // Store initial health
     this.providerHealthMap.set(providerId, {
@@ -534,9 +523,7 @@ export class HealthMonitoringCoordinator {
             failureCount: status.failureCount,
           });
         }
-      } catch (error) {
-        console.warn(`Health check failed for provider ${providerId}:`, error);
-      }
+      } catch (_error) {}
     }, interval);
 
     this.healthCheckIntervals.set(providerId, intervalId);
@@ -613,8 +600,6 @@ export class HealthMonitoringCoordinator {
         topic,
         payload,
       });
-    } catch (error) {
-      console.warn(`Failed to publish health event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }

@@ -1,7 +1,7 @@
+import { randomUUID } from "node:crypto";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
-import { randomUUID } from "crypto";
 
 export enum RecoveryStage {
   CRASHED = "CRASHED",
@@ -26,7 +26,7 @@ export interface RecoveryState {
 type StageChangeListener = (
   previous: RecoveryStage,
   current: RecoveryStage,
-  attemptCount: number,
+  attemptCount: number
 ) => void;
 
 const LEGAL_TRANSITIONS: Record<RecoveryStage, RecoveryStage[]> = {
@@ -78,7 +78,7 @@ export class RecoveryStateMachine {
     const legalTransitions = LEGAL_TRANSITIONS[from] || [];
     if (!legalTransitions.includes(to)) {
       throw new Error(
-        `Illegal transition from ${from} to ${to}. Legal: ${legalTransitions.join(", ")}`,
+        `Illegal transition from ${from} to ${to}. Legal: ${legalTransitions.join(", ")}`
       );
     }
 
@@ -179,9 +179,7 @@ export class RecoveryStateMachine {
       // Atomic write
       await fs.writeFile(tempPath, JSON.stringify(this.currentState, null, 2));
       await fs.rename(tempPath, statePath);
-    } catch (err) {
-      console.error("Failed to persist recovery state:", err);
-    }
+    } catch (_err) {}
   }
 
   private async deleteState(): Promise<void> {
@@ -208,9 +206,7 @@ export class RecoveryStateMachine {
         const failureStage = this.getFailureStateFor(this.currentStage);
         if (failureStage) {
           this.currentState.lastError = `Stage timeout after ${STAGE_TIMEOUT_MS}ms`;
-          this.transition(failureStage).catch((err) => {
-            console.error("Failed to transition to failure state:", err);
-          });
+          this.transition(failureStage).catch(_err => {});
         }
       }
     }, STAGE_TIMEOUT_MS);

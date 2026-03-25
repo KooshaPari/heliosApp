@@ -1,9 +1,9 @@
-import { describe, expect, it, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import {
-  PtyRegistry,
   DuplicatePtyError,
-  RegistryCapacityError,
   type PtyRecord,
+  PtyRegistry,
+  RegistryCapacityError,
 } from "../registry.js";
 
 function makeRecord(overrides: Partial<PtyRecord> = {}): PtyRecord {
@@ -46,7 +46,7 @@ describe("PtyRegistry", () => {
       registry.register(makeRecord({ ptyId: `pty-${i}` }));
     }
     expect(() => registry.register(makeRecord({ ptyId: "pty-overflow" }))).toThrow(
-      RegistryCapacityError,
+      RegistryCapacityError
     );
   });
 
@@ -57,7 +57,7 @@ describe("PtyRegistry", () => {
 
     const l1 = registry.getByLane("L1");
     expect(l1).toHaveLength(2);
-    expect(l1.map((r) => r.ptyId).sort()).toEqual(["a", "b"]);
+    expect(l1.map(r => r.ptyId).sort()).toEqual(["a", "b"]);
 
     expect(registry.getByLane("L2")).toHaveLength(1);
     expect(registry.getByLane("L3")).toHaveLength(0);

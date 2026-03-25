@@ -1,10 +1,10 @@
 import { type Component, createSignal } from "solid-js";
 import { Show } from "solid-js";
-import type { Message } from "../../../../runtime/src/types/conversation";
+import type { Message } from "../../../../runtime/src/types/conversation.ts";
 
 type ToolResultBlockProps = { message: Message };
 
-export const ToolResultBlock: Component<ToolResultBlockProps> = (props) => {
+export const ToolResultBlock: Component<ToolResultBlockProps> = props => {
   const [expanded, setExpanded] = createSignal(false);
   const isError = () => props.message.metadata?.status === "error";
   const output = () => props.message.metadata?.toolOutput ?? props.message.content;
@@ -48,7 +48,7 @@ export const ToolResultBlock: Component<ToolResultBlockProps> = (props) => {
             "overflow-y": "auto",
           }}
         >
-          <>{output() ?? ""}</>
+          {output() ?? ""}
         </div>
       </Show>
     </div>

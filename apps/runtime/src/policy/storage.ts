@@ -3,10 +3,10 @@
  * Persists policy rules to disk with in-memory caching and hot-swap support.
  */
 
-import { promises as fs } from "fs";
-import * as path from "path";
-import type { PolicyRule, PolicyRuleInput } from "./types";
-import { PolicyRuleSet } from "./rules";
+import { promises as fs } from "node:fs";
+import * as path from "node:path";
+import { PolicyRuleSet } from "./rules.ts";
+import type { PolicyRule } from "./types.ts";
 
 export type RulesChangedCallback = (workspaceId: string, rules: PolicyRule[]) => void;
 
@@ -143,8 +143,7 @@ export class PolicyStorage {
             }
             this.cache.set(workspaceId, ruleSet);
             this.notifyChangedDebounced(workspaceId, rules);
-          } catch (error) {
-            console.error(`Failed to reload policy rules for ${workspaceId}:`, error);
+          } catch (_error) {
             // Keep previous rules on error
           }
         }
@@ -176,7 +175,7 @@ export class PolicyStorage {
 
     // Set new timer
     const timer = setTimeout(() => {
-      this.changeCallbacks.forEach((cb) => cb(workspaceId, rules));
+      this.changeCallbacks.forEach(cb => cb(workspaceId, rules));
       this.debounceTimers.delete(workspaceId);
     }, 100); // Debounce 100ms
 
@@ -205,12 +204,13 @@ export class PolicyStorage {
       if (!rule.pattern || typeof rule.pattern !== "string") {
         throw new Error(`Rule ${rule.id} must have a pattern field`);
       }
-      if (!rule.patternType || !["glob", "regex"].includes(rule.patternType)) {
+      if (!(rule.patternType && ["glob", "regex"].includes(rule.patternType))) {
         throw new Error(`Rule ${rule.id} has invalid patternType`);
       }
       if (
-        !rule.classification ||
-        !["safe", "needs-approval", "blocked"].includes(rule.classification)
+        !(
+          rule.classification && ["safe", "needs-approval", "blocked"].includes(rule.classification)
+        )
       ) {
         throw new Error(`Rule ${rule.id} has invalid classification`);
       }

@@ -3,17 +3,16 @@
  * @see SC-010-001, NFR-010-001
  */
 import { describe, expect, it } from "bun:test";
+import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
 import { RendererRegistry } from "../../../src/renderer/registry.js";
 import { RendererStateMachine } from "../../../src/renderer/state_machine.js";
-import { switchRenderer } from "../../../src/renderer/switch.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
-import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
+import { switchRenderer } from "../../../src/renderer/switch.js";
 import {
   MockGhosttyAdapter,
   MockRioAdapter,
-  MockRendererAdapter,
-  TEST_SURFACE,
   TEST_CONFIG,
+  TEST_SURFACE,
 } from "../../helpers/mock_adapter.js";
 
 function freshSetup() {
@@ -27,7 +26,7 @@ function freshSetup() {
   sm.transition("init");
   sm.transition("init_success");
   const events: RendererLifecycleEvent[] = [];
-  const bus: RendererEventBus = { publish: (e) => events.push(e) };
+  const bus: RendererEventBus = { publish: e => events.push(e) };
   return { registry, sm, ghostty, rio, events, bus };
 }
 
@@ -53,7 +52,7 @@ describe("Switch stress tests", () => {
 
     // Now try rapid switches - sequential since state machine prevents concurrent
     let successCount = 0;
-    let failCount = 0;
+    let _failCount = 0;
     for (let i = 0; i < 10; i++) {
       try {
         const fromId = i % 2 === 0 ? "rio" : "ghostty";
@@ -68,7 +67,7 @@ describe("Switch stress tests", () => {
         });
         successCount++;
       } catch {
-        failCount++;
+        _failCount++;
       }
     }
     // All sequential switches should succeed
@@ -131,7 +130,7 @@ describe("Switch stress tests", () => {
           config: TEST_CONFIG,
           boundStreams: new Map(),
           eventBus: bus,
-        }),
+        })
       ).rejects.toThrow();
       expect(sm.state).toBe("running"); // rolled back
     }
@@ -150,7 +149,7 @@ describe("Switch stress tests", () => {
           config: TEST_CONFIG,
           boundStreams: new Map(),
           eventBus: bus,
-        }),
+        })
       ).rejects.toThrow();
       expect(sm.state).toBe("running"); // rolled back
     }
@@ -172,11 +171,11 @@ describe("Switch stress tests", () => {
         config: TEST_CONFIG,
         boundStreams: new Map(),
         eventBus: bus,
-      }),
+      })
     ).rejects.toThrow();
 
     expect(sm.state).toBe("errored");
-    expect(events.some((e) => e.type === "renderer.errored")).toBe(true);
+    expect(events.some(e => e.type === "renderer.errored")).toBe(true);
   });
 
   it("reports switch latency distribution", async () => {
@@ -201,13 +200,8 @@ describe("Switch stress tests", () => {
       latencies.push(performance.now() - start);
     }
 
-    const avg = latencies.reduce((s, l) => s + l, 0) / latencies.length;
+    const _avg = latencies.reduce((s, l) => s + l, 0) / latencies.length;
     const max = Math.max(...latencies);
-
-    // Report
-    console.log(
-      `Switch latency: avg=${avg.toFixed(2)}ms, max=${max.toFixed(2)}ms, p50=${latencies.sort()[2]!.toFixed(2)}ms`,
-    );
     // All should be well under 3 seconds
     expect(max).toBeLessThan(3000);
   });

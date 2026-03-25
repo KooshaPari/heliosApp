@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { RestorationPipeline } from "../restoration.js";
-import { RecoveryStateMachine, RecoveryStage } from "../state-machine.js";
-import { CrashLoopDetector, SafeMode } from "../safe-mode.js";
-import { CheckpointWriter, CheckpointReader, type Checkpoint } from "../checkpoint.js";
-import { OrphanReconciler } from "../orphan-reconciler.js";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
+import { type Checkpoint, CheckpointReader, CheckpointWriter } from "../checkpoint.js";
+import { OrphanReconciler } from "../orphan-reconciler.js";
+import { RestorationPipeline } from "../restoration.js";
+import { CrashLoopDetector, SafeMode } from "../safe-mode.js";
+import { RecoveryStage, RecoveryStateMachine } from "../state-machine.js";
 
 describe("Chaos Tests - Crash Recovery Resilience", () => {
   let tempDir: string;
@@ -146,7 +146,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       await reconciler.cleanup(report);
 
       const events = bus.getEvents();
-      const cleanupEvent = events.find((e) => e.topic === "recovery.orphans.cleaned");
+      const cleanupEvent = events.find(e => e.topic === "recovery.orphans.cleaned");
       expect(cleanupEvent).toBeDefined();
     });
   });
@@ -168,8 +168,8 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const result = await pipeline.restore(checkpoint);
 
       const reconciler = new OrphanReconciler(
-        result.restored.map((s) => s.sessionId),
-        bus,
+        result.restored.map(s => s.sessionId),
+        bus
       );
       const report = await reconciler.scan();
       await reconciler.cleanup(report);
@@ -197,12 +197,12 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const activityPromises = [];
       for (let i = 0; i < 5; i++) {
         activityPromises.push(
-          new Promise((resolve) => {
+          new Promise(resolve => {
             setTimeout(async () => {
               // Simulate user activity
               resolve(undefined);
             }, Math.random() * 1000);
-          }),
+          })
         );
       }
 
@@ -229,8 +229,8 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       }
 
       // All cycles should have consistent results
-      expect(results.every((r) => r.restored.length === 3)).toBe(true);
-      expect(results.every((r) => r.failed.length === 0)).toBe(true);
+      expect(results.every(r => r.restored.length === 3)).toBe(true);
+      expect(results.every(r => r.failed.length === 0)).toBe(true);
     });
   });
 

@@ -1,6 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
-import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import {
+  AUDIT_EVENT_RESULTS,
+  AUDIT_EVENT_TYPES,
+  createAuditEvent,
+} from "../../../src/audit/event.ts";
+import { SQLiteAuditStore } from "../../../src/audit/sqlite-store.ts";
 
 describe("SQLiteAuditStore", () => {
   let store: SQLiteAuditStore;
@@ -89,13 +93,13 @@ describe("SQLiteAuditStore", () => {
     it("should query with workspace filter", () => {
       const results = store.query({ workspaceId: "ws-1" });
       expect(results.length).toBeLessThanOrEqual(100);
-      expect(results.every((e) => e.workspaceId === "ws-1")).toBe(true);
+      expect(results.every(e => e.workspaceId === "ws-1")).toBe(true);
     });
 
     it("should query with event type filter", () => {
       const results = store.query({ eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED });
       expect(results.length).toBeGreaterThan(0);
-      expect(results.every((e) => e.eventType === AUDIT_EVENT_TYPES.COMMAND_EXECUTED)).toBe(true);
+      expect(results.every(e => e.eventType === AUDIT_EVENT_TYPES.COMMAND_EXECUTED)).toBe(true);
     });
 
     it("should query with pagination", () => {

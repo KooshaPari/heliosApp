@@ -5,12 +5,12 @@
  * FR-025-008: Lane binding and failure isolation.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
-import { ProviderRegistry } from "../registry.js";
-import { NormalizedProviderError, PROVIDER_ERROR_CODES } from "../errors.js";
+import { beforeEach, describe, expect, it } from "vitest";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
 import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { NormalizedProviderError } from "../errors.js";
+import { ProviderRegistry } from "../registry.js";
 
 /**
  * Mock provider for testing registry behavior.
@@ -33,7 +33,7 @@ class TestProvider implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExe
     };
   }
 
-  async execute(input: ACPExecuteInput, correlationId: string): Promise<ACPExecuteOutput> {
+  async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
     if (!this.initialized) {
       throw new Error("Not initialized");
     }
@@ -90,7 +90,7 @@ describe("ProviderRegistry", () => {
       };
 
       await expect(registry.register(registration, adapter)).rejects.toThrow(
-        /missing required field: id/i,
+        /missing required field: id/i
       );
     });
 
@@ -106,7 +106,7 @@ describe("ProviderRegistry", () => {
       };
 
       await expect(registry.register(registration, adapter)).rejects.toThrow(
-        /invalid concurrency limit/i,
+        /invalid concurrency limit/i
       );
     });
 
@@ -122,7 +122,7 @@ describe("ProviderRegistry", () => {
       };
 
       await expect(registry.register(registration, adapter)).rejects.toThrow(
-        /invalid concurrency limit/i,
+        /invalid concurrency limit/i
       );
     });
 
@@ -138,7 +138,7 @@ describe("ProviderRegistry", () => {
       };
 
       await expect(registry.register(registration, adapter)).rejects.toThrow(
-        /invalid health check interval/i,
+        /invalid health check interval/i
       );
     });
 
@@ -156,17 +156,15 @@ describe("ProviderRegistry", () => {
       await registry.register(registration, adapter);
 
       const events = bus.getEvents();
-      const registeredEvent = events.find((e) => e.topic === "provider.registered");
+      const registeredEvent = events.find(e => e.topic === "provider.registered");
       expect(registeredEvent).toBeDefined();
       expect(registeredEvent?.payload?.providerId).toBe("test-provider");
     });
 
     it("should emit provider.init.failed event on init failure", async () => {
-      class FailingProvider implements ProviderAdapter<
-        ACPConfig,
-        ACPExecuteInput,
-        ACPExecuteOutput
-      > {
+      class FailingProvider
+        implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
+      {
         async init(_config: ACPConfig): Promise<void> {
           throw new Error("Init failed");
         }
@@ -192,7 +190,7 @@ describe("ProviderRegistry", () => {
       await expect(registry.register(registration, adapter)).rejects.toThrow();
 
       const events = bus.getEvents();
-      const failedEvent = events.find((e) => e.topic === "provider.init.failed");
+      const failedEvent = events.find(e => e.topic === "provider.init.failed");
       expect(failedEvent).toBeDefined();
     });
   });
@@ -233,7 +231,7 @@ describe("ProviderRegistry", () => {
       await registry.unregister("test-provider");
 
       const events = bus.getEvents();
-      const unregisteredEvent = events.find((e) => e.topic === "provider.unregistered");
+      const unregisteredEvent = events.find(e => e.topic === "provider.unregistered");
       expect(unregisteredEvent).toBeDefined();
     });
 
@@ -287,7 +285,7 @@ describe("ProviderRegistry", () => {
       registry.incrementInFlight("test-provider");
 
       expect(() => registry.checkConcurrencyLimit("test-provider")).toThrow(
-        NormalizedProviderError,
+        NormalizedProviderError
       );
     });
 
@@ -330,7 +328,7 @@ describe("ProviderRegistry", () => {
           concurrencyLimit: 10,
           healthCheckIntervalMs: 30000,
         },
-        acpAdapter,
+        acpAdapter
       );
 
       await registry.register(
@@ -342,7 +340,7 @@ describe("ProviderRegistry", () => {
           concurrencyLimit: 10,
           healthCheckIntervalMs: 30000,
         },
-        mcpAdapter,
+        mcpAdapter
       );
 
       const acpProviders = registry.listByType("acp");
@@ -367,7 +365,7 @@ describe("ProviderRegistry", () => {
           concurrencyLimit: 10,
           healthCheckIntervalMs: 30000,
         },
-        adapter1,
+        adapter1
       );
 
       await registry.register(
@@ -379,7 +377,7 @@ describe("ProviderRegistry", () => {
           concurrencyLimit: 10,
           healthCheckIntervalMs: 30000,
         },
-        adapter2,
+        adapter2
       );
 
       const ws1Providers = registry.listByWorkspace("ws-1");
@@ -402,7 +400,7 @@ describe("ProviderRegistry", () => {
           concurrencyLimit: 10,
           healthCheckIntervalMs: 30000,
         },
-        adapter,
+        adapter
       );
 
       registry.bindToLane("test-provider", "lane-1");
@@ -422,7 +420,7 @@ describe("ProviderRegistry", () => {
           concurrencyLimit: 10,
           healthCheckIntervalMs: 30000,
         },
-        adapter,
+        adapter
       );
 
       registry.bindToLane("test-provider", "lane-1");
@@ -445,7 +443,7 @@ describe("ProviderRegistry", () => {
           concurrencyLimit: 10,
           healthCheckIntervalMs: 30000,
         },
-        adapter1,
+        adapter1
       );
 
       await registry.register(
@@ -457,7 +455,7 @@ describe("ProviderRegistry", () => {
           concurrencyLimit: 10,
           healthCheckIntervalMs: 30000,
         },
-        adapter2,
+        adapter2
       );
 
       registry.bindToLane("provider-1", "lane-1");
@@ -482,7 +480,7 @@ describe("ProviderRegistry", () => {
           concurrencyLimit: 10,
           healthCheckIntervalMs: 30000,
         },
-        adapter,
+        adapter
       );
 
       const status = {

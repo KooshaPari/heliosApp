@@ -10,11 +10,11 @@
  * @see FR-010-008, FR-010-009, SC-010-002
  */
 
-import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.js";
+import type { RenderSurface, RendererAdapter, RendererConfig } from "./adapter.js";
+import { type TerminalContext, executeHotSwap } from "./hot_swap.js";
 import type { RendererEventBus } from "./index.js";
-import { executeHotSwap, type TerminalContext } from "./hot_swap.js";
-import { executeRollback } from "./rollback.js";
 import { executeRestartWithRestore } from "./restart_restore.js";
+import { executeRollback } from "./rollback.js";
 import type { SwitchBuffer } from "./stream_binding.js";
 
 // ---------------------------------------------------------------------------
@@ -180,7 +180,7 @@ export class SwitchTransactionOrchestrator {
    */
   private async _executeHotSwapPath(
     transaction: SwitchTransaction,
-    request: SwitchTransactionRequest,
+    request: SwitchTransactionRequest
   ): Promise<SwitchTransaction> {
     // Transition to hot-swapping
     this._transitionState(transaction, "hot-swapping");
@@ -203,10 +203,10 @@ export class SwitchTransactionOrchestrator {
             request.terminals,
             request.streamBuffer,
             error.message,
-            this._eventBus,
+            this._eventBus
           );
         },
-        this._eventBus,
+        this._eventBus
       );
 
       if (result.success) {
@@ -219,14 +219,13 @@ export class SwitchTransactionOrchestrator {
         request.onProgress?.("committed");
 
         return transaction;
-      } else {
-        // Hot-swap failed, rollback was triggered
-        this._transitionState(transaction, "rolled-back");
-        request.onProgress?.("rolled-back");
-
-        transaction.error = result.error;
-        return transaction;
       }
+      // Hot-swap failed, rollback was triggered
+      this._transitionState(transaction, "rolled-back");
+      request.onProgress?.("rolled-back");
+
+      transaction.error = result.error;
+      return transaction;
     } catch (error: unknown) {
       // Unexpected error during hot-swap
       this._transitionState(transaction, "failed");
@@ -243,7 +242,7 @@ export class SwitchTransactionOrchestrator {
    */
   private async _executeRestartRestorePath(
     transaction: SwitchTransaction,
-    request: SwitchTransactionRequest,
+    request: SwitchTransactionRequest
   ): Promise<SwitchTransaction> {
     // Transition to restarting
     this._transitionState(transaction, "restarting");
@@ -266,10 +265,10 @@ export class SwitchTransactionOrchestrator {
             request.terminals,
             request.streamBuffer,
             error.message,
-            this._eventBus,
+            this._eventBus
           );
         },
-        this._eventBus,
+        this._eventBus
       );
 
       if (result.success) {
@@ -282,14 +281,13 @@ export class SwitchTransactionOrchestrator {
         request.onProgress?.("committed");
 
         return transaction;
-      } else {
-        // Restart-with-restore failed, rollback was triggered
-        this._transitionState(transaction, "rolled-back");
-        request.onProgress?.("rolled-back");
-
-        transaction.error = result.error;
-        return transaction;
       }
+      // Restart-with-restore failed, rollback was triggered
+      this._transitionState(transaction, "rolled-back");
+      request.onProgress?.("rolled-back");
+
+      transaction.error = result.error;
+      return transaction;
     } catch (error: unknown) {
       // Unexpected error during restart-with-restore
       this._transitionState(transaction, "failed");
@@ -367,8 +365,8 @@ export class SwitchTransactionOrchestrator {
           this._terminalCreationQueue.splice(index, 1);
           reject(
             new Error(
-              `Terminal creation request timed out after ${this._queueTimeoutMs}ms during active switch transaction`,
-            ),
+              `Terminal creation request timed out after ${this._queueTimeoutMs}ms during active switch transaction`
+            )
           );
         }
       }, this._queueTimeoutMs);
@@ -407,7 +405,7 @@ export class SwitchTransactionOrchestrator {
  * Create a new switch transaction orchestrator instance.
  */
 export function createSwitchOrchestrator(
-  eventBus?: RendererEventBus,
+  eventBus?: RendererEventBus
 ): SwitchTransactionOrchestrator {
   return new SwitchTransactionOrchestrator(eventBus);
 }

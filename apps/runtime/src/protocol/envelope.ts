@@ -5,9 +5,9 @@
  * well-formed envelopes with auto-generated IDs and timestamps.
  */
 
-import type { CommandEnvelope, ResponseEnvelope, EventEnvelope, Envelope } from "./types.js";
-import { validationError, backpressureError } from "./errors.js";
+import { backpressureError, validationError } from "./errors.js";
 import type { BusError } from "./errors.js";
+import type { CommandEnvelope, Envelope, EventEnvelope, ResponseEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -55,7 +55,7 @@ function monotonicNow(): number {
 export function createCommand(
   method: string,
   payload: unknown,
-  correlationId?: string,
+  correlationId?: string
 ): CommandEnvelope {
   if (!method) {
     throw new Error("createCommand: method must be a non-empty string");
@@ -80,7 +80,7 @@ export function createCommand(
 export function createResponse(
   command: CommandEnvelope,
   payload: unknown,
-  error?: BusError,
+  error?: BusError
 ): ResponseEnvelope {
   const base: ResponseEnvelope = {
     id: generateId("res"),
@@ -109,7 +109,7 @@ export function createResponse(
 export function createEvent(
   topic: string,
   payload: unknown,
-  correlationId?: string,
+  correlationId?: string
 ): EventEnvelope {
   if (!topic) {
     throw new Error("createEvent: topic must be a non-empty string");
@@ -150,24 +150,24 @@ export function validateEnvelope(input: unknown): ValidationResult {
   const envelope = input as Record<string, unknown>;
 
   // --- Required base fields ---
-  if (typeof envelope["id"] !== "string" || envelope["id"] === "") {
+  if (typeof envelope.id !== "string" || envelope.id === "") {
     return fail('Missing or empty "id" field');
   }
-  if (typeof envelope["correlation_id"] !== "string" || envelope["correlation_id"] === "") {
+  if (typeof envelope.correlation_id !== "string" || envelope.correlation_id === "") {
     return fail('Missing or empty "correlation_id" field');
   }
-  if (typeof envelope["timestamp"] !== "number" || !(envelope["timestamp"] > 0)) {
+  if (typeof envelope.timestamp !== "number" || !(envelope.timestamp > 0)) {
     return fail('Missing or invalid "timestamp" field (must be a positive number)');
   }
 
-  const type = envelope["type"];
+  const type = envelope.type;
   if (type !== "command" && type !== "response" && type !== "event") {
     return fail(`Unknown envelope type: ${String(type)}`, { type });
   }
 
   // --- Type-specific fields ---
   if (type === "command") {
-    if (typeof envelope["method"] !== "string" || envelope["method"] === "") {
+    if (typeof envelope.method !== "string" || envelope.method === "") {
       return fail('Command envelope requires a non-empty "method" field');
     }
     if (!("payload" in envelope)) {
@@ -176,13 +176,13 @@ export function validateEnvelope(input: unknown): ValidationResult {
   }
 
   if (type === "response") {
-    if (typeof envelope["method"] !== "string" || envelope["method"] === "") {
+    if (typeof envelope.method !== "string" || envelope.method === "") {
       return fail('Response envelope requires a non-empty "method" field');
     }
   }
 
   if (type === "event") {
-    if (typeof envelope["topic"] !== "string" || envelope["topic"] === "") {
+    if (typeof envelope.topic !== "string" || envelope.topic === "") {
       return fail('Event envelope requires a non-empty "topic" field');
     }
     if (!("payload" in envelope)) {
@@ -191,13 +191,13 @@ export function validateEnvelope(input: unknown): ValidationResult {
   }
 
   // --- Payload size check ---
-  if ("payload" in envelope && envelope["payload"] !== undefined && envelope["payload"] !== null) {
-    const payload = envelope["payload"];
+  if ("payload" in envelope && envelope.payload !== undefined && envelope.payload !== null) {
+    const payload = envelope.payload;
     const topicOrMethod =
-      typeof envelope["topic"] === "string"
-        ? envelope["topic"]
-        : typeof envelope["method"] === "string"
-          ? envelope["method"]
+      typeof envelope.topic === "string"
+        ? envelope.topic
+        : typeof envelope.method === "string"
+          ? envelope.method
           : "unknown";
 
     // Fast-path: Buffer/ArrayBuffer — check byteLength directly.

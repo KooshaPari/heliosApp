@@ -3,8 +3,8 @@
  */
 
 import { createSignal, onMount } from "solid-js";
-import { ApprovalPanel } from "../components/approval/ApprovalPanel";
-import { ApprovalStatus, type ApprovalRequest, type ApprovalWorkflow } from "../types/approval";
+import { ApprovalPanel } from "../components/approval/ApprovalPanel.tsx";
+import { type ApprovalRequest, ApprovalStatus, type ApprovalWorkflow } from "../types/approval.ts";
 
 export function ApprovalWorkflowPage() {
   const [requests, setRequests] = createSignal<ApprovalRequest[]>([]);
@@ -24,14 +24,14 @@ export function ApprovalWorkflowPage() {
   });
 
   const handleApprove = async (id: string) => {
-    setRequests(requests().map((r) => (r.id === id ? { ...r, status: ApprovalStatus.Approved } : r)));
+    setRequests(requests().map(r => (r.id === id ? { ...r, status: ApprovalStatus.Approved } : r)));
   };
 
   const handleReject = async (id: string, reason: string) => {
     setRequests(
-      requests().map((r) =>
-        r.id === id ? { ...r, status: ApprovalStatus.Rejected, rejectedReason: reason } : r,
-      ),
+      requests().map(r =>
+        r.id === id ? { ...r, status: ApprovalStatus.Rejected, rejectedReason: reason } : r
+      )
     );
   };
 
@@ -50,19 +50,19 @@ export function ApprovalWorkflowPage() {
             <div class="workflow-stats">
               <div class="stat">
                 <span class="label">Total</span>
-                <span class="value">{workflow()!.totalRequests}</span>
+                <span class="value">{workflow()?.totalRequests}</span>
               </div>
               <div class="stat">
                 <span class="label">Pending</span>
-                <span class="value pending">{workflow()!.pendingRequests}</span>
+                <span class="value pending">{workflow()?.pendingRequests}</span>
               </div>
               <div class="stat">
                 <span class="label">Approved</span>
-                <span class="value approved">{workflow()!.approvedRequests}</span>
+                <span class="value approved">{workflow()?.approvedRequests}</span>
               </div>
               <div class="stat">
                 <span class="label">Rejected</span>
-                <span class="value rejected">{workflow()!.rejectedRequests}</span>
+                <span class="value rejected">{workflow()?.rejectedRequests}</span>
               </div>
             </div>
           )}

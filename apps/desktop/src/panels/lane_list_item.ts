@@ -3,7 +3,7 @@
  * Renders a single lane entry with status badge, label, and action triggers
  */
 
-import { getStatusBadgeContent } from "./status_badge";
+import { getStatusBadgeContent } from "./status_badge.ts";
 
 export interface LaneListItemProps {
   laneId: string;
@@ -42,7 +42,9 @@ export class LaneListItem {
   }
 
   private render(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
@@ -56,7 +58,7 @@ export class LaneListItem {
     const item = document.createElement("div");
     item.className = `lane-list-item ${this.props.isActive ? "active" : ""} ${this.props.isSelected ? "selected" : ""}`;
     item.setAttribute("role", "option");
-    item.setAttribute("aria-selected", String(this.props.isSelected || false));
+    item.setAttribute("aria-selected", String(this.props.isSelected));
     item.setAttribute("tabindex", "0");
 
     // Badge container
@@ -121,25 +123,29 @@ export class LaneListItem {
     if (name.length <= maxLength) {
       return name;
     }
-    return name.substring(0, maxLength - 3) + "...";
+    return `${name.substring(0, maxLength - 3)}...`;
   }
 
   private attachEventListeners(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     const item = this.container.querySelector(".lane-list-item");
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     item.addEventListener("click", () => {
       this.props.onSelect(this.props.laneId);
     });
 
-    item.addEventListener("contextmenu", (e) => {
+    item.addEventListener("contextmenu", e => {
       e.preventDefault();
       this.props.onContextMenu(this.props.laneId, e as MouseEvent);
     });
 
-    item.addEventListener("keydown", (e) => {
+    item.addEventListener("keydown", e => {
       const event = e as KeyboardEvent;
       if (event.key === "Enter") {
         event.preventDefault();
@@ -149,10 +155,14 @@ export class LaneListItem {
   }
 
   private detachEventListeners(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     const item = this.container.querySelector(".lane-list-item");
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     // Event listeners are automatically removed when element is removed
   }

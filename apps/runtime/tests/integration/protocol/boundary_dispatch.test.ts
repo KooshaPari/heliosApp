@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { createRuntime } from "../../../src/index";
+import { createRuntime } from "../../../src/index.ts";
 
 function jsonRequest(url: string, body: Record<string, unknown>): Request {
   return new Request(url, {
@@ -18,7 +18,7 @@ describe("protocol boundary dispatch", () => {
         workspace_id: "ws_1",
         correlation_id: "corr-1",
         payload: {},
-      }),
+      })
     );
 
     expect(response.status).toBe(200);
@@ -35,7 +35,7 @@ describe("protocol boundary dispatch", () => {
         workspace_id: "ws_1",
         correlation_id: "corr-tool",
         payload: {},
-      }),
+      })
     );
 
     expect(response.status).toBe(409);
@@ -56,7 +56,7 @@ describe("protocol boundary dispatch", () => {
         workspace_id: "ws_1",
         correlation_id: "corr-a2a",
         payload: {},
-      }),
+      })
     );
 
     expect(response.status).toBe(409);

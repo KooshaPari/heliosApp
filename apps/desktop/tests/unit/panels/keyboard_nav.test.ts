@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { KeyboardNav, type KeyboardNavCallbacks } from "../../../src/panels/keyboard_nav";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { KeyboardNav, type KeyboardNavCallbacks } from "../../../src/panels/keyboard_nav.ts";
 
 describe("KeyboardNav", () => {
   let container: HTMLDivElement;
@@ -118,7 +118,7 @@ describe("KeyboardNav", () => {
     container.dispatchEvent(event);
 
     // Give async handler time to complete
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise(resolve => setTimeout(resolve, 10));
 
     expect(callbacks.onDelete).toHaveBeenCalled();
   });
@@ -132,7 +132,7 @@ describe("KeyboardNav", () => {
     const event = new KeyboardEvent("keydown", { key: "Backspace" });
     container.dispatchEvent(event);
 
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise(resolve => setTimeout(resolve, 10));
 
     expect(callbacks.onDelete).toHaveBeenCalled();
   });

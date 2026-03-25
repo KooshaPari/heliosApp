@@ -2,8 +2,8 @@ import { describe, expect, test } from "bun:test";
 import {
   createBoundaryDispatcher,
   getBoundaryDispatchDecision,
-} from "../../../src/protocol/boundary_adapter";
-import type { LocalBusEnvelope } from "../../../src/protocol/types";
+} from "../../../src/protocol/boundary_adapter.ts";
+import type { LocalBusEnvelope } from "../../../src/protocol/types.ts";
 
 function command(method: string): LocalBusEnvelope {
   return {

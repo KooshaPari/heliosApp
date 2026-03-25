@@ -4,16 +4,16 @@
  * FR-012-007, SC-012-003.
  */
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { RioBackend } from "../../../../src/renderer/rio/backend.js";
-import { RendererRegistry } from "../../../../src/renderer/registry.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import type {
+  RenderSurface,
   RendererAdapter,
   RendererConfig,
-  RenderSurface,
   RendererState,
 } from "../../../../src/renderer/adapter.js";
 import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
+import { RendererRegistry } from "../../../../src/renderer/registry.js";
+import { RioBackend } from "../../../../src/renderer/rio/backend.js";
 
 // ---------------------------------------------------------------------------
 // Mock ghostty
@@ -30,7 +30,9 @@ function createMockGhostty(opts?: {
 
     async init(_config: RendererConfig): Promise<void> {
       adapter._initCalled = true;
-      if (opts?.failInit) throw new Error("ghostty init failed");
+      if (opts?.failInit) {
+        throw new Error("ghostty init failed");
+      }
       adapter._state = "running";
     },
     async start(_surface: RenderSurface): Promise<void> {
@@ -99,7 +101,7 @@ describe("Crash fallback — ghostty available", () => {
 
   it("publishes fallback event via crash handlers", async () => {
     const errors: Error[] = [];
-    backend.onCrash((err) => errors.push(err));
+    backend.onCrash(err => errors.push(err));
     // _attemptFallback doesn't call crash handlers (those are called by the exit handler).
     // This just verifies crash handler registration works.
     expect(errors.length).toBe(0);

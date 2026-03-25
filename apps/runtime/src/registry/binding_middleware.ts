@@ -7,7 +7,6 @@
 
 import type { RegistryQueryInterface, TerminalBinding } from "./binding_triple.js";
 import { BindingState, validateBindingTriple } from "./binding_triple.js";
-import { TerminalNotFound, InvalidBinding } from "./terminal_registry.js";
 import type { TerminalRegistry } from "./terminal_registry.js";
 
 export interface ValidationError {
@@ -110,7 +109,7 @@ export class BindingMiddleware {
   async wrapOperation<T>(
     terminalId: string,
     handler: (binding: TerminalBinding) => Promise<T>,
-    operation?: string,
+    operation?: string
   ): Promise<T> {
     const validation = this.validateBeforeOperation(terminalId, operation);
 
@@ -132,7 +131,7 @@ export class BindingMiddleware {
   wrapOperationSync<T>(
     terminalId: string,
     handler: (binding: TerminalBinding) => T,
-    operation?: string,
+    operation?: string
   ): T {
     const validation = this.validateBeforeOperation(terminalId, operation);
 
@@ -160,7 +159,7 @@ export function createMiddlewareHandler<T>(
   middleware: BindingMiddleware,
   terminalId: string,
   handler: (binding: TerminalBinding) => Promise<T>,
-  operation?: string,
+  operation?: string
 ): () => Promise<T> {
   return () => middleware.wrapOperation(terminalId, handler, operation);
 }
@@ -172,7 +171,7 @@ export function createMiddlewareHandlerSync<T>(
   middleware: BindingMiddleware,
   terminalId: string,
   handler: (binding: TerminalBinding) => T,
-  operation?: string,
+  operation?: string
 ): () => T {
   return () => middleware.wrapOperationSync(terminalId, handler, operation);
 }

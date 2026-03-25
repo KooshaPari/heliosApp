@@ -60,31 +60,31 @@ export {
   type BufferStats,
 } from "./buffers.js";
 
-// Local imports for use in PtyManager class body.
-import { PtyRegistry as _PtyRegistry } from "./registry.js";
-import { PtyLifecycle as _PtyLifecycle } from "./state_machine.js";
-import { spawnPty as _spawnPty } from "./spawn.js";
-import type { SpawnOptions as _SpawnOptions } from "./spawn.js";
-import type { PtyRecord as _PtyRecord } from "./registry.js";
-import type { ReconciliationSummary as _ReconciliationSummary } from "./registry.js";
+import {
+  type BufferStats as _BufferStats,
+  OutputBuffer as _OutputBuffer,
+  type OutputBufferConfig as _OutputBufferConfig,
+} from "./buffers.js";
 import type { BusPublisher as _BusPublisher } from "./events.js";
 import { NoOpBusPublisher as _NoOpBusPublisher, emitPtyEvent as _emitPtyEvent } from "./events.js";
-import type { SignalHistoryMap as _SignalHistoryMap } from "./signals.js";
-import {
-  resize as _resize,
-  terminate as _terminate,
-  type TerminateOptions as _TerminateOptions,
-} from "./signals.js";
-import { writeInput as _writeInput, type ProcessMap as _ProcessMap } from "./io.js";
 import {
   IdleMonitor as _IdleMonitor,
   type IdleMonitorConfig as _IdleMonitorConfig,
 } from "./idle_monitor.js";
+import { type ProcessMap as _ProcessMap, writeInput as _writeInput } from "./io.js";
+// Local imports for use in PtyManager class body.
+import { PtyRegistry as _PtyRegistry } from "./registry.js";
+import type { PtyRecord as _PtyRecord } from "./registry.js";
+import type { ReconciliationSummary as _ReconciliationSummary } from "./registry.js";
+import type { SignalHistoryMap as _SignalHistoryMap } from "./signals.js";
 import {
-  OutputBuffer as _OutputBuffer,
-  type OutputBufferConfig as _OutputBufferConfig,
-  type BufferStats as _BufferStats,
-} from "./buffers.js";
+  type TerminateOptions as _TerminateOptions,
+  resize as _resize,
+  terminate as _terminate,
+} from "./signals.js";
+import { spawnPty as _spawnPty } from "./spawn.js";
+import type { SpawnOptions as _SpawnOptions } from "./spawn.js";
+import { PtyLifecycle as _PtyLifecycle } from "./state_machine.js";
 
 /**
  * High-level facade for PTY operations.
@@ -126,7 +126,7 @@ export class PtyManager {
     maxCapacity = 300,
     bus?: _BusPublisher,
     idleConfig?: _IdleMonitorConfig,
-    bufferConfig?: _OutputBufferConfig,
+    bufferConfig?: _OutputBufferConfig
   ) {
     this.bufferConfig = bufferConfig;
     this.registry = new _PtyRegistry(maxCapacity);
@@ -190,7 +190,7 @@ export class PtyManager {
    */
   registerProcess(
     ptyId: string,
-    proc: { readonly stdin: { write(data: Uint8Array | string): number } },
+    proc: { readonly stdin: { write(data: Uint8Array | string): number } }
   ): void {
     this.processes.set(ptyId, proc);
   }
@@ -228,7 +228,7 @@ export class PtyManager {
       throw new Error(`PTY '${ptyId}' not found`);
     }
 
-    _writeInput(record, data, this.processes, this.bus, (id) => {
+    _writeInput(record, data, this.processes, this.bus, id => {
       const lifecycle = this.lifecycles.get(id);
       if (lifecycle && lifecycle.state === "active") {
         try {

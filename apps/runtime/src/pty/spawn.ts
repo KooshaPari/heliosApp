@@ -5,9 +5,9 @@
  * @module
  */
 
+import type { PtyDimensions, PtyRecord } from "./registry.js";
+import type { PtyRegistry } from "./registry.js";
 import { PtyLifecycle } from "./state_machine.js";
-import type { PtyRecord, PtyDimensions } from "./registry.js";
-import { PtyRegistry } from "./registry.js";
 
 /** Options for spawning a new PTY. */
 export interface SpawnOptions {
@@ -72,7 +72,7 @@ export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Pr
       cwd,
       env: {
         ...env,
-        TERM: env["TERM"] ?? "xterm-256color",
+        TERM: env.TERM ?? "xterm-256color",
         COLUMNS: String(cols),
         LINES: String(rows),
       },

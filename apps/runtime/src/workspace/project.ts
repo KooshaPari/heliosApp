@@ -1,8 +1,8 @@
 // T006, T007, T008 — Project binding, stale detection, and git clone delegation
 
-import type { Workspace, ProjectBinding } from "./types.js";
-import { existsSync, realpathSync, accessSync, constants } from "node:fs";
+import { constants, accessSync, existsSync, realpathSync } from "node:fs";
 import { isAbsolute } from "node:path";
+import type { ProjectBinding, Workspace } from "./types.js";
 
 // Stub ID generator — uses spec 005 format proj_{ulid}
 function generateProjectId(): string {
@@ -36,7 +36,7 @@ export function bindLocalProject(workspace: Workspace, rootPath: string): Worksp
   }
 
   // Duplicate check
-  if (workspace.projects.some((p) => p.rootPath === resolvedPath)) {
+  if (workspace.projects.some(p => p.rootPath === resolvedPath)) {
     throw new Error(`Project with rootPath '${resolvedPath}' is already bound to this workspace`);
   }
 
@@ -62,7 +62,7 @@ export function bindLocalProject(workspace: Workspace, rootPath: string): Worksp
 export async function bindGitProject(
   workspace: Workspace,
   gitUrl: string,
-  targetDir: string,
+  targetDir: string
 ): Promise<Workspace> {
   if (!isAbsolute(targetDir)) {
     throw new Error("Target directory must be absolute");
@@ -73,7 +73,7 @@ export async function bindGitProject(
   const resolvedPath = realpathSync(targetDir);
 
   // Duplicate check
-  if (workspace.projects.some((p) => p.rootPath === resolvedPath)) {
+  if (workspace.projects.some(p => p.rootPath === resolvedPath)) {
     throw new Error(`Project with rootPath '${resolvedPath}' is already bound to this workspace`);
   }
 
@@ -97,14 +97,14 @@ export async function bindGitProject(
  * Remove a project binding from a workspace.
  */
 export function unbindProject(workspace: Workspace, projectId: string): Workspace {
-  const idx = workspace.projects.findIndex((p) => p.id === projectId);
+  const idx = workspace.projects.findIndex(p => p.id === projectId);
   if (idx === -1) {
     throw new Error(`Project '${projectId}' not found in workspace`);
   }
 
   return {
     ...workspace,
-    projects: workspace.projects.filter((p) => p.id !== projectId),
+    projects: workspace.projects.filter(p => p.id !== projectId),
     updatedAt: Date.now(),
   };
 }
@@ -121,14 +121,18 @@ export async function detectStaleProjects(workspace: Workspace): Promise<Workspa
       return binding.status === "active" ? binding : { ...binding, status: "active" };
     } catch {
       // Inaccessible — mark stale
-      if (binding.status === "stale") return binding;
+      if (binding.status === "stale") {
+        return binding;
+      }
       return { ...binding, status: "stale" };
     }
   });
 
-  const changed = updatedProjects.some((p, i) => p.status !== workspace.projects[i]!.status);
+  const changed = updatedProjects.some((p, i) => p.status !== workspace.projects[i]?.status);
 
-  if (!changed) return workspace;
+  if (!changed) {
+    return workspace;
+  }
 
   return {
     ...workspace,
@@ -140,11 +144,7 @@ export async function detectStaleProjects(workspace: Workspace): Promise<Workspa
 /**
  * Clone a git repository using system git binary.
  */
-export async function gitClone(
-  url: string,
-  targetDir: string,
-  timeoutMs: number = 120_000,
-): Promise<void> {
+export async function gitClone(url: string, targetDir: string, timeoutMs = 120_000): Promise<void> {
   // Check git availability
   try {
     const gitOpts = {

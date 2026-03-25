@@ -1,4 +1,4 @@
-import { AuditLedger, type AuditFilter } from "./ledger";
+import type { AuditFilter, AuditLedger } from "./ledger.ts";
 
 /**
  * API response wrapper for paginated results.
@@ -42,7 +42,7 @@ export class AuditLedgerAPI {
    */
   searchEvents(
     clientId: string,
-    queryParams: Record<string, any>,
+    queryParams: Record<string, any>
   ): PaginatedResponse<any> | ErrorResponse {
     if (!this.checkRateLimit(clientId)) {
       return {
@@ -77,7 +77,7 @@ export class AuditLedgerAPI {
    */
   getCorrelationChain(
     clientId: string,
-    correlationId: string,
+    correlationId: string
   ): PaginatedResponse<any> | ErrorResponse {
     if (!this.checkRateLimit(clientId)) {
       return {
@@ -115,7 +115,7 @@ export class AuditLedgerAPI {
    */
   countEvents(
     clientId: string,
-    queryParams: Record<string, any>,
+    queryParams: Record<string, any>
   ): { count: number } | ErrorResponse {
     if (!this.checkRateLimit(clientId)) {
       return {
@@ -175,24 +175,23 @@ export class AuditLedgerAPI {
       const from = queryParams.from ? new Date(queryParams.from) : new Date(0);
       const to = queryParams.to ? new Date(queryParams.to) : new Date();
 
-      if (!isNaN(from.getTime()) && !isNaN(to.getTime())) {
-        filter.timeRange = { from, to };
-      } else {
+      if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
         throw new Error("Invalid time range parameters");
       }
+      filter.timeRange = { from, to };
     }
 
     if (queryParams.limit) {
-      const limit = parseInt(queryParams.limit, 10);
-      if (isNaN(limit) || limit < 1 || limit > 1000) {
+      const limit = Number.parseInt(queryParams.limit, 10);
+      if (Number.isNaN(limit) || limit < 1 || limit > 1000) {
         throw new Error("Limit must be between 1 and 1000");
       }
       filter.limit = limit;
     }
 
     if (queryParams.offset) {
-      const offset = parseInt(queryParams.offset, 10);
-      if (isNaN(offset) || offset < 0) {
+      const offset = Number.parseInt(queryParams.offset, 10);
+      if (Number.isNaN(offset) || offset < 0) {
         throw new Error("Offset must be >= 0");
       }
       filter.offset = offset;

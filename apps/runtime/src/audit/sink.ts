@@ -1,6 +1,6 @@
-import type { AuditEvent } from "./event";
-import { AuditRingBuffer } from "./ring-buffer";
 import type { LocalBusEnvelope } from "../protocol/types.js";
+import type { AuditEvent } from "./event.ts";
+import { AuditRingBuffer } from "./ring-buffer.ts";
 
 /**
  * Extended metrics including ring buffer and overflow tracking.
@@ -88,7 +88,7 @@ export class DefaultAuditSink implements AuditSink {
 
   constructor(
     private storage: AuditStorage,
-    ringBufferCapacity: number = 10_000,
+    ringBufferCapacity = 10_000
   ) {
     this.ringBuffer = new AuditRingBuffer(ringBufferCapacity);
     this.startPeriodicFlush();
@@ -105,9 +105,7 @@ export class DefaultAuditSink implements AuditSink {
       this.overflowQueue.push(evicted);
 
       // Try to persist overflow immediately
-      this.persistOverflow().catch((err) => {
-        console.error("[AuditSink] Overflow persistence failed:", err);
-      });
+      this.persistOverflow().catch(_err => {});
     }
 
     // Also buffer for periodic flush
@@ -121,10 +119,7 @@ export class DefaultAuditSink implements AuditSink {
     // Check if buffer is at capacity
     if (this.buffer.length >= this.MAX_BUFFER_SIZE) {
       // Trigger immediate persistence without awaiting
-      this.persistWithRetry().catch((err) => {
-        // Log error but do not throw; event stays in buffer
-        console.error("[AuditSink] Persistence failed, events retained in buffer:", err);
-      });
+      this.persistWithRetry().catch(_err => {});
     }
   }
 
@@ -158,7 +153,7 @@ export class DefaultAuditSink implements AuditSink {
           throw new Error(`[AuditSink] Failed to flush after ${this.MAX_RETRIES} retries: ${err}`);
         }
         // Wait before retry
-        await new Promise((resolve) => setTimeout(resolve, this.RETRY_BACKOFF_MS * retries));
+        await new Promise(resolve => setTimeout(resolve, this.RETRY_BACKOFF_MS * retries));
       }
     }
   }
@@ -196,25 +191,21 @@ export class DefaultAuditSink implements AuditSink {
           // Clear buffer on success
           this.buffer = [];
           break;
-        } catch (err) {
+        } catch (_err) {
           this.metrics.persistenceFailures++;
           this.metrics.retryCount++;
 
           retries++;
           if (retries < this.MAX_RETRIES) {
             // Exponential backoff
-            await new Promise((resolve) =>
-              setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1)),
+            await new Promise(resolve =>
+              setTimeout(resolve, this.RETRY_BACKOFF_MS * 2 ** (retries - 1))
             );
           }
         }
       }
 
       if (this.buffer.length > 0) {
-        // Events still in buffer after retries; they will be retried on next write
-        console.warn(
-          "[AuditSink] Events retained in buffer after retries; will retry on next write",
-        );
       }
     } finally {
       this.persistenceInProgress = false;
@@ -239,15 +230,15 @@ export class DefaultAuditSink implements AuditSink {
         // Clear overflow queue on success
         this.overflowQueue = [];
         break;
-      } catch (err) {
+      } catch (_err) {
         this.metrics.sqliteWriteFailures!++;
         this.metrics.sqliteRetryCount!++;
 
         retries++;
         if (retries < this.MAX_RETRIES) {
           // Exponential backoff
-          await new Promise((resolve) =>
-            setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1)),
+          await new Promise(resolve =>
+            setTimeout(resolve, this.RETRY_BACKOFF_MS * 2 ** (retries - 1))
           );
         }
       }
@@ -260,9 +251,7 @@ export class DefaultAuditSink implements AuditSink {
   private startPeriodicFlush(): void {
     this.flushTimer = setInterval(() => {
       if (this.buffer.length > 0 || this.overflowQueue.length > 0) {
-        this.persistWithRetry().catch((err) => {
-          console.error("[AuditSink] Periodic flush failed:", err);
-        });
+        this.persistWithRetry().catch(_err => {});
       }
     }, this.FLUSH_INTERVAL_MS) as unknown as number;
   }
@@ -319,7 +308,14 @@ export interface AuditExportRow {
   envelope: Record<string, unknown>;
 }
 
-const SENSITIVE_KEYS = new Set(["authorization", "token", "secret", "password", "api_key", "apiKey"]);
+const SENSITIVE_KEYS = new Set([
+  "authorization",
+  "token",
+  "secret",
+  "password",
+  "api_key",
+  "apiKey",
+]);
 
 function redactSensitive(obj: Record<string, unknown>): Record<string, unknown> {
   const result: Record<string, unknown> = {};
@@ -360,12 +356,10 @@ export class InMemoryAuditSink {
   }
 
   async exportRecords(): Promise<AuditExportRow[]> {
-    return this.records.map((record) => {
+    return this.records.map(record => {
       const env = record.envelope as Record<string, unknown>;
       const payload = env.payload as Record<string, unknown> | undefined;
-      const redactedEnvelope = payload
-        ? { ...env, payload: redactSensitive(payload) }
-        : env;
+      const redactedEnvelope = payload ? { ...env, payload: redactSensitive(payload) } : env;
 
       return {
         envelope_id: env.id as string,
@@ -380,21 +374,15 @@ export class InMemoryAuditSink {
     });
   }
 
-  async enforceRetention(
-    asOf: Date,
-  ): Promise<{ deleted_count: number }> {
+  async enforceRetention(asOf: Date): Promise<{ deleted_count: number }> {
     if (this.retentionDays === undefined) {
       return { deleted_count: 0 };
     }
 
     const cutoff = new Date(asOf.getTime() - this.retentionDays * 24 * 60 * 60 * 1000);
     const before = this.records.length;
-    const expired = this.records.filter(
-      (r) => new Date(r.recorded_at) < cutoff,
-    );
-    this.records = this.records.filter(
-      (r) => new Date(r.recorded_at) >= cutoff,
-    );
+    const _expired = this.records.filter(r => new Date(r.recorded_at) < cutoff);
+    this.records = this.records.filter(r => new Date(r.recorded_at) >= cutoff);
 
     const deletedCount = before - this.records.length;
 

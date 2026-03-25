@@ -1,7 +1,7 @@
 import type { Component } from "solid-js";
 import { For } from "solid-js";
-import { ConversationItem } from "./ConversationItem";
 import { getAppState, newChat, updateAppState } from "../../stores/app.store";
+import { ConversationItem } from "./ConversationItem.tsx";
 
 type MockConversation = {
   id: string;
@@ -80,7 +80,7 @@ export const Sidebar: Component = () => {
         }}
       >
         <For each={MOCK_CONVERSATIONS}>
-          {(conv) => (
+          {conv => (
             <ConversationItem
               id={conv.id}
               title={conv.title}

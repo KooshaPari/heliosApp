@@ -1,6 +1,6 @@
-import type { ActiveContextStore } from "./context_store";
-import { selectActiveContext } from "./context_store";
-import type { DesktopRuntimeClient } from "./runtime_client";
+import type { ActiveContextStore } from "./context_store.ts";
+import { selectActiveContext } from "./context_store.ts";
+import type { DesktopRuntimeClient } from "./runtime_client.ts";
 
 export type RendererEngine = "ghostty" | "rio";
 
@@ -31,7 +31,7 @@ export type SwitchRendererOutcome = {
 };
 
 export async function switchRendererWithRollback(
-  input: SwitchRendererInput,
+  input: SwitchRendererInput
 ): Promise<SwitchRendererOutcome> {
   const previousEngine = input.settings.rendererEngine;
   const snapshot = selectActiveContext(input.contextStore.getState());

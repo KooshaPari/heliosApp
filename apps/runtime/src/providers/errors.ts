@@ -106,7 +106,7 @@ export class NormalizedProviderError extends Error {
     providerSource: "acp" | "mcp" | "a2a" | "internal" = "internal",
     retryable = ERROR_RETRYABLE_STATUS[code],
     correlationId?: string,
-    originalError?: Error,
+    originalError?: Error
   ) {
     super(message);
     this.name = "NormalizedProviderError";
@@ -138,7 +138,7 @@ export class NormalizedProviderError extends Error {
 export function normalizeError(
   error: unknown,
   source: "acp" | "mcp" | "a2a" | "internal" = "internal",
-  correlationId?: string,
+  correlationId?: string
 ): NormalizedProviderError {
   // Handle null/undefined
   if (error === null || error === undefined) {
@@ -146,8 +146,8 @@ export function normalizeError(
       "PROVIDER_UNKNOWN",
       "Unknown error: received null or undefined",
       source,
-      ERROR_RETRYABLE_STATUS["PROVIDER_UNKNOWN"],
-      correlationId,
+      ERROR_RETRYABLE_STATUS.PROVIDER_UNKNOWN,
+      correlationId
     );
   }
 
@@ -157,8 +157,8 @@ export function normalizeError(
       "PROVIDER_UNKNOWN",
       `Unknown error: ${error}`,
       source,
-      ERROR_RETRYABLE_STATUS["PROVIDER_UNKNOWN"],
-      correlationId,
+      ERROR_RETRYABLE_STATUS.PROVIDER_UNKNOWN,
+      correlationId
     );
   }
 
@@ -174,7 +174,7 @@ export function normalizeError(
           source,
           ERROR_RETRYABLE_STATUS[code],
           correlationId,
-          error,
+          error
         );
       }
     }
@@ -185,9 +185,9 @@ export function normalizeError(
         "PROVIDER_TIMEOUT",
         error.message,
         source,
-        ERROR_RETRYABLE_STATUS["PROVIDER_TIMEOUT"],
+        ERROR_RETRYABLE_STATUS.PROVIDER_TIMEOUT,
         correlationId,
-        error,
+        error
       );
     }
 
@@ -196,9 +196,9 @@ export function normalizeError(
         "PROVIDER_INIT_FAILED",
         error.message,
         source,
-        ERROR_RETRYABLE_STATUS["PROVIDER_INIT_FAILED"],
+        ERROR_RETRYABLE_STATUS.PROVIDER_INIT_FAILED,
         correlationId,
-        error,
+        error
       );
     }
 
@@ -207,9 +207,9 @@ export function normalizeError(
         "PROVIDER_CRASHED",
         error.message,
         source,
-        ERROR_RETRYABLE_STATUS["PROVIDER_CRASHED"],
+        ERROR_RETRYABLE_STATUS.PROVIDER_CRASHED,
         correlationId,
-        error,
+        error
       );
     }
 
@@ -218,9 +218,9 @@ export function normalizeError(
         "PROVIDER_UNAVAILABLE",
         error.message,
         source,
-        ERROR_RETRYABLE_STATUS["PROVIDER_UNAVAILABLE"],
+        ERROR_RETRYABLE_STATUS.PROVIDER_UNAVAILABLE,
         correlationId,
-        error,
+        error
       );
     }
 
@@ -229,9 +229,9 @@ export function normalizeError(
       "PROVIDER_EXECUTE_FAILED",
       error.message || "Provider execution failed",
       source,
-      ERROR_RETRYABLE_STATUS["PROVIDER_EXECUTE_FAILED"],
+      ERROR_RETRYABLE_STATUS.PROVIDER_EXECUTE_FAILED,
       correlationId,
-      error,
+      error
     );
   }
 
@@ -247,8 +247,8 @@ export function normalizeError(
       "PROVIDER_UNKNOWN",
       message,
       source,
-      ERROR_RETRYABLE_STATUS["PROVIDER_UNKNOWN"],
-      correlationId,
+      ERROR_RETRYABLE_STATUS.PROVIDER_UNKNOWN,
+      correlationId
     );
   }
 
@@ -257,8 +257,8 @@ export function normalizeError(
     "PROVIDER_UNKNOWN",
     `Unknown error of type ${typeof error}`,
     source,
-    ERROR_RETRYABLE_STATUS["PROVIDER_UNKNOWN"],
-    correlationId,
+    ERROR_RETRYABLE_STATUS.PROVIDER_UNKNOWN,
+    correlationId
   );
 }
 
@@ -281,7 +281,7 @@ export function isRetryable(error: NormalizedProviderError): boolean {
  */
 export function getErrorMessage(
   code: ProviderErrorCode,
-  details?: Record<string, unknown>,
+  details?: Record<string, unknown>
 ): string {
   let message = ERROR_MESSAGE_TEMPLATES[code];
 

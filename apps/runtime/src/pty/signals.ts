@@ -7,11 +7,11 @@
  * @module
  */
 
-import type { PtyRecord } from "./registry.js";
-import { PtyRegistry } from "./registry.js";
-import { PtyLifecycle } from "./state_machine.js";
 import type { BusPublisher, PtyEventCorrelation } from "./events.js";
 import { emitPtyEvent } from "./events.js";
+import type { PtyRecord } from "./registry.js";
+import type { PtyRegistry } from "./registry.js";
+import type { PtyLifecycle } from "./state_machine.js";
 
 // ── Signal Envelope ──────────────────────────────────────────────────────────
 
@@ -60,7 +60,7 @@ function recordSignal(
   envelope: SignalEnvelope,
   historyMap: SignalHistoryMap,
   bus: BusPublisher,
-  correlation: PtyEventCorrelation,
+  correlation: PtyEventCorrelation
 ): void {
   let history = historyMap.get(envelope.ptyId);
   if (!history) {
@@ -86,7 +86,7 @@ function deliverSignal(
   ptyId: string,
   historyMap: SignalHistoryMap,
   bus: BusPublisher,
-  correlation: PtyEventCorrelation,
+  correlation: PtyEventCorrelation
 ): SignalEnvelope {
   const timestamp = Date.now();
   try {
@@ -142,7 +142,7 @@ export function resize(
   rows: number,
   registry: PtyRegistry,
   historyMap: SignalHistoryMap,
-  bus: BusPublisher,
+  bus: BusPublisher
 ): void {
   // Reject resize on errored/stopped PTYs.
   if (record.state === "errored" || record.state === "stopped") {
@@ -153,7 +153,7 @@ export function resize(
   if (cols < 1 || cols > 10000 || rows < 1 || rows > 10000) {
     throw new InvalidDimensionsError(cols, rows);
   }
-  if (!Number.isInteger(cols) || !Number.isInteger(rows)) {
+  if (!(Number.isInteger(cols) && Number.isInteger(rows))) {
     throw new InvalidDimensionsError(cols, rows);
   }
 
@@ -217,7 +217,7 @@ export async function terminate(
   bus: BusPublisher,
   options?: TerminateOptions,
   isAlive?: (pid: number) => boolean,
-  waitForExit?: (pid: number, timeoutMs: number) => Promise<boolean>,
+  waitForExit?: (pid: number, timeoutMs: number) => Promise<boolean>
 ): Promise<void> {
   const gracePeriodMs = options?.gracePeriodMs ?? 5000;
 
@@ -251,7 +251,7 @@ export async function terminate(
       if (!checkAlive(pid)) {
         return true;
       }
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise(resolve => setTimeout(resolve, 50));
     }
     return !checkAlive(pid);
   };
@@ -264,13 +264,13 @@ export async function terminate(
   });
 
   // Step 1: Send SIGTERM.
-  const termEnvelope = deliverSignal(
+  const _termEnvelope = deliverSignal(
     record.pid,
     "SIGTERM",
     record.ptyId,
     historyMap,
     bus,
-    correlation,
+    correlation
   );
 
   // Step 2: Wait for exit within grace period.
@@ -333,7 +333,7 @@ export async function terminate(
 export function sendSighup(
   record: PtyRecord,
   historyMap: SignalHistoryMap,
-  bus: BusPublisher,
+  bus: BusPublisher
 ): SignalEnvelope {
   const correlation: PtyEventCorrelation = {
     ptyId: record.ptyId,

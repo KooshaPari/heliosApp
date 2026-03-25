@@ -1,5 +1,5 @@
-import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
-import type { InferenceEngine } from "./engine";
+import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference.ts";
+import type { InferenceEngine } from "./engine.ts";
 
 export class VllmInferenceEngine implements InferenceEngine {
   readonly id = "vllm";
@@ -22,7 +22,9 @@ export class VllmInferenceEngine implements InferenceEngine {
 
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+    if (this.apiKey) {
+      headers.Authorization = `Bearer ${this.apiKey}`;
+    }
 
     const response = await fetch(`${this.endpoint}/v1/chat/completions`, {
       method: "POST",
@@ -61,11 +63,15 @@ export class VllmInferenceEngine implements InferenceEngine {
   async listModels(): Promise<ModelInfo[]> {
     try {
       const headers: Record<string, string> = {};
-      if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+      if (this.apiKey) {
+        headers.Authorization = `Bearer ${this.apiKey}`;
+      }
       const response = await fetch(`${this.endpoint}/v1/models`, { headers });
-      if (!response.ok) return [];
+      if (!response.ok) {
+        return [];
+      }
       const data = (await response.json()) as { data: Array<{ id: string }> };
-      return data.data.map((m) => ({
+      return data.data.map(m => ({
         id: m.id,
         name: m.id,
         contextWindow: 4096,

@@ -16,7 +16,7 @@ export interface ShareBackendAdapter {
   checkAvailability(): Promise<boolean>;
   startShare(
     terminalId: string,
-    zellijSessionName: string,
+    zellijSessionName: string
   ): Promise<{ link: string; process: any }>;
   stopShare(process: any): Promise<void>;
 }
@@ -59,17 +59,17 @@ export class UptermAdapter implements ShareBackendAdapter {
    */
   async startShare(
     terminalId: string,
-    zellijSessionName: string,
+    zellijSessionName: string
   ): Promise<{ link: string; process: any }> {
     try {
       // Validate inputs
-      if (!terminalId || !zellijSessionName) {
+      if (!(terminalId && zellijSessionName)) {
         throw new Error("Missing terminalId or zellijSessionName");
       }
 
       // Generate upterm command
       const attachCommand = `zellij attach ${zellijSessionName}`;
-      const uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
+      const _uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
 
       // Mock implementation: return simulated result
       const link = `https://upterm.io/${terminalId}-${Date.now()}`;
@@ -81,7 +81,7 @@ export class UptermAdapter implements ShareBackendAdapter {
     } catch (error) {
       if (String(error).includes("not found")) {
         throw new Error(
-          "upterm binary not found. Install with: curl https://upterm.dev/install.sh | bash",
+          "upterm binary not found. Install with: curl https://upterm.dev/install.sh | bash"
         );
       }
       throw error;
@@ -139,17 +139,17 @@ export class TmateAdapter implements ShareBackendAdapter {
    */
   async startShare(
     terminalId: string,
-    zellijSessionName: string,
+    zellijSessionName: string
   ): Promise<{ link: string; process: any }> {
     try {
       // Validate inputs
-      if (!terminalId || !zellijSessionName) {
+      if (!(terminalId && zellijSessionName)) {
         throw new Error("Missing terminalId or zellijSessionName");
       }
 
       // Generate tmate command
       const attachCommand = `zellij attach ${zellijSessionName}`;
-      const tmateCommand = `tmate -F -c "${attachCommand}"`;
+      const _tmateCommand = `tmate -F -c "${attachCommand}"`;
 
       // Mock implementation: return simulated result
       // Tmate typically outputs link to stderr
@@ -162,7 +162,7 @@ export class TmateAdapter implements ShareBackendAdapter {
     } catch (error) {
       if (String(error).includes("not found")) {
         throw new Error(
-          "tmate binary not found. Install with: brew install tmate (macOS) or apt install tmate (Linux)",
+          "tmate binary not found. Install with: brew install tmate (macOS) or apt install tmate (Linux)"
         );
       }
       throw error;

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { createRuntime } from "../../../src/index";
+import { createRuntime } from "../../../src/index.ts";
 
 describe("WP05 recovery watchdog and audit fidelity", () => {
   test("reattaches recoverable sessions on restart and flags unrecoverable artifacts", async () => {
@@ -68,7 +68,9 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     const runtimeC = (createRuntime as any)(unrecoverableCheckpoint) as any;
     const brokenBootstrap = runtimeC.getBootstrapResult();
 
-    expect(brokenBootstrap?.issues.some((issue: any) => issue.state === "unrecoverable")).toBe(true);
+    expect(brokenBootstrap?.issues.some((issue: any) => issue.state === "unrecoverable")).toBe(
+      true
+    );
 
     runtimeA.shutdown();
     runtimeB.shutdown();

@@ -1,8 +1,8 @@
 // T001 - Watchdog checkpoint persistence for crash recovery
 
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 export interface WatchdogCheckpoint {
   cycleNumber: number;
@@ -24,14 +24,9 @@ export class CheckpointManager {
   }
 
   async save(checkpoint: WatchdogCheckpoint): Promise<void> {
-    try {
-      const dir = path.dirname(this.checkpointPath);
-      await fs.mkdir(dir, { recursive: true });
-      await fs.writeFile(this.checkpointPath, JSON.stringify(checkpoint, null, 2));
-    } catch (error) {
-      console.error("Failed to save checkpoint:", error);
-      throw error;
-    }
+    const dir = path.dirname(this.checkpointPath);
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(this.checkpointPath, JSON.stringify(checkpoint, null, 2));
   }
 
   async load(): Promise<WatchdogCheckpoint | null> {
@@ -39,7 +34,7 @@ export class CheckpointManager {
       const content = await fs.readFile(this.checkpointPath, "utf-8");
       const checkpoint = JSON.parse(content) as WatchdogCheckpoint;
       return checkpoint;
-    } catch (error) {
+    } catch (_error) {
       // File doesn't exist or is corrupt - return null for fresh start
       return null;
     }

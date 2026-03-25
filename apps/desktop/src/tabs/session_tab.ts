@@ -1,4 +1,4 @@
-import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
+import { type ActiveContext, type TabState, TabSurface } from "./tab_surface.ts";
 
 export interface SessionTabState extends TabState {
   expandedSections?: string[];
@@ -84,7 +84,7 @@ export class SessionTab extends TabSurface {
     const infoSectionEl = this.renderSection(
       "info",
       "Session Information",
-      this.renderSessionInfo(),
+      this.renderSessionInfo()
     );
     scrollEl.appendChild(infoSectionEl);
 
@@ -92,7 +92,7 @@ export class SessionTab extends TabSurface {
     const diagSectionEl = this.renderSection(
       "diagnostics",
       "Diagnostics",
-      this.renderDiagnostics(),
+      this.renderDiagnostics()
     );
     scrollEl.appendChild(diagSectionEl);
 

@@ -1,16 +1,16 @@
-import { describe, expect, it, afterEach } from "bun:test";
-import {
-  resize,
-  terminate,
-  sendSighup,
-  SignalHistory,
-  InvalidDimensionsError,
-} from "../signals.js";
-import type { SignalHistoryMap } from "../signals.js";
+import { afterEach, describe, expect, it } from "bun:test";
+import { InMemoryBusPublisher } from "../events.js";
 import { PtyRegistry } from "../registry.js";
 import type { PtyRecord } from "../registry.js";
+import {
+  InvalidDimensionsError,
+  SignalHistory,
+  resize,
+  sendSighup,
+  terminate,
+} from "../signals.js";
+import type { SignalHistoryMap } from "../signals.js";
 import { PtyLifecycle } from "../state_machine.js";
-import { InMemoryBusPublisher } from "../events.js";
 
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   return {
@@ -46,7 +46,7 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(history.length).toBe(2);
-    expect(history.getAll()[0]!.signal).toBe("SIGTERM");
+    expect(history.getAll()[0]?.signal).toBe("SIGTERM");
   });
 
   it("bounds history to maxRecords", () => {
@@ -73,7 +73,7 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(history.length).toBe(2);
-    expect(history.getAll()[0]!.signal).toBe("SIGTERM");
+    expect(history.getAll()[0]?.signal).toBe("SIGTERM");
   });
 });
 
@@ -90,17 +90,17 @@ describe("resize", () => {
     const updated = registry.get(record.ptyId);
     expect(updated?.dimensions).toEqual({ cols: 120, rows: 40 });
 
-    const topics = bus.events.map((e) => e.topic);
+    const topics = bus.events.map(e => e.topic);
     expect(topics).toContain("pty.signal.delivered");
     expect(topics).toContain("pty.resized");
 
     // Check resize event payload includes old/new dimensions.
-    const resizeEvt = bus.events.find((e) => e.topic === "pty.resized");
-    expect(resizeEvt?.payload["oldDimensions"]).toEqual({
+    const resizeEvt = bus.events.find(e => e.topic === "pty.resized");
+    expect(resizeEvt?.payload.oldDimensions).toEqual({
       cols: 80,
       rows: 24,
     });
-    expect(resizeEvt?.payload["newDimensions"]).toEqual({
+    expect(resizeEvt?.payload.newDimensions).toEqual({
       cols: 120,
       rows: 40,
     });
@@ -116,7 +116,7 @@ describe("resize", () => {
     expect(() => resize(record, 0, 24, registry, historyMap, bus)).toThrow(InvalidDimensionsError);
     expect(() => resize(record, 80, 0, registry, historyMap, bus)).toThrow(InvalidDimensionsError);
     expect(() => resize(record, 10001, 24, registry, historyMap, bus)).toThrow(
-      InvalidDimensionsError,
+      InvalidDimensionsError
     );
   });
 
@@ -176,7 +176,7 @@ describe("terminate", () => {
 
     expect(registry.get(record.ptyId)).toBeUndefined();
 
-    const topics = bus.events.map((e) => e.topic);
+    const topics = bus.events.map(e => e.topic);
     expect(topics).toContain("pty.terminating");
     expect(topics).toContain("pty.signal.delivered");
     expect(topics).toContain("pty.stopped");
@@ -228,10 +228,10 @@ describe("terminate", () => {
       bus,
       { gracePeriodMs: 50 },
       mockIsAlive,
-      mockWaitForExit,
+      mockWaitForExit
     );
 
-    const topics = bus.events.map((e) => e.topic);
+    const topics = bus.events.map(e => e.topic);
     expect(topics).toContain("pty.force_killed");
     expect(topics).toContain("pty.stopped");
   });
@@ -275,7 +275,7 @@ describe("sendSighup", () => {
     expect(history?.length).toBe(1);
 
     expect(bus.events).toHaveLength(1);
-    expect(bus.events[0]!.topic).toBe("pty.signal.delivered");
+    expect(bus.events[0]?.topic).toBe("pty.signal.delivered");
   });
 
   it("records failed delivery for dead process", () => {

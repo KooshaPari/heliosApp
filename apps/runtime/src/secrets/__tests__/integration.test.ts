@@ -9,19 +9,19 @@
  *   SC-028-005: Redaction audit trail present for every persisted artifact
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, rmSync, readFileSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { randomBytes } from "node:crypto";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { randomBytes } from "node:crypto";
-import { CredentialStore, CredentialAccessDeniedError } from "../credential-store.js";
-import { EncryptionService } from "../encryption.js";
-import { RedactionEngine } from "../redaction-engine.js";
-import { getDefaultRules } from "../redaction-rules.js";
-import { RedactionAuditTrail } from "../audit-trail.js";
-import { ProtectedPathDetector, ProtectedPathConfig } from "../protected-paths.js";
 import { AuditSink } from "../../audit/audit-sink.js";
 import { InMemoryLocalBus, type LocalBus } from "../../protocol/bus.js";
+import { RedactionAuditTrail } from "../audit-trail.js";
+import { CredentialAccessDeniedError, CredentialStore } from "../credential-store.js";
+import { EncryptionService } from "../encryption.js";
+import { ProtectedPathConfig, ProtectedPathDetector } from "../protected-paths.js";
+import { RedactionEngine } from "../redaction-engine.js";
+import { getDefaultRules } from "../redaction-rules.js";
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -74,7 +74,7 @@ describe("Integration Tests (T015)", () => {
     it("cat .env triggers warning", () => {
       const detector = new ProtectedPathDetector();
       const warnings: string[] = [];
-      detector.onWarning((m) => warnings.push(m.matchedPath));
+      detector.onWarning(m => warnings.push(m.matchedPath));
 
       const matches = detector.check("cat .env");
       expect(matches.length).toBeGreaterThan(0);
@@ -144,10 +144,10 @@ describe("Integration Tests (T015)", () => {
       detector.check("cat .env", { terminalId: "term-1", correlationId: "corr-1" });
 
       // Give microtask queue a chance to process
-      await new Promise((r) => setTimeout(r, 0));
+      await new Promise(r => setTimeout(r, 0));
 
       const events = bus.getEvents();
-      const pathEvent = events.find((e) => e.topic === "secrets.protected_path.accessed");
+      const pathEvent = events.find(e => e.topic === "secrets.protected_path.accessed");
       expect(pathEvent).toBeDefined();
       expect(pathEvent?.payload?.matchedPath).toBe(".env");
       expect(pathEvent?.payload?.terminalId).toBe("term-1");
@@ -183,7 +183,7 @@ describe("Integration Tests (T015)", () => {
       const config2 = new ProtectedPathConfig({ configPath });
       await config2.loadFromDisk();
       const patterns = config2.listPatterns();
-      const customPattern = patterns.find((p) => p.pattern === "*.secret");
+      const customPattern = patterns.find(p => p.pattern === "*.secret");
       expect(customPattern).toBeDefined();
     });
 
@@ -223,10 +223,10 @@ describe("Integration Tests (T015)", () => {
       detector.check("cat .env");
       detector.acknowledge("dotenv", ".env", "corr-ack");
 
-      await new Promise((r) => setTimeout(r, 0));
+      await new Promise(r => setTimeout(r, 0));
 
       const events = bus.getEvents();
-      const ackEvent = events.find((e) => e.topic === "secrets.protected_path.acknowledged");
+      const ackEvent = events.find(e => e.topic === "secrets.protected_path.acknowledged");
       expect(ackEvent).toBeDefined();
       expect(ackEvent?.payload?.matchedPath).toBe(".env");
     });
@@ -257,7 +257,7 @@ describe("Integration Tests (T015)", () => {
             },
             "providerA",
             "ws1",
-            "apiKey",
+            "apiKey"
           );
           // Should never reach here
         } catch (err) {
@@ -285,16 +285,16 @@ describe("Integration Tests (T015)", () => {
           },
           "providerA",
           "ws1",
-          "key",
+          "key"
         );
       } catch (_) {
         /* expected */
       }
 
-      await new Promise((r) => setTimeout(r, 10));
+      await new Promise(r => setTimeout(r, 10));
 
       const events = bus.getEvents();
-      const deniedEvent = events.find((e) => e.topic === "secrets.credential.access.denied");
+      const deniedEvent = events.find(e => e.topic === "secrets.credential.access.denied");
       expect(deniedEvent).toBeDefined();
       expect(deniedEvent?.payload?.requestingProviderId).toBe("providerB");
       expect(deniedEvent?.payload?.targetProviderId).toBe("providerA");
@@ -313,7 +313,7 @@ describe("Integration Tests (T015)", () => {
         },
         "providerA",
         "ws1",
-        "key",
+        "key"
       );
       expect(value).toBe("secret-value");
     });
@@ -336,7 +336,7 @@ describe("Integration Tests (T015)", () => {
         { requestingProviderId: "prov", requestingWorkspaceId: "ws", correlationId: "corr-access" },
         "prov",
         "ws",
-        "key",
+        "key"
       );
       await storeWithAudit.rotate("prov", "ws", "key", "newval", "corr-rotate");
       await storeWithAudit.revoke("prov", "ws", "key", "corr-revoke");
@@ -453,8 +453,8 @@ describe("Integration Tests (T015)", () => {
       const bus = new InMemoryLocalBus();
       const store = makeStore(tmpDir, bus);
 
-      const oldValue = "old-secret-" + randomBytes(8).toString("hex");
-      const newValue = "new-secret-" + randomBytes(8).toString("hex");
+      const oldValue = `old-secret-${randomBytes(8).toString("hex")}`;
+      const newValue = `new-secret-${randomBytes(8).toString("hex")}`;
 
       await store.create("prov", "ws", "apiKey", oldValue, "corr-create");
 
@@ -486,7 +486,7 @@ describe("Integration Tests (T015)", () => {
       await store.rotate("prov", "ws", "key", "new", "corr-2");
 
       const events = bus.getEvents();
-      const rotatedEvent = events.find((e) => e.topic === "secrets.credential.rotated");
+      const rotatedEvent = events.find(e => e.topic === "secrets.credential.rotated");
       expect(rotatedEvent).toBeDefined();
       expect(rotatedEvent?.payload?.name).toBe("key");
       // Audit event must not contain old or new values
@@ -550,7 +550,7 @@ describe("Integration Tests (T015)", () => {
       detector.check("cat .env", { terminalId: "term-1", correlationId: "corr-path" });
 
       // Allow event processing
-      await new Promise((r) => setTimeout(r, 5));
+      await new Promise(r => setTimeout(r, 5));
 
       const records = sink.query({ topic: "secrets.protected_path.accessed" });
       expect(records.length).toBeGreaterThan(0);
@@ -570,7 +570,7 @@ describe("Integration Tests (T015)", () => {
         correlationId: "corr-sensitive",
       });
 
-      await new Promise((r) => setTimeout(r, 5));
+      await new Promise(r => setTimeout(r, 5));
 
       const bundle = sink.export();
       const bundleStr = JSON.stringify(bundle);

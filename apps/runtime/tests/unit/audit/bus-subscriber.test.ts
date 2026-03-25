@@ -1,7 +1,6 @@
-import { describe, it, expect, beforeEach, mock } from "bun:test";
-import { BusAuditSubscriber, type BusEvent } from "../../../src/audit/bus-subscriber";
-import { DefaultAuditSink, NoOpAuditStorage } from "../../../src/audit/sink";
-import { AUDIT_EVENT_TYPES } from "../../../src/audit/event";
+import { beforeEach, describe, expect, it } from "bun:test";
+import { BusAuditSubscriber, type BusEvent } from "../../../src/audit/bus-subscriber.ts";
+import { DefaultAuditSink, NoOpAuditStorage } from "../../../src/audit/sink.ts";
 
 describe("BusAuditSubscriber", () => {
   let subscriber: BusAuditSubscriber;
@@ -16,7 +15,7 @@ describe("BusAuditSubscriber", () => {
     let subscriptionHandler: ((event: BusEvent) => Promise<void>) | null = null;
 
     mockBus = {
-      subscribe: (topic: string, handler: (event: BusEvent) => Promise<void>) => {
+      subscribe: (_topic: string, handler: (event: BusEvent) => Promise<void>) => {
         subscriptionHandler = handler;
         return () => {
           subscriptionHandler = null;
@@ -53,7 +52,7 @@ describe("BusAuditSubscriber", () => {
       await mockBus.emit(event);
 
       // Allow async processing
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       expect(sink.getBufferedCount()).toBeGreaterThan(0);
     });
@@ -72,7 +71,7 @@ describe("BusAuditSubscriber", () => {
       };
 
       await mockBus.emit(event);
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       expect(sink.getBufferedCount()).toBeGreaterThan(0);
     });
@@ -91,7 +90,7 @@ describe("BusAuditSubscriber", () => {
       };
 
       await mockBus.emit(event);
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       expect(sink.getBufferedCount()).toBeGreaterThan(0);
     });
@@ -110,7 +109,7 @@ describe("BusAuditSubscriber", () => {
       };
 
       await mockBus.emit(event);
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       expect(sink.getBufferedCount()).toBeGreaterThan(0);
     });
@@ -130,7 +129,7 @@ describe("BusAuditSubscriber", () => {
 
       // Should not throw
       await expect(mockBus.emit(event)).resolves.toBeUndefined();
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       // Unknown topics should not be persisted (skipped)
       expect(sink.getBufferedCount()).toBe(0);
@@ -143,7 +142,7 @@ describe("BusAuditSubscriber", () => {
 
       // Create a capturing storage to inspect events
       const capturingSink = new DefaultAuditSink({
-        persist: async (events) => {
+        persist: async events => {
           if (events.length > 0) {
             capturedEvent = events[0];
           }
@@ -181,7 +180,7 @@ describe("BusAuditSubscriber", () => {
       };
 
       await mockBus.emit(event1);
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       const count1 = sink.getBufferedCount();
       expect(count1).toBeGreaterThan(0);
@@ -201,7 +200,7 @@ describe("BusAuditSubscriber", () => {
       };
 
       await mockBus.emit(event2);
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       // After unsubscribe, events should not be captured
       expect(sink.getBufferedCount()).toBe(0);

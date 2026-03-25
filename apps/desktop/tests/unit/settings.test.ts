@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createRuntime } from "../../../runtime/src";
-import { bootDesktop } from "../../src";
+import { createRuntime } from "../../../runtime/src.ts";
+import { bootDesktop } from "../../src.ts";
 
 describe("renderer switch transaction", () => {
   test("rolls back to previous renderer on switch failure and keeps active context", async () => {

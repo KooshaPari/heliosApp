@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { ConfirmationDialog } from "../../../src/panels/confirmation_dialog";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ConfirmationDialog } from "../../../src/panels/confirmation_dialog.ts";
 
 describe("ConfirmationDialog", () => {
   let container: HTMLDivElement;
@@ -47,7 +47,7 @@ describe("ConfirmationDialog", () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const dialogElement = container.querySelector(".confirmation-dialog");
     expect(dialogElement).toBeTruthy();
@@ -74,7 +74,7 @@ describe("ConfirmationDialog", () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const confirmBtn = container.querySelector(".confirmation-confirm") as HTMLButtonElement;
     confirmBtn?.click();
@@ -97,7 +97,7 @@ describe("ConfirmationDialog", () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const cancelBtn = container.querySelector(".confirmation-cancel") as HTMLButtonElement;
     cancelBtn?.click();
@@ -119,7 +119,7 @@ describe("ConfirmationDialog", () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const dialogElement = container.querySelector(".confirmation-dialog");
     const escapeEvent = new KeyboardEvent("keydown", { key: "Escape" });
@@ -142,7 +142,7 @@ describe("ConfirmationDialog", () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const dialogElement = container.querySelector(".confirmation-dialog");
     const enterEvent = new KeyboardEvent("keydown", { key: "Enter" });
@@ -167,7 +167,7 @@ describe("ConfirmationDialog", () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const buttons = container.querySelectorAll("button") as NodeListOf<HTMLButtonElement>;
     expect(buttons.length).toBeGreaterThanOrEqual(2);
@@ -198,7 +198,7 @@ describe("ConfirmationDialog", () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const confirmBtn = container.querySelector(".confirmation-confirm") as HTMLElement;
     const bgColor = confirmBtn?.style.backgroundColor;
@@ -223,7 +223,7 @@ describe("ConfirmationDialog", () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const confirmBtn = container.querySelector(".confirmation-confirm");
     const cancelBtn = container.querySelector(".confirmation-cancel");
@@ -246,7 +246,7 @@ describe("ConfirmationDialog", () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const dialogElement = container.querySelector(".confirmation-dialog");
     expect(dialogElement?.getAttribute("role")).toBe("alertdialog");
@@ -267,7 +267,7 @@ describe("ConfirmationDialog", () => {
     dialog.mount(container);
     dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     let dialogElement = container.querySelector(".confirmation-dialog");
     expect(dialogElement).toBeTruthy();
@@ -276,7 +276,7 @@ describe("ConfirmationDialog", () => {
     confirmBtn?.click();
 
     // Wait for fade-out animation
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     dialogElement = container.querySelector(".confirmation-dialog");
     expect(dialogElement).toBeFalsy();

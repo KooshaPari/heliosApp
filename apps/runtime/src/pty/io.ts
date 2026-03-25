@@ -7,10 +7,10 @@
  * @module
  */
 
-import type { PtyRecord } from "./registry.js";
-import type { PtyState } from "./state_machine.js";
 import type { BusPublisher, PtyEventCorrelation } from "./events.js";
 import { emitPtyEvent } from "./events.js";
+import type { PtyRecord } from "./registry.js";
+import type { PtyState } from "./state_machine.js";
 
 /** Error thrown when a write targets a PTY in an invalid state. */
 export class InvalidStateError extends Error {
@@ -19,7 +19,7 @@ export class InvalidStateError extends Error {
 
   constructor(ptyId: string, currentState: PtyState) {
     super(
-      `Cannot write to PTY '${ptyId}' in state '${currentState}' (must be active or throttled)`,
+      `Cannot write to PTY '${ptyId}' in state '${currentState}' (must be active or throttled)`
     );
     this.name = "InvalidStateError";
     this.ptyId = ptyId;
@@ -58,7 +58,7 @@ export function writeInput(
   data: Uint8Array,
   processMap: ProcessMap,
   bus: BusPublisher,
-  onError?: (ptyId: string) => void,
+  onError?: (ptyId: string) => void
 ): WriteResult {
   const start = performance.now();
 

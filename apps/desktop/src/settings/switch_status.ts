@@ -22,7 +22,7 @@ export interface SwitchStatusProps {
 export class SwitchStatus {
   private container: HTMLElement | null = null;
   private props: SwitchStatusProps = { isActive: false };
-  private startTime: number = 0;
+  private startTime = 0;
   private updateInterval?: NodeJS.Timeout;
 
   mount(container: HTMLElement): void {
@@ -58,13 +58,17 @@ export class SwitchStatus {
   }
 
   private render(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
     }
 
-    if (!this.props.isActive) return;
+    if (!this.props.isActive) {
+      return;
+    }
 
     const status = this.createStatusElement();
     this.container.appendChild(status);
@@ -104,13 +108,13 @@ export class SwitchStatus {
       borderColor = "#fb923c";
       textColor = "#92400e";
       icon = "⚠";
-      message = `Switch rolled back${this.props.failureReason ? ": " + this.props.failureReason : ""}`;
+      message = `Switch rolled back${this.props.failureReason ? `: ${this.props.failureReason}` : ""}`;
     } else if (this.props.phase === "failed") {
       backgroundColor = "#fee2e2";
       borderColor = "#fca5a5";
       textColor = "#7f1d1d";
       icon = "✕";
-      message = `Switch failed${this.props.failureReason ? ": " + this.props.failureReason : ""}`;
+      message = `Switch failed${this.props.failureReason ? `: ${this.props.failureReason}` : ""}`;
     }
 
     container.style.backgroundColor = backgroundColor;
@@ -166,7 +170,7 @@ export class SwitchStatus {
       const maxDuration = this.props.phase === "committing" ? 3000 : 8000; // 3s for hot-swap, 8s for restart
       const percentage = Math.min((elapsed / maxDuration) * 100, 100);
 
-      progress.style.width = percentage + "%";
+      progress.style.width = `${percentage}%`;
       progress.style.height = "100%";
       progress.style.backgroundColor = textColor;
       progress.style.transition = "width 100ms linear";

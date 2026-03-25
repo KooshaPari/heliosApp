@@ -20,11 +20,11 @@ export interface CapabilityDisplayProps {
 export class CapabilityDisplay {
   private props: CapabilityDisplayProps;
   private container: HTMLElement | null = null;
-  private isExpanded: boolean = false;
+  private isExpanded = false;
 
   constructor(props: CapabilityDisplayProps) {
     this.props = props;
-    this.isExpanded = props.isExpanded || false;
+    this.isExpanded = props.isExpanded;
   }
 
   mount(container: HTMLElement): void {
@@ -45,7 +45,9 @@ export class CapabilityDisplay {
   }
 
   private render(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
@@ -122,21 +124,19 @@ export class CapabilityDisplay {
         loading.style.color = "#9ca3af";
         panel.appendChild(loading);
       }
-    } else if (!this.props.capability) {
-      if (this.isExpanded) {
-        const error = document.createElement("div");
-        error.className = "capability-error";
-        error.textContent = "Capability information unavailable.";
-        error.style.marginTop = "8px";
-        error.style.fontSize = "13px";
-        error.style.color = "#ef4444";
-        panel.appendChild(error);
-      }
-    } else {
+    } else if (this.props.capability) {
       if (this.isExpanded) {
         const content = this.createCapabilityContent(this.props.capability);
         panel.appendChild(content);
       }
+    } else if (this.isExpanded) {
+      const error = document.createElement("div");
+      error.className = "capability-error";
+      error.textContent = "Capability information unavailable.";
+      error.style.marginTop = "8px";
+      error.style.fontSize = "13px";
+      error.style.color = "#ef4444";
+      panel.appendChild(error);
     }
 
     return panel;
@@ -217,7 +217,7 @@ export class CapabilityDisplay {
       featuresList.style.margin = "0";
       featuresList.style.padding = "0 0 0 16px";
 
-      capability.features.forEach((feature) => {
+      capability.features.forEach(feature => {
         const item = document.createElement("li");
         item.textContent = feature;
         item.style.fontSize = "13px";
@@ -254,7 +254,9 @@ export class CapabilityDisplay {
   }
 
   private attachEventListeners(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     const header = this.container.querySelector(".capability-header") as HTMLElement;
     const toggleBtn = this.container.querySelector(".capability-toggle-btn") as HTMLElement;
@@ -266,12 +268,12 @@ export class CapabilityDisplay {
     }
 
     if (toggleBtn) {
-      toggleBtn.addEventListener("click", (e) => {
+      toggleBtn.addEventListener("click", e => {
         e.stopPropagation();
         this.toggleExpanded();
       });
 
-      toggleBtn.addEventListener("keydown", (e) => {
+      toggleBtn.addEventListener("keydown", e => {
         const event = e as KeyboardEvent;
         if (event.key === "Enter") {
           event.preventDefault();

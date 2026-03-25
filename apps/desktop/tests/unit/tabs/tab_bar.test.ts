@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { TabBar } from "../../../src/tabs/tab_bar";
-import { createMockTabSurface } from "../../../src/tabs/tab_surface";
+import { beforeEach, describe, expect, it } from "vitest";
+import { TabBar } from "../../../src/tabs/tab_bar.ts";
+import { createMockTabSurface } from "../../../src/tabs/tab_surface.ts";
 
 describe("TabBar", () => {
   let tabBar: TabBar;
@@ -32,12 +32,12 @@ describe("TabBar", () => {
       const tab1 = mockTabs[0];
       const tab2 = mockTabs[1];
 
-      let tab1Active = false;
+      let _tab1Active = false;
       let tab1Deactivated = false;
       let tab2Active = false;
 
       tab1.onActivate = () => {
-        tab1Active = true;
+        _tab1Active = true;
       };
       tab1.onDeactivate = () => {
         tab1Deactivated = true;
@@ -56,7 +56,7 @@ describe("TabBar", () => {
       let selectedTabId = "";
 
       tabBar = new TabBar(mockTabs, {
-        onTabSelected: (id) => {
+        onTabSelected: id => {
           selectedTabId = id;
         },
       });
@@ -87,7 +87,7 @@ describe("TabBar", () => {
       let reorderedTabs: string[] = [];
 
       tabBar = new TabBar(mockTabs, {
-        onTabReordered: (ids) => {
+        onTabReordered: ids => {
           reorderedTabs = ids;
         },
       });
@@ -153,12 +153,13 @@ describe("TabBar", () => {
       tabBar.pinTab("tab3", true);
 
       const order = tabBar.getTabOrder();
-      const pinned = order.filter((id) => tabBar.isTabPinned(id));
-      const unpinned = order.filter((id) => !tabBar.isTabPinned(id));
+      const pinned = order.filter(id => tabBar.isTabPinned(id));
+      const unpinned = order.filter(id => !tabBar.isTabPinned(id));
 
       // Pinned tabs should come before unpinned in the order
-      const lastPinnedIndex = Math.max(...pinned.map((id) => order.indexOf(id)));
-      const firstUnpinnedIndex = unpinned.length > 0 ? order.indexOf(unpinned[0]) : Infinity;
+      const lastPinnedIndex = Math.max(...pinned.map(id => order.indexOf(id)));
+      const firstUnpinnedIndex =
+        unpinned.length > 0 ? order.indexOf(unpinned[0]) : Number.POSITIVE_INFINITY;
 
       expect(lastPinnedIndex).toBeLessThan(firstUnpinnedIndex);
     });

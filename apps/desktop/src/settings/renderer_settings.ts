@@ -40,7 +40,9 @@ export class RendererSettings {
   }
 
   private render(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
@@ -103,7 +105,7 @@ export class RendererSettings {
       optionsContainer.style.flexDirection = "column";
       optionsContainer.style.gap = "12px";
 
-      this.props.renderers.forEach((renderer) => {
+      this.props.renderers.forEach(renderer => {
         optionsContainer.appendChild(this.createRendererOption(renderer));
       });
 
@@ -164,14 +166,14 @@ export class RendererSettings {
       badge.textContent = "Active";
       badge.style.backgroundColor = "#dbeafe";
       badge.style.color = "#0c4a6e";
-    } else if (!renderer.isAvailable) {
-      badge.textContent = "Unavailable";
-      badge.style.backgroundColor = "#fecaca";
-      badge.style.color = "#7f1d1d";
-    } else {
+    } else if (renderer.isAvailable) {
       badge.textContent = "Available";
       badge.style.backgroundColor = "#dcfce7";
       badge.style.color = "#166534";
+    } else {
+      badge.textContent = "Unavailable";
+      badge.style.backgroundColor = "#fecaca";
+      badge.style.color = "#7f1d1d";
     }
 
     nameContainer.appendChild(badge);

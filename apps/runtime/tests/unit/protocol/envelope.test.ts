@@ -1,13 +1,13 @@
-import { describe, expect, it, beforeEach, afterEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import {
-  createCommand,
-  createResponse,
-  createEvent,
-  validateEnvelope,
   MAX_PAYLOAD_SIZE,
+  createCommand,
+  createEvent,
+  createResponse,
   setMaxPayloadSize,
+  validateEnvelope,
 } from "../../../src/protocol/envelope.js";
-import { isCommand, isResponse, isEvent } from "../../../src/protocol/types.js";
+import { isCommand, isEvent, isResponse } from "../../../src/protocol/types.js";
 import type { CommandEnvelope } from "../../../src/protocol/types.js";
 
 // FR-001: Canonical envelope schema
@@ -181,7 +181,9 @@ describe("validateEnvelope", () => {
       payload: null,
     });
     expect(r.valid).toBe(false);
-    if (!r.valid) expect(r.error.code).toBe("VALIDATION_ERROR");
+    if (!r.valid) {
+      expect(r.error.code).toBe("VALIDATION_ERROR");
+    }
   });
 
   it("rejects empty id", () => {
@@ -222,7 +224,9 @@ describe("validateEnvelope", () => {
   it("rejects unknown type", () => {
     const r = validateEnvelope({ id: "x", correlation_id: "c", type: "unknown", timestamp: 1 });
     expect(r.valid).toBe(false);
-    if (!r.valid) expect(r.error.details).toEqual({ type: "unknown" });
+    if (!r.valid) {
+      expect(r.error.details).toEqual({ type: "unknown" });
+    }
   });
 
   it("rejects negative timestamp", () => {
@@ -242,7 +246,7 @@ describe("validateEnvelope", () => {
       id: "x",
       correlation_id: "c",
       type: "command",
-      timestamp: NaN,
+      timestamp: Number.NaN,
       method: "m",
       payload: null,
     });
@@ -330,7 +334,7 @@ describe("validateEnvelope", () => {
   // --- Negative: circular payload ---
   it("rejects circular reference in payload", () => {
     const obj: Record<string, unknown> = {};
-    obj["self"] = obj;
+    obj.self = obj;
     const r = validateEnvelope({
       id: "x",
       correlation_id: "c",

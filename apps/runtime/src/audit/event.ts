@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 
 /**
  * Audit event type constants to prevent typos and enable type safety.
@@ -117,7 +117,7 @@ export function createAuditEvent(input: AuditEventInput): AuditEvent {
   const now = new Date();
 
   return {
-    id: generateUUIDv7(),
+    id: generateUuiDv7(),
     timestamp: now.toISOString(),
     ...input,
   };
@@ -174,7 +174,7 @@ export function validateAuditEvent(event: AuditEvent): boolean {
 
   // Validate timestamp is valid ISO 8601
   const ts = new Date(event.timestamp);
-  if (isNaN(ts.getTime())) {
+  if (Number.isNaN(ts.getTime())) {
     return false;
   }
 
@@ -190,7 +190,7 @@ export function validateAuditEvent(event: AuditEvent): boolean {
  *
  * @returns UUID v7 string
  */
-function generateUUIDv7(): string {
+function generateUuiDv7(): string {
   // For now, use randomUUID as a placeholder.
   // TODO: Replace with proper UUID v7 generation for time-ordered IDs.
   return randomUUID();

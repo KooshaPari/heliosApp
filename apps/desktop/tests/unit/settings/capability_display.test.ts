@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { CapabilityDisplay, type Capability } from "../../../src/settings/capability_display";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { type Capability, CapabilityDisplay } from "../../../src/settings/capability_display.ts";
 
 describe("CapabilityDisplay", () => {
   let container: HTMLDivElement;

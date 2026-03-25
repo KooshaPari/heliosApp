@@ -8,8 +8,9 @@
 
 import { describe, expect, it } from "bun:test";
 import { executeHotSwap } from "../../../src/renderer/hot_swap.js";
-import { executeRollback } from "../../../src/renderer/rollback.js";
+import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 import { executeRestartWithRestore } from "../../../src/renderer/restart_restore.js";
+import { executeRollback } from "../../../src/renderer/rollback.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
 import {
   MockGhosttyAdapter,
@@ -17,7 +18,6 @@ import {
   TEST_CONFIG,
   TEST_SURFACE,
 } from "../../helpers/mock_adapter.js";
-import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 
 describe("Fault injection - hot-swap failures", () => {
   it("target renderer init failure triggers rollback", async () => {
@@ -39,7 +39,7 @@ describe("Fault injection - hot-swap failures", () => {
       TEST_SURFACE,
       async () => {
         rollbackCalled = true;
-      },
+      }
     );
 
     expect(result.success).toBe(false);
@@ -65,7 +65,7 @@ describe("Fault injection - hot-swap failures", () => {
       TEST_SURFACE,
       async () => {
         rollbackCalled = true;
-      },
+      }
     );
 
     expect(result.success).toBe(false);
@@ -100,12 +100,12 @@ describe("Fault injection - restart-with-restore failures", () => {
       buffer,
       TEST_CONFIG,
       TEST_SURFACE,
-      async () => {},
+      async () => {}
     );
 
     expect(result.success).toBe(true);
     expect(result.checkpoints.length).toBe(1);
-    expect(result.checkpoints[0]!.ptyId).toBe("pty-1");
+    expect(result.checkpoints[0]?.ptyId).toBe("pty-1");
   });
 
   it("target renderer init failure during restart triggers rollback", async () => {
@@ -127,7 +127,7 @@ describe("Fault injection - restart-with-restore failures", () => {
       TEST_SURFACE,
       async () => {
         rollbackCalled = true;
-      },
+      }
     );
 
     expect(result.success).toBe(false);
@@ -152,7 +152,7 @@ describe("Fault injection - restart-with-restore failures", () => {
       buffer,
       TEST_CONFIG,
       TEST_SURFACE,
-      async () => {},
+      async () => {}
     );
 
     expect(result.success).toBe(true);
@@ -219,7 +219,7 @@ describe("Fault injection - buffer overflow handling", () => {
 
   it("buffer still captures data after overflow", async () => {
     const buffer = new SwitchBuffer(10);
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
 
     buffer.startBuffering();
     buffer.write("pty-1", new Uint8Array(6));

@@ -1,5 +1,5 @@
-import type { AuditEvent } from "./event";
-import type { SessionSnapshot } from "./snapshot";
+import type { AuditEvent } from "./event.ts";
+import type { SessionSnapshot } from "./snapshot.ts";
 
 /**
  * Redaction rule for sensitive data masking.
@@ -73,14 +73,14 @@ export class AuditExporter {
       throw new Error("Redaction rules required before export is permitted.");
     }
 
-    const redactedEvents = events.map((event) => this.redactEvent(event));
+    const redactedEvents = events.map(event => this.redactEvent(event));
 
     return {
       metadata: {
         workspaceId,
         exportTimestamp: new Date().toISOString(),
         eventCount: events.length,
-        redactionRulesApplied: this.redactionRules.map((r) => r.description),
+        redactionRulesApplied: this.redactionRules.map(r => r.description),
       },
       events: redactedEvents,
     };
@@ -95,23 +95,23 @@ export class AuditExporter {
    * @returns Export bundle
    */
   exportSession(
-    sessionId: string,
+    _sessionId: string,
     events: AuditEvent[],
-    snapshots?: SessionSnapshot[],
+    snapshots?: SessionSnapshot[]
   ): ExportBundle {
     if (this.redactionRules.length === 0) {
       throw new Error("Redaction rules required before export is permitted.");
     }
 
-    const redactedEvents = events.map((event) => this.redactEvent(event));
-    const redactedSnapshots = snapshots?.map((snap) => this.redactSnapshot(snap));
+    const redactedEvents = events.map(event => this.redactEvent(event));
+    const redactedSnapshots = snapshots?.map(snap => this.redactSnapshot(snap));
 
     return {
       metadata: {
         workspaceId: events[0]?.workspaceId || "unknown",
         exportTimestamp: new Date().toISOString(),
         eventCount: events.length,
-        redactionRulesApplied: this.redactionRules.map((r) => r.description),
+        redactionRulesApplied: this.redactionRules.map(r => r.description),
       },
       events: redactedEvents,
       snapshots: redactedSnapshots,
@@ -143,7 +143,7 @@ export class AuditExporter {
       Object.entries(redacted.metadata || {}).map(([key, value]) => [
         key,
         typeof value === "string" ? this.redactString(value) : value,
-      ]),
+      ])
     );
 
     return redacted;

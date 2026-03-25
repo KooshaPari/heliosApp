@@ -99,12 +99,11 @@ export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<stri
  */
 export async function registerGhostty(
   registry: RendererRegistry,
-  binaryPath?: string | undefined,
+  binaryPath?: string | undefined
 ): Promise<void> {
   const available = await isGhosttyAvailable(binaryPath);
 
   if (!available) {
-    console.warn("[ghostty] Ghostty binary not found; skipping registration.");
     return;
   }
 

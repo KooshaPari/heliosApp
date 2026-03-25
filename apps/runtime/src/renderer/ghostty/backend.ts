@@ -5,15 +5,15 @@
  * ghostty terminal emulator backend.
  */
 
-import type { RendererAdapter, RendererConfig, RendererState, RenderSurface } from "../adapter.js";
+import type { RenderSurface, RendererAdapter, RendererConfig, RendererState } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
+import { detectCapabilities, getCachedCapabilities } from "./capabilities.js";
+import { GhosttyInputRelay } from "./input.js";
+import type { PtyWriter } from "./input.js";
+import { GhosttyMetrics } from "./metrics.js";
+import type { MetricsPublisher, MetricsSnapshot } from "./metrics.js";
 import { GhosttyProcess } from "./process.js";
 import { GhosttySurface } from "./surface.js";
-import { detectCapabilities, getCachedCapabilities } from "./capabilities.js";
-import { GhosttyMetrics } from "./metrics.js";
-import type { MetricsSnapshot, MetricsPublisher } from "./metrics.js";
-import { GhosttyInputRelay } from "./input.js";
-import type { PtyWriter, GhosttyInputEvent } from "./input.js";
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -74,7 +74,7 @@ export class GhosttyBackend implements RendererAdapter {
     this.version = version;
 
     // Wire process crash events to the adapter crash handler
-    this._process.onCrash((error) => {
+    this._process.onCrash(error => {
       this._state = "errored";
       this._crashHandler?.(error);
     });
@@ -400,16 +400,17 @@ export class GhosttyBackend implements RendererAdapter {
   }
 
   private _checkRenderStall(): void {
-    if (this._state !== "running") return;
-    if (this._lastFrameTimestamp === 0) return;
+    if (this._state !== "running") {
+      return;
+    }
+    if (this._lastFrameTimestamp === 0) {
+      return;
+    }
 
     const elapsed = Date.now() - this._lastFrameTimestamp;
     if (elapsed > 500) {
       // Check if the process is alive
       if (this._process.isRunning()) {
-        console.warn(
-          `[ghostty] Render stall detected: no frames for ${elapsed}ms, but process is alive.`,
-        );
       }
       // If process is dead, crash detection in WP01 T002 handles it.
     }
@@ -430,7 +431,7 @@ export class GhosttyBackend implements RendererAdapter {
   private async _pumpStream(
     ptyId: string,
     reader: ReadableStreamDefaultReader<Uint8Array>,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): Promise<void> {
     try {
       while (!signal.aborted) {

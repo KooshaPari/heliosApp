@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 
-import { createRuntime } from "../../../src";
+import { createRuntime } from "../../../src.ts";
 
 describe("terminal lifecycle and streaming data plane", () => {
   test("rejects lifecycle commands without correlation_id", async () => {
     const runtime = createRuntime() as any;
-    const response = await runtime.bus.request!({
+    const response = await runtime.bus.request?.({
       id: "cmd-missing-correlation",
       type: "command",
       ts: new Date().toISOString(),
@@ -89,7 +89,9 @@ describe("terminal lifecycle and streaming data plane", () => {
       "terminal.state.changed",
       "terminal.spawned",
     ]);
-    expect(spawnOneEvents.every((event: any) => event.correlation_id === "corr-spawn-1")).toBe(true);
+    expect(spawnOneEvents.every((event: any) => event.correlation_id === "corr-spawn-1")).toBe(
+      true
+    );
 
     const sequences = events.map((event: any) => Number(event.sequence ?? 0));
     expect(sequences.every((sequence: any) => sequence > 0)).toBe(true);
@@ -143,7 +145,7 @@ describe("terminal lifecycle and streaming data plane", () => {
         (event: any) =>
           event.topic === "terminal.output" &&
           event.correlation_id === "corr-input-overflow-2" &&
-          event.payload?.overflowed === true,
+          event.payload?.overflowed === true
       );
     expect(overflowEvent).toBeDefined();
 
@@ -153,7 +155,7 @@ describe("terminal lifecycle and streaming data plane", () => {
         (event: any) =>
           event.topic === "terminal.state.changed" &&
           event.correlation_id === "corr-input-overflow-2" &&
-          event.payload?.state === "throttled",
+          event.payload?.state === "throttled"
       );
     expect(throttledEvent).toBeDefined();
   });
@@ -200,7 +202,7 @@ describe("terminal lifecycle and streaming data plane", () => {
         (event: any) =>
           event.topic === "terminal.state.changed" &&
           event.correlation_id === "corr-resize-recover" &&
-          event.payload?.state === "active",
+          event.payload?.state === "active"
       );
 
     expect(recoveryEvent).toBeDefined();
@@ -210,7 +212,7 @@ describe("terminal lifecycle and streaming data plane", () => {
   test("clears stale buffered output when reusing terminal_id", async () => {
     const runtime = createRuntime() as any;
 
-    const firstSpawn = await runtime.bus.request!({
+    const firstSpawn = await runtime.bus.request?.({
       id: "cmd-spawn-reuse-1",
       type: "command",
       ts: new Date().toISOString(),
@@ -237,9 +239,11 @@ describe("terminal lifecycle and streaming data plane", () => {
     });
     expect(firstInput.status).toBe("ok");
     expect(firstInput.result?.output_seq).toBe(1);
-    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry: any) => entry.seq)).toEqual([1]);
+    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry: any) => entry.seq)).toEqual(
+      [1]
+    );
 
-    const secondSpawn = await runtime.bus.request!({
+    const secondSpawn = await runtime.bus.request?.({
       id: "cmd-spawn-reuse-2",
       type: "command",
       ts: new Date().toISOString(),
@@ -267,7 +271,9 @@ describe("terminal lifecycle and streaming data plane", () => {
     });
     expect(secondInput.status).toBe("ok");
     expect(secondInput.result?.output_seq).toBe(1);
-    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry: any) => entry.seq)).toEqual([1]);
+    expect(runtime.getTerminalBuffer("term-reused").entries.map((entry: any) => entry.seq)).toEqual(
+      [1]
+    );
   });
 
   test("rejects terminal input when payload.data is missing", async () => {
@@ -281,7 +287,7 @@ describe("terminal lifecycle and streaming data plane", () => {
     });
     const terminalId = String(spawn.result?.terminal_id);
 
-    const response = await runtime.bus.request!({
+    const response = await runtime.bus.request?.({
       id: "cmd-input-invalid",
       type: "command",
       ts: new Date().toISOString(),

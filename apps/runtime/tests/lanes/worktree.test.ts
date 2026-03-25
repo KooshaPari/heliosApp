@@ -1,21 +1,21 @@
 // Tests for T006-T010: Worktree provisioning, cleanup, PTY termination, orphan reconciliation
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
-import * as path from "node:path";
 import * as os from "node:os";
-import {
-  provisionWorktree,
-  removeWorktree,
-  reconcileOrphanedWorktrees,
-  computeWorktreePath,
-  computeBranchName,
-  WorktreeProvisionError,
-  resetMetrics,
-  lastMetrics,
-} from "../../src/lanes/worktree.js";
+import * as path from "node:path";
 import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
-import type { PtyManager, PtyHandle } from "../../src/lanes/index.js";
+import type { PtyManager } from "../../src/lanes/index.js";
+import {
+  WorktreeProvisionError,
+  computeBranchName,
+  computeWorktreePath,
+  lastMetrics,
+  provisionWorktree,
+  reconcileOrphanedWorktrees,
+  removeWorktree,
+  resetMetrics,
+} from "../../src/lanes/worktree.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -111,7 +111,7 @@ describe("T006 - provisionWorktree", () => {
         workspaceRepoPath: repo,
         laneId: "lane_bad_base",
         baseBranch: "nonexistent-branch",
-      }),
+      })
     ).rejects.toThrow(WorktreeProvisionError);
   });
 
@@ -201,7 +201,7 @@ describe("T008 - PTY termination during cleanup", () => {
     expect(terminated).toContain("pty2");
 
     const events = bus.getEvents();
-    const ptyEvent = events.find((e) => e.topic === "lane.ptys_terminated");
+    const ptyEvent = events.find(e => e.topic === "lane.ptys_terminated");
     expect(ptyEvent).toBeDefined();
   });
 
@@ -296,7 +296,7 @@ describe("T010 - Partial provisioning failure", () => {
     expect(updated?.state).toBe("closed");
 
     const events = bus.getEvents();
-    const failEvent = events.find((e) => e.topic === "lane.provision_failed");
+    const failEvent = events.find(e => e.topic === "lane.provision_failed");
     expect(failEvent).toBeDefined();
   });
 

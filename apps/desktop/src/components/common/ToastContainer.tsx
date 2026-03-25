@@ -18,7 +18,7 @@ const colors: Record<string, string> = {
   info: "#89b4fa",
 };
 
-export const ToastContainer: Component<ToastContainerProps> = (props) => {
+export const ToastContainer: Component<ToastContainerProps> = props => {
   return (
     <div
       style={{
@@ -32,23 +32,26 @@ export const ToastContainer: Component<ToastContainerProps> = (props) => {
       }}
     >
       <For each={props.toasts}>
-        {(toast) => (
-          <div
+        {toast => (
+          <button
+            type="button"
             onClick={() => props.onDismiss(toast.id)}
             style={{
               padding: "10px 16px",
               "border-radius": "8px",
               cursor: "pointer",
               "background-color": "#313244",
+              border: "none",
               "border-left": `3px solid ${colors[toast.type]}`,
               color: "#cdd6f4",
               "font-size": "13px",
               "max-width": "360px",
               "box-shadow": "0 4px 12px rgba(0,0,0,0.3)",
+              textAlign: "left",
             }}
           >
             {toast.message}
-          </div>
+          </button>
         )}
       </For>
     </div>

@@ -1,4 +1,4 @@
-import { type Component, createSignal, For, Show } from "solid-js";
+import { type Component, For, Show, createSignal } from "solid-js";
 
 type ModelGroup = {
   provider: string;
@@ -10,7 +10,7 @@ type ModelSelectorProps = {
   onSelect: (modelId: string) => void;
 };
 
-export const ModelSelector: Component<ModelSelectorProps> = (props) => {
+export const ModelSelector: Component<ModelSelectorProps> = props => {
   const [isOpen, setIsOpen] = createSignal(false);
 
   const modelGroups: ModelGroup[] = [
@@ -36,8 +36,10 @@ export const ModelSelector: Component<ModelSelectorProps> = (props) => {
 
   const activeModelName = () => {
     for (const group of modelGroups) {
-      const found = group.models.find((m) => m.id === props.activeModel);
-      if (found) return found.name;
+      const found = group.models.find(m => m.id === props.activeModel);
+      if (found) {
+        return found.name;
+      }
     }
     return props.activeModel.split("/").pop() ?? props.activeModel;
   };
@@ -45,6 +47,7 @@ export const ModelSelector: Component<ModelSelectorProps> = (props) => {
   return (
     <div style={{ position: "relative" }}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen())}
         style={{
           background: "none",
@@ -76,7 +79,7 @@ export const ModelSelector: Component<ModelSelectorProps> = (props) => {
           }}
         >
           <For each={modelGroups}>
-            {(group) => (
+            {group => (
               <div>
                 <div
                   style={{
@@ -90,8 +93,10 @@ export const ModelSelector: Component<ModelSelectorProps> = (props) => {
                   {group.provider}
                 </div>
                 <For each={group.models}>
-                  {(model) => (
-                    <div
+                  {model => (
+                    <button
+                      type="button"
+                      disabled={!model.available}
                       onClick={() => {
                         if (model.available) {
                           props.onSelect(model.id);
@@ -100,11 +105,14 @@ export const ModelSelector: Component<ModelSelectorProps> = (props) => {
                       }}
                       style={{
                         padding: "6px 12px",
-                        cursor: model.available ? "pointer" : "default",
+                        border: "none",
+                        cursor: model.available ? "pointer" : "not-allowed",
                         color: model.available ? "#cdd6f4" : "#585b70",
                         "font-size": "13px",
                         "background-color":
                           model.id === props.activeModel ? "#45475a" : "transparent",
+                        width: "100%",
+                        textAlign: "left",
                       }}
                     >
                       {model.name}
@@ -115,7 +123,7 @@ export const ModelSelector: Component<ModelSelectorProps> = (props) => {
                           (not configured)
                         </span>
                       </Show>
-                    </div>
+                    </button>
                   )}
                 </For>
               </div>

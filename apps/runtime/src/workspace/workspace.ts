@@ -1,8 +1,8 @@
 // T002 & T004 — Workspace entity functions and service
 // T009 — Bus event emission for workspace lifecycle
 
-import type { CreateWorkspaceInput, Workspace, WorkspaceStore } from "./types.js";
 import { detectStaleProjects } from "./project.js";
+import type { CreateWorkspaceInput, Workspace, WorkspaceStore } from "./types.js";
 
 // Stub ID generator — uses spec 005 format ws_{ulid}
 function generateWorkspaceId(): string {
@@ -18,7 +18,7 @@ function normalizeRootPath(rootPath: string): string {
 /** Bus publish function signature */
 export type BusPublishFn = (
   topic: string,
-  payload: Record<string, unknown>,
+  payload: Record<string, unknown>
 ) => void | Promise<void>;
 
 // ── Entity functions (immutable state transitions) ──────────────────
@@ -77,7 +77,7 @@ export class WorkspaceService {
   constructor(
     store: WorkspaceStore,
     sessionCountQuery?: (workspaceId: string) => Promise<number>,
-    publish?: BusPublishFn,
+    publish?: BusPublishFn
   ) {
     this.store = store;
     this.sessionCountQuery = sessionCountQuery ?? (() => Promise.resolve(0));
@@ -149,7 +149,9 @@ export class WorkspaceService {
 
   /** Fire-and-forget bus event. Never fails the calling operation. */
   private emitEvent(topic: string, payload: Record<string, unknown>): void {
-    if (this.publish == null) return;
+    if (this.publish == null) {
+      return;
+    }
     try {
       // Fire and forget — catch sync throws and promise rejections
       const result = this.publish(topic, payload);

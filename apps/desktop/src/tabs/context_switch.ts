@@ -1,4 +1,4 @@
-import type { LocalBus } from "../../../runtime/src/protocol/bus";
+import type { LocalBus } from "../../../runtime/src/protocol/bus.ts";
 
 export interface ActiveContext {
   workspaceId: string;
@@ -67,7 +67,7 @@ export class ActiveContextStore {
     this.pendingContext = context;
 
     // Debounce: wait 50ms for any additional changes before committing
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       this.debounceTimer = setTimeout(async () => {
         this.debounceTimer = null;
 

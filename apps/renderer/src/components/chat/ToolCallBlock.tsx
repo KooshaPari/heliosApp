@@ -1,10 +1,10 @@
 import { type Component, createSignal } from "solid-js";
 import { Show } from "solid-js";
-import type { Message } from "../../../../runtime/src/types/conversation";
+import type { Message } from "../../../../runtime/src/types/conversation.ts";
 
 type ToolCallBlockProps = { message: Message };
 
-export const ToolCallBlock: Component<ToolCallBlockProps> = (props) => {
+export const ToolCallBlock: Component<ToolCallBlockProps> = props => {
   const [expanded, setExpanded] = createSignal(false);
   const toolName = () => props.message.metadata?.toolName ?? "Tool Call";
   const status = () => props.message.metadata?.status ?? "complete";
@@ -63,7 +63,7 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = (props) => {
             "overflow-y": "auto",
           }}
         >
-          <>{JSON.stringify(input(), null, 2)}</>
+          {JSON.stringify(input(), null, 2)}
         </div>
       </Show>
     </div>

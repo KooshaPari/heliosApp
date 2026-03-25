@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { SwitchConfirmation } from "../../../src/settings/switch_confirmation";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { SwitchConfirmation } from "../../../src/settings/switch_confirmation.ts";
 
 describe("SwitchConfirmation", () => {
   let container: HTMLDivElement;
@@ -47,7 +47,7 @@ describe("SwitchConfirmation", () => {
     dialog.mount(container);
     await dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const content = container.textContent || "";
     expect(content).toContain("hot-swap");
@@ -68,7 +68,7 @@ describe("SwitchConfirmation", () => {
     dialog.mount(container);
     await dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const content = container.textContent || "";
     expect(content).toContain("restart");
@@ -89,12 +89,12 @@ describe("SwitchConfirmation", () => {
     dialog.mount(container);
     await dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const confirmBtn = container.querySelector(".switch-confirm") as HTMLButtonElement;
     confirmBtn?.click();
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     expect(onConfirm).toHaveBeenCalled();
   });
@@ -113,7 +113,7 @@ describe("SwitchConfirmation", () => {
     dialog.mount(container);
     await dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const cancelBtn = container.querySelector(".switch-cancel") as HTMLButtonElement;
     cancelBtn?.click();
@@ -135,7 +135,7 @@ describe("SwitchConfirmation", () => {
     dialog.mount(container);
     await dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const dialogElement = container.querySelector(".switch-confirmation-dialog");
     const escapeEvent = new KeyboardEvent("keydown", { key: "Escape" });
@@ -158,7 +158,7 @@ describe("SwitchConfirmation", () => {
     dialog.mount(container);
     await dialog.open();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const dialogElement = container.querySelector(".switch-confirmation-dialog");
     expect(dialogElement?.getAttribute("role")).toBe("alertdialog");

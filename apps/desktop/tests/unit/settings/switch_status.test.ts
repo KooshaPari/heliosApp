@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { SwitchStatus } from "../../../src/settings/switch_status";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { SwitchStatus } from "../../../src/settings/switch_status.ts";
 
 describe("SwitchStatus", () => {
   let container: HTMLDivElement;

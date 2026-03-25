@@ -1,4 +1,4 @@
-import { type Component, createSignal, Show } from "solid-js";
+import { type Component, Show, createSignal } from "solid-js";
 
 type SetupWizardProps = {
   isOpen: boolean;
@@ -6,7 +6,7 @@ type SetupWizardProps = {
   onSkip: () => void;
 };
 
-export const SetupWizard: Component<SetupWizardProps> = (props) => {
+export const SetupWizard: Component<SetupWizardProps> = props => {
   const [step, setStep] = createSignal(0);
   const [apiKey, setApiKey] = createSignal("");
 
@@ -40,6 +40,7 @@ export const SetupWizard: Component<SetupWizardProps> = (props) => {
               projects.
             </p>
             <button
+              type="button"
               onClick={() => setStep(1)}
               style={{
                 background: "#89b4fa",
@@ -63,7 +64,7 @@ export const SetupWizard: Component<SetupWizardProps> = (props) => {
             <input
               type="password"
               value={apiKey()}
-              onInput={(e) => setApiKey(e.currentTarget.value)}
+              onInput={e => setApiKey(e.currentTarget.value)}
               placeholder="sk-ant-..."
               style={{
                 width: "100%",
@@ -79,6 +80,7 @@ export const SetupWizard: Component<SetupWizardProps> = (props) => {
             />
             <div style={{ display: "flex", gap: "8px", "justify-content": "flex-end" }}>
               <button
+                type="button"
                 onClick={() => props.onSkip()}
                 style={{
                   background: "none",
@@ -92,6 +94,7 @@ export const SetupWizard: Component<SetupWizardProps> = (props) => {
                 Skip
               </button>
               <button
+                type="button"
                 onClick={() => props.onComplete(apiKey())}
                 style={{
                   background: "#89b4fa",

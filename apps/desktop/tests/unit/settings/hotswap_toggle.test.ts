@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { HotSwapToggle } from "../../../src/settings/hotswap_toggle";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { HotSwapToggle } from "../../../src/settings/hotswap_toggle.ts";
 
 describe("HotSwapToggle", () => {
   let container: HTMLDivElement;

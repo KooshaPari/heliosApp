@@ -48,7 +48,7 @@ export class ResourceClassifier {
   }
 
   classifyAll(resources: OrphanedResource[]): ClassifiedOrphan[] {
-    const classified = resources.map((r) => this.classify(r));
+    const classified = resources.map(r => this.classify(r));
     // Sort by risk level: high first, then medium, then low
     const riskOrder = { high: 0, medium: 1, low: 2 };
     return classified.sort((a, b) => riskOrder[a.riskLevel] - riskOrder[b.riskLevel]);
@@ -66,10 +66,10 @@ export class ResourceClassifier {
     // Known owner: risk increases with age
     if (ageHours < 1) {
       return "low";
-    } else if (ageHours < 24) {
-      return "medium";
-    } else {
-      return "high";
     }
+    if (ageHours < 24) {
+      return "medium";
+    }
+    return "high";
   }
 }

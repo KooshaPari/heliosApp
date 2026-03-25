@@ -1,6 +1,10 @@
-import { describe, it, expect, beforeEach } from "bun:test";
-import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
-import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
+import { beforeEach, describe, expect, it } from "bun:test";
+import {
+  AUDIT_EVENT_RESULTS,
+  AUDIT_EVENT_TYPES,
+  createAuditEvent,
+} from "../../../src/audit/event.ts";
+import { AuditRingBuffer } from "../../../src/audit/ring-buffer.ts";
 
 describe("AuditRingBuffer", () => {
   let buffer: AuditRingBuffer;
@@ -127,7 +131,7 @@ describe("AuditRingBuffer", () => {
 
       const results = buffer.query({ workspaceId: "ws-1" });
       expect(results.length).toBe(3);
-      expect(results.every((e) => e.workspaceId === "ws-1")).toBe(true);
+      expect(results.every(e => e.workspaceId === "ws-1")).toBe(true);
     });
 
     it("should filter by actor", () => {
@@ -147,7 +151,7 @@ describe("AuditRingBuffer", () => {
 
       const results = buffer.query({ actor: "agent-1" });
       expect(results.length).toBe(3);
-      expect(results.every((e) => e.actor === "agent-1")).toBe(true);
+      expect(results.every(e => e.actor === "agent-1")).toBe(true);
     });
 
     it("should filter by event type", () => {
@@ -194,7 +198,7 @@ describe("AuditRingBuffer", () => {
 
       const results = buffer.getByCorrelationId("corr-chain-1");
       expect(results.length).toBe(3);
-      expect(results.every((e) => e.correlationId === "corr-chain-1")).toBe(true);
+      expect(results.every(e => e.correlationId === "corr-chain-1")).toBe(true);
     });
   });
 

@@ -2,9 +2,9 @@
  * Policy Rule Engine Unit Tests
  */
 
-import { test, expect, describe } from "bun:test";
-import { PolicyRuleSet } from "../../../src/policy/rules";
-import { PolicyClassification, PolicyPatternType } from "../../../src/policy/types";
+import { describe, expect, test } from "bun:test";
+import { PolicyRuleSet } from "../../../src/policy/rules.ts";
+import { PolicyClassification, PolicyPatternType } from "../../../src/policy/types.ts";
 
 describe("PolicyRuleSet", () => {
   test("glob pattern matches simple commands", () => {

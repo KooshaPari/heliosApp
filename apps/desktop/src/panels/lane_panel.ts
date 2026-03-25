@@ -26,7 +26,7 @@ export interface LanePanelProps {
 
 export class LanePanel {
   private lanes: Lane[] = [];
-  private activeWorkspaceId: string = "";
+  private activeWorkspaceId = "";
   private activeLaneId?: string;
   private selectedLaneId?: string;
   private props: LanePanelProps;
@@ -68,7 +68,9 @@ export class LanePanel {
   }
 
   private render(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     this.container.innerHTML = "";
     const panel = this.createPanelElement();
@@ -78,12 +80,14 @@ export class LanePanel {
 
     // Set up event handlers for list items
     const items = this.container.querySelectorAll("[data-lane-item]");
-    items.forEach((item) => {
+    items.forEach(item => {
       const laneId = item.getAttribute("data-lane-item");
-      if (!laneId) return;
+      if (!laneId) {
+        return;
+      }
 
       item.addEventListener("click", () => this.handleLaneSelect(laneId));
-      item.addEventListener("contextmenu", (e) => this.handleLaneContextMenu(e, laneId));
+      item.addEventListener("contextmenu", e => this.handleLaneContextMenu(e, laneId));
     });
   }
 
@@ -112,7 +116,7 @@ export class LanePanel {
 
     // Content
     const isLoading = this.props.isLoading;
-    const filteredLanes = this.lanes.filter((lane) => lane.workspaceId === this.activeWorkspaceId);
+    const filteredLanes = this.lanes.filter(lane => lane.workspaceId === this.activeWorkspaceId);
 
     if (isLoading) {
       const loading = document.createElement("div");
@@ -134,7 +138,7 @@ export class LanePanel {
       const listDiv = document.createElement("div");
       listDiv.className = "lane-list";
 
-      filteredLanes.forEach((lane) => {
+      filteredLanes.forEach(lane => {
         listDiv.appendChild(this.createLaneItemElement(lane));
       });
 
@@ -245,7 +249,9 @@ export class LanePanel {
   }
 
   private attachEventListeners(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     const createBtn = this.container.querySelector('[data-action="create-lane"]');
     if (createBtn) {
@@ -260,7 +266,9 @@ export class LanePanel {
   }
 
   private detachEventListeners(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     const keyboardHandler = this.keyboardListeners.get("keyboard");
     if (keyboardHandler) {
@@ -270,43 +278,51 @@ export class LanePanel {
   }
 
   private handleKeyboardNavigation(event: KeyboardEvent): void {
-    const filteredLanes = this.lanes.filter((lane) => lane.workspaceId === this.activeWorkspaceId);
+    const filteredLanes = this.lanes.filter(lane => lane.workspaceId === this.activeWorkspaceId);
 
-    if (filteredLanes.length === 0) return;
+    if (filteredLanes.length === 0) {
+      return;
+    }
 
-    const currentIndex = filteredLanes.findIndex((lane) => lane.id === this.selectedLaneId);
+    const currentIndex = filteredLanes.findIndex(lane => lane.id === this.selectedLaneId);
     let newIndex = currentIndex >= 0 ? currentIndex : 0;
 
     switch (event.key) {
-      case "ArrowDown":
+      case "ArrowDown": {
         event.preventDefault();
         newIndex = Math.min(newIndex + 1, filteredLanes.length - 1);
         break;
-      case "ArrowUp":
+      }
+      case "ArrowUp": {
         event.preventDefault();
         newIndex = Math.max(newIndex - 1, 0);
         break;
-      case "Enter":
+      }
+      case "Enter": {
         event.preventDefault();
         if (currentIndex >= 0) {
           this.handleLaneSelect(filteredLanes[currentIndex].id);
         }
         return;
-      case "Home":
+      }
+      case "Home": {
         event.preventDefault();
         newIndex = 0;
         break;
-      case "End":
+      }
+      case "End": {
         event.preventDefault();
         newIndex = filteredLanes.length - 1;
         break;
+      }
       case "Delete":
-      case "Backspace":
+      case "Backspace": {
         event.preventDefault();
         if (currentIndex >= 0) {
           this.props.onLaneDelete(filteredLanes[currentIndex].id);
         }
         return;
+      }
       default:
         return;
     }

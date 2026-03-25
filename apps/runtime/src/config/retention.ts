@@ -7,7 +7,7 @@ export type RetentionPolicyConfig = {
 };
 
 export function createRetentionPolicyConfig(
-  input: Partial<RetentionPolicyConfig> = {},
+  input: Partial<RetentionPolicyConfig> = {}
 ): RetentionPolicyConfig {
   const retentionDays = input.retention_days ?? MIN_RETENTION_DAYS;
   if (!Number.isInteger(retentionDays) || retentionDays < MIN_RETENTION_DAYS) {

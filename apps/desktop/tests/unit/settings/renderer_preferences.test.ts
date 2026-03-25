@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { RendererPreferencesManager } from "../../../src/settings/renderer_preferences";
-import { writeFileSync, unlinkSync, mkdirSync } from "fs";
-import { resolve } from "path";
+import { unlinkSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { RendererPreferencesManager } from "../../../src/settings/renderer_preferences.ts";
 
 describe("RendererPreferencesManager", () => {
   let tempPath: string;

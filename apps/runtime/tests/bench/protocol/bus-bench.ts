@@ -56,7 +56,7 @@ function runSync(fn: () => void, iterations: number, warmup: number): number[] {
 async function runAsync(
   fn: () => Promise<void>,
   iterations: number,
-  warmup: number,
+  warmup: number
 ): Promise<number[]> {
   // Warmup
   for (let i = 0; i < warmup; i++) {
@@ -75,8 +75,8 @@ async function runAsync(
 function summarize(
   name: string,
   sorted: number[],
-  threshold_p95_ms: number,
-  warmup: number,
+  thresholdP95Ms: number,
+  warmup: number
 ): BenchResult {
   const p50 = percentile(sorted, 50);
   const p95 = percentile(sorted, 95);
@@ -88,8 +88,8 @@ function summarize(
     p50_ms: p50,
     p95_ms: p95,
     p99_ms: p99,
-    threshold_p95_ms,
-    passed: p95 <= threshold_p95_ms,
+    threshold_p95_ms: thresholdP95Ms,
+    passed: p95 <= thresholdP95Ms,
   };
 }
 
@@ -106,7 +106,7 @@ const VALIDATE_P95_THRESHOLD = 0.2; // SLO: 0.1ms, CI: 0.2ms
 
 async function benchCommandDispatch(): Promise<BenchResult> {
   const bus = createBus();
-  bus.registerMethod("bench.echo", (cmd) => createResponse(cmd, cmd.payload));
+  bus.registerMethod("bench.echo", cmd => createResponse(cmd, cmd.payload));
 
   const timings = await runAsync(
     async () => {
@@ -114,7 +114,7 @@ async function benchCommandDispatch(): Promise<BenchResult> {
       await bus.send(cmd);
     },
     ITERATIONS,
-    WARMUP,
+    WARMUP
   );
 
   bus.destroy();
@@ -135,7 +135,7 @@ async function benchEventFanout50(): Promise<BenchResult> {
       await bus.publish(evt);
     },
     ITERATIONS,
-    WARMUP,
+    WARMUP
   );
 
   bus.destroy();
@@ -157,7 +157,7 @@ function benchEnvelopeValidation(): BenchResult {
       validateEnvelope(envelope);
     },
     ITERATIONS,
-    WARMUP,
+    WARMUP
   );
 
   return summarize("envelope_validation", timings, VALIDATE_P95_THRESHOLD, WARMUP);
@@ -171,7 +171,7 @@ async function benchSustainedThroughput(): Promise<
   let lastSeq = 0;
   let violations = 0;
 
-  bus.subscribe("bench.sustained", (e) => {
+  bus.subscribe("bench.sustained", e => {
     received++;
     if (e.sequence <= lastSeq) {
       violations++;
@@ -179,13 +179,13 @@ async function benchSustainedThroughput(): Promise<
     lastSeq = e.sequence;
   });
 
-  const TARGET_RATE = 10_000; // msg/s
-  const DURATION_S = 2; // shortened for test practicality (full 10s in real CI)
-  const TOTAL = TARGET_RATE * DURATION_S;
+  const targetRate = 10_000; // msg/s
+  const durationS = 2; // shortened for test practicality (full 10s in real CI)
+  const total = targetRate * durationS;
 
   const start = performance.now();
   const promises: Promise<void>[] = [];
-  for (let i = 0; i < TOTAL; i++) {
+  for (let i = 0; i < total; i++) {
     promises.push(bus.publish(createEvent("bench.sustained", { i })));
   }
   await Promise.all(promises);
@@ -193,14 +193,14 @@ async function benchSustainedThroughput(): Promise<
 
   bus.destroy();
 
-  const passed = received === TOTAL && violations === 0;
+  const passed = received === total && violations === 0;
   return {
     name: "sustained_throughput",
-    iterations: TOTAL,
+    iterations: total,
     warmup: 0,
-    p50_ms: elapsed / TOTAL,
-    p95_ms: elapsed / TOTAL,
-    p99_ms: elapsed / TOTAL,
+    p50_ms: elapsed / total,
+    p95_ms: elapsed / total,
+    p99_ms: elapsed / total,
     threshold_p95_ms: DISPATCH_P95_THRESHOLD,
     passed,
     total_messages: received,
@@ -222,22 +222,15 @@ async function main(): Promise<void> {
   results.push(await benchSustainedThroughput());
 
   // Output structured JSON for CI
-  const output = JSON.stringify({ benchmarks: results }, null, 2);
-  console.log(output);
+  const _output = JSON.stringify({ benchmarks: results }, null, 2);
 
   // Assert all passed
-  const failures = results.filter((r) => !r.passed);
+  const failures = results.filter(r => !r.passed);
   if (failures.length > 0) {
-    console.error("\nSLO BREACHES:");
-    for (const f of failures) {
-      console.error(
-        `  ${f.name}: p95=${String(f.p95_ms.toFixed(3))}ms > threshold=${String(f.threshold_p95_ms)}ms`,
-      );
+    for (const _f of failures) {
     }
     process.exit(1);
   }
-
-  console.log("\nAll benchmarks passed SLO thresholds.");
 }
 
 await main();

@@ -11,13 +11,13 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
   ACPConfig,
   ACPExecuteInput,
   ACPExecuteOutput,
+  ProviderAdapter,
+  ProviderHealthStatus,
 } from "./adapter.js";
-import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
+import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * Policy gate interface for access control.
@@ -26,7 +26,7 @@ import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from ".
 export interface PolicyGate {
   evaluate(
     action: string,
-    context: Record<string, unknown>,
+    context: Record<string, unknown>
   ): Promise<{
     allowed: boolean;
     reason?: string;
@@ -46,7 +46,7 @@ class DefaultPolicyGate implements PolicyGate {
 /**
  * Mock ACP request for testing/prototyping.
  */
-interface ACPRequest {
+interface AcpRequest {
   correlationId: string;
   model: string;
   messages: Array<{ role: string; content: string }>;
@@ -57,7 +57,7 @@ interface ACPRequest {
 /**
  * Mock ACP response.
  */
-interface ACPResponse {
+interface AcpResponse {
   taskId: string;
   content: string;
   stopReason: string;
@@ -79,11 +79,9 @@ interface ACPResponse {
  *
  * FR-025-003: ACP protocol client for Claude.
  */
-export class ACPClientAdapter implements ProviderAdapter<
-  ACPConfig,
-  ACPExecuteInput,
-  ACPExecuteOutput
-> {
+export class ACPClientAdapter
+  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
+{
   private config: ACPConfig | null = null;
   private bus: LocalBus | null = null;
   private policyGate: PolicyGate;
@@ -133,11 +131,11 @@ export class ACPClientAdapter implements ProviderAdapter<
       }
 
       // Simulate endpoint reachability check with timeout
-      const probeTimeout = config.timeoutMs || 10000;
+      const _probeTimeout = config.timeoutMs || 10000;
       const probeResult = await Promise.race([
         this.probeEndpoint(config.endpoint),
         new Promise<boolean>((_, reject) =>
-          setTimeout(() => reject(new Error("Probe timeout")), 2000),
+          setTimeout(() => reject(new Error("Probe timeout")), 2000)
         ),
       ]);
 
@@ -170,7 +168,7 @@ export class ACPClientAdapter implements ProviderAdapter<
         "PROVIDER_INIT_FAILED",
         `ACP client init failed: ${normalized.message}`,
         "acp",
-        false,
+        false
       );
     }
   }
@@ -197,7 +195,7 @@ export class ACPClientAdapter implements ProviderAdapter<
       const probeSuccess = await Promise.race([
         this.probeEndpoint(this.config.endpoint ?? ""),
         new Promise<boolean>((_, reject) =>
-          setTimeout(() => reject(new Error("Health check timeout")), 5000),
+          setTimeout(() => reject(new Error("Health check timeout")), 5000)
         ),
       ]);
 
@@ -271,7 +269,7 @@ export class ACPClientAdapter implements ProviderAdapter<
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
         "ACP client not initialized",
-        "acp",
+        "acp"
       );
     }
 
@@ -295,7 +293,7 @@ export class ACPClientAdapter implements ProviderAdapter<
           `ACP execution denied by policy: ${reason}`,
           "acp",
           false,
-          correlationId,
+          correlationId
         );
       }
 
@@ -309,7 +307,7 @@ export class ACPClientAdapter implements ProviderAdapter<
         const startTime = Date.now();
 
         // Construct ACP request
-        const acpRequest: ACPRequest = {
+        const acpRequest: AcpRequest = {
           correlationId,
           model: this.config.model,
           messages: [
@@ -352,7 +350,7 @@ export class ACPClientAdapter implements ProviderAdapter<
           `ACP execution timeout after ${this.config.timeoutMs || 30000}ms`,
           "acp",
           true,
-          correlationId,
+          correlationId
         );
 
         await this.publishEvent("provider.acp.execute.failed", {
@@ -390,7 +388,7 @@ export class ACPClientAdapter implements ProviderAdapter<
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
         "ACP client not initialized",
-        "acp",
+        "acp"
       );
     }
 
@@ -413,7 +411,7 @@ export class ACPClientAdapter implements ProviderAdapter<
       throw new NormalizedProviderError(
         "PROVIDER_EXECUTE_FAILED",
         `Failed to cancel task ${taskId}: ${normalized.message}`,
-        "acp",
+        "acp"
       );
     }
   }
@@ -449,7 +447,7 @@ export class ACPClientAdapter implements ProviderAdapter<
         "PROVIDER_INIT_FAILED",
         `Failed to terminate ACP client: ${normalized.message}`,
         "acp",
-        false,
+        false
       );
     }
   }
@@ -477,14 +475,14 @@ export class ACPClientAdapter implements ProviderAdapter<
    * @param signal Abort signal
    * @returns ACP response
    */
-  private async sendACPRequest(request: ACPRequest, signal: AbortSignal): Promise<ACPResponse> {
+  private async sendACPRequest(request: AcpRequest, signal: AbortSignal): Promise<AcpResponse> {
     // Check for abort
     if (signal.aborted) {
       throw new Error("Request aborted");
     }
 
     // Mock implementation: simulate ACP processing
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const timeout = setTimeout(() => {
         resolve({
           taskId: `task-${request.correlationId}`,
@@ -524,9 +522,6 @@ export class ACPClientAdapter implements ProviderAdapter<
         topic,
         payload,
       });
-    } catch (error) {
-      // Log but don't throw (event publishing is best-effort)
-      console.warn(`Failed to publish ACP event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }

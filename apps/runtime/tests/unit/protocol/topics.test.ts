@@ -1,7 +1,6 @@
-import { describe, expect, it, beforeEach } from "bun:test";
-import { createBus, type LocalBus } from "../../../src/protocol/bus.js";
+import { beforeEach, describe, expect, it } from "bun:test";
+import { type LocalBus, createBus } from "../../../src/protocol/bus.js";
 import { createEvent } from "../../../src/protocol/envelope.js";
-import type { EventEnvelope } from "../../../src/protocol/types.js";
 
 // FR-004: Event fan-out with deterministic delivery
 // FR-009: Subscriber isolation (one throwing does not block others)
@@ -69,7 +68,9 @@ describe("LocalBus — event fan-out", () => {
     bus.subscribe("snapshot.test", () => {
       received.push(1);
       // Subscriber 1 unsubscribes subscriber 2 during iteration
-      if (unsub2) unsub2();
+      if (unsub2) {
+        unsub2();
+      }
     });
     unsub2 = bus.subscribe("snapshot.test", () => {
       received.push(2);
@@ -149,7 +150,7 @@ describe("LocalBus — event fan-out", () => {
     const received: number[] = [];
 
     bus.subscribe("async.order", async () => {
-      await new Promise((r) => setTimeout(r, 10));
+      await new Promise(r => setTimeout(r, 10));
       received.push(1);
     });
     bus.subscribe("async.order", async () => {
@@ -166,7 +167,7 @@ describe("LocalBus — event fan-out", () => {
   it("assigns incrementing sequence numbers to events", async () => {
     const sequences: number[] = [];
 
-    bus.subscribe("seq.test", (evt) => {
+    bus.subscribe("seq.test", evt => {
       sequences.push(evt.sequence);
     });
 

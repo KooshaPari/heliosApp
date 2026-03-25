@@ -2,9 +2,9 @@
 // FR-006: Corruption detection
 // FR-007: Recovery from snapshot
 
-import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
-import { join } from "node:path";
 import { createHash } from "node:crypto";
+import { mkdir, readFile, rename } from "node:fs/promises";
+import { join } from "node:path";
 import type { Workspace } from "./types.js";
 
 const SNAPSHOT_FILE = "workspaces.snapshot.json";
@@ -45,7 +45,7 @@ export async function createSnapshot(dataDir: string, workspaces: Workspace[]): 
 
 /** Detect whether the primary workspaces.json file is corrupted. */
 export async function detectCorruption(
-  dataDir: string,
+  dataDir: string
 ): Promise<{ corrupted: boolean; reason?: string }> {
   const filePath = join(dataDir, PRIMARY_FILE);
   let raw: string;
@@ -79,22 +79,46 @@ export async function detectCorruption(
 }
 
 function isValidEnvelope(data: unknown): data is SnapshotEnvelope {
-  if (typeof data !== "object" || data === null) return false;
+  if (typeof data !== "object" || data === null) {
+    return false;
+  }
   const obj = data as Record<string, unknown>;
-  if (obj["version"] !== 1) return false;
-  if (!Array.isArray(obj["workspaces"])) return false;
-  if (typeof obj["_checksum"] !== "string") return false;
+  if (obj.version !== 1) {
+    return false;
+  }
+  if (!Array.isArray(obj.workspaces)) {
+    return false;
+  }
+  if (typeof obj._checksum !== "string") {
+    return false;
+  }
   // Validate each workspace has required fields
-  for (const ws of obj["workspaces"] as unknown[]) {
-    if (typeof ws !== "object" || ws === null) return false;
+  for (const ws of obj.workspaces as unknown[]) {
+    if (typeof ws !== "object" || ws === null) {
+      return false;
+    }
     const w = ws as Record<string, unknown>;
-    if (typeof w["id"] !== "string") return false;
-    if (typeof w["name"] !== "string") return false;
-    if (typeof w["rootPath"] !== "string") return false;
-    if (typeof w["state"] !== "string") return false;
-    if (typeof w["createdAt"] !== "number") return false;
-    if (typeof w["updatedAt"] !== "number") return false;
-    if (!Array.isArray(w["projects"])) return false;
+    if (typeof w.id !== "string") {
+      return false;
+    }
+    if (typeof w.name !== "string") {
+      return false;
+    }
+    if (typeof w.rootPath !== "string") {
+      return false;
+    }
+    if (typeof w.state !== "string") {
+      return false;
+    }
+    if (typeof w.createdAt !== "number") {
+      return false;
+    }
+    if (typeof w.updatedAt !== "number") {
+      return false;
+    }
+    if (!Array.isArray(w.projects)) {
+      return false;
+    }
   }
   return true;
 }
@@ -116,10 +140,14 @@ export async function recoverFromSnapshot(dataDir: string): Promise<Workspace[] 
     return null;
   }
 
-  if (!isValidEnvelope(parsed)) return null;
+  if (!isValidEnvelope(parsed)) {
+    return null;
+  }
 
   const expected = computeChecksum(parsed.workspaces);
-  if (parsed._checksum !== expected) return null;
+  if (parsed._checksum !== expected) {
+    return null;
+  }
 
   return parsed.workspaces;
 }

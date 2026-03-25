@@ -1,5 +1,5 @@
-import type { LocalBus } from "../protocol/bus";
-import type { ProtocolTopic } from "../protocol/topics";
+import type { LocalBus } from "../protocol/bus.ts";
+import type { ProtocolTopic } from "../protocol/topics.ts";
 
 export type LaneState =
   | "new"
@@ -107,7 +107,7 @@ export class LaneLifecycleService {
       "provisioning",
       "lane.create.started",
       "lane.create.requested",
-      correlationId,
+      correlationId
     );
     await this.transition(laneId, "ready", "lane.created", "lane.create.succeeded", correlationId);
     return this.getRequired(laneId);
@@ -163,7 +163,7 @@ export class LaneLifecycleService {
     nextState: LaneState,
     topic: ProtocolTopic,
     runtimeEvent: RuntimeEvent,
-    correlationId?: string,
+    correlationId?: string
   ): Promise<void> {
     const lane = this.lanes.get(laneId);
     if (!lane) {

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { InMemoryLocalBus } from "../../../src/protocol/bus";
-import { ProtocolValidationError, type LocalBusEnvelope } from "../../../src/protocol/types";
-import { validateEnvelope } from "../../../src/protocol/validator";
+import { InMemoryLocalBus } from "../../../src/protocol/bus.ts";
+import { type LocalBusEnvelope, ProtocolValidationError } from "../../../src/protocol/types.ts";
+import { validateEnvelope } from "../../../src/protocol/validator.ts";
 
 function createLifecycleCommand(overrides: Partial<LocalBusEnvelope> = {}): LocalBusEnvelope {
   return {
@@ -21,10 +21,10 @@ function createLifecycleCommand(overrides: Partial<LocalBusEnvelope> = {}): Loca
 describe("protocol validator", () => {
   test("rejects malformed envelope with stable error semantics", () => {
     expect(() => validateEnvelope({ id: "evt-1", ts: "2026-02-26T00:00:00.000Z" })).toThrow(
-      ProtocolValidationError,
+      ProtocolValidationError
     );
     expect(() => validateEnvelope({ id: "evt-1", ts: "2026-02-26T00:00:00.000Z" })).toThrow(
-      "Envelope field 'type' is required",
+      "Envelope field 'type' is required"
     );
   });
 
@@ -47,7 +47,7 @@ describe("protocol validator", () => {
         ts: "2026-02-26T00:00:00",
         topic: "workspace.opened",
         payload: {},
-      }),
+      })
     ).toThrow("Envelope field 'ts' must be an RFC3339 timestamp with timezone");
   });
 
@@ -72,7 +72,7 @@ describe("protocol validator", () => {
         timestamp: "2026-02-26T00:00:00",
         topic: "workspace.opened",
         payload: {},
-      }),
+      })
     ).toThrow("Envelope field 'timestamp' must be an RFC3339 timestamp with timezone");
   });
 
@@ -120,7 +120,7 @@ describe("protocol sequencing and audit", () => {
         correlation_id: "corr-1",
         topic: "session.attached",
         payload: {},
-      }),
+      })
     ).rejects.toMatchObject({
       name: "ProtocolValidationError",
       code: "ORDERING_VIOLATION",
@@ -150,7 +150,7 @@ describe("protocol sequencing and audit", () => {
         correlation_id: "corr-accepted",
         topic: "lane.create.started",
         payload: {},
-      }),
+      })
     ).rejects.toMatchObject({
       name: "ProtocolValidationError",
       code: "ORDERING_VIOLATION",
@@ -175,7 +175,7 @@ describe("protocol sequencing and audit", () => {
         correlation_id: "corr-lane-attach",
         topic: "lane.attach.started",
         payload: {},
-      }),
+      })
     ).resolves.toBeUndefined();
 
     await expect(
@@ -188,7 +188,7 @@ describe("protocol sequencing and audit", () => {
         correlation_id: "corr-lane-attach",
         topic: "lane.attached",
         payload: {},
-      }),
+      })
     ).resolves.toBeUndefined();
 
     await expect(
@@ -201,7 +201,7 @@ describe("protocol sequencing and audit", () => {
         correlation_id: "corr-lane-attach",
         topic: "lane.attach.started",
         payload: {},
-      }),
+      })
     ).resolves.toBeUndefined();
 
     await expect(
@@ -214,7 +214,7 @@ describe("protocol sequencing and audit", () => {
         correlation_id: "corr-lane-cleanup",
         topic: "lane.cleanup.started",
         payload: {},
-      }),
+      })
     ).resolves.toBeUndefined();
 
     await expect(
@@ -227,7 +227,7 @@ describe("protocol sequencing and audit", () => {
         correlation_id: "corr-lane-cleanup",
         topic: "lane.cleaned",
         payload: {},
-      }),
+      })
     ).resolves.toBeUndefined();
 
     await expect(
@@ -240,7 +240,7 @@ describe("protocol sequencing and audit", () => {
         correlation_id: "corr-lane-cleanup",
         topic: "lane.cleanup.started",
         payload: {},
-      }),
+      })
     ).resolves.toBeUndefined();
   });
 
@@ -255,7 +255,7 @@ describe("protocol sequencing and audit", () => {
         lane_id: laneId,
         correlation_id: "corr-lane-authoritative",
         payload: {},
-      }),
+      })
     );
 
     expect(laneAttach.type).toBe("response");
@@ -268,7 +268,7 @@ describe("protocol sequencing and audit", () => {
         session_id: sessionId,
         correlation_id: "corr-session-authoritative",
         payload: {},
-      }),
+      })
     );
 
     expect(sessionAttach.type).toBe("response");
@@ -281,7 +281,7 @@ describe("protocol sequencing and audit", () => {
     const response = await bus.request(
       createLifecycleCommand({
         payload: { force_error: true },
-      }),
+      })
     );
 
     expect(response.type).toBe("response");

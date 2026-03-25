@@ -8,15 +8,15 @@
  */
 
 import type { ZellijCli } from "./cli.js";
+import { PaneTooSmallError, PtyBindingError, ZellijCliError } from "./errors.js";
 import type { TopologyTracker } from "./topology.js";
 import type {
-  PaneRecord,
-  PaneDimensions,
   CreatePaneOptions,
   MinPaneDimensions,
+  PaneDimensions,
+  PaneRecord,
   PtyManagerInterface,
 } from "./types.js";
-import { PaneTooSmallError, PaneNotFoundError, PtyBindingError, ZellijCliError } from "./errors.js";
 
 /** Default minimum pane dimensions. */
 const DEFAULT_MIN_DIMENSIONS: MinPaneDimensions = {
@@ -54,7 +54,7 @@ export class ZellijPaneManager {
   async createPane(
     sessionName: string,
     laneId: string,
-    options?: CreatePaneOptions,
+    options?: CreatePaneOptions
   ): Promise<PaneRecord> {
     const startMs = performance.now();
     const direction = options?.direction ?? "vertical";
@@ -62,10 +62,10 @@ export class ZellijPaneManager {
     // T009: Check minimum dimension enforcement before split
     const currentTopology = this.topology.getTopology(sessionName);
     if (currentTopology) {
-      const activeTab = currentTopology.tabs.find((t) => t.tabId === currentTopology.activeTabId);
+      const activeTab = currentTopology.tabs.find(t => t.tabId === currentTopology.activeTabId);
       if (activeTab && activeTab.panes.length > 0) {
         // Find the focused pane (the one being split)
-        const focusedPane = activeTab.panes.find((p) => p.focused) ?? activeTab.panes[0]!;
+        const focusedPane = activeTab.panes.find(p => p.focused) ?? activeTab.panes[0]!;
         this.validateSplit(focusedPane.dimensions, direction);
       }
     }
@@ -91,7 +91,7 @@ export class ZellijPaneManager {
 
     // Query dimensions after creation (refresh topology)
     const refreshed = await this.topology.refreshTopology(sessionName);
-    const activeTab = refreshed.tabs.find((t) => t.tabId === refreshed.activeTabId);
+    const activeTab = refreshed.tabs.find(t => t.tabId === refreshed.activeTabId);
     const newPaneTopology = activeTab?.panes[activeTab.panes.length - 1];
     const dimensions: PaneDimensions = newPaneTopology?.dimensions ?? {
       cols: 80,
@@ -119,8 +119,6 @@ export class ZellijPaneManager {
         ptyId = ptyResult.ptyId;
         this.topology.bindPty(sessionName, paneId, ptyId);
       } catch (err) {
-        // PTY spawn failed after pane create; close the pane and report
-        console.error(`[zellij-panes] PTY spawn failed for pane ${paneId}, closing pane`, err);
         await this.closePaneRaw(sessionName, paneId).catch(() => {});
         throw new PtyBindingError(paneId, err instanceof Error ? err.message : String(err));
       }
@@ -134,10 +132,7 @@ export class ZellijPaneManager {
       createdAt: new Date(),
     };
 
-    const durationMs = performance.now() - startMs;
-    console.debug(
-      `[zellij-panes] createPane(${sessionName}) pane=${paneId} duration=${durationMs.toFixed(1)}ms`,
-    );
+    const _durationMs = performance.now() - startMs;
 
     return record;
   }
@@ -153,13 +148,7 @@ export class ZellijPaneManager {
       if (paneTopology?.ptyId) {
         try {
           await this.ptyManager.terminate(paneTopology.ptyId);
-        } catch (err) {
-          // PTY may already be stopped; log and continue
-          console.warn(
-            `[zellij-panes] PTY terminate for pane ${paneId} failed (may already be stopped):`,
-            err,
-          );
-        }
+        } catch (_err) {}
       }
     }
 
@@ -167,8 +156,6 @@ export class ZellijPaneManager {
 
     // Remove from topology
     this.topology.removePane(sessionName, paneId);
-
-    console.debug(`[zellij-panes] mux.pane.closed: session=${sessionName} pane=${paneId}`);
   }
 
   /**
@@ -180,7 +167,7 @@ export class ZellijPaneManager {
     sessionName: string,
     paneId: number,
     direction: "left" | "right" | "up" | "down",
-    amount: number,
+    amount: number
   ): Promise<void> {
     const startMs = performance.now();
 
@@ -190,7 +177,7 @@ export class ZellijPaneManager {
       const resultingDimensions = this.calculateResizedDimensions(
         paneTopology.dimensions,
         direction,
-        amount,
+        amount
       );
       this.validateDimensions(resultingDimensions);
     }
@@ -218,15 +205,12 @@ export class ZellijPaneManager {
         this.ptyManager.resize(
           updatedPane.ptyId,
           updatedPane.dimensions.cols,
-          updatedPane.dimensions.rows,
+          updatedPane.dimensions.rows
         );
       }
     }
 
-    const durationMs = performance.now() - startMs;
-    console.debug(
-      `[zellij-panes] resizePane(${sessionName}, ${paneId}) duration=${durationMs.toFixed(1)}ms`,
-    );
+    const _durationMs = performance.now() - startMs;
   }
 
   /**
@@ -275,11 +259,11 @@ export class ZellijPaneManager {
 
     if (result.exitCode !== 0) {
       // If pane doesn't exist, treat as success (idempotent)
-      if (!result.stderr.includes("no pane") && !result.stderr.includes("not found")) {
+      if (!(result.stderr.includes("no pane") || result.stderr.includes("not found"))) {
         throw new ZellijCliError(
           `close-pane --session ${sessionName}`,
           result.exitCode,
-          result.stderr,
+          result.stderr
         );
       }
     }
@@ -291,7 +275,7 @@ export class ZellijPaneManager {
   private calculateResizedDimensions(
     current: PaneDimensions,
     direction: "left" | "right" | "up" | "down",
-    amount: number,
+    amount: number
   ): PaneDimensions {
     const result = { ...current };
     switch (direction) {
@@ -299,13 +283,13 @@ export class ZellijPaneManager {
         result.cols = Math.max(1, result.cols - amount);
         break;
       case "right":
-        result.cols = result.cols + amount;
+        result.cols += amount;
         break;
       case "up":
         result.rows = Math.max(1, result.rows - amount);
         break;
       case "down":
-        result.rows = result.rows + amount;
+        result.rows += amount;
         break;
     }
     return result;

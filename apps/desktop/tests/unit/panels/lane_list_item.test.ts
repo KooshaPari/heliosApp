@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { LaneListItem } from "../../../src/panels/lane_list_item";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LaneListItem } from "../../../src/panels/lane_list_item.ts";
 
 describe("LaneListItem", () => {
   let container: HTMLDivElement;
@@ -176,7 +176,7 @@ describe("LaneListItem", () => {
       "closed",
     ];
 
-    statesList.forEach((state) => {
+    statesList.forEach(state => {
       item = new LaneListItem({ ...mockProps, state });
       item.mount(container);
 

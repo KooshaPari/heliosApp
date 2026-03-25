@@ -11,7 +11,7 @@ import { BindingState, createBinding, validateBindingTriple } from "./binding_tr
 export class RegistryError extends Error {
   constructor(
     public code: string,
-    message: string,
+    message: string
   ) {
     super(message);
     this.name = "RegistryError";
@@ -175,8 +175,8 @@ export class TerminalRegistry implements RegistryQueryInterface {
   getByLane(laneId: string): TerminalBinding[] {
     const terminalIds = this.laneIndex.get(laneId) || new Set();
     return Array.from(terminalIds)
-      .map((id) => this.primaryStore.get(id))
-      .filter((binding) => binding !== undefined) as TerminalBinding[];
+      .map(id => this.primaryStore.get(id))
+      .filter(binding => binding !== undefined) as TerminalBinding[];
   }
 
   /**
@@ -185,8 +185,8 @@ export class TerminalRegistry implements RegistryQueryInterface {
   getBySession(sessionId: string): TerminalBinding[] {
     const terminalIds = this.sessionIndex.get(sessionId) || new Set();
     return Array.from(terminalIds)
-      .map((id) => this.primaryStore.get(id))
-      .filter((binding) => binding !== undefined) as TerminalBinding[];
+      .map(id => this.primaryStore.get(id))
+      .filter(binding => binding !== undefined) as TerminalBinding[];
   }
 
   /**
@@ -195,8 +195,8 @@ export class TerminalRegistry implements RegistryQueryInterface {
   getByWorkspace(workspaceId: string): TerminalBinding[] {
     const terminalIds = this.workspaceIndex.get(workspaceId) || new Set();
     return Array.from(terminalIds)
-      .map((id) => this.primaryStore.get(id))
-      .filter((binding) => binding !== undefined) as TerminalBinding[];
+      .map(id => this.primaryStore.get(id))
+      .filter(binding => binding !== undefined) as TerminalBinding[];
   }
 
   /**
@@ -245,7 +245,7 @@ export class TerminalRegistry implements RegistryQueryInterface {
     if (!index.has(key)) {
       index.set(key, new Set());
     }
-    index.get(key)!.add(value);
+    index.get(key)?.add(value);
   }
 
   private removeFromIndex(index: Map<string, Set<string>>, key: string, value: string): void {

@@ -1,6 +1,6 @@
 // Unit tests for PtyDetector
 
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { PtyDetector } from "../../../../src/lanes/watchdog/pty_detector.js";
 import type { TerminalRegistry } from "../../../../src/lanes/watchdog/pty_detector.js";
 
@@ -41,7 +41,7 @@ describe("PtyDetector", () => {
 
   it("should handle registry with bound terminals", async () => {
     const registryWithTerminals: TerminalRegistry = {
-      getTerminal: (id) => (id === "pts/0" ? { laneId: "lane-1" } : null),
+      getTerminal: id => (id === "pts/0" ? { laneId: "lane-1" } : null),
       getTerminals: () => [{ id: "pts/0", laneId: "lane-1" }],
     };
 

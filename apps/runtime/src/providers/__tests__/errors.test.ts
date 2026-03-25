@@ -5,13 +5,13 @@
  * SC-025-004: All provider errors map to normalized taxonomy.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   NormalizedProviderError,
-  normalizeError,
-  isRetryable,
-  getErrorMessage,
   PROVIDER_ERROR_CODES,
+  getErrorMessage,
+  isRetryable,
+  normalizeError,
 } from "../errors.js";
 
 describe("NormalizedProviderError", () => {
@@ -32,7 +32,7 @@ describe("NormalizedProviderError", () => {
       "acp",
       true,
       undefined,
-      original,
+      original
     );
 
     expect(error.originalError).toBe(original);
@@ -45,7 +45,7 @@ describe("NormalizedProviderError", () => {
       "Execution failed",
       "mcp",
       true,
-      correlationId,
+      correlationId
     );
 
     expect(error.correlationId).toBe(correlationId);
@@ -164,7 +164,7 @@ describe("isRetryable", () => {
       "PROVIDER_UNAVAILABLE",
       "Unavailable",
       "a2a",
-      true,
+      true
     );
     expect(isRetryable(unavailableError)).toBe(true);
   });
@@ -174,7 +174,7 @@ describe("isRetryable", () => {
       "PROVIDER_INIT_FAILED",
       "Init failed",
       "acp",
-      false,
+      false
     );
     expect(isRetryable(initError)).toBe(false);
 
@@ -182,7 +182,7 @@ describe("isRetryable", () => {
       "PROVIDER_POLICY_DENIED",
       "Policy denied",
       "internal",
-      false,
+      false
     );
     expect(isRetryable(policyError)).toBe(false);
   });
@@ -212,7 +212,7 @@ describe("getErrorMessage", () => {
   it("should have message for every error code", () => {
     const codes = Object.values(PROVIDER_ERROR_CODES);
 
-    codes.forEach((code) => {
+    codes.forEach(code => {
       const message = getErrorMessage(code as any);
       expect(message).toBeTruthy();
       expect(message.length).toBeGreaterThan(0);
@@ -244,7 +244,7 @@ describe("Error Code Retryability", () => {
   it("PROVIDER_CONCURRENCY_EXCEEDED should be retryable", () => {
     const error = new NormalizedProviderError(
       "PROVIDER_CONCURRENCY_EXCEEDED",
-      "Concurrency exceeded",
+      "Concurrency exceeded"
     );
     expect(isRetryable(error)).toBe(true);
   });

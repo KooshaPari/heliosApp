@@ -51,13 +51,13 @@ export class RedactionEngine {
   loadRules(rules: RedactionRule[]): void {
     this.rules = rules;
     this.compiledRules = rules
-      .filter((r) => r.enabled)
-      .map((r) => ({
+      .filter(r => r.enabled)
+      .map(r => ({
         rule: r,
         // Ensure global flag for exec-loop scanning
         regex: new RegExp(
           r.pattern.source,
-          r.pattern.flags.includes("g") ? r.pattern.flags : r.pattern.flags + "g",
+          r.pattern.flags.includes("g") ? r.pattern.flags : `${r.pattern.flags}g`
         ),
       }));
   }

@@ -1,11 +1,11 @@
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import {
+  AUDIT_EVENT_RESULTS,
+  AUDIT_EVENT_TYPES,
   type AuditEvent,
   createAuditEvent,
   validateAuditEvent,
-  AUDIT_EVENT_TYPES,
-  AUDIT_EVENT_RESULTS,
-} from "../../../src/audit/event";
+} from "../../../src/audit/event.ts";
 
 describe("AuditEvent Schema", () => {
   describe("createAuditEvent", () => {
@@ -72,7 +72,7 @@ describe("AuditEvent Schema", () => {
       });
 
       const ts = new Date(event.timestamp);
-      expect(isNaN(ts.getTime())).toBe(false);
+      expect(Number.isNaN(ts.getTime())).toBe(false);
       expect(event.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     });
 

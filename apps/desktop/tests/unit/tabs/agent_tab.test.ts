@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { AgentTab } from "../../../src/tabs/agent_tab";
-import type { ActiveContext } from "../../../src/tabs/context_switch";
+import { beforeEach, describe, expect, it } from "vitest";
+import { AgentTab } from "../../../src/tabs/agent_tab.ts";
+import type { ActiveContext } from "../../../src/tabs/context_switch.ts";
 
 describe("AgentTab", () => {
   let tab: AgentTab;
@@ -78,7 +78,7 @@ describe("AgentTab", () => {
       const buttons = el.querySelectorAll("button");
 
       expect(buttons.length).toBeGreaterThan(0);
-      expect(Array.from(buttons).some((b) => b.textContent?.includes("Restart"))).toBe(true);
+      expect(Array.from(buttons).some(b => b.textContent?.includes("Restart"))).toBe(true);
     });
   });
 

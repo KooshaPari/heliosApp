@@ -3,7 +3,7 @@
  * Covers: T009 (unit tests).
  */
 
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { RioProcess } from "../../../../src/renderer/rio/process.js";
 
 describe("RioProcess — initial state", () => {
@@ -41,7 +41,7 @@ describe("RioProcess — exit handler registration", () => {
   it("registers exit handlers", () => {
     const proc = new RioProcess();
     const calls: number[] = [];
-    proc.onExit((code) => calls.push(code));
+    proc.onExit(code => calls.push(code));
     // Handler registered but not called since process never started.
     expect(calls.length).toBe(0);
   });

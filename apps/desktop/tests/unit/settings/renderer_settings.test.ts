@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { RendererSettings, type Renderer } from "../../../src/settings/renderer_settings";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { type Renderer, RendererSettings } from "../../../src/settings/renderer_settings.ts";
 
 describe("RendererSettings", () => {
   let container: HTMLDivElement;
@@ -171,7 +171,7 @@ describe("RendererSettings", () => {
 
     let activeOption = container.querySelector(".renderer-option.active");
     expect(activeOption?.querySelector("[data-renderer]")?.getAttribute("data-renderer")).toBe(
-      "ghostty",
+      "ghostty"
     );
 
     const updatedRenderers = [
@@ -183,7 +183,7 @@ describe("RendererSettings", () => {
 
     activeOption = container.querySelector(".renderer-option.active");
     expect(activeOption?.querySelector("[data-renderer]")?.getAttribute("data-renderer")).toBe(
-      "rio",
+      "rio"
     );
   });
 
@@ -200,7 +200,7 @@ describe("RendererSettings", () => {
     expect(radios.length).toBe(2);
 
     const ghosttyRadio = container.querySelector(
-      '[data-renderer="ghostty"] input',
+      '[data-renderer="ghostty"] input'
     ) as HTMLInputElement;
     expect(ghosttyRadio?.checked).toBeTruthy();
   });

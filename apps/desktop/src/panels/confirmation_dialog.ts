@@ -17,7 +17,7 @@ export class ConfirmationDialog {
   private props: ConfirmationDialogProps;
   private container: HTMLElement | null = null;
   private dialogElement: HTMLElement | null = null;
-  private isOpen: boolean = false;
+  private isOpen = false;
   private previousFocus: HTMLElement | null = null;
 
   constructor(props: ConfirmationDialogProps) {
@@ -34,7 +34,9 @@ export class ConfirmationDialog {
   }
 
   open(): void {
-    if (this.isOpen || !this.container) return;
+    if (this.isOpen || !this.container) {
+      return;
+    }
 
     // Store previous focus to restore on close
     this.previousFocus = document.activeElement as HTMLElement;
@@ -45,7 +47,9 @@ export class ConfirmationDialog {
   }
 
   close(): void {
-    if (!this.isOpen || !this.dialogElement) return;
+    if (!(this.isOpen && this.dialogElement)) {
+      return;
+    }
 
     this.isOpen = false;
     this.detachEventListeners();
@@ -66,7 +70,9 @@ export class ConfirmationDialog {
   }
 
   private createAndShowDialog(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     // Backdrop
     const backdrop = document.createElement("div");
@@ -184,7 +190,9 @@ export class ConfirmationDialog {
   }
 
   private attachEventListeners(): void {
-    if (!this.dialogElement) return;
+    if (!this.dialogElement) {
+      return;
+    }
 
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -194,7 +202,7 @@ export class ConfirmationDialog {
       } else if (e.key === "Enter") {
         e.preventDefault();
         const confirmBtn = this.dialogElement?.querySelector(
-          ".confirmation-confirm",
+          ".confirmation-confirm"
         ) as HTMLButtonElement;
         if (confirmBtn) {
           this.props.onConfirm();
@@ -217,13 +225,17 @@ export class ConfirmationDialog {
   }
 
   private detachEventListeners(): void {
-    if (!this.dialogElement) return;
+    if (!this.dialogElement) {
+      return;
+    }
 
     // Event listeners are automatically removed when element is removed
   }
 
   private handleTabKey(event: KeyboardEvent): void {
-    if (!this.dialogElement) return;
+    if (!this.dialogElement) {
+      return;
+    }
 
     const buttons = this.dialogElement.querySelectorAll("button") as NodeListOf<HTMLButtonElement>;
     const focusedButton = document.activeElement as HTMLButtonElement;
@@ -235,12 +247,10 @@ export class ConfirmationDialog {
         event.preventDefault();
         buttons[buttons.length - 1].focus();
       }
-    } else {
+    } else if (focusedIndex >= buttons.length - 1) {
       // Tab
-      if (focusedIndex >= buttons.length - 1) {
-        event.preventDefault();
-        buttons[0].focus();
-      }
+      event.preventDefault();
+      buttons[0].focus();
     }
   }
 

@@ -4,9 +4,14 @@
  * FR-025-001: Typed adapter interface with lifecycle methods.
  */
 
-import { describe, it, expect } from "vitest";
-import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
-import { BaseProviderAdapter, type ACPConfig, type ACPExecuteInput, type ACPExecuteOutput } from "../adapter.js";
+import { describe, expect, it } from "vitest";
+import type { ProviderHealthStatus } from "../adapter.js";
+import {
+  type ACPConfig,
+  type ACPExecuteInput,
+  type ACPExecuteOutput,
+  BaseProviderAdapter,
+} from "../adapter.js";
 
 /**
  * Mock provider implementation for testing.
@@ -67,7 +72,7 @@ class MockProvider extends BaseProviderAdapter<ACPConfig, ACPExecuteInput, ACPEx
     };
   }
 
-  async execute(input: ACPExecuteInput, correlationId: string): Promise<ACPExecuteOutput> {
+  async execute(input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
     if (this.failExecute) {
       throw new Error("Execute failed");
     }
@@ -211,7 +216,7 @@ describe("ProviderAdapter Interface", () => {
       await provider.init(config);
 
       await expect(provider.execute({ prompt: "Hello" }, "correlation-123")).rejects.toThrow(
-        "Execute failed",
+        "Execute failed"
       );
     });
 
@@ -219,7 +224,7 @@ describe("ProviderAdapter Interface", () => {
       const provider = new MockProvider();
 
       await expect(provider.execute({ prompt: "Hello" }, "correlation-123")).rejects.toThrow(
-        "not initialized",
+        "not initialized"
       );
     });
   });
@@ -257,7 +262,7 @@ describe("ProviderAdapter Interface", () => {
           };
         }
 
-        async execute(input: CustomInput, correlationId: string): Promise<CustomOutput> {
+        async execute(input: CustomInput, _correlationId: string): Promise<CustomOutput> {
           expect(input.options.timeout).toBeGreaterThan(0);
           return {
             answer: "Custom answer",
@@ -279,7 +284,7 @@ describe("ProviderAdapter Interface", () => {
 
       const output = await provider.execute(
         { query: "test", options: { timeout: 5000 } },
-        "correlation-123",
+        "correlation-123"
       );
 
       expect(output.answer).toBe("Custom answer");

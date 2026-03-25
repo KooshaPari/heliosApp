@@ -17,7 +17,7 @@ export interface MonotonicClock {
 // Fail-fast: ensure performance.now is available at module load.
 if (typeof performance === "undefined" || typeof performance.now !== "function") {
   throw new Error(
-    "performance.now() is required for monotonic timing but is unavailable in this environment.",
+    "performance.now() is required for monotonic timing but is unavailable in this environment."
   );
 }
 
@@ -105,16 +105,12 @@ export function markEnd(metric: string, handle: number): number {
 
   // Guard: out-of-range handle.
   if (handle < 0 || handle >= s.startTimes.length) {
-    console.warn(`[perf] markEnd called with out-of-range handle ${handle}`);
-    return NaN;
+    return Number.NaN;
   }
 
   // Guard: stale / mismatched handle.
   if (s.metricNames[handle] !== metric) {
-    console.warn(
-      `[perf] markEnd handle ${handle} expected metric "${metric}" but found "${s.metricNames[handle]}" (stale?)`,
-    );
-    return NaN;
+    return Number.NaN;
   }
 
   const end = s.clock.now();
@@ -172,14 +168,10 @@ export function createInstrumentationHooks(opts?: {
 
     markEnd(metric: string, handle: number): number {
       if (handle < 0 || handle >= state.startTimes.length) {
-        console.warn(`[perf] markEnd called with out-of-range handle ${handle}`);
-        return NaN;
+        return Number.NaN;
       }
       if (state.metricNames[handle] !== metric) {
-        console.warn(
-          `[perf] markEnd handle ${handle} expected metric "${metric}" but found "${state.metricNames[handle]}" (stale?)`,
-        );
-        return NaN;
+        return Number.NaN;
       }
       const end = state.clock.now();
       const duration = end - state.startTimes[handle]!;
@@ -205,7 +197,7 @@ export function createInstrumentationHooks(opts?: {
  * Returns a teardown function.
  */
 export function setGlobalOnSample(
-  cb: (metric: string, value: number, timestamp: number) => void,
+  cb: (metric: string, value: number, timestamp: number) => void
 ): () => void {
   globalState.onSample = cb;
   return () => {
@@ -220,6 +212,6 @@ export function setGlobalOnSample(
 export function _resetGlobalHooks(opts?: { maxConcurrent?: number; clock?: MonotonicClock }): void {
   globalState = createState(
     opts?.maxConcurrent ?? DEFAULT_MAX_CONCURRENT_MARKS,
-    opts?.clock ?? defaultClock,
+    opts?.clock ?? defaultClock
   );
 }

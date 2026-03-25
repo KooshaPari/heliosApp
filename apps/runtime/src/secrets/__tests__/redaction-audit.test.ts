@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { describe, expect, it } from "bun:test";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { RedactionAuditTrail } from "../audit-trail.js";
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules } from "../redaction-rules.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
 
 function makeEngine(): RedactionEngine {
   const engine = new RedactionEngine();
@@ -35,7 +35,7 @@ describe("RedactionAuditTrail: record creation", () => {
     expect(record.artifactType).toBe("log");
     expect(record.correlationId).toBe("corr-1");
     expect(record.rulesApplied.length).toBeGreaterThan(0);
-    expect(record.matchesByCategory["AWS_ACCESS_KEY"]).toBeGreaterThan(0);
+    expect(record.matchesByCategory.AWS_ACCESS_KEY).toBeGreaterThan(0);
     expect(record.timestamp).toBeTruthy();
     expect(record.latencyMs).toBeGreaterThanOrEqual(0);
   });
@@ -82,7 +82,7 @@ describe("RedactionAuditTrail: listRecords filtering", () => {
     const engine = makeEngine();
 
     const before = new Date();
-    await new Promise((r) => setTimeout(r, 5));
+    await new Promise(r => setTimeout(r, 5));
 
     const r = engine.redact("text", ctx);
     trail.record("art-1", r, ctx);
@@ -104,9 +104,9 @@ describe("RedactionAuditTrail: bus events", () => {
     const engine = makeEngine();
     const result = engine.redact("AKIAIOSFODNN7EXAMPLE", ctx);
     trail.record("art-1", result, ctx);
-    await new Promise((r) => setTimeout(r, 10));
+    await new Promise(r => setTimeout(r, 10));
     const events = bus.getEvents();
-    expect(events.some((e) => e.topic === "secrets.redaction.applied")).toBe(true);
+    expect(events.some(e => e.topic === "secrets.redaction.applied")).toBe(true);
   });
 
   it("emitted event does not contain the secret value", async () => {
@@ -116,7 +116,7 @@ describe("RedactionAuditTrail: bus events", () => {
     const secret = "AKIAIOSFODNN7EXAMPLE";
     const result = engine.redact(secret, ctx);
     trail.record("art-1", result, ctx);
-    await new Promise((r) => setTimeout(r, 10));
+    await new Promise(r => setTimeout(r, 10));
     const events = bus.getEvents();
     const eventsStr = JSON.stringify(events);
     expect(eventsStr).not.toContain(secret);

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { TerminalRegistry } from "../../../src/sessions/terminal_registry";
+import { TerminalRegistry } from "../../../src/sessions/terminal_registry.ts";
 
 describe("TerminalRegistry", () => {
   test("stores and queries terminal context", () => {
@@ -32,14 +32,14 @@ describe("TerminalRegistry", () => {
         workspace_id: "ws-1",
         lane_id: "lane-1",
         session_id: "sess-1",
-      }),
+      })
     ).toBe(true);
     expect(
       registry.isOwnedBy("t-2", {
         workspace_id: "ws-1",
         lane_id: "lane-2",
         session_id: "sess-1",
-      }),
+      })
     ).toBe(false);
   });
 

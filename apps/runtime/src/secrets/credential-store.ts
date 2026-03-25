@@ -1,19 +1,19 @@
+import { randomBytes } from "node:crypto";
 import {
   chmodSync,
   existsSync,
   mkdirSync,
-  readdirSync,
   readFileSync,
+  readdirSync,
   renameSync,
   rmSync,
   statSync,
   writeFileSync,
 } from "node:fs";
 import { join, resolve, sep } from "node:path";
-import { randomBytes } from "node:crypto";
-import { EncryptionService } from "./encryption.js";
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
+import { EncryptionService } from "./encryption.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -141,11 +141,13 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
 
     const dir = this.credentialDir(providerId, workspaceId);
-    if (!existsSync(dir)) return [];
+    if (!existsSync(dir)) {
+      return [];
+    }
 
     return readdirSync(dir)
-      .filter((f) => f.endsWith(".enc"))
-      .map((f) => f.slice(0, -4)); // strip ".enc"
+      .filter(f => f.endsWith(".enc"))
+      .map(f => f.slice(0, -4)); // strip ".enc"
   }
 
   /**
@@ -188,7 +190,7 @@ export class CredentialStore {
     workspaceId: string,
     name: string,
     value: string,
-    correlationId: string,
+    correlationId: string
   ): Promise<void> {
     validateId("providerId", providerId);
     validateId("workspaceId", workspaceId);
@@ -216,7 +218,7 @@ export class CredentialStore {
     workspaceId: string,
     name: string,
     newValue: string,
-    correlationId: string,
+    correlationId: string
   ): Promise<void> {
     validateId("providerId", providerId);
     validateId("workspaceId", workspaceId);
@@ -255,7 +257,7 @@ export class CredentialStore {
     providerId: string,
     workspaceId: string,
     name: string,
-    correlationId: string,
+    correlationId: string
   ): Promise<void> {
     validateId("providerId", providerId);
     validateId("workspaceId", workspaceId);
@@ -278,7 +280,7 @@ export class CredentialStore {
     ctx: CredentialAccessContext,
     targetProviderId: string,
     workspaceId: string,
-    name: string,
+    name: string
   ): Promise<string> {
     this.checkAccess(ctx, targetProviderId, workspaceId);
 
@@ -300,7 +302,7 @@ export class CredentialStore {
   private checkAccess(
     ctx: CredentialAccessContext,
     targetProviderId: string,
-    targetWorkspaceId: string,
+    targetWorkspaceId: string
   ): void {
     validateId("requestingProviderId", ctx.requestingProviderId);
     validateId("requestingWorkspaceId", ctx.requestingWorkspaceId);
@@ -320,7 +322,7 @@ export class CredentialStore {
         correlationId: ctx.correlationId,
       });
       throw new CredentialAccessDeniedError(
-        `Provider '${ctx.requestingProviderId}' is not allowed to access credentials of provider '${targetProviderId}'`,
+        `Provider '${ctx.requestingProviderId}' is not allowed to access credentials of provider '${targetProviderId}'`
       );
     }
   }
@@ -353,7 +355,9 @@ export class CredentialStore {
   // -------------------------------------------------------------------------
 
   private async emit(topic: string, payload: Record<string, unknown>): Promise<void> {
-    if (this.bus === null) return;
+    if (this.bus === null) {
+      return;
+    }
     const envelope: LocalBusEnvelope = {
       id: `secrets:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
       type: "event",

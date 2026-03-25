@@ -4,7 +4,7 @@ import {
   INITIAL_ACTIVE_CONTEXT_STATE,
   selectActiveContext,
   selectRendererSwitchStatus,
-} from "../../src/context_store";
+} from "../../src/context_store.ts";
 
 describe("ActiveContextStore", () => {
   test("keeps a single active context across tab switches", () => {

@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { RendererOption } from "../../../src/settings/renderer_option";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { RendererOption } from "../../../src/settings/renderer_option.ts";
 
 describe("RendererOption", () => {
   let container: HTMLDivElement;

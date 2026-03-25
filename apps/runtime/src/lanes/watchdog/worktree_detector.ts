@@ -1,14 +1,14 @@
 // T002 - Orphaned worktree detector
 
-import { promises as fs } from "fs";
-import path from "path";
-import { LaneRegistry, type LaneRecord } from "../registry.js";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import type { LaneRecord, LaneRegistry } from "../registry.js";
 import type { OrphanedResource } from "./resource_classifier.js";
 
 export class WorktreeDetector {
   constructor(
     private readonly baseDir: string,
-    private readonly laneRegistry: LaneRegistry,
+    private readonly laneRegistry: LaneRegistry
   ) {}
 
   async detect(): Promise<OrphanedResource[]> {
@@ -18,7 +18,9 @@ export class WorktreeDetector {
       const entries = await fs.readdir(this.baseDir, { withFileTypes: true });
 
       for (const entry of entries) {
-        if (!entry.isDirectory()) continue;
+        if (!entry.isDirectory()) {
+          continue;
+        }
 
         const worktreePath = path.join(this.baseDir, entry.name);
         const laneId = this.extractLaneId(entry.name);
@@ -49,9 +51,7 @@ export class WorktreeDetector {
           estimatedOwnerId: laneId,
         });
       }
-    } catch (error) {
-      console.error("Failed to detect orphaned worktrees:", error);
-    }
+    } catch (_error) {}
 
     return orphans;
   }

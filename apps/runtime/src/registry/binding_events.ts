@@ -5,8 +5,8 @@
  * Events are published via the internal bus for downstream consumers.
  */
 
+import { randomUUID as uuidv4 } from "node:crypto";
 import type { LocalBus } from "../protocol/bus.js";
-import { randomUUID as uuidv4 } from "crypto";
 import type { BindingTriple, TerminalBinding } from "./binding_triple.js";
 
 // Event topics
@@ -58,9 +58,7 @@ export class BindingEventEmitter {
 
     try {
       await this.bus.publish(event as any);
-    } catch (error) {
-      console.error(`Failed to emit binding event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 
   /**
@@ -82,7 +80,7 @@ export class BindingEventEmitter {
   async emitRebound(
     binding: TerminalBinding,
     previousBinding: BindingTriple,
-    correlationId: string = uuidv4(),
+    correlationId: string = uuidv4()
   ): Promise<void> {
     await this.emitEvent(BINDING_TOPICS.REBOUND, {
       terminalId: binding.terminalId,
@@ -113,7 +111,7 @@ export class BindingEventEmitter {
   async emitValidationFailed(
     binding: TerminalBinding,
     reason: string,
-    correlationId: string = uuidv4(),
+    correlationId: string = uuidv4()
   ): Promise<void> {
     const payloadWithReason = {
       terminalId: binding.terminalId,
@@ -139,8 +137,6 @@ export class BindingEventEmitter {
 
     try {
       await this.bus.publish(event as any);
-    } catch (error) {
-      console.error(`Failed to emit validation_failed event:`, error);
-    }
+    } catch (_error) {}
   }
 }

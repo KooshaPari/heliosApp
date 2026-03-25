@@ -1,8 +1,12 @@
-import { describe, it, expect, beforeEach } from "bun:test";
-import { AuditLedger } from "../../../src/audit/ledger";
-import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
-import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
-import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
+import { beforeEach, describe, expect, it } from "bun:test";
+import {
+  AUDIT_EVENT_RESULTS,
+  AUDIT_EVENT_TYPES,
+  createAuditEvent,
+} from "../../../src/audit/event.ts";
+import { AuditLedger } from "../../../src/audit/ledger.ts";
+import { AuditRingBuffer } from "../../../src/audit/ring-buffer.ts";
+import { SQLiteAuditStore } from "../../../src/audit/sqlite-store.ts";
 
 describe("AuditLedger", () => {
   let ledger: AuditLedger;
@@ -55,17 +59,17 @@ describe("AuditLedger", () => {
 
     it("should filter by workspace ID", () => {
       const results = ledger.search({ workspaceId: "ws-1" });
-      expect(results.every((e) => e.workspaceId === "ws-1")).toBe(true);
+      expect(results.every(e => e.workspaceId === "ws-1")).toBe(true);
     });
 
     it("should filter by actor", () => {
       const results = ledger.search({ actor: "agent-0" });
-      expect(results.every((e) => e.actor === "agent-0")).toBe(true);
+      expect(results.every(e => e.actor === "agent-0")).toBe(true);
     });
 
     it("should filter by event type", () => {
       const results = ledger.search({ eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED });
-      expect(results.every((e) => e.eventType === AUDIT_EVENT_TYPES.COMMAND_EXECUTED)).toBe(true);
+      expect(results.every(e => e.eventType === AUDIT_EVENT_TYPES.COMMAND_EXECUTED)).toBe(true);
     });
 
     it("should merge results from ring buffer and store", () => {
@@ -163,10 +167,10 @@ describe("AuditLedger", () => {
   });
 
   describe("subscribe", () => {
-    it("should deliver matching events to subscriber", (done) => {
+    it("should deliver matching events to subscriber", done => {
       let callCount = 0;
 
-      const unsubscribe = ledger.subscribe({ workspaceId: "ws-1" }, (event) => {
+      const unsubscribe = ledger.subscribe({ workspaceId: "ws-1" }, event => {
         callCount++;
         expect(event.workspaceId).toBe("ws-1");
       });
@@ -193,7 +197,7 @@ describe("AuditLedger", () => {
       }, 150);
     });
 
-    it("should filter non-matching events", (done) => {
+    it("should filter non-matching events", done => {
       let callCount = 0;
 
       const unsubscribe = ledger.subscribe({ workspaceId: "ws-1" }, () => {

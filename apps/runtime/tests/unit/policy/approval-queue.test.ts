@@ -1,5 +1,5 @@
-import { test, expect, describe } from "bun:test";
-import { ApprovalQueue, ApprovalStatus } from "../../../src/policy/approval-queue";
+import { describe, expect, test } from "bun:test";
+import { ApprovalQueue, ApprovalStatus } from "../../../src/policy/approval-queue.ts";
 
 describe("ApprovalQueue", () => {
   test("creates approval requests", () => {

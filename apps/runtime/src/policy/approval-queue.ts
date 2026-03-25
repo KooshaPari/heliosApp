@@ -40,7 +40,7 @@ export class ApprovalQueue {
     workspaceId: string,
     agentId: string,
     requesterName: string,
-    expiryMs?: number,
+    expiryMs?: number
   ): ApprovalRequest {
     const id = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const now = new Date();
@@ -105,14 +105,14 @@ export class ApprovalQueue {
    * Get all pending requests.
    */
   getPending(): ApprovalRequest[] {
-    return Array.from(this.requests.values()).filter((r) => r.status === ApprovalStatus.Pending);
+    return Array.from(this.requests.values()).filter(r => r.status === ApprovalStatus.Pending);
   }
 
   /**
    * Get all requests for a workspace.
    */
   getForWorkspace(workspaceId: string): ApprovalRequest[] {
-    return Array.from(this.requests.values()).filter((r) => r.workspaceId === workspaceId);
+    return Array.from(this.requests.values()).filter(r => r.workspaceId === workspaceId);
   }
 
   /**

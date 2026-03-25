@@ -1,7 +1,7 @@
+import { randomUUID } from "node:crypto";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
-import { randomUUID } from "crypto";
 
 export enum CrashReason {
   HEARTBEAT_TIMEOUT = "HEARTBEAT_TIMEOUT",
@@ -40,7 +40,7 @@ export class Watchdog {
     this.bus = bus;
   }
 
-  registerProcess(name: string, pid: number, heartbeatIntervalMs: number = 2000): void {
+  registerProcess(name: string, pid: number, heartbeatIntervalMs = 2000): void {
     // Clear any existing monitor for this name
     this.unregister(name);
 
@@ -57,17 +57,21 @@ export class Watchdog {
 
   receiveHeartbeat(name: string): void {
     const monitor = this.monitors.get(name);
-    if (!monitor) return;
+    if (!monitor) {
+      return;
+    }
 
     monitor.lastHeartbeat = Date.now();
     // Reset timeout
-    if (monitor.timeoutId) clearTimeout(monitor.timeoutId);
+    if (monitor.timeoutId) {
+      clearTimeout(monitor.timeoutId);
+    }
     this.startHeartbeatTimer(monitor);
   }
 
   unregister(name: string): void {
     const monitor = this.monitors.get(name);
-    if (monitor && monitor.timeoutId) {
+    if (monitor?.timeoutId) {
       clearTimeout(monitor.timeoutId);
     }
     this.monitors.delete(name);
@@ -107,7 +111,7 @@ export class Watchdog {
     name: string,
     pid: number,
     exitCode?: number,
-    signal?: string,
+    signal?: string
   ): Promise<void> {
     this.unregister(name);
 
@@ -176,10 +180,7 @@ export class Watchdog {
       // Atomic write: write to temp file then rename
       await fs.writeFile(tempPath, JSON.stringify(event, null, 2));
       await fs.rename(tempPath, recordPath);
-    } catch (err) {
-      // Silently fail - watchdog should not crash due to I/O errors
-      console.error("Failed to write crash record:", err);
-    }
+    } catch (_err) {}
   }
 
   private async isProcessRunning(pid: number): Promise<boolean> {
@@ -196,7 +197,7 @@ export class Watchdog {
 export function startHeartbeat(
   watchdog: Watchdog,
   processName: string,
-  intervalMs: number = 2000,
+  intervalMs = 2000
 ): () => void {
   let running = true;
   const interval = setInterval(() => {

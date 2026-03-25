@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { randomBytes } from "node:crypto";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { EncryptionService } from "../encryption.js";
-import { CredentialStore, CredentialAccessDeniedError } from "../credential-store.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { CredentialAccessDeniedError, CredentialStore } from "../credential-store.js";
+import { EncryptionService } from "../encryption.js";
 
 function makeStore(dataDir: string, bus: InMemoryLocalBus): CredentialStore {
   const fixedKey = randomBytes(32);
@@ -40,7 +40,7 @@ describe("CredentialStore: cross-provider isolation", () => {
       },
       "providerA",
       "ws1",
-      "myKey",
+      "myKey"
     );
     expect(value).toBe("secret");
   });
@@ -56,8 +56,8 @@ describe("CredentialStore: cross-provider isolation", () => {
         },
         "providerA",
         "ws1",
-        "myKey",
-      ),
+        "myKey"
+      )
     ).rejects.toBeInstanceOf(CredentialAccessDeniedError);
   });
 
@@ -72,15 +72,15 @@ describe("CredentialStore: cross-provider isolation", () => {
         },
         "providerA",
         "ws1",
-        "myKey",
+        "myKey"
       );
     } catch {
       // expected
     }
     // Give the fire-and-forget a tick to settle
-    await new Promise((r) => setTimeout(r, 10));
+    await new Promise(r => setTimeout(r, 10));
     const events = bus.getEvents();
-    const denied = events.find((e) => e.topic === "secrets.credential.access.denied");
+    const denied = events.find(e => e.topic === "secrets.credential.access.denied");
     expect(denied).toBeDefined();
     expect(denied?.payload?.requestingProviderId).toBe("evil-provider");
     expect(denied?.payload?.targetProviderId).toBe("providerA");
@@ -93,12 +93,12 @@ describe("CredentialStore: cross-provider isolation", () => {
         { requestingProviderId: "evil", requestingWorkspaceId: "ws1", correlationId: "corr-002" },
         "providerA",
         "ws1",
-        "myKey",
+        "myKey"
       );
     } catch {
       // expected
     }
-    await new Promise((r) => setTimeout(r, 10));
+    await new Promise(r => setTimeout(r, 10));
     const events = bus.getEvents();
     const raw = JSON.stringify(events);
     expect(raw).not.toContain("secret-value");
@@ -115,8 +115,8 @@ describe("CredentialStore: cross-provider isolation", () => {
         },
         "providerA",
         "ws1",
-        "myKey",
-      ),
+        "myKey"
+      )
     ).rejects.toBeInstanceOf(CredentialAccessDeniedError);
   });
 
@@ -129,8 +129,8 @@ describe("CredentialStore: cross-provider isolation", () => {
         { requestingProviderId: "../evil", requestingWorkspaceId: "ws1", correlationId: "c" },
         "providerA",
         "ws1",
-        "myKey",
-      ),
+        "myKey"
+      )
     ).rejects.toThrow();
   });
 
@@ -140,8 +140,8 @@ describe("CredentialStore: cross-provider isolation", () => {
         { requestingProviderId: "p", requestingWorkspaceId: "/etc/passwd", correlationId: "c" },
         "providerA",
         "ws1",
-        "myKey",
-      ),
+        "myKey"
+      )
     ).rejects.toThrow();
   });
 
@@ -160,7 +160,7 @@ describe("CredentialStore: cross-provider isolation", () => {
         { requestingProviderId: "other", requestingWorkspaceId: "ws1", correlationId: "c" },
         "providerA",
         "ws1",
-        "myKey",
+        "myKey"
       );
       expect(true).toBe(false); // should not reach here
     } catch (err) {

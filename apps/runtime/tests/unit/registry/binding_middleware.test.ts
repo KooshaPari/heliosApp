@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { BindingMiddleware } from "../../../src/registry/binding_middleware.js";
-import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import {
   BindingState,
   type BindingTriple,
   type TerminalBinding,
 } from "../../../src/registry/binding_triple.js";
+import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 
 describe("BindingMiddleware", () => {
   let registry: TerminalRegistry;
@@ -141,7 +141,7 @@ describe("BindingMiddleware", () => {
       const handler = async () => "success";
 
       await expect(middleware.wrapOperation("terminal-nonexistent", handler)).rejects.toThrow(
-        /TERMINAL_NOT_FOUND/,
+        /TERMINAL_NOT_FOUND/
       );
     });
 
@@ -163,7 +163,7 @@ describe("BindingMiddleware", () => {
       await middleware.wrapOperation("terminal-1", handler);
 
       expect(receivedBinding).toBeDefined();
-      expect(receivedBinding!.terminalId).toBe("terminal-1");
+      expect(receivedBinding?.terminalId).toBe("terminal-1");
     });
   });
 
@@ -193,7 +193,7 @@ describe("BindingMiddleware", () => {
       const handler = () => "success";
 
       expect(() => middleware.wrapOperationSync("terminal-nonexistent", handler)).toThrow(
-        /TERMINAL_NOT_FOUND/,
+        /TERMINAL_NOT_FOUND/
       );
     });
   });

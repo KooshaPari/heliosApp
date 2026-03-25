@@ -1,13 +1,13 @@
 import { type Component, For, Show, createEffect } from "solid-js";
-import type { Message } from "../../../../runtime/src/types/conversation";
-import { MessageBubble } from "./MessageBubble";
+import type { Message } from "../../../../runtime/src/types/conversation.ts";
+import { MessageBubble } from "./MessageBubble.tsx";
 
 type ChatPanelProps = {
   messages: Message[];
   isStreaming: boolean;
 };
 
-export const ChatPanel: Component<ChatPanelProps> = (props) => {
+export const ChatPanel: Component<ChatPanelProps> = props => {
   let containerRef: HTMLDivElement | undefined;
 
   // Auto-scroll to bottom on new messages
@@ -15,7 +15,7 @@ export const ChatPanel: Component<ChatPanelProps> = (props) => {
     const _ = props.messages.length;
     if (containerRef) {
       requestAnimationFrame(() => {
-        containerRef!.scrollTop = containerRef!.scrollHeight;
+        containerRef!.scrollTop = containerRef?.scrollHeight;
       });
     }
   });
@@ -55,7 +55,7 @@ export const ChatPanel: Component<ChatPanelProps> = (props) => {
           </p>
         </div>
       </Show>
-      <For each={props.messages}>{(message) => <MessageBubble message={message} />}</For>
+      <For each={props.messages}>{message => <MessageBubble message={message} />}</For>
     </div>
   );
 };

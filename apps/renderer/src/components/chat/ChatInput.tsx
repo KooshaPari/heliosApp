@@ -8,7 +8,7 @@ type ChatInputProps = {
   activeModel: string;
 };
 
-export const ChatInput: Component<ChatInputProps> = (props) => {
+export const ChatInput: Component<ChatInputProps> = props => {
   const [text, setText] = createSignal("");
 
   const handleSend = () => {
@@ -57,7 +57,7 @@ export const ChatInput: Component<ChatInputProps> = (props) => {
         </div>
         <textarea
           value={text()}
-          onInput={(e) => setText(e.currentTarget.value)}
+          onInput={e => setText(e.currentTarget.value)}
           onKeyDown={handleKeyDown}
           placeholder="Ask anything..."
           disabled={props.isStreaming}

@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  DEFAULT_COLOR_SCHEME,
   StatusBadge,
   getStatusBadgeContent,
-  DEFAULT_COLOR_SCHEME,
-} from "../../../src/panels/status_badge";
+} from "../../../src/panels/status_badge.ts";
 
 describe("StatusBadge", () => {
   let container: HTMLDivElement;
@@ -116,7 +116,7 @@ describe("StatusBadge", () => {
     badge.mount(container);
 
     const badgeElement = container.querySelector(
-      '.status-badge[data-state="running"]',
+      '.status-badge[data-state="running"]'
     ) as HTMLElement;
     const scheme = DEFAULT_COLOR_SCHEME.running;
 
@@ -150,7 +150,7 @@ describe("StatusBadge", () => {
       "orphaned",
     ];
 
-    states.forEach((state) => {
+    states.forEach(state => {
       badge = new StatusBadge({ state });
       badge.mount(container);
 

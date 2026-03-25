@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { InMemoryLocalBus } from "../../../src/protocol/bus";
+import { InMemoryLocalBus } from "../../../src/protocol/bus.ts";
 
 test("captures lane create latency metrics", async () => {
   const bus = new InMemoryLocalBus();
@@ -17,14 +17,14 @@ test("captures lane create latency metrics", async () => {
   expect(response.status).toBe("ok");
 
   const report = (bus as any).getMetricsReport();
-  const laneSummary = report.summaries.find((metric: any) => metric.metric === "lane_create_latency_ms");
+  const laneSummary = report.summaries.find(
+    (metric: any) => metric.metric === "lane_create_latency_ms"
+  );
   expect(laneSummary).toBeDefined();
   expect((laneSummary?.count ?? 0) >= 1).toBe(true);
 
-  const metricEvents = bus.getEvents().filter((event) => event.topic === "diagnostics.metric");
-  expect(metricEvents.some((event) => event.payload?.metric === "lane_create_latency_ms")).toBe(
-    true,
-  );
+  const metricEvents = bus.getEvents().filter(event => event.topic === "diagnostics.metric");
+  expect(metricEvents.some(event => event.payload?.metric === "lane_create_latency_ms")).toBe(true);
 });
 
 test("captures session restore latency metrics", async () => {
@@ -46,7 +46,7 @@ test("captures session restore latency metrics", async () => {
 
   const report = (bus as any).getMetricsReport();
   const restoreSummary = report.summaries.find(
-    (metric: any) => metric.metric === "session_restore_latency_ms",
+    (metric: any) => metric.metric === "session_restore_latency_ms"
   );
   expect(restoreSummary).toBeDefined();
   expect((restoreSummary?.count ?? 0) >= 1).toBe(true);
@@ -73,14 +73,14 @@ test("captures terminal output backlog depth", async () => {
 
   const report = (bus as any).getMetricsReport();
   const backlogSummary = report.summaries.find(
-    (metric: any) => metric.metric === "terminal_output_backlog_depth",
+    (metric: any) => metric.metric === "terminal_output_backlog_depth"
   );
 
   expect(backlogSummary).toBeDefined();
   expect(backlogSummary?.latest).toBe(17);
 
-  const metricEvents = bus.getEvents().filter((event) => event.topic === "diagnostics.metric");
+  const metricEvents = bus.getEvents().filter(event => event.topic === "diagnostics.metric");
   expect(
-    metricEvents.some((event) => event.payload?.metric === "terminal_output_backlog_depth"),
+    metricEvents.some(event => event.payload?.metric === "terminal_output_backlog_depth")
   ).toBe(true);
 });

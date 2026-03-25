@@ -26,12 +26,12 @@ export function healthCheck(): HealthCheckResult {
 }
 
 // Re-export protocol types for consumer convenience
-export { InMemoryLocalBus } from "./protocol/bus";
-export type { LocalBus } from "./protocol/bus";
-export type { LocalBusEnvelope } from "./protocol/types";
+export { InMemoryLocalBus } from "./protocol/bus.ts";
+export type { LocalBus } from "./protocol/bus.ts";
+export type { LocalBusEnvelope } from "./protocol/types.ts";
 
-import { InMemoryLocalBus } from "./protocol/bus";
-import type { LocalBus } from "./protocol/bus";
+import { InMemoryLocalBus } from "./protocol/bus.ts";
+import type { LocalBus } from "./protocol/bus.ts";
 
 /** Runtime instance returned by createRuntime(). */
 export interface RuntimeInstance {

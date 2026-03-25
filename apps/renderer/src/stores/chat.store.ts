@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import type { Conversation, Message } from "../../../runtime/src/types/conversation";
+import type { Conversation, Message } from "../../../runtime/src/types/conversation.ts";
 
 const [conversations, setConversations] = createSignal<Conversation[]>([]);
 const [activeConversationId, setActiveConversationId] = createSignal<string | null>(null);
@@ -17,8 +17,10 @@ export function getConversations(): Conversation[] {
 
 export function getActiveConversation(): Conversation | null {
   const id = activeConversationId();
-  if (!id) return null;
-  return conversations().find((c) => c.id === id) ?? null;
+  if (!id) {
+    return null;
+  }
+  return conversations().find(c => c.id === id) ?? null;
 }
 
 export function getIsStreaming(): boolean {
@@ -70,15 +72,17 @@ export async function sendMessage(text: string): Promise<void> {
   };
 
   setConversations((prev: Conversation[]) =>
-    prev.map((c) => {
-      if (c.id !== convId) return c;
+    prev.map(c => {
+      if (c.id !== convId) {
+        return c;
+      }
       return {
         ...c,
         messages: [...c.messages, userMsg, assistantMsg],
         updatedAt: Date.now(),
         title: c.messages.length === 0 ? text.slice(0, 50) : c.title,
       };
-    }),
+    })
   );
 
   setIsStreaming(true);
@@ -96,7 +100,7 @@ export async function sendMessage(text: string): Promise<void> {
       appendToAssistantMessage(
         convId,
         assistantMsg.id,
-        "No API key configured. Set ANTHROPIC_API_KEY environment variable to enable agent chat.",
+        "No API key configured. Set ANTHROPIC_API_KEY environment variable to enable agent chat."
       );
       finalizeAssistantMessage(convId, assistantMsg.id, "complete");
       return;
@@ -104,9 +108,9 @@ export async function sendMessage(text: string): Promise<void> {
 
     const history =
       getActiveConversation()
-        ?.messages.filter((m) => m.role === "user" || m.role === "assistant")
-        .filter((m) => m.id !== assistantMsg.id)
-        .map((m) => ({ role: m.role, content: m.content })) ?? [];
+        ?.messages.filter(m => m.role === "user" || m.role === "assistant")
+        .filter(m => m.id !== assistantMsg.id)
+        .map(m => ({ role: m.role, content: m.content })) ?? [];
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -149,35 +153,43 @@ export async function sendMessage(text: string): Promise<void> {
 
 function appendToAssistantMessage(convId: string, msgId: string, content: string): void {
   setConversations((prev: Conversation[]) =>
-    prev.map((c) => {
-      if (c.id !== convId) return c;
+    prev.map(c => {
+      if (c.id !== convId) {
+        return c;
+      }
       return {
         ...c,
-        messages: c.messages.map((m) => {
-          if (m.id !== msgId) return m;
+        messages: c.messages.map(m => {
+          if (m.id !== msgId) {
+            return m;
+          }
           return { ...m, content: m.content + content };
         }),
       };
-    }),
+    })
   );
 }
 
 function finalizeAssistantMessage(
   convId: string,
   msgId: string,
-  status: "complete" | "error" | "cancelled",
+  status: "complete" | "error" | "cancelled"
 ): void {
   setConversations((prev: Conversation[]) =>
-    prev.map((c) => {
-      if (c.id !== convId) return c;
+    prev.map(c => {
+      if (c.id !== convId) {
+        return c;
+      }
       return {
         ...c,
-        messages: c.messages.map((m) => {
-          if (m.id !== msgId) return m;
+        messages: c.messages.map(m => {
+          if (m.id !== msgId) {
+            return m;
+          }
           return { ...m, metadata: { ...m.metadata, status } };
         }),
       };
-    }),
+    })
   );
   setIsStreaming(false);
 }
@@ -185,7 +197,9 @@ function finalizeAssistantMessage(
 export function cancelResponse(): void {
   // TODO: AbortController integration for cancelling in-flight requests
   const conv = getActiveConversation();
-  if (!conv) return;
+  if (!conv) {
+    return;
+  }
   const lastMsg = conv.messages[conv.messages.length - 1];
   if (lastMsg?.metadata?.status === "streaming") {
     finalizeAssistantMessage(conv.id, lastMsg.id, "cancelled");

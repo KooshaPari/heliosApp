@@ -46,7 +46,7 @@ export const METHODS: readonly string[] = Object.freeze([
 
 /** A method handler receives a command and returns a response (sync or async). */
 export type MethodHandler = (
-  command: CommandEnvelope,
+  command: CommandEnvelope
 ) => ResponseEnvelope | Promise<ResponseEnvelope>;
 
 // ---------------------------------------------------------------------------
@@ -59,7 +59,7 @@ const METHOD_NAME_RE = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
 function assertValidMethodName(method: string): void {
   if (!METHOD_NAME_RE.test(method)) {
     throw new Error(
-      `Invalid method name "${method}": must be non-empty, alphanumeric segments separated by dots`,
+      `Invalid method name "${method}": must be non-empty, alphanumeric segments separated by dots`
     );
   }
 }

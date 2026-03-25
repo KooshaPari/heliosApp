@@ -32,7 +32,7 @@ export class InvalidTransitionError extends Error {
 
   constructor(ptyId: string, currentState: PtyState, event: PtyEvent) {
     super(
-      `Invalid PTY transition: cannot apply event '${event}' in state '${currentState}' (ptyId=${ptyId})`,
+      `Invalid PTY transition: cannot apply event '${event}' in state '${currentState}' (ptyId=${ptyId})`
     );
     this.name = "InvalidTransitionError";
     this.ptyId = ptyId;

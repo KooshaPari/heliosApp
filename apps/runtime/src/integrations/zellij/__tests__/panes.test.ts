@@ -1,8 +1,8 @@
-import { describe, expect, it, mock, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+import type { ZellijCli } from "../cli.js";
+import { PaneTooSmallError, PtyBindingError } from "../errors.js";
 import { ZellijPaneManager } from "../panes.js";
 import { TopologyTracker } from "../topology.js";
-import { PaneTooSmallError, PtyBindingError } from "../errors.js";
-import type { ZellijCli } from "../cli.js";
 import type { PtyManagerInterface } from "../types.js";
 
 /**
@@ -83,7 +83,7 @@ describe("ZellijPaneManager", () => {
       });
 
       const runMock = cli.run as ReturnType<typeof mock>;
-      const firstCall = runMock.mock.calls[0]![0] as string[];
+      const firstCall = runMock.mock.calls[0]?.[0] as string[];
       expect(firstCall).toContain("--direction");
       expect(firstCall).toContain("down");
       expect(firstCall).toContain("--cwd");
@@ -133,7 +133,7 @@ describe("ZellijPaneManager", () => {
 
       // The pane is 12 cols, shrinking left by 5 would make it 7 < minCols (10)
       expect(paneManager.resizePane("test-session", 0, "left", 5)).rejects.toThrow(
-        PaneTooSmallError,
+        PaneTooSmallError
       );
     });
   });
@@ -143,7 +143,7 @@ describe("ZellijPaneManager", () => {
       expect(() => paneManager.validateSplit({ cols: 20, rows: 24 }, "vertical")).not.toThrow();
 
       expect(() => paneManager.validateSplit({ cols: 18, rows: 24 }, "vertical")).toThrow(
-        PaneTooSmallError,
+        PaneTooSmallError
       );
     });
 
@@ -151,7 +151,7 @@ describe("ZellijPaneManager", () => {
       expect(() => paneManager.validateSplit({ cols: 80, rows: 6 }, "horizontal")).not.toThrow();
 
       expect(() => paneManager.validateSplit({ cols: 80, rows: 4 }, "horizontal")).toThrow(
-        PaneTooSmallError,
+        PaneTooSmallError
       );
     });
 
@@ -161,7 +161,7 @@ describe("ZellijPaneManager", () => {
       expect(() => paneManager.validateDimensions({ cols: 9, rows: 3 })).toThrow(PaneTooSmallError);
 
       expect(() => paneManager.validateDimensions({ cols: 10, rows: 2 })).toThrow(
-        PaneTooSmallError,
+        PaneTooSmallError
       );
     });
 
@@ -182,7 +182,7 @@ describe("ZellijPaneManager", () => {
       topology.initializeTopology("tiny-session", { cols: 10, rows: 3 });
 
       expect(
-        paneManager.createPane("tiny-session", "lane-1", { direction: "vertical" }),
+        paneManager.createPane("tiny-session", "lane-1", { direction: "vertical" })
       ).rejects.toThrow(PaneTooSmallError);
     });
   });

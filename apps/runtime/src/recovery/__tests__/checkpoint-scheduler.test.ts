@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CheckpointScheduler } from "../checkpoint-scheduler.js";
-import { CheckpointWriter, type Checkpoint, type CheckpointSession } from "../checkpoint.js";
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
+import { type Checkpoint, CheckpointWriter } from "../checkpoint.js";
 
 describe("CheckpointScheduler", () => {
   let scheduler: CheckpointScheduler;
@@ -126,7 +126,7 @@ describe("CheckpointScheduler", () => {
       const slowWriter = new CheckpointWriter(tempDir);
       slowWriter.write = async () => {
         // Simulate 600ms write
-        await new Promise((resolve) => setTimeout(resolve, 600));
+        await new Promise(resolve => setTimeout(resolve, 600));
         writeCount++;
       };
 
@@ -134,7 +134,7 @@ describe("CheckpointScheduler", () => {
 
       // First checkpoint at 60s
       vi.advanceTimersByTime(60100);
-      const firstTime = Date.now();
+      const _firstTime = Date.now();
 
       // The scheduler should have increased its interval
       vi.advanceTimersByTime(60100); // Only 60s more, but interval was doubled
@@ -148,13 +148,13 @@ describe("CheckpointScheduler", () => {
 
       slowWriter.write = async (checkpoint: Checkpoint) => {
         if (isSlowWrite) {
-          await new Promise((resolve) => setTimeout(resolve, 600));
+          await new Promise(resolve => setTimeout(resolve, 600));
         }
         writeCount++;
         await fs.mkdir(path.join(tempDir, "recovery"), { recursive: true });
         await fs.writeFile(
           path.join(tempDir, "recovery", "checkpoint.json"),
-          JSON.stringify(checkpoint),
+          JSON.stringify(checkpoint)
         );
       };
 

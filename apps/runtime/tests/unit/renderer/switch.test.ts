@@ -3,20 +3,16 @@
  * @see FR-010-004, SC-010-001
  */
 import { describe, expect, it } from "bun:test";
-import {
-  switchRenderer,
-  SwitchSameRendererError,
-  SwitchTimeoutError,
-} from "../../../src/renderer/switch.js";
+import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
 import { RendererRegistry } from "../../../src/renderer/registry.js";
 import { RendererStateMachine } from "../../../src/renderer/state_machine.js";
-import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
+import { SwitchSameRendererError, switchRenderer } from "../../../src/renderer/switch.js";
 import {
   MockGhosttyAdapter,
+  type MockRendererAdapter,
   MockRioAdapter,
-  MockRendererAdapter,
-  TEST_SURFACE,
   TEST_CONFIG,
+  TEST_SURFACE,
 } from "../../helpers/mock_adapter.js";
 
 function setup(from: MockRendererAdapter, to: MockRendererAdapter) {
@@ -28,7 +24,7 @@ function setup(from: MockRendererAdapter, to: MockRendererAdapter) {
   sm.transition("init");
   sm.transition("init_success");
   const events: RendererLifecycleEvent[] = [];
-  const bus: RendererEventBus = { publish: (e) => events.push(e) };
+  const bus: RendererEventBus = { publish: e => events.push(e) };
   return { reg, sm, events, bus };
 }
 
@@ -49,7 +45,7 @@ describe("switchRenderer", () => {
 
     expect(reg.getActive()?.id).toBe("rio");
     expect(sm.state).toBe("running");
-    expect(events[0]!.type).toBe("renderer.switched");
+    expect(events[0]?.type).toBe("renderer.switched");
   });
 
   it("throws SwitchSameRendererError for same renderer", async () => {
@@ -64,7 +60,7 @@ describe("switchRenderer", () => {
         surface: TEST_SURFACE,
         config: TEST_CONFIG,
         boundStreams: new Map(),
-      }),
+      })
     ).rejects.toThrow(SwitchSameRendererError);
   });
 
@@ -81,12 +77,12 @@ describe("switchRenderer", () => {
         config: TEST_CONFIG,
         boundStreams: new Map(),
         eventBus: bus,
-      }),
+      })
     ).rejects.toThrow("rio init failed");
 
     expect(reg.getActive()?.id).toBe("ghostty");
     expect(sm.state).toBe("running");
-    expect(events.some((e) => e.type === "renderer.switch_failed")).toBe(true);
+    expect(events.some(e => e.type === "renderer.switch_failed")).toBe(true);
   });
 
   it("rolls back on new renderer start failure", async () => {
@@ -101,7 +97,7 @@ describe("switchRenderer", () => {
         surface: TEST_SURFACE,
         config: TEST_CONFIG,
         boundStreams: new Map(),
-      }),
+      })
     ).rejects.toThrow("rio start failed");
 
     expect(reg.getActive()?.id).toBe("ghostty");
@@ -121,11 +117,11 @@ describe("switchRenderer", () => {
         config: TEST_CONFIG,
         boundStreams: new Map(),
         eventBus: bus,
-      }),
+      })
     ).rejects.toThrow();
 
     expect(sm.state).toBe("errored");
-    expect(events.some((e) => e.type === "renderer.errored")).toBe(true);
+    expect(events.some(e => e.type === "renderer.errored")).toBe(true);
   });
 
   it("rebinds streams on successful switch", async () => {
@@ -162,7 +158,7 @@ describe("switchRenderer", () => {
         config: TEST_CONFIG,
         boundStreams: new Map(),
         timeoutMs: 50,
-      }),
+      })
     ).rejects.toThrow();
   });
 
@@ -178,7 +174,7 @@ describe("switchRenderer", () => {
         surface: TEST_SURFACE,
         config: TEST_CONFIG,
         boundStreams: new Map(),
-      }),
+      })
     ).rejects.toThrow("not registered");
   });
 
@@ -194,7 +190,7 @@ describe("switchRenderer", () => {
         surface: TEST_SURFACE,
         config: TEST_CONFIG,
         boundStreams: new Map(),
-      }),
+      })
     ).rejects.toThrow("not registered");
   });
 });

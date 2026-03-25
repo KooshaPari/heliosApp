@@ -7,9 +7,9 @@
  * @see FR-010-009, SC-010-002
  */
 
-import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.js";
-import type { SwitchBuffer } from "./stream_binding.js";
+import type { RenderSurface, RendererAdapter, RendererConfig } from "./adapter.js";
 import type { RendererEventBus } from "./index.js";
+import type { SwitchBuffer } from "./stream_binding.js";
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -18,7 +18,7 @@ import type { RendererEventBus } from "./index.js";
 export class HotSwapError extends Error {
   constructor(
     public readonly phase: string,
-    message: string,
+    message: string
   ) {
     super(`Hot-swap failed during ${phase}: ${message}`);
     this.name = "HotSwapError";
@@ -28,7 +28,7 @@ export class HotSwapError extends Error {
 export class HotSwapCapabilityError extends Error {
   constructor(sourceId: string, targetId: string) {
     super(
-      `Cannot hot-swap from "${sourceId}" to "${targetId}": renderer does not support hot-swap`,
+      `Cannot hot-swap from "${sourceId}" to "${targetId}": renderer does not support hot-swap`
     );
     this.name = "HotSwapCapabilityError";
   }
@@ -90,7 +90,7 @@ export async function executeHotSwap(
   config: RendererConfig,
   surface: RenderSurface,
   onRollback: (error: Error) => Promise<void>,
-  eventBus?: RendererEventBus,
+  _eventBus?: RendererEventBus
 ): Promise<HotSwapResult> {
   const startTime = Date.now();
   let currentPhase = "pre-validation";
@@ -122,7 +122,7 @@ export async function executeHotSwap(
     } catch (e: unknown) {
       throw new HotSwapError(
         currentPhase,
-        `target init failed: ${e instanceof Error ? e.message : String(e)}`,
+        `target init failed: ${e instanceof Error ? e.message : String(e)}`
       );
     }
 
@@ -131,7 +131,7 @@ export async function executeHotSwap(
     } catch (e: unknown) {
       throw new HotSwapError(
         currentPhase,
-        `target start failed: ${e instanceof Error ? e.message : String(e)}`,
+        `target start failed: ${e instanceof Error ? e.message : String(e)}`
       );
     }
 
@@ -141,7 +141,7 @@ export async function executeHotSwap(
     } catch (e: unknown) {
       throw new HotSwapError(
         currentPhase,
-        `source stop failed: ${e instanceof Error ? e.message : String(e)}`,
+        `source stop failed: ${e instanceof Error ? e.message : String(e)}`
       );
     }
 
@@ -158,7 +158,7 @@ export async function executeHotSwap(
       } catch (e: unknown) {
         throw new HotSwapError(
           currentPhase,
-          `replay for ${ptyId} failed: ${e instanceof Error ? e.message : String(e)}`,
+          `replay for ${ptyId} failed: ${e instanceof Error ? e.message : String(e)}`
         );
       }
     }

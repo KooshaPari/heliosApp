@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from "bun:test";
-import { RetentionPolicyStore, RetentionPurger } from "../../../src/audit/retention";
+import { beforeEach, describe, expect, it } from "bun:test";
+import { RetentionPolicyStore, RetentionPurger } from "../../../src/audit/retention.ts";
 
 describe("RetentionPolicyStore", () => {
   let store: RetentionPolicyStore;

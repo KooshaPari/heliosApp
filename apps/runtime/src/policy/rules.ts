@@ -4,12 +4,12 @@
  */
 
 import {
-  type PolicyRule,
-  PolicyClassification,
-  PolicyPatternType,
   type CommandContext,
+  PolicyClassification,
   type PolicyEvaluationResult,
-} from "./types";
+  PolicyPatternType,
+  type PolicyRule,
+} from "./types.ts";
 
 /**
  * Pattern matcher for glob and regex patterns.
@@ -71,14 +71,14 @@ export class PolicyRuleSet {
    * Remove a rule by ID.
    */
   removeRule(ruleId: string): void {
-    this.rules = this.rules.filter((r) => r.id !== ruleId);
+    this.rules = this.rules.filter(r => r.id !== ruleId);
   }
 
   /**
    * Update an existing rule, maintaining sort order.
    */
   updateRule(ruleId: string, updates: Partial<PolicyRule>): void {
-    const index = this.rules.findIndex((r) => r.id === ruleId);
+    const index = this.rules.findIndex(r => r.id === ruleId);
     if (index !== -1) {
       this.rules[index] = { ...this.rules[index], ...updates };
       this.rules.sort((a, b) => a.priority - b.priority);
@@ -113,8 +113,8 @@ export class PolicyRuleSet {
           continue;
         }
 
-        const hasMatchingPath = context.affectedPaths.some((path) => {
-          return rule.targets!.some((target) => {
+        const hasMatchingPath = context.affectedPaths.some(path => {
+          return rule.targets?.some(target => {
             return this.patternMatcher.matches(path, target, PolicyPatternType.Glob);
           });
         });

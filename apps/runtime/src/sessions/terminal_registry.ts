@@ -74,9 +74,9 @@ export class TerminalRegistry {
       return [];
     }
     return Array.from(terminalIds)
-      .map((terminalId) => this.terminals.get(terminalId))
+      .map(terminalId => this.terminals.get(terminalId))
       .filter((terminal): terminal is TerminalContext => terminal !== undefined)
-      .map((terminal) => ({ ...terminal }));
+      .map(terminal => ({ ...terminal }));
   }
 
   setState(terminalId: string, state: TerminalLifecycleState): TerminalContext | undefined {

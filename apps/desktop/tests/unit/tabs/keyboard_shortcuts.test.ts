@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { promises as fs } from "node:fs";
+import { tmpdir } from "node:os";
+import * as path from "node:path";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   KeyboardShortcuts,
   type ShortcutAction,
   resetKeyboardShortcuts,
-} from "../../../src/tabs/keyboard_shortcuts";
-import * as path from "path";
-import { promises as fs } from "fs";
-import { tmpdir } from "os";
+} from "../../../src/tabs/keyboard_shortcuts.ts";
 
 describe("KeyboardShortcuts", () => {
   let shortcuts: KeyboardShortcuts;
@@ -29,12 +29,12 @@ describe("KeyboardShortcuts", () => {
 
   describe("Default Shortcuts", () => {
     it("should have default shortcuts", () => {
-      const shortcuts_map = shortcuts.getShortcuts();
-      expect(shortcuts_map["select-terminal"]).toBeDefined();
-      expect(shortcuts_map["select-agent"]).toBeDefined();
-      expect(shortcuts_map["select-session"]).toBeDefined();
-      expect(shortcuts_map["select-chat"]).toBeDefined();
-      expect(shortcuts_map["select-project"]).toBeDefined();
+      const shortcutsMap = shortcuts.getShortcuts();
+      expect(shortcutsMap["select-terminal"]).toBeDefined();
+      expect(shortcutsMap["select-agent"]).toBeDefined();
+      expect(shortcutsMap["select-session"]).toBeDefined();
+      expect(shortcutsMap["select-chat"]).toBeDefined();
+      expect(shortcutsMap["select-project"]).toBeDefined();
     });
 
     it("should get specific shortcut", () => {
@@ -78,7 +78,7 @@ describe("KeyboardShortcuts", () => {
     it("should handle keyboard events", () => {
       let handledAction: ShortcutAction | null = null;
 
-      shortcuts.setHandler((action) => {
+      shortcuts.setHandler(action => {
         handledAction = action;
       });
 
@@ -94,9 +94,9 @@ describe("KeyboardShortcuts", () => {
     });
 
     it("should support shortcut listeners", () => {
-      let actions: ShortcutAction[] = [];
+      const actions: ShortcutAction[] = [];
 
-      shortcuts.onShortcut((action) => {
+      shortcuts.onShortcut(action => {
         actions.push(action);
       });
 

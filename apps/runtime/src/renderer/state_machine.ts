@@ -53,7 +53,7 @@ export interface TransitionRecord {
 export class InvalidRendererTransitionError extends Error {
   constructor(
     public readonly currentState: RendererState,
-    public readonly event: RendererEvent,
+    public readonly event: RendererEvent
   ) {
     super(`Invalid renderer transition: cannot apply event "${event}" in state "${currentState}"`);
     this.name = "InvalidRendererTransitionError";

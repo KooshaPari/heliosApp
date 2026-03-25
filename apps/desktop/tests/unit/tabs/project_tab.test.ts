@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { ProjectTab } from "../../../src/tabs/project_tab";
-import type { ActiveContext } from "../../../src/tabs/context_switch";
+import { beforeEach, describe, expect, it } from "vitest";
+import type { ActiveContext } from "../../../src/tabs/context_switch.ts";
+import { ProjectTab } from "../../../src/tabs/project_tab.ts";
 
 describe("ProjectTab", () => {
   let tab: ProjectTab;
@@ -149,8 +149,8 @@ describe("ProjectTab", () => {
 
       await tab.onContextChange(context);
       const el = tab.render();
-      const button = Array.from(el.querySelectorAll("button")).find((b) =>
-        b.textContent?.includes("Create New Lane"),
+      const button = Array.from(el.querySelectorAll("button")).find(b =>
+        b.textContent?.includes("Create New Lane")
       );
 
       expect(button).toBeDefined();
@@ -165,8 +165,8 @@ describe("ProjectTab", () => {
 
       await tab.onContextChange(context);
       const el = tab.render();
-      const button = Array.from(el.querySelectorAll("button")).find((b) =>
-        b.textContent?.includes("Open in File Manager"),
+      const button = Array.from(el.querySelectorAll("button")).find(b =>
+        b.textContent?.includes("Open in File Manager")
       );
 
       expect(button).toBeDefined();

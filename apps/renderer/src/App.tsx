@@ -1,6 +1,6 @@
 import { type Component, For, onMount } from "solid-js";
-import { TerminalPanel } from "./components/terminal/TerminalPanel";
-import { TerminalTabs } from "./components/terminal/TerminalTabs";
+import { TerminalPanel } from "./components/terminal/TerminalPanel.tsx";
+import { TerminalTabs } from "./components/terminal/TerminalTabs.tsx";
 import {
   createTerminal,
   getActiveTerminalId,
@@ -40,7 +40,7 @@ export const App: Component = () => {
         <TerminalTabs />
         <div style={{ flex: "1", position: "relative", overflow: "hidden" }}>
           <For each={getTerminals()}>
-            {(term) => (
+            {term => (
               <TerminalPanel
                 terminalId={term.id}
                 isActive={getActiveTerminalId() === term.id}

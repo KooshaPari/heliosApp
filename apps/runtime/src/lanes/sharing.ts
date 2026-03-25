@@ -1,8 +1,5 @@
-// T005 - Lane sharing (multi-agent concurrent access)
-
-import type { LaneRecord } from "./registry.js";
 import type { LaneRegistry } from "./registry.js";
-import { transition, withLaneLock, recordTransition, type LaneState } from "./state_machine.js";
+import { type LaneState, recordTransition, transition, withLaneLock } from "./state_machine.js";
 
 export class LaneClosedError extends Error {
   constructor(laneId: string) {
@@ -57,7 +54,7 @@ export async function shareLane(registry: LaneRegistry, laneId: string): Promise
 export async function attachAgent(
   registry: LaneRegistry,
   laneId: string,
-  agentId: string,
+  agentId: string
 ): Promise<void> {
   return withLaneLock(laneId, async () => {
     const lane = registry.get(laneId);
@@ -85,7 +82,7 @@ export async function attachAgent(
 export async function detachAgent(
   registry: LaneRegistry,
   laneId: string,
-  agentId: string,
+  agentId: string
 ): Promise<{ transitioned: boolean; fromState?: LaneState; toState?: LaneState }> {
   return withLaneLock(laneId, async () => {
     const lane = registry.get(laneId);
@@ -96,7 +93,7 @@ export async function detachAgent(
     if (!lane.attachedAgents.includes(agentId)) {
       return { transitioned: false };
     }
-    const remaining = lane.attachedAgents.filter((a) => a !== agentId);
+    const remaining = lane.attachedAgents.filter(a => a !== agentId);
     registry.update(laneId, { attachedAgents: remaining });
 
     // If shared and last agent detaches, transition to ready
@@ -116,7 +113,7 @@ export async function detachAgent(
  */
 export async function forceDetachAll(
   registry: LaneRegistry,
-  laneId: string,
+  laneId: string
 ): Promise<{
   detachedAgents: string[];
   transitioned: boolean;

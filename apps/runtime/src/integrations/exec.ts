@@ -1,4 +1,4 @@
-import type { LocalBus } from "../protocol/bus";
+import type { LocalBus } from "../protocol/bus.ts";
 
 export type ExecResult = {
   code: number;
@@ -51,7 +51,7 @@ export class HarnessRouteSelector {
   constructor(
     private readonly bus: LocalBus,
     private readonly probe: HarnessProbe = new ExecHarnessProbe(),
-    private readonly cooldownMs = 1_000,
+    private readonly cooldownMs = 1_000
   ) {}
 
   getStatus(): HarnessStatus {
@@ -130,7 +130,7 @@ export class HarnessRouteSelector {
       () => {
         void this.refreshHealth("interval");
       },
-      Math.max(intervalMs, this.cooldownMs),
+      Math.max(intervalMs, this.cooldownMs)
     );
   }
 
@@ -144,7 +144,7 @@ export class HarnessRouteSelector {
   private async emitStatusChange(
     previous: HarnessStatus,
     current: HarnessStatus,
-    source: "on_demand" | "interval",
+    source: "on_demand" | "interval"
   ): Promise<void> {
     await this.bus.publish({
       id: `harness-status:${Date.now()}`,

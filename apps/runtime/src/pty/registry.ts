@@ -187,7 +187,7 @@ export class PtyRegistry {
    */
   async reconcileOrphans(
     shellPatterns: string[] = ["bash", "zsh", "sh", "fish"],
-    gracePeriodMs = 5000,
+    gracePeriodMs = 5000
   ): Promise<ReconciliationSummary> {
     const start = performance.now();
     let found = 0;
@@ -202,7 +202,7 @@ export class PtyRegistry {
       for (const pid of orphanPids) {
         try {
           // Check if any existing record already has this PID
-          const existingRecord = this.list().find((r) => r.pid === pid);
+          const existingRecord = this.list().find(r => r.pid === pid);
           if (existingRecord) {
             // Already tracked, not actually orphaned
             reattached++;
@@ -253,11 +253,15 @@ export class PtyRegistry {
 
   private resolveIndex(index: Map<string, Set<string>>, key: string): PtyRecord[] {
     const ids = index.get(key);
-    if (!ids) return [];
+    if (!ids) {
+      return [];
+    }
     const records: PtyRecord[] = [];
     for (const id of ids) {
       const rec = this.primary.get(id);
-      if (rec) records.push(rec);
+      if (rec) {
+        records.push(rec);
+      }
     }
     return records;
   }
@@ -283,26 +287,32 @@ export class PtyRegistry {
 
       for (const line of lines) {
         const parts = line.trim().split(/\s+/);
-        if (parts.length < 3) continue;
+        if (parts.length < 3) {
+          continue;
+        }
 
-        const pid = parseInt(parts[0]!, 10);
-        const ppid = parseInt(parts[1]!, 10);
+        const pid = Number.parseInt(parts[0]!, 10);
+        const ppid = Number.parseInt(parts[1]!, 10);
         const comm = parts.slice(2).join(" ");
 
-        if (isNaN(pid) || isNaN(ppid)) continue;
+        if (Number.isNaN(pid) || Number.isNaN(ppid)) {
+          continue;
+        }
 
         // Only consider processes whose parent is this runtime
         // or whose parent has exited (ppid=1 on Linux, launchd on macOS)
-        if (ppid !== currentPid && ppid !== 1) continue;
+        if (ppid !== currentPid && ppid !== 1) {
+          continue;
+        }
 
         const basename = comm.split("/").pop() ?? "";
         const isShell = shellPatterns.some(
-          (pattern) => basename === pattern || basename === `-${pattern}`,
+          pattern => basename === pattern || basename === `-${pattern}`
         );
 
         if (isShell) {
           // Check if this PID is already in our registry
-          const tracked = this.list().some((r) => r.pid === pid);
+          const tracked = this.list().some(r => r.pid === pid);
           if (!tracked) {
             orphanPids.push(pid);
           }
@@ -327,7 +337,7 @@ export class PtyRegistry {
     }
 
     // Wait for grace period, then check if still alive
-    await new Promise((resolve) => setTimeout(resolve, gracePeriodMs));
+    await new Promise(resolve => setTimeout(resolve, gracePeriodMs));
 
     try {
       // Signal 0 checks existence without sending a signal

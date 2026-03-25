@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { TerminalTab } from "../../../src/tabs/terminal_tab";
-import type { ActiveContext } from "../../../src/tabs/context_switch";
+import { beforeEach, describe, expect, it } from "vitest";
+import type { ActiveContext } from "../../../src/tabs/context_switch.ts";
+import { TerminalTab } from "../../../src/tabs/terminal_tab.ts";
 
 describe("TerminalTab", () => {
   let tab: TerminalTab;

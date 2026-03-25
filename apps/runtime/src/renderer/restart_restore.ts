@@ -7,10 +7,10 @@
  * @see FR-010-010, SC-010-003
  */
 
-import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.js";
-import type { SwitchBuffer } from "./stream_binding.js";
-import type { RendererEventBus } from "./index.js";
+import type { RenderSurface, RendererAdapter, RendererConfig } from "./adapter.js";
 import type { TerminalContext } from "./hot_swap.js";
+import type { RendererEventBus } from "./index.js";
+import type { SwitchBuffer } from "./stream_binding.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -44,7 +44,7 @@ export interface RestartRestoreResult {
 export class RestartRestoreError extends Error {
   constructor(
     public readonly phase: string,
-    message: string,
+    message: string
   ) {
     super(`Restart-with-restore failed during ${phase}: ${message}`);
     this.name = "RestartRestoreError";
@@ -133,7 +133,7 @@ export async function executeRestartWithRestore(
   config: RendererConfig,
   surface: RenderSurface,
   onRollback: (error: Error) => Promise<void>,
-  eventBus?: RendererEventBus,
+  _eventBus?: RendererEventBus
 ): Promise<RestartRestoreResult> {
   const startTime = Date.now();
   let currentPhase = "checkpoint";
@@ -156,7 +156,7 @@ export async function executeRestartWithRestore(
     } catch (e: unknown) {
       throw new RestartRestoreError(
         currentPhase,
-        `source stop failed: ${e instanceof Error ? e.message : String(e)}`,
+        `source stop failed: ${e instanceof Error ? e.message : String(e)}`
       );
     }
 
@@ -170,7 +170,7 @@ export async function executeRestartWithRestore(
     } catch (e: unknown) {
       throw new RestartRestoreError(
         currentPhase,
-        `target init failed: ${e instanceof Error ? e.message : String(e)}`,
+        `target init failed: ${e instanceof Error ? e.message : String(e)}`
       );
     }
 
@@ -182,7 +182,7 @@ export async function executeRestartWithRestore(
     } catch (e: unknown) {
       throw new RestartRestoreError(
         currentPhase,
-        `restore failed: ${e instanceof Error ? e.message : String(e)}`,
+        `restore failed: ${e instanceof Error ? e.message : String(e)}`
       );
     }
 
@@ -192,7 +192,7 @@ export async function executeRestartWithRestore(
     } catch (e: unknown) {
       throw new RestartRestoreError(
         currentPhase,
-        `replay failed: ${e instanceof Error ? e.message : String(e)}`,
+        `replay failed: ${e instanceof Error ? e.message : String(e)}`
       );
     }
 

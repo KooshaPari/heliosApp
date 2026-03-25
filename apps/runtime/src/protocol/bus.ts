@@ -1,9 +1,13 @@
-import type { LocalBusEnvelope, CommandEnvelope, ResponseEnvelope, EventEnvelope } from "./types.js";
-import type { BusError } from "./errors.js";
-import { validateEnvelope, createResponse } from "./envelope.js";
-import { methodNotFound, handlerError, validationError } from "./errors.js";
-import { MethodRegistry, type MethodHandler } from "./methods.js";
+import { createResponse, validateEnvelope } from "./envelope.js";
+import { handlerError, methodNotFound, validationError } from "./errors.js";
+import { type MethodHandler, MethodRegistry } from "./methods.js";
 import { TopicRegistry, type TopicSubscriber } from "./topics.js";
+import type {
+  CommandEnvelope,
+  EventEnvelope,
+  LocalBusEnvelope,
+  ResponseEnvelope,
+} from "./types.js";
 
 // ---------------------------------------------------------------------------
 // LocalBus interface (rich typed bus used by tests and runtime)
@@ -94,7 +98,11 @@ export function createBus(options?: BusOptions): LocalBus {
       const cmd = envelope as CommandEnvelope;
 
       if (currentDepth >= maxDepth) {
-        return createResponse(cmd, null, validationError(`Re-entrant depth limit (${maxDepth}) exceeded`));
+        return createResponse(
+          cmd,
+          null,
+          validationError(`Re-entrant depth limit (${maxDepth}) exceeded`)
+        );
       }
 
       const handler = methods.resolve(cmd.method);
@@ -110,7 +118,11 @@ export function createBus(options?: BusOptions): LocalBus {
         const result = await handler(cmd);
         // Validate that handler returned a proper envelope
         if (!result || typeof result !== "object" || result.type !== "response") {
-          return createResponse(cmd, null, handlerError(cmd.method, new Error("Handler did not return a response envelope")));
+          return createResponse(
+            cmd,
+            null,
+            handlerError(cmd.method, new Error("Handler did not return a response envelope"))
+          );
         }
         return { ...result, correlation_id: cmd.correlation_id };
       } catch (err) {
@@ -130,13 +142,19 @@ export function createBus(options?: BusOptions): LocalBus {
     },
 
     async publish(input: unknown): Promise<void> {
-      if (destroyed) return;
+      if (destroyed) {
+        return;
+      }
 
       const validation = validateEnvelope(input);
-      if (!validation.valid) return;
+      if (!validation.valid) {
+        return;
+      }
 
       const envelope = validation.envelope;
-      if (envelope.type !== "event") return;
+      if (envelope.type !== "event") {
+        return;
+      }
 
       const evt = envelope as EventEnvelope;
       const seq = topics.nextSequence(evt.topic);

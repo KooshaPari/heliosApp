@@ -8,7 +8,7 @@
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { createCommand, createResponse, createEvent } from "../../../src/protocol/envelope.js";
+import { createCommand, createEvent, createResponse } from "../../../src/protocol/envelope.js";
 
 // ---------------------------------------------------------------------------
 // Minimal JSON Schema draft-07 validator (subset needed for envelope schema)
@@ -103,7 +103,7 @@ function validateSchema(data: unknown, schema: JsonSchema, path = ""): Validatio
   }
 
   if (schema.oneOf !== undefined) {
-    const matches = schema.oneOf.filter((sub) => validateSchema(data, sub, path).length === 0);
+    const matches = schema.oneOf.filter(sub => validateSchema(data, sub, path).length === 0);
     if (matches.length === 0) {
       errors.push({ path, message: "Does not match any oneOf schema" });
     } else if (matches.length > 1) {
@@ -123,7 +123,7 @@ function validateSchema(data: unknown, schema: JsonSchema, path = ""): Validatio
 
 const schemaPath = resolve(
   import.meta.dir,
-  "../../../../../specs/protocol/v1/envelope.schema.json",
+  "../../../../../specs/protocol/v1/envelope.schema.json"
 );
 const schema: JsonSchema = JSON.parse(readFileSync(schemaPath, "utf-8")) as JsonSchema;
 
@@ -171,7 +171,7 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
     };
     const errors = validateSchema(bad, schema);
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors.some((e) => e.message.includes("id"))).toBe(true);
+    expect(errors.some(e => e.message.includes("id"))).toBe(true);
   });
 
   it("rejects envelope with empty id", () => {
@@ -234,14 +234,14 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
     expect(schema.required).toContain("type");
 
     // oneOf branches
-    const commandSchema = schema.oneOf!.find((s) => s.title === "CommandEnvelope")!;
+    const commandSchema = schema.oneOf?.find(s => s.title === "CommandEnvelope")!;
     expect(commandSchema.required).toContain("method");
     expect(commandSchema.required).toContain("payload");
 
-    const responseSchema = schema.oneOf!.find((s) => s.title === "ResponseEnvelope")!;
+    const responseSchema = schema.oneOf?.find(s => s.title === "ResponseEnvelope")!;
     expect(responseSchema.required).toContain("method");
 
-    const eventSchema = schema.oneOf!.find((s) => s.title === "EventEnvelope")!;
+    const eventSchema = schema.oneOf?.find(s => s.title === "EventEnvelope")!;
     expect(eventSchema.required).toContain("topic");
     expect(eventSchema.required).toContain("payload");
     expect(eventSchema.required).toContain("sequence");

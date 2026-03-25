@@ -9,7 +9,7 @@ export interface SettingsLockOptions {
 }
 
 export class SettingsLock {
-  private isLocked: boolean = false;
+  private isLocked = false;
   private options: SettingsLockOptions;
   private lockTimeoutId?: NodeJS.Timeout;
   private lockedElements: Set<HTMLElement> = new Set();
@@ -22,7 +22,9 @@ export class SettingsLock {
   }
 
   lock(settingsContainer: HTMLElement): void {
-    if (this.isLocked) return;
+    if (this.isLocked) {
+      return;
+    }
 
     this.isLocked = true;
     this.applyLock(settingsContainer);
@@ -30,7 +32,9 @@ export class SettingsLock {
   }
 
   unlock(settingsContainer: HTMLElement): void {
-    if (!this.isLocked) return;
+    if (!this.isLocked) {
+      return;
+    }
 
     this.isLocked = false;
     this.removeLock(settingsContainer);
@@ -46,7 +50,7 @@ export class SettingsLock {
     const interactiveSelectors = 'input, button, [role="button"], [role="switch"]';
     const elements = container.querySelectorAll(interactiveSelectors) as NodeListOf<HTMLElement>;
 
-    elements.forEach((element) => {
+    elements.forEach(element => {
       if (element instanceof HTMLInputElement || element instanceof HTMLButtonElement) {
         element.disabled = true;
       } else {
@@ -66,7 +70,7 @@ export class SettingsLock {
   }
 
   private removeLock(container: HTMLElement): void {
-    this.lockedElements.forEach((element) => {
+    this.lockedElements.forEach(element => {
       if (element instanceof HTMLInputElement || element instanceof HTMLButtonElement) {
         element.disabled = false;
       } else {
@@ -85,7 +89,6 @@ export class SettingsLock {
 
   private startAutoUnlockTimer(): void {
     this.lockTimeoutId = setTimeout(() => {
-      console.warn("Settings lock timeout: auto-unlocking settings");
       this.isLocked = false;
       if (this.options.onAutoUnlocked) {
         this.options.onAutoUnlocked();

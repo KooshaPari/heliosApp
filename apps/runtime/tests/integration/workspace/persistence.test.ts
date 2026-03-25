@@ -3,12 +3,11 @@
 // FR-006: Corruption detection
 // FR-007: Recovery from snapshot
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
-import { mkdtemp, rm, writeFile, readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { createJsonStore, JsonWorkspaceStore } from "../../../src/workspace/store.js";
-import { createSnapshot } from "../../../src/workspace/snapshot.js";
+import { join } from "node:path";
+import { createJsonStore } from "../../../src/workspace/store.js";
 import type { Workspace } from "../../../src/workspace/types.js";
 
 function makeWorkspace(overrides: Partial<Workspace> = {}): Workspace {
@@ -152,7 +151,7 @@ describe("Corruption recovery", () => {
     // Tamper with the primary file's checksum
     const raw = await readFile(join(dataDir, "workspaces.json"), "utf-8");
     const data = JSON.parse(raw) as Record<string, unknown>;
-    data["_checksum"] = "badhash";
+    data._checksum = "badhash";
     await writeFile(join(dataDir, "workspaces.json"), JSON.stringify(data));
 
     const store2 = await createJsonStore(dataDir);
@@ -171,11 +170,11 @@ describe("Concurrent operations", () => {
   test("10 parallel saves produce consistent state", async () => {
     const store = await createJsonStore(dataDir);
     const workspaces = Array.from({ length: 10 }, (_, i) =>
-      makeWorkspace({ name: `Concurrent-${i}` }),
+      makeWorkspace({ name: `Concurrent-${i}` })
     );
 
     // FR-005: concurrent writes serialize correctly
-    await Promise.all(workspaces.map((ws) => store.save(ws)));
+    await Promise.all(workspaces.map(ws => store.save(ws)));
 
     const all = await store.getAll();
     expect(all).toHaveLength(10);
@@ -197,8 +196,8 @@ describe("Concurrent operations", () => {
 
     const all = await store.getAll();
     // ws should be removed, ws2 should exist
-    expect(all.find((w) => w.id === ws.id)).toBeUndefined();
-    expect(all.find((w) => w.id === ws2.id)).toBeDefined();
+    expect(all.find(w => w.id === ws.id)).toBeUndefined();
+    expect(all.find(w => w.id === ws2.id)).toBeDefined();
   });
 });
 

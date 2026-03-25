@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { createRuntime } from "../../../src/index";
+import { createRuntime } from "../../../src/index.ts";
 
 function jsonRequest(url: string, body: Record<string, unknown>): Request {
   return new Request(url, {
@@ -14,7 +14,7 @@ async function createLane(runtime: any): Promise<string> {
     jsonRequest("http://localhost/v1/workspaces/ws_1/lanes", {
       project_context_id: "project_1",
       display_name: "WP02 lane",
-    }),
+    })
   );
   expect(response.status).toBe(201);
   const body = (await response.json()) as { lane_id: string };
@@ -24,10 +24,10 @@ async function createLane(runtime: any): Promise<string> {
 async function ensureSession(
   runtime: any,
   laneId: string,
-  body: Record<string, unknown> = { provider: "codex" },
+  body: Record<string, unknown> = { provider: "codex" }
 ): Promise<Response> {
   return runtime.fetch(
-    jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/sessions`, body),
+    jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/sessions`, body)
   );
 }
 
@@ -80,7 +80,7 @@ describe("session routing lifecycle", () => {
     expect(body.diagnostics.degrade_reason).toBe("cliproxy_timeout");
 
     const statusResponse = await runtime.fetch(
-      new Request("http://localhost/v1/harness/cliproxy/status"),
+      new Request("http://localhost/v1/harness/cliproxy/status")
     );
     expect(statusResponse.status).toBe(200);
     const statusBody = (await statusResponse.json()) as {
@@ -197,7 +197,7 @@ describe("session routing lifecycle", () => {
       jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/terminals`, {
         session_id: sessionBody.session_id,
         title: "Main",
-      }),
+      })
     );
 
     expect(terminalResponse.status).toBe(201);
@@ -237,7 +237,7 @@ describe("session routing lifecycle", () => {
       jsonRequest(`http://localhost/v1/workspaces/ws_2/lanes/${laneId}/terminals`, {
         session_id: sessionBody.session_id,
         title: "Spoofed",
-      }),
+      })
     );
 
     expect(terminalResponse.status).toBe(409);
@@ -261,7 +261,7 @@ describe("session routing lifecycle", () => {
     const terminalResponse = await runtime.fetch(
       jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/terminals`, {
         session_id: sessionBody.session_id,
-      }),
+      })
     );
     expect(terminalResponse.status).toBe(201);
 
@@ -284,7 +284,7 @@ describe("session routing lifecycle", () => {
     const sessionBody = (await sessionResponse.json()) as { session_id: string };
 
     const cleanupResponse = await runtime.fetch(
-      jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/cleanup`, {}),
+      jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/cleanup`, {})
     );
     expect(cleanupResponse.status).toBe(200);
 
@@ -292,7 +292,7 @@ describe("session routing lifecycle", () => {
       jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/terminals`, {
         session_id: sessionBody.session_id,
         title: "Closed Lane Terminal",
-      }),
+      })
     );
     expect(terminalResponse.status).toBe(409);
     const body = (await terminalResponse.json()) as { error: string };

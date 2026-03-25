@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { SettingsLock } from "../../../src/settings/settings_lock";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { SettingsLock } from "../../../src/settings/settings_lock.ts";
 
 describe("SettingsLock", () => {
   let container: HTMLDivElement;
@@ -76,7 +76,7 @@ describe("SettingsLock", () => {
     lock.lock(container);
     expect(lock.isSettingsLocked()).toBe(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await new Promise(resolve => setTimeout(resolve, 150));
 
     expect(lock.isSettingsLocked()).toBe(false);
     expect(onAutoUnlocked).toHaveBeenCalled();

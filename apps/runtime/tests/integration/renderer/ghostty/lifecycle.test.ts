@@ -7,11 +7,11 @@
  * Tags: FR-011-001, FR-011-003, SC-011-003
  */
 
-import { describe, test, expect, beforeAll, afterEach } from "bun:test";
+import { afterEach, beforeAll, describe, expect, test } from "bun:test";
+import type { RenderSurface, RendererConfig } from "../../../../src/renderer/adapter.js";
 import { GhosttyBackend } from "../../../../src/renderer/ghostty/backend.js";
 import { isGhosttyAvailable } from "../../../../src/renderer/ghostty/index.js";
 import { RendererRegistry } from "../../../../src/renderer/registry.js";
-import type { RendererConfig, RenderSurface } from "../../../../src/renderer/adapter.js";
 
 const TEST_CONFIG: RendererConfig = {
   gpuAcceleration: true,
@@ -19,7 +19,7 @@ const TEST_CONFIG: RendererConfig = {
   maxDimensions: { cols: 200, rows: 50 },
 };
 
-const TEST_SURFACE: RenderSurface = {
+const _TEST_SURFACE: RenderSurface = {
   windowId: "integration-test-window",
   bounds: { x: 0, y: 0, width: 800, height: 600 },
 };
@@ -29,7 +29,6 @@ let ghosttyAvailable = false;
 beforeAll(async () => {
   ghosttyAvailable = await isGhosttyAvailable();
   if (!ghosttyAvailable) {
-    console.warn("[T013] Ghostty binary not found -- integration tests will be skipped.");
   }
 });
 
@@ -64,7 +63,9 @@ describe("Ghostty integration - lifecycle (T013)", () => {
   });
 
   test("bind mock PTY stream and verify consumption", async () => {
-    if (skipUnlessGhostty()) return;
+    if (skipUnlessGhostty()) {
+      return;
+    }
 
     backend = new GhosttyBackend("integration");
     await backend.init(TEST_CONFIG);
@@ -76,14 +77,16 @@ describe("Ghostty integration - lifecycle (T013)", () => {
 
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
-        for (const c of chunks) controller.enqueue(c);
+        for (const c of chunks) {
+          controller.enqueue(c);
+        }
         controller.close();
       },
     });
 
     backend.bindStream("pty-int-1", stream);
     // Wait for pump to consume
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise(r => setTimeout(r, 100));
 
     expect(backend.getBoundStreamCount()).toBe(1);
   });

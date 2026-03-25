@@ -6,11 +6,11 @@
  * SC-025-002: Provider crash isolation across lanes.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
-import { A2ARouterAdapter, HealthMonitoringCoordinator, type A2AEndpoint } from "../a2a-router.js";
+import { beforeEach, describe, expect, it } from "vitest";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { NormalizedProviderError } from "../errors.js";
+import { A2ARouterAdapter, HealthMonitoringCoordinator } from "../a2a-router.js";
 import type { ProviderHealthStatus } from "../adapter.js";
+import { NormalizedProviderError } from "../errors.js";
 
 describe("A2A Router Adapter", () => {
   let adapter: A2ARouterAdapter;
@@ -109,7 +109,7 @@ describe("A2A Router Adapter", () => {
       await adapter.init(config);
 
       const events = bus.getEvents();
-      const initEvent = events.find((e) => e.topic === "provider.a2a.initialized");
+      const initEvent = events.find(e => e.topic === "provider.a2a.initialized");
       expect(initEvent).toBeDefined();
       expect(initEvent?.payload?.endpointCount).toBe(1);
     });
@@ -145,7 +145,7 @@ describe("A2A Router Adapter", () => {
           requiredCapabilities: ["planning"],
           context: { deadline: "2026-03-02" },
         },
-        "corr-123",
+        "corr-123"
       );
 
       expect(result).toBeDefined();
@@ -160,7 +160,7 @@ describe("A2A Router Adapter", () => {
           requiredCapabilities: ["inference"],
           context: {},
         },
-        "corr-123",
+        "corr-123"
       );
 
       expect(result.endpointId).toBe("agent-1"); // Higher priority (lower number)
@@ -174,8 +174,8 @@ describe("A2A Router Adapter", () => {
             requiredCapabilities: ["unknown-capability"],
             context: {},
           },
-          "corr-123",
-        ),
+          "corr-123"
+        )
       ).rejects.toThrow();
     });
 
@@ -188,7 +188,7 @@ describe("A2A Router Adapter", () => {
           requiredCapabilities: ["inference"],
           context: {},
         },
-        correlationId,
+        correlationId
       );
 
       expect(result.correlationId).toBe(correlationId);
@@ -203,11 +203,11 @@ describe("A2A Router Adapter", () => {
           requiredCapabilities: ["inference"],
           context: {},
         },
-        "corr-123",
+        "corr-123"
       );
 
       const events = bus.getEvents();
-      const completedEvent = events.find((e) => e.topic === "provider.a2a.delegation.completed");
+      const completedEvent = events.find(e => e.topic === "provider.a2a.delegation.completed");
       expect(completedEvent).toBeDefined();
       expect(completedEvent?.payload?.correlationId).toBe("corr-123");
     });
@@ -219,7 +219,7 @@ describe("A2A Router Adapter", () => {
           requiredCapabilities: ["inference"],
           context: {},
         },
-        "corr-123",
+        "corr-123"
       );
 
       expect(result.duration).toBeGreaterThanOrEqual(0);
@@ -256,7 +256,7 @@ describe("A2A Router Adapter", () => {
           requiredCapabilities: ["inference"],
           context: {},
         },
-        "corr-123",
+        "corr-123"
       );
 
       expect(result).toBeDefined();
@@ -276,7 +276,7 @@ describe("A2A Router Adapter", () => {
           requiredCapabilities: ["inference"],
           context: {},
         },
-        "corr-123",
+        "corr-123"
       );
 
       // Should fallback to agent-2
@@ -297,7 +297,7 @@ describe("A2A Router Adapter", () => {
           requiredCapabilities: ["inference"],
           context: {},
         },
-        "corr-123",
+        "corr-123"
       );
 
       // Should use agent-2
@@ -367,7 +367,7 @@ describe("A2A Router Adapter", () => {
       await adapter.terminate();
 
       const events = bus.getEvents();
-      const terminatedEvent = events.find((e) => e.topic === "provider.a2a.terminated");
+      const terminatedEvent = events.find(e => e.topic === "provider.a2a.terminated");
       expect(terminatedEvent).toBeDefined();
     });
 
@@ -381,8 +381,8 @@ describe("A2A Router Adapter", () => {
             requiredCapabilities: [],
             context: {},
           },
-          "corr-123",
-        ),
+          "corr-123"
+        )
       ).rejects.toThrow(/unavailable/i);
     });
   });
@@ -414,14 +414,14 @@ describe("A2A Router Adapter", () => {
             requiredCapabilities: ["unknown"],
             context: {},
           },
-          "corr-123",
+          "corr-123"
         );
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
       const events = bus.getEvents();
-      const errorEvent = events.find((e) => e.topic === "provider.a2a.delegation.failed");
+      const errorEvent = events.find(e => e.topic === "provider.a2a.delegation.failed");
       expect(errorEvent).toBeDefined();
     });
   });
@@ -530,8 +530,8 @@ describe("Health Monitoring Coordinator", () => {
       coordinator.registerProvider("mcp-provider-1", 5000, checkFunction);
 
       // Since initial state is unavailable, they won't be returned as healthy
-      const healthyACP = coordinator.getHealthyProvidersByType("acp");
-      expect(healthyACP).toBeDefined();
+      const healthyAcp = coordinator.getHealthyProvidersByType("acp");
+      expect(healthyAcp).toBeDefined();
     });
   });
 });
@@ -567,7 +567,7 @@ describe("Provider Crash Isolation (SC-025-002)", () => {
         requiredCapabilities: ["task"],
         context: {},
       },
-      "corr-a",
+      "corr-a"
     );
     expect(resultA).toBeDefined();
 
@@ -578,7 +578,7 @@ describe("Provider Crash Isolation (SC-025-002)", () => {
         requiredCapabilities: ["task"],
         context: {},
       },
-      "corr-b",
+      "corr-b"
     );
     expect(resultB).toBeDefined();
 
@@ -620,9 +620,9 @@ describe("Error Taxonomy Completeness (SC-025-004)", () => {
           requiredCapabilities: ["unknown"],
           context: {},
         },
-        "corr-123",
+        "corr-123"
       )
-      .catch((e) => e);
+      .catch(e => e);
 
     expect(error).toBeInstanceOf(NormalizedProviderError);
     expect((error as NormalizedProviderError).code).toBeTruthy();

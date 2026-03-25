@@ -1,6 +1,6 @@
 // FR-004, FR-010: Integration tests for SLO violation detection, rate limiting, and bus emission.
 
-import { describe, it, expect, beforeEach, afterEach, jest } from "bun:test";
+import { afterEach, describe, expect, it } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 import { SLOMonitor } from "../../../src/diagnostics/slo.js";
 import type { SLODefinition } from "../../../src/diagnostics/types.js";
@@ -34,10 +34,10 @@ describe("SLO Violation Detection", () => {
     }
     const violations = monitor.checkAll();
     expect(violations.length).toBe(1);
-    expect(violations[0]!.metric).toBe(METRIC_NAME);
-    expect(violations[0]!.percentile).toBe("p95");
-    expect(violations[0]!.actual).toBeGreaterThan(60);
-    expect(violations[0]!.threshold).toBe(60);
+    expect(violations[0]?.metric).toBe(METRIC_NAME);
+    expect(violations[0]?.percentile).toBe("p95");
+    expect(violations[0]?.actual).toBeGreaterThan(60);
+    expect(violations[0]?.threshold).toBe(60);
   });
 
   // FR-004: no violation when metric is within threshold
@@ -160,8 +160,8 @@ describe("Bus Integration", () => {
     }
     monitor.checkAll();
     expect(events.length).toBe(1);
-    expect(events[0]!.topic).toBe("perf.slo_violation");
-    const payload = events[0]!.payload as Record<string, unknown>;
+    expect(events[0]?.topic).toBe("perf.slo_violation");
+    const payload = events[0]?.payload as Record<string, unknown>;
     expect(payload.metric).toBe(METRIC_NAME);
     expect(payload.percentile).toBe("p95");
   });
@@ -214,7 +214,7 @@ describe("Periodic Check Loop", () => {
     }
 
     monitor.start(50); // 50ms interval
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 150));
     monitor.stop();
 
     expect(events.length).toBeGreaterThanOrEqual(1);
@@ -235,10 +235,10 @@ describe("Periodic Check Loop", () => {
     }
 
     monitor.start(50);
-    await new Promise((r) => setTimeout(r, 80));
+    await new Promise(r => setTimeout(r, 80));
     monitor.stop();
     const countAfterStop = events.length;
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 150));
     // No more events after stop
     expect(events.length).toBe(countAfterStop);
   });
@@ -259,7 +259,7 @@ describe("Periodic Check Loop", () => {
 
     monitor.start(50);
     monitor.start(50); // should not create second interval
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 150));
     monitor.stop();
 
     // With rate limiting, only 1 event should fire regardless

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { InMemoryAuditSink } from "../../../src/audit/sink";
+import { InMemoryAuditSink } from "../../../src/audit/sink.ts";
 
 test("retention hook keeps exempt deletion-proof topic", async () => {
   const sink = new InMemoryAuditSink({ retention_days: 30 });
@@ -34,7 +34,7 @@ test("retention hook keeps exempt deletion-proof topic", async () => {
   await sink.enforceRetention(new Date("2026-02-27T00:00:00.000Z"));
   const topics = sink
     .getRecords()
-    .map((record) => (record.envelope as Record<string, unknown>).topic)
+    .map(record => (record.envelope as Record<string, unknown>).topic)
     .filter((value): value is string => typeof value === "string");
 
   expect(topics).toContain("audit.retention.deleted");

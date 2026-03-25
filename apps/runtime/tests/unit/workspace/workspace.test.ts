@@ -3,15 +3,15 @@
 // FR-002: Unique workspace names
 // FR-008: Deletion guard with active sessions
 
-import { describe, test, expect } from "bun:test";
-import {
-  createWorkspace,
-  openWorkspace,
-  closeWorkspace,
-  deleteWorkspace,
-  WorkspaceService,
-} from "../../../src/workspace/workspace.js";
+import { describe, expect, test } from "bun:test";
 import { createInMemoryStore } from "../../../src/workspace/store.js";
+import {
+  WorkspaceService,
+  closeWorkspace,
+  createWorkspace,
+  deleteWorkspace,
+  openWorkspace,
+} from "../../../src/workspace/workspace.js";
 
 // ── Entity function tests ───────────────────────────────────────────
 
@@ -36,7 +36,7 @@ describe("createWorkspace", () => {
 
   test("rejects relative root path", () => {
     expect(() => createWorkspace({ name: "Test", rootPath: "relative/path" })).toThrow(
-      "must be absolute",
+      "must be absolute"
     );
   });
 
@@ -130,7 +130,7 @@ describe("WorkspaceService", () => {
     const svc = new WorkspaceService(createInMemoryStore());
     await svc.create({ name: "Unique", rootPath: "/tmp/a" });
     await expect(svc.create({ name: "Unique", rootPath: "/tmp/b" })).rejects.toThrow(
-      "already exists",
+      "already exists"
     );
   });
 
@@ -139,7 +139,7 @@ describe("WorkspaceService", () => {
     const svc = new WorkspaceService(createInMemoryStore());
     await svc.create({ name: "MyProject", rootPath: "/tmp/a" });
     await expect(svc.create({ name: "myproject", rootPath: "/tmp/b" })).rejects.toThrow(
-      "already exists",
+      "already exists"
     );
   });
 

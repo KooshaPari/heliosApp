@@ -1,14 +1,14 @@
 import type { Component } from "solid-js";
 import { Show } from "solid-js";
-import type { Message } from "../../../../runtime/src/types/conversation";
-import { ToolCallBlock } from "./ToolCallBlock";
-import { ToolResultBlock } from "./ToolResultBlock";
+import type { Message } from "../../../../runtime/src/types/conversation.ts";
+import { ToolCallBlock } from "./ToolCallBlock.tsx";
+import { ToolResultBlock } from "./ToolResultBlock.tsx";
 
 type MessageBubbleProps = {
   message: Message;
 };
 
-export const MessageBubble: Component<MessageBubbleProps> = (props) => {
+export const MessageBubble: Component<MessageBubbleProps> = props => {
   const isUser = () => props.message.role === "user";
   const isToolCall = () => props.message.role === "tool_call";
   const isToolResult = () => props.message.role === "tool_result";
@@ -28,7 +28,7 @@ export const MessageBubble: Component<MessageBubbleProps> = (props) => {
       <Show when={isToolResult()}>
         <ToolResultBlock message={props.message} />
       </Show>
-      <Show when={!isToolCall() && !isToolResult()}>
+      <Show when={!(isToolCall() || isToolResult())}>
         <div
           style={{
             "max-width": isUser() ? "70%" : "85%",

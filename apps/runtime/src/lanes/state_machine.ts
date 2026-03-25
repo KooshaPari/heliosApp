@@ -28,7 +28,7 @@ export class InvalidLaneTransitionError extends Error {
   constructor(
     public readonly laneId: string,
     public readonly currentState: LaneState,
-    public readonly attemptedEvent: LaneEvent,
+    public readonly attemptedEvent: LaneEvent
   ) {
     super(`Invalid lane transition: lane=${laneId} state=${currentState} event=${attemptedEvent}`);
     this.name = "InvalidLaneTransitionError";
@@ -117,7 +117,7 @@ const laneLocks = new Map<string, Promise<void>>();
 export async function withLaneLock<T>(laneId: string, fn: () => Promise<T>): Promise<T> {
   const prev = laneLocks.get(laneId) ?? Promise.resolve();
   let resolve: () => void;
-  const next = new Promise<void>((r) => {
+  const next = new Promise<void>(r => {
     resolve = r;
   });
   laneLocks.set(laneId, next);
@@ -126,7 +126,7 @@ export async function withLaneLock<T>(laneId: string, fn: () => Promise<T>): Pro
   try {
     return await fn();
   } finally {
-    resolve!();
+    resolve?.();
     // Clean up if this is the last in chain
     if (laneLocks.get(laneId) === next) {
       laneLocks.delete(laneId);
@@ -141,7 +141,7 @@ export function recordTransition(
   laneId: string,
   fromState: LaneState,
   event: LaneEvent,
-  toState: LaneState,
+  toState: LaneState
 ): void {
   let history = transitionHistories.get(laneId);
   if (!history) {
