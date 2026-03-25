@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach } from 'bun:test';
 import { createBus, type CommandBus } from '../../../src/protocol/bus.js';
 import { createEvent } from '../../../src/protocol/envelope.js';
-import type { EventEnvelope } from '../../../src/protocol/types.js';
+import type { EventEnvelope, LocalBusEnvelope } from '../../../src/protocol/types.js';
 
 // FR-004: Event fan-out with deterministic delivery
 // FR-009: Subscriber isolation (one throwing does not block others)
@@ -143,7 +143,7 @@ describe('LocalBus — event fan-out', () => {
       id: "cmd_123",
       // biome-ignore lint/style/useNamingConvention: Protocol fixture intentionally uses snake_case.
       correlation_id: "cor_123",
-      timestamp: 1,
+      ts: new Date().toISOString(),
       type: "command" as const,
       method: "test",
       payload: {},

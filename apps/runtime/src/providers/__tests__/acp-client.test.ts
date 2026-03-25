@@ -156,7 +156,6 @@ describe("ACP Client Adapter", () => {
         apiKey: "acp-key",
         model: "claude-3-sonnet",
         timeout: 30000,
-        maxRetries: 3,
         healthCheckIntervalMs: 30000,
       });
 

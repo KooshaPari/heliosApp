@@ -64,7 +64,6 @@ export type LocalBusEnvelope = {
   session_id?: string;
   terminal_id?: string;
   lane_id?: string;
-  correlation_id?: string;
   method?: string;
   topic?: string;
   sequence?: number;
@@ -72,20 +71,7 @@ export type LocalBusEnvelope = {
   status?: "ok" | "error";
   result?: Record<string, unknown> | null;
   error?: ErrorPayload | null;
-  sequence?: number;
 };
-
-export class ProtocolValidationError extends Error {
-  readonly code: string;
-  readonly details?: Record<string, unknown> | undefined;
-
-  constructor(code: string, message: string, details?: Record<string, unknown>) {
-    super(message);
-    this.name = "ProtocolValidationError";
-    this.code = code;
-    this.details = details;
-  }
-}
 
 export function isCommand(value: unknown): value is CommandEnvelope {
   return (
