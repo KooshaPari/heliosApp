@@ -1,5 +1,9 @@
 import { randomBytes } from "node:crypto";
+<<<<<<< HEAD
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
+=======
+import type { LocalBus } from "../protocol/bus.js";
+>>>>>>> origin/main
 import type { LocalBusEnvelope } from "../protocol/types.js";
 
 // ---------------------------------------------------------------------------
@@ -79,9 +83,13 @@ export class AuditSink {
    */
   async ingest(envelope: LocalBusEnvelope): Promise<AuditRecord | null> {
     const topic = envelope.topic ?? "";
+<<<<<<< HEAD
     if (!this.watchedTopics.has(topic)) {
       return null;
     }
+=======
+    if (!this.watchedTopics.has(topic)) return null;
+>>>>>>> origin/main
 
     const correlationId: string =
       (envelope.payload?.correlationId as string | undefined) ?? randomBytes(8).toString("hex");
@@ -98,7 +106,11 @@ export class AuditSink {
 
     const record: AuditRecord = {
       id: `audit:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
+<<<<<<< HEAD
       timestamp: envelope.ts,
+=======
+      timestamp: envelope.ts ?? new Date().toISOString(),
+>>>>>>> origin/main
       topic,
       payload: parsedPayload,
       correlationId,
@@ -139,17 +151,29 @@ export class AuditSink {
       async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
         return bus.request(command);
       },
+<<<<<<< HEAD
+=======
+      registerMethod: bus.registerMethod.bind(bus),
+      send: bus.send.bind(bus),
+      subscribe: bus.subscribe.bind(bus),
+      destroy: bus.destroy.bind(bus),
+      getActiveCorrelationId: bus.getActiveCorrelationId.bind(bus),
+>>>>>>> origin/main
     };
   }
 
   /**
    * Query stored audit records.
    */
+<<<<<<< HEAD
   query(filter?: {
     topic?: string;
     correlationId?: string;
     since?: Date;
   }): AuditRecord[] {
+=======
+  query(filter?: { topic?: string; correlationId?: string; since?: Date }): AuditRecord[] {
+>>>>>>> origin/main
     let results = [...this.records];
 
     if (filter?.topic) {

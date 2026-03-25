@@ -43,7 +43,10 @@ export const TerminalTabs: Component<TerminalTabsProps> = props => {
           return (
             <div
               role="tab"
+<<<<<<< HEAD
               tabIndex={0}
+=======
+>>>>>>> origin/main
               aria-selected={isActive()}
               onClick={() => switchTerminal(term.id)}
               style={{

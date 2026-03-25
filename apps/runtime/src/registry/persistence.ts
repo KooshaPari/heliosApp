@@ -6,10 +6,17 @@
  * On recovery, persisted bindings are re-validated against current state.
  */
 
+<<<<<<< HEAD
 import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
+=======
+import { promises as fs } from "fs";
+import { createHash } from "crypto";
+import { homedir } from "os";
+import { dirname, join } from "path";
+>>>>>>> origin/main
 import type { TerminalBinding } from "./binding_triple.js";
 
 export interface PersistenceStore {
@@ -71,7 +78,13 @@ export class JsonFilePersistence implements PersistenceStore {
         await this.doWrite(bindings);
         this.writeTimeoutId = null;
         this.pendingBindings = null;
+<<<<<<< HEAD
       } catch (_error) {}
+=======
+      } catch (error) {
+        console.error("Failed to persist bindings:", error);
+      }
+>>>>>>> origin/main
     }, this.writeDebounceMs);
   }
 
@@ -87,13 +100,22 @@ export class JsonFilePersistence implements PersistenceStore {
       const data: PersistenceData = JSON.parse(content);
 
       // Verify structure
+<<<<<<< HEAD
       if (!(data.bindings && Array.isArray(data.bindings))) {
+=======
+      if (!data.bindings || !Array.isArray(data.bindings)) {
+        console.warn("Invalid persistence format: missing or invalid bindings array");
+>>>>>>> origin/main
         return [];
       }
 
       // Verify checksum
       const expectedChecksum = this.computeChecksum(data.bindings, data.timestamp);
       if (data.checksum !== expectedChecksum) {
+<<<<<<< HEAD
+=======
+        console.warn("Persistence file is corrupt (checksum mismatch); starting fresh");
+>>>>>>> origin/main
         return [];
       }
 
@@ -103,6 +125,10 @@ export class JsonFilePersistence implements PersistenceStore {
         // File doesn't exist; expected on first run
         return [];
       }
+<<<<<<< HEAD
+=======
+      console.warn("Failed to load persisted bindings:", error);
+>>>>>>> origin/main
       return [];
     }
   }
@@ -132,6 +158,10 @@ export class JsonFilePersistence implements PersistenceStore {
       await fs.unlink(this.storePath);
     } catch (error) {
       if ((error as any).code !== "ENOENT") {
+<<<<<<< HEAD
+=======
+        console.error("Failed to clear persistence:", error);
+>>>>>>> origin/main
       }
     }
   }

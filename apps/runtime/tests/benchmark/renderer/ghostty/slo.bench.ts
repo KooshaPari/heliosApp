@@ -12,11 +12,20 @@
  * Tags: SC-011-001, NFR-011-001, NFR-011-004
  */
 
+<<<<<<< HEAD
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import type { RendererConfig } from "../../../../src/renderer/adapter.js";
 import { GhosttyBackend } from "../../../../src/renderer/ghostty/backend.js";
 import { isGhosttyAvailable } from "../../../../src/renderer/ghostty/index.js";
 import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
+=======
+import { describe, test, expect, beforeAll, afterAll } from "bun:test";
+import { GhosttyBackend } from "../../../../src/renderer/ghostty/backend.js";
+import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
+import { isGhosttyAvailable } from "../../../../src/renderer/ghostty/index.js";
+import type { RendererConfig } from "../../../../src/renderer/adapter.js";
+import type { MetricsSnapshot } from "../../../../src/renderer/ghostty/metrics.js";
+>>>>>>> origin/main
 
 // ---------------------------------------------------------------------------
 // SLO targets
@@ -50,12 +59,23 @@ interface BenchmarkResult {
 }
 
 function reportResults(results: BenchmarkResult[]): void {
+<<<<<<< HEAD
   const _report = {
+=======
+  const report = {
+>>>>>>> origin/main
     timestamp: new Date().toISOString(),
     renderer: "ghostty",
     results,
     allPassed: results.every(r => r.passed),
   };
+<<<<<<< HEAD
+=======
+  // Output structured JSON for CI tracking
+  console.log("\n=== SLO BENCHMARK RESULTS ===");
+  console.log(JSON.stringify(report, null, 2));
+  console.log("=== END RESULTS ===\n");
+>>>>>>> origin/main
 }
 
 // ---------------------------------------------------------------------------
@@ -68,6 +88,10 @@ const benchResults: BenchmarkResult[] = [];
 beforeAll(async () => {
   ghosttyAvailable = await isGhosttyAvailable();
   if (!ghosttyAvailable) {
+<<<<<<< HEAD
+=======
+    console.warn("[T014] Ghostty binary not found -- SLO benchmarks will use synthetic data.");
+>>>>>>> origin/main
   }
 });
 

@@ -1,5 +1,6 @@
 // T017 - Unit tests for lane sharing (FR-008-007)
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, test } from "bun:test";
 import { LaneRegistry } from "../../../src/lanes/registry.js";
 import type { LaneRecord } from "../../../src/lanes/registry.js";
@@ -9,6 +10,17 @@ import {
   detachAgent,
   forceDetachAll,
   shareLane,
+=======
+import { describe, test, expect, beforeEach } from "bun:test";
+import { LaneRegistry } from "../../../src/lanes/registry.js";
+import type { LaneRecord } from "../../../src/lanes/registry.js";
+import {
+  shareLane,
+  attachAgent,
+  detachAgent,
+  forceDetachAll,
+  LaneClosedError,
+>>>>>>> origin/main
 } from "../../../src/lanes/sharing.js";
 
 function makeRecord(overrides: Partial<LaneRecord> = {}): LaneRecord {
@@ -39,7 +51,11 @@ describe("Lane Sharing (FR-008-007)", () => {
     const result = await shareLane(registry, "sh1");
     expect(result.fromState).toBe("ready");
     expect(result.toState).toBe("shared");
+<<<<<<< HEAD
     expect(registry.get("sh1")?.state).toBe("shared");
+=======
+    expect(registry.get("sh1")!.state).toBe("shared");
+>>>>>>> origin/main
   });
 
   test("shareLane is idempotent on shared lane", async () => {
@@ -62,21 +78,33 @@ describe("Lane Sharing (FR-008-007)", () => {
   test("attachAgent adds agent to list", async () => {
     registry.register(makeRecord({ laneId: "at1", state: "shared" }));
     await attachAgent(registry, "at1", "agent-a");
+<<<<<<< HEAD
     expect(registry.get("at1")?.attachedAgents).toEqual(["agent-a"]);
+=======
+    expect(registry.get("at1")!.attachedAgents).toEqual(["agent-a"]);
+>>>>>>> origin/main
   });
 
   test("attachAgent is idempotent", async () => {
     registry.register(makeRecord({ laneId: "at2", state: "shared" }));
     await attachAgent(registry, "at2", "agent-a");
     await attachAgent(registry, "at2", "agent-a");
+<<<<<<< HEAD
     expect(registry.get("at2")?.attachedAgents.length).toBe(1);
+=======
+    expect(registry.get("at2")!.attachedAgents.length).toBe(1);
+>>>>>>> origin/main
   });
 
   test("attachAgent allows multiple agents", async () => {
     registry.register(makeRecord({ laneId: "at3", state: "shared" }));
     await attachAgent(registry, "at3", "agent-a");
     await attachAgent(registry, "at3", "agent-b");
+<<<<<<< HEAD
     expect(registry.get("at3")?.attachedAgents.length).toBe(2);
+=======
+    expect(registry.get("at3")!.attachedAgents.length).toBe(2);
+>>>>>>> origin/main
   });
 
   test("attachAgent rejects closed lane", async () => {
@@ -91,6 +119,7 @@ describe("Lane Sharing (FR-008-007)", () => {
 
   test("detachAgent removes agent", async () => {
     registry.register(
+<<<<<<< HEAD
       makeRecord({ laneId: "dt1", state: "shared", attachedAgents: ["agent-a", "agent-b"] })
     );
     await detachAgent(registry, "dt1", "agent-a");
@@ -99,17 +128,51 @@ describe("Lane Sharing (FR-008-007)", () => {
 
   test("detachAgent is no-op for non-attached agent", async () => {
     registry.register(makeRecord({ laneId: "dt2", state: "shared", attachedAgents: ["agent-a"] }));
+=======
+      makeRecord({
+        laneId: "dt1",
+        state: "shared",
+        attachedAgents: ["agent-a", "agent-b"],
+      })
+    );
+    await detachAgent(registry, "dt1", "agent-a");
+    expect(registry.get("dt1")!.attachedAgents).toEqual(["agent-b"]);
+  });
+
+  test("detachAgent is no-op for non-attached agent", async () => {
+    registry.register(
+      makeRecord({
+        laneId: "dt2",
+        state: "shared",
+        attachedAgents: ["agent-a"],
+      })
+    );
+>>>>>>> origin/main
     const result = await detachAgent(registry, "dt2", "agent-z");
     expect(result.transitioned).toBe(false);
   });
 
   test("last agent detach from shared transitions to ready", async () => {
+<<<<<<< HEAD
     registry.register(makeRecord({ laneId: "dt3", state: "shared", attachedAgents: ["agent-a"] }));
+=======
+    registry.register(
+      makeRecord({
+        laneId: "dt3",
+        state: "shared",
+        attachedAgents: ["agent-a"],
+      })
+    );
+>>>>>>> origin/main
     const result = await detachAgent(registry, "dt3", "agent-a");
     expect(result.transitioned).toBe(true);
     expect(result.fromState).toBe("shared");
     expect(result.toState).toBe("ready");
+<<<<<<< HEAD
     expect(registry.get("dt3")?.state).toBe("ready");
+=======
+    expect(registry.get("dt3")!.state).toBe("ready");
+>>>>>>> origin/main
   });
 
   test("forceDetachAll removes all agents and transitions", async () => {
@@ -123,12 +186,27 @@ describe("Lane Sharing (FR-008-007)", () => {
     const result = await forceDetachAll(registry, "fd1");
     expect(result.detachedAgents).toEqual(["agent-a", "agent-b", "agent-c"]);
     expect(result.transitioned).toBe(true);
+<<<<<<< HEAD
     expect(registry.get("fd1")?.state).toBe("ready");
     expect(registry.get("fd1")?.attachedAgents.length).toBe(0);
   });
 
   test("forceDetachAll on non-shared lane does not transition", async () => {
     registry.register(makeRecord({ laneId: "fd2", state: "ready", attachedAgents: ["agent-a"] }));
+=======
+    expect(registry.get("fd1")!.state).toBe("ready");
+    expect(registry.get("fd1")!.attachedAgents.length).toBe(0);
+  });
+
+  test("forceDetachAll on non-shared lane does not transition", async () => {
+    registry.register(
+      makeRecord({
+        laneId: "fd2",
+        state: "ready",
+        attachedAgents: ["agent-a"],
+      })
+    );
+>>>>>>> origin/main
     const result = await forceDetachAll(registry, "fd2");
     expect(result.transitioned).toBe(false);
     expect(result.detachedAgents).toEqual(["agent-a"]);

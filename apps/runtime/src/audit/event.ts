@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { randomUUID } from "node:crypto";
+=======
+import { randomUUID } from "crypto";
+>>>>>>> origin/main
 
 /**
  * Audit event type constants to prevent typos and enable type safety.
@@ -81,12 +85,20 @@ export interface AuditEvent {
   /**
    * Optional lane ID for lane-scoped operations.
    */
+<<<<<<< HEAD
   laneId?: string | undefined;
+=======
+  laneId?: string;
+>>>>>>> origin/main
 
   /**
    * Optional session ID for session tracking.
    */
+<<<<<<< HEAD
   sessionId?: string | undefined;
+=======
+  sessionId?: string;
+>>>>>>> origin/main
 
   /**
    * Correlation ID linking related events across the system.
@@ -117,7 +129,11 @@ export function createAuditEvent(input: AuditEventInput): AuditEvent {
   const now = new Date();
 
   return {
+<<<<<<< HEAD
     id: generateUuiDv7(),
+=======
+    id: generateUUIDv7(),
+>>>>>>> origin/main
     timestamp: now.toISOString(),
     ...input,
   };
@@ -174,7 +190,11 @@ export function validateAuditEvent(event: AuditEvent): boolean {
 
   // Validate timestamp is valid ISO 8601
   const ts = new Date(event.timestamp);
+<<<<<<< HEAD
   if (Number.isNaN(ts.getTime())) {
+=======
+  if (isNaN(ts.getTime())) {
+>>>>>>> origin/main
     return false;
   }
 
@@ -190,7 +210,11 @@ export function validateAuditEvent(event: AuditEvent): boolean {
  *
  * @returns UUID v7 string
  */
+<<<<<<< HEAD
 function generateUuiDv7(): string {
+=======
+function generateUUIDv7(): string {
+>>>>>>> origin/main
   // For now, use randomUUID as a placeholder.
   // TODO: Replace with proper UUID v7 generation for time-ordered IDs.
   return randomUUID();

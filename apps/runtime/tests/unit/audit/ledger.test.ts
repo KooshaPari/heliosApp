@@ -1,8 +1,16 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
 import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
 import { AuditLedger } from "../../../src/audit/ledger";
 import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+import { AuditLedger } from "../../../src/audit/ledger";
+import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
+import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
+import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
+>>>>>>> origin/main
 
 describe("AuditLedger", () => {
   let ledger: AuditLedger;
@@ -64,7 +72,13 @@ describe("AuditLedger", () => {
     });
 
     it("should filter by event type", () => {
+<<<<<<< HEAD
       const results = ledger.search({ eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED });
+=======
+      const results = ledger.search({
+        eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+      });
+>>>>>>> origin/main
       expect(results.every(e => e.eventType === AUDIT_EVENT_TYPES.COMMAND_EXECUTED)).toBe(true);
     });
 
@@ -85,8 +99,21 @@ describe("AuditLedger", () => {
     });
 
     it("should respect limit and offset", () => {
+<<<<<<< HEAD
       const page1 = ledger.search({ workspaceId: "ws-1", limit: 10, offset: 0 });
       const page2 = ledger.search({ workspaceId: "ws-1", limit: 10, offset: 10 });
+=======
+      const page1 = ledger.search({
+        workspaceId: "ws-1",
+        limit: 10,
+        offset: 0,
+      });
+      const page2 = ledger.search({
+        workspaceId: "ws-1",
+        limit: 10,
+        offset: 10,
+      });
+>>>>>>> origin/main
 
       expect(page1.length).toBeLessThanOrEqual(10);
       expect(page2.length).toBeLessThanOrEqual(10);
@@ -185,12 +212,20 @@ describe("AuditLedger", () => {
 
       ledger.notifyEvent(event);
 
+<<<<<<< HEAD
       // Wait for batched delivery
+=======
+      // Wait for batched delivery (100ms batch interval + setImmediate hop)
+>>>>>>> origin/main
       setTimeout(() => {
         expect(callCount).toBe(1);
         unsubscribe();
         done();
+<<<<<<< HEAD
       }, 150);
+=======
+      }, 300);
+>>>>>>> origin/main
     });
 
     it("should filter non-matching events", done => {

@@ -1,5 +1,6 @@
 // T007-T009 - Remediation engine with confirmation gates and recovery suppression
 
+<<<<<<< HEAD
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -7,6 +8,15 @@ import { execCommand } from "../../integrations/exec.js";
 import type { ProtocolBus as LocalBus } from "../../protocol/bus.js";
 import type { LaneRegistry } from "../registry.js";
 import type { ClassifiedOrphan, ResourceType } from "./resource_classifier.js";
+=======
+import { promises as fs } from "fs";
+import { execCommand } from "../../integrations/exec.js";
+import path from "path";
+import os from "os";
+import { type ClassifiedOrphan, type ResourceType } from "./resource_classifier.js";
+import type { LocalBus } from "../../protocol/bus.js";
+import type { LaneRegistry } from "../registry.js";
+>>>>>>> origin/main
 
 export interface RemediationSuggestion {
   id: string;
@@ -84,7 +94,11 @@ export class RemediationEngine {
       this.suggestions.set(suggestion.id, suggestion);
 
       // Emit suggestion event
+<<<<<<< HEAD
       await this.publishEvent({
+=======
+      await this.bus.publish({
+>>>>>>> origin/main
         id: `remediation-suggested-${suggestion.id}`,
         type: "event",
         ts: new Date().toISOString(),
@@ -99,6 +113,7 @@ export class RemediationEngine {
       });
     }
 
+<<<<<<< HEAD
     // Sort by risk level: high > medium > low
     const riskOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
     suggestions.sort((a, b) => {
@@ -107,6 +122,8 @@ export class RemediationEngine {
       return aOrder - bOrder;
     });
 
+=======
+>>>>>>> origin/main
     return suggestions;
   }
 
@@ -126,7 +143,11 @@ export class RemediationEngine {
     }
 
     // Emit confirmation event
+<<<<<<< HEAD
     await this.publishEvent({
+=======
+    await this.bus.publish({
+>>>>>>> origin/main
       id: `remediation-confirmed-${suggestionId}`,
       type: "event",
       ts: new Date().toISOString(),
@@ -145,7 +166,11 @@ export class RemediationEngine {
     this.suggestions.delete(suggestionId);
 
     // Emit completion event
+<<<<<<< HEAD
     await this.publishEvent({
+=======
+    await this.bus.publish({
+>>>>>>> origin/main
       id: `remediation-completed-${suggestionId}`,
       type: "event",
       ts: new Date().toISOString(),
@@ -179,7 +204,11 @@ export class RemediationEngine {
     this.suggestions.delete(suggestionId);
 
     // Emit declined event
+<<<<<<< HEAD
     this.publishEvent({
+=======
+    this.bus.publish({
+>>>>>>> origin/main
       id: `remediation-declined-${suggestionId}`,
       type: "event",
       ts: new Date().toISOString(),
@@ -243,6 +272,7 @@ export class RemediationEngine {
           message: "Worktree removed successfully",
           resourceType: "worktree",
         };
+<<<<<<< HEAD
       }
       return {
         resourceId: orphan.path,
@@ -250,6 +280,16 @@ export class RemediationEngine {
         message: `git worktree remove failed: ${result.stderr}`,
         resourceType: "worktree",
       };
+=======
+      } else {
+        return {
+          resourceId: orphan.path,
+          success: false,
+          message: `git worktree remove failed: ${result.stderr}`,
+          resourceType: "worktree",
+        };
+      }
+>>>>>>> origin/main
     } catch (error) {
       return {
         resourceId: orphan.path,
@@ -261,9 +301,13 @@ export class RemediationEngine {
   }
 
   private async snapshotWorktree(orphan: ClassifiedOrphan): Promise<void> {
+<<<<<<< HEAD
     if (!orphan.path) {
       return;
     }
+=======
+    if (!orphan.path) return;
+>>>>>>> origin/main
 
     const snapshotDir = path.join(os.homedir(), ".helios", "data", "worktree_snapshots");
     await fs.mkdir(snapshotDir, { recursive: true });
@@ -302,6 +346,7 @@ export class RemediationEngine {
           message: "Zellij session terminated",
           resourceType: "zellij_session",
         };
+<<<<<<< HEAD
       }
       return {
         resourceId: orphan.path,
@@ -309,6 +354,16 @@ export class RemediationEngine {
         message: `zellij kill-session failed: ${result.stderr}`,
         resourceType: "zellij_session",
       };
+=======
+      } else {
+        return {
+          resourceId: orphan.path,
+          success: false,
+          message: `zellij kill-session failed: ${result.stderr}`,
+          resourceType: "zellij_session",
+        };
+      }
+>>>>>>> origin/main
     } catch (error) {
       return {
         resourceId: orphan.path,
@@ -360,6 +415,7 @@ export class RemediationEngine {
             message: "Process killed forcefully",
             resourceType: "pty_process",
           };
+<<<<<<< HEAD
         }
         return {
           resourceId: String(orphan.pid),
@@ -374,6 +430,24 @@ export class RemediationEngine {
         message: "SIGTERM failed",
         resourceType: "pty_process",
       };
+=======
+        } else {
+          return {
+            resourceId: String(orphan.pid),
+            success: false,
+            message: "Failed to terminate process",
+            resourceType: "pty_process",
+          };
+        }
+      } else {
+        return {
+          resourceId: String(orphan.pid),
+          success: false,
+          message: "SIGTERM failed",
+          resourceType: "pty_process",
+        };
+      }
+>>>>>>> origin/main
     } catch (error) {
       return {
         resourceId: String(orphan.pid),
@@ -400,11 +474,19 @@ export class RemediationEngine {
   private getResourceKey(orphan: ClassifiedOrphan): string {
     if (orphan.path) {
       return `${orphan.type}:${orphan.path}`;
+<<<<<<< HEAD
     }
     if (orphan.pid) {
       return `${orphan.type}:${orphan.pid}`;
     }
     return `${orphan.type}:unknown`;
+=======
+    } else if (orphan.pid) {
+      return `${orphan.type}:${orphan.pid}`;
+    } else {
+      return `${orphan.type}:unknown`;
+    }
+>>>>>>> origin/main
   }
 
   private expireCooldownEntries(): void {
@@ -447,6 +529,7 @@ export class RemediationEngine {
         const entries = Array.from(this.cooldownMap.values());
         fs.writeFile(this.cooldownPath, JSON.stringify(entries, null, 2));
       });
+<<<<<<< HEAD
     } catch (_error) {}
   }
 
@@ -459,6 +542,10 @@ export class RemediationEngine {
       }
     } catch {
       // Fire-and-forget
+=======
+    } catch (error) {
+      console.error("Failed to save cooldown map:", error);
+>>>>>>> origin/main
     }
   }
 

@@ -7,7 +7,11 @@
  * Tags: NFR-011-001, SC-011-004
  */
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, test } from "bun:test";
+=======
+import { describe, test, expect, beforeEach } from "bun:test";
+>>>>>>> origin/main
 import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
 import type { MetricsSnapshot } from "../../../../src/renderer/ghostty/metrics.js";
 
@@ -204,7 +208,11 @@ describe("GhosttyMetrics - publisher", () => {
 
     metrics.disable();
     expect(published.length).toBeGreaterThanOrEqual(1);
+<<<<<<< HEAD
     expect(published[0]?.rendererId).toBe("ghostty");
+=======
+    expect(published[0]!.rendererId).toBe("ghostty");
+>>>>>>> origin/main
   });
 
   test("clearPublisher stops publishing", () => {

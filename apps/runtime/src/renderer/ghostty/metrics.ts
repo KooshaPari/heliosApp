@@ -90,9 +90,13 @@ class NumberRingBuffer {
    * Allocates a new array -- call sparingly (once per publish interval).
    */
   sorted(): Float64Array {
+<<<<<<< HEAD
     if (this._size === 0) {
       return new Float64Array(0);
     }
+=======
+    if (this._size === 0) return new Float64Array(0);
+>>>>>>> origin/main
 
     const out = new Float64Array(this._size);
     if (this._size < this._capacity) {
@@ -119,9 +123,13 @@ class NumberRingBuffer {
 // ---------------------------------------------------------------------------
 
 function percentile(sorted: Float64Array, p: number): number {
+<<<<<<< HEAD
   if (sorted.length === 0) {
     return 0;
   }
+=======
+  if (sorted.length === 0) return 0;
+>>>>>>> origin/main
   const idx = Math.ceil((p / 100) * sorted.length) - 1;
   return sorted[Math.max(0, idx)] ?? 0;
 }
@@ -174,9 +182,13 @@ export class GhosttyMetrics {
    * publishIntervalMs > 0, starts periodic publishing.
    */
   enable(): void {
+<<<<<<< HEAD
     if (this._enabled) {
       return;
     }
+=======
+    if (this._enabled) return;
+>>>>>>> origin/main
     this._enabled = true;
     this._windowStartTimestamp = Date.now();
     this._startPublishing();
@@ -186,9 +198,13 @@ export class GhosttyMetrics {
    * Disable metrics collection and stop publishing.
    */
   disable(): void {
+<<<<<<< HEAD
     if (!this._enabled) {
       return;
     }
+=======
+    if (!this._enabled) return;
+>>>>>>> origin/main
     this._enabled = false;
     this._stopPublishing();
   }
@@ -227,9 +243,13 @@ export class GhosttyMetrics {
    *                    (e.g., performance.now() or Date.now()).
    */
   recordFrame(timestamp: number = Date.now()): void {
+<<<<<<< HEAD
     if (!this._enabled) {
       return;
     }
+=======
+    if (!this._enabled) return;
+>>>>>>> origin/main
 
     this._frameCount++;
     this._framesInWindow++;
@@ -265,9 +285,13 @@ export class GhosttyMetrics {
    * @param echoTimestamp  - When the echo was rendered.
    */
   recordInputLatency(inputTimestamp: number, echoTimestamp: number): void {
+<<<<<<< HEAD
     if (!this._enabled) {
       return;
     }
+=======
+    if (!this._enabled) return;
+>>>>>>> origin/main
     const latencyMs = echoTimestamp - inputTimestamp;
     this._inputLatencies.push(latencyMs);
   }
@@ -330,6 +354,7 @@ export class GhosttyMetrics {
   // -----------------------------------------------------------------------
 
   private _startPublishing(): void {
+<<<<<<< HEAD
     if (this._publishTimer !== undefined) {
       return;
     }
@@ -339,6 +364,11 @@ export class GhosttyMetrics {
     if (this._publishIntervalMs <= 0) {
       return;
     }
+=======
+    if (this._publishTimer !== undefined) return;
+    if (this._publisher === undefined) return;
+    if (this._publishIntervalMs <= 0) return;
+>>>>>>> origin/main
 
     this._publishTimer = setInterval(() => {
       this._publish();
@@ -353,9 +383,13 @@ export class GhosttyMetrics {
   }
 
   private _publish(): void {
+<<<<<<< HEAD
     if (this._publisher === undefined || !this._enabled) {
       return;
     }
+=======
+    if (this._publisher === undefined || !this._enabled) return;
+>>>>>>> origin/main
 
     try {
       const snapshot = this.getSnapshot();

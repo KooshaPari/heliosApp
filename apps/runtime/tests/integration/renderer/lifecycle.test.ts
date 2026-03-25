@@ -2,6 +2,7 @@
  * Integration tests for renderer adapter lifecycle with mock backends.
  * @see SC-010-001, SC-010-002, SC-010-003
  */
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
 import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
 import { RendererRegistry } from "../../../src/renderer/registry.js";
@@ -13,6 +14,19 @@ import {
   MockRioAdapter,
   TEST_CONFIG,
   TEST_SURFACE,
+=======
+import { describe, expect, it, beforeEach } from "bun:test";
+import { RendererRegistry } from "../../../src/renderer/registry.js";
+import { RendererStateMachine } from "../../../src/renderer/state_machine.js";
+import { switchRenderer } from "../../../src/renderer/switch.js";
+import { StreamBindingManager } from "../../../src/renderer/stream_binding.js";
+import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
+import {
+  MockGhosttyAdapter,
+  MockRioAdapter,
+  TEST_SURFACE,
+  TEST_CONFIG,
+>>>>>>> origin/main
 } from "../../helpers/mock_adapter.js";
 
 describe("Renderer lifecycle integration", () => {

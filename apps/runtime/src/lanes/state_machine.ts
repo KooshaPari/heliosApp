@@ -5,6 +5,11 @@ export type LaneState =
   | "provisioning"
   | "ready"
   | "running"
+<<<<<<< HEAD
+=======
+  | "active"
+  | "recovering"
+>>>>>>> origin/main
   | "blocked"
   | "shared"
   | "cleaning"
@@ -115,7 +120,11 @@ const laneLocks = new Map<string, Promise<void>>();
 
 export async function withLaneLock<T>(laneId: string, fn: () => Promise<T>): Promise<T> {
   const prev = laneLocks.get(laneId) ?? Promise.resolve();
+<<<<<<< HEAD
   let resolve: (() => void) | undefined;
+=======
+  let resolve: () => void;
+>>>>>>> origin/main
   const next = new Promise<void>(r => {
     resolve = r;
   });
@@ -125,7 +134,11 @@ export async function withLaneLock<T>(laneId: string, fn: () => Promise<T>): Pro
   try {
     return await fn();
   } finally {
+<<<<<<< HEAD
     resolve?.();
+=======
+    resolve!();
+>>>>>>> origin/main
     // Clean up if this is the last in chain
     if (laneLocks.get(laneId) === next) {
       laneLocks.delete(laneId);
@@ -147,7 +160,16 @@ export function recordTransition(
     history = [];
     transitionHistories.set(laneId, history);
   }
+<<<<<<< HEAD
   history.push({ fromState, event, toState, timestamp: new Date().toISOString() });
+=======
+  history.push({
+    fromState,
+    event,
+    toState,
+    timestamp: new Date().toISOString(),
+  });
+>>>>>>> origin/main
   if (history.length > MAX_HISTORY) {
     history.splice(0, history.length - MAX_HISTORY);
   }

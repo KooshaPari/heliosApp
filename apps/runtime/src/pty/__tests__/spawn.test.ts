@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { afterEach, describe, expect, it } from "bun:test";
 import { PtyRegistry } from "../registry.js";
 import { spawnPty } from "../spawn.js";
+=======
+import { describe, expect, it, afterEach } from "bun:test";
+import { spawnPty } from "../spawn.js";
+import { PtyRegistry } from "../registry.js";
+>>>>>>> origin/main
 
 describe("spawnPty()", () => {
   const pidsToCleanup: number[] = [];

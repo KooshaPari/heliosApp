@@ -22,7 +22,11 @@ type ExitHandler = (code: number) => void;
 const SIGKILL_TIMEOUT_MS = 3000;
 
 export class RioProcess {
+<<<<<<< HEAD
   private _proc: any | undefined;
+=======
+  private _proc: ReturnType<typeof Bun.spawn> | undefined;
+>>>>>>> origin/main
   private _pid: number | undefined;
   private _running = false;
   private _startedAt: number | undefined;
@@ -47,18 +51,30 @@ export class RioProcess {
         args.push("--no-gpu");
       }
 
+<<<<<<< HEAD
       this._proc = (Bun as any).spawn(args, {
+=======
+      this._proc = Bun.spawn(args, {
+>>>>>>> origin/main
         stdin: "pipe",
         stdout: "pipe",
         stderr: "pipe",
       });
 
+<<<<<<< HEAD
       this._pid = (this._proc as any).pid;
+=======
+      this._pid = this._proc.pid;
+>>>>>>> origin/main
       this._running = true;
       this._startedAt = Date.now();
 
       // Monitor for unexpected exit.
+<<<<<<< HEAD
       this._proc.exited.then((code: number) => {
+=======
+      this._proc.exited.then(code => {
+>>>>>>> origin/main
         this._running = false;
         for (const handler of this._exitHandlers) {
           try {
@@ -69,7 +85,11 @@ export class RioProcess {
         }
       });
 
+<<<<<<< HEAD
       return { pid: this._pid! };
+=======
+      return { pid: this._pid };
+>>>>>>> origin/main
     } catch (err) {
       this._running = false;
       this._startLock = false;
@@ -85,7 +105,11 @@ export class RioProcess {
    * Stop the rio process with SIGTERM -> SIGKILL escalation.
    */
   async stop(): Promise<void> {
+<<<<<<< HEAD
     if (!(this._proc && this._running)) {
+=======
+    if (!this._proc || !this._running) {
+>>>>>>> origin/main
       return;
     }
 
@@ -117,9 +141,13 @@ export class RioProcess {
   }
 
   getUptime(): number | undefined {
+<<<<<<< HEAD
     if (this._startedAt === undefined) {
       return undefined;
     }
+=======
+    if (this._startedAt === undefined) return undefined;
+>>>>>>> origin/main
     return Date.now() - this._startedAt;
   }
 
@@ -134,9 +162,13 @@ export class RioProcess {
    * Write data to the rio process stdin.
    */
   writeToStdin(data: Uint8Array): void {
+<<<<<<< HEAD
     if (!(this._proc && this._running)) {
       return;
     }
+=======
+    if (!this._proc || !this._running) return;
+>>>>>>> origin/main
     try {
       const stdin = this._proc.stdin;
       if (stdin && typeof stdin === "object" && "write" in stdin) {

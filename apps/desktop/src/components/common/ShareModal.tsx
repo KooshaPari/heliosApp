@@ -33,11 +33,14 @@ export const ShareModal: Component<ShareModalProps> = props => {
           "z-index": "1000",
         }}
         onClick={props.onClose}
+<<<<<<< HEAD
         onKeyDown={(e: KeyboardEvent) => {
           if (e.key === "Escape") {
             props.onClose();
           }
         }}
+=======
+>>>>>>> origin/main
       >
         <div
           style={{
@@ -48,7 +51,10 @@ export const ShareModal: Component<ShareModalProps> = props => {
             "max-width": "500px",
           }}
           onClick={(e: MouseEvent) => e.stopPropagation()}
+<<<<<<< HEAD
           onKeyDown={(e: KeyboardEvent) => e.stopPropagation()}
+=======
+>>>>>>> origin/main
         >
           <h3
             style={{
@@ -80,7 +86,10 @@ export const ShareModal: Component<ShareModalProps> = props => {
               {props.shareUrl || "Generating link..."}
             </code>
             <button
+<<<<<<< HEAD
               type="button"
+=======
+>>>>>>> origin/main
               onClick={copyToClipboard}
               style={{
                 background: copied() ? "#a6e3a1" : "#89b4fa",
@@ -97,7 +106,10 @@ export const ShareModal: Component<ShareModalProps> = props => {
             </button>
           </div>
           <button
+<<<<<<< HEAD
             type="button"
+=======
+>>>>>>> origin/main
             onClick={props.onClose}
             style={{
               "margin-top": "16px",

@@ -42,7 +42,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/027-crash-recovery-and-restoration/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/027-crash-recovery-and-restoration/spec.md`
 - Protocol bus:
@@ -232,4 +232,7 @@ Implementation command:
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:30:10Z – claude-haiku – shell_pid=57374 – lane=doing – Assigned agent via workflow command
 - 2026-03-01T13:31:39Z – claude-haiku – shell_pid=57374 – lane=done – Implemented
+<<<<<<< HEAD
 - 2026-03-01T13:41:30Z – claude-haiku – shell_pid=57374 – lane=done – Merged
+=======
+>>>>>>> origin/main

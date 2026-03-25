@@ -1,5 +1,6 @@
 import { describe, expect, it, mock } from "bun:test";
 import {
+<<<<<<< HEAD
   type EventBus,
   type MuxEvent,
   MuxEventEmitter,
@@ -9,6 +10,17 @@ import {
   type SessionCreatedEvent,
   type TabSwitchedEvent,
   generateCorrelationId,
+=======
+  MuxEventEmitter,
+  MuxEventType,
+  generateCorrelationId,
+  type EventBus,
+  type MuxEvent,
+  type SessionCreatedEvent,
+  type PaneAddedEvent,
+  type TabSwitchedEvent,
+  type PaneDimensionRejectedEvent,
+>>>>>>> origin/main
 } from "../events.js";
 
 function makeBus(): EventBus & { events: MuxEvent[] } {
@@ -98,7 +110,11 @@ describe("MuxEventEmitter", () => {
     });
 
     await new Promise(r => setTimeout(r, 10));
+<<<<<<< HEAD
     expect(bus.events[0]?.correlationId).toBe("custom-123");
+=======
+    expect(bus.events[0]!.correlationId).toBe("custom-123");
+>>>>>>> origin/main
   });
 
   it("emits pane.dimension_rejected events", async () => {
@@ -115,7 +131,11 @@ describe("MuxEventEmitter", () => {
     });
 
     await new Promise(r => setTimeout(r, 10));
+<<<<<<< HEAD
     expect(bus.events[0]?.type).toBe("mux.pane.dimension_rejected");
+=======
+    expect(bus.events[0]!.type).toBe("mux.pane.dimension_rejected");
+>>>>>>> origin/main
   });
 
   it("swallows bus publish failures without throwing", async () => {
@@ -145,9 +165,13 @@ describe("MuxEventEmitter", () => {
     const bus: EventBus = {
       publish: mock(async () => {
         callCount++;
+<<<<<<< HEAD
         if (callCount === 1) {
           throw new Error("transient");
         }
+=======
+        if (callCount === 1) throw new Error("transient");
+>>>>>>> origin/main
       }),
     };
     const emitter = new MuxEventEmitter(bus);

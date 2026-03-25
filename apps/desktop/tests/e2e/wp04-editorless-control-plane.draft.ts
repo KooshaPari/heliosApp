@@ -48,11 +48,82 @@ test("renderer switch failure rolls back and reports safe status", async ({ page
   controlPlane.setWorkspace("workspace_renderer");
 
   await controlPlane.createLane({ workspaceId: "workspace_renderer" });
-  const outcome = await controlPlane.switchRenderer("rio", { forceError: true });
+  const outcome = await controlPlane.switchRenderer("rio", {
+    forceError: true,
+  });
   await page.setContent(renderControlPlaneSnapshot(controlPlane));
 
   expect(outcome.committed).toBe(false);
   expect(outcome.rolledBack).toBe(true);
   await expect(page.getByTestId("renderer-engine")).toHaveText("ghostty");
   await expect(page.getByTestId("renderer-switch-status")).toHaveText("rolled_back");
+});
+
+test("lane lifecycle supports session restore after reconnect", async ({ page }) => {
+  const runtime = createRuntime();
+  const controlPlane = bootDesktop({ bus: runtime.bus });
+
+  const lane = await controlPlane.createLane({
+    workspaceId: "workspace_restore",
+  });
+  expect(lane.ok).toBe(true);
+  expect(lane.laneId).not.toBeNull();
+
+  const session = await controlPlane.ensureSession({
+    workspaceId: "workspace_restore",
+    laneId: lane.laneId as string,
+  });
+  expect(session.ok).toBe(true);
+  expect(session.sessionId).not.toBeNull();
+
+  const terminal = await controlPlane.spawnTerminal({
+    workspaceId: "workspace_restore",
+    laneId: lane.laneId as string,
+    sessionId: session.sessionId as string,
+  });
+  expect(terminal.ok).toBe(true);
+  expect(terminal.terminalId).not.toBeNull();
+
+  const reconnectedPlane = bootDesktop({ bus: runtime.bus });
+  reconnectedPlane.setWorkspace("workspace_restore");
+  const restored = await reconnectedPlane.restoreSession({
+    workspaceId: "workspace_restore",
+    laneId: lane.laneId as string,
+    sessionId: session.sessionId as string,
+  });
+
+  expect(restored.ok).toBe(true);
+  expect(restored.sessionId).toBe(session.sessionId);
+
+  reconnectedPlane.setActiveTab("session");
+  await page.setContent(renderControlPlaneSnapshot(reconnectedPlane));
+
+  await expect(page.getByTestId("tab-session-workspace")).toHaveText("workspace_restore");
+  await expect(page.getByTestId("tab-session-lane")).toHaveText(lane.laneId as string);
+  await expect(page.getByTestId("tab-session-session")).toHaveText(session.sessionId as string);
+
+  const topics = runtime
+    .getEvents()
+    .map(event => event.topic)
+    .filter((topic): topic is string => typeof topic === "string");
+
+  expect(topics).toEqual(
+    expect.arrayContaining([
+      "lane.create.started",
+      "lane.created",
+      "session.attach.started",
+      "session.attached",
+      "terminal.spawn.started",
+      "terminal.spawned",
+      "session.restore.started",
+      "session.restore.completed",
+    ])
+  );
+
+  expect(topics.indexOf("session.restore.started")).toBeGreaterThan(
+    topics.indexOf("terminal.spawned")
+  );
+  expect(topics.indexOf("session.restore.completed")).toBeGreaterThan(
+    topics.indexOf("session.restore.started")
+  );
 });

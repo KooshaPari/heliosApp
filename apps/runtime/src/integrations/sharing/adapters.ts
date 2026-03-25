@@ -6,8 +6,11 @@
  * FR-026-004: Tmate backend adapter.
  */
 
+<<<<<<< HEAD
 // ChildProcess is not exported from bun directly; using any for process types
 
+=======
+>>>>>>> origin/main
 /**
  * Share backend adapter interface.
  */
@@ -62,13 +65,21 @@ export class UptermAdapter implements ShareBackendAdapter {
   ): Promise<{ link: string; process: any }> {
     try {
       // Validate inputs
+<<<<<<< HEAD
       if (!(terminalId && zellijSessionName)) {
+=======
+      if (!terminalId || !zellijSessionName) {
+>>>>>>> origin/main
         throw new Error("Missing terminalId or zellijSessionName");
       }
 
       // Generate upterm command
       const attachCommand = `zellij attach ${zellijSessionName}`;
+<<<<<<< HEAD
       const _uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
+=======
+      const uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
+>>>>>>> origin/main
 
       // Mock implementation: return simulated result
       const link = `https://upterm.io/${terminalId}-${Date.now()}`;
@@ -142,13 +153,21 @@ export class TmateAdapter implements ShareBackendAdapter {
   ): Promise<{ link: string; process: any }> {
     try {
       // Validate inputs
+<<<<<<< HEAD
       if (!(terminalId && zellijSessionName)) {
+=======
+      if (!terminalId || !zellijSessionName) {
+>>>>>>> origin/main
         throw new Error("Missing terminalId or zellijSessionName");
       }
 
       // Generate tmate command
       const attachCommand = `zellij attach ${zellijSessionName}`;
+<<<<<<< HEAD
       const _tmateCommand = `tmate -F -c "${attachCommand}"`;
+=======
+      const tmateCommand = `tmate -F -c "${attachCommand}"`;
+>>>>>>> origin/main
 
       // Mock implementation: return simulated result
       // Tmate typically outputs link to stderr

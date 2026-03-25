@@ -43,7 +43,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/025-provider-adapter-interface-and-lifecycle/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/025-provider-adapter-interface-and-lifecycle/spec.md`
 - Existing protocol code:
@@ -226,4 +226,7 @@ Implementation command:
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:29:56Z – claude-haiku – shell_pid=55629 – lane=doing – Assigned agent via workflow command
 - 2026-03-01T13:33:13Z – claude-haiku – shell_pid=55629 – lane=done – Implemented: All 5 subtasks complete
+<<<<<<< HEAD
 - 2026-03-01T13:41:24Z – claude-haiku – shell_pid=55629 – lane=done – Merged
+=======
+>>>>>>> origin/main

@@ -5,15 +5,24 @@
  */
 
 import { describe, expect, it } from "bun:test";
+<<<<<<< HEAD
 import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
 import { createSwitchOrchestrator } from "../../../src/renderer/switch_transaction.js";
+=======
+import { createSwitchOrchestrator } from "../../../src/renderer/switch_transaction.js";
+import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
+>>>>>>> origin/main
 import {
   MockGhosttyAdapter,
   MockRioAdapter,
   TEST_CONFIG,
   TEST_SURFACE,
 } from "../../helpers/mock_adapter.js";
+<<<<<<< HEAD
+=======
+import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
+>>>>>>> origin/main
 
 describe("Terminal creation queueing", () => {
   it("queues terminal creation during active transaction", async () => {
@@ -23,7 +32,21 @@ describe("Terminal creation queueing", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
       ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+>>>>>>> origin/main
     ]);
 
     const switchPromise = orchestrator.startSwitch({
@@ -54,7 +77,21 @@ describe("Terminal creation queueing", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
       ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+>>>>>>> origin/main
     ]);
 
     const switchPromise = orchestrator.startSwitch({
@@ -113,7 +150,21 @@ describe("Terminal creation queueing", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
       ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+>>>>>>> origin/main
     ]);
 
     const switchPromise = orchestrator.startSwitch({
@@ -127,7 +178,13 @@ describe("Terminal creation queueing", () => {
     });
 
     // Queue a terminal creation
+<<<<<<< HEAD
     const creationPromise = orchestrator.queueTerminalCreation({ ptyId: "pty-new" });
+=======
+    const creationPromise = orchestrator.queueTerminalCreation({
+      ptyId: "pty-new",
+    });
+>>>>>>> origin/main
 
     // Wait for completion
     const [switchResult, creationResult] = await Promise.all([
@@ -148,7 +205,21 @@ describe("Terminal creation queueing", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
       ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+>>>>>>> origin/main
     ]);
 
     expect(orchestrator.isSwitchInProgress()).toBe(false);
@@ -167,7 +238,13 @@ describe("Terminal creation queueing", () => {
     expect(orchestrator.isSwitchInProgress()).toBe(true);
 
     // Queue should still work
+<<<<<<< HEAD
     const creationPromise = orchestrator.queueTerminalCreation({ ptyId: "pty-new" });
+=======
+    const creationPromise = orchestrator.queueTerminalCreation({
+      ptyId: "pty-new",
+    });
+>>>>>>> origin/main
 
     // Wait for completion
     await Promise.all([switchPromise, creationPromise]);

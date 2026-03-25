@@ -6,7 +6,11 @@
  */
 
 import type { ZellijCli } from "./cli.js";
+<<<<<<< HEAD
 import type { LayoutTopology, PaneDimensions, PaneTopology, TabTopology } from "./types.js";
+=======
+import type { LayoutTopology, TabTopology, PaneTopology, PaneDimensions } from "./types.js";
+>>>>>>> origin/main
 
 /**
  * Manages layout topology for all tracked sessions.
@@ -60,6 +64,7 @@ export class TopologyTracker {
    */
   addPane(sessionName: string, paneId: number, dimensions: PaneDimensions, ptyId?: string): void {
     const topology = this.topologies.get(sessionName);
+<<<<<<< HEAD
     if (!topology) {
       return;
     }
@@ -68,6 +73,12 @@ export class TopologyTracker {
     if (!activeTab) {
       return;
     }
+=======
+    if (!topology) return;
+
+    const activeTab = topology.tabs.find(t => t.tabId === topology.activeTabId);
+    if (!activeTab) return;
+>>>>>>> origin/main
 
     // Unfocus all existing panes
     for (const p of activeTab.panes) {
@@ -87,14 +98,22 @@ export class TopologyTracker {
    */
   removePane(sessionName: string, paneId: number): void {
     const topology = this.topologies.get(sessionName);
+<<<<<<< HEAD
     if (!topology) {
       return;
     }
+=======
+    if (!topology) return;
+>>>>>>> origin/main
 
     for (const tab of topology.tabs) {
       const idx = tab.panes.findIndex(p => p.paneId === paneId);
       if (idx !== -1) {
+<<<<<<< HEAD
         const wasFocused = tab.panes[idx]?.focused;
+=======
+        const wasFocused = tab.panes[idx]!.focused;
+>>>>>>> origin/main
         tab.panes.splice(idx, 1);
         // If removed pane was focused, focus the first remaining pane
         if (wasFocused && tab.panes.length > 0) {
@@ -135,9 +154,13 @@ export class TopologyTracker {
     defaultPaneDimensions: PaneDimensions = { cols: 80, rows: 24 }
   ): void {
     const topology = this.topologies.get(sessionName);
+<<<<<<< HEAD
     if (!topology) {
       return;
     }
+=======
+    if (!topology) return;
+>>>>>>> origin/main
 
     topology.tabs.push({
       tabId,
@@ -159,16 +182,24 @@ export class TopologyTracker {
    */
   removeTab(sessionName: string, tabId: number): void {
     const topology = this.topologies.get(sessionName);
+<<<<<<< HEAD
     if (!topology) {
       return;
     }
+=======
+    if (!topology) return;
+>>>>>>> origin/main
 
     const idx = topology.tabs.findIndex(t => t.tabId === tabId);
     if (idx !== -1) {
       topology.tabs.splice(idx, 1);
       // Update active tab if needed
       if (topology.activeTabId === tabId && topology.tabs.length > 0) {
+<<<<<<< HEAD
         topology.activeTabId = topology.tabs[0]?.tabId;
+=======
+        topology.activeTabId = topology.tabs[0]!.tabId;
+>>>>>>> origin/main
       }
     }
   }
@@ -178,9 +209,13 @@ export class TopologyTracker {
    */
   switchTab(sessionName: string, tabId: number): void {
     const topology = this.topologies.get(sessionName);
+<<<<<<< HEAD
     if (!topology) {
       return;
     }
+=======
+    if (!topology) return;
+>>>>>>> origin/main
     topology.activeTabId = tabId;
   }
 
@@ -250,6 +285,7 @@ export class TopologyTracker {
    */
   findPane(sessionName: string, paneId: number): PaneTopology | undefined {
     const topology = this.topologies.get(sessionName);
+<<<<<<< HEAD
     if (!topology) {
       return undefined;
     }
@@ -259,6 +295,13 @@ export class TopologyTracker {
       if (pane) {
         return pane;
       }
+=======
+    if (!topology) return undefined;
+
+    for (const tab of topology.tabs) {
+      const pane = tab.panes.find(p => p.paneId === paneId);
+      if (pane) return pane;
+>>>>>>> origin/main
     }
     return undefined;
   }
@@ -269,9 +312,13 @@ export class TopologyTracker {
   getPtyBindings(sessionName: string): Map<number, string> {
     const bindings = new Map<number, string>();
     const topology = this.topologies.get(sessionName);
+<<<<<<< HEAD
     if (!topology) {
       return bindings;
     }
+=======
+    if (!topology) return bindings;
+>>>>>>> origin/main
 
     for (const tab of topology.tabs) {
       for (const pane of tab.panes) {
@@ -331,8 +378,13 @@ export class TopologyTracker {
         panes.push({
           paneId: paneCounter++,
           dimensions: {
+<<<<<<< HEAD
             cols: colsMatch ? Number.parseInt(colsMatch[1]!, 10) : 80,
             rows: rowsMatch ? Number.parseInt(rowsMatch[1]!, 10) : 24,
+=======
+            cols: colsMatch ? parseInt(colsMatch[1]!, 10) : 80,
+            rows: rowsMatch ? parseInt(rowsMatch[1]!, 10) : 24,
+>>>>>>> origin/main
           },
           focused: focusMatch,
         });

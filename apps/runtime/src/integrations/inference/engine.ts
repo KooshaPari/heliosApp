@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference.ts";
+=======
+import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
+>>>>>>> origin/main
 
 export interface InferenceEngine {
   readonly id: string;

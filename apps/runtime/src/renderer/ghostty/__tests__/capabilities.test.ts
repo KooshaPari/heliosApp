@@ -2,6 +2,7 @@
  * Unit tests for ghostty capability detection (T004).
  */
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, test } from "bun:test";
 import type { RendererCapabilities } from "../../capabilities.js";
 import {
@@ -9,6 +10,15 @@ import {
   detectCapabilities,
   getCachedCapabilities,
 } from "../capabilities.js";
+=======
+import { describe, test, expect, beforeEach } from "bun:test";
+import {
+  getCachedCapabilities,
+  clearCapabilityCache,
+  detectCapabilities,
+} from "../capabilities.js";
+import type { RendererCapabilities } from "../../capabilities.js";
+>>>>>>> origin/main
 
 describe("Ghostty Capabilities", () => {
   beforeEach(() => {

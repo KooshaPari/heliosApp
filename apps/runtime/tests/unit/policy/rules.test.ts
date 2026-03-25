@@ -2,7 +2,11 @@
  * Policy Rule Engine Unit Tests
  */
 
+<<<<<<< HEAD
 import { describe, expect, test } from "bun:test";
+=======
+import { test, expect, describe } from "bun:test";
+>>>>>>> origin/main
 import { PolicyRuleSet } from "../../../src/policy/rules";
 import { PolicyClassification, PolicyPatternType } from "../../../src/policy/types";
 

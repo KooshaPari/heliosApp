@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import type { ZellijCli } from "../cli.js";
 import { TopologyTracker } from "../topology.js";
+=======
+import { describe, expect, it, mock, beforeEach } from "bun:test";
+import { TopologyTracker } from "../topology.js";
+import type { ZellijCli } from "../cli.js";
+>>>>>>> origin/main
 
 /**
  * Unit tests for TopologyTracker.
@@ -29,15 +35,32 @@ describe("TopologyTracker", () => {
 
       expect(topo.sessionName).toBe("session-1");
       expect(topo.tabs).toHaveLength(1);
+<<<<<<< HEAD
       expect(topo.tabs[0]?.panes).toHaveLength(1);
       expect(topo.tabs[0]?.panes[0]?.focused).toBe(true);
+=======
+      expect(topo.tabs[0]!.panes).toHaveLength(1);
+      expect(topo.tabs[0]!.panes[0]!.focused).toBe(true);
+>>>>>>> origin/main
       expect(topo.activeTabId).toBe(0);
     });
 
     it("uses custom initial dimensions", () => {
+<<<<<<< HEAD
       const topo = tracker.initializeTopology("session-1", { cols: 120, rows: 40 });
 
       expect(topo.tabs[0]?.panes[0]?.dimensions).toEqual({ cols: 120, rows: 40 });
+=======
+      const topo = tracker.initializeTopology("session-1", {
+        cols: 120,
+        rows: 40,
+      });
+
+      expect(topo.tabs[0]!.panes[0]!.dimensions).toEqual({
+        cols: 120,
+        rows: 40,
+      });
+>>>>>>> origin/main
     });
   });
 
@@ -54,7 +77,11 @@ describe("TopologyTracker", () => {
       expect(newPane.ptyId).toBe("pty-1");
       expect(newPane.focused).toBe(true);
       // Previous pane should be unfocused
+<<<<<<< HEAD
       expect(activeTab.panes[0]?.focused).toBe(false);
+=======
+      expect(activeTab.panes[0]!.focused).toBe(false);
+>>>>>>> origin/main
     });
 
     it("removes a pane and refocuses", () => {
@@ -65,7 +92,11 @@ describe("TopologyTracker", () => {
       const topo = tracker.getTopology("s1")!;
       const activeTab = topo.tabs.find(t => t.tabId === topo.activeTabId)!;
       expect(activeTab.panes).toHaveLength(1);
+<<<<<<< HEAD
       expect(activeTab.panes[0]?.focused).toBe(true);
+=======
+      expect(activeTab.panes[0]!.focused).toBe(true);
+>>>>>>> origin/main
     });
 
     it("does nothing for unknown session", () => {
@@ -114,7 +145,11 @@ describe("TopologyTracker", () => {
       tracker.addTab("s1", 1, "Tab 2");
       tracker.switchTab("s1", 0);
 
+<<<<<<< HEAD
       expect(tracker.getTopology("s1")?.activeTabId).toBe(0);
+=======
+      expect(tracker.getTopology("s1")!.activeTabId).toBe(0);
+>>>>>>> origin/main
     });
   });
 

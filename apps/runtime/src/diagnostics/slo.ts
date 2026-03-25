@@ -1,8 +1,89 @@
 // FR-004, FR-010: SLO violation detection, rate-limited event emission, and periodic check loop.
 
+<<<<<<< HEAD
 import type { MetricsRegistry } from "./metrics.js";
 import { computePercentiles } from "./percentiles.js";
 import type { SLODefinition, SLOViolationEvent } from "./types.js";
+=======
+import type { SLODefinition, SLOViolationEvent, PercentileBucket } from "./types.js";
+import type { MetricsRegistry } from "./metrics.js";
+import { computePercentiles } from "./percentiles.js";
+
+// ---------------------------------------------------------------------------
+// Constitution SLO definitions (frozen for immutability)
+// ---------------------------------------------------------------------------
+
+export const SLO_DEFINITIONS: readonly SLODefinition[] = Object.freeze([
+  {
+    metric: "input-to-echo",
+    percentile: "p50" as const,
+    threshold: 30,
+    unit: "ms",
+  },
+  {
+    metric: "input-to-echo",
+    percentile: "p95" as const,
+    threshold: 100,
+    unit: "ms",
+  },
+  {
+    metric: "render-frame",
+    percentile: "p95" as const,
+    threshold: 16,
+    unit: "ms",
+  },
+  {
+    metric: "render-frame",
+    percentile: "p99" as const,
+    threshold: 33,
+    unit: "ms",
+  },
+  { metric: "fps", percentile: "p50" as const, threshold: 60, unit: "fps" },
+  { metric: "memory", percentile: "p95" as const, threshold: 500, unit: "MB" },
+  {
+    metric: "bus-dispatch",
+    percentile: "p95" as const,
+    threshold: 1,
+    unit: "ms",
+  },
+]);
+
+/** Return SLO definitions for a given metric name. */
+export function getSLOsForMetric(metric: string): SLODefinition[] {
+  return SLO_DEFINITIONS.filter(d => d.metric === metric);
+}
+
+/** Check result from a single SLO against a percentile bucket. */
+export interface SLOCheckResult {
+  passed: boolean;
+  actual: number;
+  threshold: number;
+  metric: string;
+  percentile: string;
+}
+
+/**
+ * Check a single SLO definition against a percentile bucket.
+ * For "fps" unit, the check is inverted (actual must be >= threshold).
+ */
+export function checkSLO(slo: SLODefinition, bucket: PercentileBucket): SLOCheckResult {
+  const actual = bucket[slo.percentile];
+  const passed =
+    bucket.count === 0
+      ? true
+      : slo.unit === "fps"
+        ? actual >= slo.threshold
+        : actual <= slo.threshold;
+
+  return {
+    passed,
+    actual,
+    threshold: slo.threshold,
+    metric: slo.metric,
+    percentile: slo.percentile,
+  };
+}
+>>>>>>> origin/main
 
 /** Function signature for publishing events to the bus. */
 export type BusPublishFn = (topic: string, payload: unknown) => void | Promise<void>;
@@ -86,10 +167,22 @@ export class SLOMonitor {
           const result = this.busPublish("perf.slo_violation", event);
           // If async, catch errors without blocking.
           if (result && typeof (result as Promise<void>).catch === "function") {
+<<<<<<< HEAD
             (result as Promise<void>).catch(_err => {});
           }
         } catch (_err) {}
       } else {
+=======
+            (result as Promise<void>).catch(err => {
+              console.error("[slo] Bus publish error:", err);
+            });
+          }
+        } catch (err) {
+          console.error("[slo] Bus publish error:", err);
+        }
+      } else {
+        console.log("[slo] Violation:", event);
+>>>>>>> origin/main
       }
     }
 
@@ -110,19 +203,31 @@ export class SLOMonitor {
    * Start periodic SLO checks.
    * Calling start() again clears the previous interval.
    */
+<<<<<<< HEAD
   start(intervalMs = 5000): void {
+=======
+  start(intervalMs: number = 5000): void {
+>>>>>>> origin/main
     if (this.intervalHandle !== undefined) {
       clearInterval(this.intervalHandle);
     }
     this.running = true;
     this.intervalHandle = setInterval(() => {
+<<<<<<< HEAD
       if (!this.running) {
         return;
       }
+=======
+      if (!this.running) return;
+>>>>>>> origin/main
       const t0 = performance.now();
       this.checkAll();
       const elapsed = performance.now() - t0;
       if (elapsed > 5) {
+<<<<<<< HEAD
+=======
+        console.warn(`[slo] checkAll took ${elapsed.toFixed(2)}ms (> 5ms budget)`);
+>>>>>>> origin/main
       }
     }, intervalMs);
   }

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
 import {
   BindingState,
@@ -5,6 +6,15 @@ import {
   type RegistryQueryInterface,
   createBinding,
   validateBindingTriple,
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+import {
+  BindingState,
+  type BindingTriple,
+  createBinding,
+  validateBindingTriple,
+  type RegistryQueryInterface,
+>>>>>>> origin/main
 } from "../../../src/registry/binding_triple.js";
 
 /**

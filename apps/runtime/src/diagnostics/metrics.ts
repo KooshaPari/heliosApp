@@ -1,7 +1,12 @@
 // FR-009: Bounded ring buffer and metric registration / recording.
 
+<<<<<<< HEAD
 import { monotonicNow } from "./hooks.js";
 import type { MetricDefinition } from "./types.js";
+=======
+import type { MetricDefinition } from "./types.js";
+import { monotonicNow } from "./hooks.js";
+>>>>>>> origin/main
 
 // ── Ring Buffer ────────────────────────────────────────────────────────
 
@@ -115,6 +120,10 @@ export class MetricsRegistry {
   record(name: string, value: number, timestamp?: number): void {
     const entry = this.metrics.get(name);
     if (entry === undefined) {
+<<<<<<< HEAD
+=======
+      console.warn(`[metrics] Attempted to record to unregistered metric "${name}"`);
+>>>>>>> origin/main
       return;
     }
     // Lazy buffer allocation.

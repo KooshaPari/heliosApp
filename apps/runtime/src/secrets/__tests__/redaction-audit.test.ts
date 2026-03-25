@@ -1,8 +1,16 @@
+<<<<<<< HEAD
 import { describe, expect, it } from "bun:test";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { RedactionAuditTrail } from "../audit-trail.js";
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules } from "../redaction-rules.js";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+import { RedactionAuditTrail } from "../audit-trail.js";
+import { RedactionEngine } from "../redaction-engine.js";
+import { getDefaultRules } from "../redaction-rules.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
+>>>>>>> origin/main
 
 function makeEngine(): RedactionEngine {
   const engine = new RedactionEngine();
@@ -10,7 +18,15 @@ function makeEngine(): RedactionEngine {
   return engine;
 }
 
+<<<<<<< HEAD
 const ctx = { artifactId: "art-1", artifactType: "log", correlationId: "corr-1" };
+=======
+const ctx = {
+  artifactId: "art-1",
+  artifactType: "log",
+  correlationId: "corr-1",
+};
+>>>>>>> origin/main
 
 describe("RedactionAuditTrail: record creation", () => {
   it("creates a record and verify returns true", () => {
@@ -35,7 +51,11 @@ describe("RedactionAuditTrail: record creation", () => {
     expect(record.artifactType).toBe("log");
     expect(record.correlationId).toBe("corr-1");
     expect(record.rulesApplied.length).toBeGreaterThan(0);
+<<<<<<< HEAD
     expect(record.matchesByCategory.AWS_ACCESS_KEY).toBeGreaterThan(0);
+=======
+    expect(record.matchesByCategory["AWS_ACCESS_KEY"]).toBeGreaterThan(0);
+>>>>>>> origin/main
     expect(record.timestamp).toBeTruthy();
     expect(record.latencyMs).toBeGreaterThanOrEqual(0);
   });
@@ -69,8 +89,21 @@ describe("RedactionAuditTrail: listRecords filtering", () => {
       artifactType: "artifact",
       correlationId: "c2",
     });
+<<<<<<< HEAD
     trail.record("a1", r1, { artifactId: "a1", artifactType: "log", correlationId: "c1" });
     trail.record("a2", r2, { artifactId: "a2", artifactType: "artifact", correlationId: "c2" });
+=======
+    trail.record("a1", r1, {
+      artifactId: "a1",
+      artifactType: "log",
+      correlationId: "c1",
+    });
+    trail.record("a2", r2, {
+      artifactId: "a2",
+      artifactType: "artifact",
+      correlationId: "c2",
+    });
+>>>>>>> origin/main
 
     const logs = trail.listRecords({ artifactType: "log" });
     expect(logs.length).toBe(1);

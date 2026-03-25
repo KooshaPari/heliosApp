@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import type { AuditEvent } from "./event.ts";
 import type { AuditRingBuffer, AuditFilter as RingBufferFilter } from "./ring-buffer.ts";
 import type { SQLiteAuditStore } from "./sqlite-store.ts";
+=======
+import type { AuditEvent } from "./event";
+import { AuditRingBuffer, type AuditFilter as RingBufferFilter } from "./ring-buffer";
+import { SQLiteAuditStore } from "./sqlite-store";
+>>>>>>> origin/main
 
 /**
  * Enhanced filter interface for ledger queries.
@@ -173,7 +179,11 @@ export class AuditLedger {
           this.batchedNotifications.set(subscription.callback, []);
         }
 
+<<<<<<< HEAD
         this.batchedNotifications.get(subscription.callback)?.push(event);
+=======
+        this.batchedNotifications.get(subscription.callback)!.push(event);
+>>>>>>> origin/main
 
         // Start batch timer if not already running
         if (this.batchTimer === null) {
@@ -195,7 +205,13 @@ export class AuditLedger {
         events.forEach(event => {
           try {
             callback(event);
+<<<<<<< HEAD
           } catch (_err) {}
+=======
+          } catch (err) {
+            console.error("[AuditLedger] Subscription callback error:", err);
+          }
+>>>>>>> origin/main
         });
       });
     });
@@ -213,6 +229,12 @@ export class AuditLedger {
     chain: AuditEvent[]
   ): void {
     if (visited.has(correlationId)) {
+<<<<<<< HEAD
+=======
+      console.warn(
+        `[AuditLedger] Circular reference detected for correlation ID: ${correlationId}`
+      );
+>>>>>>> origin/main
       return;
     }
 
@@ -221,6 +243,7 @@ export class AuditLedger {
     // Get all events with this correlation ID from both ring buffer and store
     const ringEvents = this.ringBuffer.getByCorrelationId(correlationId);
     const storeEvents = this.store.getByCorrelationChain(correlationId);
+<<<<<<< HEAD
     // Deduplicate by ID
     const seen = new Set<string>();
     const events: AuditEvent[] = [];
@@ -232,6 +255,15 @@ export class AuditLedger {
     }
 
     if (events.length === 0) {
+=======
+    const eventMap = new Map<string, AuditEvent>();
+    for (const event of ringEvents) eventMap.set(event.id, event);
+    for (const event of storeEvents) eventMap.set(event.id, event);
+    const events = Array.from(eventMap.values());
+
+    if (events.length === 0) {
+      console.warn(`[AuditLedger] No events found for correlation ID: ${correlationId}`);
+>>>>>>> origin/main
       return;
     }
 

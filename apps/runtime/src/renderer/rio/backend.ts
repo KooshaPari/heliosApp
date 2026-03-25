@@ -5,6 +5,7 @@
  * to the abstract contract defined in spec 010.
  */
 
+<<<<<<< HEAD
 import type { RenderSurface, RendererAdapter, RendererConfig, RendererState } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
 import type { RendererRegistry } from "../registry.js";
@@ -13,6 +14,16 @@ import { RioInputRelay } from "./input.js";
 import { RioMetrics } from "./metrics.js";
 import { RioProcess } from "./process.js";
 import { RioSurface } from "./surface.js";
+=======
+import type { RendererAdapter, RendererConfig, RendererState, RenderSurface } from "../adapter.js";
+import type { RendererCapabilities } from "../capabilities.js";
+import type { RendererRegistry } from "../registry.js";
+import { RioProcess } from "./process.js";
+import { RioSurface } from "./surface.js";
+import { RioCapabilities } from "./capabilities.js";
+import { RioMetrics } from "./metrics.js";
+import { RioInputRelay } from "./input.js";
+>>>>>>> origin/main
 
 // ---------------------------------------------------------------------------
 // Error
@@ -124,6 +135,7 @@ export class RioBackend implements RendererAdapter {
     }
 
     this._surface = new RioSurface();
+<<<<<<< HEAD
     const pid = await this._process?.start({
       gpuAcceleration: this._config?.gpuAcceleration ?? false,
     });
@@ -132,6 +144,16 @@ export class RioBackend implements RendererAdapter {
 
     // Set up crash detection forwarding with fallback.
     this._process?.onExit(code => {
+=======
+    const pid = await this._process!.start({
+      gpuAcceleration: this._config?.gpuAcceleration ?? false,
+    });
+
+    this._surface.bind(surface, pid.pid);
+
+    // Set up crash detection forwarding with fallback.
+    this._process!.onExit(code => {
+>>>>>>> origin/main
       if (this._state === "running") {
         this._crashCount++;
         const error = new Error(`Rio process exited unexpectedly with code ${code}`);
@@ -166,7 +188,11 @@ export class RioBackend implements RendererAdapter {
     this._metrics.stop();
 
     // Abort all stream bindings.
+<<<<<<< HEAD
     for (const [_ptyId, binding] of this._streamBindings) {
+=======
+    for (const [ptyId, binding] of this._streamBindings) {
+>>>>>>> origin/main
       binding.aborted = true;
       try {
         binding.reader.cancel().catch(() => {});
@@ -209,9 +235,13 @@ export class RioBackend implements RendererAdapter {
       try {
         while (!binding.aborted) {
           const { done, value } = await reader.read();
+<<<<<<< HEAD
           if (done || binding.aborted) {
             break;
           }
+=======
+          if (done || binding.aborted) break;
+>>>>>>> origin/main
           if (value && this._process?.isRunning()) {
             this._process.writeToStdin(value);
           }
@@ -227,9 +257,13 @@ export class RioBackend implements RendererAdapter {
 
   unbindStream(ptyId: string): void {
     const binding = this._streamBindings.get(ptyId);
+<<<<<<< HEAD
     if (!binding) {
       return;
     }
+=======
+    if (!binding) return;
+>>>>>>> origin/main
     binding.aborted = true;
     binding.reader.cancel().catch(() => {});
     this._streamBindings.delete(ptyId);
@@ -240,7 +274,11 @@ export class RioBackend implements RendererAdapter {
     this._inputRelay.relay(ptyId, data);
   }
 
+<<<<<<< HEAD
   resize(_ptyId: string, cols: number, rows: number): void {
+=======
+  resize(ptyId: string, cols: number, rows: number): void {
+>>>>>>> origin/main
     this.guardEnabled();
     if (this._surface) {
       this._surface.resize({
@@ -276,10 +314,15 @@ export class RioBackend implements RendererAdapter {
    * Uses the renderer registry to find ghostty and switch to it.
    * If ghostty is unavailable or the switch fails, transitions to errored.
    */
+<<<<<<< HEAD
   async _attemptFallback(_crashError: Error): Promise<void> {
     if (this._fallbackInProgress) {
       return;
     }
+=======
+  async _attemptFallback(crashError: Error): Promise<void> {
+    if (this._fallbackInProgress) return;
+>>>>>>> origin/main
     this._fallbackInProgress = true;
 
     try {

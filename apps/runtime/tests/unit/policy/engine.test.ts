@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 import { describe, expect, test } from "bun:test";
 import { PolicyEngine } from "../../../src/policy/engine";
+=======
+import { test, expect, describe } from "bun:test";
+import { PolicyEngine } from "../../../src/policy/engine";
+import { PolicyClassification } from "../../../src/policy/types";
+>>>>>>> origin/main
 
 describe("PolicyEngine", () => {
   test("evaluates command classification correctly", async () => {

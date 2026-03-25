@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import type { ProtocolBus as LocalBus } from "../protocol/bus.ts";
 import type { ProtocolTopic } from "../protocol/topics.ts";
+=======
+import type { LocalBus } from "../protocol/bus";
+import type { ProtocolTopic } from "../protocol/topics";
+>>>>>>> origin/main
 
 export type LaneState =
   | "new"

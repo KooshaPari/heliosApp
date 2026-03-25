@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 import { describe, expect, test } from "bun:test";
 import {
   DuplicateLaneError,
   LaneCapacityExceededError,
   LaneNotFoundError,
   LaneRegistry,
+=======
+import { describe, test, expect } from "bun:test";
+import {
+  LaneRegistry,
+  DuplicateLaneError,
+  LaneNotFoundError,
+  LaneCapacityExceededError,
+>>>>>>> origin/main
 } from "../../src/lanes/registry.js";
 import type { LaneRecord } from "../../src/lanes/registry.js";
 
@@ -30,7 +39,11 @@ describe("LaneRegistry", () => {
     reg.register(rec);
     const got = reg.get("lane-1");
     expect(got).toBeDefined();
+<<<<<<< HEAD
     expect(got?.laneId).toBe("lane-1");
+=======
+    expect(got!.laneId).toBe("lane-1");
+>>>>>>> origin/main
   });
 
   test("duplicate lane throws", () => {
@@ -59,7 +72,11 @@ describe("LaneRegistry", () => {
     const reg = new LaneRegistry();
     reg.register(makeRecord({ laneId: "l-upd", state: "new" }));
     reg.update("l-upd", { state: "provisioning" });
+<<<<<<< HEAD
     expect(reg.get("l-upd")?.state).toBe("provisioning");
+=======
+    expect(reg.get("l-upd")!.state).toBe("provisioning");
+>>>>>>> origin/main
   });
 
   test("update non-existent throws", () => {
@@ -101,7 +118,11 @@ describe("LaneRegistry", () => {
     reg.register(makeRecord({ laneId: "closed-1", state: "closed" }));
     const active = reg.getActive();
     expect(active.length).toBe(1);
+<<<<<<< HEAD
     expect(active[0]?.laneId).toBe("active-1");
+=======
+    expect(active[0]!.laneId).toBe("active-1");
+>>>>>>> origin/main
   });
 
   test("capacity limit enforced", () => {
@@ -127,6 +148,10 @@ describe("LaneRegistry", () => {
     reg.register(rec);
     const got = reg.get("ref-test")!;
     got.state = "closed";
+<<<<<<< HEAD
     expect(reg.get("ref-test")?.state).toBe("new"); // original unchanged
+=======
+    expect(reg.get("ref-test")!.state).toBe("new"); // original unchanged
+>>>>>>> origin/main
   });
 });

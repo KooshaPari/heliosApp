@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import type { ZellijCli } from "../cli.js";
 import { TabNotFoundError } from "../errors.js";
 import { ZellijPaneManager } from "../panes.js";
 import { ZellijTabManager } from "../tabs.js";
 import { TopologyTracker } from "../topology.js";
+=======
+import { describe, expect, it, mock, beforeEach } from "bun:test";
+import { ZellijTabManager } from "../tabs.js";
+import { ZellijPaneManager } from "../panes.js";
+import { TopologyTracker } from "../topology.js";
+import { TabNotFoundError } from "../errors.js";
+import type { ZellijCli } from "../cli.js";
+>>>>>>> origin/main
 import type { PtyManagerInterface } from "../types.js";
 
 /**
@@ -13,7 +22,14 @@ import type { PtyManagerInterface } from "../types.js";
 function makeMockCli(): ZellijCli {
   return {
     run: mock(async () => ({ stdout: "", stderr: "", exitCode: 0 })),
+<<<<<<< HEAD
     checkAvailability: mock(async () => ({ available: true, version: "0.41.2" })),
+=======
+    checkAvailability: mock(async () => ({
+      available: true,
+      version: "0.41.2",
+    })),
+>>>>>>> origin/main
     listSessions: mock(async () => []),
   } as unknown as ZellijCli;
 }
@@ -38,7 +54,16 @@ describe("ZellijTabManager", () => {
     topology = new TopologyTracker(cli);
     ptyManager = makeMockPtyManager();
     paneManager = new ZellijPaneManager({ cli, topology, ptyManager });
+<<<<<<< HEAD
     tabManager = new ZellijTabManager({ cli, topology, paneManager, ptyManager });
+=======
+    tabManager = new ZellijTabManager({
+      cli,
+      topology,
+      paneManager,
+      ptyManager,
+    });
+>>>>>>> origin/main
   });
 
   describe("createTab", () => {
@@ -64,7 +89,11 @@ describe("ZellijTabManager", () => {
       await tabManager.createTab("test-session", "work");
 
       const runMock = cli.run as ReturnType<typeof mock>;
+<<<<<<< HEAD
       const callArgs = runMock.mock.calls[0]?.[0] as string[];
+=======
+      const callArgs = runMock.mock.calls[0]![0] as string[];
+>>>>>>> origin/main
       expect(callArgs).toContain("new-tab");
       expect(callArgs).toContain("--name");
       expect(callArgs).toContain("work");

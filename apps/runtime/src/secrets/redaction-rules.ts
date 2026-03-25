@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { randomBytes } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
+=======
+import { readFileSync, writeFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import type { LocalBus } from "../protocol/bus.js";
+>>>>>>> origin/main
 import type { LocalBusEnvelope } from "../protocol/types.js";
 import type { RedactionRule } from "./redaction-engine.js";
 
@@ -127,7 +133,14 @@ export class RedactionRuleManager {
       throw new Error(`Invalid regex pattern: ${(e as Error).message}`);
     }
     this.rules.set(rule.id, { ...rule, matchCount: 0 });
+<<<<<<< HEAD
     void this._emit("secrets.redaction.rules.changed", { action: "add", ruleId: rule.id });
+=======
+    void this._emit("secrets.redaction.rules.changed", {
+      action: "add",
+      ruleId: rule.id,
+    });
+>>>>>>> origin/main
   }
 
   removeRule(id: string): void {
@@ -135,19 +148,40 @@ export class RedactionRuleManager {
       throw new Error(`Rule '${id}' not found`);
     }
     this.rules.delete(id);
+<<<<<<< HEAD
     void this._emit("secrets.redaction.rules.changed", { action: "remove", ruleId: id });
+=======
+    void this._emit("secrets.redaction.rules.changed", {
+      action: "remove",
+      ruleId: id,
+    });
+>>>>>>> origin/main
   }
 
   enableRule(id: string): void {
     const rule = this._getRule(id);
     rule.enabled = true;
+<<<<<<< HEAD
     void this._emit("secrets.redaction.rules.changed", { action: "enable", ruleId: id });
+=======
+    void this._emit("secrets.redaction.rules.changed", {
+      action: "enable",
+      ruleId: id,
+    });
+>>>>>>> origin/main
   }
 
   disableRule(id: string): void {
     const rule = this._getRule(id);
     rule.enabled = false;
+<<<<<<< HEAD
     void this._emit("secrets.redaction.rules.changed", { action: "disable", ruleId: id });
+=======
+    void this._emit("secrets.redaction.rules.changed", {
+      action: "disable",
+      ruleId: id,
+    });
+>>>>>>> origin/main
   }
 
   listRules(): RedactionRule[] {
@@ -156,9 +190,13 @@ export class RedactionRuleManager {
 
   incrementMatchCount(id: string): void {
     const rule = this.rules.get(id);
+<<<<<<< HEAD
     if (rule) {
       rule.matchCount++;
     }
+=======
+    if (rule) rule.matchCount++;
+>>>>>>> origin/main
   }
 
   getMatchCount(id: string): number {
@@ -178,8 +216,13 @@ export class RedactionRuleManager {
     }>;
 
     for (const entry of parsed) {
+<<<<<<< HEAD
       if (!(entry.id && entry.pattern)) {
         throw new Error("Invalid rule entry: missing id or pattern");
+=======
+      if (!entry.id || !entry.pattern) {
+        throw new Error(`Invalid rule entry: missing id or pattern`);
+>>>>>>> origin/main
       }
       const rule: RedactionRule = {
         id: entry.id,
@@ -191,7 +234,14 @@ export class RedactionRuleManager {
       };
       this.rules.set(rule.id, { ...rule, matchCount: 0 });
     }
+<<<<<<< HEAD
     void this._emit("secrets.redaction.rules.changed", { action: "import", count: parsed.length });
+=======
+    void this._emit("secrets.redaction.rules.changed", {
+      action: "import",
+      count: parsed.length,
+    });
+>>>>>>> origin/main
   }
 
   exportRules(filePath: string): void {
@@ -200,21 +250,35 @@ export class RedactionRuleManager {
       pattern: pattern.source,
       flags: pattern.flags,
     }));
+<<<<<<< HEAD
     writeFileSync(filePath, JSON.stringify(data, null, 2), { encoding: "utf8" });
+=======
+    writeFileSync(filePath, JSON.stringify(data, null, 2), {
+      encoding: "utf8",
+    });
+>>>>>>> origin/main
   }
 
   private _getRule(id: string): RedactionRule & { matchCount: number } {
     const rule = this.rules.get(id);
+<<<<<<< HEAD
     if (!rule) {
       throw new Error(`Rule '${id}' not found`);
     }
+=======
+    if (!rule) throw new Error(`Rule '${id}' not found`);
+>>>>>>> origin/main
     return rule;
   }
 
   private async _emit(topic: string, payload: Record<string, unknown>): Promise<void> {
+<<<<<<< HEAD
     if (!this.bus) {
       return;
     }
+=======
+    if (!this.bus) return;
+>>>>>>> origin/main
     const envelope: LocalBusEnvelope = {
       id: `redaction-rules:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
       type: "event",

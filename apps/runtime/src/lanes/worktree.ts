@@ -1,7 +1,12 @@
 // T006, T007, T010 - Git worktree provisioning, cleanup, and partial failure handling
 
+<<<<<<< HEAD
 import * as fs from "node:fs";
 import * as path from "node:path";
+=======
+import * as path from "node:path";
+import * as fs from "node:fs";
+>>>>>>> origin/main
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -23,8 +28,13 @@ export interface WorktreeResult {
 }
 
 export interface WorktreeLatencyMetrics {
+<<<<<<< HEAD
   provisionMs?: number | undefined;
   cleanupMs?: number | undefined;
+=======
+  provisionMs?: number;
+  cleanupMs?: number;
+>>>>>>> origin/main
 }
 
 // ── Errors ───────────────────────────────────────────────────────────────────
@@ -59,11 +69,45 @@ export function computeBranchName(laneId: string): string {
   return `${BRANCH_PREFIX}${laneId}`;
 }
 
+<<<<<<< HEAD
+=======
+type SpawnResult = {
+  readonly stdout: ReadableStream<Uint8Array> | null;
+  readonly stderr: ReadableStream<Uint8Array> | null;
+  readonly exited: Promise<number>;
+  readonly pid: number;
+};
+
+type SpawnOptions = {
+  cwd?: string;
+  stdout?: "pipe" | "inherit" | "ignore";
+  stderr?: "pipe" | "inherit" | "ignore";
+  stdin?: "pipe" | "inherit" | "ignore";
+  env?: Record<string, string>;
+};
+
+const spawn: (command: string[], options: SpawnOptions) => SpawnResult =
+  (
+    (globalThis as Record<string, unknown>).Bun as
+      | {
+          spawn: (command: string[], options: SpawnOptions) => SpawnResult;
+        }
+      | undefined
+  )?.spawn ??
+  ((() => {
+    throw new Error("worktree module requires Bun runtime");
+  }) as (command: string[], options: SpawnOptions) => SpawnResult);
+
+>>>>>>> origin/main
 async function runGit(
   args: string[],
   cwd: string
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+<<<<<<< HEAD
   const proc = (Bun as any).spawn(["git", ...args], {
+=======
+  const proc = spawn(["git", ...args], {
+>>>>>>> origin/main
     cwd,
     stdout: "pipe",
     stderr: "pipe",
@@ -138,7 +182,11 @@ export async function removeWorktree(
   const branchName = computeBranchName(laneId);
 
   // Try git worktree remove --force
+<<<<<<< HEAD
   const _removeResult = await runGit(
+=======
+  const removeResult = await runGit(
+>>>>>>> origin/main
     ["worktree", "remove", worktreePath, "--force"],
     workspaceRepoPath
   );
@@ -215,7 +263,11 @@ export interface ReconciliationResult {
 export async function reconcileOrphanedWorktrees(
   workspaceRepoPath: string,
   knownLaneIds: Set<string>,
+<<<<<<< HEAD
   _closeLaneRecord: (laneId: string) => void
+=======
+  closeLaneRecord: (laneId: string) => void
+>>>>>>> origin/main
 ): Promise<ReconciliationResult> {
   const worktreeRoot = path.join(workspaceRepoPath, WORKTREE_DIR);
   const result: ReconciliationResult = {
@@ -235,9 +287,13 @@ export async function reconcileOrphanedWorktrees(
     }
 
     for (const entry of entries) {
+<<<<<<< HEAD
       if (!entry.isDirectory()) {
         continue;
       }
+=======
+      if (!entry.isDirectory()) continue;
+>>>>>>> origin/main
       const laneId = entry.name;
       if (!knownLaneIds.has(laneId)) {
         result.orphanedWorktrees++;
@@ -264,6 +320,11 @@ export async function reconcileOrphanedWorktrees(
 export const lastMetrics: WorktreeLatencyMetrics = {};
 
 export function resetMetrics(): void {
+<<<<<<< HEAD
   lastMetrics.provisionMs = undefined;
   lastMetrics.cleanupMs = undefined;
+=======
+  delete lastMetrics.provisionMs;
+  delete lastMetrics.cleanupMs;
+>>>>>>> origin/main
 }

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import type { InferenceEngine } from "./engine.ts";
+=======
+import type { InferenceEngine } from "./engine";
+>>>>>>> origin/main
 
 export class EngineRegistry {
   private engines: Map<string, InferenceEngine> = new Map();

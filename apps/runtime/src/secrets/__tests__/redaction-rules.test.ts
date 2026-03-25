@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -7,6 +8,21 @@ import { RedactionEngine } from "../redaction-engine.js";
 import { RedactionRuleManager, getDefaultRules } from "../redaction-rules.js";
 
 const ctx = { artifactId: "art-1", artifactType: "log", correlationId: "corr-1" };
+=======
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { RedactionEngine } from "../redaction-engine.js";
+import { getDefaultRules, RedactionRuleManager } from "../redaction-rules.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
+
+const ctx = {
+  artifactId: "art-1",
+  artifactType: "log",
+  correlationId: "corr-1",
+};
+>>>>>>> origin/main
 
 function makeEngine(manager?: RedactionRuleManager): RedactionEngine {
   const engine = new RedactionEngine();
@@ -130,7 +146,13 @@ describe("RedactionRuleManager: custom rules", () => {
 
 describe("RedactionRuleManager: enable/disable", () => {
   it("disabled rule does not match", () => {
+<<<<<<< HEAD
     const manager = new RedactionRuleManager({ initialRules: getDefaultRules() });
+=======
+    const manager = new RedactionRuleManager({
+      initialRules: getDefaultRules(),
+    });
+>>>>>>> origin/main
     manager.disableRule("aws-access-key");
     const engine = makeEngine(manager);
     const r = engine.redact("AKIAIOSFODNN7EXAMPLE", ctx);
@@ -138,7 +160,13 @@ describe("RedactionRuleManager: enable/disable", () => {
   });
 
   it("re-enabled rule matches again", () => {
+<<<<<<< HEAD
     const manager = new RedactionRuleManager({ initialRules: getDefaultRules() });
+=======
+    const manager = new RedactionRuleManager({
+      initialRules: getDefaultRules(),
+    });
+>>>>>>> origin/main
     manager.disableRule("aws-access-key");
     manager.enableRule("aws-access-key");
     const engine = makeEngine(manager);
@@ -147,7 +175,13 @@ describe("RedactionRuleManager: enable/disable", () => {
   });
 
   it("removeRule removes the rule", () => {
+<<<<<<< HEAD
     const manager = new RedactionRuleManager({ initialRules: getDefaultRules() });
+=======
+    const manager = new RedactionRuleManager({
+      initialRules: getDefaultRules(),
+    });
+>>>>>>> origin/main
     manager.removeRule("aws-access-key");
     expect(manager.listRules().some(r => r.id === "aws-access-key")).toBe(false);
   });
@@ -163,7 +197,13 @@ describe("RedactionRuleManager: persistence", () => {
   });
 
   it("exports and imports rules", () => {
+<<<<<<< HEAD
     const manager = new RedactionRuleManager({ initialRules: getDefaultRules() });
+=======
+    const manager = new RedactionRuleManager({
+      initialRules: getDefaultRules(),
+    });
+>>>>>>> origin/main
     const path = join(tmpDir, "rules.json");
     manager.exportRules(path);
 

@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { execFileSync } from "node:child_process";
 import { createCipheriv, createDecipheriv, hkdfSync, randomBytes } from "node:crypto";
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+=======
+import { createCipheriv, createDecipheriv, randomBytes, hkdfSync } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from "node:fs";
+>>>>>>> origin/main
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -112,7 +118,14 @@ export class EncryptionService {
       // Fall back to file
       const dir = join(homedir(), ".helios");
       mkdirSync(dir, { recursive: true });
+<<<<<<< HEAD
       writeFileSync(keyPath, newKey.toString("hex"), { encoding: "utf8", mode: 0o600 });
+=======
+      writeFileSync(keyPath, newKey.toString("hex"), {
+        encoding: "utf8",
+        mode: 0o600,
+      });
+>>>>>>> origin/main
       chmodSync(keyPath, 0o600);
     }
 
@@ -140,9 +153,13 @@ export class EncryptionService {
   }
 
   private readFromKeychain(): Buffer | null {
+<<<<<<< HEAD
     if (process.platform !== "darwin") {
       return null;
     }
+=======
+    if (process.platform !== "darwin") return null;
+>>>>>>> origin/main
     try {
       const hex = execFileSync(
         "security",
@@ -161,9 +178,13 @@ export class EncryptionService {
   }
 
   private writeToKeychain(key: Buffer): boolean {
+<<<<<<< HEAD
     if (process.platform !== "darwin") {
       return false;
     }
+=======
+    if (process.platform !== "darwin") return false;
+>>>>>>> origin/main
     try {
       execFileSync(
         "security",

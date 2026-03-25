@@ -1,5 +1,9 @@
 import { describe, expect, it } from "bun:test";
+<<<<<<< HEAD
 import { OutputBuffer, RingBuffer } from "../../../src/pty/buffers.js";
+=======
+import { RingBuffer, OutputBuffer } from "../../../src/pty/buffers.js";
+>>>>>>> origin/main
 import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 import type { PtyEventCorrelation } from "../../../src/pty/events.js";
 
@@ -104,7 +108,13 @@ describe("RingBuffer", () => {
 describe("OutputBuffer", () => {
   it("writes data and tracks stats", () => {
     const bus = new InMemoryBusPublisher();
+<<<<<<< HEAD
     const ob = new OutputBuffer(bus, makeCorrelation(), { capacityBytes: 1024 });
+=======
+    const ob = new OutputBuffer(bus, makeCorrelation(), {
+      capacityBytes: 1024,
+    });
+>>>>>>> origin/main
 
     ob.write(new Uint8Array(100));
     const stats = ob.getStats();
@@ -135,7 +145,11 @@ describe("OutputBuffer", () => {
 
     const onEvents = bus.events.filter(e => e.topic === "pty.backpressure.on");
     expect(onEvents).toHaveLength(1);
+<<<<<<< HEAD
     expect(onEvents[0]?.payload.utilization).toBe(0.75);
+=======
+    expect(onEvents[0]!.payload["utilization"]).toBe(0.75);
+>>>>>>> origin/main
   });
 
   it("does not re-emit backpressure.on while already active", () => {
@@ -184,8 +198,13 @@ describe("OutputBuffer", () => {
 
     ob.write(new Uint8Array(80));
     const evt = bus.events.find(e => e.topic === "pty.backpressure.on");
+<<<<<<< HEAD
     expect(evt?.payload.ptyId).toBe(corr.ptyId);
     expect(evt?.payload.laneId).toBe(corr.laneId);
+=======
+    expect(evt?.payload["ptyId"]).toBe(corr.ptyId);
+    expect(evt?.payload["laneId"]).toBe(corr.laneId);
+>>>>>>> origin/main
   });
 
   // ── Overflow telemetry ───────────────────────────────────────────
@@ -208,7 +227,11 @@ describe("OutputBuffer", () => {
 
       const overflowEvts = bus.events.filter(e => e.topic === "pty.buffer.overflow");
       expect(overflowEvts).toHaveLength(1);
+<<<<<<< HEAD
       expect(overflowEvts[0]?.payload.droppedBytes).toBe(5);
+=======
+      expect(overflowEvts[0]!.payload["droppedBytes"]).toBe(5);
+>>>>>>> origin/main
 
       const stats = ob.getStats();
       expect(stats.totalDropped).toBe(5);
@@ -221,7 +244,11 @@ describe("OutputBuffer", () => {
   it("debounces overflow events (max 1/sec)", () => {
     const bus = new InMemoryBusPublisher();
     const origWarn = console.warn;
+<<<<<<< HEAD
     console.warn = () => {};
+=======
+    console.warn = () => undefined;
+>>>>>>> origin/main
 
     try {
       const ob = new OutputBuffer(bus, makeCorrelation(), {
@@ -245,10 +272,19 @@ describe("OutputBuffer", () => {
   it("tracks cumulative stats across multiple writes", () => {
     const bus = new InMemoryBusPublisher();
     const origWarn = console.warn;
+<<<<<<< HEAD
     console.warn = () => {};
 
     try {
       const ob = new OutputBuffer(bus, makeCorrelation(), { capacityBytes: 10 });
+=======
+    console.warn = () => undefined;
+
+    try {
+      const ob = new OutputBuffer(bus, makeCorrelation(), {
+        capacityBytes: 10,
+      });
+>>>>>>> origin/main
       ob.write(new Uint8Array(8));
       ob.write(new Uint8Array(5)); // 3 dropped
       ob.consume(10);

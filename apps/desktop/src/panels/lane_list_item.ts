@@ -42,9 +42,13 @@ export class LaneListItem {
   }
 
   private render(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
@@ -57,9 +61,15 @@ export class LaneListItem {
   private createItemElement(): HTMLElement {
     const item = document.createElement("div");
     item.className = `lane-list-item ${this.props.isActive ? "active" : ""} ${this.props.isSelected ? "selected" : ""}`;
+<<<<<<< HEAD
     item.setAttribute("role", "option");
     item.setAttribute("data-lane-item", this.props.laneId);
     item.setAttribute("aria-selected", String(this.props.isSelected));
+=======
+    item.setAttribute("data-lane-item", this.props.laneId);
+    item.setAttribute("role", "option");
+    item.setAttribute("aria-selected", String(this.props.isSelected || false));
+>>>>>>> origin/main
     item.setAttribute("tabindex", "0");
 
     // Badge container
@@ -124,6 +134,7 @@ export class LaneListItem {
     if (name.length <= maxLength) {
       return name;
     }
+<<<<<<< HEAD
     return `${name.substring(0, maxLength - 3)}...`;
   }
 
@@ -136,6 +147,16 @@ export class LaneListItem {
     if (!item) {
       return;
     }
+=======
+    return name.substring(0, maxLength - 3) + "...";
+  }
+
+  private attachEventListeners(): void {
+    if (!this.container) return;
+
+    const item = this.container.querySelector(".lane-list-item");
+    if (!item) return;
+>>>>>>> origin/main
 
     item.addEventListener("click", () => {
       this.props.onSelect(this.props.laneId);
@@ -156,6 +177,7 @@ export class LaneListItem {
   }
 
   private detachEventListeners(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
@@ -164,6 +186,12 @@ export class LaneListItem {
     if (!item) {
       return;
     }
+=======
+    if (!this.container) return;
+
+    const item = this.container.querySelector(".lane-list-item");
+    if (!item) return;
+>>>>>>> origin/main
 
     // Event listeners are automatically removed when element is removed
   }

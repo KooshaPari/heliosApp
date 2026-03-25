@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
 import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
 import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
+import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
+>>>>>>> origin/main
 
 describe("AuditRingBuffer", () => {
   let buffer: AuditRingBuffer;
@@ -171,7 +177,13 @@ describe("AuditRingBuffer", () => {
         buffer.push(event);
       }
 
+<<<<<<< HEAD
       const results = buffer.query({ eventType: AUDIT_EVENT_TYPES.SESSION_CREATED });
+=======
+      const results = buffer.query({
+        eventType: AUDIT_EVENT_TYPES.SESSION_CREATED,
+      });
+>>>>>>> origin/main
       expect(results.length).toBe(2);
     });
   });

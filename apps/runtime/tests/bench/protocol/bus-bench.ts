@@ -75,7 +75,11 @@ async function runAsync(
 function summarize(
   name: string,
   sorted: number[],
+<<<<<<< HEAD
   thresholdP95Ms: number,
+=======
+  threshold_p95_ms: number,
+>>>>>>> origin/main
   warmup: number
 ): BenchResult {
   const p50 = percentile(sorted, 50);
@@ -88,8 +92,13 @@ function summarize(
     p50_ms: p50,
     p95_ms: p95,
     p99_ms: p99,
+<<<<<<< HEAD
     threshold_p95_ms: thresholdP95Ms,
     passed: p95 <= thresholdP95Ms,
+=======
+    threshold_p95_ms,
+    passed: p95 <= threshold_p95_ms,
+>>>>>>> origin/main
   };
 }
 
@@ -131,7 +140,13 @@ async function benchEventFanout50(): Promise<BenchResult> {
 
   const timings = await runAsync(
     async () => {
+<<<<<<< HEAD
       const evt = createEvent("bench.fanout", { data: "test" });
+=======
+      const evt = createEvent("bench.fanout", {
+        data: "test",
+      }) as import("../../../src/protocol/types.js").LocalBusEnvelope;
+>>>>>>> origin/main
       await bus.publish(evt);
     },
     ITERATIONS,
@@ -164,7 +179,15 @@ function benchEnvelopeValidation(): BenchResult {
 }
 
 async function benchSustainedThroughput(): Promise<
+<<<<<<< HEAD
   BenchResult & { total_messages: number; duration_s: number; ordering_violations: number }
+=======
+  BenchResult & {
+    total_messages: number;
+    duration_s: number;
+    ordering_violations: number;
+  }
+>>>>>>> origin/main
 > {
   const bus = createBus();
   let received = 0;
@@ -173,6 +196,7 @@ async function benchSustainedThroughput(): Promise<
 
   bus.subscribe("bench.sustained", e => {
     received++;
+<<<<<<< HEAD
     if (e.sequence <= lastSeq) {
       violations++;
     }
@@ -187,12 +211,35 @@ async function benchSustainedThroughput(): Promise<
   const promises: Promise<void>[] = [];
   for (let i = 0; i < total; i++) {
     promises.push(bus.publish(createEvent("bench.sustained", { i })));
+=======
+    if ((e.sequence ?? 0) <= lastSeq) {
+      violations++;
+    }
+    lastSeq = e.sequence ?? 0;
+  });
+
+  const TARGET_RATE = 10_000; // msg/s
+  const DURATION_S = 2; // shortened for test practicality (full 10s in real CI)
+  const TOTAL = TARGET_RATE * DURATION_S;
+
+  const start = performance.now();
+  const promises: Promise<void>[] = [];
+  for (let i = 0; i < TOTAL; i++) {
+    promises.push(
+      bus.publish(
+        createEvent("bench.sustained", {
+          i,
+        }) as import("../../../src/protocol/types.js").LocalBusEnvelope
+      )
+    );
+>>>>>>> origin/main
   }
   await Promise.all(promises);
   const elapsed = performance.now() - start;
 
   bus.destroy();
 
+<<<<<<< HEAD
   const passed = received === total && violations === 0;
   return {
     name: "sustained_throughput",
@@ -201,6 +248,16 @@ async function benchSustainedThroughput(): Promise<
     p50_ms: elapsed / total,
     p95_ms: elapsed / total,
     p99_ms: elapsed / total,
+=======
+  const passed = received === TOTAL && violations === 0;
+  return {
+    name: "sustained_throughput",
+    iterations: TOTAL,
+    warmup: 0,
+    p50_ms: elapsed / TOTAL,
+    p95_ms: elapsed / TOTAL,
+    p99_ms: elapsed / TOTAL,
+>>>>>>> origin/main
     threshold_p95_ms: DISPATCH_P95_THRESHOLD,
     passed,
     total_messages: received,
@@ -222,15 +279,33 @@ async function main(): Promise<void> {
   results.push(await benchSustainedThroughput());
 
   // Output structured JSON for CI
+<<<<<<< HEAD
   const _output = JSON.stringify({ benchmarks: results }, null, 2);
+=======
+  const output = JSON.stringify({ benchmarks: results }, null, 2);
+  console.log(output);
+>>>>>>> origin/main
 
   // Assert all passed
   const failures = results.filter(r => !r.passed);
   if (failures.length > 0) {
+<<<<<<< HEAD
     for (const _f of failures) {
     }
     process.exit(1);
   }
+=======
+    console.error("\nSLO BREACHES:");
+    for (const f of failures) {
+      console.error(
+        `  ${f.name}: p95=${String(f.p95_ms.toFixed(3))}ms > threshold=${String(f.threshold_p95_ms)}ms`
+      );
+    }
+    process.exit(1);
+  }
+
+  console.log("\nAll benchmarks passed SLO thresholds.");
+>>>>>>> origin/main
 }
 
 await main();

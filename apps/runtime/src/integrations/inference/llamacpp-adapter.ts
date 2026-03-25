@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference.ts";
 import type { InferenceEngine } from "./engine.ts";
+=======
+import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
+import type { InferenceEngine } from "./engine";
+>>>>>>> origin/main
 
 export class LlamaCppInferenceEngine implements InferenceEngine {
   readonly id = "llamacpp";
@@ -15,7 +20,11 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
 
   async init(): Promise<void> {
     try {
+<<<<<<< HEAD
       const file = (Bun as any).file(this.binaryPath);
+=======
+      const file = Bun.file(this.binaryPath);
+>>>>>>> origin/main
       if (!(await file.exists())) {
         throw new Error(`llama.cpp binary not found at ${this.binaryPath}`);
       }
@@ -27,11 +36,17 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
     const prompt = request.messages.map(m => `${m.role}: ${m.content}`).join("\n");
     const args = [this.binaryPath, "-m", request.model, "-p", prompt, "--no-display-prompt"];
+<<<<<<< HEAD
     if (request.maxTokens) {
       args.push("-n", String(request.maxTokens));
     }
 
     const proc = (Bun as any).spawn(args, { stdout: "pipe", stderr: "pipe" });
+=======
+    if (request.maxTokens) args.push("-n", String(request.maxTokens));
+
+    const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
+>>>>>>> origin/main
     const output = await new Response(proc.stdout).text();
     const exitCode = await proc.exited;
 
@@ -56,7 +71,11 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
   async listModels(): Promise<ModelInfo[]> {
     // Scan model directory for .gguf files
     try {
+<<<<<<< HEAD
       const glob = new (Bun as any).Glob("**/*.gguf");
+=======
+      const glob = new Bun.Glob("**/*.gguf");
+>>>>>>> origin/main
       const models: ModelInfo[] = [];
       for await (const path of glob.scan(this.modelDir)) {
         const name =
@@ -79,7 +98,11 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
     try {
+<<<<<<< HEAD
       const file = (Bun as any).file(this.binaryPath);
+=======
+      const file = Bun.file(this.binaryPath);
+>>>>>>> origin/main
       return (await file.exists()) ? "healthy" : "unavailable";
     } catch {
       return "unavailable";

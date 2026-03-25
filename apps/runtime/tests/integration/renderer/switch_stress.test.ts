@@ -3,6 +3,7 @@
  * @see SC-010-001, NFR-010-001
  */
 import { describe, expect, it } from "bun:test";
+<<<<<<< HEAD
 import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
 import { RendererRegistry } from "../../../src/renderer/registry.js";
 import { RendererStateMachine } from "../../../src/renderer/state_machine.js";
@@ -13,6 +14,19 @@ import {
   MockRioAdapter,
   TEST_CONFIG,
   TEST_SURFACE,
+=======
+import { RendererRegistry } from "../../../src/renderer/registry.js";
+import { RendererStateMachine } from "../../../src/renderer/state_machine.js";
+import { switchRenderer } from "../../../src/renderer/switch.js";
+import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
+import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
+import {
+  MockGhosttyAdapter,
+  MockRioAdapter,
+  MockRendererAdapter,
+  TEST_SURFACE,
+  TEST_CONFIG,
+>>>>>>> origin/main
 } from "../../helpers/mock_adapter.js";
 
 function freshSetup() {
@@ -52,7 +66,11 @@ describe("Switch stress tests", () => {
 
     // Now try rapid switches - sequential since state machine prevents concurrent
     let successCount = 0;
+<<<<<<< HEAD
     let _failCount = 0;
+=======
+    let failCount = 0;
+>>>>>>> origin/main
     for (let i = 0; i < 10; i++) {
       try {
         const fromId = i % 2 === 0 ? "rio" : "ghostty";
@@ -67,7 +85,11 @@ describe("Switch stress tests", () => {
         });
         successCount++;
       } catch {
+<<<<<<< HEAD
         _failCount++;
+=======
+        failCount++;
+>>>>>>> origin/main
       }
     }
     // All sequential switches should succeed
@@ -200,8 +222,18 @@ describe("Switch stress tests", () => {
       latencies.push(performance.now() - start);
     }
 
+<<<<<<< HEAD
     const _avg = latencies.reduce((s, l) => s + l, 0) / latencies.length;
     const max = Math.max(...latencies);
+=======
+    const avg = latencies.reduce((s, l) => s + l, 0) / latencies.length;
+    const max = Math.max(...latencies);
+
+    // Report
+    console.log(
+      `Switch latency: avg=${avg.toFixed(2)}ms, max=${max.toFixed(2)}ms, p50=${latencies.sort()[2]!.toFixed(2)}ms`
+    );
+>>>>>>> origin/main
     // All should be well under 3 seconds
     expect(max).toBeLessThan(3000);
   });

@@ -3,10 +3,17 @@
  * Persists policy rules to disk with in-memory caching and hot-swap support.
  */
 
+<<<<<<< HEAD
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { PolicyRuleSet } from "./rules";
 import type { PolicyRule } from "./types";
+=======
+import { promises as fs } from "fs";
+import * as path from "path";
+import type { PolicyRule, PolicyRuleInput } from "./types";
+import { PolicyRuleSet } from "./rules";
+>>>>>>> origin/main
 
 export type RulesChangedCallback = (workspaceId: string, rules: PolicyRule[]) => void;
 
@@ -143,7 +150,12 @@ export class PolicyStorage {
             }
             this.cache.set(workspaceId, ruleSet);
             this.notifyChangedDebounced(workspaceId, rules);
+<<<<<<< HEAD
           } catch (_error) {
+=======
+          } catch (error) {
+            console.error(`Failed to reload policy rules for ${workspaceId}:`, error);
+>>>>>>> origin/main
             // Keep previous rules on error
           }
         }
@@ -204,6 +216,7 @@ export class PolicyStorage {
       if (!rule.pattern || typeof rule.pattern !== "string") {
         throw new Error(`Rule ${rule.id} must have a pattern field`);
       }
+<<<<<<< HEAD
       if (!(rule.patternType && ["glob", "regex"].includes(rule.patternType))) {
         throw new Error(`Rule ${rule.id} has invalid patternType`);
       }
@@ -211,6 +224,14 @@ export class PolicyStorage {
         !(
           rule.classification && ["safe", "needs-approval", "blocked"].includes(rule.classification)
         )
+=======
+      if (!rule.patternType || !["glob", "regex"].includes(rule.patternType)) {
+        throw new Error(`Rule ${rule.id} has invalid patternType`);
+      }
+      if (
+        !rule.classification ||
+        !["safe", "needs-approval", "blocked"].includes(rule.classification)
+>>>>>>> origin/main
       ) {
         throw new Error(`Rule ${rule.id} has invalid classification`);
       }

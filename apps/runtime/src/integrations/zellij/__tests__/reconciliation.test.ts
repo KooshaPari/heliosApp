@@ -1,8 +1,16 @@
+<<<<<<< HEAD
 import { describe, expect, it, mock } from "bun:test";
 import type { ZellijCli } from "../cli.js";
 import { reconcile } from "../reconciliation.js";
 import { MuxRegistry } from "../registry.js";
 import type { CliResult, MuxSession, ZellijSession } from "../types.js";
+=======
+import { describe, expect, it, mock, beforeEach } from "bun:test";
+import { reconcile } from "../reconciliation.js";
+import { MuxRegistry } from "../registry.js";
+import type { ZellijCli } from "../cli.js";
+import type { CliResult, ZellijSession, MuxSession } from "../types.js";
+>>>>>>> origin/main
 
 function makeSession(name: string, attached = false): ZellijSession {
   return { name, created: new Date(), attached };

@@ -1,8 +1,19 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
 import { BindingMiddleware } from "../../../src/registry/binding_middleware.js";
 import { BindingState, type BindingTriple } from "../../../src/registry/binding_triple.js";
 import type { TerminalBinding } from "../../../src/registry/binding_triple.js";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+import { BindingMiddleware } from "../../../src/registry/binding_middleware.js";
+import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
+import {
+  BindingState,
+  type BindingTriple,
+  type TerminalBinding,
+} from "../../../src/registry/binding_triple.js";
+>>>>>>> origin/main
 
 describe("BindingMiddleware", () => {
   let registry: TerminalRegistry;
@@ -90,18 +101,30 @@ describe("BindingMiddleware", () => {
 
     it("should update binding state to validation_failed on stale triple", () => {
       const triple: BindingTriple = {
+<<<<<<< HEAD
         workspaceId: "WS_INVALID", // will fail format validation (uppercase)
+=======
+        workspaceId: "ws-invalid", // will fail validation
+>>>>>>> origin/main
         laneId: "lane-1",
         sessionId: "session-1",
       };
 
+<<<<<<< HEAD
       // Bypass validation to create binding with valid triple
+=======
+      // Bypass validation to create binding with invalid triple
+>>>>>>> origin/main
       const binding = registry.register("terminal-1", {
         workspaceId: "ws-1",
         laneId: "lane-1",
         sessionId: "session-1",
       });
+<<<<<<< HEAD
       // Manually corrupt binding to use invalid format
+=======
+      // Manually corrupt binding
+>>>>>>> origin/main
       binding.binding = triple;
 
       const result = middleware.validateBeforeOperation("terminal-1", "write");
@@ -123,9 +146,15 @@ describe("BindingMiddleware", () => {
       registry.register("terminal-1", triple);
 
       let called = false;
+<<<<<<< HEAD
       const handler = async () => {
         called = true;
         return "success";
+=======
+      const handler = () => {
+        called = true;
+        return Promise.resolve("success");
+>>>>>>> origin/main
       };
 
       const result = await middleware.wrapOperation("terminal-1", handler, "test");
@@ -151,6 +180,7 @@ describe("BindingMiddleware", () => {
 
       registry.register("terminal-1", triple);
 
+<<<<<<< HEAD
       let receivedBinding: TerminalBinding | null = null;
       const handler = async (binding: TerminalBinding) => {
         receivedBinding = binding;
@@ -161,6 +191,16 @@ describe("BindingMiddleware", () => {
 
       expect(receivedBinding).toBeDefined();
       expect((receivedBinding as any)?.terminalId).toBe("terminal-1");
+=======
+      const receivedBinding = await middleware.wrapOperation(
+        "terminal-1",
+        (binding: TerminalBinding) => {
+          return Promise.resolve(binding);
+        }
+      );
+
+      expect(receivedBinding.terminalId).toBe("terminal-1");
+>>>>>>> origin/main
     });
   });
 
@@ -255,9 +295,15 @@ describe("BindingMiddleware", () => {
 
       const binding = registry.register("terminal-1", triple);
 
+<<<<<<< HEAD
       // Corrupt the binding with invalid format (uppercase)
       binding.binding = {
         workspaceId: "WS_NONEXISTENT",
+=======
+      // Corrupt the binding
+      binding.binding = {
+        workspaceId: "ws-nonexistent",
+>>>>>>> origin/main
         laneId: "lane-1",
         sessionId: "session-1",
       };

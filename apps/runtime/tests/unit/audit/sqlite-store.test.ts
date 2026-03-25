@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
+=======
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
+import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
+>>>>>>> origin/main
 
 describe("SQLiteAuditStore", () => {
   let store: SQLiteAuditStore;
@@ -93,7 +99,13 @@ describe("SQLiteAuditStore", () => {
     });
 
     it("should query with event type filter", () => {
+<<<<<<< HEAD
       const results = store.query({ eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED });
+=======
+      const results = store.query({
+        eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+      });
+>>>>>>> origin/main
       expect(results.length).toBeGreaterThan(0);
       expect(results.every(e => e.eventType === AUDIT_EVENT_TYPES.COMMAND_EXECUTED)).toBe(true);
     });

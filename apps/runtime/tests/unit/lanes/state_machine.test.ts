@@ -1,5 +1,6 @@
 // T017 - Unit tests for lane state machine (FR-008-001, NFR-008-004)
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
 import {
   InvalidLaneTransitionError,
@@ -10,11 +11,27 @@ import {
   recordTransition,
   transition,
   withLaneLock,
+=======
+import { describe, expect, it, beforeEach } from "bun:test";
+import {
+  transition,
+  withLaneLock,
+  recordTransition,
+  getTransitionHistory,
+  clearTransitionHistory,
+  InvalidLaneTransitionError,
+  type LaneState,
+  type LaneEvent,
+>>>>>>> origin/main
 } from "../../../src/lanes/state_machine.js";
 
 describe("Lane State Machine (FR-008-001)", () => {
   describe("valid transitions", () => {
+<<<<<<< HEAD
     const validCases: [LaneState, LaneEvent, LaneState][] = [
+=======
+    const validCases: Array<[LaneState, LaneEvent, LaneState]> = [
+>>>>>>> origin/main
       ["new", "create", "provisioning"],
       ["provisioning", "provision_complete", "ready"],
       ["provisioning", "provision_failed", "closed"],
@@ -40,7 +57,11 @@ describe("Lane State Machine (FR-008-001)", () => {
   });
 
   describe("invalid transitions", () => {
+<<<<<<< HEAD
     const invalidCases: [LaneState, LaneEvent][] = [
+=======
+    const invalidCases: Array<[LaneState, LaneEvent]> = [
+>>>>>>> origin/main
       ["closed", "create"],
       ["closed", "provision_complete"],
       ["closed", "start_running"],
@@ -159,17 +180,29 @@ describe("Lane State Machine (FR-008-001)", () => {
 
       const history = getTransitionHistory(laneId);
       expect(history.length).toBe(3);
+<<<<<<< HEAD
       expect(history[0]?.fromState).toBe("new");
       expect(history[0]?.toState).toBe("provisioning");
       expect(history[2]?.fromState).toBe("ready");
       expect(history[2]?.toState).toBe("running");
+=======
+      expect(history[0]!.fromState).toBe("new");
+      expect(history[0]!.toState).toBe("provisioning");
+      expect(history[2]!.fromState).toBe("ready");
+      expect(history[2]!.toState).toBe("running");
+>>>>>>> origin/main
     });
 
     it("includes timestamps", () => {
       recordTransition(laneId, "new", "create", "provisioning");
       const history = getTransitionHistory(laneId);
+<<<<<<< HEAD
       expect(history[0]?.timestamp).toBeTruthy();
       expect(new Date(history[0]?.timestamp).getTime()).toBeGreaterThan(0);
+=======
+      expect(history[0]!.timestamp).toBeTruthy();
+      expect(new Date(history[0]!.timestamp).getTime()).toBeGreaterThan(0);
+>>>>>>> origin/main
     });
 
     it("caps at 20 entries", () => {

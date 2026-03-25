@@ -35,9 +35,13 @@ export class MlxInferenceEngine implements InferenceEngine {
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
     const prompt = request.messages.map(m => `${m.role}: ${m.content}`).join("\n");
     const args = ["python3", "-m", "mlx_lm.generate", "--model", request.model, "--prompt", prompt];
+<<<<<<< HEAD
     if (request.maxTokens) {
       args.push("--max-tokens", String(request.maxTokens));
     }
+=======
+    if (request.maxTokens) args.push("--max-tokens", String(request.maxTokens));
+>>>>>>> origin/main
 
     const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
     const output = await new Response(proc.stdout).text();
@@ -81,9 +85,13 @@ export class MlxInferenceEngine implements InferenceEngine {
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
     const hw = await detectHardware();
+<<<<<<< HEAD
     if (!hw.hasAppleSilicon) {
       return "unavailable";
     }
+=======
+    if (!hw.hasAppleSilicon) return "unavailable";
+>>>>>>> origin/main
     try {
       const proc = Bun.spawn(["python3", "-c", "import mlx_lm"], {
         stdout: "pipe",

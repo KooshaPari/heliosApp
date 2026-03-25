@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 import { promises as fs } from "node:fs";
 import { homedir } from "node:os";
 import * as path from "node:path";
 import type { TabState, TabSurface } from "./tab_surface.ts";
+=======
+import { promises as fs } from "fs";
+import * as path from "path";
+import { homedir } from "os";
+import type { TabSurface, TabState } from "./tab_surface";
+>>>>>>> origin/main
 
 /**
  * Persisted tab state structure.
@@ -30,7 +37,11 @@ export class TabPersistence {
   private readonly storagePath: string;
   private debounceTimer: NodeJS.Timeout | null = null;
   private pendingState: TabPersistedState | null = null;
+<<<<<<< HEAD
   private lastLoadTime = 0;
+=======
+  private lastLoadTime: number = 0;
+>>>>>>> origin/main
 
   constructor(storageDir?: string) {
     this.storageDir = storageDir ?? path.join(homedir(), ".helios", "data");
@@ -50,12 +61,20 @@ export class TabPersistence {
 
       // Validate structure
       if (!this.validateState(state)) {
+<<<<<<< HEAD
+=======
+        console.warn("Invalid tab state file, using defaults");
+>>>>>>> origin/main
         return null;
       }
 
       this.lastLoadTime = Date.now() - startTime;
 
       if (this.lastLoadTime > 100) {
+<<<<<<< HEAD
+=======
+        console.warn(`Tab state load took ${this.lastLoadTime}ms (target: <100ms)`);
+>>>>>>> origin/main
       }
 
       return state;
@@ -67,6 +86,10 @@ export class TabPersistence {
           return null;
         }
       }
+<<<<<<< HEAD
+=======
+      console.warn("Failed to load tab state:", error);
+>>>>>>> origin/main
       return null;
     }
   }
@@ -102,7 +125,13 @@ export class TabPersistence {
           // Write state to file
           const data = JSON.stringify(stateToWrite, null, 2);
           await fs.writeFile(this.storagePath, data, "utf-8");
+<<<<<<< HEAD
         } catch (_error) {}
+=======
+        } catch (error) {
+          console.error("Failed to save tab state:", error);
+        }
+>>>>>>> origin/main
 
         resolve();
       }, 500);
@@ -130,7 +159,13 @@ export class TabPersistence {
       await fs.mkdir(this.storageDir, { recursive: true });
       const data = JSON.stringify(stateToWrite, null, 2);
       await fs.writeFile(this.storagePath, data, "utf-8");
+<<<<<<< HEAD
     } catch (_error) {}
+=======
+    } catch (error) {
+      console.error("Failed to flush tab state:", error);
+    }
+>>>>>>> origin/main
   }
 
   /**
@@ -182,7 +217,11 @@ export class TabPersistence {
   /**
    * Validate persisted state structure.
    */
+<<<<<<< HEAD
   validateState(state: unknown): state is TabPersistedState {
+=======
+  private validateState(state: unknown): state is TabPersistedState {
+>>>>>>> origin/main
     if (typeof state !== "object" || state === null) {
       return false;
     }
@@ -193,9 +232,15 @@ export class TabPersistence {
       typeof s.version === "number" &&
       (s.selectedTabId === null || typeof s.selectedTabId === "string") &&
       Array.isArray(s.tabOrder) &&
+<<<<<<< HEAD
       s.tabOrder.every((id: unknown) => typeof id === "string") &&
       Array.isArray(s.pinnedTabIds) &&
       s.pinnedTabIds.every((id: unknown) => typeof id === "string") &&
+=======
+      s.tabOrder.every(id => typeof id === "string") &&
+      Array.isArray(s.pinnedTabIds) &&
+      s.pinnedTabIds.every(id => typeof id === "string") &&
+>>>>>>> origin/main
       typeof s.perTabState === "object" &&
       s.perTabState !== null &&
       typeof s.savedAt === "string"
@@ -212,6 +257,10 @@ export class TabPersistence {
       if (error instanceof Error && "code" in error) {
         const nodeError = error as NodeJS.ErrnoException;
         if (nodeError.code !== "ENOENT") {
+<<<<<<< HEAD
+=======
+          console.error("Failed to delete tab state:", error);
+>>>>>>> origin/main
         }
       }
     }

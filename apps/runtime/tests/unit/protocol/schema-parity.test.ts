@@ -8,7 +8,11 @@
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+<<<<<<< HEAD
 import { createCommand, createEvent, createResponse } from "../../../src/protocol/envelope.js";
+=======
+import { createCommand, createResponse, createEvent } from "../../../src/protocol/envelope.js";
+>>>>>>> origin/main
 
 // ---------------------------------------------------------------------------
 // Minimal JSON Schema draft-07 validator (subset needed for envelope schema)
@@ -35,6 +39,10 @@ interface ValidationError {
   message: string;
 }
 
+<<<<<<< HEAD
+=======
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Validator is a compact test helper for protocol parity.
+>>>>>>> origin/main
 function validateSchema(data: unknown, schema: JsonSchema, path = ""): ValidationError[] {
   const errors: ValidationError[] = [];
 
@@ -46,13 +54,27 @@ function validateSchema(data: unknown, schema: JsonSchema, path = ""): Validatio
         return errors;
       }
     } else if (actualType !== schema.type) {
+<<<<<<< HEAD
       errors.push({ path, message: `Expected ${schema.type}, got ${actualType}` });
+=======
+      errors.push({
+        path,
+        message: `Expected ${schema.type}, got ${actualType}`,
+      });
+>>>>>>> origin/main
       return errors;
     }
   }
 
   if (schema.const !== undefined && data !== schema.const) {
+<<<<<<< HEAD
     errors.push({ path, message: `Expected const ${String(schema.const)}, got ${String(data)}` });
+=======
+    errors.push({
+      path,
+      message: `Expected const ${String(schema.const)}, got ${String(data)}`,
+    });
+>>>>>>> origin/main
   }
 
   if (schema.enum !== undefined && !schema.enum.includes(data)) {
@@ -88,7 +110,14 @@ function validateSchema(data: unknown, schema: JsonSchema, path = ""): Validatio
     const obj = data as Record<string, unknown>;
     for (const key of schema.required) {
       if (!(key in obj)) {
+<<<<<<< HEAD
         errors.push({ path: `${path}.${key}`, message: `Missing required field "${key}"` });
+=======
+        errors.push({
+          path: `${path}.${key}`,
+          message: `Missing required field "${key}"`,
+        });
+>>>>>>> origin/main
       }
     }
   }
@@ -139,14 +168,22 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   });
 
   it("createResponse produces a schema-valid envelope", () => {
+<<<<<<< HEAD
     const cmd = createCommand("test.method", null);
+=======
+    const cmd = createCommand("test.method", {});
+>>>>>>> origin/main
     const res = createResponse(cmd, { result: 42 });
     const errors = validateSchema(res, schema);
     expect(errors).toEqual([]);
   });
 
   it("createResponse with error produces a schema-valid envelope", () => {
+<<<<<<< HEAD
     const cmd = createCommand("test.method", null);
+=======
+    const cmd = createCommand("test.method", {});
+>>>>>>> origin/main
     const res = createResponse(cmd, null, {
       code: "HANDLER_ERROR",
       message: "Something went wrong",
@@ -163,6 +200,10 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
 
   it("rejects envelope with missing id", () => {
     const bad = {
+<<<<<<< HEAD
+=======
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
+>>>>>>> origin/main
       correlation_id: "cor_123",
       timestamp: 1,
       type: "command",
@@ -177,6 +218,10 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   it("rejects envelope with empty id", () => {
     const bad = {
       id: "",
+<<<<<<< HEAD
+=======
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
+>>>>>>> origin/main
       correlation_id: "cor_123",
       timestamp: 1,
       type: "command",
@@ -190,6 +235,10 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   it("rejects envelope with invalid type", () => {
     const bad = {
       id: "cmd_123",
+<<<<<<< HEAD
+=======
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
+>>>>>>> origin/main
       correlation_id: "cor_123",
       timestamp: 1,
       type: "invalid",
@@ -203,6 +252,10 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   it("rejects event without sequence", () => {
     const bad = {
       id: "evt_123",
+<<<<<<< HEAD
+=======
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
+>>>>>>> origin/main
       correlation_id: "cor_123",
       timestamp: 1,
       type: "event",
@@ -216,6 +269,10 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
   it("rejects event without topic", () => {
     const bad = {
       id: "evt_123",
+<<<<<<< HEAD
+=======
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case keys required by schema.
+>>>>>>> origin/main
       correlation_id: "cor_123",
       timestamp: 1,
       type: "event",
@@ -234,6 +291,7 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
     expect(schema.required).toContain("type");
 
     // oneOf branches
+<<<<<<< HEAD
     const commandSchema = schema.oneOf?.find(s => s.title === "CommandEnvelope")!;
     expect(commandSchema.required).toContain("method");
     expect(commandSchema.required).toContain("payload");
@@ -245,5 +303,25 @@ describe("JSON Schema parity — runtime envelopes match canonical schema", () =
     expect(eventSchema.required).toContain("topic");
     expect(eventSchema.required).toContain("payload");
     expect(eventSchema.required).toContain("sequence");
+=======
+    const commandSchema = schema.oneOf?.find(s => s.title === "CommandEnvelope");
+    const responseSchema = schema.oneOf?.find(s => s.title === "ResponseEnvelope");
+    const eventSchema = schema.oneOf?.find(s => s.title === "EventEnvelope");
+
+    expect(commandSchema).toBeDefined();
+    expect(responseSchema).toBeDefined();
+    expect(eventSchema).toBeDefined();
+
+    const commandSchemaValue = commandSchema as JsonSchema;
+    const responseSchemaValue = responseSchema as JsonSchema;
+    const eventSchemaValue = eventSchema as JsonSchema;
+
+    expect(commandSchemaValue.required).toContain("method");
+    expect(commandSchemaValue.required).toContain("payload");
+    expect(responseSchemaValue.required).toContain("method");
+    expect(eventSchemaValue.required).toContain("topic");
+    expect(eventSchemaValue.required).toContain("payload");
+    expect(eventSchemaValue.required).toContain("sequence");
+>>>>>>> origin/main
   });
 });

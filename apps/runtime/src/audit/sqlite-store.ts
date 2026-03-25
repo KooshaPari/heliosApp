@@ -1,7 +1,14 @@
 import { Database } from "bun:sqlite";
+<<<<<<< HEAD
 import fs from "node:fs";
 import type { AuditEvent } from "./event.ts";
 import type { AuditFilter } from "./ring-buffer.ts";
+=======
+import type { AuditEvent } from "./event";
+import type { AuditFilter } from "./ring-buffer";
+import fs from "fs";
+import path from "path";
+>>>>>>> origin/main
 
 /**
  * SQLite-backed persistent storage for audit events.
@@ -17,7 +24,11 @@ export class SQLiteAuditStore {
    *
    * @param dbPath - Path to SQLite database file
    */
+<<<<<<< HEAD
   constructor(dbPath = ":memory:") {
+=======
+  constructor(dbPath: string = ":memory:") {
+>>>>>>> origin/main
     this.dbPath = dbPath;
     this.db = new Database(dbPath);
 
@@ -208,7 +219,12 @@ export class SQLiteAuditStore {
 
       const stats = fs.statSync(this.dbPath);
       return stats.size;
+<<<<<<< HEAD
     } catch (_err) {
+=======
+    } catch (err) {
+      console.error("[SQLiteAuditStore] Error getting storage size:", err);
+>>>>>>> origin/main
       return 0;
     }
   }
@@ -224,6 +240,7 @@ export class SQLiteAuditStore {
    * Initialize the database schema on first run.
    */
   private initializeSchema(): void {
+<<<<<<< HEAD
     // Check if table exists
     const tableExists = this.db
       .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='audit_events'")
@@ -232,6 +249,17 @@ export class SQLiteAuditStore {
     if (!tableExists) {
       // Create table
       this.db.exec(`
+=======
+    try {
+      // Check if table exists
+      const tableExists = this.db
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='audit_events'")
+        .get();
+
+      if (!tableExists) {
+        // Create table
+        this.db.exec(`
+>>>>>>> origin/main
           CREATE TABLE audit_events (
             id TEXT PRIMARY KEY,
             event_type TEXT NOT NULL,
@@ -249,8 +277,13 @@ export class SQLiteAuditStore {
           )
         `);
 
+<<<<<<< HEAD
       // Create indexes for efficient querying
       this.db.exec(`
+=======
+        // Create indexes for efficient querying
+        this.db.exec(`
+>>>>>>> origin/main
           CREATE INDEX idx_workspace_id ON audit_events(workspace_id);
           CREATE INDEX idx_lane_id ON audit_events(lane_id);
           CREATE INDEX idx_session_id ON audit_events(session_id);
@@ -260,6 +293,13 @@ export class SQLiteAuditStore {
           CREATE INDEX idx_timestamp ON audit_events(timestamp);
           CREATE INDEX idx_workspace_timestamp ON audit_events(workspace_id, timestamp);
         `);
+<<<<<<< HEAD
+=======
+      }
+    } catch (err) {
+      console.error("[SQLiteAuditStore] Schema initialization failed:", err);
+      throw err;
+>>>>>>> origin/main
     }
   }
 

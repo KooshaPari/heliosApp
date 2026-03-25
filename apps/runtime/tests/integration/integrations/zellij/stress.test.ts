@@ -2,6 +2,7 @@
  * T016 - Stress and edge case tests.
  */
 
+<<<<<<< HEAD
 import { describe, expect, it, mock } from "bun:test";
 import type { ZellijCli } from "../../../../src/integrations/zellij/cli.js";
 import {
@@ -14,6 +15,20 @@ import { reconcile } from "../../../../src/integrations/zellij/reconciliation.js
 import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
 import { ZellijSessionManager } from "../../../../src/integrations/zellij/session.js";
 import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
+=======
+import { describe, expect, it, mock, beforeEach } from "bun:test";
+import { ZellijSessionManager } from "../../../../src/integrations/zellij/session.js";
+import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
+import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
+import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
+import {
+  MuxEventEmitter,
+  type EventBus,
+  type MuxEvent,
+} from "../../../../src/integrations/zellij/events.js";
+import { reconcile } from "../../../../src/integrations/zellij/reconciliation.js";
+import type { ZellijCli } from "../../../../src/integrations/zellij/cli.js";
+>>>>>>> origin/main
 import type { CliResult, ZellijSession } from "../../../../src/integrations/zellij/types.js";
 
 // Reuse the FakeCli pattern
@@ -31,9 +46,13 @@ class FakeCli {
       return { stdout: "", stderr: "", exitCode: 0 };
     }
     if (args[0] === "list-sessions") {
+<<<<<<< HEAD
       if (this.sessions.size === 0) {
         return { stdout: "", stderr: "", exitCode: 0 };
       }
+=======
+      if (this.sessions.size === 0) return { stdout: "", stderr: "", exitCode: 0 };
+>>>>>>> origin/main
       const lines = [...this.sessions.values()]
         .map(s => `${s.name}  2026-02-27 10:00:00`)
         .join("\n");

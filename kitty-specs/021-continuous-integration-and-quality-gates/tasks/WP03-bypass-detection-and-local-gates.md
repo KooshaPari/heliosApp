@@ -1,7 +1,11 @@
 ---
 work_package_id: WP03
 title: Bypass Detection, Local Gate Mirror, and Tests
+<<<<<<< HEAD
 lane: "done"
+=======
+lane: "doing"
+>>>>>>> origin/main
 dependencies:
 - WP02
 base_branch: 021-continuous-integration-and-quality-gates-WP02
@@ -18,8 +22,13 @@ phase: Phase 2 - Enforcement
 assignee: ''
 agent: "claude-haiku"
 shell_pid: "90407"
+<<<<<<< HEAD
 review_status: "approved"
 reviewed_by: "Koosha Paridehpour"
+=======
+review_status: ''
+reviewed_by: ''
+>>>>>>> origin/main
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -43,7 +52,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/021-continuous-integration-and-quality-gates/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/021-continuous-integration-and-quality-gates/spec.md`
 - WP01/WP02 output: CI pipeline with 7 gates, gate report infrastructure.
@@ -220,5 +229,8 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z – system – lane=planned – Prompt created.
 - 2026-03-01T13:37:11Z – claude-haiku – shell_pid=90407 – lane=doing – Assigned agent via workflow command
+<<<<<<< HEAD
 - 2026-03-01T13:38:22Z – claude-haiku – shell_pid=90407 – lane=done – Implemented
 - 2026-03-01T13:41:18Z – claude-haiku – shell_pid=90407 – lane=done – Merged
+=======
+>>>>>>> origin/main

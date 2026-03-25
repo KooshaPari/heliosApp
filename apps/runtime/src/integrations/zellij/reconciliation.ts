@@ -46,9 +46,13 @@ export async function reconcile(
 
   // 1. Terminate live sessions that are unbound (orphans)
   for (const session of liveSessions) {
+<<<<<<< HEAD
     if (!session.name.startsWith("helios-lane-")) {
       continue;
     }
+=======
+    if (!session.name.startsWith("helios-lane-")) continue;
+>>>>>>> origin/main
     const binding = registry.getBySession(session.name);
     if (!binding) {
       // Orphan - terminate it

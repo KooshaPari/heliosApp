@@ -4,24 +4,49 @@ import type { LocalBusEnvelope } from "./types";
 import { ProtocolValidationError } from "./types";
 
 const METHOD_SET = new Set<string>(METHODS);
+<<<<<<< HEAD
 const _TOPIC_SET = new Set<string>(TOPICS);
 const RFC3339_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 
 const CORRELATION_REQUIRED_METHODS = new Set<string>([
   "lane.create",
   "session.attach",
+=======
+const TOPIC_SET = new Set<string>(TOPICS);
+const RFC3339_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
+
+const CORRELATION_REQUIRED_METHODS = new Set<string>([
+  "lane.attach",
+  "lane.cleanup",
+  "lane.create",
+  "session.attach",
+  "session.terminate",
+>>>>>>> origin/main
   "terminal.spawn",
   "terminal.input",
   "terminal.resize",
 ]);
 
 const CORRELATION_REQUIRED_TOPICS = new Set<string>([
+<<<<<<< HEAD
+=======
+  "lane.attach.started",
+  "lane.attach.failed",
+  "lane.cleanup.started",
+  "lane.cleanup.failed",
+>>>>>>> origin/main
   "lane.create.started",
   "lane.created",
   "lane.create.failed",
   "session.attach.started",
   "session.attached",
   "session.attach.failed",
+<<<<<<< HEAD
+=======
+  "session.terminate.started",
+  "session.terminate.failed",
+  "session.terminated",
+>>>>>>> origin/main
   "terminal.spawn.started",
   "terminal.spawned",
   "terminal.spawn.failed",
@@ -34,7 +59,14 @@ const METHOD_CONTEXT_REQUIREMENTS: Record<
   Array<"workspace_id" | "lane_id" | "session_id" | "terminal_id">
 > = {
   "lane.create": ["workspace_id"],
+<<<<<<< HEAD
   "session.attach": ["workspace_id", "lane_id", "session_id"],
+=======
+  "lane.attach": ["workspace_id", "lane_id"],
+  "lane.cleanup": ["workspace_id", "lane_id"],
+  "session.attach": ["workspace_id", "lane_id", "session_id"],
+  "session.terminate": ["workspace_id", "lane_id", "session_id"],
+>>>>>>> origin/main
   "terminal.spawn": ["workspace_id", "lane_id", "session_id"],
   "terminal.input": ["workspace_id", "lane_id", "session_id", "terminal_id"],
   "terminal.resize": ["workspace_id", "lane_id", "session_id", "terminal_id"],
@@ -44,12 +76,25 @@ const TOPIC_CONTEXT_REQUIREMENTS: Record<
   string,
   Array<"workspace_id" | "lane_id" | "session_id" | "terminal_id">
 > = {
+<<<<<<< HEAD
+=======
+  "lane.attach.started": ["workspace_id", "lane_id"],
+  "lane.attach.failed": ["workspace_id", "lane_id"],
+  "lane.cleanup.started": ["workspace_id", "lane_id"],
+  "lane.cleanup.failed": ["workspace_id", "lane_id"],
+>>>>>>> origin/main
   "lane.create.started": ["workspace_id", "lane_id"],
   "lane.created": ["workspace_id", "lane_id"],
   "lane.create.failed": ["workspace_id", "lane_id"],
   "session.attach.started": ["workspace_id", "lane_id", "session_id"],
   "session.attached": ["workspace_id", "lane_id", "session_id"],
   "session.attach.failed": ["workspace_id", "lane_id", "session_id"],
+<<<<<<< HEAD
+=======
+  "session.terminate.started": ["workspace_id", "lane_id", "session_id"],
+  "session.terminate.failed": ["workspace_id", "lane_id", "session_id"],
+  "session.terminated": ["workspace_id", "lane_id", "session_id"],
+>>>>>>> origin/main
   "terminal.spawn.started": ["workspace_id", "lane_id", "session_id"],
   "terminal.spawned": ["workspace_id", "lane_id", "session_id", "terminal_id"],
   "terminal.spawn.failed": ["workspace_id", "lane_id", "session_id"],
@@ -177,6 +222,10 @@ function assertCorrelationId(
       "MISSING_CORRELATION_ID",
       "Envelope field 'correlation_id' is required",
       {
+<<<<<<< HEAD
+=======
+        // biome-ignore lint/style/useNamingConvention: External protocol field names use snake_case.
+>>>>>>> origin/main
         required_by: requiredBy,
         name,
       }
@@ -184,6 +233,69 @@ function assertCorrelationId(
   }
 }
 
+<<<<<<< HEAD
+=======
+function validateCommandEnvelope(envelope: Record<string, unknown>): void {
+  const method = assertStringField(envelope, "method");
+  if (!METHOD_SET.has(method)) {
+    throw new ProtocolValidationError("INVALID_METHOD", `Unsupported method '${method}'`, {
+      method,
+    });
+  }
+  assertPayloadObject(envelope);
+
+  const requiredContext = METHOD_CONTEXT_REQUIREMENTS[method];
+  if (requiredContext) {
+    assertContext(envelope, requiredContext);
+  }
+  if (CORRELATION_REQUIRED_METHODS.has(method)) {
+    assertCorrelationId(envelope, "method", method);
+  }
+}
+
+function validateEventEnvelope(envelope: Record<string, unknown>): void {
+  const topic = assertStringField(envelope, "topic");
+  if (!/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/.test(topic)) {
+    throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${topic}'`, {
+      topic,
+    });
+  }
+  assertPayloadObject(envelope);
+
+  const requiredContext = TOPIC_CONTEXT_REQUIREMENTS[topic];
+  if (requiredContext) {
+    assertContext(envelope, requiredContext);
+  }
+  if (CORRELATION_REQUIRED_TOPICS.has(topic)) {
+    assertCorrelationId(envelope, "topic", topic);
+  }
+}
+
+function validateResponseEnvelope(envelope: Record<string, unknown>): void {
+  const status = assertStringField(envelope, "status");
+  if (status !== "ok" && status !== "error") {
+    throw new ProtocolValidationError("INVALID_STATUS", `Unsupported status '${status}'`, {
+      status,
+    });
+  }
+  assertErrorPayload(envelope);
+
+  const method = assertOptionalString(envelope, "method");
+  if (method && !METHOD_SET.has(method)) {
+    throw new ProtocolValidationError("INVALID_METHOD", `Unsupported method '${method}'`, {
+      method,
+    });
+  }
+
+  const topic = assertOptionalString(envelope, "topic");
+  if (topic && !/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/.test(topic)) {
+    throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${topic}'`, {
+      topic,
+    });
+  }
+}
+
+>>>>>>> origin/main
 export function validateEnvelope(input: unknown): LocalBusEnvelope {
   assertRecord(input);
 
@@ -212,6 +324,7 @@ export function validateEnvelope(input: unknown): LocalBusEnvelope {
   assertOptionalString(envelope, "correlation_id");
 
   if (type === "command") {
+<<<<<<< HEAD
     const method = assertStringField(envelope, "method");
     if (!METHOD_SET.has(method)) {
       throw new ProtocolValidationError("INVALID_METHOD", `Unsupported method '${method}'`, {
@@ -268,6 +381,17 @@ export function validateEnvelope(input: unknown): LocalBusEnvelope {
         topic,
       });
     }
+=======
+    validateCommandEnvelope(envelope);
+  }
+
+  if (type === "event") {
+    validateEventEnvelope(envelope);
+  }
+
+  if (type === "response") {
+    validateResponseEnvelope(envelope);
+>>>>>>> origin/main
   }
 
   // id is checked for completeness and stable semantics in thrown errors.

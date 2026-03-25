@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { promises as fs } from "node:fs";
 import os from "node:os";
@@ -8,6 +9,18 @@ import { OrphanReconciler } from "../orphan-reconciler.js";
 import { RestorationPipeline } from "../restoration.js";
 import { CrashLoopDetector, SafeMode } from "../safe-mode.js";
 import { RecoveryStage, RecoveryStateMachine } from "../state-machine.js";
+=======
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+import { RestorationPipeline } from "../restoration.js";
+import { RecoveryStateMachine, RecoveryStage } from "../state-machine.js";
+import { CrashLoopDetector, SafeMode } from "../safe-mode.js";
+import { CheckpointWriter, CheckpointReader, type Checkpoint } from "../checkpoint.js";
+import { OrphanReconciler } from "../orphan-reconciler.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { promises as fs } from "fs";
+import path from "path";
+import os from "os";
+>>>>>>> origin/main
 
 describe("Chaos Tests - Crash Recovery Resilience", () => {
   let tempDir: string;
@@ -79,6 +92,11 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
   describe("Crash loop detection (SC-027-004)", () => {
     it("should detect crash loop and enter safe mode within 5 seconds", async () => {
+<<<<<<< HEAD
+=======
+      vi.useFakeTimers();
+
+>>>>>>> origin/main
       const detector = new CrashLoopDetector(tempDir, 3, 60000);
       await detector.initialize();
 
@@ -96,6 +114,11 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       }
 
       expect(safeMode.isActive()).toBe(true);
+<<<<<<< HEAD
+=======
+
+      vi.useRealTimers();
+>>>>>>> origin/main
     });
 
     it("should disable non-essential subsystems in safe mode", async () => {
@@ -249,7 +272,11 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
       await stateMachine.transition(RecoveryStage.DETECTING);
 
+<<<<<<< HEAD
       // Retry MAX_RETRIES times (3)
+=======
+      // Try 3 times
+>>>>>>> origin/main
       for (let i = 0; i < 3; i++) {
         await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
         await stateMachine.transition(RecoveryStage.DETECTING);

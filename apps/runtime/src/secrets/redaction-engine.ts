@@ -33,7 +33,11 @@ export interface RedactionRule {
   pattern: RegExp;
   description: string;
   enabled: boolean;
+<<<<<<< HEAD
   falsePositiveRate?: number | undefined;
+=======
+  falsePositiveRate?: number;
+>>>>>>> origin/main
 }
 
 // ---------------------------------------------------------------------------
@@ -57,7 +61,11 @@ export class RedactionEngine {
         // Ensure global flag for exec-loop scanning
         regex: new RegExp(
           r.pattern.source,
+<<<<<<< HEAD
           r.pattern.flags.includes("g") ? r.pattern.flags : `${r.pattern.flags}g`
+=======
+          r.pattern.flags.includes("g") ? r.pattern.flags : r.pattern.flags + "g"
+>>>>>>> origin/main
         ),
       }));
   }
@@ -76,7 +84,16 @@ export class RedactionEngine {
     }
 
     // Collect all matches first (on original string), then apply replacements
+<<<<<<< HEAD
     const allMatches: Array<{ start: number; end: number; category: string; ruleId: string }> = [];
+=======
+    const allMatches: Array<{
+      start: number;
+      end: number;
+      category: string;
+      ruleId: string;
+    }> = [];
+>>>>>>> origin/main
 
     for (const { rule, regex } of this.compiledRules) {
       regex.lastIndex = 0;

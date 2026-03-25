@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import type { ProtocolBus as LocalBus } from "../protocol/bus.ts";
+=======
+import type { LocalBus } from "../protocol/bus";
+>>>>>>> origin/main
 
 export type ExecResult = {
   code: number;

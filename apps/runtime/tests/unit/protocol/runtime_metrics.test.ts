@@ -8,7 +8,13 @@ test("captures lane create latency metrics", async () => {
     id: "cmd-1",
     type: "command",
     ts: new Date().toISOString(),
+<<<<<<< HEAD
     workspace_id: "workspace-alpha",
+=======
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
+    workspace_id: "workspace-alpha",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
+>>>>>>> origin/main
     correlation_id: "corr-lane-1",
     method: "lane.create",
     payload: { id: "lane-alpha" },
@@ -32,9 +38,19 @@ test("captures session restore latency metrics", async () => {
     id: "cmd-restore-1",
     type: "command",
     ts: new Date().toISOString(),
+<<<<<<< HEAD
     workspace_id: "workspace-alpha",
     lane_id: "lane-alpha",
     session_id: "session-restore",
+=======
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
+    workspace_id: "workspace-alpha",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
+    lane_id: "lane-alpha",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
+    session_id: "session-restore",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
+>>>>>>> origin/main
     correlation_id: "corr-restore-1",
     method: "session.attach",
     payload: { id: "session-restore", restore: true },
@@ -57,6 +73,7 @@ test("captures terminal output backlog depth", async () => {
     id: "evt-output-1",
     type: "event",
     ts: new Date().toISOString(),
+<<<<<<< HEAD
     workspace_id: "workspace-alpha",
     lane_id: "lane-alpha",
     session_id: "session-1",
@@ -65,6 +82,22 @@ test("captures terminal output backlog depth", async () => {
     correlation_id: "corr-output-1",
     payload: {
       line: "hello",
+=======
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
+    workspace_id: "workspace-alpha",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
+    lane_id: "lane-alpha",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
+    session_id: "session-1",
+    topic: "terminal.output",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
+    terminal_id: "terminal-1",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
+    correlation_id: "corr-output-1",
+    payload: {
+      line: "hello",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use snake_case identifiers.
+>>>>>>> origin/main
       backlog_depth: 17,
     },
   });

@@ -3,8 +3,13 @@
  * Displays pending approval requests and handles approval/rejection.
  */
 
+<<<<<<< HEAD
 import { For, createSignal } from "solid-js";
 import type { ApprovalRequest } from "../../types/approval.ts";
+=======
+import { createSignal, For } from "solid-js";
+import type { ApprovalRequest } from "../../types/approval";
+>>>>>>> origin/main
 
 interface ApprovalPanelProps {
   requests: ApprovalRequest[];
@@ -80,11 +85,15 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
           </div>
 
           <div class="approval-actions">
+<<<<<<< HEAD
             <button
               type="button"
               class="approve-btn"
               onclick={() => handleApprove(selectedRequest()?.id ?? "")}
             >
+=======
+            <button class="approve-btn" onclick={() => handleApprove(selectedRequest()?.id ?? "")}>
+>>>>>>> origin/main
               Approve
             </button>
             <button type="button" class="reject-btn" onclick={() => setRejectReason("focused")}>

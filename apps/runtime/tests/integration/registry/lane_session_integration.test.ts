@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
 import type { BindingTriple } from "../../../src/registry/binding_triple.js";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
+import type { BindingTriple } from "../../../src/registry/binding_triple.js";
+>>>>>>> origin/main
 
 describe("Lane/Session Lifecycle Integration", () => {
   let registry: TerminalRegistry;
@@ -83,7 +89,11 @@ describe("Lane/Session Lifecycle Integration", () => {
       const lanes = ["lane-1", "lane-2"];
       const terminals = [];
 
+<<<<<<< HEAD
       for (const lane of lanes) {
+=======
+      for (let lane of lanes) {
+>>>>>>> origin/main
         for (let i = 0; i < 3; i++) {
           const terminalId = `terminal-${lane}-${i}`;
           terminals.push(terminalId);
@@ -106,6 +116,7 @@ describe("Lane/Session Lifecycle Integration", () => {
 
   describe("session termination triggers binding invalidation", () => {
     it("should remove all terminals when session is terminated", () => {
+<<<<<<< HEAD
       // Register terminals: 2 in session-1 (different lanes), 3 in session-2 (different lanes)
       registry.register("terminal-0", {
         workspaceId: "ws-1",
@@ -132,6 +143,16 @@ describe("Lane/Session Lifecycle Integration", () => {
         laneId: "lane-4",
         sessionId: "session-2",
       });
+=======
+      // Register multiple terminals across sessions
+      for (let i = 0; i < 5; i++) {
+        registry.register(`terminal-${i}`, {
+          workspaceId: "ws-1",
+          laneId: `lane-${i % 2}`,
+          sessionId: i < 2 ? "session-1" : "session-2",
+        });
+      }
+>>>>>>> origin/main
 
       expect(registry.getAll()).toHaveLength(5);
 
@@ -207,6 +228,7 @@ describe("Lane/Session Lifecycle Integration", () => {
 
   describe("complex invalidation scenarios", () => {
     it("should handle cascade: lane cleanup with multiple sessions", () => {
+<<<<<<< HEAD
       // Register 12 terminals: 3 lanes x 4 terminals each with unique sessions per lane
       let terminalCount = 0;
       for (let laneId = 1; laneId <= 3; laneId++) {
@@ -217,6 +239,20 @@ describe("Lane/Session Lifecycle Integration", () => {
             sessionId: `session-l${laneId}-t${t}`,
           });
           terminalCount++;
+=======
+      // Register 12 terminals: 3 lanes x 2 sessions x 2 terminals
+      let terminalCount = 0;
+      for (let laneId = 1; laneId <= 3; laneId++) {
+        for (let sessionId = 1; sessionId <= 2; sessionId++) {
+          for (let t = 0; t < 2; t++) {
+            registry.register(`terminal-${terminalCount}`, {
+              workspaceId: "ws-1",
+              laneId: `lane-${laneId}`,
+              sessionId: `session-${sessionId}`,
+            });
+            terminalCount++;
+          }
+>>>>>>> origin/main
         }
       }
 

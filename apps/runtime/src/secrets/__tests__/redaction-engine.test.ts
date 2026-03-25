@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+>>>>>>> origin/main
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules } from "../redaction-rules.js";
 
@@ -8,7 +12,15 @@ function makeEngine(): RedactionEngine {
   return engine;
 }
 
+<<<<<<< HEAD
 const ctx = { artifactId: "art-1", artifactType: "log", correlationId: "corr-1" };
+=======
+const ctx = {
+  artifactId: "art-1",
+  artifactType: "log",
+  correlationId: "corr-1",
+};
+>>>>>>> origin/main
 
 describe("RedactionEngine: known patterns redacted", () => {
   let engine: RedactionEngine;

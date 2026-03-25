@@ -1,15 +1,26 @@
 // T016 — Performance benchmarks for workspace persistence
 // SLO: CRUD < 100ms (p95), restore < 500ms (p95) for 50 workspaces
 
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+=======
+import { mkdtemp, rm } from "node:fs/promises";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+>>>>>>> origin/main
 import { createJsonStore } from "../../../src/workspace/store.js";
 import type { Workspace } from "../../../src/workspace/types.js";
 
 // CI machines may be slower — 2x factor
+<<<<<<< HEAD
 const CI_FACTOR = process.env.CI ? 2 : 1;
+=======
+const CI_FACTOR = process.env["CI"] ? 2 : 1;
+>>>>>>> origin/main
 
 function makeWorkspace(i: number): Workspace {
   return {
@@ -64,6 +75,10 @@ describe("Workspace persistence benchmarks", () => {
     }, 20);
 
     const p95Val = p95(times);
+<<<<<<< HEAD
+=======
+    console.log(`Create p95: ${p95Val.toFixed(2)}ms`);
+>>>>>>> origin/main
     expect(p95Val).toBeLessThan(100 * CI_FACTOR);
   });
 
@@ -79,6 +94,10 @@ describe("Workspace persistence benchmarks", () => {
     }, 20);
 
     const p95Val = p95(times);
+<<<<<<< HEAD
+=======
+    console.log(`Flush (50 ws) p95: ${p95Val.toFixed(2)}ms`);
+>>>>>>> origin/main
     expect(p95Val).toBeLessThan(200 * CI_FACTOR);
   });
 
@@ -94,6 +113,10 @@ describe("Workspace persistence benchmarks", () => {
     }, 20);
 
     const p95Val = p95(times);
+<<<<<<< HEAD
+=======
+    console.log(`Restore (50 ws) p95: ${p95Val.toFixed(2)}ms`);
+>>>>>>> origin/main
     expect(p95Val).toBeLessThan(500 * CI_FACTOR);
   });
 });

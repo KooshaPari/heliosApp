@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import type { AuditEvent } from "./event.ts";
+=======
+import type { AuditEvent } from "./event";
+>>>>>>> origin/main
 
 /**
  * Filter options for ring buffer queries.
@@ -31,18 +35,30 @@ export interface RingBufferMetrics {
  */
 export class AuditRingBuffer {
   private buffer: (AuditEvent | undefined)[];
+<<<<<<< HEAD
   private head = 0;
   private tail = 0;
   private size = 0;
   private totalEventsProcessed = 0;
   private totalEventsEvicted = 0;
+=======
+  private head: number = 0;
+  private tail: number = 0;
+  private size: number = 0;
+  private totalEventsProcessed: number = 0;
+  private totalEventsEvicted: number = 0;
+>>>>>>> origin/main
 
   /**
    * Create a new ring buffer with specified capacity.
    *
    * @param capacity - Maximum number of events to hold (default 10,000)
    */
+<<<<<<< HEAD
   constructor(private capacity = 10_000) {
+=======
+  constructor(private capacity: number = 10_000) {
+>>>>>>> origin/main
     this.buffer = new Array(capacity);
   }
 
@@ -59,6 +75,7 @@ export class AuditRingBuffer {
     let evicted: AuditEvent | undefined;
 
     if (this.size === this.capacity) {
+<<<<<<< HEAD
       // Buffer is full; evict the oldest event at head
       evicted = this.buffer[this.head];
       this.totalEventsEvicted++;
@@ -71,6 +88,21 @@ export class AuditRingBuffer {
     this.buffer[this.tail] = event;
     this.tail = (this.tail + 1) % this.capacity;
 
+=======
+      // Buffer is full; evict the oldest event at head and advance head
+      evicted = this.buffer[this.head];
+      this.totalEventsEvicted++;
+      this.buffer[this.tail] = event;
+      this.tail = (this.tail + 1) % this.capacity;
+      this.head = (this.head + 1) % this.capacity;
+    } else {
+      // Buffer not yet full; append and grow
+      this.buffer[this.tail] = event;
+      this.tail = (this.tail + 1) % this.capacity;
+      this.size++;
+    }
+
+>>>>>>> origin/main
     return evicted;
   }
 
@@ -113,9 +145,13 @@ export class AuditRingBuffer {
       const index = (this.head + i) % this.capacity;
       const event = this.buffer[index];
 
+<<<<<<< HEAD
       if (!event) {
         continue;
       }
+=======
+      if (!event) continue;
+>>>>>>> origin/main
 
       if (!this.matchesFilter(event, filter)) {
         continue;
@@ -134,7 +170,11 @@ export class AuditRingBuffer {
    * @returns Array of matching events
    */
   getByCorrelationId(correlationId: string): AuditEvent[] {
+<<<<<<< HEAD
     return this.query({ correlationId });
+=======
+    return this.query({ correlationId: correlationId as any });
+>>>>>>> origin/main
   }
 
   /**
@@ -188,10 +228,13 @@ export class AuditRingBuffer {
       return false;
     }
 
+<<<<<<< HEAD
     if (filter.correlationId && event.correlationId !== filter.correlationId) {
       return false;
     }
 
+=======
+>>>>>>> origin/main
     if (filter.startTime) {
       const eventTime = new Date(event.timestamp);
       if (eventTime < filter.startTime) {
@@ -199,6 +242,13 @@ export class AuditRingBuffer {
       }
     }
 
+<<<<<<< HEAD
+=======
+    if (filter.correlationId && event.correlationId !== filter.correlationId) {
+      return false;
+    }
+
+>>>>>>> origin/main
     if (filter.endTime) {
       const eventTime = new Date(event.timestamp);
       if (eventTime > filter.endTime) {

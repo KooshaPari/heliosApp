@@ -1,8 +1,13 @@
 // T002 & T004 — Workspace entity functions and service
 // T009 — Bus event emission for workspace lifecycle
 
+<<<<<<< HEAD
 import { detectStaleProjects } from "./project.js";
 import type { CreateWorkspaceInput, Workspace, WorkspaceStore } from "./types.js";
+=======
+import type { CreateWorkspaceInput, Workspace, WorkspaceStore } from "./types.js";
+import { detectStaleProjects } from "./project.js";
+>>>>>>> origin/main
 
 // Stub ID generator — uses spec 005 format ws_{ulid}
 function generateWorkspaceId(): string {
@@ -149,9 +154,13 @@ export class WorkspaceService {
 
   /** Fire-and-forget bus event. Never fails the calling operation. */
   private emitEvent(topic: string, payload: Record<string, unknown>): void {
+<<<<<<< HEAD
     if (this.publish == null) {
       return;
     }
+=======
+    if (this.publish == null) return;
+>>>>>>> origin/main
     try {
       // Fire and forget — catch sync throws and promise rejections
       const result = this.publish(topic, payload);

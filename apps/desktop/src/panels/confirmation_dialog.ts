@@ -17,7 +17,11 @@ export class ConfirmationDialog {
   private props: ConfirmationDialogProps;
   private container: HTMLElement | null = null;
   private dialogElement: HTMLElement | null = null;
+<<<<<<< HEAD
   private isOpen = false;
+=======
+  private isOpen: boolean = false;
+>>>>>>> origin/main
   private previousFocus: HTMLElement | null = null;
 
   constructor(props: ConfirmationDialogProps) {
@@ -34,9 +38,13 @@ export class ConfirmationDialog {
   }
 
   open(): void {
+<<<<<<< HEAD
     if (this.isOpen || !this.container) {
       return;
     }
+=======
+    if (this.isOpen || !this.container) return;
+>>>>>>> origin/main
 
     // Store previous focus to restore on close
     this.previousFocus = document.activeElement as HTMLElement;
@@ -47,9 +55,13 @@ export class ConfirmationDialog {
   }
 
   close(): void {
+<<<<<<< HEAD
     if (!(this.isOpen && this.dialogElement)) {
       return;
     }
+=======
+    if (!this.isOpen || !this.dialogElement) return;
+>>>>>>> origin/main
 
     this.isOpen = false;
     this.detachEventListeners();
@@ -70,9 +82,13 @@ export class ConfirmationDialog {
   }
 
   private createAndShowDialog(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
 
     // Backdrop
     const backdrop = document.createElement("div");
@@ -190,9 +206,13 @@ export class ConfirmationDialog {
   }
 
   private attachEventListeners(): void {
+<<<<<<< HEAD
     if (!this.dialogElement) {
       return;
     }
+=======
+    if (!this.dialogElement) return;
+>>>>>>> origin/main
 
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -225,17 +245,25 @@ export class ConfirmationDialog {
   }
 
   private detachEventListeners(): void {
+<<<<<<< HEAD
     if (!this.dialogElement) {
       return;
     }
+=======
+    if (!this.dialogElement) return;
+>>>>>>> origin/main
 
     // Event listeners are automatically removed when element is removed
   }
 
   private handleTabKey(event: KeyboardEvent): void {
+<<<<<<< HEAD
     if (!this.dialogElement) {
       return;
     }
+=======
+    if (!this.dialogElement) return;
+>>>>>>> origin/main
 
     const buttons = this.dialogElement.querySelectorAll("button") as NodeListOf<HTMLButtonElement>;
     const focusedButton = document.activeElement as HTMLButtonElement;

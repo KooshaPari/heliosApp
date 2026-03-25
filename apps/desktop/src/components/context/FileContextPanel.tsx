@@ -56,7 +56,17 @@ export const FileContextPanel: Component<FileContextPanelProps> = props => {
                 <span>{file.type === "write" ? "\u270F\uFE0F" : "\uD83D\uDC41\uFE0F"}</span>
                 <span style={{ "word-break": "break-all" }}>{file.path.split("/").pop()}</span>
               </div>
+<<<<<<< HEAD
               <div style={{ color: "#585b70", "font-size": "11px", "margin-top": "2px" }}>
+=======
+              <div
+                style={{
+                  color: "#585b70",
+                  "font-size": "11px",
+                  "margin-top": "2px",
+                }}
+              >
+>>>>>>> origin/main
                 {file.path}
               </div>
             </div>

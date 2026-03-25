@@ -1,5 +1,13 @@
+<<<<<<< HEAD
 import type { LaneRegistry } from "./registry.js";
 import { type LaneState, recordTransition, transition, withLaneLock } from "./state_machine.js";
+=======
+// T005 - Lane sharing (multi-agent concurrent access)
+
+import type { LaneRecord } from "./registry.js";
+import type { LaneRegistry } from "./registry.js";
+import { transition, withLaneLock, recordTransition, type LaneState } from "./state_machine.js";
+>>>>>>> origin/main
 
 export class LaneClosedError extends Error {
   constructor(laneId: string) {
@@ -83,7 +91,15 @@ export async function detachAgent(
   registry: LaneRegistry,
   laneId: string,
   agentId: string
+<<<<<<< HEAD
 ): Promise<{ transitioned: boolean; fromState?: LaneState; toState?: LaneState }> {
+=======
+): Promise<{
+  transitioned: boolean;
+  fromState?: LaneState;
+  toState?: LaneState;
+}> {
+>>>>>>> origin/main
   return withLaneLock(laneId, async () => {
     const lane = registry.get(laneId);
     if (!lane) {

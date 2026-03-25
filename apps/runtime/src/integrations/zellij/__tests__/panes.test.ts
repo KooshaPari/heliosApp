@@ -1,8 +1,16 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import type { ZellijCli } from "../cli.js";
 import { PaneTooSmallError, PtyBindingError } from "../errors.js";
 import { ZellijPaneManager } from "../panes.js";
 import { TopologyTracker } from "../topology.js";
+=======
+import { describe, expect, it, mock, beforeEach } from "bun:test";
+import { ZellijPaneManager } from "../panes.js";
+import { TopologyTracker } from "../topology.js";
+import { PaneTooSmallError, PtyBindingError } from "../errors.js";
+import type { ZellijCli } from "../cli.js";
+>>>>>>> origin/main
 import type { PtyManagerInterface } from "../types.js";
 
 /**
@@ -13,7 +21,14 @@ import type { PtyManagerInterface } from "../types.js";
 function makeMockCli(): ZellijCli {
   return {
     run: mock(async () => ({ stdout: "", stderr: "", exitCode: 0 })),
+<<<<<<< HEAD
     checkAvailability: mock(async () => ({ available: true, version: "0.41.2" })),
+=======
+    checkAvailability: mock(async () => ({
+      available: true,
+      version: "0.41.2",
+    })),
+>>>>>>> origin/main
     listSessions: mock(async () => []),
   } as unknown as ZellijCli;
 }
@@ -21,7 +36,14 @@ function makeMockCli(): ZellijCli {
 function makeMockPtyManager(): PtyManagerInterface {
   let counter = 0;
   return {
+<<<<<<< HEAD
     spawn: mock(async () => ({ ptyId: `pty-${++counter}`, pid: 1000 + counter })),
+=======
+    spawn: mock(async () => ({
+      ptyId: `pty-${++counter}`,
+      pid: 1000 + counter,
+    })),
+>>>>>>> origin/main
     terminate: mock(async () => {}),
     resize: mock(() => {}),
   };
@@ -69,7 +91,15 @@ describe("ZellijPaneManager", () => {
         terminate: mock(async () => {}),
         resize: mock(() => {}),
       };
+<<<<<<< HEAD
       const mgr = new ZellijPaneManager({ cli, topology, ptyManager: failingPty });
+=======
+      const mgr = new ZellijPaneManager({
+        cli,
+        topology,
+        ptyManager: failingPty,
+      });
+>>>>>>> origin/main
       topology.initializeTopology("test-session");
 
       expect(mgr.createPane("test-session", "lane-1")).rejects.toThrow(PtyBindingError);
@@ -83,7 +113,11 @@ describe("ZellijPaneManager", () => {
       });
 
       const runMock = cli.run as ReturnType<typeof mock>;
+<<<<<<< HEAD
       const firstCall = runMock.mock.calls[0]?.[0] as string[];
+=======
+      const firstCall = runMock.mock.calls[0]![0] as string[];
+>>>>>>> origin/main
       expect(firstCall).toContain("--direction");
       expect(firstCall).toContain("down");
       expect(firstCall).toContain("--cwd");
@@ -109,7 +143,15 @@ describe("ZellijPaneManager", () => {
         }),
         resize: mock(() => {}),
       };
+<<<<<<< HEAD
       const mgr = new ZellijPaneManager({ cli, topology, ptyManager: failTerminate });
+=======
+      const mgr = new ZellijPaneManager({
+        cli,
+        topology,
+        ptyManager: failTerminate,
+      });
+>>>>>>> origin/main
       topology.initializeTopology("test-session");
       const record = await mgr.createPane("test-session", "lane-1");
 
@@ -182,7 +224,13 @@ describe("ZellijPaneManager", () => {
       topology.initializeTopology("tiny-session", { cols: 10, rows: 3 });
 
       expect(
+<<<<<<< HEAD
         paneManager.createPane("tiny-session", "lane-1", { direction: "vertical" })
+=======
+        paneManager.createPane("tiny-session", "lane-1", {
+          direction: "vertical",
+        })
+>>>>>>> origin/main
       ).rejects.toThrow(PaneTooSmallError);
     });
   });

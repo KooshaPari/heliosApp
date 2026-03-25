@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference.ts";
 import type { InferenceEngine } from "./engine.ts";
+=======
+import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
+import type { InferenceEngine } from "./engine";
+>>>>>>> origin/main
 
 export class AnthropicInferenceEngine implements InferenceEngine {
   readonly id = "anthropic";
@@ -32,7 +37,14 @@ export class AnthropicInferenceEngine implements InferenceEngine {
       body: JSON.stringify({
         model: request.model || "claude-sonnet-4-20250514",
         max_tokens: request.maxTokens ?? 4096,
+<<<<<<< HEAD
         messages: request.messages.map(m => ({ role: m.role, content: m.content })),
+=======
+        messages: request.messages.map(m => ({
+          role: m.role,
+          content: m.content,
+        })),
+>>>>>>> origin/main
       }),
     });
 
@@ -56,7 +68,14 @@ export class AnthropicInferenceEngine implements InferenceEngine {
     return {
       content,
       model: data.model,
+<<<<<<< HEAD
       tokenUsage: { input: data.usage.input_tokens, output: data.usage.output_tokens },
+=======
+      tokenUsage: {
+        input: data.usage.input_tokens,
+        output: data.usage.output_tokens,
+      },
+>>>>>>> origin/main
       finishReason: data.stop_reason === "end_turn" ? "end_turn" : "max_tokens",
     };
   }
@@ -91,9 +110,13 @@ export class AnthropicInferenceEngine implements InferenceEngine {
   }
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
+<<<<<<< HEAD
     if (!this.apiKey) {
       return "unavailable";
     }
+=======
+    if (!this.apiKey) return "unavailable";
+>>>>>>> origin/main
     try {
       const response = await fetch(`${this.endpoint}/v1/messages`, {
         method: "POST",

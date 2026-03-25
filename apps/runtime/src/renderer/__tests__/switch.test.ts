@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { describe, expect, it } from "bun:test";
 import type { RenderSurface, RendererAdapter, RendererConfig, RendererState } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
@@ -5,6 +6,15 @@ import type { RendererEventBus, RendererLifecycleEvent } from "../index.js";
 import { RendererRegistry } from "../registry.js";
 import { RendererStateMachine } from "../state_machine.js";
 import { SwitchSameRendererError, switchRenderer } from "../switch.js";
+=======
+import { describe, expect, it, mock } from "bun:test";
+import { switchRenderer, SwitchSameRendererError } from "../switch.js";
+import { RendererRegistry } from "../registry.js";
+import { RendererStateMachine } from "../state_machine.js";
+import type { RendererAdapter, RendererConfig, RenderSurface, RendererState } from "../adapter.js";
+import type { RendererCapabilities } from "../capabilities.js";
+import type { RendererEventBus, RendererLifecycleEvent } from "../index.js";
+>>>>>>> origin/main
 
 const DEFAULT_CAPS: RendererCapabilities = {
   gpuAccelerated: true,
@@ -41,6 +51,7 @@ function createMockAdapter(
     id,
     version: "1.0.0",
     init: async () => {
+<<<<<<< HEAD
       if (opts?.initFail) {
         throw new Error(`${id} init failed`);
       }
@@ -56,6 +67,17 @@ function createMockAdapter(
       if (opts?.stopFail) {
         throw new Error(`${id} stop failed`);
       }
+=======
+      if (opts?.initFail) throw new Error(`${id} init failed`);
+      state = "initializing";
+    },
+    start: async () => {
+      if (opts?.startFail) throw new Error(`${id} start failed`);
+      state = "running";
+    },
+    stop: async () => {
+      if (opts?.stopFail) throw new Error(`${id} stop failed`);
+>>>>>>> origin/main
       state = "stopped";
     },
     bindStream: () => {},
@@ -101,7 +123,11 @@ describe("switchRenderer", () => {
     expect(reg.getActive()?.id).toBe("rio");
     expect(sm.state).toBe("running");
     expect(events.length).toBe(1);
+<<<<<<< HEAD
     expect(events[0]?.type).toBe("renderer.switched");
+=======
+    expect(events[0]!.type).toBe("renderer.switched");
+>>>>>>> origin/main
   });
 
   it("throws for same renderer", async () => {

@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 const vi = { fn: mock, spyOn: spyOn };
 import { type Lane, LanePanel } from "../../../src/panels/lane_panel";
+=======
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+import { LanePanel } from "../../../src/panels/lane_panel";
+import type { Lane } from "../../../src/panels/lane_panel";
+>>>>>>> origin/main
 
 describe("LanePanel", () => {
   let container: HTMLDivElement;
@@ -117,7 +123,11 @@ describe("LanePanel", () => {
     const event = new KeyboardEvent("keydown", { key: "ArrowDown" });
     container.dispatchEvent(event);
 
+<<<<<<< HEAD
     const selectedItems = container.querySelectorAll(".lane-list-item.selected");
+=======
+    let selectedItems = container.querySelectorAll(".lane-list-item.selected");
+>>>>>>> origin/main
     expect(selectedItems.length).toBeGreaterThan(0);
   });
 
@@ -144,7 +154,17 @@ describe("LanePanel", () => {
   it("should display active lane indicator", () => {
     const lanes: Lane[] = [
       { id: "lane-1", name: "Lane 1", state: "idle", workspaceId: "ws-1" },
+<<<<<<< HEAD
       { id: "lane-2", name: "Lane 2", state: "running", workspaceId: "ws-1", isActive: true },
+=======
+      {
+        id: "lane-2",
+        name: "Lane 2",
+        state: "running",
+        workspaceId: "ws-1",
+        isActive: true,
+      },
+>>>>>>> origin/main
     ];
 
     panel = new LanePanel({ ...mockProps, lanes, activeLaneId: "lane-2" });

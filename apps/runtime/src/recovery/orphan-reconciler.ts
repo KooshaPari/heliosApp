@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { randomUUID } from "node:crypto";
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
+=======
+import type { LocalBus } from "../protocol/bus.js";
+import { randomUUID } from "crypto";
+>>>>>>> origin/main
 
 export interface OrphanItem {
   type: "pty" | "zellij_session" | "par_lane" | "share_worker" | "temp_file";
@@ -22,7 +27,11 @@ export interface CleanupResult {
 }
 
 export class OrphanReconciler {
+<<<<<<< HEAD
   private bus?: LocalBus | undefined;
+=======
+  private bus?: LocalBus;
+>>>>>>> origin/main
   private restoredSessionIds: Set<string>;
 
   constructor(restoredSessionIds: string[], bus?: LocalBus) {
@@ -80,15 +89,33 @@ export class OrphanReconciler {
             }
           }
         } else if (item.type === "temp_file" && item.path) {
+<<<<<<< HEAD
           const { promises: fs } = await import("node:fs");
           await fs.unlink(item.path);
           removed++;
         }
       } catch (_err) {}
+=======
+          const { promises: fs } = await import("fs");
+          await fs.unlink(item.path);
+          removed++;
+        }
+      } catch (err) {
+        console.error(`Failed to cleanup orphan ${item.id}:`, err);
+      }
+>>>>>>> origin/main
     }
 
     const reviewPending = report.needsReview.length;
 
+<<<<<<< HEAD
+=======
+    // Log cleanup result
+    console.log(
+      `Orphan cleanup: ${terminated} terminated, ${removed} removed, ${reviewPending} pending review`
+    );
+
+>>>>>>> origin/main
     // Publish cleanup event
     if (this.bus) {
       await this.bus.publish({
@@ -112,8 +139,13 @@ export class OrphanReconciler {
   }
 
   private async scanOrphanPTYs(
+<<<<<<< HEAD
     _safeToTerminate: OrphanItem[],
     _needsReview: OrphanItem[]
+=======
+    safeToTerminate: OrphanItem[],
+    needsReview: OrphanItem[]
+>>>>>>> origin/main
   ): Promise<void> {
     // In a real implementation, this would scan /proc or use Bun/Node APIs
     // to find PTY processes owned by heliosApp but not associated with restored sessions
@@ -121,8 +153,13 @@ export class OrphanReconciler {
   }
 
   private async scanStaleZelijjSessions(
+<<<<<<< HEAD
     _safeToTerminate: OrphanItem[],
     _needsReview: OrphanItem[]
+=======
+    safeToTerminate: OrphanItem[],
+    needsReview: OrphanItem[]
+>>>>>>> origin/main
   ): Promise<void> {
     // In a real implementation, this would call zellij list-sessions
     // and compare against restored session IDs
@@ -131,11 +168,19 @@ export class OrphanReconciler {
 
   private async scanStaleTempFiles(
     safeToTerminate: OrphanItem[],
+<<<<<<< HEAD
     _needsReview: OrphanItem[]
   ): Promise<void> {
     try {
       const { promises: fs } = await import("node:fs");
       const path = await import("node:path");
+=======
+    needsReview: OrphanItem[]
+  ): Promise<void> {
+    try {
+      const { promises: fs } = await import("fs");
+      const path = await import("path");
+>>>>>>> origin/main
 
       // Look for stale temp files in recovery directory
       // This is a simplified version; real implementation would be more thorough
@@ -156,6 +201,12 @@ export class OrphanReconciler {
       } catch {
         // Recovery directory doesn't exist
       }
+<<<<<<< HEAD
     } catch (_err) {}
+=======
+    } catch (err) {
+      console.error("Failed to scan for stale temp files:", err);
+    }
+>>>>>>> origin/main
   }
 }

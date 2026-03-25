@@ -1,19 +1,34 @@
+<<<<<<< HEAD
 import { randomBytes } from "node:crypto";
+=======
+>>>>>>> origin/main
 import {
   chmodSync,
   existsSync,
   mkdirSync,
+<<<<<<< HEAD
   readFileSync,
   readdirSync,
+=======
+  readdirSync,
+  readFileSync,
+>>>>>>> origin/main
   renameSync,
   rmSync,
   statSync,
   writeFileSync,
 } from "node:fs";
 import { join, resolve, sep } from "node:path";
+<<<<<<< HEAD
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
 import { EncryptionService } from "./encryption.js";
+=======
+import { randomBytes } from "node:crypto";
+import { EncryptionService } from "./encryption.js";
+import type { LocalBus } from "../protocol/bus.js";
+import type { LocalBusEnvelope } from "../protocol/types.js";
+>>>>>>> origin/main
 
 // ---------------------------------------------------------------------------
 // Types
@@ -81,11 +96,15 @@ export class CredentialStore {
    * @param bus      Optional LocalBus for emitting audit events.
    * @param encryption  Optional EncryptionService (allows injection in tests).
    */
+<<<<<<< HEAD
   constructor(opts: {
     dataDir: string;
     bus?: LocalBus;
     encryption?: EncryptionService;
   }) {
+=======
+  constructor(opts: { dataDir: string; bus?: LocalBus; encryption?: EncryptionService }) {
+>>>>>>> origin/main
     this.dataDir = opts.dataDir;
     this.bus = opts.bus ?? null;
     this.encryption = opts.encryption ?? new EncryptionService();
@@ -145,9 +164,13 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
 
     const dir = this.credentialDir(providerId, workspaceId);
+<<<<<<< HEAD
     if (!existsSync(dir)) {
       return [];
     }
+=======
+    if (!existsSync(dir)) return [];
+>>>>>>> origin/main
 
     return readdirSync(dir)
       .filter(f => f.endsWith(".enc"))
@@ -359,9 +382,13 @@ export class CredentialStore {
   // -------------------------------------------------------------------------
 
   private async emit(topic: string, payload: Record<string, unknown>): Promise<void> {
+<<<<<<< HEAD
     if (this.bus === null) {
       return;
     }
+=======
+    if (this.bus === null) return;
+>>>>>>> origin/main
     const envelope: LocalBusEnvelope = {
       id: `secrets:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
       type: "event",

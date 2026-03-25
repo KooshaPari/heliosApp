@@ -22,8 +22,13 @@ export class KeyboardNav {
   private callbacks: KeyboardNavCallbacks;
   private container: HTMLElement | null = null;
   private keydownHandler?: (e: KeyboardEvent) => void;
+<<<<<<< HEAD
   private currentIndex = 0;
   private itemCount = 0;
+=======
+  private currentIndex: number = 0;
+  private itemCount: number = 0;
+>>>>>>> origin/main
 
   constructor(callbacks: KeyboardNavCallbacks, options: KeyboardNavOptions = {}) {
     this.callbacks = callbacks;
@@ -63,17 +68,25 @@ export class KeyboardNav {
   }
 
   private updateItemCount(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
     const items = this.container.querySelectorAll('[role="option"]');
     this.itemCount = items.length;
   }
 
   private attachEventListeners(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
 
     this.keydownHandler = (e: KeyboardEvent) => {
       this.handleKeydown(e);
@@ -83,9 +96,13 @@ export class KeyboardNav {
   }
 
   private detachEventListeners(): void {
+<<<<<<< HEAD
     if (!(this.container && this.keydownHandler)) {
       return;
     }
+=======
+    if (!this.container || !this.keydownHandler) return;
+>>>>>>> origin/main
     this.container.removeEventListener("keydown", this.keydownHandler);
   }
 
@@ -119,7 +136,11 @@ export class KeyboardNav {
     event.preventDefault();
   }
 
+<<<<<<< HEAD
   private handleNavigateUp(_event: KeyboardEvent): void {
+=======
+  private handleNavigateUp(event: KeyboardEvent): void {
+>>>>>>> origin/main
     if (this.currentIndex > 0) {
       this.currentIndex--;
       this.callbacks.onNavigateUp();
@@ -129,7 +150,11 @@ export class KeyboardNav {
     }
   }
 
+<<<<<<< HEAD
   private handleNavigateDown(_event: KeyboardEvent): void {
+=======
+  private handleNavigateDown(event: KeyboardEvent): void {
+>>>>>>> origin/main
     if (this.currentIndex < this.itemCount - 1) {
       this.currentIndex++;
       this.callbacks.onNavigateDown();
@@ -139,21 +164,37 @@ export class KeyboardNav {
     }
   }
 
+<<<<<<< HEAD
   private handleNavigateHome(_event: KeyboardEvent): void {
+=======
+  private handleNavigateHome(event: KeyboardEvent): void {
+>>>>>>> origin/main
     this.currentIndex = 0;
     this.callbacks.onNavigateHome();
   }
 
+<<<<<<< HEAD
   private handleNavigateEnd(_event: KeyboardEvent): void {
+=======
+  private handleNavigateEnd(event: KeyboardEvent): void {
+>>>>>>> origin/main
     this.currentIndex = Math.max(0, this.itemCount - 1);
     this.callbacks.onNavigateEnd();
   }
 
+<<<<<<< HEAD
   private handleSelect(_event: KeyboardEvent): void {
     this.callbacks.onSelect();
   }
 
   private async handleDelete(_event: KeyboardEvent): Promise<void> {
+=======
+  private handleSelect(event: KeyboardEvent): void {
+    this.callbacks.onSelect();
+  }
+
+  private async handleDelete(event: KeyboardEvent): Promise<void> {
+>>>>>>> origin/main
     if (!this.options.confirmBeforeDelete) {
       this.callbacks.onDelete();
       return;

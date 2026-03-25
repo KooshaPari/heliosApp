@@ -6,9 +6,15 @@
  */
 
 import type {
+<<<<<<< HEAD
   RenderSurface,
   RendererAdapter,
   RendererConfig,
+=======
+  RendererAdapter,
+  RendererConfig,
+  RenderSurface,
+>>>>>>> origin/main
   RendererState,
 } from "../../src/renderer/adapter.js";
 import type { RendererCapabilities } from "../../src/renderer/capabilities.js";
@@ -75,7 +81,11 @@ export class BaseMockAdapter implements RendererAdapter {
     handleInput: 0,
   };
 
+<<<<<<< HEAD
   constructor(id: string, version = "1.0.0", opts: MockAdapterOptions = {}) {
+=======
+  constructor(id: string, version: string = "1.0.0", opts: MockAdapterOptions = {}) {
+>>>>>>> origin/main
     this.id = id;
     this.version = version;
     this._opts = opts;
@@ -245,7 +255,11 @@ export function createOpenPtyStream(): ReadableStream<Uint8Array> {
 }
 
 /** Create a Uint8Array filled with a pattern for easy identification. */
+<<<<<<< HEAD
 export function createTestData(size: number, fillByte = 0xaa): Uint8Array {
+=======
+export function createTestData(size: number, fillByte: number = 0xaa): Uint8Array {
+>>>>>>> origin/main
   const data = new Uint8Array(size);
   data.fill(fillByte);
   return data;

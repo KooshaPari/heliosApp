@@ -103,12 +103,24 @@ describe("protocol asset parity", () => {
     );
     expect(topicRequired).toEqual(
       new Map<string, string[]>([
+<<<<<<< HEAD
+=======
+        ["lane.attach.started", ["correlation_id", "lane_id", "workspace_id"]],
+        ["lane.attach.failed", ["correlation_id", "lane_id", "workspace_id"]],
+        ["lane.cleanup.started", ["correlation_id", "lane_id", "workspace_id"]],
+        ["lane.cleanup.failed", ["correlation_id", "lane_id", "workspace_id"]],
+>>>>>>> origin/main
         ["lane.create.started", ["correlation_id", "lane_id", "workspace_id"]],
         ["lane.created", ["correlation_id", "lane_id", "workspace_id"]],
         ["lane.create.failed", ["correlation_id", "lane_id", "workspace_id"]],
         ["session.attach.started", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
         ["session.attached", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
         ["session.attach.failed", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
+<<<<<<< HEAD
+=======
+        ["session.terminate.started", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
+        ["session.terminate.failed", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
+>>>>>>> origin/main
         ["terminal.spawn.started", ["correlation_id", "lane_id", "session_id", "workspace_id"]],
         [
           "terminal.spawned",

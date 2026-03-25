@@ -13,9 +13,15 @@
  *   - Memory: < 10 MB per terminal
  */
 
+<<<<<<< HEAD
 import { beforeAll, describe, expect, it } from "bun:test";
 import { detectRioBinary } from "../../../../src/renderer/rio/index.js";
 import { RioMetrics } from "../../../../src/renderer/rio/metrics.js";
+=======
+import { describe, it, expect, beforeAll } from "bun:test";
+import { RioMetrics, type MetricsSummary } from "../../../../src/renderer/rio/metrics.js";
+import { detectRioBinary } from "../../../../src/renderer/rio/index.js";
+>>>>>>> origin/main
 
 // ---------------------------------------------------------------------------
 // Skip control
@@ -40,8 +46,14 @@ interface BenchmarkResult {
 }
 
 function reportResults(results: BenchmarkResult[]): void {
+<<<<<<< HEAD
   const _json = JSON.stringify({ benchmark: "rio-slo", timestamp: Date.now(), results }, null, 2);
   if (typeof console !== "undefined") {
+=======
+  const json = JSON.stringify({ benchmark: "rio-slo", timestamp: Date.now(), results }, null, 2);
+  if (typeof console !== "undefined") {
+    console.log(json);
+>>>>>>> origin/main
   }
 }
 
@@ -156,6 +168,10 @@ describe("SLO — Frame time benchmark", () => {
 describe("SLO — Memory benchmark", () => {
   it("placeholder — requires real rio process with GPU", () => {
     if (!rioAvailable) {
+<<<<<<< HEAD
+=======
+      console.log("SKIP: rio binary not available for memory benchmark");
+>>>>>>> origin/main
       return;
     }
 

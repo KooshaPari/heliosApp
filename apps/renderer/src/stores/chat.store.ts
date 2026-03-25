@@ -1,5 +1,9 @@
 import { createSignal } from "solid-js";
+<<<<<<< HEAD
 import type { Conversation, Message } from "../../../runtime/src/types/conversation.ts";
+=======
+import type { Conversation, Message } from "../../../runtime/src/types/conversation";
+>>>>>>> origin/main
 
 const [conversations, setConversations] = createSignal<Conversation[]>([]);
 const [activeConversationId, setActiveConversationId] = createSignal<string | null>(null);
@@ -17,9 +21,13 @@ export function getConversations(): Conversation[] {
 
 export function getActiveConversation(): Conversation | null {
   const id = activeConversationId();
+<<<<<<< HEAD
   if (!id) {
     return null;
   }
+=======
+  if (!id) return null;
+>>>>>>> origin/main
   return conversations().find(c => c.id === id) ?? null;
 }
 
@@ -73,9 +81,13 @@ export async function sendMessage(text: string): Promise<void> {
 
   setConversations((prev: Conversation[]) =>
     prev.map(c => {
+<<<<<<< HEAD
       if (c.id !== convId) {
         return c;
       }
+=======
+      if (c.id !== convId) return c;
+>>>>>>> origin/main
       return {
         ...c,
         messages: [...c.messages, userMsg, assistantMsg],
@@ -154,6 +166,7 @@ export async function sendMessage(text: string): Promise<void> {
 function appendToAssistantMessage(convId: string, msgId: string, content: string): void {
   setConversations((prev: Conversation[]) =>
     prev.map(c => {
+<<<<<<< HEAD
       if (c.id !== convId) {
         return c;
       }
@@ -163,6 +176,13 @@ function appendToAssistantMessage(convId: string, msgId: string, content: string
           if (m.id !== msgId) {
             return m;
           }
+=======
+      if (c.id !== convId) return c;
+      return {
+        ...c,
+        messages: c.messages.map(m => {
+          if (m.id !== msgId) return m;
+>>>>>>> origin/main
           return { ...m, content: m.content + content };
         }),
       };
@@ -177,6 +197,7 @@ function finalizeAssistantMessage(
 ): void {
   setConversations((prev: Conversation[]) =>
     prev.map(c => {
+<<<<<<< HEAD
       if (c.id !== convId) {
         return c;
       }
@@ -186,6 +207,13 @@ function finalizeAssistantMessage(
           if (m.id !== msgId) {
             return m;
           }
+=======
+      if (c.id !== convId) return c;
+      return {
+        ...c,
+        messages: c.messages.map(m => {
+          if (m.id !== msgId) return m;
+>>>>>>> origin/main
           return { ...m, metadata: { ...m.metadata, status } };
         }),
       };
@@ -197,9 +225,13 @@ function finalizeAssistantMessage(
 export function cancelResponse(): void {
   // TODO: AbortController integration for cancelling in-flight requests
   const conv = getActiveConversation();
+<<<<<<< HEAD
   if (!conv) {
     return;
   }
+=======
+  if (!conv) return;
+>>>>>>> origin/main
   const lastMsg = conv.messages[conv.messages.length - 1];
   if (lastMsg?.metadata?.status === "streaming") {
     finalizeAssistantMessage(conv.id, lastMsg.id, "cancelled");

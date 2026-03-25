@@ -8,21 +8,35 @@
  * FR-025-007: Process-level isolation for tool execution.
  */
 
+<<<<<<< HEAD
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
 import type {
+=======
+import type { LocalBus } from "../protocol/bus.js";
+import type {
+  ProviderAdapter,
+  ProviderHealthStatus,
+>>>>>>> origin/main
   MCPConfig,
   MCPExecuteInput,
   MCPExecuteOutput,
   MCPTool,
+<<<<<<< HEAD
   ProviderAdapter,
   ProviderHealthStatus,
+=======
+>>>>>>> origin/main
 } from "./adapter.js";
 import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * MCP server connection state.
  */
+<<<<<<< HEAD
 interface McpConnection {
+=======
+interface MCPConnection {
+>>>>>>> origin/main
   connected: boolean;
   lastConnectionAttempt: Date;
   reconnectAttempts: number;
@@ -46,6 +60,7 @@ interface ToolEntry {
  *
  * FR-025-004: MCP tool discovery and sandboxed invocation.
  */
+<<<<<<< HEAD
 export class MCPBridgeAdapter
   implements ProviderAdapter<MCPConfig, MCPExecuteInput, MCPExecuteOutput>
 {
@@ -53,6 +68,16 @@ export class MCPBridgeAdapter
   private bus: LocalBus | null = null;
   private terminated = false;
   private connection: McpConnection = {
+=======
+export class MCPBridgeAdapter implements ProviderAdapter<
+  MCPConfig,
+  MCPExecuteInput,
+  MCPExecuteOutput
+> {
+  private config: MCPConfig | null = null;
+  private bus: LocalBus | null = null;
+  private connection: MCPConnection = {
+>>>>>>> origin/main
     connected: false,
     lastConnectionAttempt: new Date(),
     reconnectAttempts: 0,
@@ -122,9 +147,12 @@ export class MCPBridgeAdapter
    */
   async health(): Promise<ProviderHealthStatus> {
     if (!this.config) {
+<<<<<<< HEAD
       if (this.terminated) {
         return { ...this.healthStatus };
       }
+=======
+>>>>>>> origin/main
       return {
         state: "unavailable",
         lastCheck: new Date(),
@@ -180,10 +208,17 @@ export class MCPBridgeAdapter
    * @throws NormalizedProviderError on failure
    */
   async execute(input: MCPExecuteInput, correlationId: string): Promise<MCPExecuteOutput> {
+<<<<<<< HEAD
     if (!(this.config && this.connection.connected)) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
         "MCP bridge unavailable: not initialized or disconnected",
+=======
+    if (!this.config || !this.connection.connected) {
+      throw new NormalizedProviderError(
+        "PROVIDER_UNAVAILABLE",
+        "MCP bridge not initialized or disconnected",
+>>>>>>> origin/main
         "mcp"
       );
     }
@@ -303,7 +338,10 @@ export class MCPBridgeAdapter
       this.toolCatalog.clear();
 
       this.config = null;
+<<<<<<< HEAD
       this.terminated = true;
+=======
+>>>>>>> origin/main
 
       this.healthStatus = {
         state: "unavailable",
@@ -468,7 +506,11 @@ export class MCPBridgeAdapter
    */
   private async invokeTool(
     toolName: string,
+<<<<<<< HEAD
     _toolArguments: Record<string, unknown>,
+=======
+    toolArguments: Record<string, unknown>,
+>>>>>>> origin/main
     signal: AbortSignal
   ): Promise<unknown> {
     // Check for abort
@@ -483,6 +525,7 @@ export class MCPBridgeAdapter
       list_directory: { entries: ["file1.txt", "file2.txt", "subdir/"] },
     };
 
+<<<<<<< HEAD
     const result = results[toolName] || { message: `Mock result for ${toolName}` };
 
     return new Promise((resolve, reject) => {
@@ -492,6 +535,9 @@ export class MCPBridgeAdapter
         reject(new Error("Tool invocation cancelled"));
       });
     });
+=======
+    return results[toolName] || { message: `Mock result for ${toolName}` };
+>>>>>>> origin/main
   }
 
   /**
@@ -513,6 +559,12 @@ export class MCPBridgeAdapter
         topic,
         payload,
       });
+<<<<<<< HEAD
     } catch (_error) {}
+=======
+    } catch (error) {
+      console.warn(`Failed to publish MCP event ${topic}:`, error);
+    }
+>>>>>>> origin/main
   }
 }

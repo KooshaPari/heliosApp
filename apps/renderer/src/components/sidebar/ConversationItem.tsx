@@ -12,6 +12,7 @@ function relativeTime(date: Date): string {
   const now = Date.now();
   const diffMs = now - date.getTime();
   const diffSec = Math.floor(diffMs / 1000);
+<<<<<<< HEAD
   if (diffSec < 60) {
     return `${diffSec}s ago`;
   }
@@ -23,6 +24,13 @@ function relativeTime(date: Date): string {
   if (diffHr < 24) {
     return `${diffHr}h ago`;
   }
+=======
+  if (diffSec < 60) return `${diffSec}s ago`;
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+>>>>>>> origin/main
   const diffDay = Math.floor(diffHr / 24);
   return `${diffDay}d ago`;
 }

@@ -4,6 +4,7 @@
  * FR-012-008, SC-012-004.
  */
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
 import type {
   RenderSurface,
@@ -20,6 +21,25 @@ import {
   handleRioToggle,
   isRioEnabled,
 } from "../../../../src/renderer/rio/index.js";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+import {
+  isRioEnabled,
+  registerRio,
+  handleRioToggle,
+  RioToggleQueue,
+  type RioFeatureFlagConfig,
+} from "../../../../src/renderer/rio/index.js";
+import { RendererRegistry } from "../../../../src/renderer/registry.js";
+import { RioBackend } from "../../../../src/renderer/rio/backend.js";
+import type {
+  RendererAdapter,
+  RendererConfig,
+  RenderSurface,
+  RendererState,
+} from "../../../../src/renderer/adapter.js";
+import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
+>>>>>>> origin/main
 
 // ---------------------------------------------------------------------------
 // Mock ghostty
@@ -139,7 +159,13 @@ describe("handleRioToggle — enable", () => {
     backend.setDisabled();
     registry.register(backend);
 
+<<<<<<< HEAD
     const events = await handleRioToggle(registry, true, { featureFlags: { rioRenderer: true } });
+=======
+    const events = await handleRioToggle(registry, true, {
+      featureFlags: { rioRenderer: true },
+    });
+>>>>>>> origin/main
     expect(events).toEqual([{ type: "renderer.rio.enabled" }]);
     expect(backend.isEnabled()).toBe(true);
   });
@@ -154,7 +180,13 @@ describe("handleRioToggle — enable", () => {
     backend.setDisabled();
     registry.register(backend);
 
+<<<<<<< HEAD
     await handleRioToggle(registry, true, { featureFlags: { rioRenderer: true } });
+=======
+    await handleRioToggle(registry, true, {
+      featureFlags: { rioRenderer: true },
+    });
+>>>>>>> origin/main
     expect(registry.getActive()?.id).toBe("ghostty");
   });
 });
@@ -172,7 +204,13 @@ describe("RioToggleQueue", () => {
     backend.setRegistry(registry);
     registry.register(backend);
 
+<<<<<<< HEAD
     const queue = new RioToggleQueue(registry, { featureFlags: { rioRenderer: true } });
+=======
+    const queue = new RioToggleQueue(registry, {
+      featureFlags: { rioRenderer: true },
+    });
+>>>>>>> origin/main
 
     const results = await queue.enqueue(false);
     expect(results).toEqual([{ type: "renderer.rio.disabled" }]);
@@ -186,7 +224,13 @@ describe("RioToggleQueue", () => {
     backend.setRegistry(registry);
     registry.register(backend);
 
+<<<<<<< HEAD
     const queue = new RioToggleQueue(registry, { featureFlags: { rioRenderer: true } });
+=======
+    const queue = new RioToggleQueue(registry, {
+      featureFlags: { rioRenderer: true },
+    });
+>>>>>>> origin/main
 
     // Fire multiple toggles without awaiting.
     const p1 = queue.enqueue(false);

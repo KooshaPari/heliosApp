@@ -37,9 +37,13 @@ export class RendererOption {
   }
 
   private render(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
@@ -134,6 +138,7 @@ export class RendererOption {
   }
 
   private attachEventListeners(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
@@ -142,6 +147,12 @@ export class RendererOption {
     if (!option) {
       return;
     }
+=======
+    if (!this.container) return;
+
+    const option = this.container.querySelector(".renderer-option") as HTMLElement;
+    if (!option) return;
+>>>>>>> origin/main
 
     if (this.props.isAvailable) {
       option.addEventListener("click", () => {

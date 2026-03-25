@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { getAllDefaults, validateValue } from "./schema.js";
 import type { SettingChangeEvent, SettingsSchema, SettingsStore } from "./types.js";
+=======
+import type { SettingsSchema, SettingsStore, SettingChangeEvent } from "./types.js";
+import { getAllDefaults, validateValue } from "./schema.js";
+>>>>>>> origin/main
 
 type BusPublishFn = (topic: string, payload: SettingChangeEvent) => void;
 type ChangeListener = (event: SettingChangeEvent) => void;
@@ -120,7 +125,13 @@ export class SettingsManager {
       // Hot-reloadable → publish on bus if available.
       try {
         this.busPublish?.("settings.changed", event);
+<<<<<<< HEAD
       } catch {}
+=======
+      } catch {
+        console.warn("[settings] Bus publish failed, skipping event emission.");
+      }
+>>>>>>> origin/main
     }
 
     // Always notify direct subscribers regardless of reload policy.

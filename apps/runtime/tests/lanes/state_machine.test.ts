@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import {
+<<<<<<< HEAD
   InvalidLaneTransitionError,
   type LaneEvent,
   type LaneState,
@@ -8,11 +9,25 @@ import {
   recordTransition,
   transition,
   withLaneLock,
+=======
+  transition,
+  withLaneLock,
+  recordTransition,
+  getTransitionHistory,
+  clearTransitionHistory,
+  InvalidLaneTransitionError,
+  type LaneState,
+  type LaneEvent,
+>>>>>>> origin/main
 } from "../../src/lanes/state_machine.js";
 
 describe("Lane State Machine", () => {
   describe("valid transitions", () => {
+<<<<<<< HEAD
     const cases: [LaneState, LaneEvent, LaneState][] = [
+=======
+    const cases: Array<[LaneState, LaneEvent, LaneState]> = [
+>>>>>>> origin/main
       ["new", "create", "provisioning"],
       ["provisioning", "provision_complete", "ready"],
       ["provisioning", "provision_failed", "closed"],
@@ -107,10 +122,17 @@ describe("Lane State Machine", () => {
 
       const history = getTransitionHistory(laneId);
       expect(history.length).toBe(2);
+<<<<<<< HEAD
       expect(history[0]?.fromState).toBe("new");
       expect(history[0]?.toState).toBe("provisioning");
       expect(history[1]?.fromState).toBe("provisioning");
       expect(history[1]?.toState).toBe("ready");
+=======
+      expect(history[0]!.fromState).toBe("new");
+      expect(history[0]!.toState).toBe("provisioning");
+      expect(history[1]!.fromState).toBe("provisioning");
+      expect(history[1]!.toState).toBe("ready");
+>>>>>>> origin/main
 
       clearTransitionHistory(laneId);
     });

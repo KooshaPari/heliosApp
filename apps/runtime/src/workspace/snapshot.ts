@@ -2,9 +2,15 @@
 // FR-006: Corruption detection
 // FR-007: Recovery from snapshot
 
+<<<<<<< HEAD
 import { createHash } from "node:crypto";
 import { mkdir, readFile, rename } from "node:fs/promises";
 import { join } from "node:path";
+=======
+import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
+import { join } from "node:path";
+import { createHash } from "node:crypto";
+>>>>>>> origin/main
 import type { Workspace } from "./types.js";
 
 const SNAPSHOT_FILE = "workspaces.snapshot.json";
@@ -24,9 +30,13 @@ function computeChecksum(workspaces: Workspace[]): string {
 /** Atomically write data to a file using temp + fsync + rename */
 async function atomicWrite(filePath: string, data: string): Promise<void> {
   const tmp = `${filePath}.tmp.${Date.now()}`;
+<<<<<<< HEAD
   const fd = (Bun as any).file(tmp);
   await (Bun as any).write(fd, data);
   // Bun.write does fsync internally; rename for atomicity
+=======
+  await writeFile(tmp, data, "utf-8");
+>>>>>>> origin/main
   await rename(tmp, filePath);
 }
 
@@ -79,6 +89,7 @@ export async function detectCorruption(
 }
 
 function isValidEnvelope(data: unknown): data is SnapshotEnvelope {
+<<<<<<< HEAD
   if (typeof data !== "object" || data === null) {
     return false;
   }
@@ -119,6 +130,24 @@ function isValidEnvelope(data: unknown): data is SnapshotEnvelope {
     if (!Array.isArray(w.projects)) {
       return false;
     }
+=======
+  if (typeof data !== "object" || data === null) return false;
+  const obj = data as Record<string, unknown>;
+  if (obj["version"] !== 1) return false;
+  if (!Array.isArray(obj["workspaces"])) return false;
+  if (typeof obj["_checksum"] !== "string") return false;
+  // Validate each workspace has required fields
+  for (const ws of obj["workspaces"] as unknown[]) {
+    if (typeof ws !== "object" || ws === null) return false;
+    const w = ws as Record<string, unknown>;
+    if (typeof w["id"] !== "string") return false;
+    if (typeof w["name"] !== "string") return false;
+    if (typeof w["rootPath"] !== "string") return false;
+    if (typeof w["state"] !== "string") return false;
+    if (typeof w["createdAt"] !== "number") return false;
+    if (typeof w["updatedAt"] !== "number") return false;
+    if (!Array.isArray(w["projects"])) return false;
+>>>>>>> origin/main
   }
   return true;
 }
@@ -140,6 +169,7 @@ export async function recoverFromSnapshot(dataDir: string): Promise<Workspace[] 
     return null;
   }
 
+<<<<<<< HEAD
   if (!isValidEnvelope(parsed)) {
     return null;
   }
@@ -148,6 +178,12 @@ export async function recoverFromSnapshot(dataDir: string): Promise<Workspace[] 
   if (parsed._checksum !== expected) {
     return null;
   }
+=======
+  if (!isValidEnvelope(parsed)) return null;
+
+  const expected = computeChecksum(parsed.workspaces);
+  if (parsed._checksum !== expected) return null;
+>>>>>>> origin/main
 
   return parsed.workspaces;
 }

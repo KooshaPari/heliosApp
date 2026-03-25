@@ -1,10 +1,18 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+>>>>>>> origin/main
 import { TabBar } from "../../../src/tabs/tab_bar";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
 
 describe("TabBar", () => {
   let tabBar: TabBar;
+<<<<<<< HEAD
   let mockTabs: any[] = [];
+=======
+  let mockTabs: ReturnType<typeof createMockTabSurface>[] = [];
+>>>>>>> origin/main
 
   beforeEach(() => {
     mockTabs = [
@@ -32,12 +40,20 @@ describe("TabBar", () => {
       const tab1 = mockTabs[0];
       const tab2 = mockTabs[1];
 
+<<<<<<< HEAD
       let _tab1Active = false;
+=======
+      let tab1Active = false;
+>>>>>>> origin/main
       let tab1Deactivated = false;
       let tab2Active = false;
 
       tab1.onActivate = () => {
+<<<<<<< HEAD
         _tab1Active = true;
+=======
+        tab1Active = true;
+>>>>>>> origin/main
       };
       tab1.onDeactivate = () => {
         tab1Deactivated = true;
@@ -84,7 +100,11 @@ describe("TabBar", () => {
     });
 
     it("should call onTabReordered callback", () => {
+<<<<<<< HEAD
       let reorderedTabs: any[] = [];
+=======
+      let reorderedTabs: string[] = [];
+>>>>>>> origin/main
 
       tabBar = new TabBar(mockTabs, {
         onTabReordered: ids => {
@@ -152,6 +172,7 @@ describe("TabBar", () => {
       tabBar.pinTab("tab5", true);
       tabBar.pinTab("tab3", true);
 
+<<<<<<< HEAD
       const order = tabBar.getTabOrder();
       const pinned = order.filter(id => tabBar.isTabPinned(id));
       const unpinned = order.filter(id => !tabBar.isTabPinned(id));
@@ -160,6 +181,18 @@ describe("TabBar", () => {
       const lastPinnedIndex = Math.max(...pinned.map(id => order.indexOf(id)));
       const firstUnpinnedIndex =
         unpinned.length > 0 ? order.indexOf(unpinned[0]) : Number.POSITIVE_INFINITY;
+=======
+      const element = tabBar.render();
+      const tabHeaders = element.querySelectorAll("[data-tab-id]");
+      const renderedOrder = Array.from(tabHeaders).map(el => el.getAttribute("data-tab-id"));
+
+      // Pinned tabs (tab3, tab5) should appear before unpinned in rendered order
+      const lastPinnedIndex = Math.max(
+        renderedOrder.indexOf("tab3"),
+        renderedOrder.indexOf("tab5")
+      );
+      const firstUnpinnedIndex = renderedOrder.findIndex(id => id !== "tab3" && id !== "tab5");
+>>>>>>> origin/main
 
       expect(lastPinnedIndex).toBeLessThan(firstUnpinnedIndex);
     });
@@ -183,7 +216,11 @@ describe("TabBar", () => {
       const selectedTab = element.querySelector('[data-tab-id="tab1"]') as HTMLElement;
 
       expect(selectedTab).toBeDefined();
+<<<<<<< HEAD
       expect(selectedTab.style.backgroundColor).toBe("#ffffff");
+=======
+      expect(selectedTab.style.backgroundColor).toMatch(/rgb\(255.*255.*255\)|#fff(fff)?|white/);
+>>>>>>> origin/main
     });
 
     it("should show stale context indicator", () => {

@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import type { ActiveContext } from "./context_switch.ts";
 import type { TabSurface } from "./tab_surface.ts";
+=======
+import type { TabSurface } from "./tab_surface";
+import type { ActiveContext } from "./context_switch";
+>>>>>>> origin/main
 
 export interface PropagationResult {
   successful: string[];
@@ -81,6 +86,10 @@ export class ContextPropagator {
             result.timed_out.push(tabId);
           } else {
             result.failed.push(tabId);
+<<<<<<< HEAD
+=======
+            console.error(`Failed to propagate context to tab ${tabId}:`, error);
+>>>>>>> origin/main
           }
         });
 

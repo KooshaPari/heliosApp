@@ -90,6 +90,7 @@
         "harness.status.changed",
         "audit.recorded",
         "diagnostics.metric",
+<<<<<<< HEAD
         "orphan.detection.cycle_completed",
         "orphan.detection.resource_found",
         "recovery.stage.changed",
@@ -105,6 +106,8 @@
         "secrets.credential.revoked",
         "secrets.redaction.applied",
         "secrets.protected_path.accessed",
+=======
+>>>>>>> origin/main
         null
       ]
     },
@@ -131,6 +134,7 @@
   },
   "allOf": [
     {
+<<<<<<< HEAD
       "if": { "properties": { "type": { "const": "command" } }, "required": ["type"] },
       "then": { "required": ["method", "payload"] }
     },
@@ -140,17 +144,45 @@
     },
     {
       "if": { "properties": { "type": { "const": "response" } }, "required": ["type"] },
+=======
+      "if": {
+        "properties": { "type": { "const": "command" } },
+        "required": ["type"]
+      },
+      "then": { "required": ["method", "payload"] }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "event" } },
+        "required": ["type"]
+      },
+      "then": { "required": ["topic", "payload"] }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "response" } },
+        "required": ["type"]
+      },
+>>>>>>> origin/main
       "then": { "required": ["status"] }
     },
     {
       "if": {
+<<<<<<< HEAD
         "properties": { "type": { "const": "command" }, "method": { "const": "lane.create" } },
+=======
+        "properties": {
+          "type": { "const": "command" },
+          "method": { "const": "lane.create" }
+        },
+>>>>>>> origin/main
         "required": ["type", "method"]
       },
       "then": { "required": ["correlation_id", "workspace_id"] }
     },
     {
       "if": {
+<<<<<<< HEAD
         "properties": { "type": { "const": "command" }, "method": { "const": "session.attach" } },
         "required": ["type", "method"]
       },
@@ -166,26 +198,71 @@
     {
       "if": {
         "properties": { "type": { "const": "event" }, "topic": { "const": "lane.create.started" } },
+=======
+        "properties": {
+          "type": { "const": "command" },
+          "method": { "const": "session.attach" }
+        },
+        "required": ["type", "method"]
+      },
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": { "const": "command" },
+          "method": { "const": "terminal.spawn" }
+        },
+        "required": ["type", "method"]
+      },
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "lane.create.started" }
+        },
+>>>>>>> origin/main
         "required": ["type", "topic"]
       },
       "then": { "required": ["correlation_id", "workspace_id", "lane_id"] }
     },
     {
       "if": {
+<<<<<<< HEAD
         "properties": { "type": { "const": "event" }, "topic": { "const": "lane.created" } },
+=======
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "lane.created" }
+        },
+>>>>>>> origin/main
         "required": ["type", "topic"]
       },
       "then": { "required": ["correlation_id", "workspace_id", "lane_id"] }
     },
     {
       "if": {
+<<<<<<< HEAD
         "properties": { "type": { "const": "event" }, "topic": { "const": "lane.create.failed" } },
+=======
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "lane.create.failed" }
+        },
+>>>>>>> origin/main
         "required": ["type", "topic"]
       },
       "then": { "required": ["correlation_id", "workspace_id", "lane_id"] }
     },
     {
       "if": {
+<<<<<<< HEAD
         "properties": { "type": { "const": "event" }, "topic": { "const": "session.attach.started" } },
         "required": ["type", "topic"]
       },
@@ -215,6 +292,60 @@
     {
       "if": {
         "properties": { "type": { "const": "event" }, "topic": { "const": "terminal.spawned" } },
+=======
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "session.attach.started" }
+        },
+        "required": ["type", "topic"]
+      },
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "session.attached" }
+        },
+        "required": ["type", "topic"]
+      },
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "session.attach.failed" }
+        },
+        "required": ["type", "topic"]
+      },
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "terminal.spawn.started" }
+        },
+        "required": ["type", "topic"]
+      },
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "terminal.spawned" }
+        },
+>>>>>>> origin/main
         "required": ["type", "topic"]
       },
       "then": {
@@ -223,10 +354,22 @@
     },
     {
       "if": {
+<<<<<<< HEAD
         "properties": { "type": { "const": "event" }, "topic": { "const": "terminal.spawn.failed" } },
         "required": ["type", "topic"]
       },
       "then": { "required": ["correlation_id", "workspace_id", "lane_id", "session_id"] }
+=======
+        "properties": {
+          "type": { "const": "event" },
+          "topic": { "const": "terminal.spawn.failed" }
+        },
+        "required": ["type", "topic"]
+      },
+      "then": {
+        "required": ["correlation_id", "workspace_id", "lane_id", "session_id"]
+      }
+>>>>>>> origin/main
     }
   ],
   "additionalProperties": false

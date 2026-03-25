@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 import type { ProtocolBus as LocalBus } from "@helios/runtime/protocol/bus";
+=======
+/** Minimal subset of runtime LocalBus used for context events. */
+interface LocalBus {
+  publish(event: Record<string, unknown>): Promise<void>;
+}
+>>>>>>> origin/main
 
 export interface ActiveContext {
   workspaceId: string;
@@ -119,7 +126,11 @@ export class ActiveContextStore {
             workspace_id: contextToSet?.workspaceId,
             lane_id: contextToSet?.laneId,
             session_id: contextToSet?.sessionId,
+<<<<<<< HEAD
             payload: changeEvent as unknown as Record<string, unknown>,
+=======
+            payload: changeEvent,
+>>>>>>> origin/main
           });
         }
 

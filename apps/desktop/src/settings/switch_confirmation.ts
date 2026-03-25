@@ -13,7 +13,11 @@ export interface SwitchConfirmationProps {
 export class SwitchConfirmation {
   private props: SwitchConfirmationProps;
   private container: HTMLElement | null = null;
+<<<<<<< HEAD
   private isOpen = false;
+=======
+  private isOpen: boolean = false;
+>>>>>>> origin/main
   private previousFocus: HTMLElement | null = null;
 
   constructor(props: SwitchConfirmationProps) {
@@ -32,9 +36,13 @@ export class SwitchConfirmation {
   }
 
   async open(): Promise<void> {
+<<<<<<< HEAD
     if (this.isOpen || !this.container) {
       return;
     }
+=======
+    if (this.isOpen || !this.container) return;
+>>>>>>> origin/main
 
     this.previousFocus = document.activeElement as HTMLElement;
     this.isOpen = true;
@@ -43,9 +51,13 @@ export class SwitchConfirmation {
   }
 
   close(): void {
+<<<<<<< HEAD
     if (!this.isOpen) {
       return;
     }
+=======
+    if (!this.isOpen) return;
+>>>>>>> origin/main
 
     this.isOpen = false;
     this.detachEventListeners();
@@ -66,9 +78,13 @@ export class SwitchConfirmation {
   }
 
   private createAndShowDialog(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
 
     // Backdrop
     const backdrop = document.createElement("div");
@@ -211,9 +227,13 @@ export class SwitchConfirmation {
 
   private attachEventListeners(): void {
     const dialog = document.querySelector(".switch-confirmation-dialog") as HTMLElement;
+<<<<<<< HEAD
     if (!dialog) {
       return;
     }
+=======
+    if (!dialog) return;
+>>>>>>> origin/main
 
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {

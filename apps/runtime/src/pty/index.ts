@@ -48,12 +48,16 @@ export {
   emitPtyEvent,
 } from "./events.js";
 
+<<<<<<< HEAD
 export {
   InvalidStateError,
   type WriteResult,
   type ProcessMap,
   writeInput,
 } from "./io.js";
+=======
+export { InvalidStateError, type WriteResult, type ProcessMap, writeInput } from "./io.js";
+>>>>>>> origin/main
 
 export { IdleMonitor, type IdleMonitorConfig } from "./idle_monitor.js";
 
@@ -65,6 +69,7 @@ export {
   type BufferStats,
 } from "./buffers.js";
 
+<<<<<<< HEAD
 import {
   type BufferStats as _BufferStats,
   OutputBuffer as _OutputBuffer,
@@ -72,10 +77,29 @@ import {
 } from "./buffers.js";
 import type { BusPublisher as _BusPublisher } from "./events.js";
 import { NoOpBusPublisher as _NoOpBusPublisher, emitPtyEvent as _emitPtyEvent } from "./events.js";
+=======
+// Local imports for use in PtyManager class body.
+import { PtyRegistry as _PtyRegistry } from "./registry.js";
+import { PtyLifecycle as _PtyLifecycle } from "./state_machine.js";
+import { spawnPty as _spawnPty } from "./spawn.js";
+import type { SpawnOptions as _SpawnOptions } from "./spawn.js";
+import type { PtyRecord as _PtyRecord } from "./registry.js";
+import type { ReconciliationSummary as _ReconciliationSummary } from "./registry.js";
+import type { BusPublisher as _BusPublisher } from "./events.js";
+import { NoOpBusPublisher as _NoOpBusPublisher, emitPtyEvent as _emitPtyEvent } from "./events.js";
+import type { SignalHistoryMap as _SignalHistoryMap } from "./signals.js";
+import {
+  resize as _resize,
+  terminate as _terminate,
+  type TerminateOptions as _TerminateOptions,
+} from "./signals.js";
+import { writeInput as _writeInput, type ProcessMap as _ProcessMap } from "./io.js";
+>>>>>>> origin/main
 import {
   IdleMonitor as _IdleMonitor,
   type IdleMonitorConfig as _IdleMonitorConfig,
 } from "./idle_monitor.js";
+<<<<<<< HEAD
 import { type ProcessMap as _ProcessMap, writeInput as _writeInput } from "./io.js";
 // Local imports for use in PtyManager class body.
 import { PtyRegistry as _PtyRegistry } from "./registry.js";
@@ -90,6 +114,13 @@ import {
 import { spawnPty as _spawnPty } from "./spawn.js";
 import type { SpawnOptions as _SpawnOptions } from "./spawn.js";
 import { PtyLifecycle as _PtyLifecycle } from "./state_machine.js";
+=======
+import {
+  OutputBuffer as _OutputBuffer,
+  type OutputBufferConfig as _OutputBufferConfig,
+  type BufferStats as _BufferStats,
+} from "./buffers.js";
+>>>>>>> origin/main
 
 /**
  * High-level facade for PTY operations.

@@ -1,8 +1,14 @@
 // Unit tests for WorktreeDetector
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
 import { WorktreeDetector } from "../../../../src/lanes/watchdog/worktree_detector.js";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+import { WorktreeDetector } from "../../../../src/lanes/watchdog/worktree_detector.js";
+import { LaneRegistry } from "../../../../src/lanes/registry.js";
+>>>>>>> origin/main
 
 describe("WorktreeDetector", () => {
   let detector: WorktreeDetector;

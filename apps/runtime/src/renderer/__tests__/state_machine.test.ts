@@ -1,10 +1,18 @@
 import { describe, expect, it } from "bun:test";
 import {
+<<<<<<< HEAD
   InvalidRendererTransitionError,
   RendererStateMachine,
   transition,
 } from "../state_machine.js";
 import type { RendererEvent } from "../state_machine.js";
+=======
+  RendererStateMachine,
+  InvalidRendererTransitionError,
+  transition,
+} from "../state_machine.js";
+import type { RendererEvent, RendererState } from "../state_machine.js";
+>>>>>>> origin/main
 
 describe("RendererStateMachine", () => {
   it("starts in uninitialized state", () => {
@@ -106,7 +114,11 @@ describe("RendererStateMachine", () => {
     }
     expect(sm.history.length).toBe(10);
     // First two (init, init_failure) should have been evicted
+<<<<<<< HEAD
     expect(sm.history[0]?.event).toBe("recovery_attempt");
+=======
+    expect(sm.history[0]!.event).toBe("recovery_attempt");
+>>>>>>> origin/main
   });
 });
 

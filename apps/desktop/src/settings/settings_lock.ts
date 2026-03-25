@@ -9,9 +9,15 @@ export interface SettingsLockOptions {
 }
 
 export class SettingsLock {
+<<<<<<< HEAD
   private isLocked = false;
   private options: SettingsLockOptions;
   private lockTimeoutId?: NodeJS.Timeout | undefined;
+=======
+  private isLocked: boolean = false;
+  private options: SettingsLockOptions;
+  private lockTimeoutId?: NodeJS.Timeout;
+>>>>>>> origin/main
   private lockedElements: Set<HTMLElement> = new Set();
 
   constructor(options: SettingsLockOptions = {}) {
@@ -22,9 +28,13 @@ export class SettingsLock {
   }
 
   lock(settingsContainer: HTMLElement): void {
+<<<<<<< HEAD
     if (this.isLocked) {
       return;
     }
+=======
+    if (this.isLocked) return;
+>>>>>>> origin/main
 
     this.isLocked = true;
     this.applyLock(settingsContainer);
@@ -32,9 +42,13 @@ export class SettingsLock {
   }
 
   unlock(settingsContainer: HTMLElement): void {
+<<<<<<< HEAD
     if (!this.isLocked) {
       return;
     }
+=======
+    if (!this.isLocked) return;
+>>>>>>> origin/main
 
     this.isLocked = false;
     this.removeLock(settingsContainer);
@@ -89,6 +103,10 @@ export class SettingsLock {
 
   private startAutoUnlockTimer(): void {
     this.lockTimeoutId = setTimeout(() => {
+<<<<<<< HEAD
+=======
+      console.warn("Settings lock timeout: auto-unlocking settings");
+>>>>>>> origin/main
       this.isLocked = false;
       if (this.options.onAutoUnlocked) {
         this.options.onAutoUnlocked();

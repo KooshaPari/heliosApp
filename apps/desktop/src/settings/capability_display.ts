@@ -20,11 +20,19 @@ export interface CapabilityDisplayProps {
 export class CapabilityDisplay {
   private props: CapabilityDisplayProps;
   private container: HTMLElement | null = null;
+<<<<<<< HEAD
   private isExpanded = false;
 
   constructor(props: CapabilityDisplayProps) {
     this.props = props;
     this.isExpanded = props.isExpanded ?? false;
+=======
+  private isExpanded: boolean = false;
+
+  constructor(props: CapabilityDisplayProps) {
+    this.props = props;
+    this.isExpanded = props.isExpanded || false;
+>>>>>>> origin/main
   }
 
   mount(container: HTMLElement): void {
@@ -45,9 +53,13 @@ export class CapabilityDisplay {
   }
 
   private render(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
@@ -124,11 +136,26 @@ export class CapabilityDisplay {
         loading.style.color = "#9ca3af";
         panel.appendChild(loading);
       }
+<<<<<<< HEAD
     } else if (this.props.capability) {
+=======
+    } else if (!this.props.capability) {
+      if (this.isExpanded) {
+        const error = document.createElement("div");
+        error.className = "capability-error";
+        error.textContent = "Capability information unavailable.";
+        error.style.marginTop = "8px";
+        error.style.fontSize = "13px";
+        error.style.color = "#ef4444";
+        panel.appendChild(error);
+      }
+    } else {
+>>>>>>> origin/main
       if (this.isExpanded) {
         const content = this.createCapabilityContent(this.props.capability);
         panel.appendChild(content);
       }
+<<<<<<< HEAD
     } else if (this.isExpanded) {
       const error = document.createElement("div");
       error.className = "capability-error";
@@ -137,6 +164,8 @@ export class CapabilityDisplay {
       error.style.fontSize = "13px";
       error.style.color = "#ef4444";
       panel.appendChild(error);
+=======
+>>>>>>> origin/main
     }
 
     return panel;
@@ -254,9 +283,13 @@ export class CapabilityDisplay {
   }
 
   private attachEventListeners(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
 
     const header = this.container.querySelector(".capability-header") as HTMLElement;
     const toggleBtn = this.container.querySelector(".capability-toggle-btn") as HTMLElement;

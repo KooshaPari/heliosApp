@@ -45,12 +45,17 @@ export interface ValidationResult {
  * Standard format: lowercase alphanumeric with hyphens, 1-36 characters.
  */
 function isValidIdFormat(id: string): boolean {
+<<<<<<< HEAD
   if (!id || typeof id !== "string") {
     return false;
   }
   if (id.length === 0 || id.length > 36) {
     return false;
   }
+=======
+  if (!id || typeof id !== "string") return false;
+  if (id.length < 1 || id.length > 36) return false;
+>>>>>>> origin/main
   return /^[a-z0-9-]+$/.test(id);
 }
 
@@ -86,6 +91,7 @@ export function validateBindingTriple(
     );
   }
 
+<<<<<<< HEAD
   // Validate existence in registries (only for format-valid IDs)
   if (isValidIdFormat(triple.workspaceId) && !queryInterface.workspaceExists(triple.workspaceId)) {
     errors.push(`Workspace does not exist: ${triple.workspaceId}`);
@@ -101,6 +107,19 @@ export function validateBindingTriple(
     return { valid: false, errors };
   }
 
+=======
+  // Validate existence in registries
+  if (!queryInterface.workspaceExists(triple.workspaceId)) {
+    errors.push(`Workspace does not exist: ${triple.workspaceId}`);
+  }
+  if (!queryInterface.laneExists(triple.laneId)) {
+    errors.push(`Lane does not exist: ${triple.laneId}`);
+  }
+  if (!queryInterface.sessionExists(triple.sessionId)) {
+    errors.push(`Session does not exist: ${triple.sessionId}`);
+  }
+
+>>>>>>> origin/main
   // Validate cross-references
   if (!queryInterface.laneInWorkspace(triple.laneId, triple.workspaceId)) {
     errors.push(`Lane ${triple.laneId} does not belong to workspace ${triple.workspaceId}`);

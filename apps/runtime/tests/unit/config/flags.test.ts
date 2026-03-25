@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -6,6 +7,16 @@ import { type FeatureFlag, FlagRegistry, RENDERER_ENGINE_FLAG } from "../../../s
 import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
 import { SettingsManager } from "../../../src/config/settings.js";
 import { JsonSettingsStore } from "../../../src/config/store.js";
+=======
+import { describe, expect, it, beforeEach, afterEach } from "bun:test";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { JsonSettingsStore } from "../../../src/config/store.js";
+import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
+import { SettingsManager } from "../../../src/config/settings.js";
+import { FlagRegistry, RENDERER_ENGINE_FLAG, type FeatureFlag } from "../../../src/config/flags.js";
+>>>>>>> origin/main
 
 let tempDir: string;
 let filePath: string;
@@ -34,7 +45,11 @@ describe("FlagRegistry — get", () => {
     await settings.init();
     flags.register(RENDERER_ENGINE_FLAG);
     flags.init();
+<<<<<<< HEAD
     expect(flags.get<any>("renderer_engine")).toBe("ghostty");
+=======
+    expect(flags.get<string>("renderer_engine")).toBe("ghostty");
+>>>>>>> origin/main
     flags.dispose();
     settings.dispose();
   });
@@ -58,7 +73,11 @@ describe("FlagRegistry — get", () => {
     flags.init();
 
     await settings.set("theme", "dark");
+<<<<<<< HEAD
     expect(flags.get<any>("theme")).toBe("dark");
+=======
+    expect(flags.get<string>("theme")).toBe("dark");
+>>>>>>> origin/main
     flags.dispose();
     settings.dispose();
   });
@@ -68,7 +87,11 @@ describe("FlagRegistry — get", () => {
     const { settings, flags } = createStack();
     await settings.init();
     flags.init();
+<<<<<<< HEAD
     expect(() => flags.get<any>("nonexistent")).toThrow("Unknown flag: nonexistent");
+=======
+    expect(() => flags.get("nonexistent")).toThrow("Unknown flag: nonexistent");
+>>>>>>> origin/main
     flags.dispose();
     settings.dispose();
   });
@@ -79,7 +102,11 @@ describe("FlagRegistry — get", () => {
     await settings.init();
     flags.register(RENDERER_ENGINE_FLAG);
     // Don't call flags.init() — cache populated at register time
+<<<<<<< HEAD
     expect(flags.get<any>("renderer_engine")).toBe("ghostty");
+=======
+    expect(flags.get<string>("renderer_engine")).toBe("ghostty");
+>>>>>>> origin/main
     flags.dispose();
     settings.dispose();
   });
@@ -121,8 +148,13 @@ describe("FlagRegistry — renderer_engine", () => {
     expect(flags.getRendererEngine()).toBe("ghostty");
     const p = flags.getPending<"ghostty" | "rio">("renderer_engine");
     expect(p).not.toBeNull();
+<<<<<<< HEAD
     expect(p?.current).toBe("ghostty");
     expect(p?.pending).toBe("rio");
+=======
+    expect(p!.current).toBe("ghostty");
+    expect(p!.pending).toBe("rio");
+>>>>>>> origin/main
     flags.dispose();
     settings.dispose();
   });
@@ -150,7 +182,11 @@ describe("FlagRegistry — restart-required flags", () => {
     flags.register(RENDERER_ENGINE_FLAG);
     flags.init();
     await settings.set("renderer_engine", "rio");
+<<<<<<< HEAD
     expect(flags.get<any>("renderer_engine")).toBe("ghostty");
+=======
+    expect(flags.get<string>("renderer_engine")).toBe("ghostty");
+>>>>>>> origin/main
     expect(flags.pendingRestart).toBe(true);
     flags.dispose();
     settings.dispose();
@@ -232,7 +268,11 @@ describe("FlagRegistry — getAll", () => {
     flags.register(RENDERER_ENGINE_FLAG);
     flags.init();
     const all = flags.getAll();
+<<<<<<< HEAD
     expect(all.renderer_engine).toBe("ghostty");
+=======
+    expect(all["renderer_engine"]).toBe("ghostty");
+>>>>>>> origin/main
     expect(Object.keys(all)).toEqual(["renderer_engine"]);
     flags.dispose();
     settings.dispose();
@@ -248,7 +288,11 @@ describe("FlagRegistry — concurrency", () => {
     flags.register(RENDERER_ENGINE_FLAG);
     flags.init();
     const results = await Promise.all(
+<<<<<<< HEAD
       Array.from({ length: 1000 }, () => Promise.resolve(flags.get<any>("renderer_engine")))
+=======
+      Array.from({ length: 1000 }, () => Promise.resolve(flags.get("renderer_engine")))
+>>>>>>> origin/main
     );
     expect(new Set(results).size).toBe(1);
     expect(results[0]).toBe("ghostty");

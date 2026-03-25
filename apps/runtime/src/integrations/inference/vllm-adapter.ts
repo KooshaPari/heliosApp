@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference.ts";
 import type { InferenceEngine } from "./engine.ts";
+=======
+import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
+import type { InferenceEngine } from "./engine";
+>>>>>>> origin/main
 
 export class VllmInferenceEngine implements InferenceEngine {
   readonly id = "vllm";
@@ -21,10 +26,17 @@ export class VllmInferenceEngine implements InferenceEngine {
   }
 
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
+<<<<<<< HEAD
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (this.apiKey) {
       headers.Authorization = `Bearer ${this.apiKey}`;
     }
+=======
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+>>>>>>> origin/main
 
     const response = await fetch(`${this.endpoint}/v1/chat/completions`, {
       method: "POST",
@@ -50,7 +62,14 @@ export class VllmInferenceEngine implements InferenceEngine {
     return {
       content: data.choices[0]?.message.content ?? "",
       model: data.model,
+<<<<<<< HEAD
       tokenUsage: { input: data.usage.prompt_tokens, output: data.usage.completion_tokens },
+=======
+      tokenUsage: {
+        input: data.usage.prompt_tokens,
+        output: data.usage.completion_tokens,
+      },
+>>>>>>> origin/main
       finishReason: data.choices[0]?.finish_reason === "stop" ? "end_turn" : "max_tokens",
     };
   }
@@ -63,6 +82,7 @@ export class VllmInferenceEngine implements InferenceEngine {
   async listModels(): Promise<ModelInfo[]> {
     try {
       const headers: Record<string, string> = {};
+<<<<<<< HEAD
       if (this.apiKey) {
         headers.Authorization = `Bearer ${this.apiKey}`;
       }
@@ -70,6 +90,11 @@ export class VllmInferenceEngine implements InferenceEngine {
       if (!response.ok) {
         return [];
       }
+=======
+      if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+      const response = await fetch(`${this.endpoint}/v1/models`, { headers });
+      if (!response.ok) return [];
+>>>>>>> origin/main
       const data = (await response.json()) as { data: Array<{ id: string }> };
       return data.data.map(m => ({
         id: m.id,

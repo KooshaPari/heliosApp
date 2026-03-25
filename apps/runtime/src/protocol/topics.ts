@@ -7,6 +7,7 @@
 import type { EventEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
+<<<<<<< HEAD
 // Protocol topic constants (aligned with specs/protocol/v1/topics.json)
 // ---------------------------------------------------------------------------
 
@@ -14,12 +15,53 @@ export const TOPICS = [
   "workspace.opened",
   "project.ready",
   "session.created",
+=======
+// Types
+// ---------------------------------------------------------------------------
+
+/** A topic subscriber receives an event (return value is ignored). */
+export type TopicSubscriber = (event: EventEnvelope) => void | Promise<void>;
+
+// ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+/** Topic names must be non-empty, alphanumeric with dots. */
+const TOPIC_NAME_RE = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
+
+function assertValidTopicName(topic: string): void {
+  if (!TOPIC_NAME_RE.test(topic)) {
+    throw new Error(
+      `Invalid topic name "${topic}": must be non-empty, alphanumeric segments separated by dots`
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Registry
+// ---------------------------------------------------------------------------
+
+/** Canonical list of known topic names for validation. */
+export const TOPICS: readonly string[] = [
+  "workspace.opened",
+  "project.ready",
+  "session.created",
+  "session.restore.started",
+  "session.restore.completed",
+>>>>>>> origin/main
   "session.attach.started",
   "session.attached",
   "session.attach.failed",
   "session.restore.started",
   "session.restore.completed",
   "session.terminated",
+<<<<<<< HEAD
+=======
+  "lane.attach.started",
+  "lane.attach.failed",
+  "lane.cleanup.started",
+  "lane.cleanup.failed",
+>>>>>>> origin/main
   "terminal.spawn.started",
   "terminal.spawned",
   "terminal.spawn.failed",
@@ -42,6 +84,7 @@ export const TOPICS = [
   "lane.attached",
   "lane.cleaned",
   "harness.status.changed",
+<<<<<<< HEAD
   "audit.recorded",
   "diagnostics.metric",
   "orphan.detection.cycle_completed",
@@ -90,6 +133,19 @@ function assertValidTopicName(topic: string): void {
 // Registry
 // ---------------------------------------------------------------------------
 
+=======
+  "boundary.local.dispatched",
+  "boundary.tool.dispatched",
+  "boundary.a2a.delegated",
+  "boundary.dispatch.failed",
+  "audit.recorded",
+  "diagnostics.metric",
+] as const;
+
+/** Type for valid protocol topics. */
+export type ProtocolTopic = (typeof TOPICS)[number];
+
+>>>>>>> origin/main
 export class TopicRegistry {
   private readonly subs = new Map<string, TopicSubscriber[]>();
   private readonly sequenceCounters = new Map<string, number>();
@@ -113,6 +169,7 @@ export class TopicRegistry {
 
     let removed = false;
     return () => {
+<<<<<<< HEAD
       if (removed) {
         return; // idempotent unsubscribe
       }
@@ -121,6 +178,12 @@ export class TopicRegistry {
       if (!current) {
         return;
       }
+=======
+      if (removed) return; // idempotent unsubscribe
+      removed = true;
+      const current = this.subs.get(topic);
+      if (!current) return;
+>>>>>>> origin/main
       const idx = current.indexOf(entry);
       if (idx !== -1) {
         current.splice(idx, 1);
@@ -150,6 +213,10 @@ export class TopicRegistry {
     let next = current + 1;
     // Handle overflow at Number.MAX_SAFE_INTEGER — reset to 1 with warning.
     if (current >= Number.MAX_SAFE_INTEGER) {
+<<<<<<< HEAD
+=======
+      console.warn(`[topics] Sequence counter overflow for topic "${topic}" — resetting to 1`);
+>>>>>>> origin/main
       next = 1;
     }
     this.sequenceCounters.set(topic, next);

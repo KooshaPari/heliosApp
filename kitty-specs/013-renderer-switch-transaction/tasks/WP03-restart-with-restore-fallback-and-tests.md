@@ -46,7 +46,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/013-renderer-switch-transaction/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/013-renderer-switch-transaction/spec.md`
 - Switch transaction: `apps/runtime/src/renderer/switch_transaction.ts` (WP01/WP02)
@@ -227,4 +227,8 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:33:46Z – claude-haiku – shell_pid=71577 – lane=doing – Assigned agent via workflow command
+<<<<<<< HEAD
 - 2026-03-01T13:41:03Z – claude-haiku – shell_pid=71577 – lane=done – Merged
+=======
+- 2026-03-01T13:36:08Z – claude-haiku – shell_pid=71577 – lane=done – Implemented: Restart-with-restore fallback (T011), degraded-but-safe mode (T012), terminal creation queueing (T013), fault injection tests (T014), SLO validation tests (T015), and terminal queue tests (T016). 21 tests passing.
+>>>>>>> origin/main

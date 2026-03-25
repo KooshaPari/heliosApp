@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { promises as fs } from "node:fs";
 import { homedir } from "node:os";
 import * as path from "node:path";
+=======
+import { promises as fs } from "fs";
+import * as path from "path";
+import { homedir } from "os";
+>>>>>>> origin/main
 
 export interface ShortcutMap {
   [key: string]: string;
@@ -45,8 +51,11 @@ export class KeyboardShortcuts {
   private handler: ShortcutHandler | null = null;
   private listeners: Set<(action: ShortcutAction) => void> = new Set();
   private configPath: string;
+<<<<<<< HEAD
   private readonly _isMac: boolean =
     typeof navigator !== "undefined" && /Mac|Darwin/.test(navigator.platform);
+=======
+>>>>>>> origin/main
 
   constructor(configDir?: string) {
     this.configPath = path.join(
@@ -73,7 +82,11 @@ export class KeyboardShortcuts {
       }
 
       this.buildReverseMap();
+<<<<<<< HEAD
     } catch (_error) {
+=======
+    } catch (error) {
+>>>>>>> origin/main
       // File not found or parse error, use defaults
       this.shortcuts = { ...DEFAULT_SHORTCUTS };
       this.buildReverseMap();
@@ -89,7 +102,13 @@ export class KeyboardShortcuts {
       await fs.mkdir(dir, { recursive: true });
       const data = JSON.stringify(this.shortcuts, null, 2);
       await fs.writeFile(this.configPath, data, "utf-8");
+<<<<<<< HEAD
     } catch (_error) {}
+=======
+    } catch (error) {
+      console.error("Failed to save keyboard shortcuts:", error);
+    }
+>>>>>>> origin/main
   }
 
   /**
@@ -111,6 +130,10 @@ export class KeyboardShortcuts {
    */
   remapShortcut(action: ShortcutAction, shortcut: string): boolean {
     if (!this.isValidAction(action)) {
+<<<<<<< HEAD
+=======
+      console.error(`Invalid action: ${action}`);
+>>>>>>> origin/main
       return false;
     }
 
@@ -120,6 +143,10 @@ export class KeyboardShortcuts {
         existingAction !== action &&
         this.normalizeShortcut(existingShortcut) === this.normalizeShortcut(shortcut)
       ) {
+<<<<<<< HEAD
+=======
+        console.error(`Shortcut conflict: "${shortcut}" is already mapped to "${existingAction}"`);
+>>>>>>> origin/main
         return false;
       }
     }
@@ -218,6 +245,7 @@ export class KeyboardShortcuts {
     this.reverseShortcuts.clear();
 
     for (const [action, shortcut] of Object.entries(this.shortcuts)) {
+<<<<<<< HEAD
       // Store both Cmd and Ctrl variants so matching works on any platform
       this.reverseShortcuts.set(shortcut, action as ShortcutAction);
       const altShortcut = shortcut.includes("Cmd")
@@ -226,6 +254,9 @@ export class KeyboardShortcuts {
       if (altShortcut !== shortcut) {
         this.reverseShortcuts.set(altShortcut, action as ShortcutAction);
       }
+=======
+      this.reverseShortcuts.set(shortcut, action as ShortcutAction);
+>>>>>>> origin/main
     }
   }
 

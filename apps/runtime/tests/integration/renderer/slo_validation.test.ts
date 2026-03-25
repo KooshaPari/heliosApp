@@ -8,7 +8,10 @@
 
 import { describe, expect, it } from "bun:test";
 import { executeHotSwap } from "../../../src/renderer/hot_swap.js";
+<<<<<<< HEAD
 import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
+=======
+>>>>>>> origin/main
 import { executeRestartWithRestore } from "../../../src/renderer/restart_restore.js";
 import { executeRollback } from "../../../src/renderer/rollback.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
@@ -18,14 +21,22 @@ import {
   TEST_CONFIG,
   TEST_SURFACE,
 } from "../../helpers/mock_adapter.js";
+<<<<<<< HEAD
+=======
+import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
+>>>>>>> origin/main
 
 /**
  * Calculate p95 (95th percentile) of timing values.
  */
 function calculateP95(values: number[]): number {
+<<<<<<< HEAD
   if (values.length === 0) {
     return 0;
   }
+=======
+  if (values.length === 0) return 0;
+>>>>>>> origin/main
   const sorted = [...values].sort((a, b) => a - b);
   const index = Math.ceil(sorted.length * 0.95) - 1;
   return sorted[Math.max(0, index)];
@@ -42,7 +53,21 @@ describe("SLO validation - hot-swap", () => {
       const buffer = new SwitchBuffer();
 
       const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
         ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+        [
+          "pty-1",
+          {
+            ptyId: "pty-1",
+            scrollback: [],
+            cursorX: 0,
+            cursorY: 0,
+            env: {},
+            cwd: "/",
+          },
+        ],
+>>>>>>> origin/main
       ]);
 
       const startTime = Date.now();
@@ -192,7 +217,21 @@ describe("SLO validation - rollback", () => {
       const buffer = new SwitchBuffer();
 
       const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
         ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+        [
+          "pty-1",
+          {
+            ptyId: "pty-1",
+            scrollback: [],
+            cursorX: 0,
+            cursorY: 0,
+            env: {},
+            cwd: "/",
+          },
+        ],
+>>>>>>> origin/main
       ]);
 
       const startTime = Date.now();

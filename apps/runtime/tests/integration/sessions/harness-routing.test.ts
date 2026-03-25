@@ -56,8 +56,13 @@ describe("session routing lifecycle", () => {
     expect(body.diagnostics.degrade_reason).toBeNull();
 
     const events = runtime.getEvents();
+<<<<<<< HEAD
     expect(events.some((event: any) => event.topic === "lane.created")).toBeTrue();
     expect(events.some((event: any) => event.topic === "session.created")).toBeTrue();
+=======
+    expect(events.some(event => event.topic === "lane.created")).toBeTrue();
+    expect(events.some(event => event.topic === "session.created")).toBeTrue();
+>>>>>>> origin/main
   });
 
   it("falls back to native_openai with explicit degrade reason when harness is unavailable", async () => {
@@ -94,7 +99,11 @@ describe("session routing lifecycle", () => {
     expect(statusBody.degrade_reason).toBe("cliproxy_timeout");
 
     const events = runtime.getEvents();
+<<<<<<< HEAD
     expect(events.some((event: any) => event.topic === "harness.status.changed")).toBeTrue();
+=======
+    expect(events.some(event => event.topic === "harness.status.changed")).toBeTrue();
+>>>>>>> origin/main
   });
 
   it("remains usable when harness becomes unavailable mid-flow", async () => {
@@ -197,7 +206,13 @@ describe("session routing lifecycle", () => {
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);
     expect(sessionResponse.status).toBe(200);
+<<<<<<< HEAD
     const sessionBody = (await sessionResponse.json()) as { session_id: string };
+=======
+    const sessionBody = (await sessionResponse.json()) as {
+      session_id: string;
+    };
+>>>>>>> origin/main
 
     const terminalResponse = await runtime.fetch(
       jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/terminals`, {
@@ -220,9 +235,15 @@ describe("session routing lifecycle", () => {
     expect(terminalBody.state).toBe("active");
 
     const events = runtime.getEvents();
+<<<<<<< HEAD
     expect(events.some((event: any) => event.topic === "terminal.spawn.started")).toBeTrue();
     expect(events.some((event: any) => event.topic === "terminal.state.changed")).toBeTrue();
     expect(events.some((event: any) => event.topic === "terminal.spawned")).toBeTrue();
+=======
+    expect(events.some(event => event.topic === "terminal.spawn.started")).toBeTrue();
+    expect(events.some(event => event.topic === "terminal.state.changed")).toBeTrue();
+    expect(events.some(event => event.topic === "terminal.spawned")).toBeTrue();
+>>>>>>> origin/main
     expect(runtime.getTerminal(terminalBody.terminal_id)?.state).toBe("active");
   });
 
@@ -238,7 +259,13 @@ describe("session routing lifecycle", () => {
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);
     expect(sessionResponse.status).toBe(200);
+<<<<<<< HEAD
     const sessionBody = (await sessionResponse.json()) as { session_id: string };
+=======
+    const sessionBody = (await sessionResponse.json()) as {
+      session_id: string;
+    };
+>>>>>>> origin/main
 
     const terminalResponse = await runtime.fetch(
       jsonRequest(`http://localhost/v1/workspaces/ws_2/lanes/${laneId}/terminals`, {
@@ -264,7 +291,13 @@ describe("session routing lifecycle", () => {
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);
     expect(sessionResponse.status).toBe(200);
+<<<<<<< HEAD
     const sessionBody = (await sessionResponse.json()) as { session_id: string };
+=======
+    const sessionBody = (await sessionResponse.json()) as {
+      session_id: string;
+    };
+>>>>>>> origin/main
 
     const terminalResponse = await runtime.fetch(
       jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/terminals`, {
@@ -290,7 +323,73 @@ describe("session routing lifecycle", () => {
     const laneId = await createLane(runtime);
     const sessionResponse = await ensureSession(runtime, laneId);
     expect(sessionResponse.status).toBe(200);
+<<<<<<< HEAD
     const sessionBody = (await sessionResponse.json()) as { session_id: string };
+=======
+    const sessionBody = (await sessionResponse.json()) as {
+      session_id: string;
+    };
+
+    const cleanupResponse = await runtime.fetch(
+      jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/cleanup`, {})
+    );
+    expect(cleanupResponse.status).toBe(200);
+
+    const terminalResponse = await runtime.fetch(
+      jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/terminals`, {
+        session_id: sessionBody.session_id,
+        title: "Closed Lane Terminal",
+      })
+    );
+    expect(terminalResponse.status).toBe(409);
+    const body = (await terminalResponse.json()) as { error: string };
+    expect(body.error).toBe("lane_closed");
+  });
+
+  it("updates runtime state when HTTP lifecycle endpoints drive session and terminal transitions", async () => {
+    const runtime = createRuntime({
+      harnessProbe: {
+        async check() {
+          return { ok: true };
+        },
+      },
+    });
+
+    const laneId = await createLane(runtime);
+    const sessionResponse = await ensureSession(runtime, laneId);
+    expect(sessionResponse.status).toBe(200);
+    const sessionBody = (await sessionResponse.json()) as {
+      session_id: string;
+    };
+
+    const terminalResponse = await runtime.fetch(
+      jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/terminals`, {
+        session_id: sessionBody.session_id,
+      })
+    );
+    expect(terminalResponse.status).toBe(201);
+
+    const runtimeState = runtime.getState();
+    expect(runtimeState.session).toBe("attached");
+    expect(runtimeState.terminal).toBe("active");
+  });
+
+  it("rejects terminal spawn when lane is closed", async () => {
+    const runtime = createRuntime({
+      harnessProbe: {
+        async check() {
+          return { ok: true };
+        },
+      },
+    });
+
+    const laneId = await createLane(runtime);
+    const sessionResponse = await ensureSession(runtime, laneId);
+    expect(sessionResponse.status).toBe(200);
+    const sessionBody = (await sessionResponse.json()) as {
+      session_id: string;
+    };
+>>>>>>> origin/main
 
     const cleanupResponse = await runtime.fetch(
       jsonRequest(`http://localhost/v1/workspaces/ws_1/lanes/${laneId}/cleanup`, {})

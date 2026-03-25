@@ -51,9 +51,13 @@ export class StatusBadge {
   }
 
   private render(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
 
     // Clear children safely
     while (this.container.firstChild) {

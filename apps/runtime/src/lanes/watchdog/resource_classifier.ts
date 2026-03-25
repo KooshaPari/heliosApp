@@ -5,22 +5,39 @@ export type RiskLevel = "low" | "medium" | "high";
 
 export interface OrphanedResource {
   type: ResourceType;
+<<<<<<< HEAD
   path?: string | undefined;
   pid?: number | undefined;
   createdAt: string;
   estimatedOwnerId?: string | undefined;
   metadata?: Record<string, unknown> | undefined;
+=======
+  path?: string;
+  pid?: number;
+  createdAt: string;
+  estimatedOwnerId?: string;
+  metadata?: Record<string, unknown>;
+>>>>>>> origin/main
 }
 
 export interface ClassifiedOrphan {
   type: ResourceType;
+<<<<<<< HEAD
   path?: string | undefined;
   pid?: number | undefined;
+=======
+  path?: string;
+  pid?: number;
+>>>>>>> origin/main
   age: number; // milliseconds
   estimatedOwner: string; // lane ID or "unknown"
   riskLevel: RiskLevel;
   createdAt: string;
+<<<<<<< HEAD
   metadata?: Record<string, unknown> | undefined;
+=======
+  metadata?: Record<string, unknown>;
+>>>>>>> origin/main
 }
 
 export class ResourceClassifier {
@@ -66,10 +83,18 @@ export class ResourceClassifier {
     // Known owner: risk increases with age
     if (ageHours < 1) {
       return "low";
+<<<<<<< HEAD
     }
     if (ageHours < 24) {
       return "medium";
     }
     return "high";
+=======
+    } else if (ageHours < 24) {
+      return "medium";
+    } else {
+      return "high";
+    }
+>>>>>>> origin/main
   }
 }

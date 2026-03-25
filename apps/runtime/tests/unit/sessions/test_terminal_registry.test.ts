@@ -73,7 +73,10 @@ describe("TerminalRegistry", () => {
       lane_id: "lane-1",
       session_id: "sess-1",
     });
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
     registry.spawn({
       terminal_id: "t-5",
       workspace_id: "ws-1",

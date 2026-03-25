@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
+=======
+import type { LocalBus } from "../protocol/bus.js";
+import { promises as fs } from "fs";
+import path from "path";
+import { randomUUID } from "crypto";
+>>>>>>> origin/main
 
 export enum RecoveryStage {
   CRASHED = "CRASHED",
@@ -49,9 +56,15 @@ export class RecoveryStateMachine {
   private currentStage: RecoveryStage = RecoveryStage.CRASHED;
   private currentState: RecoveryState;
   private recoveryDataDir: string;
+<<<<<<< HEAD
   private bus?: LocalBus | undefined;
   private listeners: StageChangeListener[] = [];
   private stageTimeoutId?: NodeJS.Timeout | undefined;
+=======
+  private bus?: LocalBus;
+  private listeners: StageChangeListener[] = [];
+  private stageTimeoutId?: ReturnType<typeof setTimeout> | undefined;
+>>>>>>> origin/main
 
   constructor(recoveryDataDir: string, bus?: LocalBus) {
     this.recoveryDataDir = recoveryDataDir;
@@ -90,8 +103,13 @@ export class RecoveryStateMachine {
       if (this.currentState.attemptCount > MAX_RETRIES_PER_STAGE) {
         throw new Error(`Max retries (${MAX_RETRIES_PER_STAGE}) exceeded for stage ${from}`);
       }
+<<<<<<< HEAD
     } else if (from !== to && !this.isFailureState(to)) {
       // New non-failure stage - reset attempt count
+=======
+    } else if (from !== to) {
+      // New stage - reset attempt count
+>>>>>>> origin/main
       this.currentState.attemptCount = 0;
     }
 
@@ -179,7 +197,13 @@ export class RecoveryStateMachine {
       // Atomic write
       await fs.writeFile(tempPath, JSON.stringify(this.currentState, null, 2));
       await fs.rename(tempPath, statePath);
+<<<<<<< HEAD
     } catch (_err) {}
+=======
+    } catch (err) {
+      console.error("Failed to persist recovery state:", err);
+    }
+>>>>>>> origin/main
   }
 
   private async deleteState(): Promise<void> {
@@ -206,7 +230,13 @@ export class RecoveryStateMachine {
         const failureStage = this.getFailureStateFor(this.currentStage);
         if (failureStage) {
           this.currentState.lastError = `Stage timeout after ${STAGE_TIMEOUT_MS}ms`;
+<<<<<<< HEAD
           this.transition(failureStage).catch(_err => {});
+=======
+          this.transition(failureStage).catch(err => {
+            console.error("Failed to transition to failure state:", err);
+          });
+>>>>>>> origin/main
         }
       }
     }, STAGE_TIMEOUT_MS);

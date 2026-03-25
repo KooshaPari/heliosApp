@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, test } from "bun:test";
 import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
 import { LaneClosedError, SharedLaneCleanupError } from "../../src/lanes/sharing.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
+=======
+import { describe, test, expect, beforeEach } from "bun:test";
+import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
+import { InMemoryLocalBus } from "../../src/protocol/bus.js";
+import { LaneClosedError, SharedLaneCleanupError } from "../../src/lanes/sharing.js";
+>>>>>>> origin/main
 
 describe("LaneManager", () => {
   let bus: InMemoryLocalBus;
@@ -27,7 +34,11 @@ describe("LaneManager", () => {
     const events = bus.getEvents();
     const created = events.find(e => e.topic === "lane.created");
     expect(created).toBeDefined();
+<<<<<<< HEAD
     expect(created?.workspace_id).toBe("ws-1");
+=======
+    expect(created!.workspace_id).toBe("ws-1");
+>>>>>>> origin/main
   });
 
   test("list returns all lanes", async () => {
@@ -82,9 +93,15 @@ describe("LaneManager", () => {
     const events = bus.getEvents();
     const created = events.find(e => e.topic === "lane.created");
     expect(created).toBeDefined();
+<<<<<<< HEAD
     expect(created?.payload).toBeDefined();
     expect(created?.payload?.fromState).toBeDefined();
     expect(created?.payload?.toState).toBeDefined();
+=======
+    expect(created!.payload).toBeDefined();
+    expect(created!.payload!["fromState"]).toBeDefined();
+    expect(created!.payload!["toState"]).toBeDefined();
+>>>>>>> origin/main
   });
 
   test("capacity limit rejects create", async () => {
@@ -136,7 +153,11 @@ describe("LaneManager sharing", () => {
     }
     await mgr.share(lane.laneId);
     const updated = reg.get(lane.laneId);
+<<<<<<< HEAD
     expect(updated?.state).toBe("shared");
+=======
+    expect(updated!.state).toBe("shared");
+>>>>>>> origin/main
   });
 
   test("share emits lane.shared event", async () => {
@@ -193,7 +214,14 @@ describe("LaneManager sharing", () => {
   test("force cleanup shared lane with agents succeeds", async () => {
     const lane = await mgr.create("ws-1", "main");
     const reg = mgr.getRegistry();
+<<<<<<< HEAD
     reg.update(lane.laneId, { state: "shared", attachedAgents: ["agent-1", "agent-2"] });
+=======
+    reg.update(lane.laneId, {
+      state: "shared",
+      attachedAgents: ["agent-1", "agent-2"],
+    });
+>>>>>>> origin/main
     await mgr.cleanup(lane.laneId, true);
     const updated = reg.get(lane.laneId)!;
     expect(updated.state).toBe("closed");
@@ -204,6 +232,10 @@ describe("LaneManager sharing", () => {
     const reg = mgr.getRegistry();
     reg.update(lane.laneId, { state: "shared" });
     await mgr.share(lane.laneId); // should not throw
+<<<<<<< HEAD
     expect(reg.get(lane.laneId)?.state).toBe("shared");
+=======
+    expect(reg.get(lane.laneId)!.state).toBe("shared");
+>>>>>>> origin/main
   });
 });

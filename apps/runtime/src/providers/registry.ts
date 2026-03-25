@@ -9,9 +9,15 @@
  * FR-025-008: Binding providers to lanes for failure isolation.
  */
 
+<<<<<<< HEAD
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
 import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "./adapter.js";
 import { NormalizedProviderError, normalizeError } from "./errors.js";
+=======
+import type { LocalBus } from "../protocol/bus.js";
+import type { ProviderAdapter, ProviderRegistration, ProviderHealthStatus } from "./adapter.js";
+import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
+>>>>>>> origin/main
 
 /**
  * Registered provider instance with metadata.
@@ -366,7 +372,11 @@ export class ProviderRegistry {
       );
     }
 
+<<<<<<< HEAD
     if (!(registration.type && ["acp", "mcp", "a2a"].includes(registration.type))) {
+=======
+    if (!registration.type || !["acp", "mcp", "a2a"].includes(registration.type)) {
+>>>>>>> origin/main
       throw new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
         "Registration missing or invalid required field: type",
@@ -427,6 +437,13 @@ export class ProviderRegistry {
         topic,
         payload,
       });
+<<<<<<< HEAD
     } catch (_error) {}
+=======
+    } catch (error) {
+      // Log error but don't throw (event publishing is best-effort)
+      console.warn(`Failed to publish provider event ${topic}:`, error);
+    }
+>>>>>>> origin/main
   }
 }

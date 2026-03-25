@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { promises as fs } from "node:fs";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 import { type TabPersistedState, TabPersistence } from "../../../src/tabs/tab_persistence";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
+=======
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { promises as fs } from "fs";
+import * as path from "path";
+import { TabPersistence, type TabPersistedState } from "../../../src/tabs/tab_persistence";
+import { createMockTabSurface } from "../../../src/tabs/tab_surface";
+import { tmpdir } from "os";
+>>>>>>> origin/main
 
 describe("TabPersistence", () => {
   let persistence: TabPersistence;
@@ -85,7 +94,11 @@ describe("TabPersistence", () => {
 
       const startTime = Date.now();
       await persistence.load();
+<<<<<<< HEAD
       const _duration = Date.now() - startTime;
+=======
+      const duration = Date.now() - startTime;
+>>>>>>> origin/main
 
       expect(persistence.getLastLoadTime()).toBeLessThan(100);
     });
@@ -119,10 +132,19 @@ describe("TabPersistence", () => {
 
       // Mock fs.writeFile to count writes
       const originalWriteFile = fs.writeFile;
+<<<<<<< HEAD
       fs.writeFile = async (...args: any) => {
         writeCount++;
         return (originalWriteFile as any)(...args);
       };
+=======
+      const countingWriteFile = async (...args: Parameters<typeof fs.writeFile>) => {
+        writeCount++;
+        return (originalWriteFile as Function).apply(fs, args);
+      };
+      // biome-ignore lint/suspicious/noExplicitAny: test mock override
+      (fs as any).writeFile = countingWriteFile;
+>>>>>>> origin/main
 
       const testState: TabPersistedState = {
         version: 1,
@@ -343,7 +365,11 @@ describe("TabPersistence", () => {
       };
 
       // Will not throw
+<<<<<<< HEAD
       const loadedState = persistence.validateState(testState);
+=======
+      const loadedState = persistence["validateState"](testState);
+>>>>>>> origin/main
       expect(loadedState).toBe(true);
     });
 
@@ -357,7 +383,11 @@ describe("TabPersistence", () => {
         savedAt: new Date().toISOString(),
       };
 
+<<<<<<< HEAD
       const isValid = persistence.validateState(testState);
+=======
+      const isValid = persistence["validateState"](testState);
+>>>>>>> origin/main
       expect(isValid).toBe(true); // null is allowed
     });
   });

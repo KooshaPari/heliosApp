@@ -59,8 +59,10 @@ function normalizedBoundaryError(
     type: "response",
     ts: new Date().toISOString(),
     workspace_id: command.workspace_id,
+    lane_id: command.lane_id,
     session_id: command.session_id,
     terminal_id: command.terminal_id,
+    correlation_id: command.correlation_id,
     method: command.type === "command" ? command.method : undefined,
     status: "error",
     error: {

@@ -2,9 +2,15 @@
  * Unit tests for GhosttyInputRelay (T007).
  */
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, test } from "bun:test";
 import { GhosttyInputRelay } from "../input.js";
 import type { GhosttyInputEvent, PtyWriter } from "../input.js";
+=======
+import { describe, test, expect, beforeEach } from "bun:test";
+import { GhosttyInputRelay } from "../input.js";
+import type { PtyWriter, GhosttyInputEvent } from "../input.js";
+>>>>>>> origin/main
 import { GhosttyProcess } from "../process.js";
 
 // ---------------------------------------------------------------------------

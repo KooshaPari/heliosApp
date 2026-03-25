@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
+=======
+import type { LocalBus } from "../protocol/bus.js";
+import { promises as fs } from "fs";
+import path from "path";
+import { randomUUID } from "crypto";
+>>>>>>> origin/main
 
 export interface CrashRecord {
   timestamp: number;
@@ -13,7 +20,11 @@ export class CrashLoopDetector {
   private thresholdCount: number;
   private windowMs: number;
 
+<<<<<<< HEAD
   constructor(crashDataDir: string, thresholdCount = 3, windowMs = 60000) {
+=======
+  constructor(crashDataDir: string, thresholdCount: number = 3, windowMs: number = 60000) {
+>>>>>>> origin/main
     this.crashDataDir = crashDataDir;
     this.thresholdCount = thresholdCount;
     this.windowMs = windowMs;
@@ -56,6 +67,7 @@ export class CrashLoopDetector {
 
   private persistCrashHistory(): void {
     try {
+<<<<<<< HEAD
       const dir = path.join(this.crashDataDir, "recovery");
       const historyPath = path.join(dir, "crash-history.json");
       const tempPath = `${historyPath}.tmp`;
@@ -68,6 +80,23 @@ export class CrashLoopDetector {
         .then(() => fs.rename(tempPath, historyPath))
         .catch(_err => {});
     } catch (_err) {}
+=======
+      const historyPath = path.join(this.crashDataDir, "recovery", "crash-history.json");
+      const tempPath = `${historyPath}.tmp`;
+
+      // Atomic write
+      fs.writeFile(tempPath, JSON.stringify(this.crashHistory), {
+        encoding: "utf-8",
+      })
+        .then(() => fs.rename(tempPath, historyPath))
+        .catch(err => {
+          // Silently fail - don't let history persistence block operations
+          console.error("Failed to persist crash history:", err);
+        });
+    } catch (err) {
+      console.error("Failed to persist crash history:", err);
+    }
+>>>>>>> origin/main
   }
 }
 
@@ -81,7 +110,11 @@ type SafeModeChangeListener = (active: boolean) => void;
 
 export class SafeMode {
   private active = false;
+<<<<<<< HEAD
   private bus?: LocalBus | undefined;
+=======
+  private bus?: LocalBus;
+>>>>>>> origin/main
   private listeners: SafeModeChangeListener[] = [];
   private config: SafeModeConfig;
 
@@ -95,9 +128,13 @@ export class SafeMode {
   }
 
   async enter(): Promise<void> {
+<<<<<<< HEAD
     if (this.active) {
       return;
     }
+=======
+    if (this.active) return;
+>>>>>>> origin/main
 
     this.active = true;
 
@@ -120,9 +157,13 @@ export class SafeMode {
   }
 
   async exit(): Promise<void> {
+<<<<<<< HEAD
     if (!this.active) {
       return;
     }
+=======
+    if (!this.active) return;
+>>>>>>> origin/main
 
     this.active = false;
 
@@ -159,6 +200,7 @@ export class SafeMode {
 
   // Query methods for subsystems to check if they should be active
   isProvidersEnabled(): boolean {
+<<<<<<< HEAD
     return !(this.active && this.config.disableProviders);
   }
 
@@ -168,5 +210,16 @@ export class SafeMode {
 
   isBackgroundCheckpointsEnabled(): boolean {
     return !(this.active && this.config.disableBackgroundCheckpoints);
+=======
+    return !this.active || !this.config.disableProviders;
+  }
+
+  isShareSessionsEnabled(): boolean {
+    return !this.active || !this.config.disableShareSessions;
+  }
+
+  isBackgroundCheckpointsEnabled(): boolean {
+    return !this.active || !this.config.disableBackgroundCheckpoints;
+>>>>>>> origin/main
   }
 }

@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
+=======
+import { promises as fs } from "fs";
+import path from "path";
+import { createHash } from "crypto";
+>>>>>>> origin/main
 
 export const CHECKPOINT_VERSION = 1;
 export const MAX_SCROLLBACK_SIZE = 10240; // 10 KB per session
@@ -46,6 +52,7 @@ export class CheckpointWriter {
 
   async write(checkpoint: Checkpoint): Promise<void> {
     const checkpointPath = this.getCheckpointPath();
+<<<<<<< HEAD
     // Backup previous checkpoint
     await this.backupPreviousCheckpoint(checkpointPath);
 
@@ -75,6 +82,43 @@ export class CheckpointWriter {
 
     // Atomic rename
     await fs.rename(tempPath, checkpointPath);
+=======
+
+    try {
+      // Backup previous checkpoint
+      await this.backupPreviousCheckpoint(checkpointPath);
+
+      // Clean stale temp files
+      await this.cleanStaleTempFiles(checkpointPath);
+
+      // Serialize and calculate checksum
+      const serialized = JSON.stringify(checkpoint.sessions);
+      const checksum = this.calculateChecksum(serialized);
+
+      const checkpointWithChecksum: Checkpoint = {
+        ...checkpoint,
+        checksum,
+      };
+
+      // Write to temp file
+      const tempPath = `${checkpointPath}.tmp`;
+      const content = JSON.stringify(checkpointWithChecksum, null, 2);
+
+      await fs.mkdir(path.dirname(checkpointPath), { recursive: true });
+      await fs.writeFile(tempPath, content);
+
+      // Fsync
+      const fd = await fs.open(tempPath, "r");
+      await fd.sync();
+      await fd.close();
+
+      // Atomic rename
+      await fs.rename(tempPath, checkpointPath);
+    } catch (err) {
+      console.error("Failed to write checkpoint:", err);
+      throw err;
+    }
+>>>>>>> origin/main
   }
 
   private async backupPreviousCheckpoint(checkpointPath: string): Promise<void> {
@@ -120,6 +164,10 @@ export class CheckpointReader {
 
       // Validate checksum
       if (!this.verifyChecksum(checkpoint)) {
+<<<<<<< HEAD
+=======
+        console.warn("Checkpoint checksum mismatch - trying backup");
+>>>>>>> origin/main
         return await this.readBackup();
       }
 
@@ -137,6 +185,10 @@ export class CheckpointReader {
       const checkpoint = JSON.parse(data) as Checkpoint;
 
       if (!this.verifyChecksum(checkpoint)) {
+<<<<<<< HEAD
+=======
+        console.warn("Backup checkpoint checksum mismatch - total loss");
+>>>>>>> origin/main
         return null;
       }
 

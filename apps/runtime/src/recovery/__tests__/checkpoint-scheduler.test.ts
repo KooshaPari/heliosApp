@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { CheckpointScheduler } from "../checkpoint-scheduler.js";
 import { type Checkpoint, CheckpointWriter } from "../checkpoint.js";
+=======
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+import { CheckpointScheduler } from "../checkpoint-scheduler.js";
+import { CheckpointWriter, type Checkpoint, type CheckpointSession } from "../checkpoint.js";
+import { promises as fs } from "fs";
+import path from "path";
+import os from "os";
+>>>>>>> origin/main
 
 describe("CheckpointScheduler", () => {
   let scheduler: CheckpointScheduler;
@@ -30,6 +39,10 @@ describe("CheckpointScheduler", () => {
   });
 
   beforeEach(async () => {
+<<<<<<< HEAD
+=======
+    vi.useFakeTimers();
+>>>>>>> origin/main
     tempDir = path.join(os.tmpdir(), `scheduler-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
     scheduler = new CheckpointScheduler();
@@ -46,7 +59,12 @@ describe("CheckpointScheduler", () => {
 
   afterEach(async () => {
     scheduler.stop();
+<<<<<<< HEAD
 
+=======
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+>>>>>>> origin/main
     await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
   });
 
@@ -54,8 +72,12 @@ describe("CheckpointScheduler", () => {
     it("should trigger checkpoint at configured interval", async () => {
       scheduler.start(writer, createMockCheckpoint);
 
+<<<<<<< HEAD
       // Trigger manually since we can't advance timers
       await scheduler.triggerNow();
+=======
+      vi.advanceTimersByTime(60100); // Default 60s interval + 100ms
+>>>>>>> origin/main
 
       expect(writeCount).toBeGreaterThan(0);
     });
@@ -63,10 +85,17 @@ describe("CheckpointScheduler", () => {
     it("should trigger periodic checkpoints", async () => {
       scheduler.start(writer, createMockCheckpoint);
 
+<<<<<<< HEAD
       await scheduler.triggerNow();
       const count1 = writeCount;
 
       await scheduler.triggerNow();
+=======
+      vi.advanceTimersByTime(60100);
+      const count1 = writeCount;
+
+      vi.advanceTimersByTime(60000);
+>>>>>>> origin/main
       const count2 = writeCount;
 
       expect(count2).toBeGreaterThan(count1);
@@ -82,9 +111,12 @@ describe("CheckpointScheduler", () => {
         scheduler.recordActivity();
       }
 
+<<<<<<< HEAD
       // Wait for the async triggerNow to complete
       await new Promise(r => setTimeout(r, 50));
 
+=======
+>>>>>>> origin/main
       // Should have triggered checkpoint
       expect(writeCount).toBeGreaterThan(0);
     });
@@ -98,20 +130,33 @@ describe("CheckpointScheduler", () => {
       }
 
       // Time-based interval hasn't fired yet, activity below threshold
+<<<<<<< HEAD
       await new Promise(r => setTimeout(r, 50));
+=======
+      vi.advanceTimersByTime(30000); // 30s < default 60s
+>>>>>>> origin/main
       expect(writeCount).toBe(0);
     });
 
     it("should reset activity counter after checkpoint", async () => {
       scheduler.start(writer, createMockCheckpoint);
 
+<<<<<<< HEAD
       // Record 50 activity events (triggers async checkpoint)
+=======
+      // Record 50 activity events
+>>>>>>> origin/main
       for (let i = 0; i < 50; i++) {
         scheduler.recordActivity();
       }
 
+<<<<<<< HEAD
       // Wait for the async triggerNow to complete
       await new Promise(r => setTimeout(r, 50));
+=======
+      // Wait for the async triggerNow to complete (longer timeout for coverage instrumentation)
+      await new Promise(r => setTimeout(r, 200));
+>>>>>>> origin/main
       const count1 = writeCount;
 
       // Record 25 more (not enough to trigger again)
@@ -119,7 +164,11 @@ describe("CheckpointScheduler", () => {
         scheduler.recordActivity();
       }
 
+<<<<<<< HEAD
       await new Promise(r => setTimeout(r, 50));
+=======
+      await new Promise(r => setTimeout(r, 200));
+>>>>>>> origin/main
       expect(writeCount).toBe(count1); // No additional checkpoint
     });
   });
@@ -136,9 +185,19 @@ describe("CheckpointScheduler", () => {
 
       scheduler.start(slowWriter, createMockCheckpoint);
 
+<<<<<<< HEAD
       // Trigger manually since we can't advance timers
       await scheduler.triggerNow();
 
+=======
+      // First checkpoint at 60s
+      vi.advanceTimersByTime(60100);
+      const firstTime = Date.now();
+
+      // The scheduler should have increased its interval
+      vi.advanceTimersByTime(60100); // Only 60s more, but interval was doubled
+      // With doubled interval (120s), no checkpoint should occur yet
+>>>>>>> origin/main
       expect(writeCount).toBe(1);
     });
 
@@ -161,6 +220,7 @@ describe("CheckpointScheduler", () => {
       scheduler.start(slowWriter, createMockCheckpoint);
 
       // First slow write
+<<<<<<< HEAD
       await scheduler.triggerNow();
       expect(writeCount).toBe(1);
 
@@ -171,6 +231,21 @@ describe("CheckpointScheduler", () => {
       expect(writeCount).toBeGreaterThan(1);
 
       await scheduler.triggerNow();
+=======
+      vi.advanceTimersByTime(60100);
+      expect(writeCount).toBe(1);
+
+      // Interval should be doubled now
+      isSlowWrite = false;
+
+      // Wait for fast write to occur and interval to restore
+      vi.advanceTimersByTime(120100);
+      expect(writeCount).toBeGreaterThan(1);
+
+      // Interval should be back to normal now
+      // Next checkpoint should be at original interval (60s)
+      vi.advanceTimersByTime(60100);
+>>>>>>> origin/main
       expect(writeCount).toBeGreaterThan(2);
     });
   });
@@ -193,9 +268,17 @@ describe("CheckpointScheduler", () => {
       scheduler.start(writer, createMockCheckpoint);
       scheduler.stop();
 
+<<<<<<< HEAD
       // After stop, triggerNow should still work but timer-based won't fire
       const finalCount = writeCount;
       await new Promise(r => setTimeout(r, 50));
+=======
+      vi.advanceTimersByTime(120000);
+
+      // Should not trigger any more checkpoints after stop
+      const finalCount = writeCount;
+      vi.advanceTimersByTime(120000);
+>>>>>>> origin/main
       expect(writeCount).toBe(finalCount);
     });
   });
@@ -229,7 +312,10 @@ describe("CheckpointScheduler", () => {
       expect(writeCount).toBe(0);
 
       scheduler.recordActivity(); // 50th event
+<<<<<<< HEAD
       await new Promise(r => setTimeout(r, 50));
+=======
+>>>>>>> origin/main
       expect(writeCount).toBeGreaterThan(0);
     });
   });

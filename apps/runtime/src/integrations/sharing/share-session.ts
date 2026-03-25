@@ -6,8 +6,12 @@
  * FR-026-003: Policy gate integration.
  */
 
+<<<<<<< HEAD
 import { randomUUID } from "node:crypto";
 import type { ProtocolBus as LocalBus } from "../../protocol/bus.js";
+=======
+import type { LocalBus } from "../../protocol/bus.js";
+>>>>>>> origin/main
 
 /**
  * Share session state.
@@ -177,7 +181,11 @@ export class ShareSessionManager {
 
     if (!policyDecision.allowed) {
       const session: ShareSession = {
+<<<<<<< HEAD
         id: `share-${randomUUID()}`,
+=======
+        id: `share-${Date.now()}`,
+>>>>>>> origin/main
         terminalId,
         backend,
         shareLink: null,
@@ -200,7 +208,11 @@ export class ShareSessionManager {
 
     // Create session in pending state
     const session: ShareSession = {
+<<<<<<< HEAD
       id: `share-${randomUUID()}`,
+=======
+      id: `share-${Date.now()}`,
+>>>>>>> origin/main
       terminalId,
       backend,
       shareLink: null,
@@ -216,7 +228,11 @@ export class ShareSessionManager {
     if (!this.sessionsByTerminal.has(terminalId)) {
       this.sessionsByTerminal.set(terminalId, new Set());
     }
+<<<<<<< HEAD
     this.sessionsByTerminal.get(terminalId)?.add(session.id);
+=======
+    this.sessionsByTerminal.get(terminalId)!.add(session.id);
+>>>>>>> origin/main
 
     await this.publishEvent("share.session.created", {
       sessionId: session.id,
@@ -339,6 +355,12 @@ export class ShareSessionManager {
         topic,
         payload,
       });
+<<<<<<< HEAD
     } catch (_error) {}
+=======
+    } catch (error) {
+      console.warn(`Failed to publish share event ${topic}:`, error);
+    }
+>>>>>>> origin/main
   }
 }

@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
 import { TerminalTab } from "../../../src/tabs/terminal_tab";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+import { TerminalTab } from "../../../src/tabs/terminal_tab";
+import type { ActiveContext } from "../../../src/tabs/context_switch";
+>>>>>>> origin/main
 
 describe("TerminalTab", () => {
   let tab: TerminalTab;
@@ -196,7 +202,11 @@ describe("TerminalTab", () => {
 
       await tab.onContextChange(context);
       const state = tab.getState();
+<<<<<<< HEAD
       const terminalId = state.terminalId!;
+=======
+      const terminalId = state.terminalId;
+>>>>>>> origin/main
 
       const newTab = new TerminalTab();
       newTab.restoreState(state);

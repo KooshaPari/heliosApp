@@ -7,11 +7,19 @@
  * Tags: FR-011-003, NFR-011-001
  */
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, test } from "bun:test";
 import { GhosttyInputRelay } from "../../../../src/renderer/ghostty/input.js";
 import type { GhosttyInputEvent, PtyWriter } from "../../../../src/renderer/ghostty/input.js";
 import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
 import { GhosttyProcess } from "../../../../src/renderer/ghostty/process.js";
+=======
+import { describe, test, expect, beforeEach } from "bun:test";
+import { GhosttyInputRelay } from "../../../../src/renderer/ghostty/input.js";
+import type { PtyWriter, GhosttyInputEvent } from "../../../../src/renderer/ghostty/input.js";
+import { GhosttyProcess } from "../../../../src/renderer/ghostty/process.js";
+import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
+>>>>>>> origin/main
 
 function makeEvent(data: number[]): GhosttyInputEvent {
   return {
@@ -132,8 +140,13 @@ describe("GhosttyInputRelay - byte passthrough", () => {
     relay.setFocus("pty-1");
     relay.relayInput(makeEvent([0x41, 0x42, 0x43]));
     expect(writes.length).toBe(1);
+<<<<<<< HEAD
     expect(writes[0]?.ptyId).toBe("pty-1");
     expect(writes[0]?.data).toEqual(new Uint8Array([0x41, 0x42, 0x43]));
+=======
+    expect(writes[0]!.ptyId).toBe("pty-1");
+    expect(writes[0]!.data).toEqual(new Uint8Array([0x41, 0x42, 0x43]));
+>>>>>>> origin/main
   });
 
   test("input not routed to unfocused PTY", () => {
@@ -143,7 +156,11 @@ describe("GhosttyInputRelay - byte passthrough", () => {
     relay.relayInput(makeEvent([0x41]));
     // Only pty-1 receives input
     expect(writes.length).toBe(1);
+<<<<<<< HEAD
     expect(writes[0]?.ptyId).toBe("pty-1");
+=======
+    expect(writes[0]!.ptyId).toBe("pty-1");
+>>>>>>> origin/main
   });
 
   test("focus switch routes input to new target", () => {
@@ -157,8 +174,13 @@ describe("GhosttyInputRelay - byte passthrough", () => {
     relay.relayInput(makeEvent([0x42]));
 
     expect(writes.length).toBe(2);
+<<<<<<< HEAD
     expect(writes[0]?.ptyId).toBe("pty-1");
     expect(writes[1]?.ptyId).toBe("pty-2");
+=======
+    expect(writes[0]!.ptyId).toBe("pty-1");
+    expect(writes[1]!.ptyId).toBe("pty-2");
+>>>>>>> origin/main
   });
 
   test("escape sequences pass through unmodified", () => {
@@ -166,7 +188,11 @@ describe("GhosttyInputRelay - byte passthrough", () => {
     relay.setFocus("pty-1");
     // ESC [ A = cursor up
     relay.relayInput(makeEvent([0x1b, 0x5b, 0x41]));
+<<<<<<< HEAD
     expect(writes[0]?.data).toEqual(new Uint8Array([0x1b, 0x5b, 0x41]));
+=======
+    expect(writes[0]!.data).toEqual(new Uint8Array([0x1b, 0x5b, 0x41]));
+>>>>>>> origin/main
   });
 });
 
@@ -186,7 +212,14 @@ describe("GhosttyInputRelay - metrics integration", () => {
 
     relay.setupInputRelay("pty-1", ghosttyProcess);
     relay.setFocus("pty-1");
+<<<<<<< HEAD
     relay.relayInput({ data: new Uint8Array([0x41]), timestamp: Date.now() - 10 });
+=======
+    relay.relayInput({
+      data: new Uint8Array([0x41]),
+      timestamp: Date.now() - 10,
+    });
+>>>>>>> origin/main
 
     const snap = metrics.getSnapshot();
     // Input latency should have been recorded

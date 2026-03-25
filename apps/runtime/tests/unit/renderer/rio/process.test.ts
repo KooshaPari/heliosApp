@@ -3,7 +3,11 @@
  * Covers: T009 (unit tests).
  */
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+>>>>>>> origin/main
 import { RioProcess } from "../../../../src/renderer/rio/process.js";
 
 describe("RioProcess — initial state", () => {

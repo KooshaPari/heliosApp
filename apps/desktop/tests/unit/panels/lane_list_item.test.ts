@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 const vi = { fn: mock, spyOn: spyOn };
+=======
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+>>>>>>> origin/main
 import { LaneListItem } from "../../../src/panels/lane_list_item";
 
 describe("LaneListItem", () => {

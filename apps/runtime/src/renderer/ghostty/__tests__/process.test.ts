@@ -2,7 +2,11 @@
  * Unit tests for GhosttyProcess (T002).
  */
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, test } from "bun:test";
+=======
+import { describe, test, expect, beforeEach } from "bun:test";
+>>>>>>> origin/main
 import { GhosttyProcess, GhosttyProcessError } from "../process.js";
 
 describe("GhosttyProcess", () => {
@@ -36,7 +40,14 @@ describe("GhosttyProcess", () => {
   });
 
   test("start with a real process returns pid", async () => {
+<<<<<<< HEAD
     const { pid } = await proc.start({ binaryPath: "sleep", extraArgs: ["10"] });
+=======
+    const { pid } = await proc.start({
+      binaryPath: "sleep",
+      extraArgs: ["10"],
+    });
+>>>>>>> origin/main
     expect(typeof pid).toBe("number");
     expect(pid).toBeGreaterThan(0);
     expect(proc.isRunning()).toBe(true);
@@ -80,7 +91,11 @@ describe("GhosttyProcess", () => {
     await new Promise(r => setTimeout(r, 100));
 
     expect(crashError).toBeDefined();
+<<<<<<< HEAD
     expect(crashError?.message).toContain("unexpectedly");
+=======
+    expect(crashError!.message).toContain("unexpectedly");
+>>>>>>> origin/main
   });
 
   test("restart cycles cleanly", async () => {

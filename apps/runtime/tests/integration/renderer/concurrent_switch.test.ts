@@ -8,18 +8,30 @@
  */
 
 import { describe, expect, it } from "bun:test";
+<<<<<<< HEAD
 import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
 import {
   ConcurrentSwitchError,
   createSwitchOrchestrator,
 } from "../../../src/renderer/switch_transaction.js";
+=======
+import {
+  createSwitchOrchestrator,
+  ConcurrentSwitchError,
+} from "../../../src/renderer/switch_transaction.js";
+import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
+>>>>>>> origin/main
 import {
   MockGhosttyAdapter,
   MockRioAdapter,
   TEST_CONFIG,
   TEST_SURFACE,
 } from "../../helpers/mock_adapter.js";
+<<<<<<< HEAD
+=======
+import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
+>>>>>>> origin/main
 
 describe("Concurrent switch rejection", () => {
   it("rejects concurrent switch with error details", async () => {
@@ -29,7 +41,21 @@ describe("Concurrent switch rejection", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
       ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+>>>>>>> origin/main
     ]);
 
     // Start first switch (will be slow)
@@ -73,7 +99,21 @@ describe("Concurrent switch rejection", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
       ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+>>>>>>> origin/main
     ]);
 
     const firstSwitchPromise = orchestrator.startSwitch({
@@ -116,7 +156,21 @@ describe("Concurrent switch rejection", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
       ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+>>>>>>> origin/main
     ]);
 
     // First switch: ghostty -> rio
@@ -155,7 +209,21 @@ describe("Concurrent switch rejection", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
       ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+>>>>>>> origin/main
     ]);
 
     // Initially, no switch in progress
@@ -188,7 +256,21 @@ describe("Concurrent switch rejection", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
       ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+>>>>>>> origin/main
     ]);
 
     const firstSwitch = orchestrator.startSwitch({
@@ -214,9 +296,15 @@ describe("Concurrent switch rejection", () => {
         config: TEST_CONFIG,
         surface: TEST_SURFACE,
       });
+<<<<<<< HEAD
     } catch (_error: unknown) {
       const activeTransaction2 = orchestrator.getActiveTransaction();
       expect(activeTransaction2?.id).toBe(activeTransaction1?.id as string);
+=======
+    } catch (error: unknown) {
+      const activeTransaction2 = orchestrator.getActiveTransaction();
+      expect(activeTransaction2?.id).toBe(activeTransaction1?.id);
+>>>>>>> origin/main
     }
 
     await firstSwitch;

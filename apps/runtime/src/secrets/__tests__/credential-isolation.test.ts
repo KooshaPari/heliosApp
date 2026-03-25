@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { randomBytes } from "node:crypto";
 import { mkdtempSync, rmSync } from "node:fs";
@@ -6,6 +7,16 @@ import { join } from "node:path";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { CredentialAccessDeniedError, CredentialStore } from "../credential-store.js";
 import { EncryptionService } from "../encryption.js";
+=======
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { mkdtempSync, rmSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { EncryptionService } from "../encryption.js";
+import { CredentialStore, CredentialAccessDeniedError } from "../credential-store.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
+>>>>>>> origin/main
 
 function makeStore(dataDir: string, bus: InMemoryLocalBus): CredentialStore {
   const fixedKey = randomBytes(32);
@@ -90,7 +101,15 @@ describe("CredentialStore: cross-provider isolation", () => {
     await store.create("providerA", "ws1", "myKey", "secret-value", "corr-001");
     try {
       await store.retrieveWithContext(
+<<<<<<< HEAD
         { requestingProviderId: "evil", requestingWorkspaceId: "ws1", correlationId: "corr-002" },
+=======
+        {
+          requestingProviderId: "evil",
+          requestingWorkspaceId: "ws1",
+          correlationId: "corr-002",
+        },
+>>>>>>> origin/main
         "providerA",
         "ws1",
         "myKey"
@@ -126,7 +145,15 @@ describe("CredentialStore: cross-provider isolation", () => {
   it("rejects .. in requestingProviderId", async () => {
     await expect(
       store.retrieveWithContext(
+<<<<<<< HEAD
         { requestingProviderId: "../evil", requestingWorkspaceId: "ws1", correlationId: "c" },
+=======
+        {
+          requestingProviderId: "../evil",
+          requestingWorkspaceId: "ws1",
+          correlationId: "c",
+        },
+>>>>>>> origin/main
         "providerA",
         "ws1",
         "myKey"
@@ -137,7 +164,15 @@ describe("CredentialStore: cross-provider isolation", () => {
   it("rejects / in requestingWorkspaceId", async () => {
     await expect(
       store.retrieveWithContext(
+<<<<<<< HEAD
         { requestingProviderId: "p", requestingWorkspaceId: "/etc/passwd", correlationId: "c" },
+=======
+        {
+          requestingProviderId: "p",
+          requestingWorkspaceId: "/etc/passwd",
+          correlationId: "c",
+        },
+>>>>>>> origin/main
         "providerA",
         "ws1",
         "myKey"
@@ -157,7 +192,15 @@ describe("CredentialStore: cross-provider isolation", () => {
     await store.create("providerA", "ws1", "myKey", "secret", "corr-001");
     try {
       await store.retrieveWithContext(
+<<<<<<< HEAD
         { requestingProviderId: "other", requestingWorkspaceId: "ws1", correlationId: "c" },
+=======
+        {
+          requestingProviderId: "other",
+          requestingWorkspaceId: "ws1",
+          correlationId: "c",
+        },
+>>>>>>> origin/main
         "providerA",
         "ws1",
         "myKey"

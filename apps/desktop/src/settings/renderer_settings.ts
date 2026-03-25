@@ -40,9 +40,13 @@ export class RendererSettings {
   }
 
   private render(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
@@ -167,6 +171,7 @@ export class RendererSettings {
       badge.textContent = "Active";
       badge.style.backgroundColor = "#dbeafe";
       badge.style.color = "#0c4a6e";
+<<<<<<< HEAD
     } else if (renderer.isAvailable) {
       badge.textContent = "Available";
       badge.style.backgroundColor = "#dcfce7";
@@ -175,6 +180,16 @@ export class RendererSettings {
       badge.textContent = "Unavailable";
       badge.style.backgroundColor = "#fecaca";
       badge.style.color = "#7f1d1d";
+=======
+    } else if (!renderer.isAvailable) {
+      badge.textContent = "Unavailable";
+      badge.style.backgroundColor = "#fecaca";
+      badge.style.color = "#7f1d1d";
+    } else {
+      badge.textContent = "Available";
+      badge.style.backgroundColor = "#dcfce7";
+      badge.style.color = "#166534";
+>>>>>>> origin/main
     }
 
     nameContainer.appendChild(badge);

@@ -7,10 +7,42 @@
 import type { CommandEnvelope, ResponseEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
+<<<<<<< HEAD
 // Protocol method constants (aligned with specs/protocol/v1/methods.json)
 // ---------------------------------------------------------------------------
 
 export const METHODS = [
+=======
+// Types
+// ---------------------------------------------------------------------------
+
+/** A method handler receives a command and returns a response (sync or async). */
+export type MethodHandler = (
+  command: CommandEnvelope
+) => ResponseEnvelope | Promise<ResponseEnvelope>;
+
+// ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+/** Method names must be non-empty, alphanumeric with dots. */
+const METHOD_NAME_RE = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
+
+function assertValidMethodName(method: string): void {
+  if (!METHOD_NAME_RE.test(method)) {
+    throw new Error(
+      `Invalid method name "${method}": must be non-empty, alphanumeric segments separated by dots`
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Registry
+// ---------------------------------------------------------------------------
+
+/** Canonical list of known method names for validation. */
+export const METHODS: readonly string[] = [
+>>>>>>> origin/main
   "workspace.create",
   "workspace.open",
   "project.clone",
@@ -35,6 +67,7 @@ export const METHODS = [
   "lane.create",
   "lane.attach",
   "lane.cleanup",
+<<<<<<< HEAD
 ] as const satisfies readonly string[];
 
 // ---------------------------------------------------------------------------
@@ -64,6 +97,12 @@ function assertValidMethodName(method: string): void {
 // ---------------------------------------------------------------------------
 // Registry
 // ---------------------------------------------------------------------------
+=======
+  "boundary.local.dispatch",
+  "boundary.tool.dispatch",
+  "boundary.a2a.dispatch",
+] as const;
+>>>>>>> origin/main
 
 export class MethodRegistry {
   private readonly handlers = new Map<string, MethodHandler>();

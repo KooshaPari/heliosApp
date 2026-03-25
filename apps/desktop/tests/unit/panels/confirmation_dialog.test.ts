@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 const vi = { fn: mock, spyOn: spyOn };
+=======
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+>>>>>>> origin/main
 import { ConfirmationDialog } from "../../../src/panels/confirmation_dialog";
 
 describe("ConfirmationDialog", () => {
@@ -178,7 +182,14 @@ describe("ConfirmationDialog", () => {
     confirmBtn?.focus();
 
     // Tab should move to next button
+<<<<<<< HEAD
     const tabEvent = new KeyboardEvent("keydown", { key: "Tab", bubbles: true });
+=======
+    const tabEvent = new KeyboardEvent("keydown", {
+      key: "Tab",
+      bubbles: true,
+    });
+>>>>>>> origin/main
     confirmBtn?.dispatchEvent(tabEvent);
 
     // This tests the focus trap logic
@@ -204,8 +215,13 @@ describe("ConfirmationDialog", () => {
     const confirmBtn = container.querySelector(".confirmation-confirm") as HTMLElement;
     const bgColor = confirmBtn?.style.backgroundColor;
 
+<<<<<<< HEAD
     // Red color for dangerous action (#ef4444)
     expect(bgColor).toContain("ef4444");
+=======
+    // Red color for dangerous action
+    expect(bgColor).toMatch(/244|ef4444/); // RGB for red #ef4444
+>>>>>>> origin/main
   });
 
   it("should use custom button labels", async () => {

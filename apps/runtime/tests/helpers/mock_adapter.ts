@@ -6,11 +6,19 @@
  */
 
 import type {
+<<<<<<< HEAD
   RenderSurface,
   RendererAdapter,
   RendererCapabilities,
   RendererConfig,
   RendererState,
+=======
+  RendererAdapter,
+  RendererConfig,
+  RenderSurface,
+  RendererState,
+  RendererCapabilities,
+>>>>>>> origin/main
 } from "../../src/renderer/index.js";
 
 export interface MockAdapterOptions {
@@ -60,7 +68,11 @@ export class MockRendererAdapter implements RendererAdapter {
 
   constructor(
     id: string,
+<<<<<<< HEAD
     version = "1.0.0",
+=======
+    version: string = "1.0.0",
+>>>>>>> origin/main
     opts: MockAdapterOptions = {},
     caps?: Partial<RendererCapabilities>
   ) {
@@ -72,6 +84,7 @@ export class MockRendererAdapter implements RendererAdapter {
 
   async init(_config: RendererConfig): Promise<void> {
     this.initCallCount++;
+<<<<<<< HEAD
     if (this._opts.initDelay) {
       await delay(this._opts.initDelay);
     }
@@ -81,11 +94,18 @@ export class MockRendererAdapter implements RendererAdapter {
     if (this._opts.initFailOnCall === this.initCallCount) {
       throw new Error(`${this.id} init failed on call ${this.initCallCount}`);
     }
+=======
+    if (this._opts.initDelay) await delay(this._opts.initDelay);
+    if (this._opts.initFail) throw new Error(`${this.id} init failed`);
+    if (this._opts.initFailOnCall === this.initCallCount)
+      throw new Error(`${this.id} init failed on call ${this.initCallCount}`);
+>>>>>>> origin/main
     this._state = "running";
   }
 
   async start(_surface: RenderSurface): Promise<void> {
     this.startCallCount++;
+<<<<<<< HEAD
     if (this._opts.startDelay) {
       await delay(this._opts.startDelay);
     }
@@ -95,17 +115,28 @@ export class MockRendererAdapter implements RendererAdapter {
     if (this._opts.startFailOnCall === this.startCallCount) {
       throw new Error(`${this.id} start failed on call ${this.startCallCount}`);
     }
+=======
+    if (this._opts.startDelay) await delay(this._opts.startDelay);
+    if (this._opts.startFail) throw new Error(`${this.id} start failed`);
+    if (this._opts.startFailOnCall === this.startCallCount)
+      throw new Error(`${this.id} start failed on call ${this.startCallCount}`);
+>>>>>>> origin/main
     this._state = "running";
   }
 
   async stop(): Promise<void> {
     this.stopCallCount++;
+<<<<<<< HEAD
     if (this._opts.stopDelay) {
       await delay(this._opts.stopDelay);
     }
     if (this._opts.stopFail) {
       throw new Error(`${this.id} stop failed`);
     }
+=======
+    if (this._opts.stopDelay) await delay(this._opts.stopDelay);
+    if (this._opts.stopFail) throw new Error(`${this.id} stop failed`);
+>>>>>>> origin/main
     this._state = "stopped";
   }
 
@@ -162,13 +193,29 @@ export class MockRendererAdapter implements RendererAdapter {
 
 export class MockGhosttyAdapter extends MockRendererAdapter {
   constructor(opts: MockAdapterOptions = {}, caps?: Partial<RendererCapabilities>) {
+<<<<<<< HEAD
     super("ghostty", "0.15.0", opts, { gpuAccelerated: true, sixelSupport: true, ...caps });
+=======
+    super("ghostty", "0.15.0", opts, {
+      gpuAccelerated: true,
+      sixelSupport: true,
+      ...caps,
+    });
+>>>>>>> origin/main
   }
 }
 
 export class MockRioAdapter extends MockRendererAdapter {
   constructor(opts: MockAdapterOptions = {}, caps?: Partial<RendererCapabilities>) {
+<<<<<<< HEAD
     super("rio", "0.1.0", opts, { gpuAccelerated: true, sixelSupport: false, ...caps });
+=======
+    super("rio", "0.1.0", opts, {
+      gpuAccelerated: true,
+      sixelSupport: false,
+      ...caps,
+    });
+>>>>>>> origin/main
   }
 }
 

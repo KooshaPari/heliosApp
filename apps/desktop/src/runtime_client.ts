@@ -1,8 +1,16 @@
+<<<<<<< HEAD
 import type { ProtocolBus as LocalBus } from "../../runtime/src/protocol/bus.ts";
 import type { LocalBusEnvelope } from "../../runtime/src/protocol/types.ts";
 import type { RuntimeState } from "../../runtime/src/sessions/state_machine.ts";
 import type { TransportDiagnostics } from "./context_store.ts";
 import type { RendererEngine } from "./settings.ts";
+=======
+import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
+import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
+import type { LocalBus } from "../../runtime/src/protocol/bus";
+import type { RendererEngine } from "./settings";
+import type { TransportDiagnostics } from "./context_store";
+>>>>>>> origin/main
 
 type RuntimeResponse<T extends Record<string, unknown>> = {
   ok: boolean;
@@ -128,17 +136,30 @@ export class DesktopRuntimeClient {
   async ensureSession(input: {
     workspaceId: string;
     laneId: string;
+    sessionId?: string;
+    restore?: boolean;
     forceError?: boolean;
   }): Promise<LifecycleResult> {
+<<<<<<< HEAD
     const requestedSessionId = `${input.laneId}:session`;
+=======
+    const requestedSessionId = input.sessionId ?? `${input.laneId}:session`;
+>>>>>>> origin/main
     const response = await this.bus.request(
       toCommandEnvelope(
         "session.attach",
         {
           id: requestedSessionId,
+<<<<<<< HEAD
           lane_id: input.laneId,
           session_id: requestedSessionId,
           force_error: input.forceError === true,
+=======
+          laneId: input.laneId,
+          sessionId: requestedSessionId,
+          restore: input.restore === true,
+          forceError: input.forceError === true,
+>>>>>>> origin/main
         },
         input.workspaceId,
         input.laneId,

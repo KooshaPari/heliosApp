@@ -3,9 +3,15 @@
  * Evaluates commands against stored policy rules and determines approval requirements.
  */
 
+<<<<<<< HEAD
 import type { PolicyRuleSet } from "./rules";
 import { PolicyStorage } from "./storage";
 import { type CommandContext, PolicyClassification, type PolicyEvaluationResult } from "./types";
+=======
+import { PolicyStorage } from "./storage";
+import { PolicyRuleSet } from "./rules";
+import { type CommandContext, type PolicyEvaluationResult, PolicyClassification } from "./types";
+>>>>>>> origin/main
 
 /**
  * Policy evaluation engine for commands.
@@ -16,7 +22,11 @@ export class PolicyEngine {
 
   constructor(policyDir?: string) {
     this.storage = new PolicyStorage(policyDir);
+<<<<<<< HEAD
     this.storage.onRulesChanged((workspaceId, _rules) => {
+=======
+    this.storage.onRulesChanged((workspaceId, rules) => {
+>>>>>>> origin/main
       this.ruleCache.delete(workspaceId);
     });
   }

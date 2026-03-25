@@ -1,5 +1,6 @@
 // T003 - Lane lifecycle commands + T004 - Event publishing to local bus
 // T006-T010 - Worktree provisioning, cleanup, PTY termination, orphan reconciliation
+<<<<<<< HEAD
 
 import * as path from "node:path";
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
@@ -8,6 +9,36 @@ import { LaneNotFoundError, type LaneRecord, LaneRegistry } from "./registry.js"
 import { SharedLaneCleanupError, attachAgent, detachAgent, shareLane } from "./sharing.js";
 import { type LaneState, recordTransition, transition, withLaneLock } from "./state_machine.js";
 import { provisionWorktree, reconcileOrphanedWorktrees, removeWorktree } from "./worktree.js";
+=======
+// T011-T015 - Par task binding, termination, execution, stale detection, lifecycle events
+
+import * as path from "node:path";
+import type { LocalBus } from "../protocol/bus.js";
+import type { LocalBusEnvelope } from "../protocol/types.js";
+import { LaneRegistry, type LaneRecord, LaneNotFoundError } from "./registry.js";
+import {
+  transition,
+  withLaneLock,
+  recordTransition,
+  type LaneState,
+  type LaneEvent,
+} from "./state_machine.js";
+import {
+  shareLane,
+  attachAgent,
+  detachAgent,
+  forceDetachAll,
+  LaneClosedError,
+  SharedLaneCleanupError,
+} from "./sharing.js";
+import {
+  provisionWorktree,
+  removeWorktree,
+  reconcileOrphanedWorktrees,
+  WorktreeProvisionError,
+  type ReconciliationResult,
+} from "./worktree.js";
+>>>>>>> origin/main
 
 // ── T016: Full Reconciliation Result ─────────────────────────────────────────
 
@@ -44,7 +75,13 @@ export interface PtyManager {
 
 // ── Event Types ──────────────────────────────────────────────────────────────
 
+<<<<<<< HEAD
 export type LaneBusEventTopic =
+=======
+// T015: Comprehensive lane lifecycle event catalog
+export type LaneBusEventTopic =
+  // Core lane lifecycle
+>>>>>>> origin/main
   | "lane.created"
   | "lane.state.changed"
   | "lane.shared"
@@ -52,6 +89,11 @@ export type LaneBusEventTopic =
   | "lane.closed"
   | "lane.ptys_terminated"
   | "lane.provision_failed"
+<<<<<<< HEAD
+=======
+  | "lane.worktree.provisioned"
+  | "lane.worktree.removed"
+>>>>>>> origin/main
   | "reconciliation.completed";
 
 // ── ID Generation ────────────────────────────────────────────────────────────
@@ -134,9 +176,13 @@ export class LaneManager {
   async provision(laneId: string, workspaceRepoPath: string): Promise<LaneRecord> {
     return withLaneLock(laneId, async () => {
       const lane = this.registry.get(laneId);
+<<<<<<< HEAD
       if (!lane) {
         throw new LaneNotFoundError(laneId);
       }
+=======
+      if (!lane) throw new LaneNotFoundError(laneId);
+>>>>>>> origin/main
       if (lane.state !== "provisioning") {
         throw new Error(`Cannot provision lane in state ${lane.state}`);
       }
@@ -157,6 +203,16 @@ export class LaneManager {
           worktreePath: result.worktreePath,
         });
 
+<<<<<<< HEAD
+=======
+        await this.emitEvent(
+          "lane.worktree.provisioned",
+          laneId,
+          lane.workspaceId,
+          fromState,
+          toState
+        );
+>>>>>>> origin/main
         await this.emitEvent("lane.state.changed", laneId, lane.workspaceId, fromState, toState);
         return this.registry.get(laneId)!;
       } catch (err) {
@@ -222,7 +278,11 @@ export class LaneManager {
 
   // ── T003: cleanup ────────────────────────────────────────────────────────
 
+<<<<<<< HEAD
   async cleanup(laneId: string, force = false): Promise<void> {
+=======
+  async cleanup(laneId: string, force: boolean = false): Promise<void> {
+>>>>>>> origin/main
     await withLaneLock(laneId, async () => {
       const lane = this.registry.get(laneId);
       if (!lane) {
@@ -287,6 +347,16 @@ export class LaneManager {
           const worktreeParent = path.dirname(currentLane.worktreePath);
           const workspaceRepoPath = path.dirname(worktreeParent);
           await removeWorktree(currentLane.worktreePath, workspaceRepoPath);
+<<<<<<< HEAD
+=======
+          await this.emitEvent(
+            "lane.worktree.removed",
+            laneId,
+            lane.workspaceId,
+            "cleaning",
+            "cleaning"
+          );
+>>>>>>> origin/main
         } catch {
           // Best-effort: worktree may already be removed
         }
@@ -306,9 +376,13 @@ export class LaneManager {
   // ── T008: Graceful PTY termination before worktree removal ───────────────
 
   private async terminateLanePtys(laneId: string, workspaceId: string): Promise<void> {
+<<<<<<< HEAD
     if (!this.ptyManager) {
       return;
     }
+=======
+    if (!this.ptyManager) return;
+>>>>>>> origin/main
 
     let ptys: PtyHandle[];
     try {
@@ -318,16 +392,23 @@ export class LaneManager {
       return;
     }
 
+<<<<<<< HEAD
     if (ptys.length === 0) {
       return;
     }
 
     let _forceKilled = 0;
+=======
+    if (ptys.length === 0) return;
+
+    let forceKilled = 0;
+>>>>>>> origin/main
     const terminationPromises = ptys.map(async pty => {
       try {
         const timeout = new Promise<"timeout">(resolve =>
           setTimeout(() => resolve("timeout"), this.ptyTerminationTimeoutMs)
         );
+<<<<<<< HEAD
         const termination = this.ptyManager?.terminate(pty.ptyId).then(() => "done" as const);
         const result = await Promise.race([termination, timeout]);
         if (result === "timeout") {
@@ -335,6 +416,15 @@ export class LaneManager {
         }
       } catch {
         _forceKilled++;
+=======
+        const termination = this.ptyManager!.terminate(pty.ptyId).then(() => "done" as const);
+        const result = await Promise.race([termination, timeout]);
+        if (result === "timeout") {
+          forceKilled++;
+        }
+      } catch {
+        forceKilled++;
+>>>>>>> origin/main
       }
     });
 
@@ -393,6 +483,7 @@ export class LaneManager {
       if (!isTimedOut()) {
         const fsModule = await import("node:fs");
         for (const lane of activeLanes) {
+<<<<<<< HEAD
           if (isTimedOut()) {
             break;
           }
@@ -400,6 +491,16 @@ export class LaneManager {
             result.orphanedRecords++;
             result.totalCleaned++;
             this.registry.update(lane.laneId, { state: "closed", worktreePath: null });
+=======
+          if (isTimedOut()) break;
+          if (lane.worktreePath && !fsModule.existsSync(lane.worktreePath)) {
+            result.orphanedRecords++;
+            result.totalCleaned++;
+            this.registry.update(lane.laneId, {
+              state: "closed",
+              worktreePath: null,
+            });
+>>>>>>> origin/main
           }
         }
       }
@@ -408,9 +509,13 @@ export class LaneManager {
       if (!isTimedOut()) {
         const allLanes = this.registry.list();
         for (const lane of allLanes) {
+<<<<<<< HEAD
           if (isTimedOut()) {
             break;
           }
+=======
+          if (isTimedOut()) break;
+>>>>>>> origin/main
           if (lane.parTaskPid !== null && lane.state !== "closed") {
             // Check if the process is still alive
             try {
@@ -429,9 +534,13 @@ export class LaneManager {
       if (!isTimedOut() && this.ptyManager) {
         const closedLanes = this.registry.list().filter(l => l.state === "closed");
         for (const lane of closedLanes) {
+<<<<<<< HEAD
           if (isTimedOut()) {
             break;
           }
+=======
+          if (isTimedOut()) break;
+>>>>>>> origin/main
           try {
             const ptys = this.ptyManager.getByLane(lane.laneId);
             for (const pty of ptys) {
@@ -463,9 +572,13 @@ export class LaneManager {
   }
 
   private async emitReconciliationEvent(result: FullReconciliationResult): Promise<void> {
+<<<<<<< HEAD
     if (!this.bus) {
       return;
     }
+=======
+    if (!this.bus) return;
+>>>>>>> origin/main
 
     const envelope: LocalBusEnvelope = {
       id: `reconciliation:${Date.now()}`,
@@ -483,11 +596,15 @@ export class LaneManager {
     };
 
     try {
+<<<<<<< HEAD
       if ("pushEvent" in this.bus && typeof (this.bus as any).pushEvent === "function") {
         (this.bus as any).pushEvent(envelope);
       } else {
         await this.bus.publish(envelope);
       }
+=======
+      await this.bus.publish(envelope);
+>>>>>>> origin/main
     } catch {
       // Fire-and-forget
     }
@@ -502,9 +619,13 @@ export class LaneManager {
     fromState: LaneState,
     toState: LaneState
   ): Promise<void> {
+<<<<<<< HEAD
     if (!this.bus) {
       return;
     }
+=======
+    if (!this.bus) return;
+>>>>>>> origin/main
 
     const envelope: LocalBusEnvelope = {
       id: `${laneId}:${topic}:${Date.now()}`,
@@ -523,6 +644,7 @@ export class LaneManager {
     };
 
     try {
+<<<<<<< HEAD
       // Use pushEvent if available to bypass protocol lifecycle validation.
       // LaneManager events are domain-level, not protocol lifecycle events.
       if ("pushEvent" in this.bus && typeof (this.bus as any).pushEvent === "function") {
@@ -530,6 +652,9 @@ export class LaneManager {
       } else {
         await this.bus.publish(envelope);
       }
+=======
+      await this.bus.publish(envelope);
+>>>>>>> origin/main
     } catch {
       // T004: Bus failures do not block lane operations (fire-and-forget)
     }
@@ -558,3 +683,19 @@ export {
   type WorktreeResult,
   type ReconciliationResult,
 } from "./worktree.js";
+<<<<<<< HEAD
+=======
+export {
+  ParManager,
+  ParNotFoundError,
+  ParSpawnError,
+  LaneNotReadyError,
+  ExecTimeoutError,
+  _resetParIdCounter,
+  type ParBinding,
+  type ExecResult,
+  type ParManagerOptions,
+  type SpawnFn,
+  type SpawnResult,
+} from "./par.js";
+>>>>>>> origin/main

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { describe, expect, it } from "bun:test";
+=======
+import { describe, it, expect } from "bun:test";
+>>>>>>> origin/main
 
 describe("Tab Performance Benchmarks", () => {
   it("should maintain tab switch latency under 200ms p95", async () => {

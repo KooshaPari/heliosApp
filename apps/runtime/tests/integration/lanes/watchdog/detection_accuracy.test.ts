@@ -1,10 +1,18 @@
 // Integration test for detection accuracy
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
 import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
 import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
+import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
+>>>>>>> origin/main
 
 describe("Detection Accuracy", () => {
   let engine: RemediationEngine;
@@ -24,7 +32,11 @@ describe("Detection Accuracy", () => {
       laneRegistry.register({
         laneId,
         workspaceId: "ws1",
+<<<<<<< HEAD
         state: "active" as any,
+=======
+        state: "active",
+>>>>>>> origin/main
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -162,7 +174,11 @@ describe("Detection Accuracy", () => {
       laneRegistry.register({
         laneId,
         workspaceId: "prod-ws",
+<<<<<<< HEAD
         state: "active" as any,
+=======
+        state: "active",
+>>>>>>> origin/main
         worktreePath: `/prod/${laneId}`,
         parTaskPid: 1000 + Math.random() * 1000,
         attachedAgents: ["agent-1"],

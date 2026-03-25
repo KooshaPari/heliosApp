@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { expect, test } from "bun:test";
 import { InMemoryLocalBus } from "../../src/protocol/bus";
 
@@ -150,3 +151,9 @@ test("soak: lane/session churn and backlog pressure stay within baseline thresho
   expect(retryRun.backlogP95 <= BACKLOG_P95_MAX_COUNT).toBe(true);
   expect(retryRun.restoreP95 <= SESSION_RESTORE_P95_MAX_MS).toBe(true);
 });
+=======
+import { test } from "bun:test";
+
+// Requires InMemoryLocalBus.getMetricsReport() to be implemented
+test.todo("soak: lane/session churn and backlog pressure stay within baseline thresholds — requires bus.getMetricsReport()", () => {});
+>>>>>>> origin/main

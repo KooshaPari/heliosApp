@@ -12,7 +12,11 @@ export interface LaneActionError {
 export type ActionCallback = (error?: LaneActionError) => void;
 
 export interface LaneActionsOptions {
+<<<<<<< HEAD
   runtimeApi: RuntimeApi;
+=======
+  runtimeAPI: RuntimeAPI;
+>>>>>>> origin/main
   onLaneCreated?: (laneId: string) => void;
   onLaneAttached?: (laneId: string) => void;
   onLaneDetached?: (laneId: string) => void;
@@ -21,7 +25,11 @@ export interface LaneActionsOptions {
   errorDismissTimeout?: number;
 }
 
+<<<<<<< HEAD
 export interface RuntimeApi {
+=======
+export interface RuntimeAPI {
+>>>>>>> origin/main
   createLane(workspaceId: string): Promise<{ id: string; name: string }>;
   attachLane(laneId: string): Promise<void>;
   detachLane(laneId: string): Promise<void>;
@@ -31,7 +39,11 @@ export interface RuntimeApi {
 export class LaneActions {
   private options: LaneActionsOptions;
   private pendingActions: Map<string, ActionCallback> = new Map();
+<<<<<<< HEAD
   private errorTimeouts: Map<string, NodeJS.Timeout> = new Map();
+=======
+  private errorTimeouts: Map<string, ReturnType<typeof setTimeout>> = new Map();
+>>>>>>> origin/main
 
   constructor(options: LaneActionsOptions) {
     this.options = {
@@ -48,7 +60,11 @@ export class LaneActions {
       }
 
       // Call runtime API
+<<<<<<< HEAD
       const result = await this.options.runtimeApi.createLane(workspaceId);
+=======
+      const result = await this.options.runtimeAPI.createLane(workspaceId);
+>>>>>>> origin/main
 
       if (this.options.onLaneCreated) {
         this.options.onLaneCreated(result.id);
@@ -66,7 +82,11 @@ export class LaneActions {
       }
 
       // Call runtime API
+<<<<<<< HEAD
       await this.options.runtimeApi.attachLane(laneId);
+=======
+      await this.options.runtimeAPI.attachLane(laneId);
+>>>>>>> origin/main
 
       if (this.options.onLaneAttached) {
         this.options.onLaneAttached(laneId);
@@ -84,7 +104,11 @@ export class LaneActions {
       }
 
       // Call runtime API
+<<<<<<< HEAD
       await this.options.runtimeApi.detachLane(laneId);
+=======
+      await this.options.runtimeAPI.detachLane(laneId);
+>>>>>>> origin/main
 
       if (this.options.onLaneDetached) {
         this.options.onLaneDetached(laneId);
@@ -94,7 +118,11 @@ export class LaneActions {
     }
   }
 
+<<<<<<< HEAD
   async cleanupLane(laneId: string, requireConfirmation = true): Promise<boolean> {
+=======
+  async cleanupLane(laneId: string, requireConfirmation: boolean = true): Promise<boolean> {
+>>>>>>> origin/main
     if (requireConfirmation) {
       // Confirmation must be handled by caller
       // This method assumes confirmation has been obtained
@@ -106,7 +134,11 @@ export class LaneActions {
 
   private async executeCleanup(laneId: string): Promise<boolean> {
     try {
+<<<<<<< HEAD
       await this.options.runtimeApi.cleanupLane(laneId);
+=======
+      await this.options.runtimeAPI.cleanupLane(laneId);
+>>>>>>> origin/main
 
       if (this.options.onLaneCleaned) {
         this.options.onLaneCleaned(laneId);
@@ -119,7 +151,11 @@ export class LaneActions {
     }
   }
 
+<<<<<<< HEAD
   private handleActionError(code: string, error: unknown, revertFn?: ActionCallback): void {
+=======
+  private handleActionError(code: string, error: any, revertFn?: ActionCallback): void {
+>>>>>>> origin/main
     const message = error instanceof Error ? error.message : String(error);
     const actionError: LaneActionError = {
       code,
@@ -151,9 +187,13 @@ export class LaneActions {
   }
 
   clearAllErrors(): void {
+<<<<<<< HEAD
     for (const timeout of this.errorTimeouts.values()) {
       clearTimeout(timeout);
     }
+=======
+    this.errorTimeouts.forEach(timeout => clearTimeout(timeout));
+>>>>>>> origin/main
     this.errorTimeouts.clear();
   }
 

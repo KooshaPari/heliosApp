@@ -5,7 +5,11 @@
 
 export interface BusEvent {
   topic: string;
+<<<<<<< HEAD
   payload: Record<string, any>; // bus event payloads are heterogeneous
+=======
+  payload: Record<string, any>;
+>>>>>>> origin/main
   sequenceNumber?: number;
   timestamp: number;
 }
@@ -30,10 +34,17 @@ export class LaneEventHandler {
   private subscriptions: Map<string, (event: BusEvent) => void> = new Map();
   private pendingUpdates: Map<string, BusEvent> = new Map();
   private lastEventTime: number = Date.now();
+<<<<<<< HEAD
   private connectivityTimeoutId?: NodeJS.Timeout;
   private rafId?: number | undefined;
   private lastSequenceNumbers: Map<string, number> = new Map();
   private isConnected = true;
+=======
+  private connectivityTimeoutId?: ReturnType<typeof setTimeout>;
+  private rafId?: number | undefined;
+  private lastSequenceNumbers: Map<string, number> = new Map();
+  private isConnected: boolean = true;
+>>>>>>> origin/main
 
   constructor(options: LaneEventHandlerOptions) {
     this.options = {
@@ -51,7 +62,13 @@ export class LaneEventHandler {
     this.unsubscribeFromEvents();
     this.stopConnectivityMonitoring();
     if (this.rafId) {
+<<<<<<< HEAD
       cancelAnimationFrame(this.rafId);
+=======
+      (typeof cancelAnimationFrame !== "undefined" ? cancelAnimationFrame : clearTimeout)(
+        this.rafId as number
+      );
+>>>>>>> origin/main
     }
   }
 
@@ -96,9 +113,13 @@ export class LaneEventHandler {
     const laneId = event.payload.laneId;
     const newState = event.payload.state;
 
+<<<<<<< HEAD
     if (!(laneId && newState)) {
       return;
     }
+=======
+    if (!laneId || !newState) return;
+>>>>>>> origin/main
 
     // Check sequence number to prevent out-of-order updates
     const lastSeq = this.lastSequenceNumbers.get(laneId) || -1;
@@ -122,9 +143,13 @@ export class LaneEventHandler {
     const laneId = event.payload.laneId;
     const name = event.payload.name || "New Lane";
 
+<<<<<<< HEAD
     if (!laneId) {
       return;
     }
+=======
+    if (!laneId) return;
+>>>>>>> origin/main
 
     if (this.options.onLaneCreated) {
       this.options.onLaneCreated(laneId, name);
@@ -136,9 +161,13 @@ export class LaneEventHandler {
 
     const laneId = event.payload.laneId;
 
+<<<<<<< HEAD
     if (!laneId) {
       return;
     }
+=======
+    if (!laneId) return;
+>>>>>>> origin/main
 
     if (this.options.onLaneCleaned) {
       this.options.onLaneCleaned(laneId);
@@ -185,9 +214,13 @@ export class LaneEventHandler {
     this.stopConnectivityMonitoring();
 
     this.connectivityTimeoutId = setTimeout(() => {
+<<<<<<< HEAD
       if (!this.isConnected) {
         return;
       }
+=======
+      if (!this.isConnected) return;
+>>>>>>> origin/main
 
       this.isConnected = false;
       if (this.options.onBusConnectivityIssue) {
@@ -197,11 +230,21 @@ export class LaneEventHandler {
   }
 
   private scheduleRender(): void {
+<<<<<<< HEAD
     if (this.rafId) {
       return;
     }
 
     this.rafId = requestAnimationFrame(() => {
+=======
+    if (this.rafId) return;
+
+    this.rafId = (
+      typeof requestAnimationFrame !== "undefined"
+        ? requestAnimationFrame
+        : (cb: FrameRequestCallback) => setTimeout(cb, 0) as unknown as number
+    )(() => {
+>>>>>>> origin/main
       this.rafId = undefined;
       this.processPendingUpdates();
     });

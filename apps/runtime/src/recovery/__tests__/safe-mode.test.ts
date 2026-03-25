@@ -1,15 +1,28 @@
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { CrashLoopDetector, SafeMode, type SafeModeConfig } from "../safe-mode.js";
+=======
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+import { SafeMode, CrashLoopDetector, type SafeModeConfig } from "../safe-mode.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { promises as fs } from "fs";
+import path from "path";
+import os from "os";
+>>>>>>> origin/main
 
 describe("CrashLoopDetector", () => {
   let detector: CrashLoopDetector;
   let tempDir: string;
 
   beforeEach(async () => {
+<<<<<<< HEAD
+=======
+    vi.useFakeTimers();
+>>>>>>> origin/main
     tempDir = path.join(os.tmpdir(), `crash-loop-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
     detector = new CrashLoopDetector(tempDir, 3, 60000);
@@ -17,6 +30,11 @@ describe("CrashLoopDetector", () => {
   });
 
   afterEach(async () => {
+<<<<<<< HEAD
+=======
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+>>>>>>> origin/main
     await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
   });
 
@@ -39,6 +57,7 @@ describe("CrashLoopDetector", () => {
 
   it("should not detect loop with crashes outside window", () => {
     const now = Date.now();
+<<<<<<< HEAD
     // Record two old crashes outside the window
     detector.recordCrash(now - 120000);
     detector.recordCrash(now - 90000);
@@ -46,11 +65,19 @@ describe("CrashLoopDetector", () => {
     detector.recordCrash(now - 1000);
 
     // Only 1 crash within the 60s window, threshold is 3
+=======
+    detector.recordCrash(now);
+    detector.recordCrash(now + 1000);
+    vi.advanceTimersByTime(61000); // Advance past window
+    detector.recordCrash(now + 62000);
+
+>>>>>>> origin/main
     expect(detector.isLooping()).toBe(false);
   });
 
   it("should persist and restore crash history", async () => {
     const now = Date.now();
+<<<<<<< HEAD
     detector.recordCrash(now - 3000);
     detector.recordCrash(now - 2000);
 
@@ -60,6 +87,17 @@ describe("CrashLoopDetector", () => {
     await detector2.initialize();
 
     detector2.recordCrash(now - 1000);
+=======
+    detector.recordCrash(now);
+    detector.recordCrash(now + 1000);
+
+    // Create new detector instance and load history
+    await new Promise(resolve => setTimeout(resolve, 50));
+    const detector2 = new CrashLoopDetector(tempDir, 3, 60000);
+    await detector2.initialize();
+
+    detector2.recordCrash(now + 2000);
+>>>>>>> origin/main
     expect(detector2.isLooping()).toBe(true);
   });
 
@@ -82,11 +120,22 @@ describe("SafeMode", () => {
   let bus: InMemoryLocalBus;
 
   beforeEach(() => {
+<<<<<<< HEAD
+=======
+    vi.useFakeTimers();
+>>>>>>> origin/main
     bus = new InMemoryLocalBus();
     safeMode = new SafeMode(bus);
   });
 
+<<<<<<< HEAD
   afterEach(() => {});
+=======
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+>>>>>>> origin/main
 
   it("should start inactive", () => {
     expect(safeMode.isActive()).toBe(false);
@@ -112,11 +161,19 @@ describe("SafeMode", () => {
 
   it("should publish exit event to bus", async () => {
     await safeMode.enter();
+<<<<<<< HEAD
     const enterEventCount = bus.getEvents().length;
     await safeMode.exit();
     const events = bus.getEvents();
     expect(events.length).toBe(enterEventCount + 1);
     expect(events[events.length - 1].topic).toBe("recovery.safemode.exited");
+=======
+    bus.getEvents().length = 0; // Clear events
+    await safeMode.exit();
+    const events = bus.getEvents();
+    expect(events.length).toBe(1);
+    expect(events[0].topic).toBe("recovery.safemode.exited");
+>>>>>>> origin/main
   });
 
   it("should notify state change listeners", async () => {

@@ -9,6 +9,7 @@
  * FR-025-009: Health checks with configurable intervals.
  */
 
+<<<<<<< HEAD
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
 import type {
   ACPConfig,
@@ -18,6 +19,17 @@ import type {
   ProviderHealthStatus,
 } from "./adapter.js";
 import { NormalizedProviderError, normalizeError } from "./errors.js";
+=======
+import type { LocalBus } from "../protocol/bus.js";
+import type {
+  ProviderAdapter,
+  ProviderHealthStatus,
+  ACPConfig,
+  ACPExecuteInput,
+  ACPExecuteOutput,
+} from "./adapter.js";
+import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
+>>>>>>> origin/main
 
 /**
  * Policy gate interface for access control.
@@ -46,18 +58,31 @@ class DefaultPolicyGate implements PolicyGate {
 /**
  * Mock ACP request for testing/prototyping.
  */
+<<<<<<< HEAD
 interface AcpRequest {
   correlationId: string;
   model: string;
   messages: Array<{ role: string; content: string }>;
   maxTokens?: number | undefined;
   temperature?: number | undefined;
+=======
+interface ACPRequest {
+  correlationId: string;
+  model: string;
+  messages: Array<{ role: string; content: string }>;
+  maxTokens?: number;
+  temperature?: number;
+>>>>>>> origin/main
 }
 
 /**
  * Mock ACP response.
  */
+<<<<<<< HEAD
 interface AcpResponse {
+=======
+interface ACPResponse {
+>>>>>>> origin/main
   taskId: string;
   content: string;
   stopReason: string;
@@ -79,6 +104,7 @@ interface AcpResponse {
  *
  * FR-025-003: ACP protocol client for Claude.
  */
+<<<<<<< HEAD
 export class ACPClientAdapter
   implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
 {
@@ -86,6 +112,16 @@ export class ACPClientAdapter
   private bus: LocalBus | null = null;
   private policyGate: PolicyGate;
   private terminated = false;
+=======
+export class ACPClientAdapter implements ProviderAdapter<
+  ACPConfig,
+  ACPExecuteInput,
+  ACPExecuteOutput
+> {
+  private config: ACPConfig | null = null;
+  private bus: LocalBus | null = null;
+  private policyGate: PolicyGate;
+>>>>>>> origin/main
   private healthStatus: ProviderHealthStatus = {
     state: "unavailable",
     lastCheck: new Date(),
@@ -132,7 +168,11 @@ export class ACPClientAdapter
       }
 
       // Simulate endpoint reachability check with timeout
+<<<<<<< HEAD
       const _probeTimeout = config.timeout || 10000;
+=======
+      const probeTimeout = config.timeout || 10000;
+>>>>>>> origin/main
       const probeResult = await Promise.race([
         this.probeEndpoint(config.baseUrl),
         new Promise<boolean>((_, reject) =>
@@ -145,7 +185,11 @@ export class ACPClientAdapter
       }
 
       this.config = config;
+<<<<<<< HEAD
       this.healthCheckInterval = 30000; // healthCheckIntervalMs not in ACPConfig || 30000;
+=======
+      this.healthCheckInterval = 30000;
+>>>>>>> origin/main
 
       this.healthStatus = {
         state: "healthy",
@@ -183,9 +227,12 @@ export class ACPClientAdapter
    */
   async health(): Promise<ProviderHealthStatus> {
     if (!this.config) {
+<<<<<<< HEAD
       if (this.terminated) {
         return { ...this.healthStatus };
       }
+=======
+>>>>>>> origin/main
       return {
         state: "unavailable",
         lastCheck: new Date(),
@@ -272,7 +319,11 @@ export class ACPClientAdapter
     if (!this.config) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
+<<<<<<< HEAD
         "ACP client unavailable: not initialized",
+=======
+        "ACP client not initialized",
+>>>>>>> origin/main
         "acp"
       );
     }
@@ -294,7 +345,11 @@ export class ACPClientAdapter
 
         throw new NormalizedProviderError(
           "PROVIDER_POLICY_DENIED",
+<<<<<<< HEAD
           `ACP execution policy denied: ${reason}`,
+=======
+          `ACP execution denied by policy: ${reason}`,
+>>>>>>> origin/main
           "acp",
           false,
           correlationId
@@ -311,7 +366,11 @@ export class ACPClientAdapter
         const startTime = Date.now();
 
         // Construct ACP request
+<<<<<<< HEAD
         const acpRequest: AcpRequest = {
+=======
+        const acpRequest: ACPRequest = {
+>>>>>>> origin/main
           correlationId,
           model: this.config.model,
           messages: [
@@ -391,7 +450,11 @@ export class ACPClientAdapter
     if (!this.config) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
+<<<<<<< HEAD
         "ACP client unavailable: not initialized",
+=======
+        "ACP client not initialized",
+>>>>>>> origin/main
         "acp"
       );
     }
@@ -435,7 +498,10 @@ export class ACPClientAdapter
 
       // Clear config
       this.config = null;
+<<<<<<< HEAD
       this.terminated = true;
+=======
+>>>>>>> origin/main
 
       this.healthStatus = {
         state: "unavailable",
@@ -480,14 +546,22 @@ export class ACPClientAdapter
    * @param signal Abort signal
    * @returns ACP response
    */
+<<<<<<< HEAD
   private async sendACPRequest(request: AcpRequest, signal: AbortSignal): Promise<AcpResponse> {
+=======
+  private async sendACPRequest(request: ACPRequest, signal: AbortSignal): Promise<ACPResponse> {
+>>>>>>> origin/main
     // Check for abort
     if (signal.aborted) {
       throw new Error("Request aborted");
     }
 
     // Mock implementation: simulate ACP processing
+<<<<<<< HEAD
     return new Promise((resolve, reject) => {
+=======
+    return new Promise(resolve => {
+>>>>>>> origin/main
       const timeout = setTimeout(() => {
         resolve({
           taskId: `task-${request.correlationId}`,
@@ -503,7 +577,11 @@ export class ACPClientAdapter
       // Clean up on abort
       signal.addEventListener("abort", () => {
         clearTimeout(timeout);
+<<<<<<< HEAD
         reject(new Error("Request cancelled"));
+=======
+        throw new Error("Request cancelled");
+>>>>>>> origin/main
       });
     });
   }
@@ -527,6 +605,13 @@ export class ACPClientAdapter
         topic,
         payload,
       });
+<<<<<<< HEAD
     } catch (_error) {}
+=======
+    } catch (error) {
+      // Log but don't throw (event publishing is best-effort)
+      console.warn(`Failed to publish ACP event ${topic}:`, error);
+    }
+>>>>>>> origin/main
   }
 }

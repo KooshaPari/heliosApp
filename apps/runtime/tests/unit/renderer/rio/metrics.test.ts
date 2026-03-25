@@ -3,8 +3,17 @@
  * Covers: T009 (unit tests).
  */
 
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { RioMetrics } from "../../../../src/renderer/rio/metrics.js";
+=======
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import {
+  RioMetrics,
+  type MetricsSnapshot,
+  type MetricsSummary,
+} from "../../../../src/renderer/rio/metrics.js";
+>>>>>>> origin/main
 
 describe("RioMetrics — schema identity with ghostty", () => {
   let metrics: RioMetrics;

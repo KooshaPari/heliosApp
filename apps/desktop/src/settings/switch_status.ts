@@ -22,8 +22,13 @@ export interface SwitchStatusProps {
 export class SwitchStatus {
   private container: HTMLElement | null = null;
   private props: SwitchStatusProps = { isActive: false };
+<<<<<<< HEAD
   private startTime = 0;
   private updateInterval?: NodeJS.Timeout | undefined;
+=======
+  private startTime: number = 0;
+  private updateInterval?: NodeJS.Timeout;
+>>>>>>> origin/main
 
   mount(container: HTMLElement): void {
     this.container = container;
@@ -58,17 +63,25 @@ export class SwitchStatus {
   }
 
   private render(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
     }
 
+<<<<<<< HEAD
     if (!this.props.isActive) {
       return;
     }
+=======
+    if (!this.props.isActive) return;
+>>>>>>> origin/main
 
     const status = this.createStatusElement();
     this.container.appendChild(status);
@@ -108,13 +121,21 @@ export class SwitchStatus {
       borderColor = "#fb923c";
       textColor = "#92400e";
       icon = "⚠";
+<<<<<<< HEAD
       message = `Switch rolled back${this.props.failureReason ? `: ${this.props.failureReason}` : ""}`;
+=======
+      message = `Switch rolled back${this.props.failureReason ? ": " + this.props.failureReason : ""}`;
+>>>>>>> origin/main
     } else if (this.props.phase === "failed") {
       backgroundColor = "#fee2e2";
       borderColor = "#fca5a5";
       textColor = "#7f1d1d";
       icon = "✕";
+<<<<<<< HEAD
       message = `Switch failed${this.props.failureReason ? `: ${this.props.failureReason}` : ""}`;
+=======
+      message = `Switch failed${this.props.failureReason ? ": " + this.props.failureReason : ""}`;
+>>>>>>> origin/main
     }
 
     container.style.backgroundColor = backgroundColor;
@@ -167,10 +188,17 @@ export class SwitchStatus {
 
       const progress = document.createElement("div");
       const elapsed = this.props.elapsedMs || Date.now() - this.startTime;
+<<<<<<< HEAD
       const maxDuration = (this.props.phase as string) === "committed" ? 3000 : 8000; // 3s for hot-swap, 8s for restart
       const percentage = Math.min((elapsed / maxDuration) * 100, 100);
 
       progress.style.width = `${percentage}%`;
+=======
+      const maxDuration = 8000; // progress bar only shown during active phases
+      const percentage = Math.min((elapsed / maxDuration) * 100, 100);
+
+      progress.style.width = percentage + "%";
+>>>>>>> origin/main
       progress.style.height = "100%";
       progress.style.backgroundColor = textColor;
       progress.style.transition = "width 100ms linear";

@@ -1,8 +1,15 @@
 import { describe, expect, it } from "bun:test";
+<<<<<<< HEAD
 import { InMemoryBusPublisher } from "../events.js";
 import { InvalidStateError, writeInput } from "../io.js";
 import type { ProcessMap } from "../io.js";
 import type { PtyRecord } from "../registry.js";
+=======
+import { writeInput, InvalidStateError } from "../io.js";
+import type { ProcessMap } from "../io.js";
+import type { PtyRecord } from "../registry.js";
+import { InMemoryBusPublisher } from "../events.js";
+>>>>>>> origin/main
 
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   return {
@@ -116,6 +123,10 @@ describe("writeInput", () => {
 
     expect(errorCalled).toBe(true);
     expect(bus.events).toHaveLength(1);
+<<<<<<< HEAD
     expect(bus.events[0]?.topic).toBe("pty.error");
+=======
+    expect(bus.events[0]!.topic).toBe("pty.error");
+>>>>>>> origin/main
   });
 });

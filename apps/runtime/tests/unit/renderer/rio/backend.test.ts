@@ -4,6 +4,7 @@
  * FR-012-007, FR-012-008, SC-012-003.
  */
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
 import type {
   RenderSurface,
@@ -14,15 +15,33 @@ import type {
 import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
 import { RendererRegistry } from "../../../../src/renderer/registry.js";
 import { FeatureFlagDisabledError, RioBackend } from "../../../../src/renderer/rio/backend.js";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+import { RioBackend, FeatureFlagDisabledError } from "../../../../src/renderer/rio/backend.js";
+import { RendererRegistry } from "../../../../src/renderer/registry.js";
+import type {
+  RendererAdapter,
+  RendererConfig,
+  RenderSurface,
+  RendererState,
+} from "../../../../src/renderer/adapter.js";
+import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
+>>>>>>> origin/main
 
 // ---------------------------------------------------------------------------
 // Mock ghostty adapter
 // ---------------------------------------------------------------------------
 
+<<<<<<< HEAD
 function createMockGhostty(opts?: { failInit?: boolean }): RendererAdapter & {
   _state: RendererState;
   _initCalled: boolean;
 } {
+=======
+function createMockGhostty(opts?: {
+  failInit?: boolean;
+}): RendererAdapter & { _state: RendererState; _initCalled: boolean } {
+>>>>>>> origin/main
   const adapter = {
     id: "ghostty" as const,
     version: "0.1.0",
@@ -31,9 +50,13 @@ function createMockGhostty(opts?: { failInit?: boolean }): RendererAdapter & {
 
     async init(_config: RendererConfig): Promise<void> {
       adapter._initCalled = true;
+<<<<<<< HEAD
       if (opts?.failInit) {
         throw new Error("ghostty init failed");
       }
+=======
+      if (opts?.failInit) throw new Error("ghostty init failed");
+>>>>>>> origin/main
       adapter._state = "running";
     },
     async start(_surface: RenderSurface): Promise<void> {

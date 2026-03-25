@@ -29,7 +29,12 @@ export interface GhosttyOptions {
 export class GhosttyBinaryNotFoundError extends Error {
   constructor(path: string) {
     super(
+<<<<<<< HEAD
       `Ghostty binary not found at "${path}". Ensure ghostty is installed and the path is correct.`
+=======
+      `Ghostty binary not found at "${path}". ` +
+        "Ensure ghostty is installed and the path is correct."
+>>>>>>> origin/main
     );
     this.name = "GhosttyBinaryNotFoundError";
   }
@@ -73,9 +78,13 @@ export class GhosttyProcess {
 
   /** Uptime in milliseconds, or 0 if not running. */
   getUptime(): number {
+<<<<<<< HEAD
     if (this._startedAt === undefined) {
       return 0;
     }
+=======
+    if (this._startedAt === undefined) return 0;
+>>>>>>> origin/main
     return Date.now() - this._startedAt;
   }
 
@@ -101,11 +110,16 @@ export class GhosttyProcess {
 
     // Verify binary exists
     try {
+<<<<<<< HEAD
       const which = (Bun as any).spawn(["which", binaryPath], {
+=======
+      const which = Bun.spawn(["which", binaryPath], {
+>>>>>>> origin/main
         stdout: "pipe",
         stderr: "ignore",
       });
       await which.exited;
+<<<<<<< HEAD
       if ((which as any).exitCode !== 0) {
         throw new GhosttyBinaryNotFoundError(binaryPath);
       }
@@ -113,6 +127,13 @@ export class GhosttyProcess {
       if (e instanceof GhosttyBinaryNotFoundError) {
         throw e;
       }
+=======
+      if (which.exitCode !== 0) {
+        throw new GhosttyBinaryNotFoundError(binaryPath);
+      }
+    } catch (e) {
+      if (e instanceof GhosttyBinaryNotFoundError) throw e;
+>>>>>>> origin/main
       throw new GhosttyBinaryNotFoundError(binaryPath);
     }
 
@@ -125,6 +146,7 @@ export class GhosttyProcess {
       args.push(...options.extraArgs);
     }
 
+<<<<<<< HEAD
     const proc = (Bun as any).spawn(args, {
       stdout: "pipe",
       stderr: "pipe",
@@ -133,6 +155,16 @@ export class GhosttyProcess {
 
     this._proc = proc;
     this._pid = (proc as any).pid;
+=======
+    const proc = Bun.spawn(args, {
+      stdout: "pipe",
+      stderr: "pipe",
+      env: { ...process.env, ...options.env },
+    });
+
+    this._proc = proc;
+    this._pid = proc.pid;
+>>>>>>> origin/main
     this._running = true;
     this._startedAt = Date.now();
 
@@ -149,7 +181,11 @@ export class GhosttyProcess {
       }
     });
 
+<<<<<<< HEAD
     return { pid: (proc as any).pid };
+=======
+    return { pid: proc.pid };
+>>>>>>> origin/main
   }
 
   /**

@@ -7,6 +7,7 @@
  * Tags: FR-011-001, FR-011-003, FR-011-004
  */
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, test } from "bun:test";
 import type { RenderSurface, RendererConfig } from "../../../../src/renderer/adapter.js";
 import {
@@ -17,6 +18,38 @@ import {
 } from "../../../../src/renderer/ghostty/backend.js";
 import type { PtyWriter } from "../../../../src/renderer/ghostty/input.js";
 
+=======
+import { describe, test, expect, beforeEach, afterEach, mock } from "bun:test";
+import {
+  GhosttyBackend,
+  GhosttyNotInitializedError,
+  GhosttyNotRunningError,
+  GhosttyAlreadyInitializedError,
+} from "../../../../src/renderer/ghostty/backend.js";
+import type { RendererConfig, RenderSurface } from "../../../../src/renderer/adapter.js";
+import type { PtyWriter } from "../../../../src/renderer/ghostty/input.js";
+
+// Mock Bun.spawn to avoid slow system_profiler calls during detectCapabilities
+const originalSpawn = Bun.spawn;
+beforeEach(() => {
+  (Bun as any).spawn = mock((..._args: unknown[]) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode("Metal: Supported");
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(data);
+        controller.close();
+      },
+    });
+    return { stdout: stream, stderr: null, exitCode: Promise.resolve(0) };
+  });
+});
+
+afterEach(() => {
+  (Bun as any).spawn = originalSpawn;
+});
+
+>>>>>>> origin/main
 const TEST_CONFIG: RendererConfig = {
   gpuAcceleration: true,
   colorDepth: 24,
@@ -39,6 +72,7 @@ function makeStream(chunks: Uint8Array[]): ReadableStream<Uint8Array> {
   });
 }
 
+<<<<<<< HEAD
 function makeInfiniteStream(): { stream: ReadableStream<Uint8Array>; cancel: () => void } {
   let cancelled = false;
   const stream = new ReadableStream<Uint8Array>({
@@ -68,6 +102,8 @@ function makeInfiniteStream(): { stream: ReadableStream<Uint8Array>; cancel: () 
   };
 }
 
+=======
+>>>>>>> origin/main
 describe("GhosttyBackend - lifecycle (T012)", () => {
   let backend: GhosttyBackend;
 
@@ -307,7 +343,13 @@ describe("GhosttyBackend - metrics (T012)", () => {
 describe("GhosttyBackend - input relay (T012)", () => {
   let backend: GhosttyBackend;
   const mockWriter: PtyWriter = {
+<<<<<<< HEAD
     writeInput: () => {},
+=======
+    writeInput: () => {
+      // no-op: adapter contract requires writer callback
+    },
+>>>>>>> origin/main
   };
 
   beforeEach(async () => {

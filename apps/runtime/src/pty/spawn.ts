@@ -5,9 +5,15 @@
  * @module
  */
 
+<<<<<<< HEAD
 import type { PtyDimensions, PtyRecord } from "./registry.js";
 import type { PtyRegistry } from "./registry.js";
 import { PtyLifecycle } from "./state_machine.js";
+=======
+import { PtyLifecycle } from "./state_machine.js";
+import type { PtyRecord, PtyDimensions } from "./registry.js";
+import { PtyRegistry } from "./registry.js";
+>>>>>>> origin/main
 
 /** Options for spawning a new PTY. */
 export interface SpawnOptions {
@@ -68,11 +74,19 @@ export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Pr
   lifecycle.apply("spawn_requested");
 
   try {
+<<<<<<< HEAD
     const proc = (Bun as any).spawn([shell], {
       cwd,
       env: {
         ...env,
         TERM: env.TERM ?? "xterm-256color",
+=======
+    const proc = Bun.spawn([shell], {
+      cwd,
+      env: {
+        ...env,
+        TERM: env["TERM"] ?? "xterm-256color",
+>>>>>>> origin/main
         COLUMNS: String(cols),
         LINES: String(rows),
       },
@@ -81,7 +95,11 @@ export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Pr
       stderr: "pipe",
     });
 
+<<<<<<< HEAD
     const pid = (proc as any).pid;
+=======
+    const pid = proc.pid;
+>>>>>>> origin/main
 
     if (pid <= 0) {
       lifecycle.apply("spawn_failed");

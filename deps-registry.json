@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "schemaVersion": "1.0.0",
   "metadata": {
     "lastStatusCheck": "2026-03-01T13:30:00Z",
@@ -76,4 +77,83 @@
       "lastUpdated": "2026-03-01T13:30:00Z"
     }
   ]
+=======
+	"schemaVersion": "1.0.0",
+	"metadata": {
+		"lastStatusCheck": "2026-03-01T13:30:00Z",
+		"registryCacheMaxAge": "PT1H"
+	},
+	"dependencies": [
+		{
+			"name": "electrobun",
+			"currentPin": "0.0.0-canary.20250228",
+			"channel": "alpha",
+			"upstreamSource": "https://registry.npmjs.org/electrobun",
+			"knownGoodHistory": [
+				{
+					"version": "0.0.0-canary.20250228",
+					"timestamp": "2026-03-01T13:30:00Z",
+					"gateResult": "pass"
+				}
+			],
+			"lastUpdated": "2026-03-01T13:30:00Z"
+		},
+		{
+			"name": "ghostty",
+			"currentPin": "1.2.0",
+			"channel": "stable",
+			"upstreamSource": "https://api.github.com/repos/ghostty-org/ghostty/releases",
+			"knownGoodHistory": [
+				{
+					"version": "1.2.0",
+					"timestamp": "2026-03-01T13:30:00Z",
+					"gateResult": "pass"
+				}
+			],
+			"lastUpdated": "2026-03-01T13:30:00Z"
+		},
+		{
+			"name": "zellij",
+			"currentPin": "0.40.0",
+			"channel": "stable",
+			"upstreamSource": "https://api.github.com/repos/zellij-org/zellij/releases",
+			"knownGoodHistory": [
+				{
+					"version": "0.40.0",
+					"timestamp": "2026-03-01T13:30:00Z",
+					"gateResult": "pass"
+				}
+			],
+			"lastUpdated": "2026-03-01T13:30:00Z"
+		},
+		{
+			"name": "@types/bun",
+			"currentPin": "1.2.9",
+			"channel": "stable",
+			"upstreamSource": "https://registry.npmjs.org/@types/bun",
+			"knownGoodHistory": [
+				{
+					"version": "1.2.9",
+					"timestamp": "2026-03-01T13:30:00Z",
+					"gateResult": "pass"
+				}
+			],
+			"lastUpdated": "2026-03-01T13:30:00Z"
+		},
+		{
+			"name": "typescript",
+			"currentPin": "5.8.2",
+			"channel": "stable",
+			"upstreamSource": "https://registry.npmjs.org/typescript",
+			"knownGoodHistory": [
+				{
+					"version": "5.8.2",
+					"timestamp": "2026-03-01T13:30:00Z",
+					"gateResult": "pass"
+				}
+			],
+			"lastUpdated": "2026-03-01T13:30:00Z"
+		}
+	]
+>>>>>>> origin/main
 }

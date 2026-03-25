@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import type { Conversation } from "../../../runtime/src/types/conversation.ts";
+=======
+import type { Conversation, Message } from "../../../runtime/src/types/conversation";
+>>>>>>> origin/main
 
 // In-memory persistence for renderer side
 // Will be wired to main process via RPC when ElectroBun is integrated

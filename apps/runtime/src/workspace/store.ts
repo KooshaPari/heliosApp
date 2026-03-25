@@ -2,17 +2,29 @@
 // T011 — JSON file persistence backend
 // T014 — Concurrent operation serialization
 
+<<<<<<< HEAD
 import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   PRIMARY_FILE,
+=======
+import { readFile, mkdir } from "node:fs/promises";
+import { join } from "node:path";
+import type { Workspace, WorkspaceStore } from "./types.js";
+import {
+>>>>>>> origin/main
   atomicWrite,
   computeChecksum,
   createSnapshot,
   detectCorruption,
   recoverFromSnapshot,
+<<<<<<< HEAD
 } from "./snapshot.js";
 import type { Workspace, WorkspaceStore } from "./types.js";
+=======
+  PRIMARY_FILE,
+} from "./snapshot.js";
+>>>>>>> origin/main
 
 export class InMemoryWorkspaceStore implements WorkspaceStore {
   private readonly data = new Map<string, Workspace>();
@@ -67,20 +79,33 @@ class Mutex {
     return new Promise<() => void>((resolve, reject) => {
       const timer = setTimeout(() => {
         const idx = this.queue.findIndex(e => e.resolve === resolve);
+<<<<<<< HEAD
         if (idx !== -1) {
           this.queue.splice(idx, 1);
         }
+=======
+        if (idx !== -1) this.queue.splice(idx, 1);
+>>>>>>> origin/main
         reject(new Error("Write lock timeout: could not acquire lock within 5 seconds"));
       }, LOCK_TIMEOUT_MS);
 
       const entry = { resolve, timer };
 
+<<<<<<< HEAD
       if (this.locked) {
         this.queue.push(entry);
       } else {
         this.locked = true;
         clearTimeout(timer);
         resolve(this.createRelease());
+=======
+      if (!this.locked) {
+        this.locked = true;
+        clearTimeout(timer);
+        resolve(this.createRelease());
+      } else {
+        this.queue.push(entry);
+>>>>>>> origin/main
       }
     });
   }
@@ -88,9 +113,13 @@ class Mutex {
   private createRelease(): () => void {
     let released = false;
     return () => {
+<<<<<<< HEAD
       if (released) {
         return;
       }
+=======
+      if (released) return;
+>>>>>>> origin/main
       released = true;
       const next = this.queue.shift();
       if (next) {
@@ -140,7 +169,11 @@ export class JsonWorkspaceStore implements WorkspaceStore {
     if (
       typeof parsed !== "object" ||
       parsed === null ||
+<<<<<<< HEAD
       !Array.isArray((parsed as Record<string, unknown>).workspaces)
+=======
+      !Array.isArray((parsed as Record<string, unknown>)["workspaces"])
+>>>>>>> origin/main
     ) {
       await this.attemptRecovery();
       return;
@@ -152,6 +185,10 @@ export class JsonWorkspaceStore implements WorkspaceStore {
     if (typeof envelope._checksum === "string") {
       const expected = computeChecksum(envelope.workspaces);
       if (envelope._checksum !== expected) {
+<<<<<<< HEAD
+=======
+        console.warn("[workspace-store] Checksum mismatch in primary file, attempting recovery");
+>>>>>>> origin/main
         await this.attemptRecovery();
         return;
       }
@@ -165,16 +202,30 @@ export class JsonWorkspaceStore implements WorkspaceStore {
   private async attemptRecovery(): Promise<void> {
     const corruption = await detectCorruption(this.dataDir);
     if (corruption.corrupted) {
+<<<<<<< HEAD
+=======
+      console.warn(`[workspace-store] Primary file corrupted: ${corruption.reason}`);
+>>>>>>> origin/main
     }
 
     const recovered = await recoverFromSnapshot(this.dataDir);
     if (recovered !== null) {
+<<<<<<< HEAD
+=======
+      console.warn("[workspace-store] Recovered from snapshot");
+>>>>>>> origin/main
       for (const ws of recovered) {
         this.data.set(ws.id, ws);
       }
       // Immediately flush to fix primary file
       await this.flushInternal();
     } else {
+<<<<<<< HEAD
+=======
+      console.error(
+        "[workspace-store] Recovery failed — both primary and snapshot corrupted. Starting empty."
+      );
+>>>>>>> origin/main
     }
   }
 

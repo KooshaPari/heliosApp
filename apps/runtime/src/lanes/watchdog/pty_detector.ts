@@ -50,7 +50,14 @@ export class PtyDetector {
           },
         });
       }
+<<<<<<< HEAD
     } catch (_error) {}
+=======
+    } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: PTY detection failures are intentionally logged for operational diagnostics.
+      console.warn(`PTY leak detection failed: ${String(error)}`);
+    }
+>>>>>>> origin/main
 
     return orphans;
   }
@@ -63,6 +70,10 @@ export class PtyDetector {
       const result = await execCommand("ps", ["-ef", "-o", "pid,tty,etime,comm"]);
 
       if (result.code !== 0) {
+<<<<<<< HEAD
+=======
+        console.warn("ps command failed:", result.stderr);
+>>>>>>> origin/main
         return [];
       }
 
@@ -76,11 +87,17 @@ export class PtyDetector {
       const lines = result.stdout.split("\n").slice(1); // Skip header
       for (const line of lines) {
         const parts = line.trim().split(/\s+/);
+<<<<<<< HEAD
         if (parts.length < 4) {
           continue;
         }
 
         const pid = Number.parseInt(parts[0], 10);
+=======
+        if (parts.length < 4) continue;
+
+        const pid = parseInt(parts[0], 10);
+>>>>>>> origin/main
         const tty = parts[1];
         const command = parts.slice(3).join(" ");
 
@@ -101,7 +118,13 @@ export class PtyDetector {
       }
 
       return processes;
+<<<<<<< HEAD
     } catch (_error) {
+=======
+    } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: PTY process enumeration is best-effort and should remain observable.
+      console.warn(`Failed to list PTY processes: ${String(error)}`);
+>>>>>>> origin/main
       return [];
     }
   }
@@ -112,6 +135,7 @@ export class PtyDetector {
     try {
       const parts = etimeStr.split(":").reverse();
       let seconds = 0;
+<<<<<<< HEAD
       if (parts.length > 0) {
         seconds += Number.parseInt(parts[0], 10);
       }
@@ -125,6 +149,17 @@ export class PtyDetector {
           seconds += (day * 24 + hour) * 3600;
         } else {
           seconds += Number.parseInt(hourOrDay, 10) * 3600;
+=======
+      if (parts.length >= 1) seconds += parseInt(parts[0], 10);
+      if (parts.length >= 2) seconds += parseInt(parts[1], 10) * 60;
+      if (parts.length >= 3) {
+        const hourOrDay = parts[2];
+        if (hourOrDay.includes("-")) {
+          const [day, hour] = hourOrDay.split("-").map(x => parseInt(x, 10));
+          seconds += (day * 24 + hour) * 3600;
+        } else {
+          seconds += parseInt(hourOrDay, 10) * 3600;
+>>>>>>> origin/main
         }
       }
 
@@ -135,10 +170,14 @@ export class PtyDetector {
     }
   }
 
+<<<<<<< HEAD
   private isSystemProcess(proc: {
     pid: number;
     command: string;
   }): boolean {
+=======
+  private isSystemProcess(proc: { pid: number; command: string }): boolean {
+>>>>>>> origin/main
     // Filter out common system processes that typically have PTY
     const systemPatterns = [
       /^(kernel_task|launchd|sshd|bash|sh|zsh|tmux|screen)/i,

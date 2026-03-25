@@ -4,9 +4,15 @@
  */
 import { describe, expect, it } from "bun:test";
 import {
+<<<<<<< HEAD
   DuplicateRendererError,
   RendererNotFoundError,
   RendererRegistry,
+=======
+  RendererRegistry,
+  DuplicateRendererError,
+  RendererNotFoundError,
+>>>>>>> origin/main
 } from "../../../src/renderer/registry.js";
 import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
 

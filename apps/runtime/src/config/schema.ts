@@ -62,7 +62,14 @@ export function validateValue(key: string, value: unknown): { valid: boolean; re
 
   // Reject null and undefined for defined settings.
   if (value === null || value === undefined) {
+<<<<<<< HEAD
     return { valid: false, reason: `${key}: value must not be null or undefined` };
+=======
+    return {
+      valid: false,
+      reason: `${key}: value must not be null or undefined`,
+    };
+>>>>>>> origin/main
   }
 
   switch (def.type) {
@@ -88,7 +95,11 @@ export function validateValue(key: string, value: unknown): { valid: boolean; re
       break;
     }
     case "enum": {
+<<<<<<< HEAD
       if (!def.enumValues?.includes(value as string)) {
+=======
+      if (!def.enumValues || !def.enumValues.includes(value as string)) {
+>>>>>>> origin/main
         return {
           valid: false,
           reason: `${key}: expected one of [${(def.enumValues ?? []).join(", ")}]`,

@@ -2,7 +2,11 @@
  * Unit tests for GhosttyMetrics (T008, T009).
  */
 
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+=======
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+>>>>>>> origin/main
 import { GhosttyMetrics } from "../metrics.js";
 import type { MetricsSnapshot } from "../metrics.js";
 

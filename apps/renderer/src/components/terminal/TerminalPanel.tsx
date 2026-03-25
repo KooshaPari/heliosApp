@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "@xterm/addon-web-links";
 import { Terminal } from "@xterm/xterm";
 import { type Component, onCleanup, onMount } from "solid-js";
+=======
+import { type Component, onCleanup, onMount } from "solid-js";
+import { Terminal } from "@xterm/xterm";
+import { FitAddon } from "@xterm/addon-fit";
+import { WebLinksAddon } from "@xterm/addon-web-links";
+>>>>>>> origin/main
 
 export type TerminalPanelProps = {
   terminalId: string;
@@ -16,9 +23,13 @@ export const TerminalPanel: Component<TerminalPanelProps> = props => {
   let resizeObserver: ResizeObserver | undefined;
 
   onMount(() => {
+<<<<<<< HEAD
     if (!ref) {
       return;
     }
+=======
+    if (!ref) return;
+>>>>>>> origin/main
 
     terminal = new Terminal({
       theme: {

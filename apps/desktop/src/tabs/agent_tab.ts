@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
+=======
+import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
+>>>>>>> origin/main
 
 export interface AgentAction {
   timestamp: string;
@@ -8,9 +12,15 @@ export interface AgentAction {
 }
 
 export interface AgentTabState extends TabState {
+<<<<<<< HEAD
   agentStatus?: "idle" | "running" | "error" | undefined;
   scrollPosition?: number | undefined;
   actionCount?: number | undefined;
+=======
+  agentStatus?: "idle" | "running" | "error";
+  scrollPosition?: number;
+  actionCount?: number;
+>>>>>>> origin/main
 }
 
 /**
@@ -26,7 +36,11 @@ export interface AgentTabState extends TabState {
 export class AgentTab extends TabSurface {
   private agentStatus: "idle" | "running" | "error" = "idle";
   private actions: AgentAction[] = [];
+<<<<<<< HEAD
   // errorMessage is inherited from TabSurface (protected)
+=======
+  protected override errorMessage: string | null = null;
+>>>>>>> origin/main
   private contentEl: HTMLElement | null = null;
 
   constructor() {
@@ -153,6 +167,10 @@ export class AgentTab extends TabSurface {
     restartBtn.style.fontSize = "12px";
     restartBtn.addEventListener("click", () => {
       this.agentStatus = "running";
+<<<<<<< HEAD
+=======
+      console.log("Restart agent action triggered");
+>>>>>>> origin/main
     });
 
     const logBtn = document.createElement("button");
@@ -164,7 +182,13 @@ export class AgentTab extends TabSurface {
     logBtn.style.borderRadius = "3px";
     logBtn.style.cursor = "pointer";
     logBtn.style.fontSize = "12px";
+<<<<<<< HEAD
     logBtn.addEventListener("click", () => {});
+=======
+    logBtn.addEventListener("click", () => {
+      console.log("View full log action triggered");
+    });
+>>>>>>> origin/main
 
     const copyBtn = document.createElement("button");
     copyBtn.textContent = "Copy";
@@ -179,7 +203,13 @@ export class AgentTab extends TabSurface {
       const text = this.actions.map(a => `[${a.timestamp}] ${a.action}: ${a.output}`).join("\n");
       try {
         await navigator.clipboard.writeText(text);
+<<<<<<< HEAD
       } catch {}
+=======
+      } catch {
+        console.error("Failed to copy to clipboard");
+      }
+>>>>>>> origin/main
     });
 
     footerEl.appendChild(restartBtn);

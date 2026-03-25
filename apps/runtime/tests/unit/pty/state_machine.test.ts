@@ -1,10 +1,18 @@
 import { describe, expect, it } from "bun:test";
 import {
+<<<<<<< HEAD
   InvalidTransitionError,
   type PtyEvent,
   PtyLifecycle,
   type PtyState,
   transition,
+=======
+  transition,
+  PtyLifecycle,
+  InvalidTransitionError,
+  type PtyState,
+  type PtyEvent,
+>>>>>>> origin/main
 } from "../../../src/pty/state_machine.js";
 
 // ── All valid transitions ────────────────────────────────────────────────────

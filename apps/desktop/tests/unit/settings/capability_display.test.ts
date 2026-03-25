@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 const vi = { fn: mock, spyOn: spyOn };
 import { type Capability, CapabilityDisplay } from "../../../src/settings/capability_display";
+=======
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+import { CapabilityDisplay } from "../../../src/settings/capability_display";
+import type { Capability } from "../../../src/settings/capability_display";
+>>>>>>> origin/main
 
 describe("CapabilityDisplay", () => {
   let container: HTMLDivElement;

@@ -39,4 +39,11 @@ export function getActiveTerminalId() {
 }
 
 // Stub for terminal write - will be wired to PTY bridge later
+<<<<<<< HEAD
 export function writeToTerminal(_terminalId: string, _data: string): void {}
+=======
+export function writeToTerminal(terminalId: string, data: string): void {
+  // TODO: Wire to ElectroBun RPC terminal.write
+  console.log(`[terminal ${terminalId}] write: ${data}`);
+}
+>>>>>>> origin/main

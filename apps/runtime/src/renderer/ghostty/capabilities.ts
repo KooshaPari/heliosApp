@@ -26,17 +26,32 @@ export async function detectGpu(): Promise<GpuInfo> {
   try {
     if (process.platform === "darwin") {
       // macOS always has Metal on supported hardware
+<<<<<<< HEAD
       const proc = (Bun as any).spawn(["system_profiler", "SPDisplaysDataType"], {
+=======
+      const proc = Bun.spawn(["system_profiler", "SPDisplaysDataType"], {
+>>>>>>> origin/main
         stdout: "pipe",
         stderr: "ignore",
       });
       const text = await new Response(proc.stdout).text();
       const hasMetal = text.includes("Metal");
+<<<<<<< HEAD
       return { available: hasMetal, driverVersion: hasMetal ? "metal" : undefined };
     }
 
     // Linux: probe for OpenGL
     const proc = (Bun as any).spawn(["glxinfo"], { stdout: "pipe", stderr: "ignore" });
+=======
+      return {
+        available: hasMetal,
+        driverVersion: hasMetal ? "metal" : undefined,
+      };
+    }
+
+    // Linux: probe for OpenGL
+    const proc = Bun.spawn(["glxinfo"], { stdout: "pipe", stderr: "ignore" });
+>>>>>>> origin/main
     const text = await new Response(proc.stdout).text();
     const versionMatch = text.match(/OpenGL version string:\s*(.+)/);
     return {

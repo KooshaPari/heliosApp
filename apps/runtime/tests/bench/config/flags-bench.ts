@@ -10,6 +10,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+<<<<<<< HEAD
 import { FlagRegistry, RENDERER_ENGINE_FLAG } from "../../../src/config/flags.js";
 import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
 import { SettingsManager } from "../../../src/config/settings.js";
@@ -17,6 +18,15 @@ import { JsonSettingsStore } from "../../../src/config/store.js";
 
 // CI slowdown factor — 2x threshold multiplier
 const CI_FACTOR = process.env.CI ? 2 : 1;
+=======
+import { JsonSettingsStore } from "../../../src/config/store.js";
+import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
+import { SettingsManager } from "../../../src/config/settings.js";
+import { FlagRegistry, RENDERER_ENGINE_FLAG } from "../../../src/config/flags.js";
+
+// CI slowdown factor — 2x threshold multiplier
+const CI_FACTOR = process.env["CI"] ? 2 : 1;
+>>>>>>> origin/main
 
 interface BenchResult {
   name: string;
@@ -131,7 +141,15 @@ async function benchSettingsWrite(): Promise<BenchResult> {
 async function benchHotReloadPropagation(): Promise<BenchResult> {
   const { tempDir, settings, flags } = await setup();
   // Register theme as a hot-reloadable flag
+<<<<<<< HEAD
   flags.register({ key: "theme", defaultValue: "system", description: "Theme" });
+=======
+  flags.register({
+    key: "theme",
+    defaultValue: "system",
+    description: "Theme",
+  });
+>>>>>>> origin/main
   flags.dispose();
   flags.init();
 
@@ -221,6 +239,7 @@ async function main() {
   results.push(await benchHotReloadPropagation());
   results.push(await benchFlagReadMemory());
 
+<<<<<<< HEAD
   // Assert thresholds
   const failures = results.filter(r => !r.pass);
   if (failures.length > 0) {
@@ -231,5 +250,27 @@ async function main() {
 }
 
 main().catch(_err => {
+=======
+  // Structured JSON output for CI
+  console.log(JSON.stringify({ benchmarks: results }, null, 2));
+
+  // Assert thresholds
+  const failures = results.filter(r => !r.pass);
+  if (failures.length > 0) {
+    console.error("\nBenchmark threshold breaches:");
+    for (const f of failures) {
+      console.error(
+        `  FAIL: ${f.name} — p95=${f.p95_ms.toFixed(4)} > threshold=${f.threshold_p95_ms}`
+      );
+    }
+    process.exit(1);
+  }
+
+  console.log("\nAll benchmarks passed.");
+}
+
+main().catch(err => {
+  console.error(err);
+>>>>>>> origin/main
   process.exit(1);
 });

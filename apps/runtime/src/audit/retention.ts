@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import type { AuditEvent } from "./event.ts";
+=======
+import type { AuditEvent } from "./event";
+>>>>>>> origin/main
 
 /**
  * Retention policy for workspace audit events.
@@ -112,7 +116,11 @@ export class RetentionPurger {
    * @param store - Audit store for deletion
    * @param eventSource - Function to get events for deletion
    */
+<<<<<<< HEAD
   async runPurge(workspaceId: string | undefined, _store: any, eventSource: any): Promise<void> {
+=======
+  async runPurge(workspaceId: string | undefined, store: any, eventSource: any): Promise<void> {
+>>>>>>> origin/main
     const workspaces = workspaceId ? [workspaceId] : await eventSource.getWorkspaces();
 
     for (const ws of workspaces) {
@@ -120,6 +128,10 @@ export class RetentionPurger {
 
       // Skip if legal hold is enabled
       if (policy.legalHold) {
+<<<<<<< HEAD
+=======
+        console.log(`[RetentionPurger] Legal hold active for ${ws}, skipping purge`);
+>>>>>>> origin/main
         continue;
       }
 
@@ -127,6 +139,14 @@ export class RetentionPurger {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - policy.ttlDays);
 
+<<<<<<< HEAD
+=======
+      // TODO: Integrate with actual store queries for deletion
+      console.log(
+        `[RetentionPurger] Purge expired events for ${ws} before ${cutoffDate.toISOString()}`
+      );
+
+>>>>>>> origin/main
       // Create deletion proof
       const proof: DeletionProof = {
         proofId: `proof-${Date.now()}`,

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+>>>>>>> origin/main
 import { ChatTab } from "../../../src/tabs/chat_tab";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
 
@@ -39,7 +43,11 @@ describe("ChatTab", () => {
 
       await tab.onContextChange(context);
       await tab.onContextChange(null);
+<<<<<<< HEAD
       const _el = tab.render();
+=======
+      const el = tab.render();
+>>>>>>> origin/main
 
       const state = tab.getState();
       expect(state.messageCount).toBe(0);

@@ -32,6 +32,7 @@ export const TOPICS = [
   "harness.status.changed",
   "audit.recorded",
   "diagnostics.metric",
+<<<<<<< HEAD
   "orphan.detection.cycle_completed",
   "orphan.detection.resource_found",
   "recovery.stage.changed",
@@ -47,6 +48,8 @@ export const TOPICS = [
   "secrets.credential.revoked",
   "secrets.redaction.applied",
   "secrets.protected_path.accessed",
+=======
+>>>>>>> origin/main
 ] as const;
 
 export type ProtocolTopic = (typeof TOPICS)[number];

@@ -5,12 +5,21 @@
  * FR-025-008: Lane binding and failure isolation.
  */
 
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
 import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 import { NormalizedProviderError } from "../errors.js";
 import { ProviderRegistry } from "../registry.js";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+import { ProviderRegistry } from "../registry.js";
+import { NormalizedProviderError, PROVIDER_ERROR_CODES } from "../errors.js";
+import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
+import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
+>>>>>>> origin/main
 
 /**
  * Mock provider for testing registry behavior.
@@ -33,7 +42,11 @@ class TestProvider implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExe
     };
   }
 
+<<<<<<< HEAD
   async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+=======
+  async execute(input: ACPExecuteInput, correlationId: string): Promise<ACPExecuteOutput> {
+>>>>>>> origin/main
     if (!this.initialized) {
       throw new Error("Not initialized");
     }
@@ -162,14 +175,30 @@ describe("ProviderRegistry", () => {
     });
 
     it("should emit provider.init.failed event on init failure", async () => {
+<<<<<<< HEAD
       class FailingProvider
         implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
       {
+=======
+      class FailingProvider implements ProviderAdapter<
+        ACPConfig,
+        ACPExecuteInput,
+        ACPExecuteOutput
+      > {
+>>>>>>> origin/main
         async init(_config: ACPConfig): Promise<void> {
           throw new Error("Init failed");
         }
         async health(): Promise<ProviderHealthStatus> {
+<<<<<<< HEAD
           return { state: "unavailable", lastCheck: new Date(), failureCount: 0 };
+=======
+          return {
+            state: "unavailable",
+            lastCheck: new Date(),
+            failureCount: 0,
+          };
+>>>>>>> origin/main
         }
         async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
           return { content: "", stopReason: "" };
@@ -387,6 +416,7 @@ describe("ProviderRegistry", () => {
       expect(ws2Providers).toHaveLength(1);
     });
   });
+<<<<<<< HEAD
 
   describe("Lane Binding", () => {
     it("should bind provider to lane", async () => {
@@ -497,4 +527,6 @@ describe("ProviderRegistry", () => {
       expect(retrieved?.failureCount).toBe(2);
     });
   });
+=======
+>>>>>>> origin/main
 });

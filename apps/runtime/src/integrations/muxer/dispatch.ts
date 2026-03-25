@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import type { LocalBusEnvelope } from "../../protocol/types.ts";
+=======
+import type { LocalBusEnvelope } from "../../protocol/types";
+>>>>>>> origin/main
 
 type MuxerSession = {
   id: string;
@@ -40,9 +44,13 @@ export async function handleMuxerCommand(
     case "muxer.attach": {
       const sessionId = payload.session_id as string;
       const session = sessions.get(sessionId);
+<<<<<<< HEAD
       if (!session) {
         return { error: `Session ${sessionId} not found` };
       }
+=======
+      if (!session) return { error: `Session ${sessionId} not found` };
+>>>>>>> origin/main
       session.status = "attached";
       return { session_id: sessionId, status: "attached" };
     }
@@ -50,9 +58,13 @@ export async function handleMuxerCommand(
     case "muxer.detach": {
       const sessionId = payload.session_id as string;
       const session = sessions.get(sessionId);
+<<<<<<< HEAD
       if (!session) {
         return { error: `Session ${sessionId} not found` };
       }
+=======
+      if (!session) return { error: `Session ${sessionId} not found` };
+>>>>>>> origin/main
       session.status = "detached";
       return { session_id: sessionId, status: "detached" };
     }

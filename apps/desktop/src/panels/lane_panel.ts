@@ -26,9 +26,15 @@ export interface LanePanelProps {
 
 export class LanePanel {
   private lanes: Lane[] = [];
+<<<<<<< HEAD
   private activeWorkspaceId = "";
   private activeLaneId?: string | undefined;
   private selectedLaneId?: string | undefined;
+=======
+  private activeWorkspaceId: string = "";
+  private activeLaneId?: string;
+  private selectedLaneId?: string;
+>>>>>>> origin/main
   private props: LanePanelProps;
   private container: HTMLElement | null = null;
   private scrollContainer: HTMLElement | null = null;
@@ -68,9 +74,13 @@ export class LanePanel {
   }
 
   private render(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
 
     this.container.innerHTML = "";
     const panel = this.createPanelElement();
@@ -82,9 +92,13 @@ export class LanePanel {
     const items = this.container.querySelectorAll("[data-lane-item]");
     items.forEach(item => {
       const laneId = item.getAttribute("data-lane-item");
+<<<<<<< HEAD
       if (!laneId) {
         return;
       }
+=======
+      if (!laneId) return;
+>>>>>>> origin/main
 
       item.addEventListener("click", () => this.handleLaneSelect(laneId));
       item.addEventListener("contextmenu", e => this.handleLaneContextMenu(e, laneId));
@@ -249,9 +263,13 @@ export class LanePanel {
   }
 
   private attachEventListeners(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
 
     const createBtn = this.container.querySelector('[data-action="create-lane"]');
     if (createBtn) {
@@ -266,9 +284,13 @@ export class LanePanel {
   }
 
   private detachEventListeners(): void {
+<<<<<<< HEAD
     if (!this.container) {
       return;
     }
+=======
+    if (!this.container) return;
+>>>>>>> origin/main
 
     const keyboardHandler = this.keyboardListeners.get("keyboard");
     if (keyboardHandler) {
@@ -280,14 +302,19 @@ export class LanePanel {
   private handleKeyboardNavigation(event: KeyboardEvent): void {
     const filteredLanes = this.lanes.filter(lane => lane.workspaceId === this.activeWorkspaceId);
 
+<<<<<<< HEAD
     if (filteredLanes.length === 0) {
       return;
     }
+=======
+    if (filteredLanes.length === 0) return;
+>>>>>>> origin/main
 
     const currentIndex = filteredLanes.findIndex(lane => lane.id === this.selectedLaneId);
     let newIndex = currentIndex >= 0 ? currentIndex : 0;
 
     switch (event.key) {
+<<<<<<< HEAD
       case "ArrowDown": {
         event.preventDefault();
         newIndex = Math.min(newIndex + 1, filteredLanes.length - 1);
@@ -299,11 +326,23 @@ export class LanePanel {
         break;
       }
       case "Enter": {
+=======
+      case "ArrowDown":
+        event.preventDefault();
+        newIndex = Math.min(newIndex + 1, filteredLanes.length - 1);
+        break;
+      case "ArrowUp":
+        event.preventDefault();
+        newIndex = Math.max(newIndex - 1, 0);
+        break;
+      case "Enter":
+>>>>>>> origin/main
         event.preventDefault();
         if (currentIndex >= 0) {
           this.handleLaneSelect(filteredLanes[currentIndex].id);
         }
         return;
+<<<<<<< HEAD
       }
       case "Home": {
         event.preventDefault();
@@ -317,12 +356,27 @@ export class LanePanel {
       }
       case "Delete":
       case "Backspace": {
+=======
+      case "Home":
+        event.preventDefault();
+        newIndex = 0;
+        break;
+      case "End":
+        event.preventDefault();
+        newIndex = filteredLanes.length - 1;
+        break;
+      case "Delete":
+      case "Backspace":
+>>>>>>> origin/main
         event.preventDefault();
         if (currentIndex >= 0) {
           this.props.onLaneDelete(filteredLanes[currentIndex].id);
         }
         return;
+<<<<<<< HEAD
       }
+=======
+>>>>>>> origin/main
       default:
         return;
     }

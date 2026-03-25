@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { onCleanup, onMount } from "solid-js";
 import { newChat, toggleSidebar, toggleTerminal } from "./stores/app.store";
+=======
+import { onMount, onCleanup } from "solid-js";
+import { toggleSidebar, toggleTerminal, newChat } from "./stores/app.store";
+>>>>>>> origin/main
 
 function isMeta(e: KeyboardEvent): boolean {
   return e.metaKey || e.ctrlKey;

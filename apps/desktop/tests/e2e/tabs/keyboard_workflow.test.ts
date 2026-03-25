@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { describe, expect, it } from "bun:test";
+=======
+import { describe, it, expect } from "bun:test";
+>>>>>>> origin/main
 
 describe("Keyboard-Only Workflow E2E", () => {
   it("should complete full workflow with only keyboard", async () => {

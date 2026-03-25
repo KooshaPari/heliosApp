@@ -5,6 +5,7 @@
  * surface binding, capabilities, metrics, and input relay.
  */
 
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import type { RenderSurface, RendererConfig } from "../adapter.js";
 import { FeatureFlagDisabledError, RioBackend } from "../rio/backend.js";
@@ -14,12 +15,27 @@ import { RioInputRelay } from "../rio/input.js";
 import { RioMetrics } from "../rio/metrics.js";
 import { RioProcess } from "../rio/process.js";
 import { RioSurface } from "../rio/surface.js";
+=======
+import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
+import { RioBackend, FeatureFlagDisabledError } from "../rio/backend.js";
+import { isRioEnabled, type RioFeatureFlagConfig } from "../rio/index.js";
+import { RioProcess } from "../rio/process.js";
+import { RioSurface } from "../rio/surface.js";
+import { RioCapabilities } from "../rio/capabilities.js";
+import { RioMetrics } from "../rio/metrics.js";
+import { RioInputRelay } from "../rio/input.js";
+import type { RendererConfig, RenderSurface } from "../adapter.js";
+>>>>>>> origin/main
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
+<<<<<<< HEAD
 const _DEFAULT_CONFIG: RendererConfig = {
+=======
+const DEFAULT_CONFIG: RendererConfig = {
+>>>>>>> origin/main
   gpuAcceleration: false,
   colorDepth: 24,
   maxDimensions: { cols: 200, rows: 50 },

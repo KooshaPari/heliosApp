@@ -1,12 +1,21 @@
 /**
  * Integration tests — spawn real PTYs and verify output, state transitions, events.
  *
+<<<<<<< HEAD
  * These tests use (Bun as any).spawn to create actual shell processes.
  */
 
 import { afterEach, describe, expect, it } from "bun:test";
 import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 import { PtyManager } from "../../../src/pty/index.js";
+=======
+ * These tests use Bun.spawn to create actual shell processes.
+ */
+
+import { describe, expect, it, afterEach } from "bun:test";
+import { PtyManager } from "../../../src/pty/index.js";
+import { InMemoryBusPublisher } from "../../../src/pty/events.js";
+>>>>>>> origin/main
 
 const pidsToCleanup: number[] = [];
 
@@ -44,7 +53,11 @@ describe("PTY lifecycle integration", () => {
     // Verify spawned event was emitted.
     const spawnedEvt = bus.events.find(e => e.topic === "pty.spawned");
     expect(spawnedEvt).toBeDefined();
+<<<<<<< HEAD
     expect(spawnedEvt?.payload.pid).toBe(record.pid);
+=======
+    expect(spawnedEvt!.payload["pid"]).toBe(record.pid);
+>>>>>>> origin/main
 
     // Verify state.changed event.
     const stateEvt = bus.events.find(e => e.topic === "pty.state.changed");
@@ -62,7 +75,11 @@ describe("PTY lifecycle integration", () => {
     const mgr = new PtyManager(10, bus);
 
     // Spawn a shell.
+<<<<<<< HEAD
     const proc = (Bun as any).spawn(["/bin/sh"], {
+=======
+    const proc = Bun.spawn(["/bin/sh"], {
+>>>>>>> origin/main
       stdin: "pipe",
       stdout: "pipe",
       stderr: "pipe",
@@ -78,7 +95,16 @@ describe("PTY lifecycle integration", () => {
     pidsToCleanup.push(record.pid);
 
     // Register the external process for write operations.
+<<<<<<< HEAD
     mgr.registerProcess(record.ptyId, proc);
+=======
+    mgr.registerProcess(
+      record.ptyId,
+      proc as unknown as {
+        readonly stdin: { write(data: Uint8Array | string): number };
+      }
+    );
+>>>>>>> origin/main
 
     // Write input.
     const input = new TextEncoder().encode("echo hello\n");
@@ -110,7 +136,14 @@ describe("PTY lifecycle integration", () => {
 
     const resizeEvt = bus.events.find(e => e.topic === "pty.resized");
     expect(resizeEvt).toBeDefined();
+<<<<<<< HEAD
     expect(resizeEvt?.payload.newDimensions).toEqual({ cols: 120, rows: 40 });
+=======
+    expect(resizeEvt!.payload["newDimensions"]).toEqual({
+      cols: 120,
+      rows: 40,
+    });
+>>>>>>> origin/main
 
     const updated = mgr.get(record.ptyId);
     expect(updated?.dimensions).toEqual({ cols: 120, rows: 40 });
@@ -154,9 +187,30 @@ describe("PTY lifecycle integration", () => {
     const mgr = new PtyManager(10, bus);
 
     const records = await Promise.all([
+<<<<<<< HEAD
       mgr.spawn({ shell: "/bin/sh", laneId: "lane-1", sessionId: "sess-1", terminalId: "term-1" }),
       mgr.spawn({ shell: "/bin/sh", laneId: "lane-1", sessionId: "sess-1", terminalId: "term-2" }),
       mgr.spawn({ shell: "/bin/sh", laneId: "lane-2", sessionId: "sess-2", terminalId: "term-3" }),
+=======
+      mgr.spawn({
+        shell: "/bin/sh",
+        laneId: "lane-1",
+        sessionId: "sess-1",
+        terminalId: "term-1",
+      }),
+      mgr.spawn({
+        shell: "/bin/sh",
+        laneId: "lane-1",
+        sessionId: "sess-1",
+        terminalId: "term-2",
+      }),
+      mgr.spawn({
+        shell: "/bin/sh",
+        laneId: "lane-2",
+        sessionId: "sess-2",
+        terminalId: "term-3",
+      }),
+>>>>>>> origin/main
     ]);
 
     for (const r of records) {

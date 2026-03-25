@@ -28,7 +28,11 @@ export const MessageBubble: Component<MessageBubbleProps> = props => {
       <Show when={isToolResult()}>
         <ToolResultBlock message={props.message} />
       </Show>
+<<<<<<< HEAD
       <Show when={!(isToolCall() || isToolResult())}>
+=======
+      <Show when={!isToolCall() && !isToolResult()}>
+>>>>>>> origin/main
         <div
           style={{
             "max-width": isUser() ? "70%" : "85%",

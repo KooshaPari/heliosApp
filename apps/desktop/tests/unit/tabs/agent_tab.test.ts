@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
+=======
+import { describe, it, expect, beforeEach } from "bun:test";
+>>>>>>> origin/main
 import { AgentTab } from "../../../src/tabs/agent_tab";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
 

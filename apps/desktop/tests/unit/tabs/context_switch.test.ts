@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import {
   type ActiveContext,
   ActiveContextStore,
   getActiveContextStore,
   resetActiveContextStore,
+=======
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import {
+  ActiveContextStore,
+  type ActiveContext,
+  resetActiveContextStore,
+  getActiveContextStore,
+>>>>>>> origin/main
 } from "../../../src/tabs/context_switch";
 
 describe("ActiveContextStore", () => {
@@ -107,11 +116,19 @@ describe("ActiveContextStore", () => {
 
       const calls: any[] = [];
 
+<<<<<<< HEAD
       store.onContextChange(_event => {
         calls.push("listener1");
       });
 
       store.onContextChange(_event => {
+=======
+      store.onContextChange(event => {
+        calls.push("listener1");
+      });
+
+      store.onContextChange(event => {
+>>>>>>> origin/main
         calls.push("listener2");
       });
 
@@ -130,7 +147,11 @@ describe("ActiveContextStore", () => {
 
       let callCount = 0;
 
+<<<<<<< HEAD
       const unsubscribe = store.onContextChange(_event => {
+=======
+      const unsubscribe = store.onContextChange(event => {
+>>>>>>> origin/main
         callCount++;
       });
 
@@ -164,7 +185,11 @@ describe("ActiveContextStore", () => {
         sessionId: "session3",
       };
 
+<<<<<<< HEAD
       const emittedContexts: ActiveContext[] = [];
+=======
+      let emittedContexts: ActiveContext[] = [];
+>>>>>>> origin/main
 
       store.onContextChange(event => {
         if (event.current) {
@@ -209,7 +234,11 @@ describe("ActiveContextStore", () => {
       // Wait for debounce
       await new Promise(resolve => setTimeout(resolve, 100));
 
+<<<<<<< HEAD
       expect(finalContext).toEqual(contexts[2] as any);
+=======
+      expect(finalContext!).toEqual(contexts[2]!);
+>>>>>>> origin/main
     });
   });
 
@@ -223,7 +252,11 @@ describe("ActiveContextStore", () => {
 
       let validated = false;
 
+<<<<<<< HEAD
       store.setValidator(async _ctx => {
+=======
+      store.setValidator(async ctx => {
+>>>>>>> origin/main
         validated = true;
         return true;
       });

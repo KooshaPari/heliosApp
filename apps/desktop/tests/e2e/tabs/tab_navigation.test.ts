@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { describe, expect, it } from "bun:test";
+=======
+import { describe, it, expect } from "bun:test";
+>>>>>>> origin/main
 
 describe("Tab Navigation E2E", () => {
   it("should display all 5 tabs in tab bar", async () => {

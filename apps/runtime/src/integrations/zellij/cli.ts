@@ -5,8 +5,18 @@
  * using Bun.spawn for process execution.
  */
 
+<<<<<<< HEAD
 import { ZellijNotFoundError, ZellijTimeoutError, ZellijVersionError } from "./errors.js";
 import type { AvailabilityResult, CliResult, ZellijSession } from "./types.js";
+=======
+import type { AvailabilityResult, CliResult, ZellijSession } from "./types.js";
+import {
+  ZellijNotFoundError,
+  ZellijVersionError,
+  ZellijCliError,
+  ZellijTimeoutError,
+} from "./errors.js";
+>>>>>>> origin/main
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const MINIMUM_VERSION = "0.40.0";
@@ -21,12 +31,17 @@ function compareSemver(a: string, b: string): number {
   for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
     const va = pa[i] ?? 0;
     const vb = pb[i] ?? 0;
+<<<<<<< HEAD
     if (va < vb) {
       return -1;
     }
     if (va > vb) {
       return 1;
     }
+=======
+    if (va < vb) return -1;
+    if (va > vb) return 1;
+>>>>>>> origin/main
   }
   return 0;
 }
@@ -48,6 +63,7 @@ export class ZellijCli {
     const command = `${this.zellijPath} ${args.join(" ")}`;
     const startMs = performance.now();
 
+<<<<<<< HEAD
     let proc: any;
     try {
       proc = (Bun as any).spawn([this.zellijPath, ...args], {
@@ -67,6 +83,35 @@ export class ZellijCli {
 
     const exitPromise = proc.exited.then(() => "done" as const);
     const race = await Promise.race([exitPromise, timeoutPromise]);
+=======
+    let proc: ReturnType<typeof Bun.spawn>;
+    try {
+      proc = Bun.spawn([this.zellijPath, ...args], {
+        stdout: "pipe",
+        stderr: "pipe",
+      });
+    } catch (error) {
+      const caught = error as { code?: string; message?: string };
+      if (caught?.code === "ENOENT" || caught?.message?.includes("spawn ENOENT")) {
+        throw new ZellijNotFoundError();
+      }
+      throw error;
+    }
+
+    // Race between process completion and timeout
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeoutPromise = new Promise<"timeout">(resolve => {
+      timer = setTimeout(() => {
+        resolve("timeout");
+      }, timeout);
+    });
+
+    const exitPromise = proc.exited.then(() => "done" as const);
+    const race = await Promise.race([exitPromise, timeoutPromise]);
+    if (timer) {
+      clearTimeout(timer);
+    }
+>>>>>>> origin/main
 
     if (race === "timeout") {
       proc.kill();
@@ -79,10 +124,22 @@ export class ZellijCli {
       proc.exited,
     ]);
 
+<<<<<<< HEAD
     const _durationMs = performance.now() - startMs;
     const stdout = new TextDecoder().decode(stdoutBuf);
     const stderr = new TextDecoder().decode(stderrBuf);
 
+=======
+    const durationMs = performance.now() - startMs;
+    const stdout = new TextDecoder().decode(stdoutBuf);
+    const stderr = new TextDecoder().decode(stderrBuf);
+
+    // Debug logging for all CLI calls
+    console.debug(
+      `[zellij-cli] ${command} -> exit=${exitCode} duration=${durationMs.toFixed(1)}ms`
+    );
+
+>>>>>>> origin/main
     return { stdout, stderr, exitCode };
   }
 
@@ -116,6 +173,7 @@ export class ZellijCli {
       throw new ZellijVersionError(version, MINIMUM_VERSION);
     }
 
+<<<<<<< HEAD
     // Attempt to resolve the binary path
     let path: string | undefined;
     try {
@@ -126,6 +184,9 @@ export class ZellijCli {
     } catch {
       // path stays undefined, which is fine
     }
+=======
+    const path = this.zellijPath;
+>>>>>>> origin/main
 
     return { available: true, version, path };
   }
@@ -136,6 +197,7 @@ export class ZellijCli {
   async listSessions(): Promise<ZellijSession[]> {
     const result = await this.run(["list-sessions"]);
 
+<<<<<<< HEAD
     // If no sessions, zellij may return exit code 0 with empty output
     // or exit code 1 with "No active zellij sessions found."
     if (result.exitCode !== 0 && result.stdout.includes("No active")) {
@@ -143,6 +205,12 @@ export class ZellijCli {
     }
 
     if (result.exitCode !== 0 && result.stdout.trim() === "" && result.stderr.trim() === "") {
+=======
+    if (
+      result.exitCode !== 0 &&
+      (result.stdout.includes("No active") || result.stdout.trim() === "")
+    ) {
+>>>>>>> origin/main
       return [];
     }
 
@@ -165,16 +233,24 @@ export class ZellijCli {
    */
   private parseSessionLine(line: string): ZellijSession | undefined {
     const trimmed = line.trim();
+<<<<<<< HEAD
     if (trimmed === "") {
       return undefined;
     }
+=======
+    if (trimmed === "") return undefined;
+>>>>>>> origin/main
 
     // The session name is the first whitespace-delimited token
     const parts = trimmed.split(/\s+/);
     const name = parts[0];
+<<<<<<< HEAD
     if (!name) {
       return undefined;
     }
+=======
+    if (!name) return undefined;
+>>>>>>> origin/main
 
     const attached = /\(ATTACHED\)/i.test(trimmed) || trimmed.includes("ATTACHED");
 

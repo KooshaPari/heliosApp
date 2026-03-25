@@ -253,6 +253,7 @@ export class PtyRegistry {
 
   private resolveIndex(index: Map<string, Set<string>>, key: string): PtyRecord[] {
     const ids = index.get(key);
+<<<<<<< HEAD
     if (!ids) {
       return [];
     }
@@ -262,6 +263,13 @@ export class PtyRegistry {
       if (rec) {
         records.push(rec);
       }
+=======
+    if (!ids) return [];
+    const records: PtyRecord[] = [];
+    for (const id of ids) {
+      const rec = this.primary.get(id);
+      if (rec) records.push(rec);
+>>>>>>> origin/main
     }
     return records;
   }
@@ -286,6 +294,7 @@ export class PtyRegistry {
 
       for (const line of lines) {
         const parts = line.trim().split(/\s+/);
+<<<<<<< HEAD
         if (parts.length < 3) {
           continue;
         }
@@ -303,6 +312,19 @@ export class PtyRegistry {
         if (ppid !== currentPid && ppid !== 1) {
           continue;
         }
+=======
+        if (parts.length < 3) continue;
+
+        const pid = parseInt(parts[0]!, 10);
+        const ppid = parseInt(parts[1]!, 10);
+        const comm = parts.slice(2).join(" ");
+
+        if (isNaN(pid) || isNaN(ppid)) continue;
+
+        // Only consider processes whose parent is this runtime
+        // or whose parent has exited (ppid=1 on Linux, launchd on macOS)
+        if (ppid !== currentPid && ppid !== 1) continue;
+>>>>>>> origin/main
 
         const basename = comm.split("/").pop() ?? "";
         const isShell = shellPatterns.some(

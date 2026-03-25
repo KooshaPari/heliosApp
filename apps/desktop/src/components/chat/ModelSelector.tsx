@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { type Component, For, Show, createSignal } from "solid-js";
+=======
+import { type Component, createSignal, For, Show } from "solid-js";
+>>>>>>> origin/main
 
 type ModelGroup = {
   provider: string;
@@ -17,15 +21,41 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
     {
       provider: "Cloud",
       models: [
+<<<<<<< HEAD
         { id: "claude-sonnet-4-20250514", name: "Claude Sonnet 4", available: true },
         { id: "claude-opus-4-20250514", name: "Claude Opus 4", available: true },
         { id: "claude-haiku-4-20250514", name: "Claude Haiku 4", available: true },
+=======
+        {
+          id: "claude-sonnet-4-20250514",
+          name: "Claude Sonnet 4",
+          available: true,
+        },
+        {
+          id: "claude-opus-4-20250514",
+          name: "Claude Opus 4",
+          available: true,
+        },
+        {
+          id: "claude-haiku-4-20250514",
+          name: "Claude Haiku 4",
+          available: true,
+        },
+>>>>>>> origin/main
       ],
     },
     {
       provider: "Local (MLX)",
       models: [
+<<<<<<< HEAD
         { id: "mlx-community/Llama-3.2-3B-Instruct", name: "Llama 3.2 3B", available: false },
+=======
+        {
+          id: "mlx-community/Llama-3.2-3B-Instruct",
+          name: "Llama 3.2 3B",
+          available: false,
+        },
+>>>>>>> origin/main
       ],
     },
     {
@@ -37,9 +67,13 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
   const activeModelName = () => {
     for (const group of modelGroups) {
       const found = group.models.find(m => m.id === props.activeModel);
+<<<<<<< HEAD
       if (found) {
         return found.name;
       }
+=======
+      if (found) return found.name;
+>>>>>>> origin/main
     }
     return props.activeModel.split("/").pop() ?? props.activeModel;
   };
@@ -47,7 +81,10 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
   return (
     <div style={{ position: "relative" }}>
       <button
+<<<<<<< HEAD
         type="button"
+=======
+>>>>>>> origin/main
         onClick={() => setIsOpen(!isOpen())}
         style={{
           background: "none",
@@ -94,7 +131,12 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
                 </div>
                 <For each={group.models}>
                   {model => (
+<<<<<<< HEAD
                     <div
+=======
+                    <button
+                      type="button"
+>>>>>>> origin/main
                       onClick={() => {
                         if (model.available) {
                           props.onSelect(model.id);
@@ -121,12 +163,24 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
                       {model.name}
                       <Show when={!model.available}>
                         <span
+<<<<<<< HEAD
                           style={{ "font-size": "11px", "margin-left": "8px", color: "#585b70" }}
+=======
+                          style={{
+                            "font-size": "11px",
+                            "margin-left": "8px",
+                            color: "#585b70",
+                          }}
+>>>>>>> origin/main
                         >
                           (not configured)
                         </span>
                       </Show>
+<<<<<<< HEAD
                     </div>
+=======
+                    </button>
+>>>>>>> origin/main
                   )}
                 </For>
               </div>

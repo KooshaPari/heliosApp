@@ -3,7 +3,11 @@
  * @see FR-010-007
  */
 import { describe, expect, it } from "bun:test";
+<<<<<<< HEAD
 import { compareCapabilities, queryCapabilities } from "../../../src/renderer/capabilities.js";
+=======
+import { queryCapabilities, compareCapabilities } from "../../../src/renderer/capabilities.js";
+>>>>>>> origin/main
 import type { RendererCapabilities } from "../../../src/renderer/capabilities.js";
 import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
 
@@ -71,8 +75,19 @@ describe("compareCapabilities", () => {
   });
 
   it("order-independent inputModes comparison", () => {
+<<<<<<< HEAD
     const a = { ...CAPS_A, inputModes: ["cooked", "raw"] as ("raw" | "cooked" | "application")[] };
     const b = { ...CAPS_A, inputModes: ["raw", "cooked"] as ("raw" | "cooked" | "application")[] };
+=======
+    const a = {
+      ...CAPS_A,
+      inputModes: ["cooked", "raw"] as ("raw" | "cooked" | "application")[],
+    };
+    const b = {
+      ...CAPS_A,
+      inputModes: ["raw", "cooked"] as ("raw" | "cooked" | "application")[],
+    };
+>>>>>>> origin/main
     const diff = compareCapabilities(a, b);
     expect(diff.equal).toBe(true);
   });

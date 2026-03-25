@@ -8,9 +8,15 @@
  */
 
 import type { RendererAdapter } from "./adapter.js";
+<<<<<<< HEAD
 import type { TerminalContext } from "./hot_swap.js";
 import type { RendererEventBus } from "./index.js";
 import type { SwitchBuffer } from "./stream_binding.js";
+=======
+import type { SwitchBuffer } from "./stream_binding.js";
+import type { RendererEventBus } from "./index.js";
+import type { TerminalContext } from "./hot_swap.js";
+>>>>>>> origin/main
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -90,7 +96,11 @@ export async function executeRollback(
     }
 
     // ===== Phase 3: Re-attach original renderer =====
+<<<<<<< HEAD
     for (const [ptyId, _context] of terminals) {
+=======
+    for (const [ptyId, context] of terminals) {
+>>>>>>> origin/main
       try {
         // In real implementation, would restore full context:
         // - scrollback history

@@ -3,6 +3,7 @@
 // FR-002: Unique workspace names
 // FR-008: Deletion guard with active sessions
 
+<<<<<<< HEAD
 import { describe, expect, test } from "bun:test";
 import { createInMemoryStore } from "../../../src/workspace/store.js";
 import {
@@ -12,6 +13,17 @@ import {
   deleteWorkspace,
   openWorkspace,
 } from "../../../src/workspace/workspace.js";
+=======
+import { describe, test, expect } from "bun:test";
+import {
+  createWorkspace,
+  openWorkspace,
+  closeWorkspace,
+  deleteWorkspace,
+  WorkspaceService,
+} from "../../../src/workspace/workspace.js";
+import { createInMemoryStore } from "../../../src/workspace/store.js";
+>>>>>>> origin/main
 
 // ── Entity function tests ───────────────────────────────────────────
 

@@ -40,7 +40,11 @@ export class LaneRegistry {
   private readonly workspaceIndex = new Map<string, Set<string>>();
   private readonly capacityLimit: number;
 
+<<<<<<< HEAD
   constructor(capacityLimit = 50) {
+=======
+  constructor(capacityLimit: number = 50) {
+>>>>>>> origin/main
     this.capacityLimit = capacityLimit;
   }
 
@@ -64,9 +68,13 @@ export class LaneRegistry {
 
   getByWorkspace(workspaceId: string): LaneRecord[] {
     const laneIds = this.workspaceIndex.get(workspaceId);
+<<<<<<< HEAD
     if (!laneIds) {
       return [];
     }
+=======
+    if (!laneIds) return [];
+>>>>>>> origin/main
     return [...laneIds]
       .map(id => this.lanes.get(id))
       .filter((r): r is LaneRecord => r !== undefined)

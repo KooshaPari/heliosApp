@@ -50,7 +50,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/024-audit-logging-and-session-replay/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/024-audit-logging-and-session-replay/spec.md`
 - WP01-03 output: AuditEvent schema, sink, ring buffer, SQLite store, ledger with filters.
@@ -318,4 +318,7 @@ Implementation command:
 - 2026-02-27T00:00:00Z – system – lane=planned – Prompt created.
 - 2026-03-01T13:36:09Z – claude-haiku – shell_pid=82027 – lane=doing – Assigned agent via workflow command
 - 2026-03-01T13:37:26Z – claude-haiku – shell_pid=82027 – lane=done – Implemented: Session snapshots, replay engine, retention policies, deletion proofs, and secure export with redaction
+<<<<<<< HEAD
 - 2026-03-01T13:41:22Z – claude-haiku – shell_pid=82027 – lane=done – Merged
+=======
+>>>>>>> origin/main

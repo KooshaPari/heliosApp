@@ -33,6 +33,7 @@
     "lane.cleaned",
     "harness.status.changed",
     "audit.recorded",
+<<<<<<< HEAD
     "diagnostics.metric",
     "orphan.detection.cycle_completed",
     "orphan.detection.resource_found",
@@ -49,5 +50,8 @@
     "secrets.credential.revoked",
     "secrets.redaction.applied",
     "secrets.protected_path.accessed"
+=======
+    "diagnostics.metric"
+>>>>>>> origin/main
   ]
 }

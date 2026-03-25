@@ -8,10 +8,17 @@
  */
 
 import { describe, expect, it } from "bun:test";
+<<<<<<< HEAD
 import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 import { executeRollback } from "../../../src/renderer/rollback.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
 import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
+=======
+import { executeRollback } from "../../../src/renderer/rollback.js";
+import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
+import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
+import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
+>>>>>>> origin/main
 
 describe("Rollback integration", () => {
   it("successfully restores single terminal to original renderer", async () => {
@@ -37,8 +44,13 @@ describe("Rollback integration", () => {
 
     expect(result.success).toBe(true);
     expect(result.terminalStatuses.length).toBe(1);
+<<<<<<< HEAD
     expect(result.terminalStatuses[0]?.restored).toBe(true);
     expect(result.terminalStatuses[0]?.degraded).toBe(false);
+=======
+    expect(result.terminalStatuses[0]!.restored).toBe(true);
+    expect(result.terminalStatuses[0]!.degraded).toBe(false);
+>>>>>>> origin/main
   });
 
   it("restores multiple terminals on rollback", async () => {
@@ -47,9 +59,45 @@ describe("Rollback integration", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
       ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
       ["pty-2", { ptyId: "pty-2", scrollback: [], cursorX: 5, cursorY: 10, env: {}, cwd: "/" }],
       ["pty-3", { ptyId: "pty-3", scrollback: [], cursorX: 15, cursorY: 20, env: {}, cwd: "/" }],
+=======
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+      [
+        "pty-2",
+        {
+          ptyId: "pty-2",
+          scrollback: [],
+          cursorX: 5,
+          cursorY: 10,
+          env: {},
+          cwd: "/",
+        },
+      ],
+      [
+        "pty-3",
+        {
+          ptyId: "pty-3",
+          scrollback: [],
+          cursorX: 15,
+          cursorY: 20,
+          env: {},
+          cwd: "/",
+        },
+      ],
+>>>>>>> origin/main
     ]);
 
     const result = await executeRollback(
@@ -74,7 +122,21 @@ describe("Rollback integration", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
       ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+>>>>>>> origin/main
     ]);
 
     const failureReason = "target renderer crash during initialization";
@@ -115,8 +177,33 @@ describe("Rollback integration", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
       ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
       ["pty-2", { ptyId: "pty-2", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+      [
+        "pty-2",
+        {
+          ptyId: "pty-2",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+>>>>>>> origin/main
     ]);
 
     const result = await executeRollback(original, failed, terminals, buffer, "test failure");
@@ -174,7 +261,21 @@ describe("Rollback integration", () => {
     };
 
     const terminals = new Map<string, TerminalContext>([
+<<<<<<< HEAD
       ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+=======
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+>>>>>>> origin/main
     ]);
 
     const result = await executeRollback(
