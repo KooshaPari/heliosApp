@@ -5,10 +5,10 @@
  * FR-025-007: Process-level isolation for tool execution.
  */
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { MCPBridgeAdapter } from "../mcp-bridge.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { NormalizedProviderError } from "../errors.js";
+import { MCPBridgeAdapter } from "../mcp-bridge.js";
 
 describe("MCP Bridge Adapter", () => {
   let adapter: MCPBridgeAdapter;
@@ -387,7 +387,7 @@ describe("MCP Bridge Adapter", () => {
           },
           "corr-123"
         );
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
@@ -470,7 +470,7 @@ describe("MCP Bridge Adapter", () => {
       // Execute failing tool
       try {
         await adapter.execute({ toolName: "unknown_tool", arguments: {} }, "corr-2");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 

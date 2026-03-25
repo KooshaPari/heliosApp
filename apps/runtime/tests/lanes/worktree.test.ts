@@ -1,21 +1,21 @@
 // Tests for T006-T010: Worktree provisioning, cleanup, PTY termination, orphan reconciliation
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
-import * as path from "node:path";
 import * as os from "node:os";
+import * as path from "node:path";
+import type { PtyManager } from "../../src/lanes/index.js";
+import { _resetIdCounter, LaneManager } from "../../src/lanes/index.js";
 import {
-  provisionWorktree,
-  removeWorktree,
-  reconcileOrphanedWorktrees,
-  computeWorktreePath,
   computeBranchName,
-  WorktreeProvisionError,
-  resetMetrics,
+  computeWorktreePath,
   lastMetrics,
+  provisionWorktree,
+  reconcileOrphanedWorktrees,
+  removeWorktree,
+  resetMetrics,
+  WorktreeProvisionError,
 } from "../../src/lanes/worktree.js";
-import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
-import type { PtyManager, PtyHandle } from "../../src/lanes/index.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

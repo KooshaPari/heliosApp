@@ -6,12 +6,11 @@
  * FR-009: Subscriber isolation during fan-out.
  */
 
-import { describe, expect, it, beforeEach } from 'bun:test';
-import { createBus, type CommandBus, getActiveCorrelationId } from '../../../src/protocol/bus.js';
-import { createCommand, createEvent, createResponse } from '../../../src/protocol/envelope.js';
-import type { EventEnvelope } from '../../../src/protocol/types.js';
+import { beforeEach, describe, expect, it } from "bun:test";
+import { type CommandBus, createBus } from "../../../src/protocol/bus.js";
+import { createCommand, createEvent, createResponse } from "../../../src/protocol/envelope.js";
 
-describe('Event ordering — per-topic monotonic sequences', () => {
+describe("Event ordering — per-topic monotonic sequences", () => {
   let bus: CommandBus;
 
   beforeEach(() => {
@@ -90,7 +89,7 @@ describe('Event ordering — per-topic monotonic sequences', () => {
     for (const topic of topicNames) {
       topicEvents.set(topic, []);
       bus.subscribe(topic, e => {
-        topicEvents.get(topic)!.push(e.sequence!);
+        topicEvents.get(topic)?.push(e.sequence!);
       });
     }
 
@@ -102,7 +101,7 @@ describe('Event ordering — per-topic monotonic sequences', () => {
     }
     await Promise.all(promises);
 
-    for (const [topic, seqs] of topicEvents) {
+    for (const [_topic, seqs] of topicEvents) {
       expect(seqs.length).toBe(100);
       expect(seqs[0]).toBe(1);
       for (let i = 1; i < seqs.length; i++) {
@@ -112,7 +111,7 @@ describe('Event ordering — per-topic monotonic sequences', () => {
   });
 });
 
-describe('Correlation ID propagation', () => {
+describe("Correlation ID propagation", () => {
   let bus: CommandBus;
 
   beforeEach(() => {

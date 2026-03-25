@@ -1,10 +1,10 @@
 // T020 - Stress test for concurrent lane operations (50 lanes)
 // (NFR-008-003, SC-008-002)
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { LaneManager, _resetIdCounter } from "../../../src/lanes/index.js";
+import { _resetIdCounter, LaneManager } from "../../../src/lanes/index.js";
 import { LaneCapacityExceededError } from "../../../src/lanes/registry.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 
@@ -61,7 +61,7 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
     const startTime = Date.now();
 
     // Step 1: Create 50 lanes concurrently
-    const createPromises = Array.from({ length: LANE_COUNT }, (_, i) =>
+    const createPromises = Array.from({ length: LANE_COUNT }, (_, _i) =>
       mgr.create(`ws-stress`, "main")
     );
     const lanes = await Promise.all(createPromises);
@@ -135,8 +135,8 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
     }
 
     // Cleanup one lane
-    mgr.getRegistry().update(lanes[0]!.laneId, { state: "ready" });
-    await mgr.cleanup(lanes[0]!.laneId);
+    mgr.getRegistry().update(lanes[0]?.laneId, { state: "ready" });
+    await mgr.cleanup(lanes[0]?.laneId);
 
     // Should now be able to create another
     const newLane = await mgr.create("ws-free", "main");

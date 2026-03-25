@@ -1,7 +1,7 @@
+import { randomUUID } from "node:crypto";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
-import { randomUUID } from "crypto";
 
 export enum CrashReason {
   HEARTBEAT_TIMEOUT = "HEARTBEAT_TIMEOUT",
@@ -67,7 +67,7 @@ export class Watchdog {
 
   unregister(name: string): void {
     const monitor = this.monitors.get(name);
-    if (monitor && monitor.timeoutId) {
+    if (monitor?.timeoutId) {
       clearTimeout(monitor.timeoutId);
     }
     this.monitors.delete(name);

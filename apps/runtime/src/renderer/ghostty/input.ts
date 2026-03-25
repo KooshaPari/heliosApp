@@ -12,8 +12,8 @@
  * - Per-event latency measured for NFR-011-001.
  */
 
-import type { GhosttyProcess } from "./process.js";
 import type { GhosttyMetrics } from "./metrics.js";
+import type { GhosttyProcess } from "./process.js";
 
 // ---------------------------------------------------------------------------
 // Types

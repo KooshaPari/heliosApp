@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   BindingState,
   type BindingTriple,
   createBinding,
-  validateBindingTriple,
   type RegistryQueryInterface,
+  validateBindingTriple,
 } from "../../../src/registry/binding_triple.js";
 
 /**

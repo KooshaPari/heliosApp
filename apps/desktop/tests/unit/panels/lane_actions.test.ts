@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { LaneActions } from "../../../src/panels/lane_actions";
+import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import type { RuntimeAPI } from "../../../src/panels/lane_actions";
+import { LaneActions } from "../../../src/panels/lane_actions";
 
 describe("LaneActions", () => {
   let actions: LaneActions;

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createRetentionPolicyConfig } from "../../../src/config/retention";
 import { InMemoryAuditSink } from "../../../src/audit/sink";
+import { createRetentionPolicyConfig } from "../../../src/config/retention";
 
 describe("retention policy", () => {
   test("enforces minimum retention days", () => {

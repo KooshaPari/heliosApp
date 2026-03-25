@@ -1,7 +1,6 @@
 import type { Conversation, Message } from "../../types/conversation";
 
 export class ConversationStore {
-  private filePath: string;
   private conversations: Map<string, Conversation>;
 
   constructor(filePath: string = "conversations.json") {

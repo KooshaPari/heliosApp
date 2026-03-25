@@ -6,10 +6,10 @@
  * On recovery, persisted bindings are re-validated against current state.
  */
 
-import { promises as fs } from "fs";
-import { createHash } from "crypto";
-import { homedir } from "os";
-import { dirname, join } from "path";
+import { createHash } from "node:crypto";
+import { promises as fs } from "node:fs";
+import { homedir } from "node:os";
+import { dirname, join } from "node:path";
 import type { TerminalBinding } from "./binding_triple.js";
 
 export interface PersistenceStore {

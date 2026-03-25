@@ -1,4 +1,4 @@
-import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
+import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
 
 export interface LaneInfo {
   laneId: string;
@@ -33,7 +33,6 @@ export interface ProjectMetadata {
 export class ProjectTab extends TabSurface {
   private metadata: ProjectMetadata | null = null;
   private expandedSections = new Set<string>(["lanes", "info"]);
-  private contentEl: HTMLElement | null = null;
 
   constructor() {
     super("project-tab", "project", "Project");

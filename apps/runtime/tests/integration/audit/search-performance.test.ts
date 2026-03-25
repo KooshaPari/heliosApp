@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
 import { AuditLedger } from "../../../src/audit/ledger";
 import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
-import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 
 /**
  * Calculate percentile from array of values.
@@ -117,7 +117,7 @@ describe("Audit Search Performance", () => {
 
     for (let i = 0; i < 20; i++) {
       const startTime = Date.now();
-      const results = ledger.search({
+      const _results = ledger.search({
         timeRange: { from: oneHourAgo, to: now2 },
         limit: 100,
       });
@@ -158,7 +158,7 @@ describe("Audit Search Performance", () => {
 
     for (let i = 0; i < 20; i++) {
       const startTime = Date.now();
-      const results = ledger.search({
+      const _results = ledger.search({
         workspaceId: "ws-0",
         actor: "actor-0",
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,

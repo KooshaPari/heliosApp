@@ -1,5 +1,5 @@
+import { randomUUID } from "node:crypto";
 import type { LocalBus } from "../protocol/bus.js";
-import { randomUUID } from "crypto";
 import {
   deleteRecoveryState,
   loadRecoveryState,
@@ -18,8 +18,8 @@ import {
   type StageChangeListener,
 } from "./state-machine-types.js";
 
-export { RecoveryStage } from "./state-machine-types.js";
 export type { RecoveryState, StageChangeListener } from "./state-machine-types.js";
+export { RecoveryStage } from "./state-machine-types.js";
 
 export class RecoveryStateMachine {
   private currentStage: RecoveryStage = RecoveryStage.CRASHED;
@@ -53,7 +53,7 @@ export class RecoveryStateMachine {
     const legalTransitions = LEGAL_TRANSITIONS[from] || [];
     if (!legalTransitions.includes(to)) {
       throw new Error(
-        `Illegal transition from ${from} to ${to}. Legal: ${legalTransitions.join(", ")}`,
+        `Illegal transition from ${from} to ${to}. Legal: ${legalTransitions.join(", ")}`
       );
     }
 

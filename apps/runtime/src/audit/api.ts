@@ -1,4 +1,4 @@
-import { AuditLedger, type AuditFilter } from "./ledger";
+import type { AuditFilter, AuditLedger } from "./ledger";
 
 /**
  * API response wrapper for paginated results.
@@ -24,7 +24,6 @@ export interface ErrorResponse {
  */
 export class AuditLedgerAPI {
   private requestCounts: Map<string, number> = new Map();
-  private requestResetTime: number = Date.now();
   private readonly RATE_LIMIT = 100; // 100 requests per minute
   private readonly RATE_LIMIT_WINDOW = 60_000; // 1 minute
 
@@ -175,7 +174,7 @@ export class AuditLedgerAPI {
       const from = queryParams.from ? new Date(queryParams.from) : new Date(0);
       const to = queryParams.to ? new Date(queryParams.to) : new Date();
 
-      if (!isNaN(from.getTime()) && !isNaN(to.getTime())) {
+      if (!Number.isNaN(from.getTime()) && !Number.isNaN(to.getTime())) {
         filter.timeRange = { from, to };
       } else {
         throw new Error("Invalid time range parameters");
@@ -184,7 +183,7 @@ export class AuditLedgerAPI {
 
     if (queryParams.limit) {
       const limit = parseInt(queryParams.limit, 10);
-      if (isNaN(limit) || limit < 1 || limit > 1000) {
+      if (Number.isNaN(limit) || limit < 1 || limit > 1000) {
         throw new Error("Limit must be between 1 and 1000");
       }
       filter.limit = limit;
@@ -192,7 +191,7 @@ export class AuditLedgerAPI {
 
     if (queryParams.offset) {
       const offset = parseInt(queryParams.offset, 10);
-      if (isNaN(offset) || offset < 0) {
+      if (Number.isNaN(offset) || offset < 0) {
         throw new Error("Offset must be >= 0");
       }
       filter.offset = offset;

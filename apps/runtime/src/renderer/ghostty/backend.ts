@@ -7,13 +7,13 @@
 
 import type { RendererAdapter, RendererConfig, RendererState, RenderSurface } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
+import { detectCapabilities, getCachedCapabilities } from "./capabilities.js";
+import type { PtyWriter } from "./input.js";
+import { GhosttyInputRelay } from "./input.js";
+import type { MetricsPublisher, MetricsSnapshot } from "./metrics.js";
+import { GhosttyMetrics } from "./metrics.js";
 import { GhosttyProcess } from "./process.js";
 import { GhosttySurface } from "./surface.js";
-import { detectCapabilities, getCachedCapabilities } from "./capabilities.js";
-import { GhosttyMetrics } from "./metrics.js";
-import type { MetricsSnapshot, MetricsPublisher } from "./metrics.js";
-import { GhosttyInputRelay } from "./input.js";
-import type { PtyWriter, GhosttyInputEvent } from "./input.js";
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -49,7 +49,6 @@ export class GhosttyBackend implements RendererAdapter {
   readonly version: string;
 
   private _state: RendererState = "uninitialized";
-  private _config: RendererConfig | undefined;
   private readonly _process = new GhosttyProcess();
   private readonly _surface = new GhosttySurface();
   private readonly _streams = new Map<string, ReadableStreamDefaultReader<Uint8Array>>();

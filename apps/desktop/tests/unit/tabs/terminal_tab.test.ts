@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "bun:test";
-import { TerminalTab } from "../../../src/tabs/terminal_tab";
+import { beforeEach, describe, expect, it } from "bun:test";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
+import { TerminalTab } from "../../../src/tabs/terminal_tab";
 
 describe("TerminalTab", () => {
   let tab: TerminalTab;

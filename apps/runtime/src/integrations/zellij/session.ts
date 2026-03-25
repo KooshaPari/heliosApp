@@ -5,18 +5,18 @@
  */
 
 import type { ZellijCli } from "./cli.js";
-import type { MuxRegistry } from "./registry.js";
-import type { TopologyTracker } from "./topology.js";
+import { SessionAlreadyExistsError, SessionNotFoundError } from "./errors.js";
 import type { MuxEventEmitter } from "./events.js";
 import { MuxEventType } from "./events.js";
+import type { MuxRegistry } from "./registry.js";
+import type { TopologyTracker } from "./topology.js";
 import type {
   MuxSession,
-  SessionOptions,
   PaneRecord,
-  TabRecord,
   PtyManagerInterface,
+  SessionOptions,
+  TabRecord,
 } from "./types.js";
-import { SessionNotFoundError, SessionAlreadyExistsError } from "./errors.js";
 
 /**
  * Generate the canonical session name for a lane.

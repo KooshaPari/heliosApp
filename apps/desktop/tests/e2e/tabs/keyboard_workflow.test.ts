@@ -1,4 +1,4 @@
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 
 describe("Keyboard-Only Workflow E2E", () => {
   it("should complete full workflow with only keyboard", async () => {

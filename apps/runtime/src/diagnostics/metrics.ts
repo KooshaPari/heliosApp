@@ -1,7 +1,7 @@
 // FR-009: Bounded ring buffer and metric registration / recording.
 
-import type { MetricDefinition } from "./types.js";
 import { monotonicNow } from "./hooks.js";
+import type { MetricDefinition } from "./types.js";
 
 // ── Ring Buffer ────────────────────────────────────────────────────────
 

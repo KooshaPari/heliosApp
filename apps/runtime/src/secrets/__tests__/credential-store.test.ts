@@ -1,14 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, rmSync, existsSync, statSync, readFileSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { randomBytes } from "node:crypto";
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { CredentialNotFoundError, CredentialStore } from "../credential-store.js";
 import { EncryptionService } from "../encryption.js";
-import {
-  CredentialStore,
-  CredentialNotFoundError,
-  CredentialAlreadyExistsError,
-} from "../credential-store.js";
 
 function makeStore(dataDir: string): CredentialStore {
   const fixedKey = randomBytes(32);

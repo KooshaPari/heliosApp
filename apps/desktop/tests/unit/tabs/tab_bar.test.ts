@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { TabBar } from "../../../src/tabs/tab_bar";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
 
@@ -32,12 +32,12 @@ describe("TabBar", () => {
       const tab1 = mockTabs[0];
       const tab2 = mockTabs[1];
 
-      let tab1Active = false;
+      let _tab1Active = false;
       let tab1Deactivated = false;
       let tab2Active = false;
 
       tab1.onActivate = () => {
-        tab1Active = true;
+        _tab1Active = true;
       };
       tab1.onDeactivate = () => {
         tab1Deactivated = true;

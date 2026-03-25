@@ -1,13 +1,13 @@
 // Unit tests for CheckpointManager
 
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import {
   CheckpointManager,
   type WatchdogCheckpoint,
 } from "../../../../src/lanes/watchdog/checkpoint.js";
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
 
 describe("CheckpointManager", () => {
   let manager: CheckpointManager;

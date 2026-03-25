@@ -1,7 +1,7 @@
 import type { LocalBus } from "../protocol/bus.js";
-import { RecoveryStage } from "./state-machine.js";
-import type { RestorationResult } from "./restoration.js";
 import type { CleanupResult } from "./orphan-reconciler.js";
+import type { RestorationResult } from "./restoration.js";
+import { RecoveryStage } from "./state-machine.js";
 
 export interface BannerConfig {
   containerId?: string;

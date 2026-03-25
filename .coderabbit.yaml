@@ -1,6 +1,10 @@
 # CodeRabbit AI Code Review Configuration
 
 # Global settings
+pr_validation:
+  block_on:
+    severity: info
+
 rules:
   - type: patch
     description: |
@@ -48,4 +52,6 @@ settings:
     notify_author: true
 
 # Skip review for specific files/patterns (merged with auto review above)
-# Note: docs and node_modules are already handled by max_files/max_lines limits
+# Note: max_files and max_lines are limits on total review size (e.g., 50 files, 2000 lines) 
+# and do not act as path exclusions; to skip specific paths such as docs or node_modules 
+# the configuration must use explicit path_filters.

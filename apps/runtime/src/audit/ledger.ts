@@ -1,6 +1,6 @@
 import type { AuditEvent } from "./event";
-import { AuditRingBuffer, type AuditFilter as RingBufferFilter } from "./ring-buffer";
-import { SQLiteAuditStore } from "./sqlite-store";
+import type { AuditRingBuffer, AuditFilter as RingBufferFilter } from "./ring-buffer";
+import type { SQLiteAuditStore } from "./sqlite-store";
 
 /**
  * Enhanced filter interface for ledger queries.
@@ -173,7 +173,7 @@ export class AuditLedger {
           this.batchedNotifications.set(subscription.callback, []);
         }
 
-        this.batchedNotifications.get(subscription.callback)!.push(event);
+        this.batchedNotifications.get(subscription.callback)?.push(event);
 
         // Start batch timer if not already running
         if (this.batchTimer === null) {

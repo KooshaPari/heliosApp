@@ -5,9 +5,8 @@
  * Rejects operations on terminals with invalid or stale bindings.
  */
 
-import type { RegistryQueryInterface, TerminalBinding } from "./binding_triple.js";
-import { BindingState, validateBindingTriple } from "./binding_triple.js";
-import { TerminalNotFound, InvalidBinding } from "./terminal_registry.js";
+import type { TerminalBinding } from "./binding_triple.js";
+import { BindingState } from "./binding_triple.js";
 import type { TerminalRegistry } from "./terminal_registry.js";
 
 export interface ValidationError {
@@ -31,8 +30,6 @@ export interface MiddlewareValidationResult {
  * - Binding triple is still valid (re-validates against current state)
  */
 export class BindingMiddleware {
-  private registryQueryInterface: RegistryQueryInterface;
-
   constructor(private registry: TerminalRegistry) {
     this.registryQueryInterface = registry;
   }

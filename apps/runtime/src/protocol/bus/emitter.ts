@@ -1,29 +1,27 @@
-import type { LocalBusEnvelope } from "../types.js";
-import type {
-  LocalBus,
-  AuditRecord,
-  BusState,
-  CommandBusOptions,
-  CommandEnvelope,
-  EventEnvelope,
-  ResponseEnvelope,
-  LocalBusEnvelopeWithSequence,
-} from "./types.js";
 import type { MethodHandler } from "../methods.js";
+import type { LocalBusEnvelope } from "../types.js";
 import { ProtocolValidationError } from "../types.js";
 import { validateEnvelope } from "../validator.js";
-import { isTerminalTopic, isStartTopic, resolveExpectedStartTopic } from "./lifecycle.js";
+import { isStartTopic, isTerminalTopic, resolveExpectedStartTopic } from "./lifecycle.js";
 import { MetricsRecorder } from "./metrics.js";
 import {
   handleLaneAttach,
   handleLaneCreate,
-  handleSessionAttach,
-  handleTerminalSpawn,
-  handleTerminalInput,
   handleRendererCapabilities,
   handleRendererSwitch,
+  handleSessionAttach,
+  handleTerminalInput,
+  handleTerminalSpawn,
   type RequestHandlerContext,
 } from "./request-handlers.js";
+import type {
+  AuditRecord,
+  BusState,
+  EventEnvelope,
+  LocalBus,
+  LocalBusEnvelopeWithSequence,
+  ResponseEnvelope,
+} from "./types.js";
 
 export { CommandBusImpl, createBus } from "./command-bus.js";
 
@@ -250,11 +248,11 @@ export class InMemoryLocalBus implements LocalBus {
   }
 
   // Implement LocalBus interface (stub methods)
-  registerMethod(method: string, handler: MethodHandler): void {
+  registerMethod(_method: string, _handler: MethodHandler): void {
     // Stub for interface compliance
   }
 
-  async send(envelope: unknown): Promise<ResponseEnvelope> {
+  async send(_envelope: unknown): Promise<ResponseEnvelope> {
     return {
       id: "stub",
       type: "response",
@@ -263,7 +261,7 @@ export class InMemoryLocalBus implements LocalBus {
     };
   }
 
-  subscribe(topic: string, handler: (evt: EventEnvelope) => void | Promise<void>): () => void {
+  subscribe(_topic: string, _handler: (evt: EventEnvelope) => void | Promise<void>): () => void {
     return () => {};
   }
 

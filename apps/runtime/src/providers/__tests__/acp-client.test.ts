@@ -6,9 +6,9 @@
  * FR-025-012: Policy gate integration.
  */
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
 import { NormalizedProviderError } from "../errors.js";
 
 /**
@@ -262,7 +262,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
@@ -467,7 +467,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 

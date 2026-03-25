@@ -1,5 +1,5 @@
-import type { TabSurface } from "./tab_surface";
 import type { ActiveContext } from "./context_switch";
+import type { TabSurface } from "./tab_surface";
 
 export interface PropagationResult {
   successful: string[];
@@ -20,7 +20,6 @@ export interface PropagationResult {
  */
 export class ContextPropagator {
   private registeredTabs: Map<string, TabSurface> = new Map();
-  private currentPropagation: Promise<PropagationResult> | null = null;
   private propagationAbortController: AbortController | null = null;
   private readonly PROPAGATION_TIMEOUT = 500; // ms
 

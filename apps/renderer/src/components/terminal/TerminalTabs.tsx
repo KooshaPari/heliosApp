@@ -1,11 +1,11 @@
 import { type Component, For } from "solid-js";
 import {
-  type TerminalInfo,
   closeTerminal,
   createTerminal,
   getActiveTerminalId,
   getTerminals,
   switchTerminal,
+  type TerminalInfo,
 } from "../../stores/terminal.store";
 
 export type TerminalTabsProps = {

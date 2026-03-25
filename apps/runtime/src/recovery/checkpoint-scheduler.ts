@@ -1,5 +1,4 @@
-import type { Checkpoint } from "./checkpoint.js";
-import type { CheckpointWriter } from "./checkpoint.js";
+import type { Checkpoint, CheckpointWriter } from "./checkpoint.js";
 
 const DEFAULT_CHECKPOINT_INTERVAL_MS = 60000; // 60 seconds
 const ACTIVITY_THRESHOLD = 50; // Activity events before triggering checkpoint
@@ -15,7 +14,6 @@ export class CheckpointScheduler {
   private timerInterval?: NodeJS.Timeout;
   private currentInterval = DEFAULT_CHECKPOINT_INTERVAL_MS;
   private activityCounter = 0;
-  private lastCheckpointTime = 0;
   private lastWriteDurationMs = 0;
 
   start(writer: CheckpointWriter, stateGetter: () => Checkpoint): void {

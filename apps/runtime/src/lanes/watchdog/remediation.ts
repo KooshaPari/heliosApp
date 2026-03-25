@@ -1,12 +1,12 @@
 // T007-T009 - Remediation engine with confirmation gates and recovery suppression
 
-import { promises as fs } from "fs";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { execCommand } from "../../integrations/exec.js";
-import path from "path";
-import os from "os";
-import { type ClassifiedOrphan, type ResourceType } from "./resource_classifier.js";
 import type { LocalBus } from "../../protocol/bus.js";
 import type { LaneRegistry } from "../registry.js";
+import type { ClassifiedOrphan, ResourceType } from "./resource_classifier.js";
 
 export interface RemediationSuggestion {
   id: string;

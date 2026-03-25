@@ -12,32 +12,32 @@ import { GhosttyBackend } from "./backend.js";
 // Re-exports
 // ---------------------------------------------------------------------------
 
-export { GhosttyBackend } from "./backend.js";
 export {
+  GhosttyAlreadyInitializedError,
+  GhosttyBackend,
   GhosttyNotInitializedError,
   GhosttyNotRunningError,
-  GhosttyAlreadyInitializedError,
 } from "./backend.js";
-export { GhosttyProcess, GhosttyBinaryNotFoundError, GhosttyProcessError } from "./process.js";
-export type { GhosttyOptions } from "./process.js";
-export { GhosttySurface, SurfaceBindingError } from "./surface.js";
-export type { GpuRenderingMode, GpuSurfaceStatus, SurfaceEventHandler } from "./surface.js";
 export {
-  detectCapabilities,
-  getCachedCapabilities,
   clearCapabilityCache,
+  detectCapabilities,
   detectGpu,
+  getCachedCapabilities,
 } from "./capabilities.js";
-export { GhosttyMetrics } from "./metrics.js";
+export type { GhosttyInputEvent, InputEventListener, PtyWriter } from "./input.js";
+export { GhosttyInputRelay, InputRelayError } from "./input.js";
 export type {
   FrameSample,
   InputLatencySample,
-  MetricsSnapshot,
   MetricsConfig,
   MetricsPublisher,
+  MetricsSnapshot,
 } from "./metrics.js";
-export { GhosttyInputRelay, InputRelayError } from "./input.js";
-export type { PtyWriter, GhosttyInputEvent, InputEventListener } from "./input.js";
+export { GhosttyMetrics } from "./metrics.js";
+export type { GhosttyOptions } from "./process.js";
+export { GhosttyBinaryNotFoundError, GhosttyProcess, GhosttyProcessError } from "./process.js";
+export type { GpuRenderingMode, GpuSurfaceStatus, SurfaceEventHandler } from "./surface.js";
+export { GhosttySurface, SurfaceBindingError } from "./surface.js";
 
 // ---------------------------------------------------------------------------
 // Binary detection

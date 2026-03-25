@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "bun:test";
-import { SessionTab } from "../../../src/tabs/session_tab";
+import { beforeEach, describe, expect, it } from "bun:test";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
+import { SessionTab } from "../../../src/tabs/session_tab";
 
 describe("SessionTab", () => {
   let tab: SessionTab;

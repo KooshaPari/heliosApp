@@ -1,5 +1,5 @@
+import { AUDIT_EVENT_TYPES, createAuditEvent } from "./event";
 import type { AuditSink } from "./sink";
-import { createAuditEvent, AUDIT_EVENT_TYPES } from "./event";
 
 /**
  * Bus event topic to audit event type mapping.

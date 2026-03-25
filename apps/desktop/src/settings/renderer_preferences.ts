@@ -3,9 +3,9 @@
  * Persists renderer settings across sessions
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from "fs";
-import { resolve, dirname } from "path";
-import { homedir } from "os";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { dirname, resolve } from "node:path";
 
 export interface RendererPreferences {
   activeRenderer: string;

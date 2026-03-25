@@ -7,11 +7,10 @@
  * @module
  */
 
-import type { PtyRecord } from "./registry.js";
-import { PtyRegistry } from "./registry.js";
-import { PtyLifecycle } from "./state_machine.js";
 import type { BusPublisher, PtyEventCorrelation } from "./events.js";
 import { emitPtyEvent } from "./events.js";
+import type { PtyRecord, PtyRegistry } from "./registry.js";
+import type { PtyLifecycle } from "./state_machine.js";
 
 // ── Signal Envelope ──────────────────────────────────────────────────────────
 
@@ -264,7 +263,7 @@ export async function terminate(
   });
 
   // Step 1: Send SIGTERM.
-  const termEnvelope = deliverSignal(
+  const _termEnvelope = deliverSignal(
     record.pid,
     "SIGTERM",
     record.ptyId,

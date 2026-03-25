@@ -1,15 +1,20 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import type { CommandEnvelope, EventEnvelope, LocalBusEnvelope, ResponseEnvelope } from "./types.js";
 import type { MethodHandler } from "./methods.js";
+import type {
+  CommandEnvelope,
+  EventEnvelope,
+  LocalBusEnvelope,
+  ResponseEnvelope,
+} from "./types.js";
 
-export { InMemoryLocalBus } from "./bus_in_memory.js";
 export type {
   AuditRecord,
+  BusState,
   MetricSample,
   MetricSummary,
   MetricsReport,
-  BusState,
 } from "./bus_in_memory.js";
+export { InMemoryLocalBus } from "./bus_in_memory.js";
 
 export interface LocalBus {
   request(command: LocalBusEnvelope): Promise<LocalBusEnvelope>;

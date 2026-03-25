@@ -1,12 +1,6 @@
 import type { LocalBus } from "../protocol/bus.js";
-import type {
-  MCPConfig,
-  ProviderHealthStatus,
-} from "./adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-} from "./errors.js";
+import type { MCPConfig, ProviderHealthStatus } from "./adapter.js";
+import { type NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * MCP server connection state.
@@ -48,10 +42,7 @@ export async function connectToServer(
   }
 
   try {
-    if (
-      config.serverPath.includes("localhost") ||
-      config.serverPath.includes("127.0.0.1")
-    ) {
+    if (config.serverPath.includes("localhost") || config.serverPath.includes("127.0.0.1")) {
       connection.connected = true;
       connection.reconnectAttempts = 0;
       return;
@@ -168,10 +159,12 @@ export async function invokeTool(
     };
 
     const timeout = setTimeout(() => {
-      resolve(results[toolName] || {
-        message: `Mock result for ${toolName}`,
-        arguments: toolArguments,
-      });
+      resolve(
+        results[toolName] || {
+          message: `Mock result for ${toolName}`,
+          arguments: toolArguments,
+        }
+      );
     }, 10);
 
     signal.addEventListener(
@@ -244,9 +237,6 @@ export function createUnavailableStatus(message: string): ProviderHealthStatus {
   };
 }
 
-export function normalizeMcpError(
-  error: unknown,
-  correlationId?: string
-): NormalizedProviderError {
+export function normalizeMcpError(error: unknown, correlationId?: string): NormalizedProviderError {
   return normalizeError(error, "mcp", correlationId);
 }

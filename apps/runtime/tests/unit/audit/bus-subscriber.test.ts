@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { BusAuditSubscriber, type BusEvent } from "../../../src/audit/bus-subscriber";
+import type { AuditEvent } from "../../../src/audit/event";
 import { DefaultAuditSink, NoOpAuditStorage } from "../../../src/audit/sink";
-import { type AuditEvent } from "../../../src/audit/event";
 
 type MockBus = {
   subscribe: (topic: string, handler: (event: BusEvent) => Promise<void>) => () => void;
@@ -56,11 +56,11 @@ describe("BusAuditSubscriber", () => {
       const event: BusEvent = {
         topic: AUDIT_EVENT_TYPES.lane_created,
         payload: { laneId: "lane-1" },
-        actor: 'operator-1',
-        action: 'create',
-        target: 'lane-1',
-        workspaceId: 'workspace-1',
-        correlationId: 'corr-1',
+        actor: "operator-1",
+        action: "create",
+        target: "lane-1",
+        workspaceId: "workspace-1",
+        correlationId: "corr-1",
       };
 
       await mockBus.emit(event);
@@ -77,11 +77,11 @@ describe("BusAuditSubscriber", () => {
       const event: BusEvent = {
         topic: AUDIT_EVENT_TYPES.session_created,
         payload: { sessionId: "session-1" },
-        actor: 'agent-1',
-        action: 'create',
-        target: 'session-1',
-        workspaceId: 'workspace-1',
-        correlationId: 'corr-2',
+        actor: "agent-1",
+        action: "create",
+        target: "session-1",
+        workspaceId: "workspace-1",
+        correlationId: "corr-2",
       };
 
       await mockBus.emit(event);
@@ -96,11 +96,11 @@ describe("BusAuditSubscriber", () => {
       const event: BusEvent = {
         topic: AUDIT_EVENT_TYPES.policy_evaluation_completed,
         payload: { policyId: "policy-1", result: "allowed" },
-        actor: 'system',
-        action: 'evaluate',
-        target: 'policy-1',
-        workspaceId: 'workspace-1',
-        correlationId: 'corr-3',
+        actor: "system",
+        action: "evaluate",
+        target: "policy-1",
+        workspaceId: "workspace-1",
+        correlationId: "corr-3",
       };
 
       await mockBus.emit(event);
@@ -115,11 +115,11 @@ describe("BusAuditSubscriber", () => {
       const event: BusEvent = {
         topic: AUDIT_EVENT_TYPES.approval_resolved,
         payload: { approvalId: "appr-1", decision: "approved" },
-        actor: 'operator-1',
-        action: 'resolve',
-        target: 'appr-1',
-        workspaceId: 'workspace-1',
-        correlationId: 'corr-4',
+        actor: "operator-1",
+        action: "resolve",
+        target: "appr-1",
+        workspaceId: "workspace-1",
+        correlationId: "corr-4",
       };
 
       await mockBus.emit(event);
@@ -150,8 +150,8 @@ describe("BusAuditSubscriber", () => {
     });
   });
 
-  describe('correlation ID preservation', () => {
-    it('should preserve correlation ID from bus event to audit event', async () => {
+  describe("correlation ID preservation", () => {
+    it("should preserve correlation ID from bus event to audit event", async () => {
       let capturedEvent: AuditEvent | null = null;
 
       // Create a capturing storage to inspect events
@@ -177,7 +177,7 @@ describe("BusAuditSubscriber", () => {
       await capturingSink.flush();
 
       expect(capturedEvent).toBeTruthy();
-      expect(capturedEvent?.correlationId).toBe('special-corr-id-123');
+      expect(capturedEvent?.correlationId).toBe("special-corr-id-123");
     });
   });
 

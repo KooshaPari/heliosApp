@@ -7,6 +7,7 @@
  */
 
 import { describe, expect, it } from "bun:test";
+import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 import { executeHotSwap } from "../../../src/renderer/hot_swap.js";
 import { executeRestartWithRestore } from "../../../src/renderer/restart_restore.js";
 import { executeRollback } from "../../../src/renderer/rollback.js";
@@ -17,7 +18,6 @@ import {
   TEST_CONFIG,
   TEST_SURFACE,
 } from "../../helpers/mock_adapter.js";
-import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 
 /**
  * Calculate p95 (95th percentile) of timing values.

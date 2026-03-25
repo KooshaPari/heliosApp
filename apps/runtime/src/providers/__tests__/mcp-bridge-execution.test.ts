@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { createMcpBridgeFixture, initMcpBridge } from "./mcp-bridge-test-helpers.js";
 
 describe("MCP Bridge Adapter - Execution", () => {
@@ -37,7 +37,7 @@ describe("MCP Bridge Adapter - Execution", () => {
     );
 
     const events = bus.getEvents();
-    const executeEvent = events.find((event) => event.topic === "provider.mcp.tool.executed");
+    const executeEvent = events.find(event => event.topic === "provider.mcp.tool.executed");
     expect(executeEvent?.payload?.correlationId).toBe(correlationId);
   });
 
@@ -53,7 +53,7 @@ describe("MCP Bridge Adapter - Execution", () => {
     );
 
     const events = bus.getEvents();
-    const completedEvent = events.find((event) => event.topic === "provider.mcp.tool.executed");
+    const completedEvent = events.find(event => event.topic === "provider.mcp.tool.executed");
     expect(completedEvent).toBeDefined();
     expect(completedEvent?.payload?.toolName).toBe("read_file");
     expect(completedEvent?.payload?.duration).toBeGreaterThanOrEqual(0);
@@ -76,7 +76,7 @@ describe("MCP Bridge Adapter - Execution", () => {
     const results = await Promise.all(promises);
 
     expect(results).toHaveLength(5);
-    results.forEach((result) => {
+    results.forEach(result => {
       expect(result.isError).toBe(false);
       expect(result.result).toBeDefined();
     });

@@ -6,7 +6,7 @@
  */
 
 import type { ZellijCli } from "./cli.js";
-import type { LayoutTopology, TabTopology, PaneTopology, PaneDimensions } from "./types.js";
+import type { LayoutTopology, PaneDimensions, PaneTopology, TabTopology } from "./types.js";
 
 /**
  * Manages layout topology for all tracked sessions.
@@ -88,7 +88,7 @@ export class TopologyTracker {
     for (const tab of topology.tabs) {
       const idx = tab.panes.findIndex(p => p.paneId === paneId);
       if (idx !== -1) {
-        const wasFocused = tab.panes[idx]!.focused;
+        const wasFocused = tab.panes[idx]?.focused;
         tab.panes.splice(idx, 1);
         // If removed pane was focused, focus the first remaining pane
         if (wasFocused && tab.panes.length > 0) {
@@ -158,7 +158,7 @@ export class TopologyTracker {
       topology.tabs.splice(idx, 1);
       // Update active tab if needed
       if (topology.activeTabId === tabId && topology.tabs.length > 0) {
-        topology.activeTabId = topology.tabs[0]!.tabId;
+        topology.activeTabId = topology.tabs[0]?.tabId;
       }
     }
   }

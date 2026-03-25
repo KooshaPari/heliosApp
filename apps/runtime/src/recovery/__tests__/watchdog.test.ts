@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { Watchdog, CrashReason, type CrashEvent } from "../watchdog.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { InMemoryLocalBus, type LocalBus } from "../../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
+import { type CrashEvent, CrashReason, Watchdog } from "../watchdog.js";
 
 describe("Watchdog", () => {
   let watchdog: Watchdog;

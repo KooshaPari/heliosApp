@@ -1,7 +1,7 @@
 import type { Component } from "solid-js";
 import { For } from "solid-js";
-import { ConversationItem } from "./ConversationItem";
 import { getAppState, newChat, updateAppState } from "../../stores/app.store";
+import { ConversationItem } from "./ConversationItem";
 
 type MockConversation = {
   id: string;

@@ -1,10 +1,9 @@
-import { describe, expect, it, beforeEach, afterEach } from "bun:test";
-import { mkdtemp, rm, readFile } from "node:fs/promises";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { writeFile } from "node:fs/promises";
-import { JsonSettingsStore } from "../../../src/config/store.js";
 import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
+import { JsonSettingsStore } from "../../../src/config/store.js";
 
 let tempDir: string;
 let filePath: string;
@@ -32,7 +31,7 @@ describe("JsonSettingsStore", () => {
     const values = { theme: "dark", "telemetry.enabled": true };
     await store.save(values);
     const loaded = await store.load();
-    expect(loaded["theme"]).toBe("dark");
+    expect(loaded.theme).toBe("dark");
     expect(loaded["telemetry.enabled"]).toBe(true);
   });
 
@@ -82,6 +81,6 @@ describe("JsonSettingsStore", () => {
     await rm(filePath);
     await store.save({ theme: "dark" });
     const raw = JSON.parse(await readFile(filePath, "utf-8")) as Record<string, unknown>;
-    expect(raw["theme"]).toBe("dark");
+    expect(raw.theme).toBe("dark");
   });
 });

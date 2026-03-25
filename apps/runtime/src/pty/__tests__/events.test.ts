@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
+import type { BusPublisher, PtyBusEvent, PtyEventCorrelation } from "../events.js";
 import { emitPtyEvent, InMemoryBusPublisher, NoOpBusPublisher } from "../events.js";
-import type { PtyEventCorrelation, BusPublisher, PtyBusEvent } from "../events.js";
 
 describe("emitPtyEvent", () => {
   const correlation: PtyEventCorrelation = {
@@ -21,9 +21,9 @@ describe("emitPtyEvent", () => {
     expect(evt.topic).toBe("pty.spawned");
     expect(evt.session_id).toBe("session-1");
     expect(evt.terminal_id).toBe("term-1");
-    expect(evt.payload["ptyId"]).toBe("pty-1");
-    expect(evt.payload["correlationId"]).toBe("corr-1");
-    expect(evt.payload["pid"]).toBe(123);
+    expect(evt.payload.ptyId).toBe("pty-1");
+    expect(evt.payload.correlationId).toBe("corr-1");
+    expect(evt.payload.pid).toBe(123);
     expect(evt.id).toBeDefined();
     expect(evt.ts).toBeDefined();
   });

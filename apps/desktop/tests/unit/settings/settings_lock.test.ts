@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import { SettingsLock } from "../../../src/settings/settings_lock";
 
 describe("SettingsLock", () => {

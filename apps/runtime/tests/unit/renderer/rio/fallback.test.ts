@@ -4,16 +4,16 @@
  * FR-012-007, SC-012-003.
  */
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { RioBackend } from "../../../../src/renderer/rio/backend.js";
-import { RendererRegistry } from "../../../../src/renderer/registry.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import type {
   RendererAdapter,
   RendererConfig,
-  RenderSurface,
   RendererState,
+  RenderSurface,
 } from "../../../../src/renderer/adapter.js";
 import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
+import { RendererRegistry } from "../../../../src/renderer/registry.js";
+import { RioBackend } from "../../../../src/renderer/rio/backend.js";
 
 // ---------------------------------------------------------------------------
 // Mock ghostty

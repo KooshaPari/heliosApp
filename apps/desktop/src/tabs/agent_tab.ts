@@ -1,4 +1,4 @@
-import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
+import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
 
 export interface AgentAction {
   timestamp: string;

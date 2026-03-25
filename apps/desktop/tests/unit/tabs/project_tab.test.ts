@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "bun:test";
-import { ProjectTab } from "../../../src/tabs/project_tab";
+import { beforeEach, describe, expect, it } from "bun:test";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
+import { ProjectTab } from "../../../src/tabs/project_tab";
 
 describe("ProjectTab", () => {
   let tab: ProjectTab;

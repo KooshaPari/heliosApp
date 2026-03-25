@@ -5,9 +5,11 @@
  * Events are published via the internal bus for downstream consumers.
  */
 
-import type { LocalBus } from "../protocol/bus.js";
 import { randomUUID } from "node:crypto";
+import type { LocalBus } from "../protocol/bus.js";
+
 const uuidv4 = randomUUID;
+
 import type { BindingTriple, TerminalBinding } from "./binding_triple.js";
 
 // Event topics

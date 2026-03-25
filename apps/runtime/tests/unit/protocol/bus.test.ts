@@ -1,14 +1,14 @@
-import { describe, expect, it, beforeEach } from 'bun:test';
-import { createBus, type CommandBus } from '../../../src/protocol/bus.js';
-import { createCommand, createResponse } from '../../../src/protocol/envelope.js';
-import type { CommandEnvelope, ResponseEnvelope } from '../../../src/protocol/types.js';
+import { beforeEach, describe, expect, it } from "bun:test";
+import { type CommandBus, createBus } from "../../../src/protocol/bus.js";
+import { createCommand, createResponse } from "../../../src/protocol/envelope.js";
+import type { CommandEnvelope, ResponseEnvelope } from "../../../src/protocol/types.js";
 
 // FR-003: Command dispatch pipeline
 // FR-004: Event fan-out
 // FR-009: Subscriber isolation
 // FR-010: Snapshot-based iteration
 
-describe('LocalBus — command dispatch', () => {
+describe("LocalBus — command dispatch", () => {
   let bus: CommandBus;
 
   beforeEach(() => {
@@ -34,8 +34,8 @@ describe('LocalBus — command dispatch', () => {
     const res = await bus.send(cmd);
 
     expect(res.error).toBeDefined();
-    expect(res.error!.code).toBe("METHOD_NOT_FOUND");
-    expect(res.error!.message).toContain("no.such.method");
+    expect(res.error?.code).toBe("METHOD_NOT_FOUND");
+    expect(res.error?.message).toContain("no.such.method");
   });
 
   // FR-003: HANDLER_ERROR when handler throws
@@ -48,8 +48,8 @@ describe('LocalBus — command dispatch', () => {
     const res = await bus.send(cmd);
 
     expect(res.error).toBeDefined();
-    expect(res.error!.code).toBe("HANDLER_ERROR");
-    expect(res.error!.message).toContain("sync boom");
+    expect(res.error?.code).toBe("HANDLER_ERROR");
+    expect(res.error?.message).toContain("sync boom");
   });
 
   // FR-003: HANDLER_ERROR when async handler rejects
@@ -62,7 +62,7 @@ describe('LocalBus — command dispatch', () => {
     const res = await bus.send(cmd);
 
     expect(res.error).toBeDefined();
-    expect(res.error!.code).toBe("HANDLER_ERROR");
+    expect(res.error?.code).toBe("HANDLER_ERROR");
   });
 
   // FR-003: VALIDATION_ERROR for malformed envelope
@@ -70,7 +70,7 @@ describe('LocalBus — command dispatch', () => {
     const res = await bus.send({ garbage: true });
 
     expect(res.error).toBeDefined();
-    expect(res.error!.code).toBe("VALIDATION_ERROR");
+    expect(res.error?.code).toBe("VALIDATION_ERROR");
   });
 
   // FR-003: VALIDATION_ERROR for non-command envelope
@@ -88,8 +88,8 @@ describe('LocalBus — command dispatch', () => {
     const res = await bus.send(event);
 
     expect(res.error).toBeDefined();
-    expect(res.error!.code).toBe("VALIDATION_ERROR");
-    expect(res.error!.message).toContain("command");
+    expect(res.error?.code).toBe("VALIDATION_ERROR");
+    expect(res.error?.message).toContain("command");
   });
 
   // FR-003: re-entrant dispatch works
@@ -114,7 +114,7 @@ describe('LocalBus — command dispatch', () => {
   it("returns error when re-entrant depth limit exceeded", async () => {
     const depthBus = createBus({ maxDepth: 3 });
 
-    depthBus.registerMethod("recurse", async cmd => {
+    depthBus.registerMethod("recurse", async _cmd => {
       const nested = createCommand("recurse", {});
       return await depthBus.send(nested);
     });
@@ -124,7 +124,7 @@ describe('LocalBus — command dispatch', () => {
 
     // At some depth it should return an error, not stack overflow
     expect(res.error).toBeDefined();
-    expect(res.error!.message).toContain("depth limit");
+    expect(res.error?.message).toContain("depth limit");
   });
 
   it("returns HANDLER_ERROR when handler returns non-envelope value", async () => {
@@ -136,7 +136,7 @@ describe('LocalBus — command dispatch', () => {
     const res = await bus.send(cmd);
 
     expect(res.error).toBeDefined();
-    expect(res.error!.code).toBe("HANDLER_ERROR");
+    expect(res.error?.code).toBe("HANDLER_ERROR");
   });
 
   it("returns structured error after destroy, not a crash", async () => {
@@ -145,8 +145,8 @@ describe('LocalBus — command dispatch', () => {
     const res = await bus.send(cmd);
 
     expect(res.error).toBeDefined();
-    expect(res.error!.code).toBe("VALIDATION_ERROR");
-    expect(res.error!.message).toContain("destroyed");
+    expect(res.error?.code).toBe("VALIDATION_ERROR");
+    expect(res.error?.message).toContain("destroyed");
   });
 
   it("carries correlation_id through to response", async () => {

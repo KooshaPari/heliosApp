@@ -1,7 +1,7 @@
-import { promises as fs } from "fs";
-import * as path from "path";
-import { homedir } from "os";
-import type { TabSurface, TabState } from "./tab_surface";
+import { promises as fs } from "node:fs";
+import { homedir } from "node:os";
+import * as path from "node:path";
+import type { TabState, TabSurface } from "./tab_surface";
 
 /**
  * Persisted tab state structure.

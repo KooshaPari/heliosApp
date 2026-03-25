@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
+import type { AuditSink } from "../audit/audit-sink.js"; // Used for type annotation
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
-import type { RedactionResult, RedactionContext } from "./redaction-engine.js";
-import type { AuditSink } from "../audit/audit-sink.js"; // Used for type annotation
+import type { RedactionContext, RedactionResult } from "./redaction-engine.js";
 
 // ---------------------------------------------------------------------------
 // Types

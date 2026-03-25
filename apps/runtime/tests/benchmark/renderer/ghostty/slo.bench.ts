@@ -12,12 +12,11 @@
  * Tags: SC-011-001, NFR-011-001, NFR-011-004
  */
 
-import { describe, test, expect, beforeAll, afterAll } from "bun:test";
-import { GhosttyBackend } from "../../../../src/renderer/ghostty/backend.js";
-import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
-import { isGhosttyAvailable } from "../../../../src/renderer/ghostty/index.js";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import type { RendererConfig } from "../../../../src/renderer/adapter.js";
-import type { MetricsSnapshot } from "../../../../src/renderer/ghostty/metrics.js";
+import { GhosttyBackend } from "../../../../src/renderer/ghostty/backend.js";
+import { isGhosttyAvailable } from "../../../../src/renderer/ghostty/index.js";
+import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
 
 // ---------------------------------------------------------------------------
 // SLO targets

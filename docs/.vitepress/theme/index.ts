@@ -1,3 +1,3 @@
-import PhenoDocsTheme from '@phenodocs-theme'
+import PhenoDocsTheme from "@phenodocs-theme";
 
-export default PhenoDocsTheme
+export default PhenoDocsTheme;

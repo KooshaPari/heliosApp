@@ -1,4 +1,4 @@
-import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
+import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
 
 export interface SessionTabState extends TabState {
   expandedSections?: string[];
@@ -26,7 +26,6 @@ export interface SessionMetadata {
 export class SessionTab extends TabSurface {
   private metadata: SessionMetadata | null = null;
   private expandedSections = new Set<string>(["info", "diagnostics"]);
-  private contentEl: HTMLElement | null = null;
 
   constructor() {
     super("session-tab", "session", "Session");

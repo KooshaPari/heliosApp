@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import type { ActiveContext } from "../../../src/tabs/context_switch";
 import {
   ContextPropagator,
   resetContextPropagator,
 } from "../../../src/tabs/context_switch_propagation";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
-import type { ActiveContext } from "../../../src/tabs/context_switch";
 
 describe("ContextPropagator", () => {
   let propagator: ContextPropagator;
@@ -122,10 +122,10 @@ describe("ContextPropagator", () => {
   describe("Propagation Cancellation", () => {
     it("should cancel previous propagation on new context", async () => {
       const slowTab = mockTabs[0];
-      let callCount = 0;
+      let _callCount = 0;
 
       slowTab.onContextChange = async () => {
-        callCount++;
+        _callCount++;
         await new Promise(resolve => setTimeout(resolve, 200));
       };
 
@@ -142,7 +142,7 @@ describe("ContextPropagator", () => {
       };
 
       // Start first propagation
-      const promise1 = propagator.propagateContext(context1);
+      const _promise1 = propagator.propagateContext(context1);
 
       // Immediately start second propagation (should cancel first)
       await new Promise(resolve => setTimeout(resolve, 50));

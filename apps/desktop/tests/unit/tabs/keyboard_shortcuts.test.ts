@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { promises as fs } from "node:fs";
+import { tmpdir } from "node:os";
+import * as path from "node:path";
 import {
   KeyboardShortcuts,
-  type ShortcutAction,
   resetKeyboardShortcuts,
+  type ShortcutAction,
 } from "../../../src/tabs/keyboard_shortcuts";
-import * as path from "path";
-import { promises as fs } from "fs";
-import { tmpdir } from "os";
 
 describe("KeyboardShortcuts", () => {
   let shortcuts: KeyboardShortcuts;
@@ -94,7 +94,7 @@ describe("KeyboardShortcuts", () => {
     });
 
     it("should support shortcut listeners", () => {
-      let actions: ShortcutAction[] = [];
+      const actions: ShortcutAction[] = [];
 
       shortcuts.onShortcut(action => {
         actions.push(action);

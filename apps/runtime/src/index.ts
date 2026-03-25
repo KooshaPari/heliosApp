@@ -7,32 +7,31 @@
 
 import { InMemoryLocalBus } from "./protocol/bus.js";
 import type { LocalBusEnvelope } from "./protocol/types.js";
-import { RecoveryRegistry } from "./sessions/registry.js";
-import type {
-  RecoveryBootstrapResult,
-  RecoveryMetadata,
-  WatchdogScanResult,
-} from "./sessions/types.js";
-import { RedactionEngine } from "./secrets/redaction-engine.js";
-import { getDefaultRules } from "./secrets/redaction-rules.js";
-import { handleRuntimeRequest } from "./runtime/ops.js";
 import { handleRuntimeFetch } from "./runtime/fetch.js";
+import { handleRuntimeRequest } from "./runtime/ops.js";
 import type {
   HealthCheckResult,
   RuntimeAuditBundle,
   RuntimeAuditRecord,
   RuntimeOptions,
   TerminalBuffer,
-  TerminalBufferEntry,
 } from "./runtime/types.js";
+import { RedactionEngine } from "./secrets/redaction-engine.js";
+import { getDefaultRules } from "./secrets/redaction-rules.js";
+import { RecoveryRegistry } from "./sessions/registry.js";
+import type {
+  RecoveryBootstrapResult,
+  RecoveryMetadata,
+  WatchdogScanResult,
+} from "./sessions/types.js";
 
 /** Semantic version of the runtime package. */
 export const VERSION = "0.0.1" as const;
 
 const startTime = performance.now();
-const METHOD_SET = new Set<string>(METHODS);
+const _METHOD_SET = new Set<string>(METHODS);
 
-function normalizePayload(value: unknown): Record<string, unknown> {
+function _normalizePayload(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return {};
   }
@@ -67,7 +66,7 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
   return value;
 }
 
-function redactPayload(
+function _redactPayload(
   engine: RedactionEngine,
   payload: Record<string, unknown>,
   correlationId: string
@@ -112,7 +111,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
   function appendAuditRecord(record: RuntimeAuditRecord): void {
     const enriched = { ...record };
     if (!enriched.recorded_at) {
-        enriched.recorded_at = new Date().toISOString();
+      enriched.recorded_at = new Date().toISOString();
     }
     auditRecords.push(enriched);
   }
@@ -134,36 +133,32 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
   async function request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
     return handleRuntimeRequest(
       {
-      bus,
-      recovery,
-      redactionEngine,
-      terminalBufferCap,
-      terminalBuffers,
-      appendAuditRecord,
-      getTerminalBuffer,
-      getTerminalState: () => terminalState,
-      setTerminalState: (state) => {
-        terminalState = state;
+        bus,
+        recovery,
+        redactionEngine,
+        terminalBufferCap,
+        terminalBuffers,
+        appendAuditRecord,
+        getTerminalBuffer,
+        getTerminalState: () => terminalState,
+        setTerminalState: state => {
+          terminalState = state;
+        },
       },
-    },
-    command,
-  );
+      command
+    );
   }
 
   async function fetch(requestInput: Request): Promise<Response> {
-    return handleRuntimeFetch(
-      requestInput,
-      request,
-      {
-        bus,
-        appendAuditRecord,
-      },
-    );
+    return handleRuntimeFetch(requestInput, request, {
+      bus,
+      appendAuditRecord,
+    });
   }
 
   function exportAuditBundle(filter?: { correlation_id?: string }): RuntimeAuditBundle {
     const records = filter?.correlation_id
-      ? auditRecords.filter((record) => record.correlation_id === filter.correlation_id)
+      ? auditRecords.filter(record => record.correlation_id === filter.correlation_id)
       : [...auditRecords];
     return {
       count: records.length,
@@ -199,7 +194,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       const state: any = { terminal: terminalState };
       const hasSessions = auditRecords.some(r => r.topic === "session.attached");
       if (hasSessions) {
-          state.session = "attached";
+        state.session = "attached";
       }
       return state;
     },
@@ -234,27 +229,29 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       } as LocalBusEnvelope);
     },
     getEvents(): LocalBusEnvelope[] {
-      return auditRecords.filter((r) => r.type === "event").map((r, index) => {
-        return {
-          ts: r.recorded_at,
-          type: "event",
-          topic: r.topic,
-          correlation_id: r.correlation_id,
-          payload: r.payload,
-          sequence: index + 1,
-        } as LocalBusEnvelope;
-      });
+      return auditRecords
+        .filter(r => r.type === "event")
+        .map((r, index) => {
+          return {
+            ts: r.recorded_at,
+            type: "event",
+            topic: r.topic,
+            correlation_id: r.correlation_id,
+            payload: r.payload,
+            sequence: index + 1,
+          } as LocalBusEnvelope;
+        });
     },
     async getAuditRecords(): Promise<any[]> {
-      return auditRecords.map(r => ({ 
-          recorded_at: r.recorded_at,
-          type: r.type,
-          envelope: { 
-              correlation_id: r.correlation_id,
-              topic: r.topic,
-              method: r.method,
-              payload: r.payload
-          } 
+      return auditRecords.map(r => ({
+        recorded_at: r.recorded_at,
+        type: r.type,
+        envelope: {
+          correlation_id: r.correlation_id,
+          topic: r.topic,
+          method: r.method,
+          payload: r.payload,
+        },
       }));
     },
     shutdown(): void {},
@@ -263,8 +260,8 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
 
 export type {
   HealthCheckResult,
-  RuntimeAuditRecord,
   RuntimeAuditBundle,
+  RuntimeAuditRecord,
   RuntimeOptions,
   TerminalBuffer,
   TerminalBufferEntry,

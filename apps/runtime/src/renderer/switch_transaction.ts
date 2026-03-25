@@ -11,10 +11,10 @@
  */
 
 import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.js";
-import type { RendererEventBus } from "./index.js";
 import { executeHotSwap, type TerminalContext } from "./hot_swap.js";
-import { executeRollback } from "./rollback.js";
+import type { RendererEventBus } from "./index.js";
 import { executeRestartWithRestore } from "./restart_restore.js";
+import { executeRollback } from "./rollback.js";
 import type { SwitchBuffer } from "./stream_binding.js";
 
 // ---------------------------------------------------------------------------

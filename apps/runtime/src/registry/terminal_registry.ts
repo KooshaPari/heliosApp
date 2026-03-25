@@ -261,7 +261,7 @@ export class TerminalRegistry implements RegistryQueryInterface {
     if (!index.has(key)) {
       index.set(key, new Set());
     }
-    index.get(key)!.add(value);
+    index.get(key)?.add(value);
   }
 
   private removeFromIndex(index: Map<string, Set<string>>, key: string, value: string): void {

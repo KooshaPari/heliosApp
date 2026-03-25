@@ -131,14 +131,14 @@ function globToRegex(glob: string): string {
       result += "[^/]";
       i++;
     } else if (/[.+^${}()|[\]\\]/.test(ch)) {
-      result += "\\" + ch;
+      result += `\\${ch}`;
       i++;
     } else {
       result += ch;
       i++;
     }
   }
-  return "(^|/|^.*[/\\\\])" + result + "($|[/\\\\])";
+  return `(^|/|^.*[/\\\\])${result}($|[/\\\\])`;
 }
 
 export function extractFilePaths(command: string): string[] {

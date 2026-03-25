@@ -1,8 +1,8 @@
+import type { LocalBus } from "../../runtime/src/protocol/bus";
 import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
 import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
-import type { LocalBus } from "../../runtime/src/protocol/bus";
-import type { RendererEngine } from "./settings";
 import type { TransportDiagnostics } from "./context_store";
+import type { RendererEngine } from "./settings";
 
 type RuntimeResponse<T extends Record<string, unknown>> = {
   ok: boolean;

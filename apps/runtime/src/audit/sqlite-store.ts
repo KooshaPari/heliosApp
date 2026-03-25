@@ -1,8 +1,7 @@
 import { Database } from "bun:sqlite";
+import fs from "node:fs";
 import type { AuditEvent } from "./event";
 import type { AuditFilter } from "./ring-buffer";
-import fs from "fs";
-import path from "path";
 
 /**
  * SQLite-backed persistent storage for audit events.
@@ -11,7 +10,6 @@ import path from "path";
 export class SQLiteAuditStore {
   private db: Database;
   private readonly dbPath: string;
-  private schemaVersion = 1;
 
   /**
    * Create or open an SQLite audit store.

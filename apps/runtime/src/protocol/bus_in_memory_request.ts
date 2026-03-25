@@ -1,5 +1,5 @@
-import type { LocalBusEnvelope } from "./types.js";
 import type { BusState } from "./bus_in_memory.js";
+import type { LocalBusEnvelope } from "./types.js";
 
 type InMemoryRequestContext = {
   getState(): BusState;
@@ -154,7 +154,10 @@ export async function handleInMemoryRequest(
       }
       ctx.setState({ session: "attached" });
       const sessionResultId =
-        command.session_id ?? command.payload?.id ?? command.payload?.session_id ?? `session_${Date.now()}`;
+        command.session_id ??
+        command.payload?.id ??
+        command.payload?.session_id ??
+        `session_${Date.now()}`;
       return {
         id: `res-${Date.now()}`,
         type: "response",
@@ -234,7 +237,7 @@ export async function handleInMemoryRequest(
     }
 
     if (command.method === "terminal.input") {
-      if (command.payload?.data === undefined && !Object.prototype.hasOwnProperty.call(command, "data")) {
+      if (command.payload?.data === undefined && !Object.hasOwn(command, "data")) {
         return makeErrorResponse(command, "INVALID_TERMINAL_INPUT", "payload.data is required");
       }
 

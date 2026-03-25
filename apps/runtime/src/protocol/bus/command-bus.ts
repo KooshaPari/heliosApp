@@ -1,14 +1,14 @@
 // CommandBusImpl — extracted from emitter.ts for static analysis compliance.
 
+import type { MethodHandler } from "../methods.js";
 import type { LocalBusEnvelope } from "../types.js";
 import type {
-  LocalBus,
   CommandBusOptions,
   CommandEnvelope,
   EventEnvelope,
+  LocalBus,
   ResponseEnvelope,
 } from "./types.js";
-import type { MethodHandler } from "../methods.js";
 import { isCommandEnvelope, isEventEnvelope } from "./validation.js";
 
 // ---------------------------------------------------------------------------
@@ -129,7 +129,7 @@ export class CommandBusImpl implements LocalBus {
       if (
         !result ||
         typeof result !== "object" ||
-        (result as unknown as Record<string, unknown>)["type"] !== "response"
+        (result as unknown as Record<string, unknown>).type !== "response"
       ) {
         return makeErrorResponse(
           cmd.id,
@@ -193,7 +193,7 @@ export class CommandBusImpl implements LocalBus {
 
     // Inject active correlation_id from command context (FR-008)
     if (this.activeCorrelationId) {
-      (event as unknown as Record<string, unknown>)["correlation_id"] = this.activeCorrelationId;
+      (event as unknown as Record<string, unknown>).correlation_id = this.activeCorrelationId;
     }
 
     const topic = event.topic;
@@ -202,7 +202,7 @@ export class CommandBusImpl implements LocalBus {
     const currentSeq = this.topicSequenceCounters.get(topic) ?? 0;
     const nextSeq = currentSeq + 1;
     this.topicSequenceCounters.set(topic, nextSeq);
-    (event as unknown as Record<string, unknown>)["sequence"] = nextSeq;
+    (event as unknown as Record<string, unknown>).sequence = nextSeq;
     const list = this.subscribers.get(topic);
     if (!list) {
       return;

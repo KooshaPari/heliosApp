@@ -1,8 +1,8 @@
 // T006, T007, T008 — Project binding, stale detection, and git clone delegation
 
-import type { Workspace, ProjectBinding } from "./types.js";
-import { existsSync, realpathSync, accessSync, constants } from "node:fs";
+import { accessSync, constants, existsSync, realpathSync } from "node:fs";
 import { isAbsolute } from "node:path";
+import type { ProjectBinding, Workspace } from "./types.js";
 
 // Stub ID generator — uses spec 005 format proj_{ulid}
 function generateProjectId(): string {
@@ -126,7 +126,7 @@ export async function detectStaleProjects(workspace: Workspace): Promise<Workspa
     }
   });
 
-  const changed = updatedProjects.some((p, i) => p.status !== workspace.projects[i]!.status);
+  const changed = updatedProjects.some((p, i) => p.status !== workspace.projects[i]?.status);
 
   if (!changed) return workspace;
 

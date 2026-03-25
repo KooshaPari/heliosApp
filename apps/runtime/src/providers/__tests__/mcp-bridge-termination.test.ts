@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { createMcpBridgeFixture, initMcpBridge } from "./mcp-bridge-test-helpers.js";
 
 describe("MCP Bridge Adapter - Termination", () => {
@@ -29,7 +29,7 @@ describe("MCP Bridge Adapter - Termination", () => {
     await adapter.terminate();
 
     const events = bus.getEvents();
-    const terminatedEvent = events.find((event) => event.topic === "provider.mcp.terminated");
+    const terminatedEvent = events.find(event => event.topic === "provider.mcp.terminated");
     expect(terminatedEvent).toBeDefined();
   });
 

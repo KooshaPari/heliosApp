@@ -7,10 +7,10 @@
  * FR-026-004: Tmate backend adapter.
  */
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { ShareSessionManager, type PolicyGate, type ShareSession } from "../share-session.js";
-import { UptermAdapter, TmateAdapter, getBackendAdapter } from "../adapters.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { InMemoryLocalBus } from "../../../protocol/bus.js";
+import { getBackendAdapter, TmateAdapter, UptermAdapter } from "../adapters.js";
+import { type PolicyGate, ShareSessionManager } from "../share-session.js";
 
 /**
  * Mock policy gate for testing.
@@ -134,7 +134,7 @@ describe("Share Session Management", () => {
 
       try {
         await manager.create("terminal-123", "upterm", 60000, "corr-001");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
@@ -149,7 +149,7 @@ describe("Share Session Management", () => {
 
       try {
         await manager.create("terminal-123", "upterm", 60000, "corr-001");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
@@ -305,8 +305,8 @@ describe("Share Session Management", () => {
     it("should track sessions separately by backend", async () => {
       const terminalId = "terminal-123";
 
-      const upterm = await manager.create(terminalId, "upterm", 60000, "corr-001");
-      const tmate = await manager.create(terminalId, "tmate", 60000, "corr-002");
+      const _upterm = await manager.create(terminalId, "upterm", 60000, "corr-001");
+      const _tmate = await manager.create(terminalId, "tmate", 60000, "corr-002");
 
       const sessions = manager.listByTerminal(terminalId);
       const backends = sessions.map(s => s.backend);

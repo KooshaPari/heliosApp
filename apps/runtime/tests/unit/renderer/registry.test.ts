@@ -4,9 +4,9 @@
  */
 import { describe, expect, it } from "bun:test";
 import {
-  RendererRegistry,
   DuplicateRendererError,
   RendererNotFoundError,
+  RendererRegistry,
 } from "../../../src/renderer/registry.js";
 import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
 

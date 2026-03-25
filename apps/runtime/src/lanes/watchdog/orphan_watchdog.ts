@@ -1,12 +1,12 @@
 // T001 - Orphan watchdog scheduler with checkpoint persistence
 
-import { CheckpointManager, type WatchdogCheckpoint } from "./checkpoint.js";
-import { ResourceClassifier, type ClassifiedOrphan } from "./resource_classifier.js";
-import { WorktreeDetector } from "./worktree_detector.js";
-import { ZellijDetector, type SessionRegistry } from "./zellij_detector.js";
-import { PtyDetector, type TerminalRegistry } from "./pty_detector.js";
 import type { LocalBus } from "../../protocol/bus.js";
 import type { LaneRegistry } from "../registry.js";
+import { CheckpointManager, type WatchdogCheckpoint } from "./checkpoint.js";
+import { PtyDetector, type TerminalRegistry } from "./pty_detector.js";
+import { type ClassifiedOrphan, ResourceClassifier } from "./resource_classifier.js";
+import { WorktreeDetector } from "./worktree_detector.js";
+import { type SessionRegistry, ZellijDetector } from "./zellij_detector.js";
 
 export interface WatchdogConfig {
   detectionInterval: number; // milliseconds

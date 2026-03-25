@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import fs from "node:fs";
+import path from "node:path";
+import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
+import type { AuditStorage } from "../../../src/audit/sink";
 import { DefaultAuditSink } from "../../../src/audit/sink";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
-import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
-import type { AuditStorage } from "../../../src/audit/sink";
-import fs from "fs";
-import path from "path";
 
-const TMP_DIR = "/tmp/audit-test-" + Math.random().toString(36).substring(7);
+const TMP_DIR = `/tmp/audit-test-${Math.random().toString(36).substring(7)}`;
 
 describe("Storage Chaos Tests", () => {
   let dbPath: string;
@@ -31,18 +31,18 @@ describe("Storage Chaos Tests", () => {
         fs.unlinkSync(dbPath);
       }
 
-      if (fs.existsSync(path.join(TMP_DIR, dbPath + "-wal"))) {
-        fs.unlinkSync(path.join(TMP_DIR, dbPath + "-wal"));
+      if (fs.existsSync(path.join(TMP_DIR, `${dbPath}-wal`))) {
+        fs.unlinkSync(path.join(TMP_DIR, `${dbPath}-wal`));
       }
 
-      if (fs.existsSync(path.join(TMP_DIR, dbPath + "-shm"))) {
-        fs.unlinkSync(path.join(TMP_DIR, dbPath + "-shm"));
+      if (fs.existsSync(path.join(TMP_DIR, `${dbPath}-shm`))) {
+        fs.unlinkSync(path.join(TMP_DIR, `${dbPath}-shm`));
       }
 
       if (fs.existsSync(TMP_DIR)) {
         fs.rmdirSync(TMP_DIR);
       }
-    } catch (err) {
+    } catch (_err) {
       // Ignore cleanup errors
     }
   });
@@ -58,7 +58,7 @@ describe("Storage Chaos Tests", () => {
 
     const sink = new DefaultAuditSink(storageAdapter, 1000);
 
-    let writtenCount = 0;
+    let _writtenCount = 0;
     for (let i = 0; i < 50_000; i++) {
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
@@ -72,7 +72,7 @@ describe("Storage Chaos Tests", () => {
       });
 
       await sink.write(event);
-      writtenCount++;
+      _writtenCount++;
 
       // Periodically flush
       if (i % 10_000 === 0) {

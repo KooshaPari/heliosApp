@@ -22,7 +22,7 @@ export const EMPTY_PERCENTILE_BUCKET: PercentileBucket = {
  * The input values are never mutated.
  */
 export function computePercentiles(
-  source: Float64Array | ReadonlyArray<number> | ValueBufferLike,
+  source: Float64Array | ReadonlyArray<number> | ValueBufferLike
 ): PercentileBucket {
   const values =
     source instanceof Float64Array

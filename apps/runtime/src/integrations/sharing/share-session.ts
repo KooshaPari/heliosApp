@@ -59,7 +59,6 @@ export interface ShareWorkerResult {
  * Spawns and manages the lifecycle of share worker processes.
  */
 export class ShareWorker {
-  private process: any = null;
   private hearbeat: NodeJS.Timeout | null = null;
 
   /**
@@ -221,7 +220,7 @@ export class ShareSessionManager {
     if (!this.sessionsByTerminal.has(terminalId)) {
       this.sessionsByTerminal.set(terminalId, new Set());
     }
-    this.sessionsByTerminal.get(terminalId)!.add(session.id);
+    this.sessionsByTerminal.get(terminalId)?.add(session.id);
 
     await this.publishEvent("share.session.created", {
       sessionId: session.id,

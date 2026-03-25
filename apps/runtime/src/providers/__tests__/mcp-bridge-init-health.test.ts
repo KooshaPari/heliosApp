@@ -1,5 +1,9 @@
-import { describe, expect, it, beforeEach } from "vitest";
-import { createMcpBridgeFixture, initMcpBridge, MCP_BRIDGE_CONFIG } from "./mcp-bridge-test-helpers.js";
+import { beforeEach, describe, expect, it } from "vitest";
+import {
+  createMcpBridgeFixture,
+  initMcpBridge,
+  MCP_BRIDGE_CONFIG,
+} from "./mcp-bridge-test-helpers.js";
 
 describe("MCP Bridge Adapter - Init and Health", () => {
   let adapter: ReturnType<typeof createMcpBridgeFixture>["adapter"];
@@ -32,15 +36,15 @@ describe("MCP Bridge Adapter - Init and Health", () => {
 
     const tools = adapter.getTools();
     expect(tools.length).toBeGreaterThan(0);
-    expect(tools.some((tool) => tool.name === "read_file")).toBe(true);
-    expect(tools.some((tool) => tool.name === "write_file")).toBe(true);
+    expect(tools.some(tool => tool.name === "read_file")).toBe(true);
+    expect(tools.some(tool => tool.name === "write_file")).toBe(true);
   });
 
   it("emits initialization event", async () => {
     await initMcpBridge(adapter);
 
     const events = bus.getEvents();
-    const initEvent = events.find((event) => event.topic === "provider.mcp.initialized");
+    const initEvent = events.find(event => event.topic === "provider.mcp.initialized");
     expect(initEvent).toBeDefined();
     expect(initEvent?.payload?.serverPath).toBe("stdio");
   });
@@ -49,9 +53,7 @@ describe("MCP Bridge Adapter - Init and Health", () => {
     await initMcpBridge(adapter);
 
     const events = bus.getEvents();
-    const discoveryEvents = events.filter(
-      (event) => event.topic === "provider.mcp.tool.discovered"
-    );
+    const discoveryEvents = events.filter(event => event.topic === "provider.mcp.tool.discovered");
     expect(discoveryEvents.length).toBeGreaterThan(0);
   });
 

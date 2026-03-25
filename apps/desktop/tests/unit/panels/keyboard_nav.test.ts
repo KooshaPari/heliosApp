@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { KeyboardNav } from "../../../src/panels/keyboard_nav";
+import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import type { KeyboardNavCallbacks } from "../../../src/panels/keyboard_nav";
+import { KeyboardNav } from "../../../src/panels/keyboard_nav";
 
 describe("KeyboardNav", () => {
   let container: HTMLDivElement;

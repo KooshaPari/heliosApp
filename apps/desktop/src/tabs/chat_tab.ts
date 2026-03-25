@@ -1,4 +1,4 @@
-import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
+import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
 
 export interface ChatMessage {
   id: string;
@@ -28,7 +28,6 @@ export interface ChatTabState extends TabState {
 export class ChatTab extends TabSurface {
   private messages: ChatMessage[] = [];
   private draftInput: string = "";
-  private contentEl: HTMLElement | null = null;
   private scrollContainer: HTMLElement | null = null;
 
   constructor() {
@@ -280,7 +279,7 @@ export class ChatTab extends TabSurface {
   /**
    * Generate mock chat history for demonstration.
    */
-  private generateMockChatHistory(context: ActiveContext): void {
+  private generateMockChatHistory(_context: ActiveContext): void {
     const baseTime = Date.now();
     this.messages = [
       {

@@ -7,10 +7,10 @@
 
 import type {
   RendererAdapter,
-  RendererConfig,
-  RenderSurface,
-  RendererState,
   RendererCapabilities,
+  RendererConfig,
+  RendererState,
+  RenderSurface,
 } from "../../src/renderer/index.js";
 
 export interface MockAdapterOptions {

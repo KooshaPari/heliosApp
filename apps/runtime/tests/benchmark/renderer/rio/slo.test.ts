@@ -13,9 +13,9 @@
  *   - Memory: < 10 MB per terminal
  */
 
-import { describe, it, expect, beforeAll } from "bun:test";
-import { RioMetrics, type MetricsSummary } from "../../../../src/renderer/rio/metrics.js";
+import { beforeAll, describe, expect, it } from "bun:test";
 import { detectRioBinary } from "../../../../src/renderer/rio/index.js";
+import { RioMetrics } from "../../../../src/renderer/rio/metrics.js";
 
 // ---------------------------------------------------------------------------
 // Skip control

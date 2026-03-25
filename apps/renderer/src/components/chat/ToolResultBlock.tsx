@@ -1,5 +1,4 @@
-import { type Component, createSignal } from "solid-js";
-import { Show } from "solid-js";
+import { type Component, createSignal, Show } from "solid-js";
 import type { Message } from "../../../../runtime/src/types/conversation";
 
 type ToolResultBlockProps = { message: Message };
@@ -48,7 +47,7 @@ export const ToolResultBlock: Component<ToolResultBlockProps> = props => {
             "overflow-y": "auto",
           }}
         >
-          <>{output() ?? ""}</>
+          {output() ?? ""}
         </div>
       </Show>
     </div>

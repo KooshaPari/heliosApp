@@ -7,11 +7,11 @@
  * Tags: FR-011-001, FR-011-003, SC-011-003
  */
 
-import { describe, test, expect, beforeAll, afterEach } from "bun:test";
+import { afterEach, beforeAll, describe, expect, test } from "bun:test";
+import type { RendererConfig, RenderSurface } from "../../../../src/renderer/adapter.js";
 import { GhosttyBackend } from "../../../../src/renderer/ghostty/backend.js";
 import { isGhosttyAvailable } from "../../../../src/renderer/ghostty/index.js";
 import { RendererRegistry } from "../../../../src/renderer/registry.js";
-import type { RendererConfig, RenderSurface } from "../../../../src/renderer/adapter.js";
 
 const TEST_CONFIG: RendererConfig = {
   gpuAcceleration: true,
@@ -19,7 +19,7 @@ const TEST_CONFIG: RendererConfig = {
   maxDimensions: { cols: 200, rows: 50 },
 };
 
-const TEST_SURFACE: RenderSurface = {
+const _TEST_SURFACE: RenderSurface = {
   windowId: "integration-test-window",
   bounds: { x: 0, y: 0, width: 800, height: 600 },
 };

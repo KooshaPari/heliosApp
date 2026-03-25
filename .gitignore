@@ -31,4 +31,3 @@ agileplus/
 .github/copilot-instructions.md
 .claudeignore
 .llmignore
-packages/types/

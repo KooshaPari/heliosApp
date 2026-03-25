@@ -19,7 +19,7 @@ export function validateEnvelope(input: unknown): LocalBusEnvelope {
     throw new ProtocolValidationError(
       "INVALID_ENVELOPE_TYPE",
       `Unsupported envelope type '${type}'`,
-      { type },
+      { type }
     );
   }
 

@@ -1,11 +1,11 @@
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import {
+  AUDIT_EVENT_RESULTS,
+  AUDIT_EVENT_TYPES,
+  type AuditEvent,
   createAuditEvent,
   validateAuditEvent,
-  AUDIT_EVENT_TYPES,
-  AUDIT_EVENT_RESULTS,
-  type AuditEvent,
-} from '../../../src/audit/event';
+} from "../../../src/audit/event";
 
 type CustomMetadata = {
   nested: {
@@ -13,9 +13,7 @@ type CustomMetadata = {
   };
 };
 
-const isCustomMetadata = (
-  value: unknown
-): value is CustomMetadata => {
+const isCustomMetadata = (value: unknown): value is CustomMetadata => {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false;
   }
@@ -30,13 +28,13 @@ const isCustomMetadata = (
     typeof nested === "object" &&
     nested !== null &&
     !Array.isArray(nested) &&
-    typeof nested["value"] === "number"
+    typeof nested.value === "number"
   );
 };
 
-describe('AuditEvent Schema', () => {
-  describe('createAuditEvent', () => {
-    it('should create a valid event with all required fields', () => {
+describe("AuditEvent Schema", () => {
+  describe("createAuditEvent", () => {
+    it("should create a valid event with all required fields", () => {
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
         actor: "agent-1",
@@ -99,7 +97,7 @@ describe('AuditEvent Schema', () => {
       });
 
       const ts = new Date(event.timestamp);
-      expect(isNaN(ts.getTime())).toBe(false);
+      expect(Number.isNaN(ts.getTime())).toBe(false);
       expect(event.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     });
 
@@ -140,7 +138,7 @@ describe('AuditEvent Schema', () => {
 
       expect(event.metadata.exitCode).toBe(0);
       expect(event.metadata.duration).toBe(250);
-      const customMetadata = (event.metadata as Record<string, unknown>)["custom"];
+      const customMetadata = (event.metadata as Record<string, unknown>).custom;
       expect(isCustomMetadata(customMetadata)).toBe(true);
       if (isCustomMetadata(customMetadata)) {
         expect(customMetadata.nested.value).toBe(42);
@@ -232,9 +230,9 @@ describe('AuditEvent Schema', () => {
       expect(validateAuditEvent(event)).toBe(false);
     });
 
-    it('should reject events with invalid metadata (array)', () => {
+    it("should reject events with invalid metadata (array)", () => {
       const event = {
-        id: 'id-1',
+        id: "id-1",
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
         actor: "agent-1",
         action: "execute",

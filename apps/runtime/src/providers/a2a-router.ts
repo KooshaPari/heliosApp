@@ -9,13 +9,7 @@
  */
 
 import type { LocalBus } from "../protocol/bus.js";
-import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
-  A2AConfig,
-  A2AExecuteInput,
-  A2AExecuteOutput,
-} from "./adapter.js";
+import type { A2AConfig, ProviderAdapter, ProviderHealthStatus } from "./adapter.js";
 import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 export { HealthMonitoringCoordinator } from "./health-monitor.js";
@@ -78,11 +72,9 @@ export interface A2ARouterConfig extends A2AConfig {
  * FR-025-005: A2A federation with external agent delegation.
  */
 // biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
-export class A2ARouterAdapter implements ProviderAdapter<
-  A2ARouterConfig,
-  A2ADelegation & { correlationId?: string },
-  A2AResult
-> {
+export class A2ARouterAdapter
+  implements ProviderAdapter<A2ARouterConfig, A2ADelegation & { correlationId?: string }, A2AResult>
+{
   private config: A2ARouterConfig | null = null;
   private bus: LocalBus | null = null;
   private endpoints: A2AEndpoint[] = [];
@@ -461,9 +453,9 @@ export class A2ARouterAdapter implements ProviderAdapter<
    * @returns Delegation result
    */
   private async sendDelegation(
-    endpoint: A2AEndpoint,
+    _endpoint: A2AEndpoint,
     delegation: A2ADelegation & { correlationId?: string },
-    correlationId: string,
+    _correlationId: string,
     signal: AbortSignal
   ): Promise<unknown> {
     await Promise.resolve();

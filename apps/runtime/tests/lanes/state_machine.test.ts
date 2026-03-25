@@ -1,13 +1,13 @@
 import { describe, expect, it } from "bun:test";
 import {
+  clearTransitionHistory,
+  getTransitionHistory,
+  InvalidLaneTransitionError,
+  type LaneEvent,
+  type LaneState,
+  recordTransition,
   transition,
   withLaneLock,
-  recordTransition,
-  getTransitionHistory,
-  clearTransitionHistory,
-  InvalidLaneTransitionError,
-  type LaneState,
-  type LaneEvent,
 } from "../../src/lanes/state_machine.js";
 
 describe("Lane State Machine", () => {
@@ -107,10 +107,10 @@ describe("Lane State Machine", () => {
 
       const history = getTransitionHistory(laneId);
       expect(history.length).toBe(2);
-      expect(history[0]!.fromState).toBe("new");
-      expect(history[0]!.toState).toBe("provisioning");
-      expect(history[1]!.fromState).toBe("provisioning");
-      expect(history[1]!.toState).toBe("ready");
+      expect(history[0]?.fromState).toBe("new");
+      expect(history[0]?.toState).toBe("provisioning");
+      expect(history[1]?.fromState).toBe("provisioning");
+      expect(history[1]?.toState).toBe("ready");
 
       clearTransitionHistory(laneId);
     });

@@ -2,10 +2,10 @@
 // FR-003: Workspace lifecycle events
 // FR-009: Bus error isolation
 
-import { describe, test, expect, mock, beforeEach } from "bun:test";
-import { WorkspaceService } from "../../../src/workspace/workspace.js";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { createInMemoryStore } from "../../../src/workspace/store.js";
 import type { WorkspaceStore } from "../../../src/workspace/types.js";
+import { WorkspaceService } from "../../../src/workspace/workspace.js";
 
 let store: WorkspaceStore;
 let events: Array<{ topic: string; payload: Record<string, unknown> }>;
@@ -24,10 +24,10 @@ describe("workspace lifecycle events", () => {
     const svc = new WorkspaceService(store, undefined, publishMock);
     const ws = await svc.create({ name: "Test", rootPath: "/tmp/test" });
     expect(events).toHaveLength(1);
-    expect(events[0]!.topic).toBe("workspace.created");
-    expect(events[0]!.payload["workspaceId"]).toBe(ws.id);
-    expect(events[0]!.payload["name"]).toBe("Test");
-    expect(events[0]!.payload["rootPath"]).toBe("/tmp/test");
+    expect(events[0]?.topic).toBe("workspace.created");
+    expect(events[0]?.payload.workspaceId).toBe(ws.id);
+    expect(events[0]?.payload.name).toBe("Test");
+    expect(events[0]?.payload.rootPath).toBe("/tmp/test");
   });
 
   test("open emits workspace.opened", async () => {
@@ -38,8 +38,8 @@ describe("workspace lifecycle events", () => {
     events.length = 0;
     await svc.open(ws.id);
     expect(events).toHaveLength(1);
-    expect(events[0]!.topic).toBe("workspace.opened");
-    expect(events[0]!.payload["workspaceId"]).toBe(ws.id);
+    expect(events[0]?.topic).toBe("workspace.opened");
+    expect(events[0]?.payload.workspaceId).toBe(ws.id);
   });
 
   test("close emits workspace.closed", async () => {
@@ -48,8 +48,8 @@ describe("workspace lifecycle events", () => {
     events.length = 0;
     await svc.close(ws.id);
     expect(events).toHaveLength(1);
-    expect(events[0]!.topic).toBe("workspace.closed");
-    expect(events[0]!.payload["workspaceId"]).toBe(ws.id);
+    expect(events[0]?.topic).toBe("workspace.closed");
+    expect(events[0]?.payload.workspaceId).toBe(ws.id);
   });
 
   test("delete emits workspace.deleted", async () => {
@@ -58,8 +58,8 @@ describe("workspace lifecycle events", () => {
     events.length = 0;
     await svc.delete(ws.id);
     expect(events).toHaveLength(1);
-    expect(events[0]!.topic).toBe("workspace.deleted");
-    expect(events[0]!.payload["workspaceId"]).toBe(ws.id);
+    expect(events[0]?.topic).toBe("workspace.deleted");
+    expect(events[0]?.payload.workspaceId).toBe(ws.id);
   });
 });
 

@@ -247,7 +247,7 @@ export class RioToggleQueue {
     // Resolve all but last with queued event.
     const last = this._pending[this._pending.length - 1]!;
     for (let i = 0; i < this._pending.length - 1; i++) {
-      this._pending[i]!.resolve([{ type: "renderer.rio.toggle_queued" }]);
+      this._pending[i]?.resolve([{ type: "renderer.rio.toggle_queued" }]);
     }
     this._pending = [];
     return last;

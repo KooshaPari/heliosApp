@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { CapabilityDisplay } from "../../../src/settings/capability_display";
+import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import type { Capability } from "../../../src/settings/capability_display";
+import { CapabilityDisplay } from "../../../src/settings/capability_display";
 
 describe("CapabilityDisplay", () => {
   let container: HTMLDivElement;

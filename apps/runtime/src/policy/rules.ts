@@ -4,11 +4,11 @@
  */
 
 import {
-  type PolicyRule,
-  PolicyClassification,
-  PolicyPatternType,
   type CommandContext,
+  PolicyClassification,
   type PolicyEvaluationResult,
+  PolicyPatternType,
+  type PolicyRule,
 } from "./types";
 
 /**
@@ -114,7 +114,7 @@ export class PolicyRuleSet {
         }
 
         const hasMatchingPath = context.affectedPaths.some(path => {
-          return rule.targets!.some(target => {
+          return rule.targets?.some(target => {
             return this.patternMatcher.matches(path, target, PolicyPatternType.Glob);
           });
         });

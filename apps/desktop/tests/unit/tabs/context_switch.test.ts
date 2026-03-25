@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import {
-  ActiveContextStore,
   type ActiveContext,
-  resetActiveContextStore,
+  ActiveContextStore,
   getActiveContextStore,
+  resetActiveContextStore,
 } from "../../../src/tabs/context_switch";
 
 describe("ActiveContextStore", () => {
@@ -107,11 +107,11 @@ describe("ActiveContextStore", () => {
 
       const calls: any[] = [];
 
-      store.onContextChange(event => {
+      store.onContextChange(_event => {
         calls.push("listener1");
       });
 
-      store.onContextChange(event => {
+      store.onContextChange(_event => {
         calls.push("listener2");
       });
 
@@ -130,7 +130,7 @@ describe("ActiveContextStore", () => {
 
       let callCount = 0;
 
-      const unsubscribe = store.onContextChange(event => {
+      const unsubscribe = store.onContextChange(_event => {
         callCount++;
       });
 
@@ -164,7 +164,7 @@ describe("ActiveContextStore", () => {
         sessionId: "session3",
       };
 
-      let emittedContexts: ActiveContext[] = [];
+      const emittedContexts: ActiveContext[] = [];
 
       store.onContextChange(event => {
         if (event.current) {
@@ -223,7 +223,7 @@ describe("ActiveContextStore", () => {
 
       let validated = false;
 
-      store.setValidator(async ctx => {
+      store.setValidator(async _ctx => {
         validated = true;
         return true;
       });

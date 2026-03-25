@@ -1,10 +1,10 @@
-import { describe, expect, it, mock } from "bun:test";
-import { switchRenderer, SwitchSameRendererError } from "../switch.js";
-import { RendererRegistry } from "../registry.js";
-import { RendererStateMachine } from "../state_machine.js";
-import type { RendererAdapter, RendererConfig, RenderSurface, RendererState } from "../adapter.js";
+import { describe, expect, it } from "bun:test";
+import type { RendererAdapter, RendererConfig, RendererState, RenderSurface } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
 import type { RendererEventBus, RendererLifecycleEvent } from "../index.js";
+import { RendererRegistry } from "../registry.js";
+import { RendererStateMachine } from "../state_machine.js";
+import { SwitchSameRendererError, switchRenderer } from "../switch.js";
 
 const DEFAULT_CAPS: RendererCapabilities = {
   gpuAccelerated: true,
@@ -95,7 +95,7 @@ describe("switchRenderer", () => {
     expect(reg.getActive()?.id).toBe("rio");
     expect(sm.state).toBe("running");
     expect(events.length).toBe(1);
-    expect(events[0]!.type).toBe("renderer.switched");
+    expect(events[0]?.type).toBe("renderer.switched");
   });
 
   it("throws for same renderer", async () => {

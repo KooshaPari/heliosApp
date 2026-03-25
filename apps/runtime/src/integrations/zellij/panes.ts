@@ -8,15 +8,15 @@
  */
 
 import type { ZellijCli } from "./cli.js";
+import { PaneTooSmallError, PtyBindingError, ZellijCliError } from "./errors.js";
 import type { TopologyTracker } from "./topology.js";
 import type {
-  PaneRecord,
-  PaneDimensions,
   CreatePaneOptions,
   MinPaneDimensions,
+  PaneDimensions,
+  PaneRecord,
   PtyManagerInterface,
 } from "./types.js";
-import { PaneTooSmallError, PaneNotFoundError, PtyBindingError, ZellijCliError } from "./errors.js";
 
 /** Default minimum pane dimensions. */
 const DEFAULT_MIN_DIMENSIONS: MinPaneDimensions = {

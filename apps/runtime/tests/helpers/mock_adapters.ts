@@ -8,8 +8,8 @@
 import type {
   RendererAdapter,
   RendererConfig,
-  RenderSurface,
   RendererState,
+  RenderSurface,
 } from "../../src/renderer/adapter.js";
 import type { RendererCapabilities } from "../../src/renderer/capabilities.js";
 

@@ -11,13 +11,13 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
   ACPConfig,
   ACPExecuteInput,
   ACPExecuteOutput,
+  ProviderAdapter,
+  ProviderHealthStatus,
 } from "./adapter.js";
-import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
+import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * Policy gate interface for access control.
@@ -79,11 +79,9 @@ interface ACPResponse {
  *
  * FR-025-003: ACP protocol client for Claude.
  */
-export class ACPClientAdapter implements ProviderAdapter<
-  ACPConfig,
-  ACPExecuteInput,
-  ACPExecuteOutput
-> {
+export class ACPClientAdapter
+  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
+{
   private config: ACPConfig | null = null;
   private bus: LocalBus | null = null;
   private policyGate: PolicyGate;
@@ -93,8 +91,6 @@ export class ACPClientAdapter implements ProviderAdapter<
     failureCount: 0,
   };
   private inFlightTasks = new Map<string, AbortController>();
-  private lastHealthCheckTime = 0;
-  private healthCheckInterval = 30000; // Default 30s
   private terminated = false;
 
   constructor(bus?: LocalBus, policyGate?: PolicyGate) {
@@ -280,7 +276,9 @@ export class ACPClientAdapter implements ProviderAdapter<
     if (!this.config || this.terminated) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        this.terminated ? "ACP client unavailable: terminated" : "ACP client unavailable: not initialized",
+        this.terminated
+          ? "ACP client unavailable: terminated"
+          : "ACP client unavailable: not initialized",
         "acp"
       );
     }
@@ -399,7 +397,9 @@ export class ACPClientAdapter implements ProviderAdapter<
     if (!this.config || this.terminated) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        this.terminated ? "ACP client unavailable: terminated" : "ACP client unavailable: not initialized",
+        this.terminated
+          ? "ACP client unavailable: terminated"
+          : "ACP client unavailable: not initialized",
         "acp"
       );
     }

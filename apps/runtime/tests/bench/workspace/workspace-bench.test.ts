@@ -1,15 +1,15 @@
 // T016 — Performance benchmarks for workspace persistence
 // SLO: CRUD < 100ms (p95), restore < 500ms (p95) for 50 workspaces
 
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
-import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { join } from "node:path";
 import { createJsonStore } from "../../../src/workspace/store.js";
 import type { Workspace } from "../../../src/workspace/types.js";
 
 // CI machines may be slower — 2x factor
-const CI_FACTOR = process.env["CI"] ? 2 : 1;
+const CI_FACTOR = process.env.CI ? 2 : 1;
 
 function makeWorkspace(i: number): Workspace {
   return {

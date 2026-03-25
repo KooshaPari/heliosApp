@@ -6,8 +6,8 @@
  */
 
 import type { ZellijCli } from "./cli.js";
-import type { MuxBinding, MuxSession } from "./types.js";
 import { DuplicateBindingError } from "./errors.js";
+import type { MuxBinding, MuxSession } from "./types.js";
 
 export class MuxRegistry {
   private readonly bySession = new Map<string, MuxBinding>();
@@ -87,7 +87,7 @@ export class MuxRegistry {
    * Compatibility accessor for watchdog interfaces expecting `getSessions`.
    */
   getSessions(): Array<{ id: string; laneId?: string }> {
-    return this.list().map((binding) => ({
+    return this.list().map(binding => ({
       id: binding.sessionName,
       laneId: binding.laneId,
     }));

@@ -1,11 +1,11 @@
-import { describe, expect, it, beforeEach, afterEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import {
   createCommand,
-  createResponse,
   createEvent,
-  validateEnvelope,
+  createResponse,
   MAX_PAYLOAD_SIZE,
   setMaxPayloadSize,
+  validateEnvelope,
 } from "../../../src/protocol/envelope.js";
 import type { CommandEnvelope } from "../../../src/protocol/types.js";
 
@@ -346,7 +346,7 @@ describe("validateEnvelope", () => {
   // --- Negative: circular payload ---
   it("rejects circular reference in payload", () => {
     const obj: Record<string, unknown> = {};
-    obj["self"] = obj;
+    obj.self = obj;
     const r = validateEnvelope({
       id: "x",
       // biome-ignore lint/style/useNamingConvention: Protocol fixtures use wire-format snake_case keys.

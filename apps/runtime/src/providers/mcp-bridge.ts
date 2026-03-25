@@ -10,17 +10,14 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
   MCPConfig,
   MCPExecuteInput,
   MCPExecuteOutput,
   MCPTool,
+  ProviderAdapter,
+  ProviderHealthStatus,
 } from "./adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-} from "./errors.js";
+import { NormalizedProviderError, normalizeError } from "./errors.js";
 import {
   connectToServer,
   createHealthyStatus,
@@ -28,10 +25,10 @@ import {
   createUnavailableStatus,
   discoverTools,
   invokeTool,
+  type MCPConnection,
   normalizeMcpError,
   publishEvent,
   reconnectToServer,
-  type MCPConnection,
   type ToolEntry,
 } from "./mcp-bridge-support.js";
 
@@ -43,11 +40,9 @@ import {
  *
  * FR-025-004: MCP tool discovery and sandboxed invocation.
  */
-export class MCPBridgeAdapter implements ProviderAdapter<
-  MCPConfig,
-  MCPExecuteInput,
-  MCPExecuteOutput
-> {
+export class MCPBridgeAdapter
+  implements ProviderAdapter<MCPConfig, MCPExecuteInput, MCPExecuteOutput>
+{
   private config: MCPConfig | null = null;
   private bus: LocalBus | null = null;
   private connection: MCPConnection = {
@@ -208,11 +203,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
         const startTime = Date.now();
 
         // Execute tool (mock implementation)
-        const result = await invokeTool(
-          input.toolName,
-          input.arguments,
-          abortController.signal
-        );
+        const result = await invokeTool(input.toolName, input.arguments, abortController.signal);
 
         const duration = Date.now() - startTime;
 

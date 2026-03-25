@@ -288,7 +288,7 @@ export class PtyRegistry {
         const ppid = parseInt(parts[1]!, 10);
         const comm = parts.slice(2).join(" ");
 
-        if (isNaN(pid) || isNaN(ppid)) continue;
+        if (Number.isNaN(pid) || Number.isNaN(ppid)) continue;
 
         // Only consider processes whose parent is this runtime
         // or whose parent has exited (ppid=1 on Linux, launchd on macOS)

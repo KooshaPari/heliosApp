@@ -5,20 +5,20 @@
  * Cross-workspace import from @helios/runtime validates path alias resolution.
  */
 
-import { healthCheck, VERSION, type HealthCheckResult } from "@helios/runtime";
+import { type HealthCheckResult, healthCheck, VERSION } from "@helios/runtime";
 import { InMemoryLocalBus } from "../../runtime/src/protocol/bus";
 import {
   ActiveContextStore,
+  type ActiveTab,
   INITIAL_ACTIVE_CONTEXT_STATE,
   selectActiveContext,
-  type ActiveTab,
 } from "./context_store";
 import { DesktopRuntimeClient } from "./runtime_client";
 import {
   DEFAULT_SETTINGS,
-  switchRendererWithRollback,
   type DesktopSettings,
   type RendererEngine,
+  switchRendererWithRollback,
 } from "./settings";
 import { buildAllTabSurfaces, type TabSurface } from "./tabs";
 

@@ -1,6 +1,6 @@
 // FR-002: Unit tests for rolling percentile computation.
 
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { RingBuffer } from "../../../src/diagnostics/metrics.js";
 import {
   computePercentiles,

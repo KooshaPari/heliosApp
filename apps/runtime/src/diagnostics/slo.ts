@@ -1,8 +1,8 @@
 // FR-004, FR-010: SLO violation detection, rate-limited event emission, and periodic check loop.
 
-import type { PercentileBucket, SLODefinition, SLOViolationEvent } from "./types.js";
 import type { MetricsRegistry } from "./metrics.js";
 import { computePercentiles } from "./percentiles.js";
+import type { PercentileBucket, SLODefinition, SLOViolationEvent } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Constitution SLO definitions (frozen for immutability)
@@ -100,7 +100,7 @@ export interface SLOCheckResult {
 
 /** Return all configured SLOs for a metric name. */
 export function getSLOsForMetric(metric: string): SLODefinition[] {
-  return SLO_DEFINITIONS.filter((slo) => slo.metric === metric);
+  return SLO_DEFINITIONS.filter(slo => slo.metric === metric);
 }
 
 /**

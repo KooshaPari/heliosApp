@@ -3,17 +3,16 @@
  * @see SC-010-001, NFR-010-001
  */
 import { describe, expect, it } from "bun:test";
+import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
 import { RendererRegistry } from "../../../src/renderer/registry.js";
 import { RendererStateMachine } from "../../../src/renderer/state_machine.js";
-import { switchRenderer } from "../../../src/renderer/switch.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
-import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
+import { switchRenderer } from "../../../src/renderer/switch.js";
 import {
   MockGhosttyAdapter,
   MockRioAdapter,
-  MockRendererAdapter,
-  TEST_SURFACE,
   TEST_CONFIG,
+  TEST_SURFACE,
 } from "../../helpers/mock_adapter.js";
 
 function freshSetup() {
@@ -53,7 +52,7 @@ describe("Switch stress tests", () => {
 
     // Now try rapid switches - sequential since state machine prevents concurrent
     let successCount = 0;
-    let failCount = 0;
+    let _failCount = 0;
     for (let i = 0; i < 10; i++) {
       try {
         const fromId = i % 2 === 0 ? "rio" : "ghostty";
@@ -68,7 +67,7 @@ describe("Switch stress tests", () => {
         });
         successCount++;
       } catch {
-        failCount++;
+        _failCount++;
       }
     }
     // All sequential switches should succeed
@@ -206,7 +205,7 @@ describe("Switch stress tests", () => {
 
     // Report
     console.log(
-      `Switch latency: avg=${avg.toFixed(2)}ms, max=${max.toFixed(2)}ms, p50=${latencies.sort()[2]!.toFixed(2)}ms`
+      `Switch latency: avg=${avg.toFixed(2)}ms, max=${max.toFixed(2)}ms, p50=${latencies.sort()[2]?.toFixed(2)}ms`
     );
     // All should be well under 3 seconds
     expect(max).toBeLessThan(3000);

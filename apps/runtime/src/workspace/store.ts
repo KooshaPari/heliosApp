@@ -2,17 +2,17 @@
 // T011 — JSON file persistence backend
 // T014 — Concurrent operation serialization
 
-import { readFile, mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Workspace, WorkspaceStore } from "./types.js";
 import {
   atomicWrite,
   computeChecksum,
   createSnapshot,
   detectCorruption,
-  recoverFromSnapshot,
   PRIMARY_FILE,
+  recoverFromSnapshot,
 } from "./snapshot.js";
+import type { Workspace, WorkspaceStore } from "./types.js";
 
 export class InMemoryWorkspaceStore implements WorkspaceStore {
   private readonly data = new Map<string, Workspace>();
@@ -136,7 +136,7 @@ export class JsonWorkspaceStore implements WorkspaceStore {
     if (
       typeof parsed !== "object" ||
       parsed === null ||
-      !Array.isArray((parsed as Record<string, unknown>)["workspaces"])
+      !Array.isArray((parsed as Record<string, unknown>).workspaces)
     ) {
       await this.attemptRecovery();
       return;

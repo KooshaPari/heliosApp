@@ -6,11 +6,11 @@
  * SC-025-002: Provider crash isolation across lanes.
  */
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { A2ARouterAdapter, HealthMonitoringCoordinator, type A2AEndpoint } from "../a2a-router.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { NormalizedProviderError } from "../errors.js";
+import { A2ARouterAdapter, HealthMonitoringCoordinator } from "../a2a-router.js";
 import type { ProviderHealthStatus } from "../adapter.js";
+import { NormalizedProviderError } from "../errors.js";
 
 type RouterConfig = {
   endpoints: Array<{
@@ -429,7 +429,7 @@ describe("A2A Router Adapter", () => {
           },
           "corr-123"
         );
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 

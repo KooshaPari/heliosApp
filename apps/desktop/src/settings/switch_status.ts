@@ -104,13 +104,13 @@ export class SwitchStatus {
       borderColor = "#fb923c";
       textColor = "#92400e";
       icon = "⚠";
-      message = `Switch rolled back${this.props.failureReason ? ": " + this.props.failureReason : ""}`;
+      message = `Switch rolled back${this.props.failureReason ? `: ${this.props.failureReason}` : ""}`;
     } else if (this.props.phase === "failed") {
       backgroundColor = "#fee2e2";
       borderColor = "#fca5a5";
       textColor = "#7f1d1d";
       icon = "✕";
-      message = `Switch failed${this.props.failureReason ? ": " + this.props.failureReason : ""}`;
+      message = `Switch failed${this.props.failureReason ? `: ${this.props.failureReason}` : ""}`;
     }
 
     container.style.backgroundColor = backgroundColor;
@@ -166,7 +166,7 @@ export class SwitchStatus {
       const maxDuration = 8000; // progress bar only shown during active phases
       const percentage = Math.min((elapsed / maxDuration) * 100, 100);
 
-      progress.style.width = percentage + "%";
+      progress.style.width = `${percentage}%`;
       progress.style.height = "100%";
       progress.style.backgroundColor = textColor;
       progress.style.transition = "width 100ms linear";
