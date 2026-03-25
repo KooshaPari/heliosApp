@@ -20,7 +20,7 @@ describe("MCP Bridge Adapter - Termination", () => {
 
     health = await adapter.health();
     expect(health.state).toBe("unavailable");
-    expect(health.message).toContain("Terminated");
+    expect(health.message?.includes("Terminated")).toBe(true);
   });
 
   it("emits termination event", async () => {
