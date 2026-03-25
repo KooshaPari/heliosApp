@@ -105,8 +105,7 @@ export function markEnd(metric: string, handle: number): number {
 
   // Guard: out-of-range handle.
   if (handle < 0 || handle >= s.startTimes.length) {
-    console.warn(`[perf] markEnd called with out-of-range handle ${handle}`);
-    return NaN;
+    return Number.NaN;
   }
 
   // Guard: stale / mismatched handle.
@@ -172,8 +171,7 @@ export function createInstrumentationHooks(opts?: {
 
     markEnd(metric: string, handle: number): number {
       if (handle < 0 || handle >= state.startTimes.length) {
-        console.warn(`[perf] markEnd called with out-of-range handle ${handle}`);
-        return NaN;
+        return Number.NaN;
       }
       if (state.metricNames[handle] !== metric) {
         console.warn(

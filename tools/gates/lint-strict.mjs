@@ -42,8 +42,6 @@ if (failures.length > 0) {
 	process.exit(1);
 }
 
-console.log(`Strict lint gate passed for ${files.length} files.`);
-
 function collectTsFiles(paths) {
 	const output = [];
 	for (const path of paths) {

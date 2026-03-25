@@ -1,6 +1,6 @@
-import { promises as fs } from "fs";
-import * as path from "path";
-import { homedir } from "os";
+import { promises as fs } from "node:fs";
+import { homedir } from "node:os";
+import * as path from "node:path";
 
 export interface ShortcutMap {
   [key: string]: string;
@@ -71,7 +71,7 @@ export class KeyboardShortcuts {
       }
 
       this.buildReverseMap();
-    } catch (error) {
+    } catch (_error) {
       // File not found or parse error, use defaults
       this.shortcuts = { ...DEFAULT_SHORTCUTS };
       this.buildReverseMap();
@@ -87,9 +87,7 @@ export class KeyboardShortcuts {
       await fs.mkdir(dir, { recursive: true });
       const data = JSON.stringify(this.shortcuts, null, 2);
       await fs.writeFile(this.configPath, data, "utf-8");
-    } catch (error) {
-      console.error("Failed to save keyboard shortcuts:", error);
-    }
+    } catch (_error) {}
   }
 
   /**
@@ -111,7 +109,6 @@ export class KeyboardShortcuts {
    */
   remapShortcut(action: ShortcutAction, shortcut: string): boolean {
     if (!this.isValidAction(action)) {
-      console.error(`Invalid action: ${action}`);
       return false;
     }
 

@@ -1,4 +1,4 @@
-import type { LocalBusEnvelope } from "./types";
+import type { LocalBusEnvelope } from "./types.ts";
 
 export type ProtocolBoundary = "local_control" | "tool_interop" | "agent_delegation";
 export type BoundaryAdapterName = "local_bus" | "tool_bridge" | "a2a_bridge";

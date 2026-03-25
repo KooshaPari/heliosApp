@@ -1,6 +1,6 @@
 // FR-007: Unit tests for metrics query API.
 
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 import { MetricsQuery } from "../../../src/diagnostics/query.js";
 
@@ -26,8 +26,8 @@ describe("MetricsQuery", () => {
     }
     const stats = query.getStats("latency");
     expect(stats).not.toBeNull();
-    expect(stats!.p50).toBe(51);
-    expect(stats!.count).toBe(100);
+    expect(stats?.p50).toBe(51);
+    expect(stats?.count).toBe(100);
   });
 
   // FR-007: Unknown metric returns null
@@ -66,8 +66,8 @@ describe("MetricsQuery", () => {
     const all = query.getAllStats();
     expect(Object.keys(all)).toContain("a");
     expect(Object.keys(all)).toContain("b");
-    expect(all["a"]!.count).toBe(1);
-    expect(all["b"]!.count).toBe(1);
+    expect(all.a?.count).toBe(1);
+    expect(all.b?.count).toBe(1);
   });
 
   // FR-007: getAllStats excludes metrics without samples
@@ -103,8 +103,8 @@ describe("MetricsQuery", () => {
 
     const samples = query.getRawSamples("m");
     expect(samples.length).toBe(5);
-    expect(samples[0]!.value).toBe(1);
-    expect(samples[4]!.value).toBe(5);
+    expect(samples[0]?.value).toBe(1);
+    expect(samples[4]?.value).toBe(5);
   });
 
   // FR-007: getRawSamples respects limit
@@ -120,8 +120,8 @@ describe("MetricsQuery", () => {
     const samples = query.getRawSamples("m", 3);
     expect(samples.length).toBe(3);
     // Should return the most recent 3
-    expect(samples[0]!.value).toBe(8);
-    expect(samples[2]!.value).toBe(10);
+    expect(samples[0]?.value).toBe(8);
+    expect(samples[2]?.value).toBe(10);
   });
 
   // FR-007: getRawSamples for unknown metric

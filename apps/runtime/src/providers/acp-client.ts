@@ -11,11 +11,11 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
   ACPConfig,
   ACPExecuteInput,
   ACPExecuteOutput,
+  ProviderAdapter,
+  ProviderHealthStatus,
 } from "./adapter.js";
 import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
 
@@ -46,7 +46,7 @@ class DefaultPolicyGate implements PolicyGate {
 /**
  * Mock ACP request for testing/prototyping.
  */
-interface ACPRequest {
+interface AcpRequest {
   correlationId: string;
   model: string;
   messages: Array<{ role: string; content: string }>;
@@ -57,7 +57,7 @@ interface ACPRequest {
 /**
  * Mock ACP response.
  */
-interface ACPResponse {
+interface AcpResponse {
   taskId: string;
   content: string;
   stopReason: string;
@@ -95,6 +95,7 @@ export class ACPClientAdapter implements ProviderAdapter<
   private inFlightTasks = new Map<string, AbortController>();
   private lastHealthCheckTime = 0;
   private healthCheckInterval = 30000; // Default 30s
+  private terminated = false;
 
   constructor(bus?: LocalBus, policyGate?: PolicyGate) {
     this.bus = bus || null;
@@ -183,6 +184,15 @@ export class ACPClientAdapter implements ProviderAdapter<
    * @returns Current health status
    */
   async health(): Promise<ProviderHealthStatus> {
+    if (this.terminated) {
+      return {
+        state: "unavailable",
+        lastCheck: new Date(),
+        failureCount: 0,
+        message: "Terminated",
+      };
+    }
+
     if (!this.config) {
       return {
         state: "unavailable",
@@ -267,10 +277,12 @@ export class ACPClientAdapter implements ProviderAdapter<
    * @throws NormalizedProviderError on failure
    */
   async execute(input: ACPExecuteInput, correlationId: string): Promise<ACPExecuteOutput> {
-    if (!this.config) {
+    if (!this.config || this.terminated) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        "ACP client not initialized",
+        this.terminated
+          ? "ACP client unavailable: terminated"
+          : "ACP client unavailable: not initialized",
         "acp"
       );
     }
@@ -292,7 +304,7 @@ export class ACPClientAdapter implements ProviderAdapter<
 
         throw new NormalizedProviderError(
           "PROVIDER_POLICY_DENIED",
-          `ACP execution denied by policy: ${reason}`,
+          `ACP execution policy denied: ${reason}`,
           "acp",
           false,
           correlationId
@@ -309,7 +321,7 @@ export class ACPClientAdapter implements ProviderAdapter<
         const startTime = Date.now();
 
         // Construct ACP request
-        const acpRequest: ACPRequest = {
+        const acpRequest: AcpRequest = {
           correlationId,
           model: this.config.model,
           messages: [
@@ -386,10 +398,12 @@ export class ACPClientAdapter implements ProviderAdapter<
    * @throws NormalizedProviderError on failure
    */
   async cancel(taskId: string): Promise<void> {
-    if (!this.config) {
+    if (!this.config || this.terminated) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        "ACP client not initialized",
+        this.terminated
+          ? "ACP client unavailable: terminated"
+          : "ACP client unavailable: not initialized",
         "acp"
       );
     }
@@ -433,6 +447,7 @@ export class ACPClientAdapter implements ProviderAdapter<
 
       // Clear config
       this.config = null;
+      this.terminated = true;
 
       this.healthStatus = {
         state: "unavailable",
@@ -457,12 +472,12 @@ export class ACPClientAdapter implements ProviderAdapter<
   /**
    * Probe endpoint for reachability.
    *
-   * @param endpoint Endpoint URL
+   * @param baseUrl Base URL for reachability checks
    * @returns true if reachable, false otherwise
    */
-  private async probeEndpoint(endpoint: string): Promise<boolean> {
+  private async probeEndpoint(baseUrl: string): Promise<boolean> {
     // Mock implementation: always return true for test endpoints
-    if (endpoint.includes("localhost") || endpoint.includes("127.0.0.1")) {
+    if (baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1")) {
       return true;
     }
 
@@ -524,9 +539,6 @@ export class ACPClientAdapter implements ProviderAdapter<
         topic,
         payload,
       });
-    } catch (error) {
-      // Log but don't throw (event publishing is best-effort)
-      console.warn(`Failed to publish ACP event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }

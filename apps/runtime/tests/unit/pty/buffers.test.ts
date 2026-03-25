@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { RingBuffer, OutputBuffer } from "../../../src/pty/buffers.js";
+import { OutputBuffer, RingBuffer } from "../../../src/pty/buffers.js";
 import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 import type { PtyEventCorrelation } from "../../../src/pty/events.js";
 
@@ -137,7 +137,7 @@ describe("OutputBuffer", () => {
 
     const onEvents = bus.events.filter(e => e.topic === "pty.backpressure.on");
     expect(onEvents).toHaveLength(1);
-    expect(onEvents[0]!.payload["utilization"]).toBe(0.75);
+    expect(onEvents[0]?.payload.utilization).toBe(0.75);
   });
 
   it("does not re-emit backpressure.on while already active", () => {
@@ -210,7 +210,7 @@ describe("OutputBuffer", () => {
 
       const overflowEvts = bus.events.filter(e => e.topic === "pty.buffer.overflow");
       expect(overflowEvts).toHaveLength(1);
-      expect(overflowEvts[0]!.payload["droppedBytes"]).toBe(5);
+      expect(overflowEvts[0]?.payload.droppedBytes).toBe(5);
 
       const stats = ob.getStats();
       expect(stats.totalDropped).toBe(5);

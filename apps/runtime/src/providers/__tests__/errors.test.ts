@@ -8,10 +8,10 @@
 import { describe, it, expect } from "bun:test";
 import {
   NormalizedProviderError,
-  normalizeError,
-  isRetryable,
-  getErrorMessage,
   PROVIDER_ERROR_CODES,
+  getErrorMessage,
+  isRetryable,
+  normalizeError,
 } from "../errors.js";
 
 describe("NormalizedProviderError", () => {

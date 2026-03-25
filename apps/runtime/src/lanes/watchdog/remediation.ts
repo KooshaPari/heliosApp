@@ -1,12 +1,12 @@
 // T007-T009 - Remediation engine with confirmation gates and recovery suppression
 
-import { promises as fs } from "fs";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { execCommand } from "../../integrations/exec.js";
-import path from "path";
-import os from "os";
-import { type ClassifiedOrphan, type ResourceType } from "./resource_classifier.js";
 import type { LocalBus } from "../../protocol/bus.js";
 import type { LaneRegistry } from "../registry.js";
+import type { ClassifiedOrphan, ResourceType } from "./resource_classifier.js";
 
 export interface RemediationSuggestion {
   id: string;
@@ -59,7 +59,7 @@ export class RemediationEngine {
         continue; // Skip resources in cooldown
       }
 
-      // Check if owning lane is recovering
+      // Check if owning lane is in transient cleanup
       if (orphan.estimatedOwner !== "unknown") {
         try {
           const lane = this.laneRegistry.get(orphan.estimatedOwner);
@@ -235,14 +235,13 @@ export class RemediationEngine {
           message: "Worktree removed successfully",
           resourceType: "worktree",
         };
-      } else {
-        return {
-          resourceId: orphan.path,
-          success: false,
-          message: `git worktree remove failed: ${result.stderr}`,
-          resourceType: "worktree",
-        };
       }
+      return {
+        resourceId: orphan.path,
+        success: false,
+        message: `git worktree remove failed: ${result.stderr}`,
+        resourceType: "worktree",
+      };
     } catch (error) {
       return {
         resourceId: orphan.path,
@@ -254,7 +253,9 @@ export class RemediationEngine {
   }
 
   private async snapshotWorktree(orphan: ClassifiedOrphan): Promise<void> {
-    if (!orphan.path) return;
+    if (!orphan.path) {
+      return;
+    }
 
     const snapshotDir = path.join(os.homedir(), ".helios", "data", "worktree_snapshots");
     await fs.mkdir(snapshotDir, { recursive: true });
@@ -293,14 +294,13 @@ export class RemediationEngine {
           message: "Zellij session terminated",
           resourceType: "zellij_session",
         };
-      } else {
-        return {
-          resourceId: orphan.path,
-          success: false,
-          message: `zellij kill-session failed: ${result.stderr}`,
-          resourceType: "zellij_session",
-        };
       }
+      return {
+        resourceId: orphan.path,
+        success: false,
+        message: `zellij kill-session failed: ${result.stderr}`,
+        resourceType: "zellij_session",
+      };
     } catch (error) {
       return {
         resourceId: orphan.path,
@@ -352,22 +352,20 @@ export class RemediationEngine {
             message: "Process killed forcefully",
             resourceType: "pty_process",
           };
-        } else {
-          return {
-            resourceId: String(orphan.pid),
-            success: false,
-            message: "Failed to terminate process",
-            resourceType: "pty_process",
-          };
         }
-      } else {
         return {
           resourceId: String(orphan.pid),
           success: false,
-          message: "SIGTERM failed",
+          message: "Failed to terminate process",
           resourceType: "pty_process",
         };
       }
+      return {
+        resourceId: String(orphan.pid),
+        success: false,
+        message: "SIGTERM failed",
+        resourceType: "pty_process",
+      };
     } catch (error) {
       return {
         resourceId: String(orphan.pid),
@@ -394,11 +392,11 @@ export class RemediationEngine {
   private getResourceKey(orphan: ClassifiedOrphan): string {
     if (orphan.path) {
       return `${orphan.type}:${orphan.path}`;
-    } else if (orphan.pid) {
-      return `${orphan.type}:${orphan.pid}`;
-    } else {
-      return `${orphan.type}:unknown`;
     }
+    if (orphan.pid) {
+      return `${orphan.type}:${orphan.pid}`;
+    }
+    return `${orphan.type}:unknown`;
   }
 
   private expireCooldownEntries(): void {
@@ -441,9 +439,7 @@ export class RemediationEngine {
         const entries = Array.from(this.cooldownMap.values());
         fs.writeFile(this.cooldownPath, JSON.stringify(entries, null, 2));
       });
-    } catch (error) {
-      console.error("Failed to save cooldown map:", error);
-    }
+    } catch (_error) {}
   }
 
   private sleep(ms: number): Promise<void> {

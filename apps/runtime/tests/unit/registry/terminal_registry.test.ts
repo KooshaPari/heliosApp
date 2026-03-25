@@ -1,12 +1,11 @@
 import { describe, it, expect, beforeEach } from "bun:test";
 import {
-  TerminalRegistry,
-  DuplicateTerminalId,
   DuplicateSessionId,
+  DuplicateTerminalId,
   InvalidBinding,
   TerminalNotFound,
+  TerminalRegistry,
 } from "../../../src/registry/terminal_registry.js";
-import { BindingState, type BindingTriple } from "../../../src/registry/binding_triple.js";
 
 describe("TerminalRegistry", () => {
   let registry: TerminalRegistry;

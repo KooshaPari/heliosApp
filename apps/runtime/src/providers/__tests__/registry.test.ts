@@ -11,6 +11,10 @@ import { NormalizedProviderError, PROVIDER_ERROR_CODES } from "../errors.js";
 import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
 import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
+import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import { NormalizedProviderError } from "../errors.js";
+import { ProviderRegistry } from "../registry.js";
 
 /**
  * Mock provider for testing registry behavior.
@@ -33,7 +37,7 @@ class TestProvider implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExe
     };
   }
 
-  async execute(input: ACPExecuteInput, correlationId: string): Promise<ACPExecuteOutput> {
+  async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
     if (!this.initialized) {
       throw new Error("Not initialized");
     }

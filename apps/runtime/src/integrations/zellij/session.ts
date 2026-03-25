@@ -5,18 +5,18 @@
  */
 
 import type { ZellijCli } from "./cli.js";
-import type { MuxRegistry } from "./registry.js";
-import type { TopologyTracker } from "./topology.js";
+import { SessionAlreadyExistsError, SessionNotFoundError } from "./errors.js";
 import type { MuxEventEmitter } from "./events.js";
 import { MuxEventType } from "./events.js";
+import type { MuxRegistry } from "./registry.js";
+import type { TopologyTracker } from "./topology.js";
 import type {
   MuxSession,
-  SessionOptions,
   PaneRecord,
-  TabRecord,
   PtyManagerInterface,
+  SessionOptions,
+  TabRecord,
 } from "./types.js";
-import { SessionNotFoundError, SessionAlreadyExistsError } from "./errors.js";
 
 /**
  * Generate the canonical session name for a lane.
@@ -62,9 +62,6 @@ export class ZellijSessionManager {
     }
 
     if (options?.cwd) {
-      console.debug(
-        `[zellij-session] session creation requested with cwd=${options.cwd}; preserving in host-specific runtime`
-      );
     }
 
     // For creating a detached session, we run the zellij process but let it detach
@@ -88,10 +85,7 @@ export class ZellijSessionManager {
     const postSessions = await this.cli.listSessions();
     const created = postSessions.find(s => s.name === sessionName);
 
-    const durationMs = performance.now() - startMs;
-    console.debug(
-      `[zellij-session] createSession(${laneId}) completed in ${durationMs.toFixed(1)}ms`
-    );
+    const _durationMs = performance.now() - startMs;
 
     const muxSession: MuxSession = {
       sessionName,
@@ -256,9 +250,6 @@ export class ZellijSessionManager {
     try {
       const result = await this.cli.run(["--session", sessionName, "action", "dump-layout"]);
       if (result.exitCode !== 0) {
-        console.warn(
-          `[zellij-session] Could not query layout for ${sessionName}: ${result.stderr}`
-        );
         return "";
       }
       return result.stdout;

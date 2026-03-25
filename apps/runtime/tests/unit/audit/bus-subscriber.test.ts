@@ -7,7 +7,7 @@ import { AUDIT_EVENT_TYPES } from "../../../src/audit/event";
 describe("BusAuditSubscriber", () => {
   let subscriber: BusAuditSubscriber;
   let sink: DefaultAuditSink;
-  let mockBus: any;
+  let mockBus: MockBus;
 
   beforeEach(() => {
     subscriber = new BusAuditSubscriber();
@@ -17,15 +17,15 @@ describe("BusAuditSubscriber", () => {
     let subscriptionHandler: ((event: BusEvent) => Promise<void>) | null = null;
 
     mockBus = {
-      subscribe: (topic: string, handler: (event: BusEvent) => Promise<void>) => {
+      subscribe: (_topic: string, handler: (event: BusEvent) => Promise<void>) => {
         subscriptionHandler = handler;
         return () => {
           subscriptionHandler = null;
         };
       },
-      emit: (event: BusEvent) => {
+      emit: async (event: BusEvent) => {
         if (subscriptionHandler) {
-          return subscriptionHandler(event);
+          await subscriptionHandler(event);
         }
       },
     };

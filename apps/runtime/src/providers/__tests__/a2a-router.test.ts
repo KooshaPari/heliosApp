@@ -9,8 +9,9 @@
 import { describe, it, expect, beforeEach } from "bun:test";
 import { A2ARouterAdapter, HealthMonitoringCoordinator, type A2AEndpoint } from "../a2a-router.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { NormalizedProviderError } from "../errors.js";
+import { A2ARouterAdapter, HealthMonitoringCoordinator } from "../a2a-router.js";
 import type { ProviderHealthStatus } from "../adapter.js";
+import { NormalizedProviderError } from "../errors.js";
 
 type RouterConfig = {
   endpoints: Array<{
@@ -429,7 +430,7 @@ describe("A2A Router Adapter", () => {
           },
           "corr-123"
         );
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
@@ -549,8 +550,8 @@ describe("Health Monitoring Coordinator", () => {
       coordinator.registerProvider("mcp-provider-1", 5000, checkFunction);
 
       // Since initial state is unavailable, they won't be returned as healthy
-      const healthyACP = coordinator.getHealthyProvidersByType("acp");
-      expect(healthyACP).toBeDefined();
+      const healthyAcp = coordinator.getHealthyProvidersByType("acp");
+      expect(healthyAcp).toBeDefined();
     });
   });
 });

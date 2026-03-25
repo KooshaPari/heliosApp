@@ -207,8 +207,8 @@ describe("SwitchBuffer", () => {
 
     expect(buf.getBufferedBytes()).toBeLessThanOrEqual(10);
     expect(events.length).toBeGreaterThan(0);
-    expect(events[0]!.type).toBe("renderer.switch.buffer_overflow");
-    expect(events[0]!.ptyId).toBe("pty-1");
+    expect(events[0]?.type).toBe("renderer.switch.buffer_overflow");
+    expect(events[0]?.ptyId).toBe("pty-1");
   });
 
   it("buffers independently per PTY", () => {

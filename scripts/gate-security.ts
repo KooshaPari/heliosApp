@@ -1,8 +1,5 @@
 #!/usr/bin/env bun
-/**
- * Gate 6: Security vulnerability scanning
- * Scans dependencies for known vulnerabilities using npm audit
- */
+import { type GateFinding, createGateReport, writeGateReport } from "./gate-report.ts";
 
 import { readFileSync, existsSync } from "fs";
 import {

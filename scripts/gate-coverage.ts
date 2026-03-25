@@ -1,8 +1,5 @@
 #!/usr/bin/env bun
-/**
- * Gate 5: Code coverage threshold enforcement
- * Parses coverage output and generates structured JSON report
- */
+import { type GateFinding, createGateReport, writeGateReport } from "./gate-report.ts";
 
 import { readFileSync, existsSync } from "fs";
 import {

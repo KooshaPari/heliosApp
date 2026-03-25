@@ -96,8 +96,6 @@ export class BusAuditSubscriber {
     const auditEventType = TOPIC_TO_AUDIT_TYPE[event.topic];
 
     if (!auditEventType) {
-      // Unknown topic: log warning but continue
-      console.warn(`[BusAuditSubscriber] Unknown bus topic: ${event.topic}`);
       // Optionally create a generic audit event for unknown topics
       // For now, skip unknown topics to avoid noise
       return;

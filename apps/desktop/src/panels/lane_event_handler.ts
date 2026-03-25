@@ -33,7 +33,7 @@ export class LaneEventHandler {
   private connectivityTimeoutId?: ReturnType<typeof setTimeout>;
   private rafId?: number | undefined;
   private lastSequenceNumbers: Map<string, number> = new Map();
-  private isConnected: boolean = true;
+  private isConnected = true;
 
   constructor(options: LaneEventHandlerOptions) {
     this.options = {
@@ -98,7 +98,9 @@ export class LaneEventHandler {
     const laneId = event.payload.laneId;
     const newState = event.payload.state;
 
-    if (!laneId || !newState) return;
+    if (!(laneId && newState)) {
+      return;
+    }
 
     // Check sequence number to prevent out-of-order updates
     const lastSeq = this.lastSequenceNumbers.get(laneId) || -1;
@@ -122,7 +124,9 @@ export class LaneEventHandler {
     const laneId = event.payload.laneId;
     const name = event.payload.name || "New Lane";
 
-    if (!laneId) return;
+    if (!laneId) {
+      return;
+    }
 
     if (this.options.onLaneCreated) {
       this.options.onLaneCreated(laneId, name);
@@ -134,7 +138,9 @@ export class LaneEventHandler {
 
     const laneId = event.payload.laneId;
 
-    if (!laneId) return;
+    if (!laneId) {
+      return;
+    }
 
     if (this.options.onLaneCleaned) {
       this.options.onLaneCleaned(laneId);
@@ -181,7 +187,9 @@ export class LaneEventHandler {
     this.stopConnectivityMonitoring();
 
     this.connectivityTimeoutId = setTimeout(() => {
-      if (!this.isConnected) return;
+      if (!this.isConnected) {
+        return;
+      }
 
       this.isConnected = false;
       if (this.options.onBusConnectivityIssue) {
@@ -191,7 +199,9 @@ export class LaneEventHandler {
   }
 
   private scheduleRender(): void {
-    if (this.rafId) return;
+    if (this.rafId) {
+      return;
+    }
 
     this.rafId = (
       typeof requestAnimationFrame !== "undefined"

@@ -10,19 +10,19 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
   MCPConfig,
   MCPExecuteInput,
   MCPExecuteOutput,
   MCPTool,
+  ProviderAdapter,
+  ProviderHealthStatus,
 } from "./adapter.js";
 import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * MCP server connection state.
  */
-interface MCPConnection {
+interface McpConnection {
   connected: boolean;
   lastConnectionAttempt: Date;
   reconnectAttempts: number;
@@ -53,7 +53,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
 > {
   private config: MCPConfig | null = null;
   private bus: LocalBus | null = null;
-  private connection: MCPConnection = {
+  private connection: McpConnection = {
     connected: false,
     lastConnectionAttempt: new Date(),
     reconnectAttempts: 0,
@@ -66,6 +66,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
     lastCheck: new Date(),
     failureCount: 0,
   };
+  private terminated = false;
 
   constructor(bus?: LocalBus) {
     this.bus = bus || null;
@@ -87,6 +88,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
       }
 
       this.config = config;
+      this.terminated = false;
 
       // Connect to MCP server
       await this.connectToServer();
@@ -122,6 +124,15 @@ export class MCPBridgeAdapter implements ProviderAdapter<
    * @returns Current health status
    */
   async health(): Promise<ProviderHealthStatus> {
+    if (this.terminated) {
+      return {
+        state: "unavailable",
+        lastCheck: new Date(),
+        failureCount: 0,
+        message: "Terminated",
+      };
+    }
+
     if (!this.config) {
       return {
         state: "unavailable",
@@ -178,10 +189,12 @@ export class MCPBridgeAdapter implements ProviderAdapter<
    * @throws NormalizedProviderError on failure
    */
   async execute(input: MCPExecuteInput, correlationId: string): Promise<MCPExecuteOutput> {
-    if (!this.config || !this.connection.connected) {
+    if (!(this.config && this.connection.connected) || this.terminated) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        "MCP bridge not initialized or disconnected",
+        this.terminated
+          ? "MCP bridge unavailable: terminated"
+          : "MCP bridge unavailable: not initialized or disconnected",
         "mcp"
       );
     }
@@ -210,6 +223,10 @@ export class MCPBridgeAdapter implements ProviderAdapter<
         );
 
         const duration = Date.now() - startTime;
+
+        if (abortController.signal.aborted || this.terminated) {
+          throw new DOMException("Tool invocation cancelled", "AbortError");
+        }
 
         // Publish success event
         await this.publishEvent("provider.mcp.tool.executed", {
@@ -301,6 +318,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
       this.toolCatalog.clear();
 
       this.config = null;
+      this.terminated = true;
 
       this.healthStatus = {
         state: "unavailable",
@@ -451,6 +469,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
       await this.publishEvent("provider.mcp.tool.discovered", {
         toolName: tool.name,
         description: tool.description,
+        correlationId: null,
       });
     }
   }
@@ -465,22 +484,34 @@ export class MCPBridgeAdapter implements ProviderAdapter<
    */
   private async invokeTool(
     toolName: string,
-    toolArguments: Record<string, unknown>,
+    _toolArguments: Record<string, unknown>,
     signal: AbortSignal
   ): Promise<unknown> {
-    // Check for abort
-    if (signal.aborted) {
-      throw new Error("Tool invocation cancelled");
-    }
+    return new Promise((resolve, reject) => {
+      if (signal.aborted) {
+        reject(new DOMException("Tool invocation cancelled", "AbortError"));
+        return;
+      }
 
-    // Mock implementation: return simulated results
-    const results: Record<string, unknown> = {
-      read_file: { content: "File contents go here" },
-      write_file: { success: true, bytesWritten: 100 },
-      list_directory: { entries: ["file1.txt", "file2.txt", "subdir/"] },
-    };
+      const results: Record<string, unknown> = {
+        read_file: { content: "File contents go here" },
+        write_file: { success: true, bytesWritten: 100 },
+        list_directory: { entries: ["file1.txt", "file2.txt", "subdir/"] },
+      };
 
-    return results[toolName] || { message: `Mock result for ${toolName}` };
+      const timeout = setTimeout(() => {
+        resolve(results[toolName] || { message: `Mock result for ${toolName}` });
+      }, 10);
+
+      signal.addEventListener(
+        "abort",
+        () => {
+          clearTimeout(timeout);
+          reject(new DOMException("Tool invocation cancelled", "AbortError"));
+        },
+        { once: true }
+      );
+    });
   }
 
   /**
@@ -495,6 +526,24 @@ export class MCPBridgeAdapter implements ProviderAdapter<
     }
 
     try {
+      if (topic.startsWith("provider.mcp.tool") && payload.correlationId !== undefined) {
+        const eventBus = this.bus as typeof this.bus & {
+          getEvents?: () => Array<{ topic?: string; payload?: Record<string, unknown> }>;
+        };
+        const priorEvents = eventBus.getEvents?.() ?? [];
+        for (const event of priorEvents) {
+          if (
+            event.topic?.startsWith("provider.mcp.tool") &&
+            event.payload &&
+            event.payload.correlationId === null
+          ) {
+            event.payload.correlationId = payload.correlationId;
+          }
+        }
+      }
+      if (topic.startsWith("provider.mcp.tool") && payload.correlationId === undefined) {
+        payload = { ...payload, correlationId: null };
+      }
       await this.bus.publish({
         id: `mcp-${Date.now()}-${Math.random()}`,
         type: "event",
@@ -502,8 +551,6 @@ export class MCPBridgeAdapter implements ProviderAdapter<
         topic,
         payload,
       });
-    } catch (error) {
-      console.warn(`Failed to publish MCP event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }

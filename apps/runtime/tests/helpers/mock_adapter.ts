@@ -6,11 +6,11 @@
  */
 
 import type {
-  RendererAdapter,
-  RendererConfig,
   RenderSurface,
-  RendererState,
+  RendererAdapter,
   RendererCapabilities,
+  RendererConfig,
+  RendererState,
 } from "../../src/renderer/index.js";
 
 export interface MockAdapterOptions {
@@ -90,8 +90,12 @@ export class MockRendererAdapter implements RendererAdapter {
 
   async stop(): Promise<void> {
     this.stopCallCount++;
-    if (this._opts.stopDelay) await delay(this._opts.stopDelay);
-    if (this._opts.stopFail) throw new Error(`${this.id} stop failed`);
+    if (this._opts.stopDelay) {
+      await delay(this._opts.stopDelay);
+    }
+    if (this._opts.stopFail) {
+      throw new Error(`${this.id} stop failed`);
+    }
     this._state = "stopped";
   }
 

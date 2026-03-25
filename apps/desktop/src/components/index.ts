@@ -1,1 +1,1 @@
-export { ModelSelector } from "./chat/ModelSelector";
+export { ModelSelector } from "./chat/ModelSelector.tsx";

@@ -1,7 +1,7 @@
+import { randomUUID } from "node:crypto";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
-import { randomUUID } from "crypto";
 
 export interface CrashRecord {
   timestamp: number;
@@ -98,7 +98,9 @@ export class SafeMode {
   }
 
   async enter(): Promise<void> {
-    if (this.active) return;
+    if (this.active) {
+      return;
+    }
 
     this.active = true;
 
@@ -121,7 +123,9 @@ export class SafeMode {
   }
 
   async exit(): Promise<void> {
-    if (!this.active) return;
+    if (!this.active) {
+      return;
+    }
 
     this.active = false;
 
@@ -158,14 +162,14 @@ export class SafeMode {
 
   // Query methods for subsystems to check if they should be active
   isProvidersEnabled(): boolean {
-    return !this.active || !this.config.disableProviders;
+    return !(this.active && this.config.disableProviders);
   }
 
   isShareSessionsEnabled(): boolean {
-    return !this.active || !this.config.disableShareSessions;
+    return !(this.active && this.config.disableShareSessions);
   }
 
   isBackgroundCheckpointsEnabled(): boolean {
-    return !this.active || !this.config.disableBackgroundCheckpoints;
+    return !(this.active && this.config.disableBackgroundCheckpoints);
   }
 }

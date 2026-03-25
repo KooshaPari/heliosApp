@@ -1,13 +1,12 @@
 // FR-001, FR-008: Unit tests for monotonic clock and markStart/markEnd API.
 
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import {
-  monotonicNow,
-  markStart,
-  markEnd,
-  getMarkOverflowCount,
-  createInstrumentationHooks,
   _resetGlobalHooks,
+  createInstrumentationHooks,
+  markEnd,
+  markStart,
+  monotonicNow,
 } from "../../../src/diagnostics/hooks.js";
 import type { MonotonicClock } from "../../../src/diagnostics/hooks.js";
 
@@ -178,7 +177,7 @@ describe("createInstrumentationHooks", () => {
     hooks.markEnd("render", h);
 
     expect(samples).toHaveLength(1);
-    expect(samples[0]!.metric).toBe("render");
-    expect(samples[0]!.value).toBe(7);
+    expect(samples[0]?.metric).toBe("render");
+    expect(samples[0]?.value).toBe(7);
   });
 });
