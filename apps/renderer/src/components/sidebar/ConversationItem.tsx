@@ -21,7 +21,7 @@ function relativeTime(date: Date): string {
   return `${diffDay}d ago`;
 }
 
-export const ConversationItem: Component<ConversationItemProps> = (props) => {
+export const ConversationItem: Component<ConversationItemProps> = props => {
   return (
     <div
       onClick={() => props.onClick(props.id)}

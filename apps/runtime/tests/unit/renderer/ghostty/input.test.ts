@@ -177,14 +177,19 @@ describe("GhosttyInputRelay - metrics integration", () => {
 
     const writes: Array<{ ptyId: string; data: Uint8Array }> = [];
     const writer: PtyWriter = {
-      writeInput(ptyId, data) { writes.push({ ptyId, data }); },
+      writeInput(ptyId, data) {
+        writes.push({ ptyId, data });
+      },
     };
     const relay = new GhosttyInputRelay(writer, metrics);
     const ghosttyProcess = new GhosttyProcess();
 
     relay.setupInputRelay("pty-1", ghosttyProcess);
     relay.setFocus("pty-1");
-    relay.relayInput({ data: new Uint8Array([0x41]), timestamp: Date.now() - 10 });
+    relay.relayInput({
+      data: new Uint8Array([0x41]),
+      timestamp: Date.now() - 10,
+    });
 
     const snap = metrics.getSnapshot();
     // Input latency should have been recorded

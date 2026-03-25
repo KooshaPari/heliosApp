@@ -55,9 +55,7 @@ export class ZellijDetector {
     return orphans;
   }
 
-  private async listZellijSessions(): Promise<
-    Array<{ name: string; created: number }>
-  > {
+  private async listZellijSessions(): Promise<Array<{ name: string; created: number }>> {
     try {
       // Use zellij CLI to list sessions
       const result = await execCommand("zellij", ["list-sessions", "-n"]);
@@ -68,8 +66,8 @@ export class ZellijDetector {
 
       const sessions = result.stdout
         .split("\n")
-        .filter((line) => line.trim())
-        .map((line) => {
+        .filter(line => line.trim())
+        .map(line => {
           return {
             name: line.trim(),
             created: Date.now(), // Default: assume recent if we can't determine

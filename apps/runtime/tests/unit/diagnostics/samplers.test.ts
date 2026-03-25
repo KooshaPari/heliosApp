@@ -27,7 +27,7 @@ describe("MemorySampler", () => {
   // FR-005
   it("records samples at configured interval", async () => {
     sampler.start();
-    await new Promise((r) => setTimeout(r, 350));
+    await new Promise(r => setTimeout(r, 350));
     sampler.stop();
     const entry = registry.getMetric("memory");
     expect(entry).toBeDefined();
@@ -37,7 +37,7 @@ describe("MemorySampler", () => {
   // FR-005: Values in MB
   it("records values in MB (not bytes)", async () => {
     sampler.start();
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 150));
     sampler.stop();
     const entry = registry.getMetric("memory");
     expect(entry).toBeDefined();
@@ -52,7 +52,7 @@ describe("MemorySampler", () => {
     sampler.start();
     sampler.start();
     sampler.start();
-    await new Promise((r) => setTimeout(r, 250));
+    await new Promise(r => setTimeout(r, 250));
     sampler.stop();
     const entry = registry.getMetric("memory");
     // If duplicated, we'd have 3x the samples. With 100ms interval over 250ms, expect ~2-3.
@@ -62,10 +62,10 @@ describe("MemorySampler", () => {
   // FR-005: stop halts cleanly
   it("stops sampling cleanly", async () => {
     sampler.start();
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 150));
     sampler.stop();
     const countAfterStop = registry.getMetric("memory")!.buffer.getCount();
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 200));
     const countLater = registry.getMetric("memory")!.buffer.getCount();
     expect(countLater).toBe(countAfterStop);
   });

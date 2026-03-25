@@ -3,7 +3,11 @@
  */
 
 import { describe, test, expect, beforeEach } from "bun:test";
-import { getCachedCapabilities, clearCapabilityCache, detectCapabilities } from "../capabilities.js";
+import {
+  getCachedCapabilities,
+  clearCapabilityCache,
+  detectCapabilities,
+} from "../capabilities.js";
 import type { RendererCapabilities } from "../../capabilities.js";
 
 describe("Ghostty Capabilities", () => {

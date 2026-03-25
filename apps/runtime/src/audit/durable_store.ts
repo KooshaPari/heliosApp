@@ -14,4 +14,3 @@ export class Slice1AuditDurabilityPlaceholder implements AuditDurableStore {
     return [];
   }
 }
-

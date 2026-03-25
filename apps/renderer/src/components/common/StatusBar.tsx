@@ -38,12 +38,8 @@ export const StatusBar: Component = () => {
         />
         <span>{state().connectionStatus}</span>
       </div>
-      <div style={{ color: "#89b4fa", "font-weight": "500" }}>
-        {state().activeModel}
-      </div>
-      <div>
-        session: --
-      </div>
+      <div style={{ color: "#89b4fa", "font-weight": "500" }}>{state().activeModel}</div>
+      <div>session: --</div>
     </div>
   );
 };

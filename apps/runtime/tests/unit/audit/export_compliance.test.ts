@@ -19,8 +19,8 @@ describe("audit export compliance", () => {
         terminal_id: "terminal-1",
         correlation_id: "corr-1",
         topic: "terminal.output",
-        payload: { chunk: "ok" }
-      }
+        payload: { chunk: "ok" },
+      },
     });
 
     const rows = await sink.exportRecords();
@@ -48,16 +48,18 @@ describe("audit export compliance", () => {
         topic: "session.attached",
         payload: {
           authorization: "Bearer secret-value",
-          nested: { token: "abc123", safe: "value" }
-        }
-      }
+          nested: { token: "abc123", safe: "value" },
+        },
+      },
     });
 
     const rows = await sink.exportRecords();
-    const payload = (rows[0]?.envelope as Record<string, unknown>).payload as Record<string, unknown>;
+    const payload = (rows[0]?.envelope as Record<string, unknown>).payload as Record<
+      string,
+      unknown
+    >;
     expect(payload.authorization).toBe("[REDACTED]");
     expect((payload.nested as Record<string, unknown>).token).toBe("[REDACTED]");
     expect((payload.nested as Record<string, unknown>).safe).toBe("value");
   });
 });
-

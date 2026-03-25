@@ -28,7 +28,7 @@ describe("compareCapabilities", () => {
     const diff = compareCapabilities(a, b);
     expect(diff.equal).toBe(false);
     expect(diff.differences.length).toBe(2);
-    const fields = diff.differences.map((d) => d.field);
+    const fields = diff.differences.map(d => d.field);
     expect(fields).toContain("gpuAccelerated");
     expect(fields).toContain("colorDepth");
   });
@@ -38,7 +38,7 @@ describe("compareCapabilities", () => {
     const b = { ...baseCaps(), maxDimensions: { cols: 100, rows: 50 } };
     const diff = compareCapabilities(a, b);
     expect(diff.equal).toBe(false);
-    expect(diff.differences.some((d) => d.field === "maxDimensions")).toBe(true);
+    expect(diff.differences.some(d => d.field === "maxDimensions")).toBe(true);
   });
 
   it("detects inputModes difference (order independent)", () => {
@@ -46,13 +46,16 @@ describe("compareCapabilities", () => {
     const b = { ...baseCaps(), inputModes: ["application" as const] };
     const diff = compareCapabilities(a, b);
     expect(diff.equal).toBe(false);
-    expect(diff.differences.some((d) => d.field === "inputModes")).toBe(true);
+    expect(diff.differences.some(d => d.field === "inputModes")).toBe(true);
   });
 
   it("treats same inputModes in different order as equal", () => {
     const a = baseCaps();
-    const b = { ...baseCaps(), inputModes: ["cooked" as const, "raw" as const] };
+    const b = {
+      ...baseCaps(),
+      inputModes: ["cooked" as const, "raw" as const],
+    };
     const diff = compareCapabilities(a, b);
-    expect(diff.differences.some((d) => d.field === "inputModes")).toBe(false);
+    expect(diff.differences.some(d => d.field === "inputModes")).toBe(false);
   });
 });

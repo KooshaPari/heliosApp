@@ -18,10 +18,7 @@ function makeMuxSession(sessionName: string, laneId: string): MuxSession {
   };
 }
 
-function makeCli(
-  sessions: ZellijSession[],
-  killResults?: Map<string, CliResult>,
-): ZellijCli {
+function makeCli(sessions: ZellijSession[], killResults?: Map<string, CliResult>): ZellijCli {
   return {
     listSessions: mock(async () => sessions),
     run: mock(async (args: string[]) => {
@@ -65,10 +62,7 @@ describe("reconcile", () => {
   });
 
   it("handles mixed orphans and stale bindings", async () => {
-    const cli = makeCli([
-      makeSession("helios-lane-orphan"),
-      makeSession("helios-lane-alive"),
-    ]);
+    const cli = makeCli([makeSession("helios-lane-orphan"), makeSession("helios-lane-alive")]);
     const registry = new MuxRegistry();
     registry.bind("helios-lane-alive", "alive", makeMuxSession("helios-lane-alive", "alive"));
     registry.bind("helios-lane-gone", "gone", makeMuxSession("helios-lane-gone", "gone"));

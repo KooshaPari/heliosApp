@@ -13,7 +13,7 @@ const CI_FACTOR = 2; // relaxed threshold for CI machines
 function benchmarkLoop(
   iterations: number,
   warmup: number,
-  fn: () => void,
+  fn: () => void
 ): { p99: number; median: number; mean: number } {
   // Warm up
   for (let i = 0; i < warmup; i++) {
@@ -90,7 +90,12 @@ describe("Instrumentation Overhead Benchmarks", () => {
 
     for (let i = 0; i < 10; i++) {
       const name = `bench-slo-${i}`;
-      registry.register({ name, type: "latency", unit: "ms", description: `SLO ${i}` });
+      registry.register({
+        name,
+        type: "latency",
+        unit: "ms",
+        description: `SLO ${i}`,
+      });
       for (let j = 0; j < 1000; j++) {
         registry.record(name, Math.random() * 100, j);
       }
