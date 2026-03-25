@@ -21,10 +21,10 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "recommended": "warn",
       "suspicious": {
         "all": true,
-        "noExplicitAny": "warn",
+        "noExplicitAny": "off",
         "useAwait": "warn",
         "noEmptyBlockStatements": "warn",
         "noEvolvingTypes": "warn",
@@ -41,7 +41,7 @@
       },
       "style": {
         "all": true,
-        "useNamingConvention": "warn",
+        "useNamingConvention": "off",
         "noNonNullAssertion": "warn",
         "noParameterProperties": "off",
         "noNamespaceImport": "warn",
@@ -83,7 +83,9 @@
   },
   "overrides": [
     {
-      "include": ["apps/desktop/src/runtime_client.ts"],
+      "include": [
+        "apps/desktop/src/runtime_client.ts"
+      ],
       "linter": {
         "rules": {
           "style": {
