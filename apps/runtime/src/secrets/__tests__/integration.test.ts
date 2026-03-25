@@ -9,50 +9,56 @@
  *   SC-028-005: Redaction audit trail present for every persisted artifact
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, rmSync, readFileSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { randomBytes } from "node:crypto";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { randomBytes } from "node:crypto";
-import { CredentialStore, CredentialAccessDeniedError } from "../credential-store.js";
-import { EncryptionService } from "../encryption.js";
-import { RedactionEngine } from "../redaction-engine.js";
-import { getDefaultRules } from "../redaction-rules.js";
-import { RedactionAuditTrail } from "../audit-trail.js";
-import { ProtectedPathDetector, ProtectedPathConfig } from "../protected-paths.js";
 import { AuditSink } from "../../audit/audit-sink.js";
 import { InMemoryLocalBus, type LocalBus } from "../../protocol/bus.js";
+import { RedactionAuditTrail } from "../audit-trail.js";
+import {
+	CredentialAccessDeniedError,
+	CredentialStore,
+} from "../credential-store.js";
+import { EncryptionService } from "../encryption.js";
+import {
+	ProtectedPathConfig,
+	ProtectedPathDetector,
+} from "../protected-paths.js";
+import { RedactionEngine } from "../redaction-engine.js";
+import { getDefaultRules } from "../redaction-rules.js";
 
 // ---------------------------------------------------------------------------
 // Test helpers
 // ---------------------------------------------------------------------------
 
 function makeFixedEncryption(): EncryptionService {
-  const fixedKey = randomBytes(32);
-  return new EncryptionService({ masterKeyOverride: async () => fixedKey });
+	const fixedKey = randomBytes(32);
+	return new EncryptionService({ masterKeyOverride: async () => fixedKey });
 }
 
 function makeStore(dataDir: string, bus: LocalBus): CredentialStore {
-  return new CredentialStore({
-    dataDir,
-    bus,
-    encryption: makeFixedEncryption(),
-  });
+	return new CredentialStore({
+		dataDir,
+		bus,
+		encryption: makeFixedEncryption(),
+	});
 }
 
 function makeEngine(): RedactionEngine {
-  const engine = new RedactionEngine();
-  engine.loadRules(getDefaultRules());
-  return engine;
+	const engine = new RedactionEngine();
+	engine.loadRules(getDefaultRules());
+	return engine;
 }
 
 function makeRedactFn(engine: RedactionEngine): (text: string) => string {
-  return (text: string) =>
-    engine.redact(text, {
-      artifactId: `redact:${Date.now()}`,
-      artifactType: "audit_payload",
-      correlationId: "integration-test",
-    }).redacted;
+	return (text: string) =>
+		engine.redact(text, {
+			artifactId: `redact:${Date.now()}`,
+			artifactType: "audit_payload",
+			correlationId: "integration-test",
+		}).redacted;
 }
 
 // ---------------------------------------------------------------------------

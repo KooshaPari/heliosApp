@@ -32,12 +32,12 @@ describe.skip("path alias resolution (requires external project setup)", () => {
     const { healthCheck } = await import("@helios/runtime");
     const result = healthCheck();
 
-    expect(result.ok).toBe(true);
-    expect(typeof result.timestamp).toBe("number");
-    expect(typeof result.uptimeMs).toBe("number");
-    expect(result.timestamp).toBeGreaterThan(0);
-    expect(result.uptimeMs).toBeGreaterThanOrEqual(0);
-  });
+		expect(result.ok).toBe(true);
+		expect(typeof result.timestamp).toBe("number");
+		expect(typeof result.uptimeMs).toBe("number");
+		expect(result.timestamp).toBeGreaterThan(0);
+		expect(result.uptimeMs).toBeGreaterThanOrEqual(0);
+	});
 
   // @ts-ignore
   test("@helios/runtime type exports are structurally correct", async () => {
@@ -45,8 +45,8 @@ describe.skip("path alias resolution (requires external project setup)", () => {
     const { healthCheck } = await import("@helios/runtime");
     const result = healthCheck();
 
-    // Verify the shape matches HealthCheckResult interface
-    const keys = Object.keys(result).sort();
-    expect(keys).toEqual(["ok", "timestamp", "uptimeMs"]);
-  });
+		// Verify the shape matches HealthCheckResult interface
+		const keys = Object.keys(result).sort();
+		expect(keys).toEqual(["ok", "timestamp", "uptimeMs"]);
+	});
 });

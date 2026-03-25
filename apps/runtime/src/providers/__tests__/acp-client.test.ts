@@ -6,38 +6,38 @@
  * FR-025-012: Policy gate integration.
  */
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
 import { NormalizedProviderError } from "../errors.js";
 
 /**
  * Mock policy gate for testing.
  */
 class MockPolicyGate implements PolicyGate {
-  private shouldDeny = false;
-  private denialReason = "Test denial";
+	private shouldDeny = false;
+	private denialReason = "Test denial";
 
-  setShouldDeny(deny: boolean, reason?: string): void {
-    this.shouldDeny = deny;
-    if (reason) {
-      this.denialReason = reason;
-    }
-  }
+	setShouldDeny(deny: boolean, reason?: string): void {
+		this.shouldDeny = deny;
+		if (reason) {
+			this.denialReason = reason;
+		}
+	}
 
-  async evaluate(
-    _action: string,
-    _context: Record<string, unknown>
-  ): Promise<{ allowed: boolean; reason?: string }> {
-    await Promise.resolve();
-    if (this.shouldDeny) {
-      return {
-        allowed: false,
-        reason: this.denialReason,
-      };
-    }
-    return { allowed: true };
-  }
+	async evaluate(
+		_action: string,
+		_context: Record<string, unknown>,
+	): Promise<{ allowed: boolean; reason?: string }> {
+		await Promise.resolve();
+		if (this.shouldDeny) {
+			return {
+				allowed: false,
+				reason: this.denialReason,
+			};
+		}
+		return { allowed: true };
+	}
 }
 
 describe("ACP Client Adapter", () => {
