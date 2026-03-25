@@ -1,0 +1,10 @@
+{
+  "feature_number": "029",
+  "slug": "colab-toolchain-modernization",
+  "friendly_name": "Colab Toolchain Modernization",
+  "mission": "software-dev",
+  "source_description": "Migrate co(lab) fork to Phenotype-standard toolchain: Taskfile.yml, bun-native scripts, quality lane hierarchy, dependency cleanup, project constitution, and MLX inference evaluation.",
+  "created_at": "2026-02-28T00:00:00Z",
+  "target_branch": "main",
+  "vcs": "git"
+}
