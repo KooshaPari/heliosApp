@@ -1,5 +1,6 @@
 import type { LocalBus } from "../protocol/bus.js";
 import { promises as fs } from "fs";
+import { mkdirSync, writeFileSync } from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
 
@@ -63,15 +64,8 @@ export class CrashLoopDetector {
   private persistCrashHistory(): void {
     try {
       const historyPath = path.join(this.crashDataDir, "recovery", "crash-history.json");
-      const tempPath = `${historyPath}.tmp`;
-
-      // Atomic write
-      fs.writeFile(tempPath, JSON.stringify(this.crashHistory), { encoding: "utf-8" })
-        .then(() => fs.rename(tempPath, historyPath))
-        .catch((err) => {
-          // Silently fail - don't let history persistence block operations
-          console.error("Failed to persist crash history:", err);
-        });
+      mkdirSync(path.dirname(historyPath), { recursive: true });
+      writeFileSync(historyPath, JSON.stringify(this.crashHistory), { encoding: "utf-8" });
     } catch (err) {
       console.error("Failed to persist crash history:", err);
     }

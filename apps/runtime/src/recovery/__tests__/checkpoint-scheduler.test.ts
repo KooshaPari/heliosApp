@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, jest as vi } from "bun:test";
 import { CheckpointScheduler } from "../checkpoint-scheduler.js";
 import {
   CheckpointWriter,
