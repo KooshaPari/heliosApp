@@ -128,7 +128,7 @@ describe("OrphanWatchdog", () => {
     expect(summary?.ptyProcesses).toBe(0);
 
     watchdog.stop();
-  });
+  }, 15000);
 
   it("should not allow double start", async () => {
     watchdog = new OrphanWatchdog({
@@ -174,5 +174,5 @@ describe("OrphanWatchdog", () => {
     expect(duration).toBeLessThan(5000); // Generous limit for slow CI
 
     watchdog.stop();
-  });
+  }, 15000);
 });

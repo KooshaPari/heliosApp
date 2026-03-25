@@ -49,7 +49,7 @@ jobs:
         run: |
           FILES='${{ steps.files.outputs.files }}'
           FILES_ARRAY=$(echo "$FILES" | jq -r '.[]' | tr '\n' ' ')
-          tsx scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>compliance-stderr.log
+          bun run scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>compliance-stderr.log
           cat compliance-result.json
           if [ -s compliance-stderr.log ]; then
             echo "::warning::Compliance checker stderr:"
