@@ -4,10 +4,6 @@
   "private": true,
   "type": "module",
   "packageManager": "bun@1.2.20",
-  "engines": {
-    "node": ">=20.0.0",
-    "bun": ">=1.2.20"
-  },
   "workspaces": [
     "apps/runtime",
     "apps/desktop"
@@ -47,6 +43,6 @@
     "happy-dom": "20.8.7",
     "oxlint": "latest",
     "typescript": "5.8.2",
-    "vitepress": "1.6.4"
+    "vitepress": "1.6.3"
   }
 }

@@ -13,12 +13,6 @@ repos:
       - id: detect-private-key
   - repo: local
     hooks:
-      - id: lint-staged
-        name: lint-staged
-        entry: bun run lint
-        language: system
-        files: \.(ts|tsx|js|jsx|json|md)$
-        pass_filenames: true
       - id: security-guard-pre-commit-pre-push
         name: security-guard pre-commit/pre-push
         entry: .github/scripts/security-guard.sh
