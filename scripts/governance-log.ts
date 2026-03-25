@@ -3,13 +3,13 @@
  * Provides append-only logging and querying for merge governance records.
  */
 
-import { promises as fs } from 'fs';
-import * as path from 'path';
+import { promises as fs } from 'node:fs';
+import * as path from 'node:path';
 import type {
   GovernanceLogEntry,
-  ValidationResult,
-  GovernanceLogQueryResult
-} from './governance-types';
+  GovernanceLogQueryResult,
+  ValidationResult
+} from "./governance-types.ts";
 
 const GOVERNANCE_LOG_PATH = path.join(
   path.dirname(path.dirname(import.meta.url)).replace('file://', ''),
@@ -92,10 +92,10 @@ function validateEntry(entry: GovernanceLogEntry): void {
   if (typeof entry.selfMerge !== 'boolean') {
     errors.push('selfMerge must be boolean');
   }
-  if (!entry.mergeCommitSha || !/^[a-f0-9]{40}$/.test(entry.mergeCommitSha)) {
+  if (!(entry.mergeCommitSha && /^[a-f0-9]{40}$/.test(entry.mergeCommitSha))) {
     errors.push('mergeCommitSha must be a valid 40-char SHA');
   }
-  if (!entry.timestamp || isNaN(Date.parse(entry.timestamp))) {
+  if (!entry.timestamp || Number.isNaN(Date.parse(entry.timestamp))) {
     errors.push('timestamp must be a valid ISO 8601 string');
   }
   
@@ -226,47 +226,43 @@ if (import.meta.main) {
   
   const run = async () => {
     switch (command) {
-      case 'validate':
+      case 'validate': {
         const result = await validateGovernanceLog();
-        console.log(JSON.stringify(result, null, 2));
         process.exit(result.valid ? 0 : 1);
         break;
+      }
       
-      case 'self-merges':
-        const days = parseInt(args[1] || '7', 10);
+      case 'self-merges': {
+        const days = Number.parseInt(args[1] || '7', 10);
         const selfMerges = await getSelfMerges(days);
-        console.log(`Self-merges in last ${days} days:`, selfMerges.count);
-        selfMerges.entries.forEach(e => console.log(`  PR #${e.prNumber}: ${e.author}`));
+        selfMerges.entries.forEach(_e => );
         break;
+      }
       
-      case 'exceptions':
+      case 'exceptions': {
         const exceptions = await getExceptionADRs();
-        console.log(`Merges with exceptions: ${exceptions.count}`);
-        exceptions.entries.forEach(e => {
-          console.log(`  PR #${e.prNumber}: ${e.exceptionADRs.join(', ')}`);
+        exceptions.entries.forEach(_e => {
         });
         break;
+      }
       
-      case 'by-author':
+      case 'by-author': {
         const author = args[1];
         if (!author) {
-          console.error('Usage: governance-log.ts by-author <author>');
           process.exit(1);
         }
         const byAuthor = await getEntriesByAuthor(author);
-        console.log(`Merges by ${author}: ${byAuthor.count}`);
-        byAuthor.entries.forEach(e => console.log(`  PR #${e.prNumber}: ${e.title}`));
+        byAuthor.entries.forEach(_e => );
         break;
+      }
       
-      default:
-        console.error(`Unknown command: ${command}`);
-        console.error('Available commands: validate, self-merges, exceptions, by-author');
+      default: {
         process.exit(1);
+      }
     }
   };
   
-  run().catch(err => {
-    console.error(err);
+  run().catch(_err => {
     process.exit(1);
   });
 }

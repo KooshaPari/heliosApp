@@ -46,7 +46,7 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
 
   return (
     <div style={{ position: "relative" }}>
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen())}
         style={{
           background: "none",
@@ -93,7 +93,7 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
                 </div>
                 <For each={group.models}>
                   {model => (
-                    <button
+                    <button type="button"
                       type="button"
                       onClick={() => {
                         if (model.available) {

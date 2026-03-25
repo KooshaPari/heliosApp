@@ -1,13 +1,7 @@
 #!/usr/bin/env bun
-/**
- * Gate 5: Code coverage threshold enforcement
- * Parses coverage output and generates structured JSON report
- */
+import { type GateFinding, createGateReport, writeGateReport } from "./gate-report.ts";
 
-import { readFileSync, existsSync } from 'fs';
-import { createGateReport, writeGateReport, formatGateReport, type GateFinding } from './gate-report';
-
-const REPORT_OUTPUT = '.gate-reports/gate-coverage.json';
+const REPORT_OUTPUT = ".gate-reports/gate-coverage.json";
 const COVERAGE_THRESHOLD = 85;
 
 interface CoverageMetrics {
@@ -20,9 +14,12 @@ interface CoverageMetrics {
 /**
  * Parse coverage output and extract metrics.
  */
-function parseCoverageData(): { packages: Map<string, CoverageMetrics>; aggregate: CoverageMetrics } {
+function parseCoverageData(): {
+  packages: Map<string, CoverageMetrics>;
+  aggregate: CoverageMetrics;
+} {
   const packages = new Map<string, CoverageMetrics>();
-  const logPath = '/tmp/coverage.json';
+  const _logPath = "/tmp/coverage.json";
 
   const aggregate: CoverageMetrics = {
     lines: 0,
@@ -44,18 +41,18 @@ function parseCoverageData(): { packages: Map<string, CoverageMetrics>; aggregat
  */
 function checkCoverageThresholds(
   packages: Map<string, CoverageMetrics>,
-  aggregate: CoverageMetrics,
+  _aggregate: CoverageMetrics
 ): GateFinding[] {
   const findings: GateFinding[] = [];
 
   packages.forEach((metrics, pkgName) => {
-    const metricsEntries = Object.entries(metrics) as Array<[keyof CoverageMetrics, number]>;
+    const metricsEntries = Object.entries(metrics) as [keyof CoverageMetrics, number][];
     metricsEntries.forEach(([metricName, value]) => {
       if (value < COVERAGE_THRESHOLD) {
         findings.push({
           file: pkgName,
           message: `Coverage for ${metricName} is ${value}%, below threshold of ${COVERAGE_THRESHOLD}%`,
-          severity: 'error',
+          severity: "error",
           rule: `coverage-${metricName}`,
           remediation: `Add tests to increase ${metricName} coverage above ${COVERAGE_THRESHOLD}%`,
         });
@@ -75,26 +72,20 @@ async function main(): Promise<void> {
   const findings = checkCoverageThresholds(packages, aggregate);
   const duration = Date.now() - startTime;
 
-  const report = createGateReport('coverage', findings, duration);
+  const report = createGateReport("coverage", findings, duration);
   writeGateReport(report, REPORT_OUTPUT);
 
-  console.log(formatGateReport(report));
-
   if (packages.size > 0) {
-    console.log('\nPer-Package Coverage:');
-    packages.forEach((metrics, pkgName) => {
-      console.log(`  ${pkgName}:`);
-      Object.entries(metrics).forEach(([metric, value]) => {
-        const status = value >= COVERAGE_THRESHOLD ? '✓' : '✗';
-        console.log(`    ${status} ${metric}: ${value}%`);
+    packages.forEach((metrics, _pkgName) => {
+      Object.entries(metrics).forEach(([_metric, value]) => {
+        const _status = value >= COVERAGE_THRESHOLD ? "✓" : "✗";
       });
     });
   }
 
-  process.exit(report.status === 'pass' ? 0 : 1);
+  process.exit(report.status === "pass" ? 0 : 1);
 }
 
-main().catch((e) => {
-  console.error(`Error: ${e}`);
+main().catch(_e => {
   process.exit(2);
 });

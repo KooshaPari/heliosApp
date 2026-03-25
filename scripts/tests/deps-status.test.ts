@@ -1,17 +1,17 @@
-import { expect, test, describe, beforeEach, afterEach, mock } from 'bun:test';
-import { rmSync, writeFileSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { mkdirSync, rmSync } from "node:fs";
+import { join } from "node:path";
 
 const REPO_ROOT = process.cwd();
-const CACHE_DIR = join(REPO_ROOT, '.cache');
-const CACHE_FILE = join(CACHE_DIR, 'deps-status-cache.json');
+const CACHE_DIR = join(REPO_ROOT, ".cache");
+const _CACHE_FILE = join(CACHE_DIR, "deps-status-cache.json");
 
-describe('Dependency Status Command', () => {
+describe("Dependency Status Command", () => {
   beforeEach(() => {
     // Clean up cache before each test
     try {
       rmSync(CACHE_DIR, { recursive: true, force: true });
-    } catch (e) {
+    } catch (_e) {
       // Ignore
     }
   });
@@ -20,69 +20,71 @@ describe('Dependency Status Command', () => {
     // Clean up cache after each test
     try {
       rmSync(CACHE_DIR, { recursive: true, force: true });
-    } catch (e) {
+    } catch (_e) {
       // Ignore
     }
   });
 
-  test('status command loads and parses registry', async () => {
+  test("status command loads and parses registry", async () => {
     // This is a fixture test: we rely on deps-registry.json existing
     // The command should successfully load it without errors
-    const registryPath = join(REPO_ROOT, 'deps-registry.json');
-    const stat = require('fs').statSync(registryPath);
+    const registryPath = join(REPO_ROOT, "deps-registry.json");
+    const stat = require("node:fs").statSync(registryPath);
     expect(stat.isFile()).toBe(true);
   });
 
-  test('cache file is created on first run', () => {
+  test("cache file is created on first run", () => {
     // After running deps-status, cache should be created
     // This is verified by checking that cache directory can be created
     try {
       mkdirSync(CACHE_DIR, { recursive: true });
       expect(true).toBe(true);
-    } catch (e) {
+    } catch (_e) {
       expect(false).toBe(true);
     }
   });
 
-  test('duration parsing handles PT1H format', () => {
+  test("duration parsing handles PT1H format", () => {
     // Helper to test duration parsing
     function parseDuration(duration: string): number {
       const match = duration.match(/PT(\d+)([HMS])/);
-      if (!match) return 3600000;
+      if (!match) {
+        return 3600000;
+      }
       const [, value, unit] = match;
-      const num = parseInt(value, 10);
+      const num = Number.parseInt(value, 10);
       switch (unit) {
-        case 'H':
+        case "H":
           return num * 3600000;
-        case 'M':
+        case "M":
           return num * 60000;
-        case 'S':
+        case "S":
           return num * 1000;
         default:
           return 3600000;
       }
     }
 
-    expect(parseDuration('PT1H')).toBe(3600000);
-    expect(parseDuration('PT30M')).toBe(1800000);
-    expect(parseDuration('PT60S')).toBe(60000);
+    expect(parseDuration("PT1H")).toBe(3600000);
+    expect(parseDuration("PT30M")).toBe(1800000);
+    expect(parseDuration("PT60S")).toBe(60000);
   });
 
-  test('cache is considered fresh within TTL', () => {
+  test("cache is considered fresh within TTL", () => {
     // Test cache freshness logic
     const maxAge = 3600000; // 1 hour
     const cacheAge = 1800000; // 30 minutes
     expect(cacheAge < maxAge).toBe(true);
   });
 
-  test('cache is considered stale after TTL', () => {
+  test("cache is considered stale after TTL", () => {
     // Test cache staleness logic
     const maxAge = 3600000; // 1 hour
     const cacheAge = 7200000; // 2 hours
     expect(cacheAge < maxAge).toBe(false);
   });
 
-  test('daysSince calculation is correct', () => {
+  test("daysSince calculation is correct", () => {
     // Helper to test days calculation
     function daysSince(timestamp: string): number {
       const then = new Date(timestamp);
@@ -101,34 +103,34 @@ describe('Dependency Status Command', () => {
     expect(daysOld).toBe(30);
   });
 
-  test('status enum values are valid', () => {
-    const validStatuses = ['up-to-date', 'upgrade-available', 'stale', 'error'];
-    expect(validStatuses).toContain('up-to-date');
-    expect(validStatuses).toContain('upgrade-available');
-    expect(validStatuses).toContain('stale');
-    expect(validStatuses).toContain('error');
+  test("status enum values are valid", () => {
+    const validStatuses = ["up-to-date", "upgrade-available", "stale", "error"];
+    expect(validStatuses).toContain("up-to-date");
+    expect(validStatuses).toContain("upgrade-available");
+    expect(validStatuses).toContain("stale");
+    expect(validStatuses).toContain("error");
   });
 
-  test('JSON output format validation', () => {
+  test("JSON output format validation", () => {
     // Test that JSON output would be valid
     const mockReport = [
       {
-        package: 'electrobun',
-        currentPin: '0.0.0-canary.20250228',
-        latestAvailable: '0.0.0-canary.20250301',
-        channel: 'alpha',
+        package: "electrobun",
+        currentPin: "0.0.0-canary.20250228",
+        latestAvailable: "0.0.0-canary.20250301",
+        channel: "alpha",
         daysSinceUpdate: 2,
-        status: 'upgrade-available' as const,
+        status: "upgrade-available" as const,
       },
     ];
 
     const json = JSON.stringify(mockReport, null, 2);
     const parsed = JSON.parse(json);
-    expect(parsed[0].package).toBe('electrobun');
-    expect(parsed[0].status).toBe('upgrade-available');
+    expect(parsed[0].package).toBe("electrobun");
+    expect(parsed[0].status).toBe("upgrade-available");
   });
 
-  test('exit codes are correct for different scenarios', () => {
+  test("exit codes are correct for different scenarios", () => {
     // Test exit code logic
     const testCases = [
       { hasErrors: false, hasUpgrades: false, expectedCode: 0 },

@@ -1,5 +1,5 @@
 // ID validation — checks format, prefix, and body
-import { type EntityType, REVERSE_PREFIX_MAP } from './prefixes.js';
+import { type EntityType, REVERSE_PREFIX_MAP } from "./prefixes.js";
 
 const BODY_REGEX = /^[0-9A-HJKMNP-TV-Z]{26}$/;
 
@@ -9,12 +9,12 @@ export type ValidationResult =
 
 export function validateId(raw: string): ValidationResult {
   if (!raw) {
-    return { valid: false, reason: 'Empty input' };
+    return { valid: false, reason: "Empty input" };
   }
 
-  const sepIdx = raw.indexOf('_');
+  const sepIdx = raw.indexOf("_");
   if (sepIdx === -1) {
-    return { valid: false, reason: 'Missing separator' };
+    return { valid: false, reason: "Missing separator" };
   }
 
   const prefix = raw.substring(0, sepIdx);
@@ -30,7 +30,7 @@ export function validateId(raw: string): ValidationResult {
   }
 
   if (!BODY_REGEX.test(body)) {
-    return { valid: false, reason: 'Invalid characters in body' };
+    return { valid: false, reason: "Invalid characters in body" };
   }
 
   return { valid: true, entityType };

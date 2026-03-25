@@ -1,23 +1,23 @@
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
-const specPath = process.env.TRACE_SPEC_PATH ?? "agileplus/001-colab-agent-terminal-control-plane/spec.md";
+const specPath =
+  process.env.TRACE_SPEC_PATH ?? "agileplus/001-colab-agent-terminal-control-plane/spec.md";
 const matrixPath =
   process.env.TRACE_MATRIX_PATH ??
   "agileplus/001-colab-agent-terminal-control-plane/traceability-matrix.json";
 
 function extractRequirementIds(specText) {
   const matches = [...specText.matchAll(/\*\*((?:FR|NFR)-[0-9]+[a-z]?)\*\*/g)];
-  return [...new Set(matches.map((match) => match[1]))];
+  return [...new Set(matches.map(match => match[1]))];
 }
 
-function fail(message) {
-  console.error(`Requirement traceability gate failed: ${message}`);
+function fail(_message) {
   process.exit(1);
 }
 
 const specText = readFileSync(specPath, "utf8");
 const requirementIds = extractRequirementIds(specText);
-if (!requirementIds.length) {
+if (requirementIds.length === 0) {
   fail(`no FR/NFR identifiers found in ${specPath}`);
 }
 
@@ -26,9 +26,9 @@ if (!Array.isArray(matrix.requirements)) {
   fail(`matrix file ${matrixPath} must contain a requirements array`);
 }
 
-const byId = new Map(matrix.requirements.map((entry) => [entry.id, entry]));
-const missing = requirementIds.filter((id) => !byId.has(id));
-if (missing.length) {
+const byId = new Map(matrix.requirements.map(entry => [entry.id, entry]));
+const missing = requirementIds.filter(id => !byId.has(id));
+if (missing.length > 0) {
   fail(`missing mappings for: ${missing.join(", ")}`);
 }
 
@@ -51,8 +51,6 @@ for (const id of requirementIds) {
   }
 }
 
-if (broken.length) {
+if (broken.length > 0) {
   fail(broken.join("; "));
 }
-
-console.log(`Requirement traceability gate passed for ${requirementIds.length} requirements.`);
