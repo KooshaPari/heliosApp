@@ -11,7 +11,7 @@
 			"@helios/desktop": ["apps/desktop/src/index.ts"],
 			"@helios/desktop/*": ["apps/desktop/src/*"]
 		},
-		"types": ["vitest"]
+		"types": ["bun-types", "vitest"]
 	},
 	"include": ["src/**/*.ts", "tests/**/*.ts"]
 }
