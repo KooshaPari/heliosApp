@@ -36,6 +36,7 @@ export type RuntimeAuditRecord = {
   correlation_id?: string;
   payload: Record<string, unknown>;
   error?: { code: string; message: string; retryable?: boolean } | null;
+  envelope?: Record<string, unknown>;
 };
 
 export type RuntimeAuditBundle = {
@@ -143,6 +144,23 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
     auditRecords.push(record);
   }
 
+  function publishEvent(event: LocalBusEnvelope): void {
+    bus.publish(event);
+    appendAuditRecord({
+      recorded_at: new Date().toISOString(),
+      type: "event",
+      topic: event.topic,
+      correlation_id: event.correlation_id,
+      payload: redactPayload(
+        redactionEngine,
+        normalizePayload(event.payload),
+        event.correlation_id ?? event.id,
+      ),
+      error: null,
+      envelope: event as unknown as Record<string, unknown>,
+    });
+  }
+
   function getTerminalBuffer(terminalId: string): TerminalBuffer {
     let buffer = terminalBuffers.get(terminalId);
     if (!buffer) {
@@ -163,7 +181,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
 
     if (buffer.total_bytes + dataSize > terminalBufferCap) {
       buffer.dropped_bytes += dataSize;
-      bus.publish({
+      publishEvent({
         id: `evt-throttle-${Date.now()}`,
         type: "event",
         ts: new Date().toISOString(),
@@ -172,7 +190,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
         terminal_id: terminalId,
         payload: { state: "throttled", runtime_state: { terminal: "throttled" } },
       });
-      bus.publish({
+      publishEvent({
         id: `evt-output-overflow-${Date.now()}`,
         type: "event",
         ts: new Date().toISOString(),
@@ -188,7 +206,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
     buffer.entries.push({ seq, data });
     buffer.total_bytes += dataSize;
 
-    bus.publish({
+    publishEvent({
       id: `evt-output-${Date.now()}`,
       type: "event",
       ts: new Date().toISOString(),
@@ -204,6 +222,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       recorded_at: new Date().toISOString(),
       type: "command",
       method: envelope.method,
+      topic: envelope.topic, // Explicit topic for event types
       correlation_id: envelope.correlation_id,
       payload: redactPayload(
         redactionEngine,
@@ -211,6 +230,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
         envelope.correlation_id ?? envelope.id,
       ),
       error: null,
+      envelope: envelope as unknown as Record<string, unknown>,
     });
   }
 
@@ -219,6 +239,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       recorded_at: new Date().toISOString(),
       type: "response",
       method: envelope.method,
+      topic: envelope.topic, // Explicit topic for event types
       correlation_id: envelope.correlation_id,
       payload: redactPayload(
         redactionEngine,
@@ -226,6 +247,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
         envelope.correlation_id ?? envelope.id,
       ),
       error: envelope.error ?? null,
+      envelope: envelope as unknown as Record<string, unknown>,
     });
   }
 
@@ -260,11 +282,29 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
   }
 
   async function request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+    if (command.type === "command" && command.method) {
+        const needsCorrelation = ["lane.create", "session.attach", "terminal.spawn"];
+        if (needsCorrelation.includes(command.method) && !command.correlation_id) {
+            const response: LocalBusEnvelope = {
+                id: command.id,
+                type: "response",
+                ts: new Date().toISOString(),
+                correlation_id: command.correlation_id,
+                method: command.method,
+                status: "error",
+                error: { code: "MISSING_CORRELATION_ID", message: "Correlation ID is required", retryable: false },
+            };
+            recordResponse(response);
+            return response;
+        }
+    }
+
     recordCommand(command);
 
     if (command.type === "command" && command.method === "terminal.spawn") {
       const payload = normalizePayload(command.payload);
-      const terminalId = typeof payload.terminal_id === "string" ? payload.terminal_id : `term-${Date.now()}`;
+      const sessionId = command.session_id ?? (typeof payload.session_id === "string" ? payload.session_id : undefined);
+      const terminalId = typeof payload.terminal_id === "string" ? payload.terminal_id : (sessionId ? `${sessionId}-term-${Date.now()}` : `term-${Date.now()}`);
       terminalBuffers.delete(terminalId);
 
       const response: LocalBusEnvelope = {
@@ -277,7 +317,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
         result: { terminal_id: terminalId },
       };
 
-      bus.publish({
+      publishEvent({
         id: `evt-spawn-started-${Date.now()}`,
         type: "event",
         ts: new Date().toISOString(),
@@ -286,7 +326,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
         payload: { terminal_id: terminalId },
       });
 
-      bus.publish({
+      publishEvent({
         id: `evt-state-changed-1-${Date.now()}`,
         type: "event",
         ts: new Date().toISOString(),
@@ -295,7 +335,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
         payload: { state: "initializing" },
       });
 
-      bus.publish({
+      publishEvent({
         id: `evt-state-changed-2-${Date.now()}`,
         type: "event",
         ts: new Date().toISOString(),
@@ -304,7 +344,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
         payload: { state: "active" },
       });
 
-      bus.publish({
+      publishEvent({
         id: `evt-spawned-${Date.now()}`,
         type: "event",
         ts: new Date().toISOString(),
@@ -387,6 +427,13 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
       const payload = normalizePayload(command.payload);
       const terminalId = typeof command.terminal_id === "string" ? command.terminal_id : typeof payload.terminal_id === "string" ? payload.terminal_id : undefined;
 
+      if (terminalId) {
+          const buffer = terminalBuffers.get(terminalId);
+          if (buffer) {
+              buffer.dropped_bytes = 0;
+          }
+      }
+
       const response: LocalBusEnvelope = {
         id: command.id,
         type: "response",
@@ -396,7 +443,7 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
         status: "ok",
       };
 
-      bus.publish({
+      publishEvent({
         id: `evt-state-changed-resize-${Date.now()}`,
         type: "event",
         ts: new Date().toISOString(),
@@ -408,20 +455,6 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
 
       recordResponse(response);
       return response;
-    }
-
-    if (command.type === "command" && command.method && !command.correlation_id) {
-        const response: LocalBusEnvelope = {
-          id: command.id,
-          type: "response",
-          ts: new Date().toISOString(),
-          correlation_id: command.correlation_id,
-          method: command.method,
-          status: "error",
-          error: { code: "MISSING_CORRELATION_ID", message: "Correlation ID is required", retryable: false },
-        };
-        recordResponse(response);
-        return response;
     }
 
     if (command.type === "command" && command.method && !METHOD_SET.has(command.method)) {
@@ -474,6 +507,110 @@ export function createRuntime(options: RuntimeOptions & { terminalBufferCapBytes
 
   async function fetch(requestInput: Request): Promise<Response> {
     const url = new URL(requestInput.url);
+
+    if (url.pathname.startsWith("/v1/workspaces/") && url.pathname.endsWith("/lanes") && requestInput.method === "POST") {
+      const body = (await requestInput.json()) as Record<string, unknown>;
+      const workspaceId = url.pathname.split("/")[3];
+      const preferredTransport = typeof body.preferred_transport === "string" ? body.preferred_transport : "cliproxy_harness";
+
+      if (preferredTransport !== "cliproxy_harness" && preferredTransport !== "native_openai") {
+        return Response.json({ error: "invalid_preferred_transport" }, { status: 400 });
+      }
+
+      const command: LocalBusEnvelope = {
+        id: `lane-create-${Date.now()}`,
+        type: "command",
+        ts: new Date().toISOString(),
+        workspace_id: workspaceId,
+        correlation_id: typeof body.correlation_id === "string" ? body.correlation_id : `cor-${Date.now()}`,
+        method: "lane.create",
+        payload: {
+          ...body,
+          preferred_transport: preferredTransport
+        },
+      };
+
+      const result = await request(command);
+      if (result.status === "error") {
+        return Response.json({ error: result.error?.code }, { status: 400 });
+      }
+
+      return Response.json(result.result ?? {}, { status: 201 });
+    }
+
+    if (url.pathname.includes("/lanes/") && url.pathname.endsWith("/sessions") && requestInput.method === "POST") {
+      const body = (await requestInput.json()) as Record<string, unknown>;
+      const parts = url.pathname.split("/");
+      const laneId = parts[parts.indexOf("lanes") + 1];
+
+      const command: LocalBusEnvelope = {
+        id: `session-attach-${Date.now()}`,
+        type: "command",
+        ts: new Date().toISOString(),
+        lane_id: laneId,
+        correlation_id: typeof body.correlation_id === "string" ? body.correlation_id : `cor-${Date.now()}`,
+        method: "session.attach",
+        payload: body,
+      };
+
+      const result = await request(command);
+      if (result.status === "error") {
+        return Response.json({ error: result.error?.code }, { status: 400 });
+      }
+
+      return Response.json(result.result ?? {}, { status: 200 });
+    }
+
+    if (url.pathname.includes("/sessions/") && url.pathname.endsWith("/terminals") && requestInput.method === "POST") {
+      const body = (await requestInput.json()) as Record<string, unknown>;
+      const parts = url.pathname.split("/");
+      const sessionId = parts[parts.indexOf("sessions") + 1];
+      const workspaceId = parts[parts.indexOf("workspaces") + 1];
+
+      if (body.workspace_id && body.workspace_id !== workspaceId) {
+          return Response.json({ error: "WORKSPACE_MISMATCH" }, { status: 400 });
+      }
+
+      const command: LocalBusEnvelope = {
+        id: `terminal-spawn-${Date.now()}`,
+        type: "command",
+        ts: new Date().toISOString(),
+        session_id: sessionId,
+        workspace_id: workspaceId,
+        correlation_id: typeof body.correlation_id === "string" ? body.correlation_id : `cor-${Date.now()}`,
+        method: "terminal.spawn",
+        payload: body,
+      };
+
+      const result = await request(command);
+      if (result.status === "error") {
+        return Response.json({ error: result.error?.code }, { status: 400 });
+      }
+
+      return Response.json(result.result ?? {}, { status: 200 });
+    }
+
+    if (url.pathname.includes("/v1/workspaces/") && url.pathname.includes("/lanes/") && requestInput.method === "DELETE") {
+      const parts = url.pathname.split("/");
+      const laneId = parts[parts.indexOf("lanes") + 1];
+
+      const command: LocalBusEnvelope = {
+        id: `lane-cleanup-${Date.now()}`,
+        type: "command",
+        ts: new Date().toISOString(),
+        lane_id: laneId,
+        correlation_id: `cor-${Date.now()}`,
+        method: "lane.cleanup",
+        payload: { lane_id: laneId },
+      };
+
+      const result = await request(command);
+      if (result.status === "error") {
+        return Response.json({ error: result.error?.code }, { status: 400 });
+      }
+
+      return Response.json({ status: "ok" }, { status: 200 });
+    }
 
     if (url.pathname === "/v1/protocol/dispatch" && requestInput.method === "POST") {
       const body = (await requestInput.json()) as Record<string, unknown>;

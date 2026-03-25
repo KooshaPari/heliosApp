@@ -1,5 +1,5 @@
 import type { LocalBus } from "../protocol/bus.js";
-import { promises as fs } from "fs";
+import { mkdirSync, writeFileSync } from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
 
@@ -88,13 +88,13 @@ export class Watchdog {
     }, timeoutMs);
   }
 
-  private async handleHeartbeatTimeout(monitor: ProcessMonitor): Promise<void> {
+  private handleHeartbeatTimeout(monitor: ProcessMonitor): void {
     // Check if process is still running
-    const isRunning = await this.isProcessRunning(monitor.pid);
+    const isRunning = this.isProcessRunning(monitor.pid);
 
-    let reason = CrashReason.Unresponsive;
+    let reason = CrashReason.UNRESPONSIVE;
     if (!isRunning) {
-      reason = CrashReason.HeartbeatTimeout;
+      reason = CrashReason.HEARTBEAT_TIMEOUT;
     }
 
     const crashEvent: CrashEvent = {
@@ -104,7 +104,7 @@ export class Watchdog {
       timestamp: Date.now(),
     };
 
-    await this.handleCrash(crashEvent);
+    this.handleCrash(crashEvent);
   }
 
   async handleProcessExit(
@@ -116,13 +116,13 @@ export class Watchdog {
     this.unregister(name);
 
     // Classify exit
-    let reason = CrashReason.ExitCode;
+    let reason = CrashReason.EXIT_CODE;
     if (signal) {
       if (signal === "SIGTERM") {
         // Graceful termination - no recovery needed
         return;
       }
-      reason = CrashReason.Signal;
+      reason = CrashReason.SIGNAL;
     } else if (exitCode === 0) {
       // Graceful shutdown - no recovery needed
       return;
@@ -137,16 +137,18 @@ export class Watchdog {
       timestamp: Date.now(),
     };
 
-    await this.handleCrash(crashEvent);
+    this.handleCrash(crashEvent);
   }
 
-  private async handleCrash(event: CrashEvent): Promise<void> {
-    // Write crash record to filesystem
-    await this.writeCrashRecord(event);
+  private handleCrash(event: CrashEvent): void {
+    // Notify crash handlers first so timer-driven failures are observable immediately.
+    for (const handler of this.crashHandlers) {
+      handler(event);
+    }
 
     // Publish bus event if available
     if (this.bus) {
-      await this.bus.publish({
+      void this.bus.publish({
         id: randomUUID(),
         type: "event",
         ts: new Date().toISOString(),
@@ -159,34 +161,29 @@ export class Watchdog {
           signal: event.signal,
           timestamp: event.timestamp,
         },
+      }).catch((err) => {
+        console.error("Failed to publish crash event:", err);
       });
     }
 
-    // Invoke crash handlers
-    for (const handler of this.crashHandlers) {
-      handler(event);
-    }
+    // Persist crash record after observers have been notified.
+    this.writeCrashRecord(event);
   }
 
-  private async writeCrashRecord(event: CrashEvent): Promise<void> {
+  private writeCrashRecord(event: CrashEvent): void {
     try {
-      await fs.mkdir(path.join(this.crashDataDir, "recovery"), {
-        recursive: true,
-      });
-
       const recordPath = path.join(this.crashDataDir, "recovery", "last-crash.json");
-      const tempPath = `${recordPath}.tmp`;
+      mkdirSync(path.dirname(recordPath), { recursive: true });
 
-      // Atomic write: write to temp file then rename
-      await fs.writeFile(tempPath, JSON.stringify(event, null, 2));
-      await fs.rename(tempPath, recordPath);
+      // Write directly so crash handling stays deterministic under fake timers.
+      writeFileSync(recordPath, JSON.stringify(event, null, 2));
     } catch (err) {
       // Silently fail - watchdog should not crash due to I/O errors
       console.error("Failed to write crash record:", err);
     }
   }
 
-  private async isProcessRunning(pid: number): Promise<boolean> {
+  private isProcessRunning(pid: number): boolean {
     try {
       // Try to send signal 0 (no-op kill) to check if process exists
       process.kill(pid, 0);

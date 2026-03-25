@@ -54,3 +54,15 @@ export class ProtocolValidationError extends Error {
     this.details = details;
   }
 }
+
+export function isCommand(envelope: LocalBusEnvelope): envelope is CommandEnvelope {
+  return envelope.type === "command" && typeof envelope.method === "string";
+}
+
+export function isResponse(envelope: LocalBusEnvelope): envelope is ResponseEnvelope {
+  return envelope.type === "response" && (envelope.status === "ok" || envelope.status === "error");
+}
+
+export function isEvent(envelope: LocalBusEnvelope): envelope is EventEnvelope {
+  return envelope.type === "event" && typeof envelope.topic === "string";
+}

@@ -312,5 +312,14 @@ export class InMemoryAuditSink implements AuditSink {
   getRecords(): AuditEvent[] {
     return [...this.records];
   }
+
+  async append(event: AuditEvent): Promise<void> {
+    await this.write(event);
+  }
+
+  async enforceRetention(days: number): Promise<void> {
+    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    this.records = this.records.filter((r) => new Date(r.recorded_at) >= cutoff);
+  }
 }
 

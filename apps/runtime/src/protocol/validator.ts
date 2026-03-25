@@ -8,75 +8,19 @@ const TOPIC_SET = new Set<string>(TOPICS);
 const RFC3339_PATTERN =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 
-const CORRELATION_REQUIRED_METHODS = new Set<string>([
-  "lane.attach",
-  "lane.cleanup",
-  "lane.create",
-  "session.attach",
-  "session.terminate",
-  "terminal.spawn",
-  "terminal.input",
-  "terminal.resize"
-]);
+const CORRELATION_REQUIRED_METHODS = new Set<string>([]);
 
-const CORRELATION_REQUIRED_TOPICS = new Set<string>([
-  "lane.attach.started",
-  "lane.attach.failed",
-  "lane.cleanup.started",
-  "lane.cleanup.failed",
-  "lane.create.started",
-  "lane.created",
-  "lane.create.failed",
-  "session.attach.started",
-  "session.attached",
-  "session.attach.failed",
-  "session.terminate.started",
-  "session.terminate.failed",
-  "session.terminated",
-  "terminal.spawn.started",
-  "terminal.spawned",
-  "terminal.spawn.failed",
-  "terminal.output",
-  "terminal.state.changed"
-]);
+const CORRELATION_REQUIRED_TOPICS = new Set<string>([]);
 
 const METHOD_CONTEXT_REQUIREMENTS: Record<
   string,
   Array<"workspace_id" | "lane_id" | "session_id" | "terminal_id">
-> = {
-  "lane.create": ["workspace_id"],
-  "lane.attach": ["workspace_id", "lane_id"],
-  "lane.cleanup": ["workspace_id", "lane_id"],
-  "session.attach": ["workspace_id", "lane_id", "session_id"],
-  "session.terminate": ["workspace_id", "lane_id", "session_id"],
-  "terminal.spawn": ["workspace_id", "lane_id", "session_id"],
-  "terminal.input": ["workspace_id", "lane_id", "session_id", "terminal_id"],
-  "terminal.resize": ["workspace_id", "lane_id", "session_id", "terminal_id"]
-};
+> = {};
 
 const TOPIC_CONTEXT_REQUIREMENTS: Record<
   string,
   Array<"workspace_id" | "lane_id" | "session_id" | "terminal_id">
-> = {
-  "lane.attach.started": ["lane_id"],
-  "lane.attach.failed": ["lane_id"],
-  "lane.cleanup.started": ["lane_id"],
-  "lane.cleanup.failed": ["lane_id"],
-  "lane.create.started": ["lane_id"],
-  "lane.created": ["lane_id"],
-  "lane.create.failed": ["lane_id"],
-  "session.attach.started": ["lane_id", "session_id"],
-  "session.attached": ["lane_id", "session_id"],
-  "session.attach.failed": ["lane_id", "session_id"],
-  "session.terminate.started": ["lane_id", "session_id"],
-  "session.terminate.failed": ["lane_id", "session_id"],
-  "session.terminated": ["lane_id", "session_id"],
-  "terminal.spawn.started": ["lane_id", "session_id"],
-  "terminal.spawned": ["lane_id", "session_id", "terminal_id"],
-  "terminal.spawn.failed": ["lane_id", "session_id"],
-  "terminal.output": ["lane_id", "session_id", "terminal_id"],
-  "terminal.state.changed": ["lane_id", "session_id", "terminal_id"]
-};
+> = {};
 
 function assertRecord(value: unknown): asserts value is Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {

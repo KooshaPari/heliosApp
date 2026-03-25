@@ -1,67 +1,13 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import type { LocalBusEnvelope } from "./types.js";
 import { ProtocolValidationError } from "./types.js";
 import { validateEnvelope } from "./validator.js";
 
-export interface LocalBus {
-  publish(event: LocalBusEnvelope): Promise<void>;
-  request(command: LocalBusEnvelope): Promise<LocalBusEnvelope>;
+const correlationStorage = new AsyncLocalStorage<string>();
+
+export function getActiveCorrelationId(): string | undefined {
+  return correlationStorage.getStore();
 }
-
-type LocalBusEnvelopeWithSequence = LocalBusEnvelope & { sequence?: number };
-
-// ---------------------------------------------------------------------------
-// Audit record (for protocol_bus tests)
-// ---------------------------------------------------------------------------
-
-export type AuditRecord = {
-  envelope: LocalBusEnvelope;
-  outcome: "accepted" | "rejected";
-  error?: string;
-};
-
-// ---------------------------------------------------------------------------
-// Metrics report (for runtime_metrics tests)
-// ---------------------------------------------------------------------------
-
-export type MetricSample = {
-  metric: string;
-  value: number;
-  tags?: Record<string, string>;
-};
-
-export type MetricSummary = {
-  metric: string;
-  count: number;
-  latest?: number;
-  p95?: number;
-  p99?: number;
-  min?: number;
-  max?: number;
-};
-
-export type MetricsReport = {
-  summaries: MetricSummary[];
-  samples?: MetricSample[];
-};
-
-// ---------------------------------------------------------------------------
-// State (for protocol_bus tests)
-// ---------------------------------------------------------------------------
-
-export type BusState = {
-  session: "attached" | "detached";
-  terminal?: "active" | "inactive" | "throttled";
-};
-
-// ---------------------------------------------------------------------------
-// InMemoryLocalBus — protocol lifecycle implementation
-// ---------------------------------------------------------------------------
-
-const _LIFECYCLE_SEQUENCES: Record<string, string[]> = {
-  "session.attach": ["session.attach.started", "session.attached", "session.attach.failed"],
-  "lane.create": ["lane.create.started", "lane.created", "lane.create.failed"],
-  "terminal.spawn": ["terminal.spawn.started", "terminal.spawned", "terminal.spawn.failed"],
-};
 
 const TERMINAL_TOPICS = new Set([
   "session.attached",
@@ -77,13 +23,6 @@ const START_TOPICS = new Set([
   "lane.create.started",
   "terminal.spawn.started",
 ]);
-
-const hasTopLevelDataField = (envelope: LocalBusEnvelope): boolean =>
-  Object.prototype.hasOwnProperty.call(envelope, "data");
-
-export function getActiveCorrelationId(): string | undefined {
-  return undefined; // TODO: Implement using AsyncLocalStorage if needed
-}
 
 export class InMemoryLocalBus implements LocalBus {
   private readonly eventLog: LocalBusEnvelope[] = [];
@@ -175,7 +114,7 @@ export class InMemoryLocalBus implements LocalBus {
   }
 
   private getSequence(): number {
-    return this.eventLog.filter(e => e.type === "event").length;
+    return this.eventLog.length;
   }
 
   private publishLifecycleEvent(topic: string, envelope: LocalBusEnvelope): void {
@@ -778,12 +717,12 @@ class CommandBusImpl implements LocalBus {
     }
 
     // Execute handler
-    const prevCorrelation = this.activeCorrelationId;
-    this.activeCorrelationId = cmd.correlation_id;
     this.currentDepth++;
 
     try {
-      const result = await handler(cmd);
+      const result = await correlationStorage.run(cmd.correlation_id, async () => {
+        return await handler(cmd);
+      });
       // Validate result is a response envelope
       if (
         !result ||
@@ -811,7 +750,6 @@ class CommandBusImpl implements LocalBus {
       );
     } finally {
       this.currentDepth--;
-      this.activeCorrelationId = prevCorrelation;
     }
   }
 
@@ -851,8 +789,11 @@ class CommandBusImpl implements LocalBus {
     const event = evt as EventEnvelope;
 
     // Inject active correlation_id from command context (FR-008)
-    if (this.activeCorrelationId) {
-      (event as Record<string, unknown>).correlation_id = this.activeCorrelationId;
+    if (!event.correlation_id) {
+      const activeId = getActiveCorrelationId();
+      if (activeId) {
+        (event as Record<string, unknown>).correlation_id = activeId;
+      }
     }
 
     const topic = event.topic;

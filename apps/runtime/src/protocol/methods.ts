@@ -31,6 +31,9 @@ export const METHODS = [
   "lane.create",
   "lane.attach",
   "lane.cleanup",
+  "boundary.local.dispatch",
+  "boundary.tool.dispatch",
+  "boundary.a2a.dispatch",
 ] as const;
 
 export type ProtocolMethod = (typeof METHODS)[number];
