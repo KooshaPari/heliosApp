@@ -144,6 +144,7 @@ const formalOnlyContractTopics = formalTopics.filter(
 );
 
 if (runtimeOnlyMethods.length > 0) {
+<<<<<<< HEAD
 	errors.push(
 		`Runtime-only methods missing from formal assets: ${runtimeOnlyMethods.join(", ")}`,
 	);
@@ -172,17 +173,47 @@ if (formalOnlyContractTopics.length > 0) {
 	errors.push(
 		`Formal topics missing from contract schema enum: ${formalOnlyContractTopics.join(", ")}`,
 	);
+=======
+  errors.push(`Runtime-only methods missing from formal assets: ${runtimeOnlyMethods.join(", ")}`);
+}
+if (runtimeOnlyTopics.length > 0) {
+  errors.push(`Runtime-only topics missing from formal assets: ${runtimeOnlyTopics.join(", ")}`);
+}
+if (formalOnlyMethods.length > 0) {
+  errors.push(`Formal-only methods missing from runtime assets: ${formalOnlyMethods.join(", ")}`);
+}
+if (formalOnlyTopics.length > 0) {
+  errors.push(`Formal-only topics missing from runtime assets: ${formalOnlyTopics.join(", ")}`);
+}
+if (formalOnlyContractMethods.length > 0) {
+  errors.push(
+    `Formal methods missing from contract schema enum: ${formalOnlyContractMethods.join(", ")}`
+  );
+}
+if (formalOnlyContractTopics.length > 0) {
+  errors.push(
+    `Formal topics missing from contract schema enum: ${formalOnlyContractTopics.join(", ")}`
+  );
+>>>>>>> fix/ci-fixes
 }
 
 validateMatrixEntries("method", formalMethods, matrix.methods ?? [], errors);
 validateMatrixEntries("topic", formalTopics, matrix.topics ?? [], errors);
 
 if (errors.length > 0) {
+<<<<<<< HEAD
 	process.stderr.write("Protocol parity gate failed.\n");
 	for (const message of errors) {
 		process.stderr.write(`- ${message}\n`);
 	}
 	process.exit(1);
+=======
+  process.stderr.write("Protocol parity gate failed.\n");
+  for (const message of errors) {
+    process.stderr.write(`- ${message}\n`);
+  }
+  process.exit(1);
+>>>>>>> fix/ci-fixes
 }
 
 process.stdout.write("Protocol parity gate passed.\n");

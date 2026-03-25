@@ -1,235 +1,96 @@
 /**
- * Approval Request Panel UI Component
+ * ApprovalPanel.tsx
  * Displays pending approval requests and handles approval/rejection.
  */
 
-import { createSignal, For } from "solid-js";
-import type { ApprovalRequest } from "../../types/approval";
+import { For, createSignal } from "solid-js";
+import type { ApprovalRequest } from "../../types/approval.ts";
 
 interface ApprovalPanelProps {
   requests: ApprovalRequest[];
-  onApprove: (id: string) => void;
-  onReject: (id: string, reason: string) => void;
+  onApprove: (requestId: string) => Promise<void>;
+  onReject: (requestId: string, reason: string) => Promise<void>;
 }
 
-export function ApprovalPanel(props: ApprovalPanelProps) {
-  const [selectedId, setSelectedId] = createSignal<string | null>(null);
+export const ApprovalPanel = (props: ApprovalPanelProps) => {
+  const [rejectingId, setRejectingId] = createSignal<string | null>(null);
   const [rejectReason, setRejectReason] = createSignal("");
 
-  const selectedRequest = () => {
-    const id = selectedId();
-    return id ? props.requests.find(r => r.id === id) : null;
+  const handleApprove = async (id: string) => {
+    await props.onApprove(id);
   };
 
-  const handleApprove = (id: string) => {
-    props.onApprove(id);
-    setSelectedId(null);
-  };
-
-  const handleReject = () => {
-    const id = selectedId();
-    if (id && rejectReason()) {
-      props.onReject(id, rejectReason());
-      setSelectedId(null);
-      setRejectReason("");
-    }
+  const handleReject = async (id: string) => {
+    if (!rejectReason()) return;
+    await props.onReject(id, rejectReason());
+    setRejectingId(null);
+    setRejectReason("");
   };
 
   return (
-    <div class="approval-panel">
-      <h2>Pending Approvals ({props.requests.length})</h2>
-
-      {props.requests.length === 0 ? (
-        <p class="empty-state">No pending approval requests</p>
-      ) : (
-        <div class="requests-list">
-          <For each={props.requests}>
-            {request => (
-              <div
-                class={`request-item ${selectedId() === request.id ? "selected" : ""}`}
-                onclick={() => setSelectedId(request.id)}
-              >
-                <div class="request-header">
-                  <code class="command">{request.command}</code>
-                  <span class="agent">{request.agentId}</span>
+    <div class="approval-panel p-4 bg-gray-900 text-white rounded-lg shadow-xl">
+      <h2 class="text-xl font-bold mb-4">Pending Approvals</h2>
+      <div class="space-y-4">
+        <For each={props.requests}>
+          {(request) => (
+            <div class="p-3 border border-gray-700 rounded bg-gray-800">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium">{request.title}</div>
+                  <div class="text-sm text-gray-400">{request.description}</div>
+                  <div class="mt-1 text-xs text-gray-500">
+                    From: {request.requester} • {new Date(request.timestamp).toLocaleString()}
+                  </div>
                 </div>
-                <div class="request-meta">
-                  <span>{request.requesterName}</span>
-                  <span class="time">{new Date(request.createdAt).toLocaleString()}</span>
+                <div class="flex space-x-2">
+                  <button
+                    onClick={() => handleApprove(request.id)}
+                    class="px-3 py-1 bg-green-600 hover:bg-green-700 rounded text-sm transition-colors"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => setRejectingId(request.id)}
+                    class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm transition-colors"
+                  >
+                    Reject
+                  </button>
                 </div>
               </div>
-            )}
-          </For>
-        </div>
-      )}
 
-      {selectedRequest() && (
-        <div class="approval-details">
-          <h3>Review Request</h3>
-          <div class="detail-group">
-            <span>Command:</span>
-            <code>{selectedRequest()?.command}</code>
-          </div>
-          <div class="detail-group">
-            <span>Requested by:</span>
-            <span>{selectedRequest()?.requesterName}</span>
-          </div>
-          <div class="detail-group">
-            <span>Workspace:</span>
-            <span>{selectedRequest()?.workspaceId}</span>
-          </div>
-
-          <div class="approval-actions">
-            <button type="button" class="approve-btn" onclick={() => handleApprove(selectedRequest()?.id ?? "")}>
-              Approve
-            </button>
-            <button type="button" class="reject-btn" onclick={() => setRejectReason("focused")}>
-              Reject
-            </button>
-          </div>
-
-          {rejectReason() === "focused" && (
-            <div class="reject-form">
-              <textarea
-                placeholder="Reason for rejection..."
-                value={rejectReason()}
-                oninput={e => setRejectReason(e.currentTarget.value)}
-              />
-              <div class="reject-actions">
-                <button type="button" onclick={handleReject}>
-                  Confirm Reject
-                </button>
-                <button type="button" onclick={() => setRejectReason("")}>
-                  Cancel
-                </button>
-              </div>
+              {rejectingId() === request.id && (
+                <div class="mt-3 pt-3 border-t border-gray-700">
+                  <textarea
+                    value={rejectReason()}
+                    onInput={(e) => setRejectReason(e.currentTarget.value)}
+                    placeholder="Reason for rejection..."
+                    class="w-full p-2 bg-gray-900 border border-gray-700 rounded text-sm focus:outline-none focus:border-blue-500"
+                    rows={2}
+                  />
+                  <div class="flex justify-end space-x-2 mt-2">
+                    <button
+                      onClick={() => setRejectingId(null)}
+                      class="px-2 py-1 text-xs text-gray-400 hover:text-white"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleReject(request.id)}
+                      disabled={!rejectReason()}
+                      class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-xs disabled:opacity-50"
+                    >
+                      Confirm Rejection
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
-
-      <style>{`
-        .approval-panel {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          padding: 1rem;
-          background: #f5f5f5;
-          border-radius: 8px;
-        }
-
-        .requests-list {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          max-height: 300px;
-          overflow-y: auto;
-        }
-
-        .request-item {
-          padding: 0.75rem;
-          background: white;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .request-item:hover {
-          border-color: #0066cc;
-          background: #f0f7ff;
-        }
-
-        .request-item.selected {
-          border-color: #0066cc;
-          background: #e6f2ff;
-          font-weight: 500;
-        }
-
-        .command {
-          font-family: monospace;
-          font-size: 0.9em;
-          background: #f0f0f0;
-          padding: 0.25rem 0.5rem;
-          border-radius: 3px;
-        }
-
-        .approval-details {
-          padding: 1rem;
-          background: white;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-        }
-
-        .detail-group {
-          margin-bottom: 0.75rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
-
-        .approval-actions {
-          display: flex;
-          gap: 0.5rem;
-          margin-top: 1rem;
-        }
-
-        button {
-          padding: 0.5rem 1rem;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: 500;
-          transition: all 0.2s;
-        }
-
-        .approve-btn {
-          background: #28a745;
-          color: white;
-        }
-
-        .approve-btn:hover {
-          background: #218838;
-        }
-
-        .reject-btn {
-          background: #dc3545;
-          color: white;
-        }
-
-        .reject-btn:hover {
-          background: #c82333;
-        }
-
-        .reject-form {
-          margin-top: 1rem;
-          padding: 0.75rem;
-          background: #fff3cd;
-          border-radius: 4px;
-        }
-
-        textarea {
-          width: 100%;
-          padding: 0.5rem;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          font-family: inherit;
-          min-height: 80px;
-          resize: vertical;
-        }
-
-        .reject-actions {
-          display: flex;
-          gap: 0.5rem;
-          margin-top: 0.5rem;
-        }
-
-        .empty-state {
-          text-align: center;
-          color: #666;
-          padding: 2rem;
-        }
-      `}</style>
+        </For>
+        {props.requests.length === 0 && (
+          <div class="text-center py-8 text-gray-500">No pending approval requests</div>
+        )}
+      </div>
     </div>
   );
-}
+};
