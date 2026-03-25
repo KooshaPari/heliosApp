@@ -83,6 +83,7 @@ export function scanBypassDirectives(
 	}
 
 	function scanFile(filePath: string, fileName: string) {
+		if (shouldExclude(filePath)) return;
 		const content = readFileSync(filePath, "utf-8");
 		const lines = content.split("\n");
 		const relativePath = filePath.replace(process.cwd(), "");
