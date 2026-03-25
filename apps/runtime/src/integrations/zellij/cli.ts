@@ -57,11 +57,15 @@ export class ZellijCli {
       });
     } catch (error) {
       const caught = error as { code?: string; message?: string };
+<<<<<<< HEAD
       if (
         caught?.code === "ENOENT" ||
         caught?.message?.includes("spawn ENOENT") ||
         caught?.message?.includes("ENOENT")
       ) {
+=======
+      if (caught?.code === "ENOENT" || caught?.message?.includes("spawn ENOENT")) {
+>>>>>>> origin/main
         throw new ZellijNotFoundError();
       }
       throw error;

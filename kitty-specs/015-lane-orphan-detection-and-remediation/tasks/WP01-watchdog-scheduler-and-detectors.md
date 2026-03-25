@@ -1,11 +1,11 @@
 ---
 work_package_id: WP01
 title: Watchdog Scheduler and Three Detectors
-lane: "planned"
+lane: "done"
 dependencies: []
 base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00+00:00'
+base_commit: c36745c15926bc46d62710af10aa4ca1718575b1
+created_at: '2026-03-01T13:29:36.317013+00:00'
 subtasks:
 - T001
 - T002
@@ -15,10 +15,10 @@ subtasks:
 - T006
 phase: Phase 1 - Detection Foundation
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: "claude-haiku"
+shell_pid: "54633"
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -44,7 +44,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/015-lane-orphan-detection-and-remediation/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/015-lane-orphan-detection-and-remediation/spec.md`
 - Lane lifecycle: spec 008
@@ -240,3 +240,5 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-03-01T13:29:37Z – claude-haiku – shell_pid=54633 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T13:32:23Z – claude-haiku – shell_pid=54633 – lane=done – Implemented watchdog scheduler and detectors

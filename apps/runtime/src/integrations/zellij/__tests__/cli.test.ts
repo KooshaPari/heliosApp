@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { ZellijCli } from "../cli.js";
 import { ZellijNotFoundError, ZellijVersionError, ZellijTimeoutError } from "../errors.js";
+=======
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+import { ZellijCli } from "../cli.js";
+import { ZellijNotFoundError, ZellijVersionError } from "../errors.js";
+>>>>>>> origin/main
 
 /**
  * Unit tests for ZellijCli.
@@ -38,6 +44,13 @@ describe("ZellijCli", () => {
     originalSpawn = Bun.spawn;
   });
 
+<<<<<<< HEAD
+=======
+  afterEach(() => {
+    Bun.spawn = originalSpawn;
+  });
+
+>>>>>>> origin/main
   describe("checkAvailability", () => {
     it("returns available=true with version when zellij is found", async () => {
       // @ts-expect-error mock override
@@ -53,7 +66,10 @@ describe("ZellijCli", () => {
     });
 
     it("returns available=false when zellij binary not found", async () => {
+<<<<<<< HEAD
       // @ts-ignore mock override
+=======
+>>>>>>> origin/main
       Bun.spawn = mock(() => {
         throw new Error("spawn ENOENT");
       });
@@ -72,9 +88,13 @@ describe("ZellijCli", () => {
 
       const cli = new ZellijCli();
 
+<<<<<<< HEAD
       expect(cli.checkAvailability()).rejects.toThrow(ZellijVersionError);
 
       Bun.spawn = originalSpawn;
+=======
+      await expect(cli.checkAvailability()).rejects.toThrow(ZellijVersionError);
+>>>>>>> origin/main
     });
 
     it("returns available=false on non-zero exit code", async () => {
@@ -85,8 +105,11 @@ describe("ZellijCli", () => {
       const result = await cli.checkAvailability();
 
       expect(result.available).toBe(false);
+<<<<<<< HEAD
 
       Bun.spawn = originalSpawn;
+=======
+>>>>>>> origin/main
     });
   });
 
@@ -104,6 +127,7 @@ describe("ZellijCli", () => {
 
       Bun.spawn = originalSpawn;
     });
+<<<<<<< HEAD
 
     it("throws ZellijNotFoundError when binary not found", async () => {
       // @ts-expect-error mock override
@@ -145,6 +169,8 @@ describe("ZellijCli", () => {
 
       Bun.spawn = originalSpawn;
     });
+=======
+>>>>>>> origin/main
   });
 
   describe("listSessions", () => {
@@ -180,6 +206,7 @@ describe("ZellijCli", () => {
 
       Bun.spawn = originalSpawn;
     });
+<<<<<<< HEAD
 
     it("returns empty array on empty output with exit 0", async () => {
       // @ts-expect-error mock override
@@ -329,5 +356,7 @@ describe("ZellijCli", () => {
 
       Bun.spawn = originalSpawn;
     });
+=======
+>>>>>>> origin/main
   });
 });

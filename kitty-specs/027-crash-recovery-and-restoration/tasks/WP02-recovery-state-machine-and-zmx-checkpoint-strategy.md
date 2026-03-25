@@ -1,11 +1,12 @@
 ---
 work_package_id: WP02
 title: Recovery State Machine and zmx Checkpoint Strategy
-lane: "planned"
+lane: "done"
 dependencies:
 - WP01
-base_branch: main
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 027-crash-recovery-and-restoration-WP01
+base_commit: e0c44e02f0b8ddd373b23d2bf8c089235a2efc7c
+created_at: '2026-03-01T13:31:53.577089+00:00'
 subtasks:
 - T005
 - T006
@@ -14,10 +15,10 @@ subtasks:
 - T009
 phase: Phase 1 - State Machine and Checkpoints
 assignee: ''
-agent: ''
-shell_pid: ''
-review_status: ''
-reviewed_by: ''
+agent: "claude-haiku"
+shell_pid: "64666"
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -279,3 +280,5 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-03-01T13:31:53Z – claude-haiku – shell_pid=64666 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T13:33:51Z – claude-haiku – shell_pid=64666 – lane=done – Implemented

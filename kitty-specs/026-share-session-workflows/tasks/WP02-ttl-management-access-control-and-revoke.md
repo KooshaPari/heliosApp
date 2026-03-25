@@ -1,11 +1,12 @@
 ---
 work_package_id: WP02
 title: TTL Management, Access Control, and Revoke
-lane: "planned"
+lane: "done"
 dependencies:
 - WP01
-base_branch: main
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 026-share-session-workflows-WP01
+base_commit: cb6593a964ea2c1830fad33b2235a9eed4a7753d
+created_at: '2026-03-01T13:38:29.330394+00:00'
 subtasks:
 - T006
 - T007
@@ -14,10 +15,10 @@ subtasks:
 - T010
 phase: Phase 1 - Lifecycle Management
 assignee: ''
-agent: ''
-shell_pid: ''
-review_status: ''
-reviewed_by: ''
+agent: "claude-haiku"
+shell_pid: "96381"
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -241,3 +242,5 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-03-01T13:38:29Z – claude-haiku – shell_pid=96381 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T13:41:28Z – claude-haiku – shell_pid=96381 – lane=done – Merged

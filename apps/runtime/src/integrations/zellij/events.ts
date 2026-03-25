@@ -174,7 +174,13 @@ export class MuxEventEmitter {
    * Helper to build and emit a typed event with common fields populated.
    */
   emitTyped<T extends MuxEvent>(
+<<<<<<< HEAD
     partial: Omit<T, "timestamp" | "correlationId"> & { correlationId?: string }
+=======
+    partial: Omit<T, "timestamp" | "correlationId"> & {
+      correlationId?: string;
+    }
+>>>>>>> origin/main
   ): void {
     const event = {
       ...partial,

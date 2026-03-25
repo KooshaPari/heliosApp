@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { describe, expect, it, mock, beforeEach } from "bun:test";
+=======
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+>>>>>>> origin/main
 import { ZellijCli } from "../cli.js";
 import { MuxRegistry } from "../registry.js";
 import { ZellijSessionManager, sessionNameForLane } from "../session.js";
@@ -40,6 +44,13 @@ describe("ZellijSessionManager", () => {
     originalSpawn = Bun.spawn;
   });
 
+<<<<<<< HEAD
+=======
+  afterEach(() => {
+    Bun.spawn = originalSpawn;
+  });
+
+>>>>>>> origin/main
   describe("createSession", () => {
     it("creates a session and registers binding", async () => {
       let callCount = 0;
@@ -79,9 +90,13 @@ describe("ZellijSessionManager", () => {
       const registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
+<<<<<<< HEAD
       expect(manager.createSession("dup")).rejects.toThrow(SessionAlreadyExistsError);
 
       Bun.spawn = originalSpawn;
+=======
+      await expect(manager.createSession("dup")).rejects.toThrow(SessionAlreadyExistsError);
+>>>>>>> origin/main
     });
   });
 
@@ -111,9 +126,15 @@ describe("ZellijSessionManager", () => {
       const registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
+<<<<<<< HEAD
       expect(manager.reattachSession("helios-lane-missing")).rejects.toThrow(SessionNotFoundError);
 
       Bun.spawn = originalSpawn;
+=======
+      await expect(manager.reattachSession("helios-lane-missing")).rejects.toThrow(
+        SessionNotFoundError
+      );
+>>>>>>> origin/main
     });
   });
 
@@ -162,6 +183,7 @@ describe("ZellijSessionManager", () => {
 
       Bun.spawn = originalSpawn;
     });
+<<<<<<< HEAD
 
     it("unbinds even if kill command fails", async () => {
       let callCount = 0;
@@ -325,5 +347,7 @@ describe("ZellijSessionManager", () => {
 
       Bun.spawn = originalSpawn;
     });
+=======
+>>>>>>> origin/main
   });
 });

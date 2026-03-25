@@ -57,7 +57,11 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
+<<<<<<< HEAD
         run: bun install --frozen-lockfile
+=======
+        run: bun install
+>>>>>>> origin/main
       - name: Verify format
         run: bunx oxfmt --check apps docs/.vitepress playwright.config.ts tsconfig.json package.json
 
@@ -72,7 +76,11 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
+<<<<<<< HEAD
         run: bun install --frozen-lockfile
+=======
+        run: bun install
+>>>>>>> origin/main
       - name: Run lint
         run: bun run lint
 
@@ -87,7 +95,11 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
+<<<<<<< HEAD
         run: bun install --frozen-lockfile
+=======
+        run: bun install
+>>>>>>> origin/main
       - name: Run tests
         run: bun run test
 
@@ -102,7 +114,11 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
+<<<<<<< HEAD
         run: bun install --frozen-lockfile
+=======
+        run: bun install
+>>>>>>> origin/main
       - name: Run coverage
         run: bun run test:coverage
 
@@ -132,7 +148,11 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
+<<<<<<< HEAD
         run: bun install --frozen-lockfile
+=======
+        run: bun install
+>>>>>>> origin/main
       - name: Install Playwright browsers
         run: bunx playwright install --with-deps chromium
       - name: Run e2e smoke

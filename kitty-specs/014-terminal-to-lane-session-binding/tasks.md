@@ -21,10 +21,10 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T001 Implement binding triple type definitions and validation in `apps/runtime/src/registry/binding_triple.ts`
-- [ ] T002 Implement terminal registry with CRUD and multi-key indexing in `apps/runtime/src/registry/terminal_registry.ts`
-- [ ] T003 Implement pre-operation binding validation middleware in `apps/runtime/src/registry/binding_middleware.ts`
-- [ ] T004 [P] Add unit and property-based tests for registry CRUD, uniqueness, and validation in `apps/runtime/tests/unit/registry/`
+- [x] T001 Implement binding triple type definitions and validation in `apps/runtime/src/registry/binding_triple.ts`
+- [x] T002 Implement terminal registry with CRUD and multi-key indexing in `apps/runtime/src/registry/terminal_registry.ts`
+- [x] T003 Implement pre-operation binding validation middleware in `apps/runtime/src/registry/binding_middleware.ts`
+- [x] T004 [P] Add unit and property-based tests for registry CRUD, uniqueness, and validation in `apps/runtime/tests/unit/registry/`
 
 ### Implementation Notes
 - Registry must enforce: no duplicate terminal_ids, no unbound terminals, valid lane/session references.
@@ -52,10 +52,10 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T005 Implement binding lifecycle event emission (bound, rebound, unbound, validation-failed) in `apps/runtime/src/registry/binding_events.ts`
-- [ ] T006 Implement durable persistence adapter for binding state in `apps/runtime/src/registry/persistence.ts`
-- [ ] T007 Implement lane/session lifecycle event subscription for automatic binding invalidation
-- [ ] T008 [P] Add integration tests for persistence, restart recovery, lifecycle event propagation, and latency benchmarks in `apps/runtime/tests/integration/registry/`
+- [x] T005 Implement binding lifecycle event emission (bound, rebound, unbound, validation-failed) in `apps/runtime/src/registry/binding_events.ts`
+- [x] T006 Implement durable persistence adapter for binding state in `apps/runtime/src/registry/persistence.ts`
+- [x] T007 Implement lane/session lifecycle event subscription for automatic binding invalidation
+- [x] T008 [P] Add integration tests for persistence, restart recovery, lifecycle event propagation, and latency benchmarks in `apps/runtime/tests/integration/registry/`
 
 ### Implementation Notes
 - Persistence must be file-backed or embedded SQLite for restart survival.

@@ -21,11 +21,11 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T001 Implement switch transaction state machine with full state graph and transition guards in `apps/runtime/src/renderer/switch_transaction.ts`
-- [ ] T002 Implement renderer capability matrix query (hot-swap support, version constraints) in `apps/runtime/src/renderer/capability_matrix.ts`
-- [ ] T003 Implement PTY stream proxy with bounded buffering, backpressure, and replay in `apps/runtime/src/renderer/pty_stream_proxy.ts`
-- [ ] T004 Wire lifecycle event emission for switch-started, switch-committed, switch-rolled-back, switch-failed on the internal bus
-- [ ] T005 [P] Add unit tests for state machine transitions, capability queries, and PTY proxy buffering in `apps/runtime/tests/unit/renderer/`
+- [x] T001 Implement switch transaction state machine with full state graph and transition guards in `apps/runtime/src/renderer/switch_transaction.ts`
+- [x] T002 Implement renderer capability matrix query (hot-swap support, version constraints) in `apps/runtime/src/renderer/capability_matrix.ts`
+- [x] T003 Implement PTY stream proxy with bounded buffering, backpressure, and replay in `apps/runtime/src/renderer/pty_stream_proxy.ts`
+- [x] T004 Wire lifecycle event emission for switch-started, switch-committed, switch-rolled-back, switch-failed on the internal bus
+- [x] T005 [P] Add unit tests for state machine transitions, capability queries, and PTY proxy buffering in `apps/runtime/tests/unit/renderer/`
 
 ### Implementation Notes
 - State machine must be self-contained with no external side effects during transitions.
@@ -53,11 +53,11 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T006 Implement hot-swap execution path (detach source renderer, attach target renderer, replay buffered PTY) in `apps/runtime/src/renderer/hot_swap.ts`
-- [ ] T007 Implement rollback logic (restore previous renderer, replay PTY buffer, recover session state) in `apps/runtime/src/renderer/rollback.ts`
-- [ ] T008 Implement concurrent switch rejection (reject new switch requests while transaction is in progress)
-- [ ] T009 Wire hot-swap and rollback paths into the switch transaction state machine
-- [ ] T010 [P] Add integration tests for hot-swap success, hot-swap failure with rollback, and concurrent switch rejection in `apps/runtime/tests/integration/renderer/`
+- [x] T006 Implement hot-swap execution path (detach source renderer, attach target renderer, replay buffered PTY) in `apps/runtime/src/renderer/hot_swap.ts`
+- [x] T007 Implement rollback logic (restore previous renderer, replay PTY buffer, recover session state) in `apps/runtime/src/renderer/rollback.ts`
+- [x] T008 Implement concurrent switch rejection (reject new switch requests while transaction is in progress)
+- [x] T009 Wire hot-swap and rollback paths into the switch transaction state machine
+- [x] T010 [P] Add integration tests for hot-swap success, hot-swap failure with rollback, and concurrent switch rejection in `apps/runtime/tests/integration/renderer/`
 
 ### Implementation Notes
 - Hot-swap must be atomic across all terminals: all switch or none do.
@@ -85,12 +85,12 @@
 **Estimated Prompt Size**: ~420 lines
 
 ### Included Subtasks
-- [ ] T011 Implement restart-with-restore execution path (zmx checkpoint, teardown source, start target, restore from checkpoint) in `apps/runtime/src/renderer/restart_restore.ts`
-- [ ] T012 Implement degraded-but-safe mode for double-failure (rollback failure) with headless PTY preservation
-- [ ] T013 Implement terminal creation queueing during active switch transactions
-- [ ] T014 [P] Add fault injection tests: init failure, mid-swap failure, rollback failure, PTY buffer overflow in `apps/runtime/tests/integration/renderer/`
-- [ ] T015 [P] Add SLO validation tests for hot-swap (<3s), restart-with-restore (<8s), and rollback (<5s) at p95 in `apps/runtime/tests/integration/renderer/`
-- [ ] T016 [P] Add Playwright end-to-end tests for full switch workflow including UI feedback in `apps/desktop/tests/e2e/renderer/`
+- [x] T011 Implement restart-with-restore execution path (zmx checkpoint, teardown source, start target, restore from checkpoint) in `apps/runtime/src/renderer/restart_restore.ts`
+- [x] T012 Implement degraded-but-safe mode for double-failure (rollback failure) with headless PTY preservation
+- [x] T013 Implement terminal creation queueing during active switch transactions
+- [x] T014 [P] Add fault injection tests: init failure, mid-swap failure, rollback failure, PTY buffer overflow in `apps/runtime/tests/integration/renderer/`
+- [x] T015 [P] Add SLO validation tests for hot-swap (<3s), restart-with-restore (<8s), and rollback (<5s) at p95 in `apps/runtime/tests/integration/renderer/`
+- [x] T016 [P] Add Playwright end-to-end tests for full switch workflow including UI feedback in `apps/desktop/tests/e2e/renderer/`
 
 ### Implementation Notes
 - zmx checkpoint must capture scrollback, cursor, env, and cwd for all active terminals.

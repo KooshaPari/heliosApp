@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { MuxRegistry } from "../registry.js";
 import { DuplicateBindingError } from "../errors.js";
@@ -27,6 +28,13 @@ function makeMockProc(stdout: string, stderr: string, exitCode: number) {
   };
 }
 
+=======
+import { describe, expect, it } from "bun:test";
+import { MuxRegistry } from "../registry.js";
+import { DuplicateBindingError } from "../errors.js";
+import type { MuxSession } from "../types.js";
+
+>>>>>>> origin/main
 function makeMockSession(sessionName: string, laneId: string): MuxSession {
   return {
     sessionName,
@@ -119,6 +127,7 @@ describe("MuxRegistry", () => {
 
     expect(registry.getBySession("s1")).toBeDefined();
   });
+<<<<<<< HEAD
 
   describe("getOrphaned", () => {
     let originalSpawn: typeof Bun.spawn;
@@ -215,4 +224,6 @@ describe("MuxRegistry", () => {
       Bun.spawn = originalSpawn;
     });
   });
+=======
+>>>>>>> origin/main
 });
