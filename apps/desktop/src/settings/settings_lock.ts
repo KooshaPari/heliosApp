@@ -70,7 +70,7 @@ export class SettingsLock {
   }
 
   private removeLock(container: HTMLElement): void {
-    this.lockedElements.forEach(element => {
+    for (const element of this.lockedElements) {
       if (element instanceof HTMLInputElement || element instanceof HTMLButtonElement) {
         element.disabled = false;
       } else {
