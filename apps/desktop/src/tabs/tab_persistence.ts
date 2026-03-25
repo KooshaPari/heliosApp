@@ -56,6 +56,8 @@ export class TabPersistence {
       this.lastLoadTime = Date.now() - startTime;
 
       if (this.lastLoadTime > 100) {
+        // Log slow load times in debug mode
+        console.debug("Tab persistence load took", this.lastLoadTime, "ms");
       }
 
       return state;
@@ -102,9 +104,9 @@ export class TabPersistence {
           // Write state to file
           const data = JSON.stringify(stateToWrite, null, 2);
           await fs.writeFile(this.storagePath, data, "utf-8");
-        } catch (_error) {}
-
-        resolve();
+        } catch {
+          // Ignore save errors
+        }
       }, 500);
     });
   }
@@ -130,7 +132,9 @@ export class TabPersistence {
       await fs.mkdir(this.storageDir, { recursive: true });
       const data = JSON.stringify(stateToWrite, null, 2);
       await fs.writeFile(this.storagePath, data, "utf-8");
-    } catch (_error) {}
+    } catch {
+      // Ignore flush errors
+    }
   }
 
   /**
@@ -214,7 +218,9 @@ export class TabPersistence {
     } catch (error) {
       if (error instanceof Error && "code" in error) {
         const nodeError = error as NodeJS.ErrnoException;
+        // ENOENT is expected - file might not exist
         if (nodeError.code !== "ENOENT") {
+          console.warn("Failed to delete tab persistence:", nodeError.code);
         }
       }
     }

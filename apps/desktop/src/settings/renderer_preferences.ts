@@ -47,7 +47,9 @@ export class RendererPreferencesManager {
         }
         return { ...DEFAULT_PREFERENCES };
       }
-    } catch (_error) {}
+    } catch {
+      // Use defaults on parse error
+    }
 
     this.preferences = { ...DEFAULT_PREFERENCES };
     return { ...this.preferences };
@@ -62,7 +64,9 @@ export class RendererPreferencesManager {
       writeFileSync(this.preferencesPath, content, "utf-8");
 
       this.isDirty = false;
-    } catch (_error) {}
+    } catch {
+      // Use defaults on parse error
+    }
   }
 
   getActiveRenderer(): string {
@@ -112,7 +116,9 @@ export class RendererPreferencesManager {
     const dir = dirname(this.preferencesPath);
     try {
       mkdirSync(dir, { recursive: true });
-    } catch (_error) {}
+    } catch {
+      // Use defaults on parse error
+    }
   }
 
   private isValidPreferences(obj: any): boolean {
