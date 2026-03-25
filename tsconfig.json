@@ -16,9 +16,7 @@
 	"include": [
 		"apps/**/*.ts",
 		"apps/**/*.tsx",
-		"playwright.config.ts",
-		"docs/.vitepress/**/*.ts",
-		"docs/.vitepress/**/*.d.ts"
+		"playwright.config.ts"
 	],
 	"exclude": ["node_modules", "dist", "coverage", ".worktrees"]
 }

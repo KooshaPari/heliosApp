@@ -165,7 +165,7 @@ export class AgentTab extends TabSurface {
     logBtn.style.fontSize = "12px";
     logBtn.addEventListener("click", () => {
       // Open log panel
-      console.debug("Log button clicked for agent:", this.props.agentId);
+      console.debug("Log button clicked for agent tab");
     });
 
     const copyBtn = document.createElement("button");
