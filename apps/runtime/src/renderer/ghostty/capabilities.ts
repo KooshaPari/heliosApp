@@ -5,23 +5,7 @@
  * then caches them for fast (<50ms) queries.
  */
 
-import type { Subprocess } from "bun";
 import type { RendererCapabilities } from "../capabilities.js";
-
-type SpawnResult = Subprocess;
-type SpawnOptions = {
-  stdout: "pipe" | "inherit" | "ignore";
-  stderr: "pipe" | "inherit" | "ignore";
-};
-
-const spawn = Bun.spawn as unknown as (command: string[], options: SpawnOptions) => SpawnResult;
-
-function readStreamText(stream: SpawnResult["stdout"]): Promise<string> {
-  if (stream === null || typeof stream === "number") {
-    return Promise.resolve("");
-  }
-  return new Response(stream).text();
-}
 
 // ---------------------------------------------------------------------------
 // GPU detection
@@ -42,21 +26,21 @@ export async function detectGpu(): Promise<GpuInfo> {
   try {
     if (process.platform === "darwin") {
       // macOS always has Metal on supported hardware
-      const proc = spawn(["system_profiler", "SPDisplaysDataType"], {
+      const proc = Bun.spawn(["system_profiler", "SPDisplaysDataType"], {
         stdout: "pipe",
-        stderr: "pipe",
+        stderr: "ignore",
       });
-      const text = await readStreamText(proc.stdout);
+      const text = await new Response(proc.stdout).text();
       const hasMetal = text.includes("Metal");
-      return { available: hasMetal, driverVersion: hasMetal ? "metal" : undefined };
+      return {
+        available: hasMetal,
+        driverVersion: hasMetal ? "metal" : undefined,
+      };
     }
 
     // Linux: probe for OpenGL
-    const proc = spawn(["glxinfo"], {
-      stdout: "pipe",
-      stderr: "pipe",
-    });
-    const text = await readStreamText(proc.stdout);
+    const proc = Bun.spawn(["glxinfo"], { stdout: "pipe", stderr: "ignore" });
+    const text = await new Response(proc.stdout).text();
     const versionMatch = text.match(/OpenGL version string:\s*(.+)/);
     return {
       available: versionMatch !== null,

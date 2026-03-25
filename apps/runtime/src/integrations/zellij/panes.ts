@@ -8,15 +8,15 @@
  */
 
 import type { ZellijCli } from "./cli.js";
-import { PaneTooSmallError, PtyBindingError, ZellijCliError } from "./errors.js";
 import type { TopologyTracker } from "./topology.js";
 import type {
+  PaneRecord,
+  PaneDimensions,
   CreatePaneOptions,
   MinPaneDimensions,
-  PaneDimensions,
-  PaneRecord,
   PtyManagerInterface,
 } from "./types.js";
+import { PaneTooSmallError, PaneNotFoundError, PtyBindingError, ZellijCliError } from "./errors.js";
 
 /** Default minimum pane dimensions. */
 const DEFAULT_MIN_DIMENSIONS: MinPaneDimensions = {
@@ -59,7 +59,16 @@ export class ZellijPaneManager {
     const startMs = performance.now();
     const direction = options?.direction ?? "vertical";
 
-    this.validateSplitForNewPane(sessionName, direction);
+    // T009: Check minimum dimension enforcement before split
+    const currentTopology = this.topology.getTopology(sessionName);
+    if (currentTopology) {
+      const activeTab = currentTopology.tabs.find(t => t.tabId === currentTopology.activeTabId);
+      if (activeTab && activeTab.panes.length > 0) {
+        // Find the focused pane (the one being split)
+        const focusedPane = activeTab.panes.find(p => p.focused) ?? activeTab.panes[0]!;
+        this.validateSplit(focusedPane.dimensions, direction);
+      }
+    }
 
     // T006: Execute zellij pane creation
     const args = ["--session", sessionName, "action", "new-pane"];
@@ -77,6 +86,7 @@ export class ZellijPaneManager {
       throw new ZellijCliError(`new-pane --session ${sessionName}`, result.exitCode, result.stderr);
     }
 
+    // Assign a pane ID
     const paneId = ++this.paneCounter;
 
     // Query dimensions after creation (refresh topology)
@@ -92,7 +102,29 @@ export class ZellijPaneManager {
     this.topology.addPane(sessionName, paneId, dimensions);
 
     // T008: Spawn PTY for the pane
-    const ptyId = await this.spawnPanePty(sessionName, laneId, paneId, dimensions, options?.cwd);
+    let ptyId: string | undefined;
+    if (this.ptyManager) {
+      try {
+        const spawnOpts: Parameters<PtyManagerInterface["spawn"]>[0] = {
+          laneId,
+          sessionId: sessionName,
+          terminalId: String(paneId),
+          cols: dimensions.cols,
+          rows: dimensions.rows,
+        };
+        if (options?.cwd) {
+          spawnOpts.cwd = options.cwd;
+        }
+        const ptyResult = await this.ptyManager.spawn(spawnOpts);
+        ptyId = ptyResult.ptyId;
+        this.topology.bindPty(sessionName, paneId, ptyId);
+      } catch (err) {
+        // PTY spawn failed after pane create; close the pane and report
+        console.error(`[zellij-panes] PTY spawn failed for pane ${paneId}, closing pane`, err);
+        await this.closePaneRaw(sessionName, paneId).catch(() => {});
+        throw new PtyBindingError(paneId, err instanceof Error ? err.message : String(err));
+      }
+    }
 
     const record: PaneRecord = {
       id: paneId,
@@ -102,7 +134,10 @@ export class ZellijPaneManager {
       createdAt: new Date(),
     };
 
-    const _durationMs = performance.now() - startMs;
+    const durationMs = performance.now() - startMs;
+    console.debug(
+      `[zellij-panes] createPane(${sessionName}) pane=${paneId} duration=${durationMs.toFixed(1)}ms`
+    );
 
     return record;
   }
@@ -118,8 +153,12 @@ export class ZellijPaneManager {
       if (paneTopology?.ptyId) {
         try {
           await this.ptyManager.terminate(paneTopology.ptyId);
-        } catch (_err) {
-          // PTY already terminated or not bound yet; closePane remains idempotent.
+        } catch (err) {
+          // PTY may already be stopped; log and continue
+          console.warn(
+            `[zellij-panes] PTY terminate for pane ${paneId} failed (may already be stopped):`,
+            err
+          );
         }
       }
     }
@@ -128,6 +167,8 @@ export class ZellijPaneManager {
 
     // Remove from topology
     this.topology.removePane(sessionName, paneId);
+
+    console.debug(`[zellij-panes] mux.pane.closed: session=${sessionName} pane=${paneId}`);
   }
 
   /**
@@ -182,7 +223,10 @@ export class ZellijPaneManager {
       }
     }
 
-    const _durationMs = performance.now() - startMs;
+    const durationMs = performance.now() - startMs;
+    console.debug(
+      `[zellij-panes] resizePane(${sessionName}, ${paneId}) duration=${durationMs.toFixed(1)}ms`
+    );
   }
 
   /**
@@ -231,7 +275,7 @@ export class ZellijPaneManager {
 
     if (result.exitCode !== 0) {
       // If pane doesn't exist, treat as success (idempotent)
-      if (!(result.stderr.includes("no pane") || result.stderr.includes("not found"))) {
+      if (!result.stderr.includes("no pane") && !result.stderr.includes("not found")) {
         throw new ZellijCliError(
           `close-pane --session ${sessionName}`,
           result.exitCode,
@@ -255,70 +299,15 @@ export class ZellijPaneManager {
         result.cols = Math.max(1, result.cols - amount);
         break;
       case "right":
-        result.cols += amount;
+        result.cols = result.cols + amount;
         break;
       case "up":
         result.rows = Math.max(1, result.rows - amount);
         break;
       case "down":
-        result.rows += amount;
-        break;
-      default:
+        result.rows = result.rows + amount;
         break;
     }
     return result;
-  }
-
-  private validateSplitForNewPane(sessionName: string, direction: "horizontal" | "vertical"): void {
-    const currentTopology = this.topology.getTopology(sessionName);
-    if (!currentTopology) {
-      return;
-    }
-
-    const activeTab = currentTopology.tabs.find(t => t.tabId === currentTopology.activeTabId);
-    if (!activeTab || activeTab.panes.length === 0) {
-      return;
-    }
-
-    const focusedPane = activeTab.panes.find(p => p.focused) ?? activeTab.panes[0];
-    if (!focusedPane) {
-      return;
-    }
-    this.validateSplit(focusedPane.dimensions, direction);
-  }
-
-  private async spawnPanePty(
-    sessionName: string,
-    laneId: string,
-    paneId: number,
-    dimensions: PaneDimensions,
-    cwd?: string
-  ): Promise<string | undefined> {
-    if (!this.ptyManager) {
-      return undefined;
-    }
-
-    try {
-      const spawnOpts: Parameters<PtyManagerInterface["spawn"]>[0] = {
-        laneId,
-        sessionId: sessionName,
-        terminalId: String(paneId),
-        cols: dimensions.cols,
-        rows: dimensions.rows,
-      };
-      if (cwd) {
-        spawnOpts.cwd = cwd;
-      }
-      const ptyResult = await this.ptyManager.spawn(spawnOpts);
-      this.topology.bindPty(sessionName, paneId, ptyResult.ptyId);
-      return ptyResult.ptyId;
-    } catch (err) {
-      await this.closePaneRaw(sessionName, paneId).catch(_cleanupErr => {
-        // Ignore cleanup failures while surfacing original PTY bind issue.
-        // Keep cleanup best-effort; primary failure remains deterministic.
-        return;
-      });
-      throw new PtyBindingError(paneId, err instanceof Error ? err.message : String(err));
-    }
   }
 }

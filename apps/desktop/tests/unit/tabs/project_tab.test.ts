@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import type { ActiveContext } from "../../../src/tabs/context_switch";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { ProjectTab } from "../../../src/tabs/project_tab";
+import type { ActiveContext } from "../../../src/tabs/context_switch";
 
 describe("ProjectTab", () => {
   let tab: ProjectTab;
@@ -234,9 +234,7 @@ describe("ProjectTab", () => {
       const newTab = new ProjectTab();
       newTab.restoreState(originalState);
 
-      expect(newTab.getState().expandedSections ?? []).toEqual(
-        originalState.expandedSections ?? []
-      );
+      expect(newTab.getState().expandedSections).toEqual(originalState.expandedSections);
     });
   });
 

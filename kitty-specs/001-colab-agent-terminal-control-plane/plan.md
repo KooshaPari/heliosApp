@@ -1,10 +1,13 @@
-# Implementation Plan: Colab Agent Terminal Control Plane
-*Path: [templates/plan-template.md](templates/plan-template.md)*
+# 001 Colab Agent Terminal Control Plane - Plan
 
-**Branch**: `001-colab-agent-terminal-control-plane` | **Date**: 2026-02-26 | **Spec**: [kitty-specs/001-colab-agent-terminal-control-plane/spec.md](kitty-specs/001-colab-agent-terminal-control-plane/spec.md)
-**Input**: Feature specification from `/kitty-specs/001-colab-agent-terminal-control-plane/spec.md`
+## Slice Boundaries
+- Slice 1 (current): in-memory runtime state, non-durable lifecycle/audit processing.
+- Slice 2 (placeholder contract only in WP08): durable audit persistence and session checkpoint replay.
 
-## Summary
+## Slice-2 Durability Placeholder Contract
+- `apps/runtime/src/sessions/checkpoint_store.ts` defines `CheckpointStore`.
+- `apps/runtime/src/audit/durable_store.ts` defines `AuditDurableStore`.
+- Slice-1 implementations remain non-operational placeholders and must not silently persist state.
 
 Deliver a tight first vertical slice for a terminal-first control plane: one canonical runtime path (`codex` CLI + `cliproxyapi++` harness), one end-to-end tabbed UX flow (terminal/agent/session/chat/project), deterministic lifecycle events, and in-memory session continuity keyed by Codex session IDs. If harness initialization fails, degrade to native OpenAI login path while keeping local runtime responsive.
 

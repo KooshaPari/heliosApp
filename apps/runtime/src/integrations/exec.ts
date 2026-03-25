@@ -1,4 +1,4 @@
-import type { ProtocolBus as LocalBus } from "../protocol/bus.ts";
+import type { LocalBus } from "../protocol/bus";
 
 export type ExecResult = {
   code: number;
@@ -10,20 +10,15 @@ export type SessionTransport = "cliproxy_harness" | "native_openai";
 
 export type HarnessStatus = {
   status: "healthy" | "degraded" | "unavailable";
-  // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
   fallback_transport: "native_openai";
-  // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
   degrade_reason: string | null;
 };
 
 export type HarnessRouteDecision = {
   transport: SessionTransport;
   diagnostics: {
-    // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
     selected_transport: SessionTransport;
-    // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
     degrade_reason: string | null;
-    // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
     harness_status: HarnessStatus["status"];
   };
 };
@@ -47,9 +42,7 @@ export class ExecHarnessProbe implements HarnessProbe {
 export class HarnessRouteSelector {
   private status: HarnessStatus = {
     status: "unavailable",
-    // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
     fallback_transport: "native_openai",
-    // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
     degrade_reason: "harness_not_checked",
   };
 
@@ -72,24 +65,18 @@ export class HarnessRouteSelector {
       this.status = probeResult.ok
         ? {
             status: "healthy",
-            // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
             fallback_transport: "native_openai",
-            // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
             degrade_reason: null,
           }
         : {
             status: "unavailable",
-            // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
             fallback_transport: "native_openai",
-            // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
             degrade_reason: probeResult.reason ?? "cliproxy_healthcheck_failed",
           };
     } catch (error) {
       this.status = {
         status: "degraded",
-        // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
         fallback_transport: "native_openai",
-        // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
         degrade_reason: this.errorReason(error),
       };
     }
@@ -109,11 +96,8 @@ export class HarnessRouteSelector {
       return {
         transport: "native_openai",
         diagnostics: {
-          // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
           selected_transport: "native_openai",
-          // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
           degrade_reason: "preferred_transport_native_openai",
-          // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
           harness_status: this.status.status,
         },
       };
@@ -123,11 +107,8 @@ export class HarnessRouteSelector {
       return {
         transport: "cliproxy_harness",
         diagnostics: {
-          // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
           selected_transport: "cliproxy_harness",
-          // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
           degrade_reason: null,
-          // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
           harness_status: this.status.status,
         },
       };
@@ -136,11 +117,8 @@ export class HarnessRouteSelector {
     return {
       transport: "native_openai",
       diagnostics: {
-        // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
         selected_transport: "native_openai",
-        // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
         degrade_reason: this.status.degrade_reason ?? "cliproxy_route_degraded",
-        // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
         harness_status: this.status.status,
       },
     };
@@ -150,7 +128,7 @@ export class HarnessRouteSelector {
     this.stopMonitoring();
     this.monitorTimer = setInterval(
       () => {
-        this.refreshHealth("interval");
+        void this.refreshHealth("interval");
       },
       Math.max(intervalMs, this.cooldownMs)
     );
@@ -177,7 +155,6 @@ export class HarnessRouteSelector {
         source,
         previous,
         current,
-        // biome-ignore lint/style/useNamingConvention: Protocol payload keys use snake_case by contract.
         degrade_reason: current.degrade_reason,
       },
     });
@@ -211,17 +188,11 @@ export async function execCommand(command: string, args: string[]): Promise<Exec
 }
 
 type TerminalCommandContext = {
-  // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
   command_id: string;
-  // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
   correlation_id: string;
-  // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
   workspace_id: string;
-  // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
   lane_id: string;
-  // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
   session_id: string;
-  // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
   terminal_id?: string;
 };
 
@@ -230,13 +201,11 @@ type SpawnTerminalInput = TerminalCommandContext & {
 };
 
 type InputTerminalInput = TerminalCommandContext & {
-  // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
   terminal_id: string;
   data: string;
 };
 
 type ResizeTerminalInput = TerminalCommandContext & {
-  // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
   terminal_id: string;
   cols: number;
   rows: number;
@@ -267,21 +236,15 @@ export function buildSpawnTerminalCommand(input: SpawnTerminalInput) {
 
   return {
     id: input.command_id,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     correlation_id: input.correlation_id,
     type: "command" as const,
     ts: nowIsoString(),
     method: "terminal.spawn" as const,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     workspace_id: input.workspace_id,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     lane_id: input.lane_id,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     session_id: input.session_id,
     payload: {
-      // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
       session_id: input.session_id,
-      // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
       terminal_id: input.terminal_id,
       title: input.title,
     },
@@ -299,23 +262,16 @@ export function buildInputTerminalCommand(input: InputTerminalInput) {
 
   return {
     id: input.command_id,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     correlation_id: input.correlation_id,
     type: "command" as const,
     ts: nowIsoString(),
     method: "terminal.input" as const,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     workspace_id: input.workspace_id,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     lane_id: input.lane_id,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     session_id: input.session_id,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     terminal_id: input.terminal_id,
     payload: {
-      // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
       terminal_id: input.terminal_id,
-      // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
       session_id: input.session_id,
       data: input.data,
     },
@@ -335,23 +291,16 @@ export function buildResizeTerminalCommand(input: ResizeTerminalInput) {
 
   return {
     id: input.command_id,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     correlation_id: input.correlation_id,
     type: "command" as const,
     ts: nowIsoString(),
     method: "terminal.resize" as const,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     workspace_id: input.workspace_id,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     lane_id: input.lane_id,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     session_id: input.session_id,
-    // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
     terminal_id: input.terminal_id,
     payload: {
-      // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
       terminal_id: input.terminal_id,
-      // biome-ignore lint/style/useNamingConvention: Runtime protocol fields are snake_case by contract.
       session_id: input.session_id,
       cols: input.cols,
       rows: input.rows,

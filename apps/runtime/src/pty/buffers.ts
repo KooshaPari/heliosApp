@@ -105,9 +105,7 @@ export class RingBuffer {
    */
   peek(count?: number): Uint8Array {
     const n = Math.min(count ?? this._size, this._size);
-    if (n === 0) {
-      return new Uint8Array(0);
-    }
+    if (n === 0) return new Uint8Array(0);
 
     const result = new Uint8Array(n);
     const firstChunk = Math.min(n, this._capacity - this.head);
@@ -311,7 +309,7 @@ export class OutputBuffer {
   }
 
   private emitBackpressureOn(utilization: number): void {
-    emitPtyEvent(this.bus, "pty.backpressure.on", this.correlation, {
+    emitPtyEvent(this.bus, "pty.backpressure.on" as const, this.correlation, {
       ptyId: this.correlation.ptyId,
       laneId: this.correlation.laneId,
       utilization,
@@ -321,7 +319,7 @@ export class OutputBuffer {
 
   private emitBackpressureOff(): void {
     const utilization = this.ring.utilization;
-    emitPtyEvent(this.bus, "pty.backpressure.off", this.correlation, {
+    emitPtyEvent(this.bus, "pty.backpressure.off" as const, this.correlation, {
       ptyId: this.correlation.ptyId,
       laneId: this.correlation.laneId,
       utilization,
@@ -333,8 +331,8 @@ export class OutputBuffer {
     // Log warning on first overflow.
     if (!this.firstOverflowLogged) {
       this.firstOverflowLogged = true;
-      // biome-ignore lint/suspicious/noConsole: intentional overflow warning
       console.warn(
+        // intentional overflow warning
         `[OutputBuffer] overflow: ${droppedBytes} bytes dropped for pty ${this.correlation.ptyId}`
       );
     }
@@ -345,7 +343,7 @@ export class OutputBuffer {
       this.lastOverflowEventTs = now;
       this._overflowEvents++;
 
-      emitPtyEvent(this.bus, "pty.buffer.overflow", this.correlation, {
+      emitPtyEvent(this.bus, "pty.buffer.overflow" as const, this.correlation, {
         ptyId: this.correlation.ptyId,
         laneId: this.correlation.laneId,
         droppedBytes,

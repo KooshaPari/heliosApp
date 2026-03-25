@@ -121,21 +121,19 @@ export interface ACPConfig {
 /** ACP execute input */
 export interface ACPExecuteInput {
   prompt: string;
-  systemPrompt?: string | undefined;
-  maxTokens?: number | undefined;
-  temperature?: number | undefined;
+  systemPrompt?: string;
+  maxTokens?: number;
+  temperature?: number;
 }
 
 /** ACP execute output */
 export interface ACPExecuteOutput {
   content: string;
   stopReason: string;
-  usage?:
-    | {
-        inputTokens: number;
-        outputTokens: number;
-      }
-    | undefined;
+  usage?: {
+    inputTokens: number;
+    outputTokens: number;
+  };
 }
 
 /** Type alias for ACP adapter implementation */
@@ -201,9 +199,11 @@ export type A2AAdapter = ProviderAdapter<A2AConfig, A2AExecuteInput, A2AExecuteO
  * Providers can extend this class to share implementation
  * of common patterns (health check scheduling, error handling, etc.).
  */
-export abstract class BaseProviderAdapter<TConfig, TExecuteInput, TExecuteOutput>
-  implements ProviderAdapter<TConfig, TExecuteInput, TExecuteOutput>
-{
+export abstract class BaseProviderAdapter<
+  TConfig,
+  TExecuteInput,
+  TExecuteOutput,
+> implements ProviderAdapter<TConfig, TExecuteInput, TExecuteOutput> {
   protected config: TConfig | null = null;
   protected healthStatus: ProviderHealthStatus = {
     state: "unavailable",

@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
-import type { ZellijCli } from "../cli.js";
+import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { TopologyTracker } from "../topology.js";
+import type { ZellijCli } from "../cli.js";
 
 /**
  * Unit tests for TopologyTracker.
@@ -29,15 +29,21 @@ describe("TopologyTracker", () => {
 
       expect(topo.sessionName).toBe("session-1");
       expect(topo.tabs).toHaveLength(1);
-      expect(topo.tabs[0]?.panes).toHaveLength(1);
-      expect(topo.tabs[0]?.panes[0]?.focused).toBe(true);
+      expect(topo.tabs[0]!.panes).toHaveLength(1);
+      expect(topo.tabs[0]!.panes[0]!.focused).toBe(true);
       expect(topo.activeTabId).toBe(0);
     });
 
     it("uses custom initial dimensions", () => {
-      const topo = tracker.initializeTopology("session-1", { cols: 120, rows: 40 });
+      const topo = tracker.initializeTopology("session-1", {
+        cols: 120,
+        rows: 40,
+      });
 
-      expect(topo.tabs[0]?.panes[0]?.dimensions).toEqual({ cols: 120, rows: 40 });
+      expect(topo.tabs[0]!.panes[0]!.dimensions).toEqual({
+        cols: 120,
+        rows: 40,
+      });
     });
   });
 
@@ -46,28 +52,15 @@ describe("TopologyTracker", () => {
       tracker.initializeTopology("s1");
       tracker.addPane("s1", 1, { cols: 40, rows: 24 }, "pty-1");
 
-      const topo = tracker.getTopology("s1");
-      expect(topo).toBeDefined();
-      if (!topo) {
-        return;
-      }
-
-      const activeTab = topo.tabs.find(t => t.tabId === topo.activeTabId);
-      expect(activeTab).toBeDefined();
-      if (!activeTab) {
-        return;
-      }
+      const topo = tracker.getTopology("s1")!;
+      const activeTab = topo.tabs.find(t => t.tabId === topo.activeTabId)!;
       expect(activeTab.panes).toHaveLength(2);
 
-      const newPane = activeTab.panes.find(p => p.paneId === 1);
-      expect(newPane).toBeDefined();
-      if (!newPane) {
-        return;
-      }
+      const newPane = activeTab.panes.find(p => p.paneId === 1)!;
       expect(newPane.ptyId).toBe("pty-1");
       expect(newPane.focused).toBe(true);
       // Previous pane should be unfocused
-      expect(activeTab.panes[0]?.focused).toBe(false);
+      expect(activeTab.panes[0]!.focused).toBe(false);
     });
 
     it("removes a pane and refocuses", () => {
@@ -75,19 +68,10 @@ describe("TopologyTracker", () => {
       tracker.addPane("s1", 1, { cols: 40, rows: 24 });
       tracker.removePane("s1", 1);
 
-      const topo = tracker.getTopology("s1");
-      expect(topo).toBeDefined();
-      if (!topo) {
-        return;
-      }
-
-      const activeTab = topo.tabs.find(t => t.tabId === topo.activeTabId);
-      expect(activeTab).toBeDefined();
-      if (!activeTab) {
-        return;
-      }
+      const topo = tracker.getTopology("s1")!;
+      const activeTab = topo.tabs.find(t => t.tabId === topo.activeTabId)!;
       expect(activeTab.panes).toHaveLength(1);
-      expect(activeTab.panes[0]?.focused).toBe(true);
+      expect(activeTab.panes[0]!.focused).toBe(true);
     });
 
     it("does nothing for unknown session", () => {
@@ -101,11 +85,7 @@ describe("TopologyTracker", () => {
       tracker.initializeTopology("s1");
       tracker.updatePaneDimensions("s1", 0, { cols: 100, rows: 50 });
 
-      const pane = tracker.findPane("s1", 0);
-      expect(pane).toBeDefined();
-      if (!pane) {
-        return;
-      }
+      const pane = tracker.findPane("s1", 0)!;
       expect(pane.dimensions).toEqual({ cols: 100, rows: 50 });
     });
   });
@@ -115,11 +95,7 @@ describe("TopologyTracker", () => {
       tracker.initializeTopology("s1");
       tracker.bindPty("s1", 0, "pty-abc");
 
-      const pane = tracker.findPane("s1", 0);
-      expect(pane).toBeDefined();
-      if (!pane) {
-        return;
-      }
+      const pane = tracker.findPane("s1", 0)!;
       expect(pane.ptyId).toBe("pty-abc");
     });
   });
@@ -129,20 +105,12 @@ describe("TopologyTracker", () => {
       tracker.initializeTopology("s1");
       tracker.addTab("s1", 1, "Second Tab");
 
-      const topo = tracker.getTopology("s1");
-      expect(topo).toBeDefined();
-      if (!topo) {
-        return;
-      }
+      const topo = tracker.getTopology("s1")!;
       expect(topo.tabs).toHaveLength(2);
       expect(topo.activeTabId).toBe(1);
 
       tracker.removeTab("s1", 1);
-      const updated = tracker.getTopology("s1");
-      expect(updated).toBeDefined();
-      if (!updated) {
-        return;
-      }
+      const updated = tracker.getTopology("s1")!;
       expect(updated.tabs).toHaveLength(1);
       expect(updated.activeTabId).toBe(0);
     });
@@ -152,7 +120,7 @@ describe("TopologyTracker", () => {
       tracker.addTab("s1", 1, "Tab 2");
       tracker.switchTab("s1", 0);
 
-      expect(tracker.getTopology("s1")?.activeTabId).toBe(0);
+      expect(tracker.getTopology("s1")!.activeTabId).toBe(0);
     });
   });
 

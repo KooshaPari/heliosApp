@@ -1,6 +1,6 @@
 import { type Component, createSignal } from "solid-js";
 import { Show } from "solid-js";
-import type { Message } from "../../../../runtime/src/types/conversation.ts";
+import type { Message } from "../../../../runtime/src/types/conversation";
 
 type ToolCallBlockProps = { message: Message };
 
@@ -24,17 +24,6 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = props => {
     }
   };
 
-  const toggleExpanded = () => {
-    setExpanded(!expanded());
-  };
-
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
-      event.preventDefault();
-      toggleExpanded();
-    }
-  };
-
   return (
     <div
       style={{
@@ -44,11 +33,8 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = props => {
         overflow: "hidden",
       }}
     >
-      <button
-        type="button"
-        aria-expanded={expanded()}
-        onKeyDown={handleKeyDown}
-        onClick={toggleExpanded}
+      <div
+        onClick={() => setExpanded(!expanded())}
         style={{
           display: "flex",
           "align-items": "center",
@@ -63,7 +49,7 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = props => {
         <span>{statusIcon()}</span>
         <span style={{ flex: "1" }}>{toolName()}</span>
         <span>{expanded() ? "\u25B2" : "\u25BC"}</span>
-      </button>
+      </div>
       <Show when={expanded() && input() !== undefined}>
         <div
           style={{
@@ -77,7 +63,7 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = props => {
             "overflow-y": "auto",
           }}
         >
-          {JSON.stringify(input(), null, 2)}
+          <>{JSON.stringify(input(), null, 2)}</>
         </div>
       </Show>
     </div>

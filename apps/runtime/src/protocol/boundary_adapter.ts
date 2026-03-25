@@ -1,4 +1,4 @@
-import type { LocalBusEnvelope } from "./types.ts";
+import type { LocalBusEnvelope } from "./types";
 
 export type ProtocolBoundary = "local_control" | "tool_interop" | "agent_delegation";
 export type BoundaryAdapterName = "local_bus" | "tool_bridge" | "a2a_bridge";
@@ -54,10 +54,16 @@ function normalizedBoundaryError(
   message: string,
   details: Record<string, unknown>
 ): LocalBusEnvelope {
-  const envelope: LocalBusEnvelope = {
+  return {
     id: command.id,
     type: "response",
     ts: new Date().toISOString(),
+    workspace_id: command.workspace_id,
+    lane_id: command.lane_id,
+    session_id: command.session_id,
+    terminal_id: command.terminal_id,
+    correlation_id: command.correlation_id,
+    method: command.type === "command" ? command.method : undefined,
     status: "error",
     error: {
       code,
@@ -66,22 +72,6 @@ function normalizedBoundaryError(
       details,
     },
   };
-  if (command.workspace_id !== undefined) {
-    envelope.workspace_id = command.workspace_id;
-  }
-  if (command.lane_id !== undefined) {
-    envelope.lane_id = command.lane_id;
-  }
-  if (command.session_id !== undefined) {
-    envelope.session_id = command.session_id;
-  }
-  if (command.terminal_id !== undefined) {
-    envelope.terminal_id = command.terminal_id;
-  }
-  if (command.type === "command" && command.method !== undefined) {
-    envelope.method = command.method;
-  }
-  return envelope;
 }
 
 export function getBoundaryDispatchDecision(method: string): BoundaryDispatchDecision {

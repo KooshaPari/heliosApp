@@ -1,15 +1,19 @@
 // T018 - Integration tests for full lane lifecycle with real git repos
 // (FR-008-001, FR-008-002, FR-008-004, FR-008-005, FR-008-007)
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { LaneManager, _resetIdCounter } from "../../../src/lanes/index.js";
-import { computeBranchName } from "../../../src/lanes/worktree.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
+import { computeWorktreePath, computeBranchName } from "../../../src/lanes/worktree.js";
 
 async function runGit(args: string[], cwd: string): Promise<string> {
-  const proc = (Bun as any).spawn(["git", ...args], { cwd, stdout: "pipe", stderr: "pipe" });
+  const proc = Bun.spawn(["git", ...args], {
+    cwd,
+    stdout: "pipe",
+    stderr: "pipe",
+  });
   const stdout = await new Response(proc.stdout).text();
   const exitCode = await proc.exited;
   if (exitCode !== 0) {
@@ -31,8 +35,6 @@ async function createTempRepo(): Promise<string> {
   fs.writeFileSync(path.join(tmpDir, "README.md"), "# Test Repo\n");
   await runGit(["add", "."], tmpDir);
   await runGit(["commit", "-m", "initial commit"], tmpDir);
-  // Ensure the default branch is named 'main' regardless of git config
-  await runGit(["branch", "-M", "main"], tmpDir);
   return tmpDir;
 }
 
@@ -107,7 +109,7 @@ describe("Lane Lifecycle Integration (FR-008-001, FR-008-002)", () => {
 
     // Lane record is closed
     const closed = mgr.getRegistry().get(lane.laneId);
-    expect(closed?.state).toBe("closed");
+    expect(closed!.state).toBe("closed");
   });
 
   test("sharing: two agents can attach and detach", async () => {
@@ -115,16 +117,16 @@ describe("Lane Lifecycle Integration (FR-008-001, FR-008-002)", () => {
     await mgr.provision(lane.laneId, repoDir);
 
     await mgr.share(lane.laneId);
-    expect(mgr.getRegistry().get(lane.laneId)?.state).toBe("shared");
+    expect(mgr.getRegistry().get(lane.laneId)!.state).toBe("shared");
 
     await mgr.attach(lane.laneId, "agent-1");
     await mgr.attach(lane.laneId, "agent-2");
-    expect(mgr.getRegistry().get(lane.laneId)?.attachedAgents.length).toBe(2);
+    expect(mgr.getRegistry().get(lane.laneId)!.attachedAgents.length).toBe(2);
 
     await mgr.detach(lane.laneId, "agent-1");
     await mgr.detach(lane.laneId, "agent-2");
     // After last agent detaches from shared, transitions to ready
-    expect(mgr.getRegistry().get(lane.laneId)?.state).toBe("ready");
+    expect(mgr.getRegistry().get(lane.laneId)!.state).toBe("ready");
 
     await mgr.cleanup(lane.laneId);
   });
@@ -156,6 +158,6 @@ describe("Lane Lifecycle Integration (FR-008-001, FR-008-002)", () => {
     await mgr.cleanup(lane.laneId);
     // Second cleanup should not throw
     await mgr.cleanup(lane.laneId);
-    expect(mgr.getRegistry().get(lane.laneId)?.state).toBe("closed");
+    expect(mgr.getRegistry().get(lane.laneId)!.state).toBe("closed");
   });
 });

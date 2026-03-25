@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
+import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
 
 // ---------------------------------------------------------------------------
@@ -79,9 +79,7 @@ export class AuditSink {
    */
   async ingest(envelope: LocalBusEnvelope): Promise<AuditRecord | null> {
     const topic = envelope.topic ?? "";
-    if (!this.watchedTopics.has(topic)) {
-      return null;
-    }
+    if (!this.watchedTopics.has(topic)) return null;
 
     const correlationId: string =
       (envelope.payload?.correlationId as string | undefined) ?? randomBytes(8).toString("hex");
@@ -98,7 +96,7 @@ export class AuditSink {
 
     const record: AuditRecord = {
       id: `audit:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
-      timestamp: envelope.ts,
+      timestamp: envelope.ts ?? new Date().toISOString(),
       topic,
       payload: parsedPayload,
       correlationId,
@@ -136,20 +134,21 @@ export class AuditSink {
         await sink.ingest(event);
         await bus.publish(event);
       },
-      request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+      async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
         return bus.request(command);
       },
+      registerMethod: bus.registerMethod.bind(bus),
+      send: bus.send.bind(bus),
+      subscribe: bus.subscribe.bind(bus),
+      destroy: bus.destroy.bind(bus),
+      getActiveCorrelationId: bus.getActiveCorrelationId.bind(bus),
     };
   }
 
   /**
    * Query stored audit records.
    */
-  query(filter?: {
-    topic?: string;
-    correlationId?: string;
-    since?: Date;
-  }): AuditRecord[] {
+  query(filter?: { topic?: string; correlationId?: string; since?: Date }): AuditRecord[] {
     let results = [...this.records];
 
     if (filter?.topic) {
@@ -204,7 +203,7 @@ export class AuditSink {
   }
 
   // Overrideable persistence hook
-  private _persistRecord(record: AuditRecord): void {
+  private async _persistRecord(record: AuditRecord): Promise<void> {
     this.records.push(record);
   }
 }

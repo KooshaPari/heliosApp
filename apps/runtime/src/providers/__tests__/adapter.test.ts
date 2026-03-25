@@ -4,14 +4,10 @@
  * FR-025-001: Typed adapter interface with lifecycle methods.
  */
 
-import { describe, expect, it } from "bun:test";
-import type { ProviderHealthStatus } from "../adapter.js";
-import {
-  type ACPConfig,
-  type ACPExecuteInput,
-  type ACPExecuteOutput,
-  BaseProviderAdapter,
-} from "../adapter.js";
+import { describe, it, expect } from "bun:test";
+import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
+import { BaseProviderAdapter } from "../adapter.js";
+import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 
 /**
  * Mock provider implementation for testing.
@@ -31,11 +27,15 @@ class MockProvider extends BaseProviderAdapter<ACPConfig, ACPExecuteInput, ACPEx
     this.failExecute = options?.failExecute ?? false;
   }
 
+<<<<<<< HEAD
   async init(config: ACPConfig): Promise<void> {
     await Promise.resolve();
 
+=======
+  init(config: ACPConfig): Promise<void> {
+>>>>>>> origin/main
     if (this.failInit) {
-      throw new Error("Init failed");
+      return Promise.reject(new Error("Init failed"));
     }
 
     this.config = config;
@@ -46,60 +46,73 @@ class MockProvider extends BaseProviderAdapter<ACPConfig, ACPExecuteInput, ACPEx
       lastCheck: new Date(),
       failureCount: 0,
     });
+    return Promise.resolve();
   }
 
+<<<<<<< HEAD
   async health(): Promise<ProviderHealthStatus> {
     await Promise.resolve();
 
+=======
+  health(): Promise<ProviderHealthStatus> {
+>>>>>>> origin/main
     if (this.failHealth) {
-      return {
+      return Promise.resolve({
         state: "unavailable",
         lastCheck: new Date(),
         failureCount: 3,
         message: "Health check failed",
-      };
+      });
     }
 
     if (!this.isInitialized) {
-      return {
+      return Promise.resolve({
         state: "unavailable",
         lastCheck: new Date(),
         failureCount: 0,
         message: "Not initialized",
-      };
+      });
     }
 
-    return {
+    return Promise.resolve({
       state: this.isHealthy ? "healthy" : "degraded",
       lastCheck: new Date(),
       failureCount: 0,
-    };
+    });
   }
 
+<<<<<<< HEAD
   async execute(input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
     await Promise.resolve();
 
+=======
+  execute(input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+>>>>>>> origin/main
     if (this.failExecute) {
-      throw new Error("Execute failed");
+      return Promise.reject(new Error("Execute failed"));
     }
 
     if (!this.isInitialized) {
-      throw new Error("Provider not initialized");
+      return Promise.reject(new Error("Provider not initialized"));
     }
 
-    return {
+    return Promise.resolve({
       content: `Mock response to: ${input.prompt}`,
       stopReason: "end_turn",
       usage: {
         inputTokens: 10,
         outputTokens: 20,
       },
-    };
+    });
   }
 
+<<<<<<< HEAD
   async terminate(): Promise<void> {
     await Promise.resolve();
 
+=======
+  terminate(): Promise<void> {
+>>>>>>> origin/main
     this.isInitialized = false;
     this.isHealthy = false;
     this.updateHealthStatus({
@@ -108,6 +121,7 @@ class MockProvider extends BaseProviderAdapter<ACPConfig, ACPExecuteInput, ACPEx
       failureCount: 0,
       message: "Terminated",
     });
+    return Promise.resolve();
   }
 
   // Test helpers
@@ -258,31 +272,50 @@ describe("ProviderAdapter Interface", () => {
       }
 
       class CustomProvider extends BaseProviderAdapter<CustomConfig, CustomInput, CustomOutput> {
+<<<<<<< HEAD
         async init(config: CustomConfig): Promise<void> {
           await Promise.resolve();
+=======
+        init(config: CustomConfig): Promise<void> {
+>>>>>>> origin/main
           expect(config.customField).toBeDefined();
+          return Promise.resolve();
         }
 
+<<<<<<< HEAD
         async health(): Promise<ProviderHealthStatus> {
           await Promise.resolve();
           return {
+=======
+        health(): Promise<ProviderHealthStatus> {
+          return Promise.resolve({
+>>>>>>> origin/main
             state: "healthy",
             lastCheck: new Date(),
             failureCount: 0,
-          };
+          });
         }
 
+<<<<<<< HEAD
         async execute(input: CustomInput, _correlationId: string): Promise<CustomOutput> {
           await Promise.resolve();
+=======
+        execute(input: CustomInput, _correlationId: string): Promise<CustomOutput> {
+>>>>>>> origin/main
           expect(input.options.timeout).toBeGreaterThan(0);
-          return {
+          return Promise.resolve({
             answer: "Custom answer",
             metadata: { score: 0.95 },
-          };
+          });
         }
 
+<<<<<<< HEAD
         async terminate(): Promise<void> {
           await Promise.resolve();
+=======
+        terminate(): Promise<void> {
+          return Promise.resolve();
+>>>>>>> origin/main
         }
       }
 

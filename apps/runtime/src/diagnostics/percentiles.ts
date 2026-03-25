@@ -22,14 +22,14 @@ export function computePercentiles(values: Float64Array): PercentileBucket | und
     p50: percentileFromSorted(sorted, 0.5),
     p95: percentileFromSorted(sorted, 0.95),
     p99: percentileFromSorted(sorted, 0.99),
-    min: sorted[0],
-    max: sorted[count - 1],
+    min: sorted[0]!,
+    max: sorted[count - 1]!,
     count,
   };
 }
 
 /** Nearest-rank percentile on a pre-sorted Float64Array. */
 function percentileFromSorted(sorted: Float64Array, p: number): number {
-  const index = Math.ceil(p * sorted.length) - 1;
-  return sorted[Math.max(0, index)];
+  const index = Math.ceil(p * sorted.length);
+  return sorted[Math.min(index, sorted.length - 1)]!;
 }

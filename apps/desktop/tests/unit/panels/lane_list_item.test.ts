@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-const vi = { fn: mock, spyOn: spyOn };
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { LaneListItem } from "../../../src/panels/lane_list_item";
 
 describe("LaneListItem", () => {
@@ -177,7 +176,7 @@ describe("LaneListItem", () => {
       "closed",
     ];
 
-    for (const state of statesList) {
+    statesList.forEach(state => {
       item = new LaneListItem({ ...mockProps, state });
       item.mount(container);
 
@@ -188,7 +187,7 @@ describe("LaneListItem", () => {
       while (container.firstChild) {
         container.removeChild(container.firstChild);
       }
-    }
+    });
   });
 
   it("should handle both orphaned and active states together", () => {

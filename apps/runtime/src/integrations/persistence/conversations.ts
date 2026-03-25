@@ -1,10 +1,10 @@
-import type { Conversation, Message } from "../../types/conversation.ts";
+import type { Conversation, Message } from "../../types/conversation";
 
 export class ConversationStore {
   private filePath: string;
   private conversations: Map<string, Conversation>;
 
-  constructor(filePath = "conversations.json") {
+  constructor(filePath: string = "conversations.json") {
     this.filePath = filePath;
     this.conversations = new Map();
   }
@@ -13,12 +13,13 @@ export class ConversationStore {
    * Load conversations from persistent storage
    */
   async loadConversations(): Promise<Conversation[]> {
-    await Promise.resolve();
     try {
       // In a real implementation, this would read from Bun.file(this.filePath)
       // For now, we'll return an empty array as a placeholder
-      return await Promise.resolve(Array.from(this.conversations.values()));
-    } catch (_error) {
+      const result = Array.from(this.conversations.values());
+      return result;
+    } catch (error) {
+      console.error(`[ConversationStore] Failed to load conversations:`, error);
       return [];
     }
   }
@@ -27,14 +28,15 @@ export class ConversationStore {
    * Save all conversations to persistent storage
    */
   async saveConversations(conversations: Conversation[]): Promise<void> {
-    await Promise.resolve();
     try {
       this.conversations.clear();
       for (const conv of conversations) {
         this.conversations.set(conv.id, conv);
       }
-    } catch (_error) {
-      // Persistence is intentionally in-memory for now; write failures are non-blocking.
+      // In a real implementation, this would write to Bun.file(this.filePath)
+      console.log(`[ConversationStore] Saved ${conversations.length} conversations`);
+    } catch (error) {
+      console.error(`[ConversationStore] Failed to save conversations:`, error);
     }
   }
 
@@ -42,11 +44,12 @@ export class ConversationStore {
    * Save a single conversation
    */
   async saveConversation(conversation: Conversation): Promise<void> {
-    await Promise.resolve();
     try {
       this.conversations.set(conversation.id, conversation);
-    } catch (_error) {
-      // Persistence is intentionally in-memory for now; write failures are non-blocking.
+      // In a real implementation, this would update the persisted file
+      console.log(`[ConversationStore] Saved conversation ${conversation.id}`);
+    } catch (error) {
+      console.error(`[ConversationStore] Failed to save conversation:`, error);
     }
   }
 
@@ -54,11 +57,12 @@ export class ConversationStore {
    * Delete a conversation by ID
    */
   async deleteConversation(id: string): Promise<void> {
-    await Promise.resolve();
     try {
       this.conversations.delete(id);
-    } catch (_error) {
-      // Persistence is intentionally in-memory for now; write failures are non-blocking.
+      // In a real implementation, this would update the persisted file
+      console.log(`[ConversationStore] Deleted conversation ${id}`);
+    } catch (error) {
+      console.error(`[ConversationStore] Failed to delete conversation:`, error);
     }
   }
 
@@ -89,8 +93,8 @@ export class ConversationStore {
       conv.updatedAt = new Date().toISOString();
       this.conversations.set(conversationId, conv);
       await this.saveConversation(conv);
-    } catch (_error) {
-      // Persistence is intentionally in-memory for now; update failures are non-blocking.
+    } catch (error) {
+      console.error(`[ConversationStore] Failed to add message:`, error);
     }
   }
 
@@ -98,11 +102,12 @@ export class ConversationStore {
    * Clear all conversations
    */
   async clearConversations(): Promise<void> {
-    await Promise.resolve();
     try {
       this.conversations.clear();
-    } catch (_error) {
-      // Persistence is intentionally in-memory for now; clearing failures are non-blocking.
+      // In a real implementation, this would clear the persisted file
+      console.log(`[ConversationStore] Cleared all conversations`);
+    } catch (error) {
+      console.error(`[ConversationStore] Failed to clear conversations:`, error);
     }
   }
 }

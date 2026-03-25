@@ -1,6 +1,6 @@
-import type { AuditEvent } from "./event.ts";
-import type { AuditRingBuffer, AuditFilter as RingBufferFilter } from "./ring-buffer.ts";
-import type { SQLiteAuditStore } from "./sqlite-store.ts";
+import type { AuditEvent } from "./event";
+import { AuditRingBuffer, type AuditFilter as RingBufferFilter } from "./ring-buffer";
+import { SQLiteAuditStore } from "./sqlite-store";
 
 /**
  * Enhanced filter interface for ledger queries.
@@ -43,9 +43,9 @@ export class AuditLedger {
   private subscriptions: Subscription[] = [];
   private batchedNotifications: Map<SubscriptionCallback, AuditEvent[]> = new Map();
   private batchTimer: number | null = null;
-  private readonly batchIntervalMs = 100;
-  private readonly defaultLimit = 100;
-  private readonly maxLimit = 1000;
+  private readonly BATCH_INTERVAL_MS = 100;
+  private readonly DEFAULT_LIMIT = 100;
+  private readonly MAX_LIMIT = 1000;
 
   constructor(
     private ringBuffer: AuditRingBuffer,
@@ -60,7 +60,7 @@ export class AuditLedger {
    * @returns Matching events in chronological order
    */
   search(filter: AuditFilter): AuditEvent[] {
-    const limit = Math.min(filter.limit || this.defaultLimit, this.maxLimit);
+    const limit = Math.min(filter.limit || this.DEFAULT_LIMIT, this.MAX_LIMIT);
     const offset = filter.offset || 0;
 
     // Convert AuditFilter to ring buffer filter
@@ -83,14 +83,12 @@ export class AuditLedger {
     // Merge and deduplicate results by event ID
     const merged = new Map<string, AuditEvent>();
 
-    for (const event of rbResults) {
-      merged.set(event.id, event);
-    }
-    for (const event of dbResults) {
+    rbResults.forEach(event => merged.set(event.id, event));
+    dbResults.forEach(event => {
       if (!merged.has(event.id)) {
         merged.set(event.id, event);
       }
-    }
+    });
 
     // Convert to array, sort chronologically, apply pagination
     const combined = Array.from(merged.values()).sort(
@@ -175,13 +173,13 @@ export class AuditLedger {
           this.batchedNotifications.set(subscription.callback, []);
         }
 
-        this.batchedNotifications.get(subscription.callback)?.push(event);
+        this.batchedNotifications.get(subscription.callback)!.push(event);
 
         // Start batch timer if not already running
         if (this.batchTimer === null) {
           this.batchTimer = setTimeout(() => {
             this.deliverBatchedNotifications();
-          }, this.batchIntervalMs) as unknown as number;
+          }, this.BATCH_INTERVAL_MS) as unknown as number;
         }
       }
     }
@@ -194,13 +192,13 @@ export class AuditLedger {
     this.batchedNotifications.forEach((events, callback) => {
       // Invoke callback asynchronously to avoid blocking
       setImmediate(() => {
-        for (const event of events) {
+        events.forEach(event => {
           try {
             callback(event);
-          } catch (error) {
-            this.handleNotificationError(error);
+          } catch (err) {
+            console.error("[AuditLedger] Subscription callback error:", err);
           }
-        }
+        });
       });
     });
 
@@ -217,6 +215,9 @@ export class AuditLedger {
     chain: AuditEvent[]
   ): void {
     if (visited.has(correlationId)) {
+      console.warn(
+        `[AuditLedger] Circular reference detected for correlation ID: ${correlationId}`
+      );
       return;
     }
 
@@ -225,27 +226,17 @@ export class AuditLedger {
     // Get all events with this correlation ID from both ring buffer and store
     const ringEvents = this.ringBuffer.getByCorrelationId(correlationId);
     const storeEvents = this.store.getByCorrelationChain(correlationId);
-    // Deduplicate by ID
-    const seen = new Set<string>();
-    const events: AuditEvent[] = [];
-    for (const e of ringEvents) {
-      if (!seen.has(e.id)) {
-        seen.add(e.id);
-        events.push(e);
-      }
-    }
-    for (const e of storeEvents) {
-      if (!seen.has(e.id)) {
-        seen.add(e.id);
-        events.push(e);
-      }
-    }
+    const eventMap = new Map<string, AuditEvent>();
+    for (const event of ringEvents) eventMap.set(event.id, event);
+    for (const event of storeEvents) eventMap.set(event.id, event);
+    const events = Array.from(eventMap.values());
 
     if (events.length === 0) {
+      console.warn(`[AuditLedger] No events found for correlation ID: ${correlationId}`);
       return;
     }
 
-    for (const event of events) {
+    events.forEach(event => {
       if (!chain.find(e => e.id === event.id)) {
         chain.push(event);
       }
@@ -255,7 +246,7 @@ export class AuditLedger {
       if (parentCorrelationId && typeof parentCorrelationId === "string") {
         this.traverseCorrelationChain(parentCorrelationId, visited, chain);
       }
-    }
+    });
   }
 
   /**
@@ -296,56 +287,40 @@ export class AuditLedger {
    * Check if an event matches a filter.
    */
   private matchesFilter(event: AuditEvent, filter: AuditFilter): boolean {
-    return (
-      this.matchesWorkspace(event, filter) &&
-      this.matchesLane(event, filter) &&
-      this.matchesSession(event, filter) &&
-      this.matchesActor(event, filter) &&
-      this.matchesEventType(event, filter) &&
-      this.matchesCorrelationId(event, filter) &&
-      this.matchesTimeRange(event, filter)
-    );
-  }
-
-  private matchesWorkspace(event: AuditEvent, filter: AuditFilter): boolean {
-    return !filter.workspaceId || event.workspaceId === filter.workspaceId;
-  }
-
-  private matchesLane(event: AuditEvent, filter: AuditFilter): boolean {
-    return !filter.laneId || event.laneId === filter.laneId;
-  }
-
-  private matchesSession(event: AuditEvent, filter: AuditFilter): boolean {
-    return !filter.sessionId || event.sessionId === filter.sessionId;
-  }
-
-  private matchesActor(event: AuditEvent, filter: AuditFilter): boolean {
-    return !filter.actor || event.actor === filter.actor;
-  }
-
-  private matchesEventType(event: AuditEvent, filter: AuditFilter): boolean {
-    if (!filter.eventType) {
-      return true;
-    }
-    return Array.isArray(filter.eventType)
-      ? filter.eventType.includes(event.eventType)
-      : filter.eventType === event.eventType;
-  }
-
-  private matchesCorrelationId(event: AuditEvent, filter: AuditFilter): boolean {
-    return !filter.correlationId || event.correlationId === filter.correlationId;
-  }
-
-  private matchesTimeRange(event: AuditEvent, filter: AuditFilter): boolean {
-    if (!filter.timeRange) {
-      return true;
+    if (filter.workspaceId && event.workspaceId !== filter.workspaceId) {
+      return false;
     }
 
-    const eventTime = new Date(event.timestamp);
-    return eventTime >= filter.timeRange.from && eventTime <= filter.timeRange.to;
-  }
+    if (filter.laneId && event.laneId !== filter.laneId) {
+      return false;
+    }
 
-  private handleNotificationError(_error: unknown): void {
-    // Intentionally ignored. Notification failures should not block event flow.
+    if (filter.sessionId && event.sessionId !== filter.sessionId) {
+      return false;
+    }
+
+    if (filter.actor && event.actor !== filter.actor) {
+      return false;
+    }
+
+    if (filter.eventType) {
+      const eventTypes = Array.isArray(filter.eventType) ? filter.eventType : [filter.eventType];
+      if (!eventTypes.includes(event.eventType as any)) {
+        return false;
+      }
+    }
+
+    if (filter.correlationId && event.correlationId !== filter.correlationId) {
+      return false;
+    }
+
+    if (filter.timeRange) {
+      const eventTime = new Date(event.timestamp);
+      if (eventTime < filter.timeRange.from || eventTime > filter.timeRange.to) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }

@@ -6,8 +6,7 @@
  * FR-026-003: Policy gate integration.
  */
 
-import { randomUUID } from "node:crypto";
-import type { ProtocolBus as LocalBus } from "../../protocol/bus.js";
+import type { LocalBus } from "../../protocol/bus.js";
 
 /**
  * Share session state.
@@ -60,7 +59,7 @@ export interface ShareWorkerResult {
  * Spawns and manages the lifecycle of share worker processes.
  */
 export class ShareWorker {
-  private process: unknown | null = null;
+  private process: any = null;
   private hearbeat: NodeJS.Timeout | null = null;
 
   /**
@@ -91,14 +90,13 @@ export class ShareWorker {
   /**
    * Kill the share worker process.
    */
-  kill(): Promise<void> {
+  async kill(): Promise<void> {
     if (this.hearbeat) {
       clearInterval(this.hearbeat);
       this.hearbeat = null;
     }
     // In real implementation, would send SIGTERM/SIGKILL
     this.process = null;
-    return Promise.resolve();
   }
 
   /**
@@ -125,8 +123,8 @@ export interface PolicyGate {
  * Default pass-through policy gate.
  */
 class DefaultPolicyGate implements PolicyGate {
-  evaluate(): Promise<{ allowed: boolean }> {
-    return Promise.resolve({ allowed: true });
+  async evaluate(): Promise<{ allowed: boolean }> {
+    return { allowed: true };
   }
 }
 
@@ -178,7 +176,7 @@ export class ShareSessionManager {
 
     if (!policyDecision.allowed) {
       const session: ShareSession = {
-        id: `share-${randomUUID()}`,
+        id: `share-${Date.now()}`,
         terminalId,
         backend,
         shareLink: null,
@@ -201,7 +199,7 @@ export class ShareSessionManager {
 
     // Create session in pending state
     const session: ShareSession = {
-      id: `share-${randomUUID()}`,
+      id: `share-${Date.now()}`,
       terminalId,
       backend,
       shareLink: null,
@@ -217,7 +215,7 @@ export class ShareSessionManager {
     if (!this.sessionsByTerminal.has(terminalId)) {
       this.sessionsByTerminal.set(terminalId, new Set());
     }
-    this.sessionsByTerminal.get(terminalId)?.add(session.id);
+    this.sessionsByTerminal.get(terminalId)!.add(session.id);
 
     await this.publishEvent("share.session.created", {
       sessionId: session.id,
@@ -340,8 +338,8 @@ export class ShareSessionManager {
         topic,
         payload,
       });
-    } catch (_error) {
-      // Intentionally ignore bus publish errors for fire-and-forget events.
+    } catch (error) {
+      console.warn(`Failed to publish share event ${topic}:`, error);
     }
   }
 }

@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-const vi = { fn: mock, spyOn: spyOn };
-import { KeyboardNav, type KeyboardNavCallbacks } from "../../../src/panels/keyboard_nav";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+import { KeyboardNav } from "../../../src/panels/keyboard_nav";
+import type { KeyboardNavCallbacks } from "../../../src/panels/keyboard_nav";
 
 describe("KeyboardNav", () => {
   let container: HTMLDivElement;

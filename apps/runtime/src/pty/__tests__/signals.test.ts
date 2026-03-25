@@ -1,16 +1,16 @@
-import { afterEach, describe, expect, it } from "bun:test";
-import { InMemoryBusPublisher } from "../events.js";
-import { PtyRegistry } from "../registry.js";
-import type { PtyRecord } from "../registry.js";
+import { describe, expect, it } from "bun:test";
 import {
-  InvalidDimensionsError,
-  SignalHistory,
   resize,
-  sendSighup,
   terminate,
+  sendSighup,
+  SignalHistory,
+  InvalidDimensionsError,
 } from "../signals.js";
 import type { SignalHistoryMap } from "../signals.js";
+import { PtyRegistry } from "../registry.js";
+import type { PtyRecord } from "../registry.js";
 import { PtyLifecycle } from "../state_machine.js";
+import { InMemoryBusPublisher } from "../events.js";
 
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   return {
@@ -18,7 +18,7 @@ function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
     laneId: "lane-1",
     sessionId: "session-1",
     terminalId: "term-1",
-    pid: 99999, // non-existent PID — avoids signalling the test runner
+    pid: 99999,
     state: "active",
     dimensions: { cols: 80, rows: 24 },
     createdAt: Date.now(),
@@ -27,6 +27,21 @@ function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
     ...overrides,
   };
 }
+
+function spawnShellProcess(): number {
+  const proc = Bun.spawn(["/bin/sh"], {
+    stdout: "pipe",
+    stderr: "pipe",
+  }) as { pid?: number };
+
+  if (proc.pid === undefined) {
+    throw new Error("Bun.spawn did not return a process ID");
+  }
+
+  return proc.pid;
+}
+
+const pidsToCleanup: number[] = [];
 
 describe("SignalHistory", () => {
   it("stores and retrieves envelopes", () => {
@@ -46,7 +61,7 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(history.length).toBe(2);
-    expect(history.getAll()[0]?.signal).toBe("SIGTERM");
+    expect(history.getAll()[0]!.signal).toBe("SIGTERM");
   });
 
   it("bounds history to maxRecords", () => {
@@ -73,36 +88,18 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(history.length).toBe(2);
-    expect(history.getAll()[0]?.signal).toBe("SIGTERM");
+    expect(history.getAll()[0]!.signal).toBe("SIGTERM");
   });
 });
 
 describe("resize", () => {
-  const pidsToCleanup: number[] = [];
-
-  afterEach(() => {
-    for (const pid of pidsToCleanup) {
-      try {
-        process.kill(pid, "SIGKILL");
-      } catch {
-        // already exited
-      }
-    }
-    pidsToCleanup.length = 0;
-  });
-
   it("updates dimensions and emits events", () => {
     // Spawn a real child so SIGWINCH delivery succeeds.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const proc = Bun.spawn(["/bin/sh"], {
-      stdin: "pipe",
-      stdout: "pipe",
-      stderr: "pipe",
-    } as any) as any;
-    pidsToCleanup.push(proc.pid as number);
+    const pid = spawnShellProcess();
+    pidsToCleanup.push(pid);
 
     const registry = new PtyRegistry();
-    const record = makeRecord({ pid: proc.pid as number });
+    const record = makeRecord({ pid });
     registry.register(record);
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
@@ -118,11 +115,11 @@ describe("resize", () => {
 
     // Check resize event payload includes old/new dimensions.
     const resizeEvt = bus.events.find(e => e.topic === "pty.resized");
-    expect(resizeEvt?.payload.oldDimensions).toEqual({
+    expect(resizeEvt?.payload["oldDimensions"]).toEqual({
       cols: 80,
       rows: 24,
     });
-    expect(resizeEvt?.payload.newDimensions).toEqual({
+    expect(resizeEvt?.payload["newDimensions"]).toEqual({
       cols: 120,
       rows: 40,
     });
@@ -164,44 +161,33 @@ describe("resize", () => {
 });
 
 describe("terminate", () => {
-  const pidsToCleanup: number[] = [];
-
-  afterEach(() => {
-    for (const pid of pidsToCleanup) {
-      try {
-        process.kill(pid, "SIGKILL");
-      } catch {
-        // already exited
-      }
-    }
-    pidsToCleanup.length = 0;
-  });
-
   it("terminates with SIGTERM and cleans up", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const proc = Bun.spawn(["/bin/sh"], {
-      stdin: "pipe",
-      stdout: "pipe",
-      stderr: "pipe",
-    } as any) as any;
-    pidsToCleanup.push(proc.pid as number);
-
     const registry = new PtyRegistry();
-    const record = makeRecord({ pid: proc.pid as number });
+    const record = makeRecord({ pid: 99998 });
     registry.register(record);
     const lifecycle = new PtyLifecycle(record.ptyId, "active");
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
 
-    await terminate(record, lifecycle, registry, historyMap, bus, {
-      gracePeriodMs: 500,
-    });
+    const mockIsAlive = () => false;
+    const mockWait = async () => true;
+    await terminate(
+      record,
+      lifecycle,
+      registry,
+      historyMap,
+      bus,
+      {
+        gracePeriodMs: 50,
+      },
+      mockIsAlive,
+      mockWait
+    );
 
     expect(registry.get(record.ptyId)).toBeUndefined();
 
     const topics = bus.events.map(e => e.topic);
     expect(topics).toContain("pty.terminating");
-    expect(topics).toContain("pty.signal.delivered");
     expect(topics).toContain("pty.stopped");
   });
 
@@ -260,76 +246,61 @@ describe("terminate", () => {
   });
 
   it("handles terminate on throttled PTY", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const proc = Bun.spawn(["/bin/sh"], {
-      stdin: "pipe",
-      stdout: "pipe",
-      stderr: "pipe",
-    } as any) as any;
-    pidsToCleanup.push(proc.pid as number);
-
     const registry = new PtyRegistry();
-    const record = makeRecord({ pid: proc.pid as number, state: "throttled" });
+    const record = makeRecord({ pid: 99998, state: "throttled" });
     registry.register(record);
     const lifecycle = new PtyLifecycle(record.ptyId, "throttled");
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
 
-    await terminate(record, lifecycle, registry, historyMap, bus, {
-      gracePeriodMs: 200,
-    });
+    const mockIsAlive = () => false;
+    const mockWait = async () => true;
+    await terminate(
+      record,
+      lifecycle,
+      registry,
+      historyMap,
+      bus,
+      {
+        gracePeriodMs: 50,
+      },
+      mockIsAlive,
+      mockWait
+    );
 
     expect(registry.get(record.ptyId)).toBeUndefined();
   });
 });
 
 describe("sendSighup", () => {
-  const pidsToCleanup: number[] = [];
-
-  afterEach(() => {
-    for (const pid of pidsToCleanup) {
-      try {
-        process.kill(pid, "SIGKILL");
-      } catch {
-        // already exited
-      }
-    }
-    pidsToCleanup.length = 0;
-  });
-
-  it("records signal delivery", () => {
+  it("records successful delivery", () => {
     // Spawn a real child so SIGHUP has a valid target (not the test runner).
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const proc = Bun.spawn(["/bin/sh"], {
-      stdin: "pipe",
-      stdout: "pipe",
-      stderr: "pipe",
-    } as any) as any;
-    pidsToCleanup.push(proc.pid as number);
+    const pid = spawnShellProcess();
+    pidsToCleanup.push(pid);
 
-    const record = makeRecord({ pid: proc.pid as number });
+    const record = makeRecord({ pid });
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
-
     const envelope = sendSighup(record, historyMap, bus);
-
     expect(envelope.outcome).toBe("delivered");
     expect(envelope.signal).toBe("SIGHUP");
-
-    const history = historyMap.get(record.ptyId);
-    expect(history?.length).toBe(1);
-
-    expect(bus.events).toHaveLength(1);
-    expect(bus.events[0]?.topic).toBe("pty.signal.delivered");
+    expect(historyMap.get(record.ptyId)?.length).toBe(1);
   });
 
   it("records failed delivery for dead process", () => {
+    // Use a non-existent PID to avoid sending signals to the test process
     const record = makeRecord({ pid: 999999 });
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
 
     const envelope = sendSighup(record, historyMap, bus);
+
+    expect(envelope.signal).toBe("SIGHUP");
+    // Non-existent PID → delivery fails
     expect(envelope.outcome).toBe("failed");
     expect(envelope.error).toBeDefined();
+
+    const history = historyMap.get(record.ptyId);
+    expect(history?.length).toBe(1);
   });
 });

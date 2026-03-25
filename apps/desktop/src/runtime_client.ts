@@ -1,8 +1,8 @@
-import type { ProtocolBus as LocalBus } from "../../runtime/src/protocol/bus.ts";
-import type { LocalBusEnvelope } from "../../runtime/src/protocol/types.ts";
-import type { RuntimeState } from "../../runtime/src/sessions/state_machine.ts";
-import type { TransportDiagnostics } from "./context_store.ts";
-import type { RendererEngine } from "./settings.ts";
+import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
+import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
+import type { LocalBus } from "../../runtime/src/protocol/bus";
+import type { RendererEngine } from "./settings";
+import type { TransportDiagnostics } from "./context_store";
 
 type RuntimeResponse<T extends Record<string, unknown>> = {
   ok: boolean;
@@ -31,33 +31,6 @@ export type RendererSwitchResult = {
   error: string | null;
 };
 
-function toProtocolName(value: string): string {
-  return value.replace(/[A-Z]/g, "_$&").toLowerCase();
-}
-
-function toProtocolValue(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map(entry => toProtocolValue(entry));
-  }
-  if (value === null || typeof value !== "object") {
-    return value;
-  }
-
-  return toProtocolRecord(value as Record<string, unknown>);
-}
-
-function toProtocolRecord(value: Record<string, unknown>): Record<string, unknown> {
-  const protocol: Record<string, unknown> = {};
-  for (const [key, rawValue] of Object.entries(value)) {
-    if (rawValue === undefined) {
-      continue;
-    }
-    const protocolKey = toProtocolName(key);
-    protocol[protocolKey] = toProtocolValue(rawValue);
-  }
-  return protocol;
-}
-
 function toCommandEnvelope(
   method: string,
   payload: Record<string, unknown>,
@@ -67,18 +40,18 @@ function toCommandEnvelope(
   terminalId: string | null
 ): LocalBusEnvelope {
   const correlationId = `${method}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
-  return toProtocolRecord({
+  return {
     id: correlationId,
     type: "command",
     ts: new Date().toISOString(),
+    correlation_id: correlationId,
     method,
-    correlationId,
-    workspaceId: workspaceId ?? undefined,
-    laneId: laneId ?? undefined,
-    sessionId: sessionId ?? undefined,
-    terminalId: terminalId ?? undefined,
+    workspace_id: workspaceId ?? undefined,
+    lane_id: laneId ?? undefined,
+    session_id: sessionId ?? undefined,
+    terminal_id: terminalId ?? undefined,
     payload,
-  }) as LocalBusEnvelope;
+  };
 }
 
 function toResponse<T extends Record<string, unknown>>(
@@ -131,10 +104,10 @@ export class DesktopRuntimeClient {
         "lane.create",
         {
           id: requestedLaneId,
-          laneId: requestedLaneId,
-          preferredTransport: input.preferredTransport ?? "cliproxy_harness",
-          simulateDegrade: input.simulateDegrade === true,
-          forceError: input.forceError === true,
+          lane_id: requestedLaneId,
+          preferred_transport: input.preferredTransport ?? "cliproxy_harness",
+          simulate_degrade: input.simulateDegrade === true,
+          force_error: input.forceError === true,
         },
         input.workspaceId,
         requestedLaneId,
@@ -155,9 +128,11 @@ export class DesktopRuntimeClient {
   async ensureSession(input: {
     workspaceId: string;
     laneId: string;
+    sessionId?: string;
+    restore?: boolean;
     forceError?: boolean;
   }): Promise<LifecycleResult> {
-    const requestedSessionId = `${input.laneId}:session`;
+    const requestedSessionId = input.sessionId ?? `${input.laneId}:session`;
     const response = await this.bus.request(
       toCommandEnvelope(
         "session.attach",
@@ -165,6 +140,7 @@ export class DesktopRuntimeClient {
           id: requestedSessionId,
           laneId: input.laneId,
           sessionId: requestedSessionId,
+          restore: input.restore === true,
           forceError: input.forceError === true,
         },
         input.workspaceId,
@@ -195,10 +171,10 @@ export class DesktopRuntimeClient {
         "terminal.spawn",
         {
           id: requestedTerminalId,
-          laneId: input.laneId,
-          sessionId: input.sessionId,
-          terminalId: requestedTerminalId,
-          forceError: input.forceError === true,
+          lane_id: input.laneId,
+          session_id: input.sessionId,
+          terminal_id: requestedTerminalId,
+          force_error: input.forceError === true,
         },
         input.workspaceId,
         input.laneId,
@@ -243,8 +219,8 @@ export class DesktopRuntimeClient {
       toCommandEnvelope(
         "renderer.switch",
         {
-          targetEngine: input.targetEngine,
-          forceError: input.forceError === true,
+          target_engine: input.targetEngine,
+          force_error: input.forceError === true,
         },
         input.workspaceId,
         null,

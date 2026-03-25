@@ -11,10 +11,10 @@ export interface TabState {
   tabId: string;
   tabType: TabType;
   label: string;
-  scrollPosition?: number | undefined;
-  selection?: string | undefined;
-  expandedSections?: string[] | undefined;
-  customData?: Record<string, unknown> | undefined;
+  scrollPosition?: number;
+  selection?: string;
+  expandedSections?: string[];
+  customData?: Record<string, unknown>;
 }
 
 /**
@@ -31,8 +31,8 @@ export abstract class TabSurface {
   protected tabId: string;
   protected tabType: TabType;
   protected label: string;
-  protected isActive = false;
-  protected staleContext = false;
+  protected isActive: boolean = false;
+  protected staleContext: boolean = false;
   protected lastContext: ActiveContext | null = null;
   protected errorMessage: string | null = null;
   protected unsubscribeContext: (() => void) | null = null;
@@ -54,10 +54,11 @@ export abstract class TabSurface {
         this.staleContext = true;
         const errorMsg = error instanceof Error ? error.message : String(error);
         this.errorMessage = errorMsg;
+        console.error(`[${this.tabType}] Context change failed:`, errorMsg);
 
         // Emit error event
         try {
-          const _store = getActiveContextStore();
+          const store = getActiveContextStore();
           // Note: would publish to bus if it was available
         } catch {
           // Silently ignore if store not available
@@ -172,6 +173,7 @@ export abstract class TabSurface {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       this.errorMessage = errorMsg;
+      console.error(`[${this.tabType}] Render error:`, errorMsg);
 
       // Create error display element using safe DOM methods
       const errorEl = document.createElement("div");

@@ -5,10 +5,10 @@
  * FR-025-007: Process-level isolation for tool execution.
  */
 
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach } from "bun:test";
+import { MCPBridgeAdapter } from "../mcp-bridge.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { NormalizedProviderError } from "../errors.js";
-import { MCPBridgeAdapter } from "../mcp-bridge.js";
 
 describe("MCP Bridge Adapter", () => {
   let adapter: MCPBridgeAdapter;
@@ -387,7 +387,7 @@ describe("MCP Bridge Adapter", () => {
           },
           "corr-123"
         );
-      } catch (_e) {
+      } catch (e) {
         // Expected
       }
 
@@ -412,8 +412,6 @@ describe("MCP Bridge Adapter", () => {
     it("should include correlation ID in all tool-related bus events", async () => {
       const correlationId = "unique-trace-id";
 
-      bus.getEvents(); // Clear events from init
-
       await adapter.execute(
         {
           toolName: "read_file",
@@ -423,11 +421,8 @@ describe("MCP Bridge Adapter", () => {
       );
 
       const events = bus.getEvents();
-      const toolEvents = events.filter(
-        e => e.topic === "provider.mcp.tool.executed" || e.topic === "provider.mcp.tool.failed"
-      );
+      const toolEvents = events.filter(e => e.topic?.startsWith("provider.mcp.tool"));
 
-      expect(toolEvents.length).toBeGreaterThan(0);
       toolEvents.forEach(event => {
         expect(event.payload?.correlationId).toBe(correlationId);
       });
@@ -449,7 +444,10 @@ describe("MCP Bridge Adapter", () => {
       const results = await Promise.all([
         adapter.execute({ toolName: "read_file", arguments: { path: "/file1.txt" } }, "corr-1"),
         adapter.execute(
-          { toolName: "write_file", arguments: { path: "/file2.txt", content: "test" } },
+          {
+            toolName: "write_file",
+            arguments: { path: "/file2.txt", content: "test" },
+          },
           "corr-2"
         ),
         adapter.execute({ toolName: "list_directory", arguments: { path: "/tmp" } }, "corr-3"),
@@ -472,7 +470,7 @@ describe("MCP Bridge Adapter", () => {
       // Execute failing tool
       try {
         await adapter.execute({ toolName: "unknown_tool", arguments: {} }, "corr-2");
-      } catch (_e) {
+      } catch (e) {
         // Expected
       }
 

@@ -1,7 +1,7 @@
+import { type Component, onCleanup, onMount } from "solid-js";
+import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "@xterm/addon-web-links";
-import { Terminal } from "@xterm/xterm";
-import { type Component, onCleanup, onMount } from "solid-js";
 
 export type TerminalPanelProps = {
   terminalId: string;
@@ -16,9 +16,7 @@ export const TerminalPanel: Component<TerminalPanelProps> = props => {
   let resizeObserver: ResizeObserver | undefined;
 
   onMount(() => {
-    if (!ref) {
-      return;
-    }
+    if (!ref) return;
 
     terminal = new Terminal({
       theme: {
@@ -65,9 +63,7 @@ export const TerminalPanel: Component<TerminalPanelProps> = props => {
 
   return (
     <div
-      ref={el => {
-        ref = el;
-      }}
+      ref={el => (ref = el)}
       style={{
         display: props.isActive ? "block" : "none",
         width: "100%",

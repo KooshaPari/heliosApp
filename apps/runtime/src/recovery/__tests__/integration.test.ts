@@ -1,26 +1,24 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { RestorationPipeline, type RestorationResult } from "../restoration.js";
+import { RecoveryStateMachine, RecoveryStage } from "../state-machine.js";
+import { CheckpointWriter, type Checkpoint, type CheckpointSession } from "../checkpoint.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
-import type { Checkpoint, CheckpointSession } from "../checkpoint.js";
-import { RestorationPipeline } from "../restoration.js";
-import { RecoveryStage, RecoveryStateMachine } from "../state-machine.js";
+import { promises as fs } from "fs";
+import path from "path";
+import os from "os";
 
 describe("Integration Tests - Crash to Live Recovery", () => {
   let tempDir: string;
   let bus: InMemoryLocalBus;
   let pipeline: RestorationPipeline;
   let stateMachine: RecoveryStateMachine;
-  const asEnvironmentVariables = (entries: [string, string][]) =>
-    Object.fromEntries(entries) as Record<string, string>;
 
   const createMockSession = (index: number): CheckpointSession => ({
     sessionId: `sess-${index}`,
     terminalId: `term-${index}`,
     laneId: `lane-${index}`,
     workingDirectory: tempDir,
-    environmentVariables: asEnvironmentVariables([["TEST", "true"]]),
+    environmentVariables: { TEST: "true" },
     scrollbackSnapshot: `output ${index}`,
     zelijjSessionName: `session-${index}`,
     shellCommand: "bash",
@@ -43,9 +41,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
   });
 
   afterEach(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {
-      // Best-effort cleanup in test teardown.
-    });
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
   });
 
   describe("Full recovery (SC-027-001)", () => {
@@ -121,7 +117,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
       await stateMachine.transition(RecoveryStage.Restoring);
 
       // Get current stage
-      const _checkpoint = createMockCheckpoint(5);
+      const checkpoint = createMockCheckpoint(5);
       const beforeCrash = stateMachine.getCurrentStage();
 
       // Simulate second recovery after crash - should resume from RESTORING
@@ -148,9 +144,9 @@ describe("Integration Tests - Crash to Live Recovery", () => {
 
       // Both should have same number of restored sessions
       expect(result2.restored.length).toBe(result1.restored.length);
-      for (const s of result2.restored) {
+      result2.restored.forEach(s => {
         expect(restoredIds.has(s.sessionId)).toBe(true);
-      }
+      });
     });
   });
 

@@ -1,4 +1,4 @@
-import type { AuditEvent } from "./event.ts";
+import type { AuditEvent } from "./event";
 
 /**
  * Filter options for ring buffer queries.
@@ -31,18 +31,18 @@ export interface RingBufferMetrics {
  */
 export class AuditRingBuffer {
   private buffer: (AuditEvent | undefined)[];
-  private head = 0;
-  private tail = 0;
-  private size = 0;
-  private totalEventsProcessed = 0;
-  private totalEventsEvicted = 0;
+  private head: number = 0;
+  private tail: number = 0;
+  private size: number = 0;
+  private totalEventsProcessed: number = 0;
+  private totalEventsEvicted: number = 0;
 
   /**
    * Create a new ring buffer with specified capacity.
    *
    * @param capacity - Maximum number of events to hold (default 10,000)
    */
-  constructor(private capacity = 10_000) {
+  constructor(private capacity: number = 10_000) {
     this.buffer = new Array(capacity);
   }
 
@@ -59,17 +59,18 @@ export class AuditRingBuffer {
     let evicted: AuditEvent | undefined;
 
     if (this.size === this.capacity) {
-      // Buffer is full; evict the oldest event at head
+      // Buffer is full; evict the oldest event at head and advance head
       evicted = this.buffer[this.head];
       this.totalEventsEvicted++;
+      this.buffer[this.tail] = event;
+      this.tail = (this.tail + 1) % this.capacity;
       this.head = (this.head + 1) % this.capacity;
     } else {
+      // Buffer not yet full; append and grow
+      this.buffer[this.tail] = event;
+      this.tail = (this.tail + 1) % this.capacity;
       this.size++;
     }
-
-    // Insert at tail
-    this.buffer[this.tail] = event;
-    this.tail = (this.tail + 1) % this.capacity;
 
     return evicted;
   }
@@ -113,9 +114,7 @@ export class AuditRingBuffer {
       const index = (this.head + i) % this.capacity;
       const event = this.buffer[index];
 
-      if (!event) {
-        continue;
-      }
+      if (!event) continue;
 
       if (!this.matchesFilter(event, filter)) {
         continue;
@@ -134,7 +133,7 @@ export class AuditRingBuffer {
    * @returns Array of matching events
    */
   getByCorrelationId(correlationId: string): AuditEvent[] {
-    return this.query({ correlationId });
+    return this.query({ correlationId: correlationId as any });
   }
 
   /**
@@ -168,50 +167,42 @@ export class AuditRingBuffer {
    * @returns true if event matches
    */
   private matchesFilter(event: AuditEvent, filter: AuditFilter): boolean {
-    return (
-      this.matchesWorkspace(event, filter) &&
-      this.matchesLane(event, filter) &&
-      this.matchesSession(event, filter) &&
-      this.matchesActor(event, filter) &&
-      this.matchesEventType(event, filter) &&
-      this.matchesCorrelationId(event, filter) &&
-      this.matchesTimeWindow(event, filter)
-    );
-  }
-
-  private matchesWorkspace(event: AuditEvent, filter: AuditFilter): boolean {
-    return !filter.workspaceId || event.workspaceId === filter.workspaceId;
-  }
-
-  private matchesLane(event: AuditEvent, filter: AuditFilter): boolean {
-    return !filter.laneId || event.laneId === filter.laneId;
-  }
-
-  private matchesSession(event: AuditEvent, filter: AuditFilter): boolean {
-    return !filter.sessionId || event.sessionId === filter.sessionId;
-  }
-
-  private matchesActor(event: AuditEvent, filter: AuditFilter): boolean {
-    return !filter.actor || event.actor === filter.actor;
-  }
-
-  private matchesEventType(event: AuditEvent, filter: AuditFilter): boolean {
-    return !filter.eventType || event.eventType === filter.eventType;
-  }
-
-  private matchesCorrelationId(event: AuditEvent, filter: AuditFilter): boolean {
-    return !filter.correlationId || event.correlationId === filter.correlationId;
-  }
-
-  private matchesTimeWindow(event: AuditEvent, filter: AuditFilter): boolean {
-    const eventTime = new Date(event.timestamp);
-
-    if (filter.startTime && eventTime < filter.startTime) {
+    if (filter.workspaceId && event.workspaceId !== filter.workspaceId) {
       return false;
     }
 
-    if (filter.endTime && eventTime > filter.endTime) {
+    if (filter.laneId && event.laneId !== filter.laneId) {
       return false;
+    }
+
+    if (filter.sessionId && event.sessionId !== filter.sessionId) {
+      return false;
+    }
+
+    if (filter.actor && event.actor !== filter.actor) {
+      return false;
+    }
+
+    if (filter.eventType && event.eventType !== filter.eventType) {
+      return false;
+    }
+
+    if (filter.startTime) {
+      const eventTime = new Date(event.timestamp);
+      if (eventTime < filter.startTime) {
+        return false;
+      }
+    }
+
+    if (filter.correlationId && event.correlationId !== filter.correlationId) {
+      return false;
+    }
+
+    if (filter.endTime) {
+      const eventTime = new Date(event.timestamp);
+      if (eventTime > filter.endTime) {
+        return false;
+      }
     }
 
     return true;

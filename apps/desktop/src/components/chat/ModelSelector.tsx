@@ -1,4 +1,4 @@
-import { type Component, For, Show, createSignal } from "solid-js";
+import { type Component, createSignal, For, Show } from "solid-js";
 
 type ModelGroup = {
   provider: string;
@@ -17,15 +17,31 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
     {
       provider: "Cloud",
       models: [
-        { id: "claude-sonnet-4-20250514", name: "Claude Sonnet 4", available: true },
-        { id: "claude-opus-4-20250514", name: "Claude Opus 4", available: true },
-        { id: "claude-haiku-4-20250514", name: "Claude Haiku 4", available: true },
+        {
+          id: "claude-sonnet-4-20250514",
+          name: "Claude Sonnet 4",
+          available: true,
+        },
+        {
+          id: "claude-opus-4-20250514",
+          name: "Claude Opus 4",
+          available: true,
+        },
+        {
+          id: "claude-haiku-4-20250514",
+          name: "Claude Haiku 4",
+          available: true,
+        },
       ],
     },
     {
       provider: "Local (MLX)",
       models: [
-        { id: "mlx-community/Llama-3.2-3B-Instruct", name: "Llama 3.2 3B", available: false },
+        {
+          id: "mlx-community/Llama-3.2-3B-Instruct",
+          name: "Llama 3.2 3B",
+          available: false,
+        },
       ],
     },
     {
@@ -37,9 +53,7 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
   const activeModelName = () => {
     for (const group of modelGroups) {
       const found = group.models.find(m => m.id === props.activeModel);
-      if (found) {
-        return found.name;
-      }
+      if (found) return found.name;
     }
     return props.activeModel.split("/").pop() ?? props.activeModel;
   };
@@ -47,7 +61,6 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
   return (
     <div style={{ position: "relative" }}>
       <button
-        type="button"
         onClick={() => setIsOpen(!isOpen())}
         style={{
           background: "none",
@@ -102,14 +115,19 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
                           setIsOpen(false);
                         }
                       }}
+                      onKeyDown={e => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          if (model.available) {
+                            props.onSelect(model.id);
+                            setIsOpen(false);
+                          }
+                        }
+                      }}
                       style={{
                         padding: "6px 12px",
                         cursor: model.available ? "pointer" : "default",
                         color: model.available ? "#cdd6f4" : "#585b70",
-                        border: "none",
                         "font-size": "13px",
-                        width: "100%",
-                        "text-align": "left",
                         "background-color":
                           model.id === props.activeModel ? "#45475a" : "transparent",
                       }}
@@ -117,7 +135,11 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
                       {model.name}
                       <Show when={!model.available}>
                         <span
-                          style={{ "font-size": "11px", "margin-left": "8px", color: "#585b70" }}
+                          style={{
+                            "font-size": "11px",
+                            "margin-left": "8px",
+                            color: "#585b70",
+                          }}
                         >
                           (not configured)
                         </span>

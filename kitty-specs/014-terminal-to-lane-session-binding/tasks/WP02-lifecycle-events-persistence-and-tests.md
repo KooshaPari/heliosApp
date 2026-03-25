@@ -43,7 +43,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/014-terminal-to-lane-session-binding/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/014-terminal-to-lane-session-binding/spec.md`
 - Terminal registry: `apps/runtime/src/registry/terminal_registry.ts` (WP01)
@@ -193,4 +193,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:31:57Z – claude-haiku – shell_pid=64856 – lane=doing – Assigned agent via workflow command
-- 2026-03-01T13:41:06Z – claude-haiku – shell_pid=64856 – lane=done – Merged
+- 2026-03-01T13:34:18Z – claude-haiku – shell_pid=64856 – lane=done – Implemented: Event emission, persistence adapter, lifecycle subscriptions, and comprehensive integration tests

@@ -1,4 +1,4 @@
-import { type Component, For, Show } from "solid-js";
+import { type Component, For, Show, createSignal } from "solid-js";
 
 type DiffLine = {
   type: "add" | "remove" | "context";
@@ -15,17 +15,19 @@ type DiffViewProps = {
 
 export const DiffView: Component<DiffViewProps> = props => {
   const lineColor = (type: string) => {
-    if (type === "add") {
-      return { bg: "rgba(166,227,161,0.1)", color: "#a6e3a1" };
-    }
-    if (type === "remove") {
-      return { bg: "rgba(243,139,168,0.1)", color: "#f38ba8" };
-    }
+    if (type === "add") return { bg: "rgba(166,227,161,0.1)", color: "#a6e3a1" };
+    if (type === "remove") return { bg: "rgba(243,139,168,0.1)", color: "#f38ba8" };
     return { bg: "transparent", color: "#a6adc8" };
   };
 
   return (
-    <div style={{ border: "1px solid #313244", "border-radius": "8px", overflow: "hidden" }}>
+    <div
+      style={{
+        border: "1px solid #313244",
+        "border-radius": "8px",
+        overflow: "hidden",
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -40,7 +42,6 @@ export const DiffView: Component<DiffViewProps> = props => {
         <div style={{ display: "flex", gap: "8px" }}>
           <Show when={props.onAccept}>
             <button
-              type="button"
               onClick={props.onAccept}
               style={{
                 background: "#a6e3a1",
@@ -57,7 +58,6 @@ export const DiffView: Component<DiffViewProps> = props => {
           </Show>
           <Show when={props.onReject}>
             <button
-              type="button"
               onClick={props.onReject}
               style={{
                 background: "#f38ba8",
@@ -74,7 +74,13 @@ export const DiffView: Component<DiffViewProps> = props => {
           </Show>
         </div>
       </div>
-      <div style={{ "font-family": "monospace", "font-size": "12px", "overflow-x": "auto" }}>
+      <div
+        style={{
+          "font-family": "monospace",
+          "font-size": "12px",
+          "overflow-x": "auto",
+        }}
+      >
         <For each={props.lines}>
           {line => {
             const style = lineColor(line.type);
@@ -97,7 +103,13 @@ export const DiffView: Component<DiffViewProps> = props => {
                 >
                   {line.lineNumber}
                 </span>
-                <span style={{ padding: "0 8px", color: style.color, "white-space": "pre" }}>
+                <span
+                  style={{
+                    padding: "0 8px",
+                    color: style.color,
+                    "white-space": "pre",
+                  }}
+                >
                   {line.type === "add" ? "+" : line.type === "remove" ? "-" : " "}
                   {line.content}
                 </span>

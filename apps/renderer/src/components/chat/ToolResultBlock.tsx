@@ -1,6 +1,6 @@
 import { type Component, createSignal } from "solid-js";
 import { Show } from "solid-js";
-import type { Message } from "../../../../runtime/src/types/conversation.ts";
+import type { Message } from "../../../../runtime/src/types/conversation";
 
 type ToolResultBlockProps = { message: Message };
 
@@ -8,17 +8,6 @@ export const ToolResultBlock: Component<ToolResultBlockProps> = props => {
   const [expanded, setExpanded] = createSignal(false);
   const isError = () => props.message.metadata?.status === "error";
   const output = () => props.message.metadata?.toolOutput ?? props.message.content;
-
-  const toggleExpanded = () => {
-    setExpanded(!expanded());
-  };
-
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
-      event.preventDefault();
-      toggleExpanded();
-    }
-  };
 
   return (
     <div
@@ -29,11 +18,8 @@ export const ToolResultBlock: Component<ToolResultBlockProps> = props => {
         overflow: "hidden",
       }}
     >
-      <button
-        type="button"
-        aria-expanded={expanded()}
-        onKeyDown={handleKeyDown}
-        onClick={toggleExpanded}
+      <div
+        onClick={() => setExpanded(!expanded())}
         style={{
           display: "flex",
           "align-items": "center",
@@ -48,7 +34,7 @@ export const ToolResultBlock: Component<ToolResultBlockProps> = props => {
         <span>{isError() ? "\u274C" : "\u2705"}</span>
         <span style={{ flex: "1" }}>{isError() ? "Error" : "Result"}</span>
         <span>{expanded() ? "\u25B2" : "\u25BC"}</span>
-      </button>
+      </div>
       <Show when={expanded()}>
         <div
           style={{
@@ -62,7 +48,7 @@ export const ToolResultBlock: Component<ToolResultBlockProps> = props => {
             "overflow-y": "auto",
           }}
         >
-          {output() ?? ""}
+          <>{output() ?? ""}</>
         </div>
       </Show>
     </div>

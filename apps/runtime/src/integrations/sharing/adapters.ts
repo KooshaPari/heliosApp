@@ -7,13 +7,6 @@
  */
 
 /**
- * Minimal process handle abstraction for mocked share adapters.
- */
-export type ShareProcessHandle = {
-  pid: number;
-};
-
-/**
  * Share backend adapter interface.
  */
 export interface ShareBackendAdapter {
@@ -21,8 +14,8 @@ export interface ShareBackendAdapter {
   startShare(
     terminalId: string,
     zellijSessionName: string
-  ): Promise<{ link: string; process: ShareProcessHandle }>;
-  stopShare(process: ShareProcessHandle): Promise<void>;
+  ): Promise<{ link: string; process: any }>;
+  stopShare(process: any): Promise<void>;
 }
 
 /**
@@ -49,9 +42,9 @@ export class UptermAdapter implements ShareBackendAdapter {
   /**
    * Check if upterm binary is available.
    */
-  checkAvailability(): Promise<boolean> {
+  async checkAvailability(): Promise<boolean> {
     // Mock implementation: always return true
-    return Promise.resolve(true);
+    return true;
   }
 
   /**
@@ -64,24 +57,24 @@ export class UptermAdapter implements ShareBackendAdapter {
   async startShare(
     terminalId: string,
     zellijSessionName: string
-  ): Promise<{ link: string; process: ShareProcessHandle }> {
+  ): Promise<{ link: string; process: any }> {
     try {
       // Validate inputs
-      if (!(terminalId && zellijSessionName)) {
+      if (!terminalId || !zellijSessionName) {
         throw new Error("Missing terminalId or zellijSessionName");
       }
 
       // Generate upterm command
       const attachCommand = `zellij attach ${zellijSessionName}`;
-      const _uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
+      const uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
 
       // Mock implementation: return simulated result
       const link = `https://upterm.io/${terminalId}-${Date.now()}`;
 
-      return await Promise.resolve({
+      return {
         link,
         process: { pid: Math.floor(Math.random() * 100000) + 1000 },
-      });
+      };
     } catch (error) {
       if (String(error).includes("not found")) {
         throw new Error(
@@ -97,13 +90,12 @@ export class UptermAdapter implements ShareBackendAdapter {
    *
    * @param process Process handle
    */
-  stopShare(process: ShareProcessHandle): Promise<void> {
+  async stopShare(process: any): Promise<void> {
     // Mock implementation: just mark as stopped
     if (!process) {
       throw new Error("Invalid process");
     }
     // In real implementation, would send SIGTERM/SIGKILL
-    return Promise.resolve();
   }
 }
 
@@ -130,9 +122,9 @@ export class TmateAdapter implements ShareBackendAdapter {
   /**
    * Check if tmate binary is available.
    */
-  checkAvailability(): Promise<boolean> {
+  async checkAvailability(): Promise<boolean> {
     // Mock implementation: always return true
-    return Promise.resolve(true);
+    return true;
   }
 
   /**
@@ -145,25 +137,25 @@ export class TmateAdapter implements ShareBackendAdapter {
   async startShare(
     terminalId: string,
     zellijSessionName: string
-  ): Promise<{ link: string; process: ShareProcessHandle }> {
+  ): Promise<{ link: string; process: any }> {
     try {
       // Validate inputs
-      if (!(terminalId && zellijSessionName)) {
+      if (!terminalId || !zellijSessionName) {
         throw new Error("Missing terminalId or zellijSessionName");
       }
 
       // Generate tmate command
       const attachCommand = `zellij attach ${zellijSessionName}`;
-      const _tmateCommand = `tmate -F -c "${attachCommand}"`;
+      const tmateCommand = `tmate -F -c "${attachCommand}"`;
 
       // Mock implementation: return simulated result
       // Tmate typically outputs link to stderr
       const link = `https://tmate.io/${terminalId}-${Date.now()}`;
 
-      return await Promise.resolve({
+      return {
         link,
         process: { pid: Math.floor(Math.random() * 100000) + 1000 },
-      });
+      };
     } catch (error) {
       if (String(error).includes("not found")) {
         throw new Error(
@@ -179,13 +171,12 @@ export class TmateAdapter implements ShareBackendAdapter {
    *
    * @param process Process handle
    */
-  stopShare(process: ShareProcessHandle): Promise<void> {
+  async stopShare(process: any): Promise<void> {
     // Mock implementation: just mark as stopped
     if (!process) {
       throw new Error("Invalid process");
     }
     // In real implementation, would send SIGTERM/SIGKILL
-    return Promise.resolve();
   }
 }
 
@@ -196,10 +187,7 @@ export class TmateAdapter implements ShareBackendAdapter {
  * @param config Backend-specific configuration
  * @returns Adapter instance
  */
-export function getBackendAdapter(
-  backend: string,
-  config?: UptermConfig | TmateConfig
-): ShareBackendAdapter {
+export function getBackendAdapter(backend: string, config?: any): ShareBackendAdapter {
   switch (backend) {
     case "upterm":
       return new UptermAdapter(config as UptermConfig | undefined);

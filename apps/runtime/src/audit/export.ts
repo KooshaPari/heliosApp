@@ -1,5 +1,5 @@
-import type { AuditEvent } from "./event.ts";
-import type { SessionSnapshot } from "./snapshot.ts";
+import type { AuditEvent } from "./event";
+import type { SessionSnapshot } from "./snapshot";
 
 /**
  * Redaction rule for sensitive data masking.
@@ -26,7 +26,7 @@ export interface ExportMetadata {
 export interface ExportBundle {
   metadata: ExportMetadata;
   events: AuditEvent[];
-  snapshots?: SessionSnapshot[] | undefined;
+  snapshots?: SessionSnapshot[];
 }
 
 /**
@@ -95,7 +95,7 @@ export class AuditExporter {
    * @returns Export bundle
    */
   exportSession(
-    _sessionId: string,
+    sessionId: string,
     events: AuditEvent[],
     snapshots?: SessionSnapshot[]
   ): ExportBundle {

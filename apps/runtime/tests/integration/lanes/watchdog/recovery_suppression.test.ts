@@ -1,10 +1,10 @@
 // Integration tests for recovery-aware suppression
 
-import { beforeEach, describe, expect, it } from "bun:test";
-import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
 import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
 
 describe("Recovery Suppression", () => {
   let engine: RemediationEngine;
@@ -22,7 +22,7 @@ describe("Recovery Suppression", () => {
     laneRegistry.register({
       laneId: "lane-abc123",
       workspaceId: "ws1",
-      state: "recovering" as any,
+      state: "recovering",
       worktreePath: "/tmp/lane-abc123",
       parTaskPid: null,
       attachedAgents: [],
@@ -55,7 +55,7 @@ describe("Recovery Suppression", () => {
     laneRegistry.register({
       laneId,
       workspaceId: "ws2",
-      state: "recovering" as any,
+      state: "recovering",
       worktreePath: "/tmp/lane-xyz",
       parTaskPid: null,
       attachedAgents: [],
@@ -132,7 +132,7 @@ describe("Recovery Suppression", () => {
     laneRegistry.register({
       laneId: "lane-active",
       workspaceId: "ws1",
-      state: "active" as any,
+      state: "active",
       worktreePath: "/tmp/lane-active",
       parTaskPid: null,
       attachedAgents: [],
@@ -144,7 +144,7 @@ describe("Recovery Suppression", () => {
     laneRegistry.register({
       laneId: "lane-recovering",
       workspaceId: "ws2",
-      state: "recovering" as any,
+      state: "recovering",
       worktreePath: "/tmp/lane-recovering",
       parTaskPid: null,
       attachedAgents: [],

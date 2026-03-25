@@ -1,5 +1,5 @@
 /**
- * A2A Federation Router, Health Monitoring, and Failover
+ * A2A Federation Router and Failover
  *
  * Implements the A2A protocol client adapter for external agent delegation
  * with endpoint registration, failover routing, and failure isolation.
@@ -8,14 +8,32 @@
  * FR-025-010: Failover routing for degraded providers.
  */
 
+<<<<<<< HEAD
 import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
 import type { ProviderAdapter, ProviderHealthStatus } from "./adapter.js";
+=======
+import type { LocalBus } from "../protocol/bus.js";
+import type {
+  ProviderAdapter,
+  ProviderHealthStatus,
+  A2AConfig,
+  A2AExecuteInput,
+  A2AExecuteOutput,
+} from "./adapter.js";
+>>>>>>> origin/main
 import { NormalizedProviderError, normalizeError } from "./errors.js";
+
+export { HealthMonitoringCoordinator } from "./health-monitor.js";
 
 /**
  * A2A endpoint configuration.
  */
+<<<<<<< HEAD
 export interface A2aEndpoint {
+=======
+// biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
+export interface A2AEndpoint {
+>>>>>>> origin/main
   id: string;
   url: string;
   priority: number;
@@ -26,7 +44,12 @@ export interface A2aEndpoint {
 /**
  * A2A delegation context.
  */
+<<<<<<< HEAD
 export interface A2aDelegation {
+=======
+// biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
+export interface A2ADelegation {
+>>>>>>> origin/main
   taskDescription: string;
   requiredCapabilities: string[];
   context: Record<string, unknown>;
@@ -35,7 +58,12 @@ export interface A2aDelegation {
 /**
  * A2A delegation result.
  */
+<<<<<<< HEAD
 export interface A2aResult {
+=======
+// biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
+export interface A2AResult {
+>>>>>>> origin/main
   endpointId: string;
   result: unknown;
   correlationId: string;
@@ -45,6 +73,7 @@ export interface A2aResult {
 /**
  * A2A Router Configuration.
  */
+<<<<<<< HEAD
 export interface A2aRouterConfig {
   agentId?: string;
   endpoint?: string;
@@ -52,6 +81,16 @@ export interface A2aRouterConfig {
   timeout?: number;
   endpoints?: Array<{ id: string; url: string; priority: number; capabilities: string[] }>;
   failoverEnabled?: boolean;
+=======
+// biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
+export interface A2ARouterConfig extends A2AConfig {
+  endpoints?: Array<{
+    id: string;
+    url: string;
+    priority: number;
+    capabilities: string[];
+  }>;
+>>>>>>> origin/main
 }
 
 /**
@@ -65,10 +104,20 @@ export interface A2aRouterConfig {
  *
  * FR-025-005: A2A federation with external agent delegation.
  */
+<<<<<<< HEAD
 export class A2aRouterAdapter
   implements ProviderAdapter<A2aRouterConfig, A2aDelegation & { correlationId?: string }, A2aResult>
 {
   private config: A2aRouterConfig | null = null;
+=======
+// biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
+export class A2ARouterAdapter implements ProviderAdapter<
+  A2ARouterConfig,
+  A2ADelegation & { correlationId?: string },
+  A2AResult
+> {
+  private config: A2ARouterConfig | null = null;
+>>>>>>> origin/main
   private bus: LocalBus | null = null;
   private endpoints: A2aEndpoint[] = [];
   private healthStatus: ProviderHealthStatus = {
@@ -93,7 +142,7 @@ export class A2aRouterAdapter
   async init(config: A2aRouterConfig): Promise<void> {
     try {
       // Validate config
-      if (!(config.endpoints && Array.isArray(config.endpoints)) || config.endpoints.length === 0) {
+      if (!config.endpoints || !Array.isArray(config.endpoints) || config.endpoints.length === 0) {
         throw new Error("Missing or invalid endpoints");
       }
 
@@ -411,7 +460,12 @@ export class A2aRouterAdapter
    * @param endpoint Endpoint to probe
    * @throws Error if probe fails
    */
+<<<<<<< HEAD
   private probeEndpoint(endpoint: A2aEndpoint): void {
+=======
+  private async probeEndpoint(endpoint: A2AEndpoint): Promise<void> {
+    await Promise.resolve();
+>>>>>>> origin/main
     // Mock implementation: always succeeds for localhost/127.0.0.1
     if (endpoint.url.includes("localhost") || endpoint.url.includes("127.0.0.1")) {
       return;
@@ -430,12 +484,22 @@ export class A2aRouterAdapter
    * @param signal Abort signal
    * @returns Delegation result
    */
+<<<<<<< HEAD
   private sendDelegation(
     _endpoint: A2aEndpoint,
     delegation: A2aDelegation & { correlationId?: string },
     _correlationId: string,
     signal: AbortSignal
   ): unknown {
+=======
+  private async sendDelegation(
+    endpoint: A2AEndpoint,
+    delegation: A2ADelegation & { correlationId?: string },
+    correlationId: string,
+    signal: AbortSignal
+  ): Promise<unknown> {
+    await Promise.resolve();
+>>>>>>> origin/main
     // Check for abort
     if (signal.aborted) {
       throw new Error("Delegation cancelled");
@@ -469,6 +533,7 @@ export class A2aRouterAdapter
         payload,
       });
     } catch (_error) {
+<<<<<<< HEAD
       // Best-effort bus publish; monitor path should not fail caller flow.
     }
   }
@@ -610,6 +675,9 @@ export class HealthMonitoringCoordinator {
       });
     } catch (_error) {
       // Best-effort bus publish; monitor path should not fail caller flow.
+=======
+      // Best-effort event publishing should not fail delegation flow.
+>>>>>>> origin/main
     }
   }
 }

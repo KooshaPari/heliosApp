@@ -1,5 +1,5 @@
-import { AUDIT_EVENT_TYPES, createAuditEvent } from "./event";
 import type { AuditSink } from "./sink";
+import { createAuditEvent, AUDIT_EVENT_TYPES } from "./event";
 
 /**
  * Bus event topic to audit event type mapping.
@@ -53,10 +53,6 @@ export interface BusEvent {
  * Subscribes to local bus events and automatically captures them as audit events.
  * Enables forensic analysis without requiring manual instrumentation in every producer.
  */
-interface BusLike {
-  subscribe(topic: string, handler: (event: unknown) => Promise<void> | void): () => void;
-}
-
 export class BusAuditSubscriber {
   private unsubscribe: (() => void) | null = null;
 
@@ -67,19 +63,14 @@ export class BusAuditSubscriber {
    * @param bus - The local event bus instance
    * @param sink - The audit sink for persisting events
    */
-  subscribe(bus: BusLike, sink: AuditSink): void {
+  subscribe(bus: any, sink: AuditSink): void {
     // Subscribe to all topics
-    this.unsubscribe = bus.subscribe("*", async (event: unknown) => {
-      if (!event || typeof event !== "object") {
-        return;
-      }
-
-      const busEvent = event as BusEvent;
+    this.unsubscribe = bus.subscribe("*", async (event: BusEvent) => {
       try {
-        await this.handleBusEvent(busEvent, sink);
-      } catch (error) {
-        // Best-effort auditing: ignore listener failures to avoid impacting bus flow.
-        this.logBusEventError(error);
+        await this.handleBusEvent(event, sink);
+      } catch (err) {
+        // Log error but do not throw; do not block bus dispatch
+        console.error("[BusAuditSubscriber] Error handling bus event:", err);
       }
     });
   }
@@ -105,6 +96,8 @@ export class BusAuditSubscriber {
     const auditEventType = TOPIC_TO_AUDIT_TYPE[event.topic];
 
     if (!auditEventType) {
+      // Unknown topic: log warning but continue
+      console.warn(`[BusAuditSubscriber] Unknown bus topic: ${event.topic}`);
       // Optionally create a generic audit event for unknown topics
       // For now, skip unknown topics to avoid noise
       return;
@@ -168,9 +161,5 @@ export class BusAuditSubscriber {
       default:
         return lastPart || "unknown";
     }
-  }
-
-  private logBusEventError(_error: unknown): void {
-    // Intentionally ignored; failures are best-effort by design.
   }
 }

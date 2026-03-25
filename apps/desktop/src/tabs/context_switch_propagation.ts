@@ -1,11 +1,11 @@
-import type { ActiveContext } from "./context_switch.ts";
-import type { TabSurface } from "./tab_surface.ts";
+import type { TabSurface } from "./tab_surface";
+import type { ActiveContext } from "./context_switch";
 
 export interface PropagationResult {
   successful: string[];
   failed: string[];
-  timedOut: string[];
-  durationMs: number;
+  timed_out: string[];
+  duration_ms: number;
 }
 
 /**
@@ -22,7 +22,7 @@ export class ContextPropagator {
   private registeredTabs: Map<string, TabSurface> = new Map();
   private currentPropagation: Promise<PropagationResult> | null = null;
   private propagationAbortController: AbortController | null = null;
-  private readonly propagationTimeoutMs = 500; // ms
+  private readonly PROPAGATION_TIMEOUT = 500; // ms
 
   /**
    * Register a tab for context propagation.
@@ -54,8 +54,8 @@ export class ContextPropagator {
     const result: PropagationResult = {
       successful: [],
       failed: [],
-      timedOut: [],
-      durationMs: 0,
+      timed_out: [],
+      duration_ms: 0,
     };
 
     const propagationPromises: Promise<void>[] = [];
@@ -78,9 +78,10 @@ export class ContextPropagator {
           }
 
           if (error.message === "TIMEOUT") {
-            result.timedOut.push(tabId);
+            result.timed_out.push(tabId);
           } else {
             result.failed.push(tabId);
+            console.error(`Failed to propagate context to tab ${tabId}:`, error);
           }
         });
 
@@ -90,7 +91,7 @@ export class ContextPropagator {
     // Wait for all propagations to complete
     await Promise.all(propagationPromises);
 
-    result.durationMs = Date.now() - startTime;
+    result.duration_ms = Date.now() - startTime;
 
     // If propagation was cancelled, throw error
     if (this.propagationAbortController.signal.aborted) {
@@ -113,7 +114,7 @@ export class ContextPropagator {
       new Promise<boolean>((_, reject) => {
         const timeoutId = setTimeout(() => {
           reject(new Error("TIMEOUT"));
-        }, this.propagationTimeoutMs);
+        }, this.PROPAGATION_TIMEOUT);
 
         signal.addEventListener("abort", () => {
           clearTimeout(timeoutId);

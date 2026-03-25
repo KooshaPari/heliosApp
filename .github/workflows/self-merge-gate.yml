@@ -4,7 +4,6 @@ on:
   pull_request:
     types: [synchronize, opened, reopened]
     branches: [main]
-  status: {}
 
 jobs:
   check-merge-readiness:
@@ -12,9 +11,9 @@ jobs:
     name: Check Merge Readiness
     permissions:
       contents: read
-      statuses: read
       checks: read
-      pull-requests: read
+      statuses: read
+      pull-requests: write
 
     steps:
       - name: Check PR merge conditions
@@ -22,78 +21,39 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const { owner, repo } = context.repo;
-            const actor = context.actor;
-            const normalize = value => String(value || "").toLowerCase();
+            const { owner, repo, number } = context.issue;
 
-            const resolvePullRequestNumberFromPayload = async (commitSha) => {
-              if (!commitSha) {
-                return null;
-              }
-              const prs = await github.paginate(
-                github.rest.repos.listPullRequestsAssociatedWithCommit,
-                {
-                  owner,
-                  repo,
-                  commit_sha: commitSha,
-                }
-              );
-              const openPr = prs.find((pr) => pr.state === "open" && pr.base?.ref === "main");
-              return openPr ? openPr.number : null;
-            };
-
-            const pullRequestNumber = context.payload.pull_request
-              ? context.payload.pull_request.number
-              : context.payload?.check_suite?.pull_requests?.[0]?.number
-                || context.payload?.check_run?.pull_requests?.[0]?.number
-                || await resolvePullRequestNumberFromPayload(
-                context.payload?.pull_request?.head?.sha ||
-                context.payload?.sha ||
-                context.sha
-              );
-
-            if (!pullRequestNumber) {
-              core.info("No associated pull request found for this event. Skipping merge gate check.");
-              core.setOutput('can-self-merge', false);
-              core.setOutput('all-checks-passed', false);
-              core.setOutput('has-approval', false);
-              core.setOutput('is-author', false);
-              core.setOutput('pr-number', '');
-              core.setOutput('missing-requirements', ['no-associated-pr']);
-              core.setOutput('missing-checks', ['no-associated-pr'].join('\n'));
-              return;
-            }
-            
             // Get PR details
             const pr = await github.rest.pulls.get({
               owner,
               repo,
-              pull_number: pullRequestNumber
+              pull_number: number
             });
-            
+
             // Check if author is the actor
-            const isAuthor = pr.data.user.login === actor;
-            
+            const isAuthor = pr.data.user.login === context.actor;
+
             // Get reviews
             const reviews = await github.rest.pulls.listReviews({
               owner,
               repo,
-              pull_number: pullRequestNumber
+              pull_number: number
             });
-            
+
             // Track latest review state per reviewer to handle DISMISSED/CHANGES_REQUESTED
             const latestReviewByUser = {};
             reviews.data.forEach(review => {
-              if (review.state !== 'COMMENTED') {
-                latestReviewByUser[review.user.login] = review.state;
+              if (review.state === 'APPROVED') {
+                latestReviewByUser[review.user.login] = true;
               }
             });
             const approvals = Object.fromEntries(
               Object.entries(latestReviewByUser).filter(([, state]) => state === 'APPROVED')
             );
-            
-            // Get commit status checks
+
+            // Get check runs using Check Runs API (not Status API)
             const commit = pr.data.head;
+<<<<<<< HEAD
             const statuses = await github.rest.repos.getCombinedStatusForRef({
               owner,
               repo,
@@ -180,116 +140,103 @@ jobs:
                   requirementStatus[key] = reason;
                 }
               }
+=======
+            const requiredCheckNameMap = {
+              'Quality Gates Pipeline': 'quality-gates',
+              'Constitution Compliance Validation': 'compliance-check',
+              'CodeRabbit': 'coderabbit-review'
+>>>>>>> origin/main
             };
 
-            // Check legacy status checks
-            (statuses.data?.statuses || []).forEach(status => {
-              const key = aliasToCheck.get(normalize(status.context));
-              if (!key) {
-                return;
-              }
-              const state = normalize(status.state);
-              if (state === "success") {
-                updateRequirement(key, true, "passed");
-              } else {
-                updateRequirement(key, false, `status check failed with ${state}`);
-              }
-            });
+            const checkResults = {};
+            let allCheckRunsData = [];
+            let page = 1;
+            let hasMore = true;
 
-            // Check rich check runs when available
-            let checkRuns = [];
-            try {
-              checkRuns = await github.paginate(github.rest.checks.listForRef, {
+            // Paginate through all check runs (max 100 per page)
+            while (hasMore) {
+              const checksResponse = await github.rest.checks.listForRef({
                 owner,
                 repo,
                 ref: commit.sha,
+                per_page: 100,
+                page: page
               });
-            } catch (error) {
-              console.log(`Unable to fetch check runs: ${error.message}`);
+
+              allCheckRunsData = allCheckRunsData.concat(checksResponse.data.check_runs);
+              hasMore = allCheckRunsData.length < checksResponse.data.total_count;
+              page++;
             }
 
-            checkRuns.forEach(run => {
-              const key = aliasToCheck.get(normalize(run.name));
-              if (!key) {
-                return;
-              }
-              const status = normalize(run.status);
-              const conclusion = normalize(run.conclusion);
-              const isPassing = status === "completed" && conclusion === "success";
-              if (isPassing) {
-                updateRequirement(key, true, "passed");
-              } else {
-                const reason = conclusion ? `check run ${status}/${conclusion}` : `check run ${status}`;
-                updateRequirement(key, false, reason);
-              }
+            // Map check run names to our required checks and extract results
+            const foundChecks = new Set();
+            allCheckRunsData.forEach(checkRun => {
+              Object.entries(requiredCheckNameMap).forEach(([actualName, mappedName]) => {
+                if (checkRun.name === actualName) {
+                  foundChecks.add(actualName);
+                  checkResults[mappedName] = checkRun.status === 'completed' && checkRun.conclusion === 'success';
+                  console.log(`Check: ${actualName} (${mappedName}) - Status: ${checkRun.status}, Conclusion: ${checkRun.conclusion}`);
+                }
+              });
             });
 
-            const allChecksPassed = requiredChecks.every(({ key }) => checkResults[key] === true);
-            const missingChecks = requiredChecks
-              .filter(({ key }) => !checkResults[key])
-              .map(({ key }) => `${key} (${requirementStatus[key]})`);
-            
+            // Verify all required checks passed
+            const allChecksPassed = Object.keys(requiredCheckNameMap).every(actualName => {
+              const mapped = requiredCheckNameMap[actualName];
+              return checkResults[mapped] === true;
+            });
+
             // Verify at least one approval from agent/reviewer
             const hasApproval = Object.keys(approvals).length > 0;
-            const isApprovalMissing = !hasApproval;
-            const isAuthorMissing = !isAuthor;
-            
+
             // Determine if self-merge is allowed
             const canSelfMerge = allChecksPassed && hasApproval && isAuthor;
-            
+
             // Output status
+            console.log(`\n=== Merge Readiness Summary ===`);
             console.log(`All checks passed: ${allChecksPassed}`);
             console.log(`Has approval: ${hasApproval}`);
             console.log(`Is author: ${isAuthor}`);
             console.log(`Can self-merge: ${canSelfMerge}`);
-            
+
             // Set output for downstream steps
             core.setOutput('can-self-merge', canSelfMerge);
             core.setOutput('all-checks-passed', allChecksPassed);
             core.setOutput('has-approval', hasApproval);
             core.setOutput('is-author', isAuthor);
-            core.setOutput('pr-number', pullRequestNumber);
-            const missingRequirements = [
-              ...missingChecks,
-              ...(isApprovalMissing ? ["approvals"] : []),
-              ...(isAuthorMissing ? ["author"] : []),
-            ];
-            core.setOutput('missing-requirements', missingRequirements.join(','));
-            core.setOutput('missing-checks', missingChecks.join('\n'));
+
+            // Report which specific checks are missing/failing
+            const missing = [];
+            Object.entries(requiredCheckNameMap).forEach(([actualName, mappedName]) => {
+              if (checkResults[mappedName] !== true) {
+                const status = checkResults[mappedName] === false ? 'failed' : 'missing';
+                missing.push(`${actualName} (${status})`);
+              }
+            });
+            if (!hasApproval) missing.push('review approvals');
+            if (!isAuthor) missing.push('author check');
+            core.setOutput('missing-requirements', missing.join('; '));
       
       - name: Comment on missing requirements
-        if: steps.check.outputs.can-self-merge == 'false' && steps.check.outputs.pr-number != ''
+        if: steps.check.outputs.can-self-merge == 'false'
         uses: actions/github-script@v7
-        env:
-          PR_NUMBER: ${{ steps.check.outputs.pr-number }}
-          ALL_CHECKS_PASSED: ${{ steps.check.outputs.all-checks-passed }}
-          HAS_APPROVAL: ${{ steps.check.outputs.has-approval }}
-          IS_AUTHOR: ${{ steps.check.outputs.is-author }}
-          MISSING_CHECKS: ${{ steps.check.outputs.missing-checks }}
         with:
           script: |
-            const { owner, repo } = context.repo;
-            const number = Number(process.env.PR_NUMBER);
-            const allChecksPassed = process.env.ALL_CHECKS_PASSED === 'true';
-            const hasApproval = process.env.HAS_APPROVAL === 'true';
-            const isAuthor = process.env.IS_AUTHOR === 'true';
-            const missingChecks = process.env.MISSING_CHECKS ? process.env.MISSING_CHECKS.split('\n') : [];
-
-            let message = 'Self-merge is blocked due to missing requirements:\n\n';
-            if (!allChecksPassed) {
-              message += '- Required checks missing or not passing:\n';
-              for (const check of missingChecks) {
-                message += `  - ${check}\n`;
-              }
+            const { owner, repo, number } = context.issue;
+            const missingReqs = "${{ steps.check.outputs.missing-requirements }}".split(',');
+            
+            let message = '⚠️ **Self-merge is blocked due to missing requirements:**\n\n';
+            if (!${{ steps.check.outputs.all-checks-passed }}) {
+              message += '- ❌ Not all quality gates have passed\n';
             }
-            if (!hasApproval) {
-              message += '- PR does not have required review approval\n';
+            if (!${{ steps.check.outputs.has-approval }}) {
+              message += '- ❌ PR does not have required review approval\n';
             }
-            if (!isAuthor) {
-              message += '- Only the PR author can self-merge\n';
+            if (!${{ steps.check.outputs.is-author }}) {
+              message += '- ℹ️ Only the PR author can self-merge\n';
             }
             message += '\nPlease ensure all checks pass before merging.';
-
+            
             github.rest.issues.createComment({
               owner,
               repo,
@@ -302,11 +249,19 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const { owner, repo } = context.repo;
-            const number = Number('${{ steps.check.outputs.pr-number }}');
+            const { owner, repo, number } = context.issue;
             github.rest.issues.createComment({
               owner,
               repo,
               issue_number: number,
-              body: 'All merge requirements satisfied. You may now self-merge this PR.'
+              body: '✅ All merge requirements satisfied. You may now self-merge this PR.'
             });
+
+# Helper function (in comments - needs to be inline in actual workflow)
+# function getMissingRequirements(checksPassed, approval, isAuthor) {
+#   const missing = [];
+#   if (!checksPassed) missing.push('quality-gates');
+#   if (!approval) missing.push('approvals');
+#   if (!isAuthor) missing.push('author');
+#   return missing.join(',');
+# }

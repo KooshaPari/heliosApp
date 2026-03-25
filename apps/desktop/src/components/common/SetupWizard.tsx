@@ -1,4 +1,4 @@
-import { type Component, Show, createSignal } from "solid-js";
+import { type Component, createSignal, Show } from "solid-js";
 
 type SetupWizardProps = {
   isOpen: boolean;
@@ -35,12 +35,17 @@ export const SetupWizard: Component<SetupWizardProps> = props => {
         >
           <Show when={step() === 0}>
             <h2 style={{ color: "#cdd6f4", "margin-bottom": "12px" }}>Welcome to Helios</h2>
-            <p style={{ color: "#a6adc8", "line-height": "1.6", "margin-bottom": "24px" }}>
+            <p
+              style={{
+                color: "#a6adc8",
+                "line-height": "1.6",
+                "margin-bottom": "24px",
+              }}
+            >
               An agent-first desktop IDE. Chat with AI to write code, run commands, and build
               projects.
             </p>
             <button
-              type="button"
               onClick={() => setStep(1)}
               style={{
                 background: "#89b4fa",
@@ -58,7 +63,13 @@ export const SetupWizard: Component<SetupWizardProps> = props => {
           </Show>
           <Show when={step() === 1}>
             <h2 style={{ color: "#cdd6f4", "margin-bottom": "12px" }}>API Key</h2>
-            <p style={{ color: "#a6adc8", "margin-bottom": "16px", "font-size": "14px" }}>
+            <p
+              style={{
+                color: "#a6adc8",
+                "margin-bottom": "16px",
+                "font-size": "14px",
+              }}
+            >
               Enter your Anthropic API key to enable cloud inference.
             </p>
             <input
@@ -78,9 +89,14 @@ export const SetupWizard: Component<SetupWizardProps> = props => {
                 "margin-bottom": "16px",
               }}
             />
-            <div style={{ display: "flex", gap: "8px", "justify-content": "flex-end" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "8px",
+                "justify-content": "flex-end",
+              }}
+            >
               <button
-                type="button"
                 onClick={() => props.onSkip()}
                 style={{
                   background: "none",
@@ -94,7 +110,6 @@ export const SetupWizard: Component<SetupWizardProps> = props => {
                 Skip
               </button>
               <button
-                type="button"
                 onClick={() => props.onComplete(apiKey())}
                 style={{
                   background: "#89b4fa",

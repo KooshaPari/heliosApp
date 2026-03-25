@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { InMemoryBusPublisher, PtyManager } from "../index.js";
+=======
+import { describe, expect, it, afterEach } from "bun:test";
+import { PtyManager, InMemoryBusPublisher } from "../index.js";
+>>>>>>> origin/main
 
 describe("PtyManager", () => {
   const pidsToCleanup: number[] = [];

@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
-import type { AuditSink } from "../audit/audit-sink.js"; // Used for type annotation
-import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
+import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
-import type { RedactionContext, RedactionResult } from "./redaction-engine.js";
+import type { RedactionResult, RedactionContext } from "./redaction-engine.js";
+import type { AuditSink } from "../audit/audit-sink.js"; // Used for type annotation
 
 // ---------------------------------------------------------------------------
 // Types
@@ -105,9 +105,7 @@ export class RedactionAuditTrail {
     if (this.auditSink) {
       await this.auditSink.ingest(envelope);
     }
-    if (!this.bus) {
-      return;
-    }
+    if (!this.bus) return;
     await this.bus.publish(envelope);
   }
 }

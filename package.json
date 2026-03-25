@@ -2,24 +2,38 @@
   "name": "heliosapp",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/runtime",
+    "apps/desktop"
+  ],
   "type": "module",
-  "packageManager": "bun@1.2.20",
   "scripts": {
     "typecheck": "tsc --noEmit",
+<<<<<<< HEAD
     "lint": "oxlint -c .oxlintrc.json apps docs/.vitepress playwright.config.ts",
     "lint:type-aware": "oxlint -c .oxlintrc.json --type-aware --tsconfig tsconfig.json apps/runtime/src apps/desktop/src",
     "format": "oxfmt --write apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
     "format:check": "oxfmt --check apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
     "test": "bun test apps/runtime apps/desktop/tests/unit",
     "test:coverage": "bun test --coverage apps/runtime apps/desktop/tests/unit",
+=======
+    "lint": "oxlint --config .oxlintrc.json apps docs/.vitepress playwright.config.ts tsconfig.json",
+    "format": "oxfmt --config .oxfmtrc.json --write apps docs/.vitepress playwright.config.ts tsconfig.json",
+    "test": "bun test apps/runtime/tests/unit scripts/tests/",
+    "test:desktop": "bun test apps/desktop/tests/unit",
+    "test:integration": "bun test apps/runtime/tests/integration",
+    "test:coverage": "bun test --coverage apps/runtime/tests/unit apps/desktop/tests/unit",
+>>>>>>> origin/main
     "test:e2e": "playwright test",
-    "test:e2e:gate": "playwright test --reporter=line --workers=1",
+    "gates": "bun scripts/gates.ts",
     "docs:index": "bash docs/scripts/generate-doc-index.sh",
-    "docs:validate-session-docs": "bash docs/scripts/validate-session-docs.sh",
     "docs:dev": "vitepress dev docs",
     "docs:build": "bun run docs:index && vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "governance:query": "tsx scripts/governance-log.ts"
+    "deps:status": "bun scripts/deps-status.ts",
+    "deps:rollback": "bun scripts/deps-rollback.ts",
+    "deps:canary": "bun scripts/deps-canary.ts",
+    "deps:log": "bun scripts/deps-canary.ts log"
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.10.0",
@@ -28,17 +42,26 @@
     "solid-js": "^1.9.11"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "@happy-dom/global-registrator": "20.7.0",
+=======
+>>>>>>> origin/main
     "@playwright/test": "1.51.1",
     "@types/node": "22.13.10",
-    "bun-types": "1.2.9",
+    "bun-types": "1.3.10",
     "esbuild": "^0.27.3",
     "esbuild-plugin-solid": "^0.6.0",
+<<<<<<< HEAD
     "happy-dom": "20.7.0",
     "oxfmt": "0.36.0",
     "oxlint": "1.51.0",
     "oxlint-tsgolint": "0.16.0",
+=======
+    "happy-dom": "20.8.7",
+    "oxlint": "latest",
+>>>>>>> origin/main
     "typescript": "5.8.2",
-    "vitepress": "1.6.3"
-  }
+    "vitepress": "1.6.4"
+  },
+  "packageManager": "bun@1.2.20"
 }

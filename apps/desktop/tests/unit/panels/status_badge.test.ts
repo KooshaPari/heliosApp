@@ -1,8 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import {
-  DEFAULT_COLOR_SCHEME,
   StatusBadge,
   getStatusBadgeContent,
+  DEFAULT_COLOR_SCHEME,
 } from "../../../src/panels/status_badge";
 
 describe("StatusBadge", () => {
@@ -150,7 +150,7 @@ describe("StatusBadge", () => {
       "orphaned",
     ];
 
-    for (const state of states) {
+    states.forEach(state => {
       badge = new StatusBadge({ state });
       badge.mount(container);
 
@@ -162,7 +162,7 @@ describe("StatusBadge", () => {
       while (container.firstChild) {
         container.removeChild(container.firstChild);
       }
-    }
+    });
   });
 
   it("should have status role attribute", () => {

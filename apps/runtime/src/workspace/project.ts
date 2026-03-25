@@ -1,24 +1,8 @@
 // T006, T007, T008 — Project binding, stale detection, and git clone delegation
 
-import { constants, accessSync, existsSync, realpathSync } from "node:fs";
+import type { Workspace, ProjectBinding } from "./types.js";
+import { existsSync, realpathSync, accessSync, constants } from "node:fs";
 import { isAbsolute } from "node:path";
-import type { Subprocess } from "bun";
-import type { ProjectBinding, Workspace } from "./types.js";
-
-type SpawnResult = Subprocess;
-type SpawnOptions = {
-  stdout: "pipe" | "inherit" | "ignore";
-  stderr: "pipe" | "inherit" | "ignore";
-};
-
-const spawn = Bun.spawn as unknown as (command: string[], options: SpawnOptions) => SpawnResult;
-
-function readStreamText(stream: SpawnResult["stderr"]): Promise<string> {
-  if (stream === null || typeof stream === "number") {
-    return Promise.resolve("");
-  }
-  return new Response(stream).text();
-}
 
 // Stub ID generator — uses spec 005 format proj_{ulid}
 function generateProjectId(): string {
@@ -137,18 +121,14 @@ export async function detectStaleProjects(workspace: Workspace): Promise<Workspa
       return binding.status === "active" ? binding : { ...binding, status: "active" };
     } catch {
       // Inaccessible — mark stale
-      if (binding.status === "stale") {
-        return binding;
-      }
+      if (binding.status === "stale") return binding;
       return { ...binding, status: "stale" };
     }
   });
 
-  const changed = updatedProjects.some((p, i) => p.status !== workspace.projects[i]?.status);
+  const changed = updatedProjects.some((p, i) => p.status !== workspace.projects[i]!.status);
 
-  if (!changed) {
-    return workspace;
-  }
+  if (!changed) return workspace;
 
   return {
     ...workspace,
@@ -160,10 +140,14 @@ export async function detectStaleProjects(workspace: Workspace): Promise<Workspa
 /**
  * Clone a git repository using system git binary.
  */
-export async function gitClone(url: string, targetDir: string, timeoutMs = 120_000): Promise<void> {
+export async function gitClone(
+  url: string,
+  targetDir: string,
+  timeoutMs: number = 120_000
+): Promise<void> {
   // Check git availability
   try {
-    const versionProc = spawn(["git", "--version"], {
+    const versionProc = Bun.spawn(["git", "--version"], {
       stdout: "pipe",
       stderr: "pipe",
     });
@@ -175,7 +159,7 @@ export async function gitClone(url: string, targetDir: string, timeoutMs = 120_0
     throw new Error("git is not available on this system. Install git to clone repositories.");
   }
 
-  const proc = spawn(["git", "clone", url, targetDir], {
+  const proc = Bun.spawn(["git", "clone", url, targetDir], {
     stdout: "pipe",
     stderr: "pipe",
   });
@@ -188,7 +172,7 @@ export async function gitClone(url: string, targetDir: string, timeoutMs = 120_0
   clearTimeout(timer);
 
   if (exitCode !== 0) {
-    const stderr = await readStreamText(proc.stderr);
+    const stderr = await new Response(proc.stderr).text();
     throw new Error(`git clone failed (exit ${exitCode}): ${stderr.trim()}`);
   }
 

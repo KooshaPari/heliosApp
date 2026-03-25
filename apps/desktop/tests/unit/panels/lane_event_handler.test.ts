@@ -1,10 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-const vi = { fn: mock, spyOn: spyOn };
-import {
-  type BusEvent,
-  type BusSubscriber,
-  LaneEventHandler,
-} from "../../../src/panels/lane_event_handler";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+import { LaneEventHandler } from "../../../src/panels/lane_event_handler";
+import type { BusSubscriber, BusEvent } from "../../../src/panels/lane_event_handler";
 
 describe("LaneEventHandler", () => {
   let handler: LaneEventHandler;
@@ -54,8 +50,9 @@ describe("LaneEventHandler", () => {
     const stateChangedHandler = busHandlers.get("lane.state.changed");
     stateChangedHandler?.(event);
 
-    // Wait for RAF
-    await new Promise(resolve => setTimeout(resolve, 20));
+    // Wait for RAF fallback (setTimeout(0)) to fire
+    await new Promise(resolve => setTimeout(resolve, 50));
+
     expect(onStateChanged).toHaveBeenCalledWith("lane-1", "running");
   });
 
@@ -128,8 +125,9 @@ describe("LaneEventHandler", () => {
       timestamp: Date.now(),
     });
 
-    // Wait for RAF
-    await new Promise(resolve => setTimeout(resolve, 20));
+    // Wait for RAF to fire (happy-dom needs a longer wait)
+    await new Promise(resolve => requestAnimationFrame(() => resolve(undefined)));
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     expect(onStateChanged).toHaveBeenCalled();
     // Should only render final state due to batching
@@ -160,8 +158,9 @@ describe("LaneEventHandler", () => {
       timestamp: Date.now(),
     });
 
-    // Wait for RAF
-    await new Promise(resolve => setTimeout(resolve, 30));
+    // Wait for RAF fallback to fire
+    await new Promise(resolve => setTimeout(resolve, 50));
+
     // The out-of-order event should be discarded
     expect(onStateChanged).toHaveBeenCalledWith("lane-1", "running");
   });
@@ -171,12 +170,12 @@ describe("LaneEventHandler", () => {
     handler = new LaneEventHandler({
       bus: mockBus,
       onBusConnectivityIssue,
-      busTimeoutMs: 100, // Short timeout for testing
+      busTimeoutMs: 50, // Short timeout for testing
     });
     handler.mount();
 
-    // Simulate no events for timeout period
-    await new Promise(resolve => setTimeout(resolve, 150));
+    // Simulate no events for timeout period (wait well beyond busTimeoutMs)
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     expect(onBusConnectivityIssue).toHaveBeenCalledWith(true);
   });
@@ -186,12 +185,12 @@ describe("LaneEventHandler", () => {
     handler = new LaneEventHandler({
       bus: mockBus,
       onBusConnectivityIssue,
-      busTimeoutMs: 100,
+      busTimeoutMs: 50,
     });
     handler.mount();
 
     // Wait for connectivity issue
-    await new Promise(resolve => setTimeout(resolve, 150));
+    await new Promise(resolve => setTimeout(resolve, 200));
     expect(onBusConnectivityIssue).toHaveBeenCalledWith(true);
 
     // Receive an event

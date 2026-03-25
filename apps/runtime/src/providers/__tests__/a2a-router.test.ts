@@ -6,15 +6,31 @@
  * SC-025-002: Provider crash isolation across lanes.
  */
 
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach } from "bun:test";
+import { A2ARouterAdapter, HealthMonitoringCoordinator, type A2AEndpoint } from "../a2a-router.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+<<<<<<< HEAD
 import {
   A2aRouterAdapter,
   type A2aRouterConfig,
   HealthMonitoringCoordinator,
 } from "../a2a-router.js";
 import type { ProviderHealthStatus } from "../adapter.js";
+=======
+>>>>>>> origin/main
 import { NormalizedProviderError } from "../errors.js";
+import type { ProviderHealthStatus } from "../adapter.js";
+
+type RouterConfig = {
+  endpoints: Array<{
+    id: string;
+    url: string;
+    priority: number;
+    capabilities: string[];
+  }>;
+  timeout: number;
+  failoverEnabled: boolean;
+};
 
 describe("A2A Router Adapter", () => {
   let adapter: A2aRouterAdapter;
@@ -27,7 +43,11 @@ describe("A2A Router Adapter", () => {
 
   describe("Initialization", () => {
     it("should initialize with valid endpoints", async () => {
+<<<<<<< HEAD
       const config: A2aRouterConfig = {
+=======
+      const config: RouterConfig = {
+>>>>>>> origin/main
         endpoints: [
           {
             id: "agent-1",
@@ -46,24 +66,42 @@ describe("A2A Router Adapter", () => {
         failoverEnabled: true,
       };
 
+<<<<<<< HEAD
       await adapter.init(config);
+=======
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
+>>>>>>> origin/main
 
       const health = await adapter.health();
       expect(health.state).toBe("healthy");
     });
 
     it("should reject missing endpoints", async () => {
+<<<<<<< HEAD
       const config: A2aRouterConfig = {
+=======
+      const config: RouterConfig = {
+>>>>>>> origin/main
         endpoints: [],
         timeout: 30000,
         failoverEnabled: true,
       };
 
+<<<<<<< HEAD
       await expect(adapter.init(config)).rejects.toThrow(/init failed/i);
     });
 
     it("should sort endpoints by priority", async () => {
       const config: A2aRouterConfig = {
+=======
+      await expect(
+        adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0])
+      ).rejects.toThrow(/init failed/i);
+    });
+
+    it("should sort endpoints by priority", async () => {
+      const config: RouterConfig = {
+>>>>>>> origin/main
         endpoints: [
           {
             id: "agent-3",
@@ -88,7 +126,11 @@ describe("A2A Router Adapter", () => {
         failoverEnabled: true,
       };
 
+<<<<<<< HEAD
       await adapter.init(config);
+=======
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
+>>>>>>> origin/main
 
       const endpoints = adapter.getEndpoints();
       expect(endpoints[0].id).toBe("agent-1");
@@ -97,7 +139,11 @@ describe("A2A Router Adapter", () => {
     });
 
     it("should emit initialization event", async () => {
+<<<<<<< HEAD
       const config: A2aRouterConfig = {
+=======
+      const config: RouterConfig = {
+>>>>>>> origin/main
         endpoints: [
           {
             id: "agent-1",
@@ -110,7 +156,11 @@ describe("A2A Router Adapter", () => {
         failoverEnabled: true,
       };
 
+<<<<<<< HEAD
       await adapter.init(config);
+=======
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
+>>>>>>> origin/main
 
       const events = bus.getEvents();
       const initEvent = events.find(e => e.topic === "provider.a2a.initialized");
@@ -121,7 +171,11 @@ describe("A2A Router Adapter", () => {
 
   describe("Delegation Routing", () => {
     beforeEach(async () => {
+<<<<<<< HEAD
       const config: A2aRouterConfig = {
+=======
+      const config: RouterConfig = {
+>>>>>>> origin/main
         endpoints: [
           {
             id: "agent-1",
@@ -139,7 +193,11 @@ describe("A2A Router Adapter", () => {
         timeout: 30000,
         failoverEnabled: true,
       };
+<<<<<<< HEAD
       await adapter.init(config);
+=======
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
+>>>>>>> origin/main
     });
 
     it("should delegate to endpoint with matching capabilities", async () => {
@@ -232,7 +290,11 @@ describe("A2A Router Adapter", () => {
 
   describe("Failover Routing", () => {
     beforeEach(async () => {
+<<<<<<< HEAD
       const config: A2aRouterConfig = {
+=======
+      const config: RouterConfig = {
+>>>>>>> origin/main
         endpoints: [
           {
             id: "agent-1",
@@ -250,7 +312,11 @@ describe("A2A Router Adapter", () => {
         timeout: 30000,
         failoverEnabled: true,
       };
+<<<<<<< HEAD
       await adapter.init(config);
+=======
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
+>>>>>>> origin/main
     });
 
     it("should route to healthy endpoint", async () => {
@@ -311,7 +377,11 @@ describe("A2A Router Adapter", () => {
 
   describe("Health Monitoring", () => {
     beforeEach(async () => {
+<<<<<<< HEAD
       const config: A2aRouterConfig = {
+=======
+      const config: RouterConfig = {
+>>>>>>> origin/main
         endpoints: [
           {
             id: "agent-1",
@@ -323,7 +393,11 @@ describe("A2A Router Adapter", () => {
         timeout: 30000,
         failoverEnabled: true,
       };
+<<<<<<< HEAD
       await adapter.init(config);
+=======
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
+>>>>>>> origin/main
     });
 
     it("should report healthy initially", async () => {
@@ -340,7 +414,11 @@ describe("A2A Router Adapter", () => {
 
   describe("Termination", () => {
     beforeEach(async () => {
+<<<<<<< HEAD
       const config: A2aRouterConfig = {
+=======
+      const config: RouterConfig = {
+>>>>>>> origin/main
         endpoints: [
           {
             id: "agent-1",
@@ -352,7 +430,11 @@ describe("A2A Router Adapter", () => {
         timeout: 30000,
         failoverEnabled: true,
       };
+<<<<<<< HEAD
       await adapter.init(config);
+=======
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
+>>>>>>> origin/main
     });
 
     it("should terminate successfully", async () => {
@@ -387,13 +469,17 @@ describe("A2A Router Adapter", () => {
           },
           "corr-123"
         )
-      ).rejects.toThrow(/unavailable|not initialized/i);
+      ).rejects.toThrow(/unavailable/i);
     });
   });
 
   describe("Error Handling", () => {
     beforeEach(async () => {
+<<<<<<< HEAD
       const config: A2aRouterConfig = {
+=======
+      const config: RouterConfig = {
+>>>>>>> origin/main
         endpoints: [
           {
             id: "agent-1",
@@ -405,7 +491,11 @@ describe("A2A Router Adapter", () => {
         timeout: 30000,
         failoverEnabled: true,
       };
+<<<<<<< HEAD
       await adapter.init(config);
+=======
+      await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
+>>>>>>> origin/main
     });
 
     it("should emit error event on delegation failure", async () => {
@@ -420,7 +510,7 @@ describe("A2A Router Adapter", () => {
           },
           "corr-123"
         );
-      } catch (_e) {
+      } catch (e) {
         // Expected
       }
 
@@ -540,8 +630,8 @@ describe("Health Monitoring Coordinator", () => {
       coordinator.registerProvider("mcp-provider-1", 5000, checkFunction);
 
       // Since initial state is unavailable, they won't be returned as healthy
-      const healthyAcp = coordinator.getHealthyProvidersByType("acp");
-      expect(healthyAcp).toBeDefined();
+      const healthyACP = coordinator.getHealthyProvidersByType("acp");
+      expect(healthyACP).toBeDefined();
     });
   });
 });
@@ -551,10 +641,17 @@ describe("Provider Crash Isolation (SC-025-002)", () => {
     const bus = new InMemoryLocalBus();
 
     // Create two separate adapter instances (simulating two lanes)
+<<<<<<< HEAD
     const laneAlphaAdapter = new A2aRouterAdapter(bus);
     const laneBetaAdapter = new A2aRouterAdapter(bus);
 
     const config: A2aRouterConfig = {
+=======
+    const laneAdapterA = new A2ARouterAdapter(bus);
+    const laneAdapterB = new A2ARouterAdapter(bus);
+
+    const config: RouterConfig = {
+>>>>>>> origin/main
       endpoints: [
         {
           id: "agent-1",
@@ -567,11 +664,19 @@ describe("Provider Crash Isolation (SC-025-002)", () => {
       failoverEnabled: true,
     };
 
+<<<<<<< HEAD
     await laneAlphaAdapter.init(config);
     await laneBetaAdapter.init(config);
 
     // Lane A executes successfully
     const resultA = await laneAlphaAdapter.execute(
+=======
+    await laneAdapterA.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
+    await laneAdapterB.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
+
+    // Lane A executes successfully
+    const resultA = await laneAdapterA.execute(
+>>>>>>> origin/main
       {
         taskDescription: "Task A",
         requiredCapabilities: ["task"],
@@ -582,7 +687,11 @@ describe("Provider Crash Isolation (SC-025-002)", () => {
     expect(resultA).toBeDefined();
 
     // Lane B executes successfully (unaffected by Lane A)
+<<<<<<< HEAD
     const resultB = await laneBetaAdapter.execute(
+=======
+    const resultB = await laneAdapterB.execute(
+>>>>>>> origin/main
       {
         taskDescription: "Task B",
         requiredCapabilities: ["task"],
@@ -606,7 +715,11 @@ describe("Error Taxonomy Completeness (SC-025-004)", () => {
     bus = new InMemoryLocalBus();
     adapter = new A2aRouterAdapter(bus);
 
+<<<<<<< HEAD
     const config: A2aRouterConfig = {
+=======
+    const config: RouterConfig = {
+>>>>>>> origin/main
       endpoints: [
         {
           id: "agent-1",
@@ -618,7 +731,11 @@ describe("Error Taxonomy Completeness (SC-025-004)", () => {
       timeout: 30000,
       failoverEnabled: true,
     };
+<<<<<<< HEAD
     await adapter.init(config);
+=======
+    await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
+>>>>>>> origin/main
   });
 
   it("should map all delegation errors to normalized error codes", async () => {

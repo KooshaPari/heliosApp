@@ -1,7 +1,7 @@
-import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
+import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
 
 export interface SessionTabState extends TabState {
-  expandedSections?: string[] | undefined;
+  expandedSections?: string[];
 }
 
 export interface SessionMetadata {
@@ -10,7 +10,7 @@ export interface SessionMetadata {
   lifecycleState: string;
   harnessTransport: string;
   terminalCount: number;
-  degradationReason?: string | undefined;
+  degradationReason?: string;
 }
 
 /**
@@ -32,11 +32,11 @@ export class SessionTab extends TabSurface {
     super("session-tab", "session", "Session");
   }
 
-  onContextChange(context: ActiveContext | null): Promise<void> {
+  async onContextChange(context: ActiveContext | null): Promise<void> {
     // When context changes, query session metadata
     if (!context) {
       this.metadata = null;
-      return Promise.resolve();
+      return;
     }
 
     // In a real implementation, query session registry:
@@ -52,8 +52,6 @@ export class SessionTab extends TabSurface {
       terminalCount: 2,
       degradationReason: undefined,
     };
-
-    return Promise.resolve();
   }
 
   render(): HTMLElement {

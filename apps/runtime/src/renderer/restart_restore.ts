@@ -7,10 +7,10 @@
  * @see FR-010-010, SC-010-003
  */
 
-import type { RenderSurface, RendererAdapter, RendererConfig } from "./adapter.js";
-import type { TerminalContext } from "./hot_swap.js";
-import type { RendererEventBus } from "./index.js";
+import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.js";
 import type { SwitchBuffer } from "./stream_binding.js";
+import type { RendererEventBus } from "./index.js";
+import type { TerminalContext } from "./hot_swap.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -133,7 +133,7 @@ export async function executeRestartWithRestore(
   config: RendererConfig,
   surface: RenderSurface,
   onRollback: (error: Error) => Promise<void>,
-  _eventBus?: RendererEventBus
+  eventBus?: RendererEventBus
 ): Promise<RestartRestoreResult> {
   const startTime = Date.now();
   let currentPhase = "checkpoint";

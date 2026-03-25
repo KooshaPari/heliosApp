@@ -15,7 +15,8 @@ export class ZellijNotFoundError extends Error {
 export class ZellijVersionError extends Error {
   constructor(actual: string, required: string) {
     super(
-      `zellij version ${actual} is below the minimum required ${required}. Please upgrade: https://zellij.dev/documentation/installation`
+      `zellij version ${actual} is below the minimum required ${required}. ` +
+        "Please upgrade: https://zellij.dev/documentation/installation"
     );
     this.name = "ZellijVersionError";
   }
@@ -69,7 +70,7 @@ export class PaneTooSmallError extends Error {
 
   constructor(requestedCols: number, requestedRows: number, minCols: number, minRows: number) {
     super(
-      `Pane dimensions ${requestedCols}x${requestedRows} violate minimum ${minCols}x${minRows}`
+      `Pane dimensions ${requestedCols}x${requestedRows} violate minimum ` + `${minCols}x${minRows}`
     );
     this.name = "PaneTooSmallError";
     this.requestedCols = requestedCols;

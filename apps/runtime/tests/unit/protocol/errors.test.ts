@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import {
-  backpressureError,
-  handlerError,
-  methodNotFound,
-  timeoutError,
   validationError,
+  methodNotFound,
+  handlerError,
+  timeoutError,
+  backpressureError,
 } from "../../../src/protocol/errors.js";
 
 // FR-007: Error taxonomy covers all bus failure modes.
