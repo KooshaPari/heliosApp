@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `turbo.json` for task orchestration and caching.
 - Added `Quick Start` section to `README.md`.
 - Added `lint-staged` hook to `.pre-commit-config.yaml`.
+- Added `@helios/logger`, `@helios/errors`, and `@helios/types` shared packages.
 
 ### Fixed
 
@@ -23,3 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed syntax error in `lane_event_handler.ts` (unclosed loop).
 - Installed missing type definitions (@types/node, bun-types, @playwright/test) and `vitest`.
 - Deduplicated `dependencies` and pinned `engines` in `package.json`.
+- Resolved merge conflicts in `package.json` and `CLAUDE.md`.
+- Normalized `BindingState` enum casing to `snake_case`.
+- Stabilized runtime audit retention and lane lifecycle events.
