@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
- * Gate 2: OXC Lint report generator
- * Parses OXC linter output and generates structured JSON report
+ * Gate 2: Biome Lint report generator
+ * Parses Biome linter output and generates structured JSON report
  */
 
 import { existsSync, readFileSync } from "node:fs";
@@ -10,7 +10,12 @@ import { type GateFinding, createGateReport, writeGateReport } from "./gate-repo
 const REPORT_OUTPUT = ".gate-reports/gate-lint.json";
 
 /**
- * Parse OXC lint output from log file.
+ * Parse Biome lint output from log file.
+ * Biome output format:
+ *   file.ts:line:col rule ━━━━━
+ *   ...
+ *   > line │ content
+ *     ...
  */
 function parseLintLog(): GateFinding[] {
   const findings: GateFinding[] = [];
@@ -23,21 +28,33 @@ function parseLintLog(): GateFinding[] {
   const output = readFileSync(logPath, "utf-8");
   const lines = output.split("\n");
 
-  // Parse OXC error format: file.ts:line:col - error|warning|info: message (rule)
-  // or file.ts:line:col - error: message
-  const errorPattern = /^(.+?):(\d+):(\d+)\s+-\s+(error|warning|info):\s+(.+?)(?:\s+\((\w+)\))?$/i;
+  // Biome error format: file.ts:line:col rule ━━━━━━━━━━━━━━━━━━━━
+  // The rule name is prefixed with "lint/" (e.g., "lint/a11y/useButtonType")
+  const biomePattern = /^(.+?):(\d+):(\d+)\s+(lint\/\S+)\s+/i;
 
+  // Build findings from matching lines
   lines.forEach(line => {
-    const match = line.match(errorPattern);
+    const match = line.match(biomePattern);
     if (match) {
-      const [, file, lineNum, col, severity, message, rule] = match;
+      const [, file, lineNum, col, rule] = match;
+      // Extract message from following lines if available
+      const lineIdx = lines.indexOf(line);
+      let message = "Biome lint error";
+      if (lineIdx + 1 < lines.length) {
+        const nextLine = lines[lineIdx + 1];
+        // Messages often start with "!" or describe the issue
+        const msgMatch = nextLine.match(/^\s+[!~] (.+)$/);
+        if (msgMatch) {
+          message = msgMatch[1];
+        }
+      }
       findings.push({
         file,
         line: Number.parseInt(lineNum, 10),
         column: Number.parseInt(col, 10) - 1,
         message,
-        severity: severity.toLowerCase() as "error" | "warning" | "info",
-        rule: rule || undefined,
+        severity: "error",
+        rule: rule.replace("lint/", ""),
       });
     }
   });
