@@ -39,19 +39,50 @@ jobs:
 
       - name: Gate 1 - TypeScript Typecheck
         id: gate-typecheck
-        run: bun run typecheck
+        run: |
+          set +e
+          bun run typecheck | tee /tmp/typecheck.log
+          TYPECHECK_EXIT=${PIPESTATUS[0]}
+          bun run scripts/gate-typecheck.ts
+          REPORT_EXIT=$?
+          set -e
+          if [ "$TYPECHECK_EXIT" -ne 0 ] || [ "$REPORT_EXIT" -ne 0 ]; then
+            exit 1
+          fi
         timeout-minutes: 3
         continue-on-error: false
 
       - name: Gate 2 - OXC Lint
         id: gate-lint
-        run: bun run lint
+        run: |
+          set +e
+          bun run lint | tee /tmp/lint.log
+          LINT_EXIT=${PIPESTATUS[0]}
+          bun run scripts/gate-lint.ts
+          REPORT_EXIT=$?
+          set -e
+          if [ "$LINT_EXIT" -ne 0 ] || [ "$REPORT_EXIT" -ne 0 ]; then
+            exit 1
+          fi
         timeout-minutes: 3
         continue-on-error: false
 
       - name: Gate 3 - Unit Tests
         id: gate-test
+<<<<<<< HEAD
+        run: |
+          set +e
+          bun test apps/runtime apps/desktop/tests/unit scripts/tests/ | tee /tmp/test.log
+          TEST_EXIT=${PIPESTATUS[0]}
+          bun run scripts/gate-test.ts
+          REPORT_EXIT=$?
+          set -e
+          if [ "$TEST_EXIT" -ne 0 ] || [ "$REPORT_EXIT" -ne 0 ]; then
+            exit 1
+          fi
+=======
         run: bun run test
+>>>>>>> origin/main
         timeout-minutes: 5
         continue-on-error: false
 
@@ -101,7 +132,15 @@ jobs:
 
       - name: Upload Gate Reports
         if: always()
+<<<<<<< HEAD
+        run: bun run scripts/gate-aggregate.ts
+
+      - name: Upload Gate Reports Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+=======
         uses: actions/upload-artifact@v7
+>>>>>>> origin/main
         with:
           name: gate-reports
           path: .gate-reports/
