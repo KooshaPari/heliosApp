@@ -22,24 +22,21 @@ export const ShareModal: Component<ShareModalProps> = props => {
 
   return (
     <Show when={props.isOpen}>
-      <div
+      <button
+        type="button"
         style={{
           position: "fixed",
           inset: "0",
-          "background-color": "rgba(0,0,0,0.5)",
+          background: "rgba(0,0,0,0.5)",
           display: "flex",
           "align-items": "center",
           "justify-content": "center",
           "z-index": "1000",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
         }}
         onClick={props.onClose}
-        onKeyDown={(e: KeyboardEvent) => {
-          if (e.key === "Escape") {
-            props.onClose();
-          }
-        }}
-        role="button"
-        tabIndex={0}
       >
         <div
           style={{
@@ -116,7 +113,7 @@ export const ShareModal: Component<ShareModalProps> = props => {
             Close
           </button>
         </div>
-      </div>
+      </button>
     </Show>
   );
 };
