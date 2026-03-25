@@ -48,14 +48,11 @@ jobs:
           bun-version: 1.2.20
 
       - name: Install dependencies
-<<<<<<< HEAD
         working-directory: heliosApp
         run: bun install
 
       - name: Install phenodocs dependencies
         working-directory: phenodocs
-=======
->>>>>>> origin/main
         run: bun install
 
       - name: Generate docs index
