@@ -1,4 +1,4 @@
-import type { LocalBusEnvelope } from "./types";
+import type { LocalBusEnvelope } from "./types.ts";
 
 export type ProtocolBoundary =
 	| "local_control"
