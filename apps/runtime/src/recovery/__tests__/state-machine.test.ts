@@ -8,13 +8,13 @@ import { RecoveryStage, type RecoveryState, RecoveryStateMachine } from "../stat
 describe("RecoveryStateMachine", () => {
   let stateMachine: RecoveryStateMachine;
   let tempDir: string;
-  let bus: LocalBus;
+  let bus: InMemoryLocalBus;
 
   beforeEach(async () => {
     vi.useFakeTimers();
     tempDir = path.join(os.tmpdir(), `state-machine-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
-    bus = new InMemoryLocalBus() as LocalBus;
+    bus = new InMemoryLocalBus();
     stateMachine = new RecoveryStateMachine(tempDir, bus);
     await stateMachine.initialize();
   });
@@ -191,7 +191,7 @@ describe("RecoveryStateMachine", () => {
       await stateMachine.transition(RecoveryStage.DETECTING);
       const events = bus.getEvents();
       expect(events.length).toBeGreaterThan(0);
-      expect(events.at(0)?.topic).toBe("recovery.stage.changed");
+      expect(events[0].topic).toBe("recovery.stage.changed");
     });
 
     it("should include correct payload in stage change event", async () => {

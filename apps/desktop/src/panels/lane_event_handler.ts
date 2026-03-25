@@ -5,7 +5,7 @@
 
 export interface BusEvent {
   topic: string;
-  payload: Record<string, any>; // bus event payloads are heterogeneous
+  payload: Record<string, any>;
   sequenceNumber?: number;
   timestamp: number;
 }

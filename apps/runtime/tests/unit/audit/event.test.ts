@@ -242,7 +242,7 @@ describe("AuditEvent Schema", () => {
         workspaceId: "workspace-1",
         correlationId: "corr-1",
         metadata: [], // Invalid: should be object
-      } as unknown as AuditEvent;
+      };
 
       expect(validateAuditEvent(event)).toBe(false);
     });

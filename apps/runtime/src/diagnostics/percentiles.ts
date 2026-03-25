@@ -2,24 +2,11 @@
 
 import type { PercentileBucket } from "./types.js";
 
-interface ValueBufferLike {
-  getValues(): Float64Array;
-}
-
-export const EMPTY_PERCENTILE_BUCKET: PercentileBucket = {
-  p50: 0,
-  p95: 0,
-  p99: 0,
-  min: 0,
-  max: 0,
-  count: 0,
-};
-
 /**
- * Compute percentile statistics from a Float64Array or RingBuffer-like value source.
- * Uses nearest-rank percentiles and a linear-time selection path instead of full sorting.
+ * Compute percentile statistics from a Float64Array of values.
+ * Uses the nearest-rank method. Returns undefined if values is empty.
  *
- * The input values are never mutated.
+ * The input array is **not** mutated — a sorted copy is created internally.
  */
 export function computePercentiles(
   source: Float64Array | ReadonlyArray<number> | ValueBufferLike
@@ -54,26 +41,12 @@ export function computePercentiles(
   }
 
   if (count === 0) {
-    return EMPTY_PERCENTILE_BUCKET;
+    return undefined;
   }
 
-  const p50Index = percentileIndex(count, 0.5);
-  const p95Index = percentileIndex(count, 0.95);
-  const p99Index = percentileIndex(count, 0.99);
-
-  let p50 = quickSelect(scratch, 0, count - 1, p50Index);
-  let p95 = p50Index === p95Index ? p50 : quickSelect(scratch, 0, count - 1, p95Index);
-  let p99 = p95Index === p99Index ? p95 : quickSelect(scratch, 0, count - 1, p99Index);
-
-  if (p50Index > p95Index) {
-    [p50, p95] = [p95, p50];
-  }
-  if (p95Index > p99Index) {
-    [p95, p99] = [p99, p95];
-  }
-  if (p50Index > p95Index) {
-    [p50, p95] = [p95, p50];
-  }
+  // Sort a copy (Float64Array.prototype.sort is in-place).
+  const sorted = new Float64Array(values);
+  sorted.sort();
 
   return {
     p50,

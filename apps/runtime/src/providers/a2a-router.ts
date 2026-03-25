@@ -84,7 +84,6 @@ export class A2ARouterAdapter
     failureCount: 0,
   };
   private inFlightDelegations = new Map<string, AbortController>();
-  private terminated = false;
 
   constructor(bus?: LocalBus) {
     this.bus = bus || null;
@@ -106,7 +105,6 @@ export class A2ARouterAdapter
       }
 
       this.config = config;
-      this.terminated = false;
 
       // Initialize endpoints sorted by priority
       this.endpoints = config.endpoints
@@ -164,15 +162,6 @@ export class A2ARouterAdapter
    * @returns Current health status
    */
   async health(): Promise<ProviderHealthStatus> {
-    if (this.terminated) {
-      return {
-        state: "unavailable",
-        lastCheck: new Date(),
-        failureCount: 0,
-        message: "Terminated",
-      };
-    }
-
     if (!this.config) {
       return {
         state: "unavailable",
@@ -230,12 +219,10 @@ export class A2ARouterAdapter
     input: A2ADelegation & { correlationId?: string },
     correlationId: string
   ): Promise<A2AResult> {
-    if (!this.config || this.endpoints.length === 0 || this.terminated) {
+    if (!this.config || this.endpoints.length === 0) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        this.terminated
-          ? "A2A router unavailable: terminated"
-          : "A2A router unavailable: not initialized or no endpoints configured",
+        "A2A router not initialized or no endpoints configured",
         "a2a"
       );
     }
@@ -333,7 +320,6 @@ export class A2ARouterAdapter
       // Clear endpoints
       this.endpoints = [];
       this.config = null;
-      this.terminated = true;
 
       this.healthStatus = {
         state: "unavailable",

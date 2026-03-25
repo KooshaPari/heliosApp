@@ -227,19 +227,11 @@ async function checkTestCoverage(files: string[]): Promise<Finding[]> {
 
     if (!filePath.includes("node_modules") && filePath.endsWith(".ts")) {
       // Skip non-source files (configs, workflow scripts, drafts)
-<<<<<<< HEAD
       if (filePath.includes(".draft.") || filePath.endsWith(".mjs") || filePath.endsWith(".d.ts")) {
         continue;
       }
 
       // Forward lookup: Look for corresponding test file in multiple common locations
-=======
-      if (filePath.includes(".draft.") || filePath.endsWith(".mjs")) {
-        continue;
-      }
-
-      // Look for corresponding test file in multiple common locations
->>>>>>> fix/ci-fixes
       const baseName = path.basename(filePath, path.extname(filePath));
       const dirName = path.dirname(filePath);
       const candidatePaths = [
@@ -274,14 +266,11 @@ async function checkTestCoverage(files: string[]): Promise<Finding[]> {
         }
       }
 
-<<<<<<< HEAD
       // Reverse lookup: If forward lookup failed, check if any test imports this source file
       if (!hasTest) {
         hasTest = await findTestsImportingSource(filePath, files);
       }
 
-=======
->>>>>>> fix/ci-fixes
       if (!hasTest) {
         const testPath = filePath.replace(/\.ts$/, ".test.ts");
         findings.push({

@@ -12,7 +12,7 @@ export function ApprovalWorkflowPage() {
   const [workflow, setWorkflow] = createSignal<ApprovalWorkflow | null>(null);
   const [loading, setLoading] = createSignal(true);
 
-  onMount(() => {
+  onMount(async () => {
     setRequests([]);
     setWorkflow({
       userId: "current-user",

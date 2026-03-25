@@ -1,3 +1,5 @@
+import { METHODS } from "./methods";
+import { TOPICS } from "./topics";
 import type { LocalBusEnvelope } from "./types";
 import { ProtocolValidationError } from "./types";
 import {
@@ -49,6 +51,7 @@ export function validateEnvelope(input: unknown): LocalBusEnvelope {
     validateResponseEnvelope(envelope);
   }
 
+  // id is checked for completeness and stable semantics in thrown errors.
   if (!id) {
     throw new ProtocolValidationError("MISSING_REQUIRED_FIELD", "Envelope field 'id' is required");
   }

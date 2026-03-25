@@ -180,15 +180,6 @@ export class ACPClientAdapter
    * @returns Current health status
    */
   async health(): Promise<ProviderHealthStatus> {
-    if (this.terminated) {
-      return {
-        state: "unavailable",
-        lastCheck: new Date(),
-        failureCount: 0,
-        message: "Terminated",
-      };
-    }
-
     if (!this.config) {
       return {
         state: "unavailable",
@@ -273,7 +264,7 @@ export class ACPClientAdapter
    * @throws NormalizedProviderError on failure
    */
   async execute(input: ACPExecuteInput, correlationId: string): Promise<ACPExecuteOutput> {
-    if (!this.config || this.terminated) {
+    if (!this.config) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
         this.terminated
@@ -300,7 +291,7 @@ export class ACPClientAdapter
 
         throw new NormalizedProviderError(
           "PROVIDER_POLICY_DENIED",
-          `ACP execution policy denied: ${reason}`,
+          `ACP execution denied by policy: ${reason}`,
           "acp",
           false,
           correlationId
@@ -394,7 +385,7 @@ export class ACPClientAdapter
    * @throws NormalizedProviderError on failure
    */
   async cancel(taskId: string): Promise<void> {
-    if (!this.config || this.terminated) {
+    if (!this.config) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
         this.terminated
@@ -443,7 +434,6 @@ export class ACPClientAdapter
 
       // Clear config
       this.config = null;
-      this.terminated = true;
 
       this.healthStatus = {
         state: "unavailable",
@@ -468,12 +458,12 @@ export class ACPClientAdapter
   /**
    * Probe endpoint for reachability.
    *
-   * @param baseUrl Base URL for reachability checks
+   * @param endpoint Endpoint URL
    * @returns true if reachable, false otherwise
    */
-  private async probeEndpoint(baseUrl: string): Promise<boolean> {
+  private async probeEndpoint(endpoint: string): Promise<boolean> {
     // Mock implementation: always return true for test endpoints
-    if (baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1")) {
+    if (endpoint.includes("localhost") || endpoint.includes("127.0.0.1")) {
       return true;
     }
 

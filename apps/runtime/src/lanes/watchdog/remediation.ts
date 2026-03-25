@@ -59,7 +59,7 @@ export class RemediationEngine {
         continue; // Skip resources in cooldown
       }
 
-      // Check if owning lane is in transient cleanup
+      // Check if owning lane is recovering
       if (orphan.estimatedOwner !== "unknown") {
         try {
           const lane = this.laneRegistry.get(orphan.estimatedOwner);

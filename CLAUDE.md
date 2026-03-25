@@ -431,3 +431,11 @@ git worktree remove ../.worktrees/<topic>
 - Feature work goes in `.worktrees/<topic>/`
 - Legacy `PROJECT-wtrees/` and `repo-wtrees/` roots are for migration only and must not receive new work.
 - Canonical repository remains on `main` for final integration and verification.
+
+---
+
+## AgilePlus Governance
+- This repo uses AgilePlus for spec-driven development
+- Feature specs live in `agileplus-specs/` (AgilePlus native format)
+- Spec docs (PRD.md, ADR.md, FUNCTIONAL_REQUIREMENTS.md, PLAN.md) are maintained at repo root
+- See the AgilePlus documentation for governance workflows

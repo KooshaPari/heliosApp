@@ -51,14 +51,6 @@ export class MuxRegistry {
   }
 
   /**
-   * Compatibility accessor for watchdog interfaces expecting `getSession`.
-   */
-  getSession(sessionName: string): { laneId?: string } | null {
-    const binding = this.getBySession(sessionName);
-    return binding ? { laneId: binding.laneId } : null;
-  }
-
-  /**
    * Look up a binding by lane ID.
    */
   getByLane(laneId: string): MuxBinding | undefined {

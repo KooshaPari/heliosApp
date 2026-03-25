@@ -1,5 +1,4 @@
-import { expect, test } from "bun:test";
-import { InMemoryLocalBus } from "../../src/protocol/bus";
+import { test } from "bun:test";
 
 const LANE_CREATE_P95_MS = 30;
 const SESSION_RESTORE_P95_MS = 35;

@@ -14,7 +14,6 @@ import {
 } from "./gate-report";
 
 const REPORT_OUTPUT = ".gate-reports/gate-static-analysis.json";
-<<<<<<< HEAD
 const MAX_FILE_LENGTH = 500;
 const SOURCE_DIRECTORIES = [
 	join(process.cwd(), "apps/runtime/src"),
@@ -100,9 +99,6 @@ function getFileLengthFinding(
 		remediation,
 	};
 }
-=======
-const MAX_FILE_LENGTH = 800;
->>>>>>> fix/ci-fixes
 
 function scanForViolations(): GateFinding[] {
 	const findings: GateFinding[] = [];

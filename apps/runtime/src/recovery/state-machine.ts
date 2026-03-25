@@ -50,6 +50,7 @@ export class RecoveryStateMachine {
   async transition(to: RecoveryStage): Promise<void> {
     const from = this.currentStage;
 
+    // Validate transition
     const legalTransitions = LEGAL_TRANSITIONS[from] || [];
     if (!legalTransitions.includes(to)) {
       throw new Error(
@@ -57,13 +58,16 @@ export class RecoveryStateMachine {
       );
     }
 
-    const isRetry = isFailureState(from) && isFailureState(to) === false;
+    // Update state
+    const isRetry = this.isFailureState(from) && this.isFailureState(to) === false;
     if (isRetry) {
+      // Retrying - increment attempt count
       this.currentState.attemptCount++;
       if (this.currentState.attemptCount > MAX_RETRIES_PER_STAGE) {
         throw new Error(`Max retries (${MAX_RETRIES_PER_STAGE}) exceeded for stage ${from}`);
       }
-    } else if (from !== to && !isFailureState(to)) {
+    } else if (from !== to) {
+      // New stage - reset attempt count
       this.currentState.attemptCount = 0;
     }
 
@@ -71,8 +75,10 @@ export class RecoveryStateMachine {
     this.currentState.stage = to;
     this.currentState.timestamp = Date.now();
 
-    await persistRecoveryState(this.recoveryDataDir, this.currentState);
+    // Persist state
+    await this.persistState();
 
+    // Publish event
     if (this.bus) {
       await this.bus.publish({
         id: randomUUID(),
@@ -88,7 +94,10 @@ export class RecoveryStateMachine {
       });
     }
 
+    // Notify listeners
     this.notifyListeners(from, to, this.currentState.attemptCount);
+
+    // Set stage timeout
     this.startStageTimeout();
   }
 
@@ -104,7 +113,7 @@ export class RecoveryStateMachine {
       timestamp: Date.now(),
       attemptCount: 0,
     };
-    await deleteRecoveryState(this.recoveryDataDir);
+    await this.deleteState();
     this.clearStageTimeout();
   }
 
@@ -112,20 +121,19 @@ export class RecoveryStateMachine {
     this.listeners.push(listener);
   }
 
+  private isFailureState(stage: RecoveryStage): boolean {
+    return stage.includes("FAILED");
+  }
+
   private async loadState(): Promise<void> {
-    const state = await loadRecoveryState(this.recoveryDataDir);
-    if (state) {
+    try {
+      const statePath = path.join(this.recoveryDataDir, "recovery", "recovery-state.json");
+      const data = await fs.readFile(statePath, "utf-8");
+      const state = JSON.parse(data) as RecoveryState;
       this.currentStage = state.stage;
       this.currentState = state;
       return;
     }
-
-    this.currentStage = RecoveryStage.CRASHED;
-    this.currentState = {
-      stage: RecoveryStage.CRASHED,
-      timestamp: Date.now(),
-      attemptCount: 0,
-    };
   }
 
   private notifyListeners(from: RecoveryStage, to: RecoveryStage, attemptCount: number): void {
@@ -138,8 +146,9 @@ export class RecoveryStateMachine {
     this.clearStageTimeout();
 
     this.stageTimeoutId = setTimeout(() => {
-      if (!isFailureState(this.currentStage)) {
-        const failureStage = getFailureStateFor(this.currentStage);
+      // Transition to failure state if not already in one
+      if (!this.isFailureState(this.currentStage)) {
+        const failureStage = this.getFailureStateFor(this.currentStage);
         if (failureStage) {
           this.currentState.lastError = `Stage timeout after ${STAGE_TIMEOUT_MS}ms`;
           this.transition(failureStage).catch(err => {

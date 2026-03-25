@@ -164,9 +164,6 @@ export function normalizeError(
 
   // Handle Error objects
   if (error instanceof Error) {
-    const message = error.message || "Provider execution failed";
-    const normalizedMessage = message.toLowerCase();
-
     // Check for known error codes in custom error objects
     if ("code" in error && typeof (error as any).code === "string") {
       const code = (error as any).code as ProviderErrorCode;
@@ -183,10 +180,10 @@ export function normalizeError(
     }
 
     // Check for specific error patterns
-    if (normalizedMessage.includes("timeout")) {
+    if (error.message.includes("timeout") || error.message.includes("TIMEOUT")) {
       return new NormalizedProviderError(
         "PROVIDER_TIMEOUT",
-        message,
+        error.message,
         source,
         ERROR_RETRYABLE_STATUS.PROVIDER_TIMEOUT,
         correlationId,
@@ -194,10 +191,10 @@ export function normalizeError(
       );
     }
 
-    if (normalizedMessage.includes("init") || normalizedMessage.includes("initialization")) {
+    if (error.message.includes("init") || error.message.includes("initialization")) {
       return new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
-        message,
+        error.message,
         source,
         ERROR_RETRYABLE_STATUS.PROVIDER_INIT_FAILED,
         correlationId,
@@ -205,16 +202,10 @@ export function normalizeError(
       );
     }
 
-    if (
-      normalizedMessage.includes("crash") ||
-      normalizedMessage.includes("exit") ||
-      normalizedMessage.includes("sigterm") ||
-      normalizedMessage.includes("sigkill") ||
-      normalizedMessage.includes("process killed")
-    ) {
+    if (error.message.includes("crash") || error.message.includes("exit")) {
       return new NormalizedProviderError(
         "PROVIDER_CRASHED",
-        message,
+        error.message,
         source,
         ERROR_RETRYABLE_STATUS.PROVIDER_CRASHED,
         correlationId,
@@ -222,10 +213,10 @@ export function normalizeError(
       );
     }
 
-    if (normalizedMessage.includes("unavailable")) {
+    if (error.message.includes("unavailable")) {
       return new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
-        message,
+        error.message,
         source,
         ERROR_RETRYABLE_STATUS.PROVIDER_UNAVAILABLE,
         correlationId,
@@ -236,7 +227,7 @@ export function normalizeError(
     // Fallback to generic execute failed
     return new NormalizedProviderError(
       "PROVIDER_EXECUTE_FAILED",
-      message,
+      error.message || "Provider execution failed",
       source,
       ERROR_RETRYABLE_STATUS.PROVIDER_EXECUTE_FAILED,
       correlationId,

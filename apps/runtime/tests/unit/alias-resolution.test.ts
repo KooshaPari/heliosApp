@@ -6,16 +6,6 @@
  */
 import { describe, expect, test } from "bun:test";
 
-declare module "@helios/runtime" {
-  export const VERSION: string;
-  export type HealthCheckResult = {
-    ok: boolean;
-    timestamp: number;
-    uptimeMs: number;
-  };
-  export function healthCheck(): HealthCheckResult;
-}
-
 describe("path alias resolution", () => {
   test("@helios/runtime resolves and exports VERSION", async () => {
     const runtime = await import("@helios/runtime");

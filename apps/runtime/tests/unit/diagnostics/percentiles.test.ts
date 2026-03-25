@@ -2,11 +2,7 @@
 
 import { describe, expect, it } from "bun:test";
 import { RingBuffer } from "../../../src/diagnostics/metrics.js";
-import {
-  computePercentiles,
-  EMPTY_PERCENTILE_BUCKET,
-} from "../../../src/diagnostics/percentiles.js";
-import type { PercentileBucket } from "../../../src/diagnostics/types.js";
+import { computePercentiles } from "../../../src/diagnostics/percentiles.js";
 
 describe("computePercentiles", () => {
   // FR-002: Known distribution [1..100]
