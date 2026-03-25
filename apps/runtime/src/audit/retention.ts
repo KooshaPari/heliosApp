@@ -112,7 +112,7 @@ export class RetentionPurger {
    * @param store - Audit store for deletion
    * @param eventSource - Function to get events for deletion
    */
-  async runPurge(workspaceId: string | undefined, _store: any, eventSource: any): Promise<void> {
+  async runPurge(workspaceId: string | undefined, store: any, eventSource: any): Promise<void> {
     const workspaces = workspaceId ? [workspaceId] : await eventSource.getWorkspaces();
 
     for (const ws of workspaces) {
@@ -120,6 +120,7 @@ export class RetentionPurger {
 
       // Skip if legal hold is enabled
       if (policy.legalHold) {
+        console.log(`[RetentionPurger] Legal hold active for ${ws}, skipping purge`);
         continue;
       }
 

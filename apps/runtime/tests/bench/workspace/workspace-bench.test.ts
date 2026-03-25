@@ -64,6 +64,7 @@ describe("Workspace persistence benchmarks", () => {
     }, 20);
 
     const p95Val = p95(times);
+    console.log(`Create p95: ${p95Val.toFixed(2)}ms`);
     expect(p95Val).toBeLessThan(100 * CI_FACTOR);
   });
 
@@ -79,6 +80,7 @@ describe("Workspace persistence benchmarks", () => {
     }, 20);
 
     const p95Val = p95(times);
+    console.log(`Flush (50 ws) p95: ${p95Val.toFixed(2)}ms`);
     expect(p95Val).toBeLessThan(200 * CI_FACTOR);
   });
 
@@ -94,6 +96,7 @@ describe("Workspace persistence benchmarks", () => {
     }, 20);
 
     const p95Val = p95(times);
+    console.log(`Restore (50 ws) p95: ${p95Val.toFixed(2)}ms`);
     expect(p95Val).toBeLessThan(500 * CI_FACTOR);
   });
 });

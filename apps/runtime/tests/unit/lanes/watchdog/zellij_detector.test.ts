@@ -1,6 +1,6 @@
 // Unit tests for ZellijDetector
 
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { ZellijDetector } from "../../../../src/lanes/watchdog/zellij_detector.js";
 import type { SessionRegistry } from "../../../../src/lanes/watchdog/zellij_detector.js";
 

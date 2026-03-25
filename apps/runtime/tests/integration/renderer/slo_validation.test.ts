@@ -8,7 +8,6 @@
 
 import { describe, expect, it } from "bun:test";
 import { executeHotSwap } from "../../../src/renderer/hot_swap.js";
-import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 import { executeRestartWithRestore } from "../../../src/renderer/restart_restore.js";
 import { executeRollback } from "../../../src/renderer/rollback.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
@@ -24,9 +23,7 @@ import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
  * Calculate p95 (95th percentile) of timing values.
  */
 function calculateP95(values: number[]): number {
-  if (values.length === 0) {
-    return 0;
-  }
+  if (values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);
   const index = Math.ceil(sorted.length * 0.95) - 1;
   return sorted[Math.max(0, index)];

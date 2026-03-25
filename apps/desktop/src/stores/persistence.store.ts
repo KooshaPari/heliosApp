@@ -1,4 +1,4 @@
-import type { Conversation } from "@helios/runtime/types/conversation.ts";
+import type { Conversation, Message } from "../../../runtime/src/types/conversation";
 
 // In-memory persistence for renderer side
 // Will be wired to main process via RPC when ElectroBun is integrated

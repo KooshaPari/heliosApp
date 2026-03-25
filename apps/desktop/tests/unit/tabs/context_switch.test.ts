@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import {
-  type ActiveContext,
   ActiveContextStore,
-  getActiveContextStore,
+  type ActiveContext,
   resetActiveContextStore,
   getActiveContextStore,
 } from "../../../src/tabs/context_switch";
@@ -165,7 +164,7 @@ describe("ActiveContextStore", () => {
         sessionId: "session3",
       };
 
-      const emittedContexts: ActiveContext[] = [];
+      let emittedContexts: ActiveContext[] = [];
 
       store.onContextChange(event => {
         if (event.current) {

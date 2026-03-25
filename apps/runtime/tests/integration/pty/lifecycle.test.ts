@@ -4,9 +4,9 @@
  * These tests use Bun.spawn to create actual shell processes.
  */
 
-import { afterEach, describe, expect, it } from "bun:test";
-import { InMemoryBusPublisher } from "../../../src/pty/events.js";
+import { describe, expect, it, afterEach } from "bun:test";
 import { PtyManager } from "../../../src/pty/index.js";
+import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 
 const pidsToCleanup: number[] = [];
 
@@ -44,7 +44,7 @@ describe("PTY lifecycle integration", () => {
     // Verify spawned event was emitted.
     const spawnedEvt = bus.events.find(e => e.topic === "pty.spawned");
     expect(spawnedEvt).toBeDefined();
-    expect(spawnedEvt?.payload.pid).toBe(record.pid);
+    expect(spawnedEvt!.payload["pid"]).toBe(record.pid);
 
     // Verify state.changed event.
     const stateEvt = bus.events.find(e => e.topic === "pty.state.changed");

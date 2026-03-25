@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { InMemoryLocalBus } from "../../../src/protocol/bus.ts";
+import { InMemoryLocalBus } from "../../../src/protocol/bus";
 
 test("captures lane create latency metrics", async () => {
   const bus = new InMemoryLocalBus();

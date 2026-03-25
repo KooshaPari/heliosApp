@@ -6,7 +6,6 @@ import { readFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { Workspace, WorkspaceStore } from "./types.js";
 import {
-  PRIMARY_FILE,
   atomicWrite,
   computeChecksum,
   createSnapshot,
@@ -74,12 +73,12 @@ class Mutex {
 
       const entry = { resolve, timer };
 
-      if (this.locked) {
-        this.queue.push(entry);
-      } else {
+      if (!this.locked) {
         this.locked = true;
         clearTimeout(timer);
         resolve(this.createRelease());
+      } else {
+        this.queue.push(entry);
       }
     });
   }
@@ -87,9 +86,7 @@ class Mutex {
   private createRelease(): () => void {
     let released = false;
     return () => {
-      if (released) {
-        return;
-      }
+      if (released) return;
       released = true;
       const next = this.queue.shift();
       if (next) {
@@ -165,6 +162,7 @@ export class JsonWorkspaceStore implements WorkspaceStore {
   private async attemptRecovery(): Promise<void> {
     const corruption = await detectCorruption(this.dataDir);
     if (corruption.corrupted) {
+      console.warn(`[workspace-store] Primary file corrupted: ${corruption.reason}`);
     }
 
     const recovered = await recoverFromSnapshot(this.dataDir);

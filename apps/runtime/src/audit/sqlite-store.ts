@@ -232,9 +232,9 @@ export class SQLiteAuditStore {
         .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='audit_events'")
         .get();
 
-    if (!tableExists) {
-      // Create table
-      this.db.exec(`
+      if (!tableExists) {
+        // Create table
+        this.db.exec(`
           CREATE TABLE audit_events (
             id TEXT PRIMARY KEY,
             event_type TEXT NOT NULL,
@@ -252,8 +252,8 @@ export class SQLiteAuditStore {
           )
         `);
 
-      // Create indexes for efficient querying
-      this.db.exec(`
+        // Create indexes for efficient querying
+        this.db.exec(`
           CREATE INDEX idx_workspace_id ON audit_events(workspace_id);
           CREATE INDEX idx_lane_id ON audit_events(lane_id);
           CREATE INDEX idx_session_id ON audit_events(session_id);

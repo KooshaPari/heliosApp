@@ -1,4 +1,4 @@
-import type { TabSurface } from "./tab_surface.ts";
+import type { TabSurface } from "./tab_surface";
 
 export interface TabBarConfig {
   onTabSelected?: (tabId: string) => void;
@@ -22,7 +22,7 @@ export class TabBar {
   private selectedTabId: string | null = null;
   private pinnedTabIds = new Set<string>();
   private tabOrder: string[] = [];
-  private focusedTabIndex = 0;
+  private focusedTabIndex: number = 0;
   private draggedTabId: string | null = null;
   private config: Required<TabBarConfig>;
   private container: HTMLElement | null = null;
@@ -250,13 +250,12 @@ export class TabBar {
 
     switch (event.key) {
       case "Enter":
-      case " ": {
+      case " ":
         event.preventDefault();
         this.selectTab(tabId);
         break;
-      }
 
-      case "ArrowRight": {
+      case "ArrowRight":
         event.preventDefault();
         if (currentIndex < orderedTabs.length - 1) {
           const nextTab = orderedTabs[currentIndex + 1];
@@ -264,9 +263,8 @@ export class TabBar {
           this.focusTab(nextTab.getTabId());
         }
         break;
-      }
 
-      case "ArrowLeft": {
+      case "ArrowLeft":
         event.preventDefault();
         if (currentIndex > 0) {
           const prevTab = orderedTabs[currentIndex - 1];
@@ -274,7 +272,6 @@ export class TabBar {
           this.focusTab(prevTab.getTabId());
         }
         break;
-      }
 
       case "Tab":
         // Allow natural Tab behavior to move focus out of tab bar
@@ -289,9 +286,7 @@ export class TabBar {
    * Focus a tab by ID.
    */
   private focusTab(tabId: string): void {
-    if (!this.container) {
-      return;
-    }
+    if (!this.container) return;
 
     const tabEl = this.container.querySelector(`[data-tab-id="${tabId}"]`) as HTMLElement;
 

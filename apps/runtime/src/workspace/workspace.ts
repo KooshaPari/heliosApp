@@ -149,9 +149,7 @@ export class WorkspaceService {
 
   /** Fire-and-forget bus event. Never fails the calling operation. */
   private emitEvent(topic: string, payload: Record<string, unknown>): void {
-    if (this.publish == null) {
-      return;
-    }
+    if (this.publish == null) return;
     try {
       // Fire and forget — catch sync throws and promise rejections
       const result = this.publish(topic, payload);

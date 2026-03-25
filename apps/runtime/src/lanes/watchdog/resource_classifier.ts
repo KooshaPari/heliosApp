@@ -66,10 +66,10 @@ export class ResourceClassifier {
     // Known owner: risk increases with age
     if (ageHours < 1) {
       return "low";
-    }
-    if (ageHours < 24) {
+    } else if (ageHours < 24) {
       return "medium";
+    } else {
+      return "high";
     }
-    return "high";
   }
 }

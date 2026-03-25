@@ -1,14 +1,14 @@
 import { describe, expect, it, mock } from "bun:test";
 import {
-  type EventBus,
-  type MuxEvent,
   MuxEventEmitter,
   MuxEventType,
-  type PaneAddedEvent,
-  type PaneDimensionRejectedEvent,
-  type SessionCreatedEvent,
-  type TabSwitchedEvent,
   generateCorrelationId,
+  type EventBus,
+  type MuxEvent,
+  type SessionCreatedEvent,
+  type PaneAddedEvent,
+  type TabSwitchedEvent,
+  type PaneDimensionRejectedEvent,
 } from "../events.js";
 
 function makeBus(): EventBus & { events: MuxEvent[] } {
@@ -145,9 +145,7 @@ describe("MuxEventEmitter", () => {
     const bus: EventBus = {
       publish: mock(async () => {
         callCount++;
-        if (callCount === 1) {
-          throw new Error("transient");
-        }
+        if (callCount === 1) throw new Error("transient");
       }),
     };
     const emitter = new MuxEventEmitter(bus);

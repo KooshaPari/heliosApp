@@ -8,7 +8,7 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { type TerminalContext, executeHotSwap } from "../../../src/renderer/hot_swap.js";
+import { executeHotSwap, type TerminalContext } from "../../../src/renderer/hot_swap.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
 import {
   MockGhosttyAdapter,
@@ -50,7 +50,7 @@ describe("Hot-swap integration", () => {
     expect(result.success).toBe(true);
     expect(result.phase).toBe("committed");
     expect(result.preservedContexts.length).toBe(1);
-    expect(result.preservedContexts[0]?.ptyId).toBe("pty-1");
+    expect(result.preservedContexts[0]!.ptyId).toBe("pty-1");
   });
 
   it("successfully hot-swaps multiple terminals", async () => {

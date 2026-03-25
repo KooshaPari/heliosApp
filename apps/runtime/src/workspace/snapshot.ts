@@ -114,14 +114,10 @@ export async function recoverFromSnapshot(dataDir: string): Promise<Workspace[] 
     return null;
   }
 
-  if (!isValidEnvelope(parsed)) {
-    return null;
-  }
+  if (!isValidEnvelope(parsed)) return null;
 
   const expected = computeChecksum(parsed.workspaces);
-  if (parsed._checksum !== expected) {
-    return null;
-  }
+  if (parsed._checksum !== expected) return null;
 
   return parsed.workspaces;
 }

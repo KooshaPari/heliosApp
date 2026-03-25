@@ -1,6 +1,6 @@
-import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference.ts";
-import type { InferenceEngine } from "./engine.ts";
-import { detectHardware } from "./hardware.ts";
+import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
+import type { InferenceEngine } from "./engine";
+import { detectHardware } from "./hardware";
 
 export class MlxInferenceEngine implements InferenceEngine {
   readonly id = "mlx";
@@ -35,9 +35,7 @@ export class MlxInferenceEngine implements InferenceEngine {
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
     const prompt = request.messages.map(m => `${m.role}: ${m.content}`).join("\n");
     const args = ["python3", "-m", "mlx_lm.generate", "--model", request.model, "--prompt", prompt];
-    if (request.maxTokens) {
-      args.push("--max-tokens", String(request.maxTokens));
-    }
+    if (request.maxTokens) args.push("--max-tokens", String(request.maxTokens));
 
     const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
     const output = await new Response(proc.stdout).text();
@@ -81,9 +79,7 @@ export class MlxInferenceEngine implements InferenceEngine {
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
     const hw = await detectHardware();
-    if (!hw.hasAppleSilicon) {
-      return "unavailable";
-    }
+    if (!hw.hasAppleSilicon) return "unavailable";
     try {
       const proc = Bun.spawn(["python3", "-c", "import mlx_lm"], {
         stdout: "pipe",

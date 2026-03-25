@@ -136,7 +136,7 @@ describe("CheckpointScheduler", () => {
 
       // First checkpoint at 60s
       vi.advanceTimersByTime(60100);
-      const _firstTime = Date.now();
+      const firstTime = Date.now();
 
       // The scheduler should have increased its interval
       vi.advanceTimersByTime(60100); // Only 60s more, but interval was doubled

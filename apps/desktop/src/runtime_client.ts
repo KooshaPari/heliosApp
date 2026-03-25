@@ -1,6 +1,6 @@
-import type { LocalBusEnvelope } from "@helios/runtime/protocol/types";
-import type { RuntimeState } from "@helios/runtime/sessions/state_machine";
-import type { LocalBus } from "@helios/runtime/protocol/bus";
+import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
+import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
+import type { LocalBus } from "../../runtime/src/protocol/bus";
 import type { RendererEngine } from "./settings";
 import type { TransportDiagnostics } from "./context_store";
 

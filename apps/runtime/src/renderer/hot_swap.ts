@@ -7,9 +7,9 @@
  * @see FR-010-009, SC-010-002
  */
 
-import type { RenderSurface, RendererAdapter, RendererConfig } from "./adapter.js";
-import type { RendererEventBus } from "./index.js";
+import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.js";
 import type { SwitchBuffer } from "./stream_binding.js";
+import type { RendererEventBus } from "./index.js";
 
 // ---------------------------------------------------------------------------
 // Errors

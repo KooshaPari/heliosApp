@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import type { Conversation, Message } from "../../../runtime/src/types/conversation.ts";
+import type { Conversation, Message } from "../../../runtime/src/types/conversation";
 
 const [conversations, setConversations] = createSignal<Conversation[]>([]);
 const [activeConversationId, setActiveConversationId] = createSignal<string | null>(null);
@@ -17,9 +17,7 @@ export function getConversations(): Conversation[] {
 
 export function getActiveConversation(): Conversation | null {
   const id = activeConversationId();
-  if (!id) {
-    return null;
-  }
+  if (!id) return null;
   return conversations().find(c => c.id === id) ?? null;
 }
 
@@ -187,9 +185,7 @@ function finalizeAssistantMessage(
 export function cancelResponse(): void {
   // TODO: AbortController integration for cancelling in-flight requests
   const conv = getActiveConversation();
-  if (!conv) {
-    return;
-  }
+  if (!conv) return;
   const lastMsg = conv.messages[conv.messages.length - 1];
   if (lastMsg?.metadata?.status === "streaming") {
     finalizeAssistantMessage(conv.id, lastMsg.id, "cancelled");

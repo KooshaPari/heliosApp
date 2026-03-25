@@ -45,7 +45,7 @@
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
       "semicolons": "always",
-      "trailingCommas": "es5"
+      "trailingComma": "es5"
     }
   },
   "overrides": [
@@ -55,74 +55,6 @@
         "rules": {
           "style": {
             "useNamingConvention": "off"
-          }
-        }
-      }
-    },
-    {
-      "include": ["tsconfig*.json", "**/tsconfig*.json"],
-      "formatter": {
-        "enabled": true
-      },
-      "linter": {
-        "enabled": false
-      }
-    },
-    {
-      "include": ["playwright.config.ts", "docs/.vitepress/theme/index.ts"],
-      "linter": {
-        "rules": {
-          "style": {
-            "noDefaultExport": "off"
-          }
-        }
-      }
-    },
-    {
-      "include": ["tools/gates/**"],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "noNodejsModules": "off"
-          }
-        }
-      }
-    },
-    {
-      "include": ["apps/desktop/src/panels/lane_actions.ts"],
-      "linter": {
-        "rules": {
-          "style": {
-            "useNamingConvention": "off"
-          },
-          "suspicious": {
-            "noExplicitAny": "off"
-          },
-          "complexity": {
-            "noForEach": "off"
-          }
-        }
-      }
-    },
-    {
-      "include": ["apps/desktop/src/settings/**", "apps/desktop/src/tabs/**"],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "noNodejsModules": "off"
-          },
-          "suspicious": {
-            "noEmptyBlockStatements": "off"
-          }
-        }
-      }
-    },
-    {
-      "include": ["apps/runtime/src/**", "apps/runtime/tests/**"],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "noNodejsModules": "off"
           }
         }
       }

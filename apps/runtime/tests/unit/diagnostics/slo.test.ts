@@ -1,7 +1,7 @@
 // FR-003: Unit tests for SLO definitions and checks.
 
-import { describe, expect, it } from "bun:test";
-import { SLO_DEFINITIONS, checkSLO, getSLOsForMetric } from "../../../src/diagnostics/slo.js";
+import { describe, it, expect } from "bun:test";
+import { SLO_DEFINITIONS, getSLOsForMetric, checkSLO } from "../../../src/diagnostics/slo.js";
 import type { PercentileBucket, SLODefinition } from "../../../src/diagnostics/types.js";
 
 function makeBucket(overrides: Partial<PercentileBucket> = {}): PercentileBucket {
@@ -33,7 +33,7 @@ describe("getSLOsForMetric", () => {
   it("returns single SLO for fps", () => {
     const slos = getSLOsForMetric("fps");
     expect(slos.length).toBe(1);
-    expect(slos[0]?.threshold).toBe(60);
+    expect(slos[0]!.threshold).toBe(60);
   });
 });
 

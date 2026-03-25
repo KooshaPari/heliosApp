@@ -6,8 +6,8 @@
  */
 
 import { healthCheck, VERSION, type HealthCheckResult } from "@helios/runtime";
-import { InMemoryLocalBus } from "@helios/runtime/protocol/bus/emitter.js";
-import type { LocalBus } from "@helios/runtime/protocol/bus.js";
+import { InMemoryLocalBus } from "../../runtime/src/protocol/bus/emitter.js";
+import type { LocalBus } from "../../runtime/src/protocol/bus.js";
 import {
   ActiveContextStore,
   selectActiveContext,

@@ -180,7 +180,6 @@ export class AuditLedgerAPI {
       } else {
         throw new Error("Invalid time range parameters");
       }
-      filter.timeRange = { from, to };
     }
 
     if (queryParams.limit) {

@@ -5,8 +5,6 @@ import { promises as fs } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 import type { BindingTriple } from "../../../src/registry/binding_triple.js";
-import { InMemoryPersistence, JsonFilePersistence } from "../../../src/registry/persistence.js";
-import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 
 describe("Persistence Integration", () => {
   let registry: TerminalRegistry;

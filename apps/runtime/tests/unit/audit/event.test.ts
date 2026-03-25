@@ -72,7 +72,7 @@ describe("AuditEvent Schema", () => {
       });
 
       const ts = new Date(event.timestamp);
-      expect(Number.isNaN(ts.getTime())).toBe(false);
+      expect(isNaN(ts.getTime())).toBe(false);
       expect(event.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     });
 
@@ -219,7 +219,7 @@ describe("AuditEvent Schema", () => {
         workspaceId: "workspace-1",
         correlationId: "corr-1",
         metadata: [], // Invalid: should be object
-      } as unknown as AuditEvent;
+      };
 
       expect(validateAuditEvent(event)).toBe(false);
     });

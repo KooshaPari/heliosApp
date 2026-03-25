@@ -2,18 +2,18 @@
  * T016 - Stress and edge case tests.
  */
 
-import { describe, expect, it, mock } from "bun:test";
-import type { ZellijCli } from "../../../../src/integrations/zellij/cli.js";
+import { describe, expect, it, mock, beforeEach } from "bun:test";
+import { ZellijSessionManager } from "../../../../src/integrations/zellij/session.js";
+import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
+import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
+import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
 import {
+  MuxEventEmitter,
   type EventBus,
   type MuxEvent,
-  MuxEventEmitter,
 } from "../../../../src/integrations/zellij/events.js";
-import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
 import { reconcile } from "../../../../src/integrations/zellij/reconciliation.js";
-import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
-import { ZellijSessionManager } from "../../../../src/integrations/zellij/session.js";
-import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
+import type { ZellijCli } from "../../../../src/integrations/zellij/cli.js";
 import type { CliResult, ZellijSession } from "../../../../src/integrations/zellij/types.js";
 
 // Reuse the FakeCli pattern

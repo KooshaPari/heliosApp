@@ -1,7 +1,7 @@
 // FR-001, FR-009: Unit tests for RingBuffer and MetricsRegistry.
 
-import { beforeEach, describe, expect, it } from "bun:test";
-import { MetricsRegistry, RingBuffer } from "../../../src/diagnostics/metrics.js";
+import { describe, it, expect, beforeEach } from "bun:test";
+import { RingBuffer, MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 import type { MetricDefinition } from "../../../src/diagnostics/types.js";
 
 // ── RingBuffer ─────────────────────────────────────────────────────────
@@ -136,9 +136,9 @@ describe("MetricsRegistry", () => {
 
     const metric = registry.getMetric("input_latency");
     expect(metric).toBeDefined();
-    expect(metric?.definition.name).toBe("input_latency");
-    expect(metric?.buffer.getCount()).toBe(2);
-    expect(Array.from(metric?.buffer.getValues())).toEqual([12.5, 8.3]);
+    expect(metric!.definition.name).toBe("input_latency");
+    expect(metric!.buffer.getCount()).toBe(2);
+    expect(Array.from(metric!.buffer.getValues())).toEqual([12.5, 8.3]);
   });
 
   it("lazy buffer allocation: no buffer until first record", () => {
@@ -154,7 +154,7 @@ describe("MetricsRegistry", () => {
     registry.register(latencyDef);
     const def = registry.getDefinition("input_latency");
     expect(def).toBeDefined();
-    expect(def?.name).toBe("input_latency");
+    expect(def!.name).toBe("input_latency");
   });
 
   it("unregister removes metric", () => {
@@ -172,7 +172,7 @@ describe("MetricsRegistry", () => {
     // If it used monotonicNow the timestamp would be very different from 99999.
     // We verify indirectly by checking the value was stored.
     const metric = registry.getMetric("input_latency");
-    expect(metric?.buffer.getCount()).toBe(1);
+    expect(metric!.buffer.getCount()).toBe(1);
   });
 
   it("respects custom bufferSize from definition", () => {
@@ -188,7 +188,7 @@ describe("MetricsRegistry", () => {
       registry.record("tiny", i, i * 10);
     }
     const metric = registry.getMetric("tiny");
-    expect(metric?.buffer.getCount()).toBe(3);
-    expect(metric?.buffer.getOverflowCount()).toBe(2);
+    expect(metric!.buffer.getCount()).toBe(3);
+    expect(metric!.buffer.getOverflowCount()).toBe(2);
   });
 });

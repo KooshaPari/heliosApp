@@ -3,9 +3,9 @@ import { RestorationPipeline, type RestorationResult } from "../restoration.js";
 import { RecoveryStateMachine, RecoveryStage } from "../state-machine.js";
 import { CheckpointWriter, type Checkpoint, type CheckpointSession } from "../checkpoint.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
-import type { Checkpoint, CheckpointSession } from "../checkpoint.js";
-import { RestorationPipeline } from "../restoration.js";
-import { RecoveryStage, RecoveryStateMachine } from "../state-machine.js";
+import { promises as fs } from "fs";
+import path from "path";
+import os from "os";
 
 describe("Integration Tests - Crash to Live Recovery", () => {
   let tempDir: string;
@@ -117,7 +117,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
       await stateMachine.transition(RecoveryStage.RESTORING);
 
       // Get current stage
-      const _checkpoint = createMockCheckpoint(5);
+      const checkpoint = createMockCheckpoint(5);
       const beforeCrash = stateMachine.getCurrentStage();
 
       // Simulate second recovery after crash - should resume from RESTORING

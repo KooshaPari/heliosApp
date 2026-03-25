@@ -1,6 +1,6 @@
 import { type Component, For, Show, createEffect } from "solid-js";
-import type { Message } from "../../../../runtime/src/types/conversation.ts";
-import { MessageBubble } from "./MessageBubble.tsx";
+import type { Message } from "../../../../runtime/src/types/conversation";
+import { MessageBubble } from "./MessageBubble";
 
 type ChatPanelProps = {
   messages: Message[];
@@ -15,7 +15,7 @@ export const ChatPanel: Component<ChatPanelProps> = props => {
     const _ = props.messages.length;
     if (containerRef) {
       requestAnimationFrame(() => {
-        containerRef!.scrollTop = containerRef?.scrollHeight;
+        containerRef!.scrollTop = containerRef!.scrollHeight;
       });
     }
   });

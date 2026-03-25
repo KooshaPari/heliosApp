@@ -1,8 +1,8 @@
-import { describe, expect, it } from "bun:test";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { RedactionAuditTrail } from "../audit-trail.js";
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules } from "../redaction-rules.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 
 function makeEngine(): RedactionEngine {
   const engine = new RedactionEngine();
@@ -39,7 +39,7 @@ describe("RedactionAuditTrail: record creation", () => {
     expect(record.artifactType).toBe("log");
     expect(record.correlationId).toBe("corr-1");
     expect(record.rulesApplied.length).toBeGreaterThan(0);
-    expect(record.matchesByCategory.AWS_ACCESS_KEY).toBeGreaterThan(0);
+    expect(record.matchesByCategory["AWS_ACCESS_KEY"]).toBeGreaterThan(0);
     expect(record.timestamp).toBeTruthy();
     expect(record.latencyMs).toBeGreaterThanOrEqual(0);
   });

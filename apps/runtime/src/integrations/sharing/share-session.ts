@@ -142,16 +142,10 @@ export class ShareSessionManager {
   private sessionsByTerminal = new Map<string, Set<string>>();
   private bus: LocalBus | null = null;
   private policyGate: PolicyGate;
-  private nextSessionOrdinal = 0;
 
   constructor(bus?: LocalBus, policyGate?: PolicyGate) {
     this.bus = bus || null;
     this.policyGate = policyGate || new DefaultPolicyGate();
-  }
-
-  private createSessionId(): string {
-    this.nextSessionOrdinal += 1;
-    return `share-${Date.now()}-${this.nextSessionOrdinal}`;
   }
 
   /**
@@ -182,7 +176,7 @@ export class ShareSessionManager {
 
     if (!policyDecision.allowed) {
       const session: ShareSession = {
-        id: this.createSessionId(),
+        id: `share-${Date.now()}`,
         terminalId,
         backend,
         shareLink: null,
@@ -205,7 +199,7 @@ export class ShareSessionManager {
 
     // Create session in pending state
     const session: ShareSession = {
-      id: this.createSessionId(),
+      id: `share-${Date.now()}`,
       terminalId,
       backend,
       shareLink: null,
@@ -221,7 +215,7 @@ export class ShareSessionManager {
     if (!this.sessionsByTerminal.has(terminalId)) {
       this.sessionsByTerminal.set(terminalId, new Set());
     }
-    this.sessionsByTerminal.get(terminalId)?.add(session.id);
+    this.sessionsByTerminal.get(terminalId)!.add(session.id);
 
     await this.publishEvent("share.session.created", {
       sessionId: session.id,
@@ -344,6 +338,8 @@ export class ShareSessionManager {
         topic,
         payload,
       });
-    } catch (_error) {}
+    } catch (error) {
+      console.warn(`Failed to publish share event ${topic}:`, error);
+    }
   }
 }

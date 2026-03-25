@@ -9,19 +9,19 @@
  *   SC-028-005: Redaction audit trail present for every persisted artifact
  */
 
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { randomBytes } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { mkdtempSync, rmSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { AuditSink } from "../../audit/audit-sink.js";
-import { InMemoryLocalBus, type LocalBus } from "../../protocol/bus.js";
-import { RedactionAuditTrail } from "../audit-trail.js";
-import { CredentialAccessDeniedError, CredentialStore } from "../credential-store.js";
+import { randomBytes } from "node:crypto";
+import { CredentialStore, CredentialAccessDeniedError } from "../credential-store.js";
 import { EncryptionService } from "../encryption.js";
-import { ProtectedPathConfig, ProtectedPathDetector } from "../protected-paths.js";
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules } from "../redaction-rules.js";
+import { RedactionAuditTrail } from "../audit-trail.js";
+import { ProtectedPathDetector, ProtectedPathConfig } from "../protected-paths.js";
+import { AuditSink } from "../../audit/audit-sink.js";
+import { InMemoryLocalBus, type LocalBus } from "../../protocol/bus.js";
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -464,8 +464,8 @@ describe("Integration Tests (T015)", () => {
       const bus = new InMemoryLocalBus();
       const store = makeStore(tmpDir, bus);
 
-      const oldValue = `old-secret-${randomBytes(8).toString("hex")}`;
-      const newValue = `new-secret-${randomBytes(8).toString("hex")}`;
+      const oldValue = "old-secret-" + randomBytes(8).toString("hex");
+      const newValue = "new-secret-" + randomBytes(8).toString("hex");
 
       await store.create("prov", "ws", "apiKey", oldValue, "corr-create");
 

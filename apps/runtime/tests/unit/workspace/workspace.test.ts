@@ -5,6 +5,10 @@
 
 import { describe, test, expect } from "bun:test";
 import {
+  createWorkspace,
+  openWorkspace,
+  closeWorkspace,
+  deleteWorkspace,
   WorkspaceService,
 } from "../../../src/workspace/workspace.js";
 import { createInMemoryStore } from "../../../src/workspace/store.js";

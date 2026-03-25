@@ -42,7 +42,7 @@ describe("Storage Chaos Tests", () => {
       if (fs.existsSync(TMP_DIR)) {
         fs.rmdirSync(TMP_DIR);
       }
-    } catch (_err) {
+    } catch (err) {
       // Ignore cleanup errors
     }
   });
@@ -58,7 +58,7 @@ describe("Storage Chaos Tests", () => {
 
     const sink = new DefaultAuditSink(storageAdapter, 1000);
 
-    let _writtenCount = 0;
+    let writtenCount = 0;
     for (let i = 0; i < 50_000; i++) {
       const event = createAuditEvent({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
@@ -72,7 +72,7 @@ describe("Storage Chaos Tests", () => {
       });
 
       await sink.write(event);
-      _writtenCount++;
+      writtenCount++;
 
       // Periodically flush
       if (i % 10_000 === 0) {
@@ -262,6 +262,9 @@ describe("Storage Chaos Tests", () => {
     // 3M events at this rate should be < 500MB
     // (EVENT_COUNT / 3M) * storageSize < 500MB
     const projectedSize = (3_000_000 / EVENT_COUNT) * storageSize;
+
+    console.log(`Storage test: ${eventCount} events, ${storageSize} bytes`);
+    console.log(`Projected size for 3M events: ${projectedSize / 1024 / 1024} MB`);
 
     // Ensure per-event size is reasonable (< 200 bytes per event)
     expect(sizePerEvent).toBeLessThan(200);

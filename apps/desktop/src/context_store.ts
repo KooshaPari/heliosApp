@@ -1,4 +1,4 @@
-import type { RuntimeState } from "@helios/runtime/sessions/state_machine.ts";
+import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
 
 export type ActiveTab = "terminal" | "agent" | "session" | "chat" | "project";
 

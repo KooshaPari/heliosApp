@@ -7,13 +7,13 @@
 
 import type { RendererAdapter, RendererConfig, RendererState, RenderSurface } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
-import { detectCapabilities, getCachedCapabilities } from "./capabilities.js";
-import { GhosttyInputRelay } from "./input.js";
-import type { PtyWriter } from "./input.js";
-import { GhosttyMetrics } from "./metrics.js";
-import type { MetricsPublisher, MetricsSnapshot } from "./metrics.js";
 import { GhosttyProcess } from "./process.js";
 import { GhosttySurface } from "./surface.js";
+import { detectCapabilities, getCachedCapabilities } from "./capabilities.js";
+import { GhosttyMetrics } from "./metrics.js";
+import type { MetricsSnapshot, MetricsPublisher } from "./metrics.js";
+import { GhosttyInputRelay } from "./input.js";
+import type { PtyWriter, GhosttyInputEvent } from "./input.js";
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -400,12 +400,8 @@ export class GhosttyBackend implements RendererAdapter {
   }
 
   private _checkRenderStall(): void {
-    if (this._state !== "running") {
-      return;
-    }
-    if (this._lastFrameTimestamp === 0) {
-      return;
-    }
+    if (this._state !== "running") return;
+    if (this._lastFrameTimestamp === 0) return;
 
     const elapsed = Date.now() - this._lastFrameTimestamp;
     if (elapsed > 500) {

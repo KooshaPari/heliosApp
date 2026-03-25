@@ -6,7 +6,6 @@
 import {
   type PolicyRule,
   PolicyClassification,
-  type PolicyEvaluationResult,
   PolicyPatternType,
   type CommandContext,
   type PolicyEvaluationResult,
@@ -115,7 +114,7 @@ export class PolicyRuleSet {
         }
 
         const hasMatchingPath = context.affectedPaths.some(path => {
-          return rule.targets?.some(target => {
+          return rule.targets!.some(target => {
             return this.patternMatcher.matches(path, target, PolicyPatternType.Glob);
           });
         });

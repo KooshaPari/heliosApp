@@ -14,8 +14,6 @@ import type {
   RendererState,
 } from "../../../../src/renderer/adapter.js";
 import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
-import { RendererRegistry } from "../../../../src/renderer/registry.js";
-import { RioBackend } from "../../../../src/renderer/rio/backend.js";
 
 // ---------------------------------------------------------------------------
 // Mock ghostty
@@ -32,9 +30,7 @@ function createMockGhostty(opts?: {
 
     async init(_config: RendererConfig): Promise<void> {
       adapter._initCalled = true;
-      if (opts?.failInit) {
-        throw new Error("ghostty init failed");
-      }
+      if (opts?.failInit) throw new Error("ghostty init failed");
       adapter._state = "running";
     },
     async start(_surface: RenderSurface): Promise<void> {

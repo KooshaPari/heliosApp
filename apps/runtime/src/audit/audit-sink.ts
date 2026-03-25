@@ -79,9 +79,7 @@ export class AuditSink {
    */
   async ingest(envelope: LocalBusEnvelope): Promise<AuditRecord | null> {
     const topic = envelope.topic ?? "";
-    if (!this.watchedTopics.has(topic)) {
-      return null;
-    }
+    if (!this.watchedTopics.has(topic)) return null;
 
     const correlationId: string =
       (envelope.payload?.correlationId as string | undefined) ?? randomBytes(8).toString("hex");

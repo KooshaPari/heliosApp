@@ -6,9 +6,9 @@
  */
 
 import type {
-  RenderSurface,
   RendererAdapter,
   RendererConfig,
+  RenderSurface,
   RendererState,
 } from "../../src/renderer/adapter.js";
 import type { RendererCapabilities } from "../../src/renderer/capabilities.js";
@@ -75,7 +75,7 @@ export class BaseMockAdapter implements RendererAdapter {
     handleInput: 0,
   };
 
-  constructor(id: string, version = "1.0.0", opts: MockAdapterOptions = {}) {
+  constructor(id: string, version: string = "1.0.0", opts: MockAdapterOptions = {}) {
     this.id = id;
     this.version = version;
     this._opts = opts;

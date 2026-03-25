@@ -8,9 +8,9 @@
 
 import { describe, test, expect, afterEach, mock, beforeEach } from "bun:test";
 import {
-  clearCapabilityCache,
   detectCapabilities,
   getCachedCapabilities,
+  clearCapabilityCache,
 } from "../../../../src/renderer/ghostty/capabilities.js";
 
 // Mock Bun.spawn to avoid slow system_profiler calls in tests
@@ -63,7 +63,7 @@ describe("Capability detection", () => {
   });
 
   test("detectCapabilities forceRefresh re-detects", async () => {
-    const _caps1 = await detectCapabilities();
+    const caps1 = await detectCapabilities();
     const caps2 = await detectCapabilities(true);
     // Both valid but may be different objects
     expect(caps2).toBeDefined();

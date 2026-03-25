@@ -1,8 +1,8 @@
 // FR-008, NFR-001: Microbenchmarks proving instrumentation overhead < 0.1ms per measurement.
 
-import { describe, expect, it } from "bun:test";
+import { describe, it, expect } from "bun:test";
 import { createInstrumentationHooks } from "../../../src/diagnostics/hooks.js";
-import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
+import { MetricsRegistry, RingBuffer } from "../../../src/diagnostics/metrics.js";
 import { computePercentiles } from "../../../src/diagnostics/percentiles.js";
 import { SLOMonitor } from "../../../src/diagnostics/slo.js";
 import type { SLODefinition } from "../../../src/diagnostics/types.js";
@@ -31,9 +31,7 @@ function benchmarkLoop(
   const p99Index = Math.ceil(0.99 * iterations) - 1;
   const medIndex = Math.ceil(0.5 * iterations) - 1;
   let sum = 0;
-  for (let i = 0; i < iterations; i++) {
-    sum += durations[i]!;
-  }
+  for (let i = 0; i < iterations; i++) sum += durations[i]!;
 
   return {
     p99: durations[p99Index]!,
@@ -49,6 +47,8 @@ describe("Instrumentation Overhead Benchmarks", () => {
       const h = hooks.markStart("bench-metric");
       hooks.markEnd("bench-metric", h);
     });
+
+    console.log(JSON.stringify({ benchmark: "markStart+markEnd", ...result }));
     expect(result.p99).toBeLessThan(0.1 * CI_FACTOR);
   });
 
@@ -65,6 +65,8 @@ describe("Instrumentation Overhead Benchmarks", () => {
     const result = benchmarkLoop(100_000, WARMUP, () => {
       registry.record("bench-record", 42, ts++);
     });
+
+    console.log(JSON.stringify({ benchmark: "record", ...result }));
     expect(result.p99).toBeLessThan(0.05 * CI_FACTOR);
   });
 
@@ -77,6 +79,8 @@ describe("Instrumentation Overhead Benchmarks", () => {
     const result = benchmarkLoop(1_000, WARMUP, () => {
       computePercentiles(values);
     });
+
+    console.log(JSON.stringify({ benchmark: "computePercentiles-10k", ...result }));
     expect(result.p99).toBeLessThan(1 * CI_FACTOR);
   });
 
@@ -98,12 +102,14 @@ describe("Instrumentation Overhead Benchmarks", () => {
       defs.push({ metric: name, percentile: "p95", threshold: 50, unit: "ms" });
     }
 
-    const monitor = new SLOMonitor(registry, defs, () => {});
+    const monitor = new SLOMonitor(registry, defs);
 
     const result = benchmarkLoop(1_000, WARMUP, () => {
       monitor.resetRateLimiter(); // allow re-check each iteration
       monitor.checkAll();
     });
+
+    console.log(JSON.stringify({ benchmark: "checkAll-10-slos", ...result }));
     expect(result.p99).toBeLessThan(5 * CI_FACTOR);
   });
 });

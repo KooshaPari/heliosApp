@@ -189,7 +189,7 @@ export class DefaultAuditSink implements AuditSink {
           await this.storage.persist(eventsToPersist);
           this.buffer = [];
           break;
-        } catch (_err) {
+        } catch (err) {
           this.metrics.persistenceFailures++;
           this.metrics.retryCount++;
           retries++;
@@ -223,7 +223,7 @@ export class DefaultAuditSink implements AuditSink {
         await this.storage.persist(eventsToPersist);
         this.overflowQueue = [];
         break;
-      } catch (_err) {
+      } catch (err) {
         this.metrics.sqliteWriteFailures!++;
         this.metrics.sqliteRetryCount!++;
         retries++;

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 
 const specPath =
 	process.env.TRACE_SPEC_PATH ??

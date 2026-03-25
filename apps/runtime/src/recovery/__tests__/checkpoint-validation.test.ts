@@ -1,9 +1,9 @@
 import { describe, it, expect } from "bun:test";
 import {
+  validateCheckpoint,
   CHECKPOINT_VERSION,
   type Checkpoint,
   type CheckpointSession,
-  validateCheckpoint,
 } from "../checkpoint.js";
 
 describe("Checkpoint Validation", () => {

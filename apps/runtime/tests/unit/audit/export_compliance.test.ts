@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { InMemoryAuditSink } from "../../../src/audit/sink.ts";
+import { InMemoryAuditSink } from "../../../src/audit/sink";
 
 describe("audit export compliance", () => {
   test("exports required correlation fields", async () => {

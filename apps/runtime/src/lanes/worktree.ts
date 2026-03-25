@@ -1,7 +1,7 @@
 // T006, T007, T010 - Git worktree provisioning, cleanup, and partial failure handling
 
-import * as fs from "node:fs";
 import * as path from "node:path";
+import * as fs from "node:fs";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -74,7 +74,7 @@ type SpawnOptions = {
   env?: Record<string, string>;
 };
 
-const _spawn: (command: string[], options: SpawnOptions) => SpawnResult =
+const spawn: (command: string[], options: SpawnOptions) => SpawnResult =
   (
     (globalThis as Record<string, unknown>).Bun as
       | {
@@ -165,7 +165,7 @@ export async function removeWorktree(
   const branchName = computeBranchName(laneId);
 
   // Try git worktree remove --force
-  const _removeResult = await runGit(
+  const removeResult = await runGit(
     ["worktree", "remove", worktreePath, "--force"],
     workspaceRepoPath
   );
@@ -262,9 +262,7 @@ export async function reconcileOrphanedWorktrees(
     }
 
     for (const entry of entries) {
-      if (!entry.isDirectory()) {
-        continue;
-      }
+      if (!entry.isDirectory()) continue;
       const laneId = entry.name;
       if (!knownLaneIds.has(laneId)) {
         result.orphanedWorktrees++;
@@ -291,6 +289,6 @@ export async function reconcileOrphanedWorktrees(
 export const lastMetrics: WorktreeLatencyMetrics = {};
 
 export function resetMetrics(): void {
-  lastMetrics.provisionMs = undefined;
-  lastMetrics.cleanupMs = undefined;
+  delete lastMetrics.provisionMs;
+  delete lastMetrics.cleanupMs;
 }

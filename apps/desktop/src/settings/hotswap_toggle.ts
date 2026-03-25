@@ -31,9 +31,7 @@ export class HotSwapToggle {
   }
 
   private render(): void {
-    if (!this.container) {
-      return;
-    }
+    if (!this.container) return;
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
@@ -139,13 +137,10 @@ export class HotSwapToggle {
     } else {
       return "Slower but more reliable switch (~8s) via full restart.";
     }
-    return "Slower but more reliable switch (~8s) via full restart.";
   }
 
   private attachEventListeners(): void {
-    if (!this.container) {
-      return;
-    }
+    if (!this.container) return;
 
     const toggleSwitch = this.container.querySelector(".hotswap-switch") as HTMLElement;
     const checkbox = this.container.querySelector("#hotswap-toggle") as HTMLInputElement;
