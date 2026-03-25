@@ -23,6 +23,7 @@
 		"docs:dev": "vitepress dev docs",
 		"docs:build": "bun run docs:index && vitepress build docs",
 		"docs:preview": "vitepress preview docs",
+		"governance:query": "tsx scripts/governance-log.ts",
 		"deps:status": "bun scripts/deps-status.ts",
 		"deps:rollback": "bun scripts/deps-rollback.ts",
 		"deps:canary": "bun scripts/deps-canary.ts",

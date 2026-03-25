@@ -7,6 +7,8 @@
 .amazonq/
 .github/copilot/
 .kittify/.dashboard
+!.kittify/memory/
+!.kittify/memory/constitution.md
 !.gemini/
 !.gemini/config.yaml
 *.tsbuildinfo
