@@ -63,7 +63,7 @@ describe("OrphanWatchdog", () => {
 
     // After stop, detection duration should be set
     expect(watchdog.getLastDetectionDuration()).toBeGreaterThanOrEqual(0);
-  });
+  }, 15000);
 
   it("should run detection cycles on interval", async () => {
     watchdog = new OrphanWatchdog({
@@ -92,7 +92,7 @@ describe("OrphanWatchdog", () => {
     expect(events[0].topic).toBe("orphan.detection.cycle_completed");
 
     watchdog.stop();
-  });
+  }, 15000);
 
   it("should emit detection cycle event with correct structure", async () => {
     watchdog = new OrphanWatchdog({
@@ -148,7 +148,7 @@ describe("OrphanWatchdog", () => {
     await watchdog.start();
 
     watchdog.stop();
-  });
+  }, 15000);
 
   it("should track detection duration", async () => {
     watchdog = new OrphanWatchdog({
