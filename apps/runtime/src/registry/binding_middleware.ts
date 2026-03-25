@@ -47,10 +47,7 @@ export class BindingMiddleware {
    *
    * If re-validation fails, updates binding state to 'validation_failed'.
    */
-  validateBeforeOperation(
-    terminalId: string,
-    _operation?: string,
-  ): MiddlewareValidationResult {
+  validateBeforeOperation(terminalId: string, _operation?: string): MiddlewareValidationResult {
     // Check terminal exists
     const binding = this.registry.get(terminalId);
     if (!binding) {
@@ -65,36 +62,39 @@ export class BindingMiddleware {
     }
 
     // Check binding state
-    if (binding.state !== BindingState.Bound && binding.state !== BindingState.Rebound) {
+    if (binding.state !== BindingState.bound && binding.state !== BindingState.rebound) {
       return {
         valid: false,
         error: {
           code: "INVALID_BINDING_STATE",
           message: `Terminal binding is in ${binding.state} state, expected 'bound' or 'rebound'`,
           fatal:
-            binding.state === BindingState.ValidationFailed ||
-            binding.state === BindingState.Unbound,
+            binding.state === BindingState.validation_failed ||
+            binding.state === BindingState.unbound,
         },
         binding,
       };
     }
 
-    // Re-validate binding triple against current state
-    const validation = validateBindingTriple(
-      binding.binding,
-      this.registryQueryInterface,
-    );
+    // Check binding staleness: verify the binding's context IDs still exist in registry indexes
+    const boundWorkspace = this.registry.getByWorkspace(binding.binding.workspaceId);
+    const boundLane = this.registry.getByLane(binding.binding.laneId);
+    const boundSession = this.registry.getBySession(binding.binding.sessionId);
+    const isStale =
+      !boundWorkspace.some(b => b.terminalId === terminalId) ||
+      !boundLane.some(b => b.terminalId === terminalId) ||
+      !boundSession.some(b => b.terminalId === terminalId);
 
-    if (!validation.valid) {
+    if (isStale) {
       // Mark binding as validation failed
-      binding.state = BindingState.ValidationFailed;
+      binding.state = BindingState.validation_failed;
       binding.updatedAt = Date.now();
 
       return {
         valid: false,
         error: {
           code: "STALE_BINDING",
-          message: `Terminal binding validation failed: ${validation.errors.join("; ")}`,
+          message: `Terminal binding is stale: binding context no longer matches registry indexes`,
           fatal: true,
         },
         binding,
@@ -118,7 +118,7 @@ export class BindingMiddleware {
   async wrapOperation<T>(
     terminalId: string,
     handler: (binding: TerminalBinding) => Promise<T>,
-    operation?: string,
+    operation?: string
   ): Promise<T> {
     const validation = this.validateBeforeOperation(terminalId, operation);
 
@@ -140,7 +140,7 @@ export class BindingMiddleware {
   wrapOperationSync<T>(
     terminalId: string,
     handler: (binding: TerminalBinding) => T,
-    operation?: string,
+    operation?: string
   ): T {
     const validation = this.validateBeforeOperation(terminalId, operation);
 
@@ -168,7 +168,7 @@ export function createMiddlewareHandler<T>(
   middleware: BindingMiddleware,
   terminalId: string,
   handler: (binding: TerminalBinding) => Promise<T>,
-  operation?: string,
+  operation?: string
 ): () => Promise<T> {
   return () => middleware.wrapOperation(terminalId, handler, operation);
 }
@@ -180,7 +180,7 @@ export function createMiddlewareHandlerSync<T>(
   middleware: BindingMiddleware,
   terminalId: string,
   handler: (binding: TerminalBinding) => T,
-  operation?: string,
+  operation?: string
 ): () => T {
   return () => middleware.wrapOperationSync(terminalId, handler, operation);
 }

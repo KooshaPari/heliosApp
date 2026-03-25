@@ -8,20 +8,20 @@ test("lane/session context remains cohesive across all tabs", async ({ page }) =
 
   const lane = await controlPlane.createLane({
     workspaceId: "workspace_e2e",
-    simulateDegrade: true
+    simulateDegrade: true,
   });
   expect(lane.ok).toBe(true);
   expect(lane.laneId).not.toBeNull();
   const session = await controlPlane.ensureSession({
     workspaceId: "workspace_e2e",
-    laneId: lane.laneId as string
+    laneId: lane.laneId as string,
   });
   expect(session.ok).toBe(true);
   expect(session.sessionId).not.toBeNull();
   await controlPlane.spawnTerminal({
     workspaceId: "workspace_e2e",
     laneId: lane.laneId as string,
-    sessionId: session.sessionId as string
+    sessionId: session.sessionId as string,
   });
 
   controlPlane.setActiveTab("terminal");
@@ -48,7 +48,9 @@ test("renderer switch failure rolls back and reports safe status", async ({ page
   controlPlane.setWorkspace("workspace_renderer");
 
   await controlPlane.createLane({ workspaceId: "workspace_renderer" });
-  const outcome = await controlPlane.switchRenderer("rio", { forceError: true });
+  const outcome = await controlPlane.switchRenderer("rio", {
+    forceError: true,
+  });
   await page.setContent(renderControlPlaneSnapshot(controlPlane));
 
   expect(outcome.committed).toBe(false);
@@ -61,7 +63,9 @@ test("lane lifecycle supports session restore after reconnect", async ({ page })
   const runtime = createRuntime();
   const controlPlane = bootDesktop({ bus: runtime.bus });
 
-  const lane = await controlPlane.createLane({ workspaceId: "workspace_restore" });
+  const lane = await controlPlane.createLane({
+    workspaceId: "workspace_restore",
+  });
   expect(lane.ok).toBe(true);
   expect(lane.laneId).not.toBeNull();
 

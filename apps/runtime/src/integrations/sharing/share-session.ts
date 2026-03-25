@@ -168,10 +168,11 @@ export class ShareSessionManager {
     correlationId: string
   ): Promise<ShareSession> {
     // Check policy gate
-    const policyDecision = await this.policyGate.evaluate(
-      "share.session.create",
-      { terminalId, backend, correlationId }
-    );
+    const policyDecision = await this.policyGate.evaluate("share.session.create", {
+      terminalId,
+      backend,
+      correlationId,
+    });
 
     if (!policyDecision.allowed) {
       const session: ShareSession = {
@@ -314,7 +315,7 @@ export class ShareSessionManager {
   listByTerminal(terminalId: string): ShareSession[] {
     const sessionIds = this.sessionsByTerminal.get(terminalId) || new Set();
     return Array.from(sessionIds)
-      .map((id) => this.sessions.get(id))
+      .map(id => this.sessions.get(id))
       .filter((s): s is ShareSession => s !== undefined);
   }
 
