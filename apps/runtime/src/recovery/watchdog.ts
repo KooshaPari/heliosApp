@@ -4,10 +4,10 @@ import path from "path";
 import type { LocalBus } from "../protocol/bus.js";
 
 export enum CrashReason {
-	HEARTBEAT_TIMEOUT = "HEARTBEAT_TIMEOUT",
-	UNRESPONSIVE = "UNRESPONSIVE",
-	EXIT_CODE = "EXIT_CODE",
-	SIGNAL = "SIGNAL",
+  HEARTBEAT_TIMEOUT = "HEARTBEAT_TIMEOUT",
+  UNRESPONSIVE = "UNRESPONSIVE",
+  EXIT_CODE = "EXIT_CODE",
+  SIGNAL = "SIGNAL",
 }
 
 export interface CrashEvent {

@@ -124,19 +124,17 @@ describe("TabPersistence", () => {
 		it("should debounce saves", async () => {
 			let writeCount = 0;
 
-			// Mock fs.writeFile to count writes
-			const originalWriteFile = fs.writeFile;
-			fs.writeFile = async (...args: Parameters<typeof fs.writeFile>) => {
-				writeCount++;
-				return (originalWriteFile as Function).apply(fs, args);
-			};
-			// biome-ignore lint/suspicious/noExplicitAny: test mock override
-			(fs as any).writeFile = async (
-				...args: Parameters<typeof fs.writeFile>
-			) => {
-				writeCount++;
-				return originalWriteFile(...args);
-			};
+      // Mock fs.writeFile to count writes
+      const originalWriteFile = fs.writeFile;
+      fs.writeFile = async (...args: Parameters<typeof fs.writeFile>) => {
+        writeCount++;
+        return (originalWriteFile as Function).apply(fs, args);
+      };
+      // biome-ignore lint/suspicious/noExplicitAny: test mock override
+      (fs as any).writeFile = async (...args: Parameters<typeof fs.writeFile>) => {
+        writeCount++;
+        return originalWriteFile(...args);
+      };
 
 			const testState: TabPersistedState = {
 				version: 1,

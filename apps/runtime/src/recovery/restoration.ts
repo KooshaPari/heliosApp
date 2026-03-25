@@ -48,28 +48,28 @@ export class RestorationPipeline {
 					survivingZelijjSessions,
 				);
 
-				if (matching) {
-					// Reattach surviving session
-					try {
-						await this.reattachZelijjSession(session, matching);
-						const restored_session: RestoredSession = {
-							sessionId: session.sessionId,
-							terminalId: session.terminalId,
-							laneId: session.laneId,
-							zellijSessionName: matching,
-							status: "reattached",
-						};
-						restored.push(restored_session);
-						await this.publishSessionRestored(restored_session);
-					} catch {
-						// Fall through to respawn attempt
-						await this.attemptRespawn(session, restored, failed);
-					}
-				} else {
-					// Respawn new session
-					await this.attemptRespawn(session, restored, failed);
-				}
-			}
+        if (matching) {
+          // Reattach surviving session
+          try {
+            await this.reattachZelijjSession(session, matching);
+            const restored_session: RestoredSession = {
+              sessionId: session.sessionId,
+              terminalId: session.terminalId,
+              laneId: session.laneId,
+              zellijSessionName: matching,
+              status: "reattached",
+            };
+            restored.push(restored_session);
+            await this.publishSessionRestored(restored_session);
+          } catch  {
+            // Fall through to respawn attempt
+            await this.attemptRespawn(session, restored, failed);
+          }
+        } else {
+          // Respawn new session
+          await this.attemptRespawn(session, restored, failed);
+        }
+      }
 
 			// Stage 2: Par lane re-inventory (no-op for now, reserved for future)
 

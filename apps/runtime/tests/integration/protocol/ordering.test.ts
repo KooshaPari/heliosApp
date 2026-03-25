@@ -6,21 +6,10 @@
  * FR-009: Subscriber isolation during fan-out.
  */
 
-import { beforeEach, describe, expect, it } from "bun:test";
-import {
-	type CommandBus,
-	createBus,
-	getActiveCorrelationId,
-} from "../../../src/protocol/bus.js";
-import {
-	createCommand,
-	createEvent,
-	createResponse,
-} from "../../../src/protocol/envelope.js";
-import type {
-	EventEnvelope,
-	LocalBusEnvelope,
-} from "../../../src/protocol/types.js";
+import { describe, expect, it, beforeEach } from 'bun:test';
+import { createBus, getActiveCorrelationId, type CommandBus } from '../../../src/protocol/bus.js';
+import { createCommand, createEvent, createResponse } from '../../../src/protocol/envelope.js';
+import type { EventEnvelope, LocalBusEnvelope } from '../../../src/protocol/types.js';
 
 describe("Event ordering — per-topic monotonic sequences", () => {
 	let bus: CommandBus;

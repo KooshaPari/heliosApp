@@ -5,7 +5,7 @@
  * Cross-workspace import from @helios/runtime validates path alias resolution.
  */
 
-import { type HealthCheckResult, VERSION, healthCheck } from "@helios/runtime";
+import { healthCheck, VERSION, type HealthCheckResult } from "@helios/runtime";
 import { InMemoryLocalBus, type LocalBus } from "@helios/runtime";
 import {
 	ActiveContextStore,

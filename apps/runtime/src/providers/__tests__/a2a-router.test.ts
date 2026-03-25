@@ -448,18 +448,18 @@ describe("A2A Router Adapter", () => {
 		it("should emit error event on delegation failure", async () => {
 			bus.getEvents(); // Clear events
 
-			try {
-				await adapter.execute(
-					{
-						taskDescription: "Test",
-						requiredCapabilities: ["unknown"],
-						context: {},
-					},
-					"corr-123",
-				);
-			} catch {
-				// Expected
-			}
+      try {
+        await adapter.execute(
+          {
+            taskDescription: "Test",
+            requiredCapabilities: ["unknown"],
+            context: {},
+          },
+          "corr-123"
+        );
+      } catch  {
+        // Expected
+      }
 
 			const events = bus.getEvents();
 			const errorEvent = events.find(

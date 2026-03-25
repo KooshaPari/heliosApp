@@ -88,10 +88,7 @@ export function checkSLO(
 }
 
 /** Function signature for publishing events to the bus. */
-export type BusPublishFn = (
-	topic: string,
-	payload: unknown,
-) => void | Promise<void>;
+export type BusPublishFn = (topic: string, payload: unknown) => void | Promise<void>;
 
 /**
  * Monitors registered metrics against SLO definitions, emitting rate-limited

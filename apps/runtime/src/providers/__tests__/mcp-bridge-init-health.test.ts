@@ -65,13 +65,13 @@ describe("MCP Bridge Adapter - Init and Health", () => {
 	it("reports healthy health status with timestamp", async () => {
 		await initMcpBridge(adapter);
 
-		const health = await adapter.health();
-		expect(health.state).toBe("healthy");
-		expect(health.failureCount).toBe(0);
-		expect(health.lastCheck).toBeDefined();
-		expect(health.lastCheck instanceof Date).toBe(true);
-		expect(health.lastCheck.getTime()).toBeLessThanOrEqual(Date.now());
-	});
+    const health = await adapter.health();
+    expect(health.state).toBe("healthy");
+    expect(health.failureCount).toBe(0);
+    expect(health.lastCheck).toBeDefined();
+    expect(health.lastCheck instanceof Date).toBe(true);
+    expect(health.lastCheck.getTime()).toBeLessThanOrEqual(Date.now());
+  });
 
 	it("handles server disconnection gracefully", async () => {
 		await initMcpBridge(adapter);

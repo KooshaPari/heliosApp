@@ -37,16 +37,16 @@ export class CheckpointManager {
 		}
 	}
 
-	async load(): Promise<WatchdogCheckpoint | null> {
-		try {
-			const content = await fs.readFile(this.checkpointPath, "utf-8");
-			const checkpoint = JSON.parse(content) as WatchdogCheckpoint;
-			return checkpoint;
-		} catch {
-			// File doesn't exist or is corrupt - return null for fresh start
-			return null;
-		}
-	}
+  async load(): Promise<WatchdogCheckpoint | null> {
+    try {
+      const content = await fs.readFile(this.checkpointPath, "utf-8");
+      const checkpoint = JSON.parse(content) as WatchdogCheckpoint;
+      return checkpoint;
+    } catch  {
+      // File doesn't exist or is corrupt - return null for fresh start
+      return null;
+    }
+  }
 
 	async delete(): Promise<void> {
 		try {

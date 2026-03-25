@@ -41,8 +41,8 @@ describe("MCP Bridge Adapter - Error Handling", () => {
 			)
 			.catch((caught) => caught);
 
-		expect(error instanceof NormalizedProviderError).toBe(true);
-	});
+    expect(error instanceof NormalizedProviderError).toBe(true);
+  });
 
 	it("emits error event on execution failure", async () => {
 		bus.getEvents();

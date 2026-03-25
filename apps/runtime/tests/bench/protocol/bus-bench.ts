@@ -105,10 +105,8 @@ const FANOUT_P95_THRESHOLD = 10.0; // SLO: 5ms, CI: 10ms
 const VALIDATE_P95_THRESHOLD = 0.2; // SLO: 0.1ms, CI: 0.2ms
 
 async function benchCommandDispatch(): Promise<BenchResult> {
-	const bus = createBus();
-	bus.registerMethod("bench.echo", (cmd) =>
-		createResponse(cmd, cmd.payload as Record<string, unknown>),
-	);
+  const bus = createBus();
+  bus.registerMethod("bench.echo", cmd => createResponse(cmd, cmd.payload as Record<string, unknown>));
 
 	const timings = await runAsync(
 		async () => {

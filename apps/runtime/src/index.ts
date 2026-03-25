@@ -10,7 +10,7 @@ export { InMemoryAuditSink } from "./audit/sink.js";
 export { InMemoryLocalBus } from "./protocol/bus.js";
 export type { LocalBus } from "./protocol/bus.js";
 
-export const VERSION = "0.0.1" as const;
+export const VERSION = "0.1.1" as const;
 
 export interface HealthCheckResult {
 	readonly ok: boolean;
@@ -21,11 +21,11 @@ export interface HealthCheckResult {
 const _startTime = performance.now();
 
 export function healthCheck(): HealthCheckResult {
-	return {
-		ok: true,
-		timestamp: Date.now(),
-		uptimeMs: performance.now() - _startTime,
-	};
+  return {
+    ok: true,
+    timestamp: Date.now(),
+    uptimeMs: performance.now() - _startTime,
+  };
 }
 
 // NOTE: Redaction and METHODS-related code removed - not yet implemented
@@ -215,11 +215,11 @@ function classifyBootstrap(metadata: RecoveryMetadata): BootstrapResult {
 }
 
 export type RuntimeOptions = {
-	terminalBufferCapBytes?: number;
-	harnessProbe?: {
-		check(): Promise<{ ok: boolean; reason?: string }>;
-	};
-	recovery_metadata?: RecoveryMetadata;
+  terminalBufferCapBytes?: number;
+  harnessProbe?: {
+    check(): Promise<{ ok: boolean; reason?: string }>;
+  };
+  recovery_metadata?: RecoveryMetadata;
 };
 
 export function createRuntime(options: RuntimeOptions = {}): RuntimeHandle {

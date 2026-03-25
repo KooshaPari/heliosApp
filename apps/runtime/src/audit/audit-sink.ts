@@ -1,11 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { LocalBus } from "../protocol/bus.js";
+import type { LocalBusEnvelope, EventEnvelope, ResponseEnvelope } from "../protocol/types.js";
 import type { MethodHandler } from "../protocol/methods.js";
-import type {
-	EventEnvelope,
-	LocalBusEnvelope,
-	ResponseEnvelope,
-} from "../protocol/types.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -129,41 +125,34 @@ export class AuditSink {
 		// Audit sink is wired via wrapBus pattern; this method is kept for future extensibility
 	}
 
-	/**
-	 * Create a wrapping LocalBus that intercepts all publish calls and feeds
-	 * them into this audit sink before forwarding to the underlying bus.
-	 */
-	wrapBus(bus: LocalBus): LocalBus {
-		const sink = this;
-		const extBus = bus as unknown as {
-			registerMethod?(method: string, handler: MethodHandler): void;
-			send?(envelope: unknown): Promise<ResponseEnvelope>;
-			subscribe?(
-				topic: string,
-				handler: (evt: EventEnvelope) => void | Promise<void>,
-			): () => void;
-			destroy?(): void;
-			getActiveCorrelationId?(): string | undefined;
-		};
-		return {
-			async publish(event: LocalBusEnvelope): Promise<void> {
-				await sink.ingest(event);
-				await bus.publish(event);
-			},
-			async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
-				return bus.request(command);
-			},
-			...(extBus.registerMethod && {
-				registerMethod: extBus.registerMethod.bind(extBus),
-			}),
-			...(extBus.send && { send: extBus.send.bind(extBus) }),
-			...(extBus.subscribe && { subscribe: extBus.subscribe.bind(extBus) }),
-			...(extBus.destroy && { destroy: extBus.destroy.bind(extBus) }),
-			...(extBus.getActiveCorrelationId && {
-				getActiveCorrelationId: extBus.getActiveCorrelationId.bind(extBus),
-			}),
-		};
-	}
+  /**
+   * Create a wrapping LocalBus that intercepts all publish calls and feeds
+   * them into this audit sink before forwarding to the underlying bus.
+   */
+  wrapBus(bus: LocalBus): LocalBus {
+    const sink = this;
+    const extBus = bus as unknown as {
+      registerMethod?(method: string, handler: MethodHandler): void;
+      send?(envelope: unknown): Promise<ResponseEnvelope>;
+      subscribe?(topic: string, handler: (evt: EventEnvelope) => void | Promise<void>): () => void;
+      destroy?(): void;
+      getActiveCorrelationId?(): string | undefined;
+    };
+    return {
+      async publish(event: LocalBusEnvelope): Promise<void> {
+        await sink.ingest(event);
+        await bus.publish(event);
+      },
+      async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+        return bus.request(command);
+      },
+      ...(extBus.registerMethod && { registerMethod: extBus.registerMethod.bind(extBus) }),
+      ...(extBus.send && { send: extBus.send.bind(extBus) }),
+      ...(extBus.subscribe && { subscribe: extBus.subscribe.bind(extBus) }),
+      ...(extBus.destroy && { destroy: extBus.destroy.bind(extBus) }),
+      ...(extBus.getActiveCorrelationId && { getActiveCorrelationId: extBus.getActiveCorrelationId.bind(extBus) }),
+    };
+  }
 
 	/**
 	 * Query stored audit records.

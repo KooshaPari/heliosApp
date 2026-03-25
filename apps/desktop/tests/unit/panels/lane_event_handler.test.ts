@@ -42,13 +42,13 @@ describe("LaneEventHandler", () => {
 		);
 	});
 
-	it("should handle state changed events", async () => {
-		const onStateChanged = mock();
-		handler = new LaneEventHandler({
-			bus: mockBus,
-			onStateChanged,
-		});
-		handler.mount();
+  it('should handle state changed events', async () => {
+    const onStateChanged = mock();
+    handler = new LaneEventHandler({
+      bus: mockBus,
+      onStateChanged,
+    });
+    handler.mount();
 
 		const event: BusEvent = {
 			topic: "lane.state.changed",
@@ -144,13 +144,13 @@ describe("LaneEventHandler", () => {
 		// Should only render final state due to batching
 	});
 
-	it("should discard out-of-order events", async () => {
-		const onStateChanged = mock();
-		handler = new LaneEventHandler({
-			bus: mockBus,
-			onStateChanged,
-		});
-		handler.mount();
+  it('should discard out-of-order events', async () => {
+    const onStateChanged = mock();
+    handler = new LaneEventHandler({
+      bus: mockBus,
+      onStateChanged,
+    });
+    handler.mount();
 
 		const stateChangedHandler = busHandlers.get("lane.state.changed");
 

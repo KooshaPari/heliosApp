@@ -117,15 +117,15 @@ describe("Process-Level Isolation", () => {
 			await laneProviderA.init({ apiKey: "test", model: "claude-3-sonnet" });
 			await laneProviderB.init({ apiKey: "test", model: "claude-3-sonnet" });
 
-			// Crash lane A provider multiple times
-			laneProviderA.setCrash(true);
-			for (let i = 0; i < 3; i++) {
-				try {
-					await laneProviderA.execute({ prompt: "test" }, "corr-123");
-				} catch {
-					// Expected
-				}
-			}
+      // Crash lane A provider multiple times
+      laneProviderA.setCrash(true);
+      for (let i = 0; i < 3; i++) {
+        try {
+          await laneProviderA.execute({ prompt: "test" }, "corr-123");
+        } catch  {
+          // Expected
+        }
+      }
 
 			// Check lane A health
 			const laneHealthA = await laneProviderA.health();
@@ -144,14 +144,14 @@ describe("Process-Level Isolation", () => {
 
 			await provider.init({ apiKey: "test", model: "claude-3-sonnet" });
 
-			// Simulate multiple executions
-			for (let i = 0; i < 100; i++) {
-				try {
-					await provider.execute({ prompt: `test-${i}` }, `corr-${i}`);
-				} catch {
-					// Handle error
-				}
-			}
+      // Simulate multiple executions
+      for (let i = 0; i < 100; i++) {
+        try {
+          await provider.execute({ prompt: `test-${i}` }, `corr-${i}`);
+        } catch  {
+          // Handle error
+        }
+      }
 
 			// Terminate should clean up resources
 			await provider.terminate();
@@ -282,15 +282,15 @@ describe("Process-Level Isolation", () => {
 			// Get initial health
 			const initialHealth = await Promise.all(providers.map((p) => p.health()));
 
-			// Lane B crashes multiple times
-			providers[1].setCrash(true);
-			for (let i = 0; i < 5; i++) {
-				try {
-					await providers[1].execute({ prompt: "test" }, `corr-${i}`);
-				} catch {
-					// Expected
-				}
-			}
+      // Lane B crashes multiple times
+      providers[1].setCrash(true);
+      for (let i = 0; i < 5; i++) {
+        try {
+          await providers[1].execute({ prompt: "test" }, `corr-${i}`);
+        } catch  {
+          // Expected
+        }
+      }
 
 			// Check health again
 			const finalHealth = await Promise.all(providers.map((p) => p.health()));
@@ -329,13 +329,13 @@ describe("Process-Level Isolation", () => {
 
 			await provider.init({ apiKey: "test", model: "claude-3-sonnet" });
 
-			// Cause a crash
-			provider.setCrash(true);
-			try {
-				await provider.execute({ prompt: "test" }, "corr-123");
-			} catch {
-				// Expected
-			}
+      // Cause a crash
+      provider.setCrash(true);
+      try {
+        await provider.execute({ prompt: "test" }, "corr-123");
+      } catch  {
+        // Expected
+      }
 
 			// Termination should still succeed
 			await provider.terminate();

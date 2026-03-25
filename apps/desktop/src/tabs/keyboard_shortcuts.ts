@@ -70,13 +70,13 @@ export class KeyboardShortcuts {
 				}
 			}
 
-			this.buildReverseMap();
-		} catch {
-			// File not found or parse error, use defaults
-			this.shortcuts = { ...DEFAULT_SHORTCUTS };
-			this.buildReverseMap();
-		}
-	}
+      this.buildReverseMap();
+    } catch  {
+      // File not found or parse error, use defaults
+      this.shortcuts = { ...DEFAULT_SHORTCUTS };
+      this.buildReverseMap();
+    }
+  }
 
 	/**
 	 * Save shortcuts to disk.

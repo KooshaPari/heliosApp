@@ -331,17 +331,15 @@ export class ZellijSessionManager {
 		return [{ index: 0, name: "Tab #1", panes: [{ id: 0, title: "default" }] }];
 	}
 
-	/**
-	 * Extract lane ID from the session naming convention.
-	 */
-	private extractLaneId(sessionName: string): string {
-		const prefix = "helios-lane-";
-		if (sessionName.startsWith(prefix)) {
-			return sessionName.slice(prefix.length);
-		}
-		console.warn(
-			`[zellij-session] Could not parse lane id from session name: ${sessionName}`,
-		);
-		return sessionName;
-	}
+  /**
+   * Extract lane ID from the session naming convention.
+   */
+  private extractLaneId(sessionName: string): string {
+    const prefix = "helios-lane-";
+    if (sessionName.startsWith(prefix)) {
+      return sessionName.slice(prefix.length);
+    }
+    console.warn(`[zellij-session] Could not parse lane id from session name: ${sessionName}`);
+    return sessionName;
+  }
 }

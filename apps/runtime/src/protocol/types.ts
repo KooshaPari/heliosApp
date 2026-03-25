@@ -59,22 +59,22 @@ export type EventEnvelope = EnvelopeBase & {
 export type Envelope = CommandEnvelope | ResponseEnvelope | EventEnvelope;
 
 export type LocalBusEnvelope = {
-	id: string;
-	type: EnvelopeType;
-	ts: string;
-	timestamp?: string | number;
-	correlation_id?: string;
-	workspace_id?: string;
-	session_id?: string;
-	terminal_id?: string;
-	lane_id?: string;
-	method?: string;
-	topic?: string;
-	sequence?: number;
-	payload?: Record<string, unknown>;
-	status?: "ok" | "error";
-	result?: Record<string, unknown> | null;
-	error?: ErrorPayload | null;
+  id: string;
+  type: EnvelopeType;
+  ts: string;
+  timestamp?: string | number;
+  correlation_id?: string;
+  workspace_id?: string;
+  session_id?: string;
+  terminal_id?: string;
+  lane_id?: string;
+  method?: string;
+  topic?: string;
+  sequence?: number;
+  payload?: Record<string, unknown>;
+  status?: "ok" | "error";
+  result?: Record<string, unknown> | null;
+  error?: ErrorPayload | null;
 };
 
 export function isCommand(value: unknown): value is CommandEnvelope {

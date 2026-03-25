@@ -53,28 +53,28 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
 		expect(bootstrap?.recovered_session_ids).toContain("session-1");
 		expect(bootstrap?.issues.length).toBe(0);
 
-		const unrecoverableCheckpoint = {
-			...checkpoint,
-			sessions: [
-				...checkpoint.sessions.map((s) => ({
-					session_id: s.session_id,
-					workspace_id: s.workspace_id,
-					lane_id: s.lane_id,
-					status: s.status,
-					codex_session_id: s.codex_session_id,
-				})),
-				{
-					session_id: "session-orphan",
-					workspace_id: "ws-1",
-					lane_id: "lane-1",
-					status: "detached" as const,
-				},
-			],
-		};
-		const runtimeC = createRuntime({
-			recovery_metadata: unrecoverableCheckpoint,
-		});
-		const brokenBootstrap = runtimeC.getBootstrapResult();
+    const unrecoverableCheckpoint = {
+      ...checkpoint,
+      sessions: [
+        ...(checkpoint.sessions.map(s => ({
+          session_id: s.session_id,
+          workspace_id: s.workspace_id,
+          lane_id: s.lane_id,
+          status: s.status,
+          codex_session_id: s.codex_session_id,
+        }))),
+        {
+          session_id: "session-orphan",
+          workspace_id: "ws-1",
+          lane_id: "lane-1",
+          status: "detached" as const,
+        },
+      ],
+    };
+    const runtimeC = createRuntime({
+      recovery_metadata: unrecoverableCheckpoint,
+    });
+    const brokenBootstrap = runtimeC.getBootstrapResult();
 
 		expect(
 			brokenBootstrap?.issues.some(

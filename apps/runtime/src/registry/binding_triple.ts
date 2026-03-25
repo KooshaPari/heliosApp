@@ -13,10 +13,10 @@ export interface BindingTriple {
 }
 
 export enum BindingState {
-	bound = "bound",
-	rebound = "rebound",
-	unbound = "unbound",
-	validation_failed = "validation_failed",
+  bound = "bound",
+  rebound = "rebound",
+  unbound = "unbound",
+  validation_failed = "validation_failed",
 }
 
 export interface TerminalBinding {

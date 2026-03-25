@@ -106,25 +106,25 @@ describe("Concurrent switch rejection", () => {
 			surface: TEST_SURFACE,
 		});
 
-		// Try to start second switch
-		try {
-			await orchestrator.startSwitch({
-				targetRendererId: target.id,
-				sourceAdapter: source,
-				targetAdapter: target,
-				terminals,
-				streamBuffer: buffer,
-				config: TEST_CONFIG,
-				surface: TEST_SURFACE,
-			});
-			expect.unreachable("Should have thrown ConcurrentSwitchError");
-		} catch (error: unknown) {
-			if (error instanceof ConcurrentSwitchError) {
-				const activeTransaction = orchestrator.getActiveTransaction();
-				expect(activeTransaction).toBeDefined();
-				expect(activeTransaction?.id).toMatch(/^[\da-f-]+$/);
-			}
-		}
+    // Try to start second switch
+    try {
+      await orchestrator.startSwitch({
+        targetRendererId: target.id,
+        sourceAdapter: source,
+        targetAdapter: target,
+        terminals,
+        streamBuffer: buffer,
+        config: TEST_CONFIG,
+        surface: TEST_SURFACE,
+      });
+      expect.unreachable("Should have thrown ConcurrentSwitchError");
+    } catch (error: unknown) {
+      if (error instanceof ConcurrentSwitchError) {
+        const activeTransaction = orchestrator.getActiveTransaction();
+        expect(activeTransaction).toBeDefined();
+        expect(activeTransaction?.id).toMatch(/^[\da-f-]+$/);
+      }
+    }
 
 		await firstSwitchPromise;
 	});
@@ -254,20 +254,20 @@ describe("Concurrent switch rejection", () => {
 		const activeTransaction1 = orchestrator.getActiveTransaction();
 		expect(activeTransaction1).toBeDefined();
 
-		try {
-			await orchestrator.startSwitch({
-				targetRendererId: target.id,
-				sourceAdapter: source,
-				targetAdapter: target,
-				terminals,
-				streamBuffer: buffer,
-				config: TEST_CONFIG,
-				surface: TEST_SURFACE,
-			});
-		} catch {
-			const activeTransaction2 = orchestrator.getActiveTransaction();
-			expect(activeTransaction2?.id).toBe(activeTransaction1?.id);
-		}
+    try {
+      await orchestrator.startSwitch({
+        targetRendererId: target.id,
+        sourceAdapter: source,
+        targetAdapter: target,
+        terminals,
+        streamBuffer: buffer,
+        config: TEST_CONFIG,
+        surface: TEST_SURFACE,
+      });
+    } catch  {
+      const activeTransaction2 = orchestrator.getActiveTransaction();
+      expect(activeTransaction2?.id).toBe(activeTransaction1?.id);
+    }
 
 		await firstSwitch;
 	});

@@ -43,13 +43,13 @@ describe("Storage Chaos Tests", () => {
 				fs.unlinkSync(path.join(TMP_DIR, dbPath + "-shm"));
 			}
 
-			if (fs.existsSync(TMP_DIR)) {
-				fs.rmdirSync(TMP_DIR);
-			}
-		} catch {
-			// Ignore cleanup errors
-		}
-	});
+      if (fs.existsSync(TMP_DIR)) {
+        fs.rmdirSync(TMP_DIR);
+      }
+    } catch  {
+      // Ignore cleanup errors
+    }
+  });
 
 	it("should recover all persisted events after restart", async () => {
 		// Phase 1: Write 50,000 events

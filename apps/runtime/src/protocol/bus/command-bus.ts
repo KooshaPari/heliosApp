@@ -143,42 +143,38 @@ export class CommandBusImpl implements LocalBus {
 		this.activeCorrelationId = cmd.correlation_id;
 		this.currentDepth++;
 
-		try {
-			const result = await handler(
-				cmd as unknown as import("../types.js").CommandEnvelope,
-			);
-			// Validate result is a response envelope
-			if (
-				!result ||
-				typeof result !== "object" ||
-				(result as unknown as Record<string, unknown>)["type"] !== "response"
-			) {
-				return makeErrorResponse(
-					cmd.id,
-					cmd.correlation_id,
-					cmd.method,
-					"HANDLER_ERROR",
-					`Handler for "${cmd.method}" returned non-envelope value`,
-				);
-			}
-			return result as unknown as ResponseEnvelope;
-		} catch (err) {
-			const msg =
-				err instanceof Error
-					? err.message.replace(/\/[\w/.:-]+/g, "<path>")
-					: String(err);
-			return makeErrorResponse(
-				cmd.id,
-				cmd.correlation_id,
-				cmd.method,
-				"HANDLER_ERROR",
-				`Handler for "${cmd.method}" failed: ${msg}`,
-			);
-		} finally {
-			this.currentDepth--;
-			this.activeCorrelationId = prevCorrelation;
-		}
-	}
+    try {
+      const result = await handler(cmd as unknown as import("../types.js").CommandEnvelope);
+      // Validate result is a response envelope
+      if (
+        !result ||
+        typeof result !== "object" ||
+        (result as unknown as Record<string, unknown>)["type"] !== "response"
+      ) {
+        return makeErrorResponse(
+          cmd.id,
+          cmd.correlation_id,
+          cmd.method,
+          "HANDLER_ERROR",
+          `Handler for "${cmd.method}" returned non-envelope value`
+        );
+      }
+      return result as unknown as ResponseEnvelope;
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message.replace(/\/[\w/.:-]+/g, "<path>") : String(err);
+      return makeErrorResponse(
+        cmd.id,
+        cmd.correlation_id,
+        cmd.method,
+        "HANDLER_ERROR",
+        `Handler for "${cmd.method}" failed: ${msg}`
+      );
+    } finally {
+      this.currentDepth--;
+      this.activeCorrelationId = prevCorrelation;
+    }
+  }
 
 	subscribe(
 		topic: string,
