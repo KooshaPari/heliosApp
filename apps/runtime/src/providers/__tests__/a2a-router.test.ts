@@ -429,7 +429,7 @@ describe("A2A Router Adapter", () => {
           },
           "corr-123"
         );
-      } catch (e) {
+      } catch  {
         // Expected
       }
 

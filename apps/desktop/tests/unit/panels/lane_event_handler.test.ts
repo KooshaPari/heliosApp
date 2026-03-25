@@ -33,7 +33,7 @@ describe("LaneEventHandler", () => {
     expect(mockBus.subscribe).toHaveBeenCalledWith("lane.created", expect.any(Function));
   });
 
-  it('should handle state changed events', () => {
+  it('should handle state changed events', async () => {
     const onStateChanged = mock();
     handler = new LaneEventHandler({
       bus: mockBus,
@@ -133,7 +133,7 @@ describe("LaneEventHandler", () => {
     // Should only render final state due to batching
   });
 
-  it('should discard out-of-order events', () => {
+  it('should discard out-of-order events', async () => {
     const onStateChanged = mock();
     handler = new LaneEventHandler({
       bus: mockBus,

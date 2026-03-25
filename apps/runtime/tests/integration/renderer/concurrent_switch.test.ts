@@ -122,7 +122,7 @@ describe("Concurrent switch rejection", () => {
       if (error instanceof ConcurrentSwitchError) {
         const activeTransaction = orchestrator.getActiveTransaction();
         expect(activeTransaction).toBeDefined();
-        expect(activeTransaction?.id).toMatch(/^[\da-f\-]+$/);
+        expect(activeTransaction?.id).toMatch(/^[\da-f-]+$/);
       }
     }
 
@@ -264,7 +264,7 @@ describe("Concurrent switch rejection", () => {
         config: TEST_CONFIG,
         surface: TEST_SURFACE,
       });
-    } catch (error: unknown) {
+    } catch  {
       const activeTransaction2 = orchestrator.getActiveTransaction();
       expect(activeTransaction2?.id).toBe(activeTransaction1?.id);
     }

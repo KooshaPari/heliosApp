@@ -139,7 +139,7 @@ export class CommandBusImpl implements LocalBus {
           `Handler for "${cmd.method}" returned non-envelope value`
         );
       }
-      return result as ResponseEnvelope;
+      return result as unknown as ResponseEnvelope;
     } catch (err) {
       const msg =
         err instanceof Error ? err.message.replace(/\/[\w/.:-]+/g, "<path>") : String(err);

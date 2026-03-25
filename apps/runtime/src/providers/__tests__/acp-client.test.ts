@@ -156,7 +156,6 @@ describe("ACP Client Adapter", () => {
         apiKey: "acp-key",
         model: "claude-3-sonnet",
         timeout: 30000,
-        maxRetries: 3,
         healthCheckIntervalMs: 30000,
       });
 
@@ -271,7 +270,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch (e) {
+      } catch  {
         // Expected
       }
 
@@ -479,7 +478,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch (e) {
+      } catch  {
         // Expected
       }
 

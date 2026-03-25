@@ -492,4 +492,4 @@ export class A2ARouterAdapter implements ProviderAdapter<
 }
 
 // Re-export HealthMonitoringCoordinator from its own module for backward compatibility.
-export { HealthMonitoringCoordinator } from "./health-monitor.js";
+// Note: The primary export is at line 21.

@@ -61,7 +61,7 @@ export class RestorationPipeline {
             };
             restored.push(restored_session);
             await this.publishSessionRestored(restored_session);
-          } catch (err) {
+          } catch  {
             // Fall through to respawn attempt
             await this.attemptRespawn(session, restored, failed);
           }

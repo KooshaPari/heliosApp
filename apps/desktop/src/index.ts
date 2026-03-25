@@ -6,7 +6,7 @@
  */
 
 import { healthCheck, VERSION, type HealthCheckResult } from "@helios/runtime";
-import { InMemoryLocalBus } from "../../runtime/src/protocol/bus";
+import { InMemoryLocalBus, type LocalBus } from "@helios/runtime";
 import {
   ActiveContextStore,
   INITIAL_ACTIVE_CONTEXT_STATE,
