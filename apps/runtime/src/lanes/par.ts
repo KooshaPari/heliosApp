@@ -2,126 +2,37 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
-import type { LaneRegistry, LaneRecord } from "./registry.js";
+import type { LaneRegistry } from "./registry.js";
 import { transition, withLaneLock, recordTransition, type LaneState } from "./state_machine.js";
+import {
+  type ParBinding,
+  type ExecResult,
+  type ParManagerOptions,
+  type SpawnFn,
+  type SpawnResult,
+  ParNotFoundError,
+  ParSpawnError,
+  LaneNotReadyError,
+  ExecTimeoutError,
+  generateParTaskId,
+  isProcessAlive,
+  defaultSpawn,
+} from "./par-types.js";
 
-// ── Types ───────────────────────────────────────────────────────────────────
-
-export interface ParBinding {
-  laneId: string;
-  parTaskId: string;
-  pid: number;
-  worktreePath: string;
-  startedAt: Date;
-  status: "active" | "stale" | "terminated";
-  lastHeartbeat: Date;
-}
-
-export interface ExecResult {
-  stdout: string;
-  stderr: string;
-  exitCode: number;
-  duration: number;
-}
-
-export interface ParManagerOptions {
-  registry: LaneRegistry;
-  bus?: LocalBus | null;
-  staleTimeoutMs?: number;
-  forceKillTimeoutMs?: number;
-  healthCheckIntervalMs?: number;
-  execTimeoutMs?: number;
-  /** Override for spawning processes (for testing) */
-  spawnFn?: SpawnFn;
-}
-
-export type SpawnFn = (
-  cmd: string[],
-  opts: { cwd?: string; stdout?: "pipe"; stderr?: "pipe" },
-) => SpawnResult;
-
-export interface SpawnResult {
-  pid: number;
-  stdout: ReadableStream<Uint8Array> | null;
-  stderr: ReadableStream<Uint8Array> | null;
-  exited: Promise<number>;
-  kill(signal?: number): void;
-}
-
-// ── Errors ──────────────────────────────────────────────────────────────────
-
-export class ParNotFoundError extends Error {
-  constructor(public readonly laneId: string) {
-    super(`No par binding found for lane ${laneId}`);
-    this.name = "ParNotFoundError";
-  }
-}
-
-export class ParSpawnError extends Error {
-  constructor(
-    public readonly laneId: string,
-    public readonly reason: string,
-  ) {
-    super(`Par spawn failed for lane ${laneId}: ${reason}`);
-    this.name = "ParSpawnError";
-  }
-}
-
-export class LaneNotReadyError extends Error {
-  constructor(
-    public readonly laneId: string,
-    public readonly state: string,
-  ) {
-    super(`Lane ${laneId} is not ready for execution (state: ${state})`);
-    this.name = "LaneNotReadyError";
-  }
-}
-
-export class ExecTimeoutError extends Error {
-  constructor(
-    public readonly laneId: string,
-    public readonly timeoutMs: number,
-  ) {
-    super(`Command execution timed out in lane ${laneId} after ${timeoutMs}ms`);
-    this.name = "ExecTimeoutError";
-  }
-}
-
-// ── ID Generation ───────────────────────────────────────────────────────────
-
-let parIdCounter = 0;
-
-function generateParTaskId(): string {
-  parIdCounter += 1;
-  return `par_${Date.now()}_${parIdCounter.toString(36)}`;
-}
-
-/** Reset counter for testing. */
-export function _resetParIdCounter(): void {
-  parIdCounter = 0;
-}
-
-// ── Default spawn using Bun.spawn ───────────────────────────────────────────
-
-function defaultSpawn(
-  cmd: string[],
-  opts: { cwd?: string; stdout?: "pipe"; stderr?: "pipe" },
-): SpawnResult {
-  const proc = Bun.spawn(cmd, {
-    cwd: opts.cwd,
-    stdout: opts.stdout ?? "pipe",
-    stderr: opts.stderr ?? "pipe",
-  });
-  return {
-    pid: proc.pid,
-    stdout: proc.stdout as ReadableStream<Uint8Array> | null,
-    stderr: proc.stderr as ReadableStream<Uint8Array> | null,
-    exited: proc.exited,
-    kill(signal?: number) {
-      proc.kill(signal);
-    },
-  };
-}
+export type {
+  ParBinding,
+  ExecResult,
+  ParManagerOptions,
+  SpawnFn,
+  SpawnResult,
+} from "./par-types.js";
+export {
+  ParNotFoundError,
+  ParSpawnError,
+  LaneNotReadyError,
+  ExecTimeoutError,
+  _resetParIdCounter,
+} from "./par-types.js";
 
 // ── Par Manager ─────────────────────────────────────────────────────────────
 
@@ -160,15 +71,13 @@ export class ParManager {
     let proc: SpawnResult;
 
     try {
-      proc = this.spawnFn(
-        ["par", "task", "create", "--cwd", worktreePath],
-        { cwd: worktreePath, stdout: "pipe", stderr: "pipe" },
-      );
+      proc = this.spawnFn(["par", "task", "create", "--cwd", worktreePath], {
+        cwd: worktreePath,
+        stdout: "pipe",
+        stderr: "pipe",
+      });
     } catch (err) {
-      throw new ParSpawnError(
-        laneId,
-        err instanceof Error ? err.message : String(err),
-      );
+      throw new ParSpawnError(laneId, err instanceof Error ? err.message : String(err));
     }
 
     const pid = proc.pid;
@@ -194,22 +103,24 @@ export class ParManager {
     this.registry.update(laneId, { parTaskPid: pid });
 
     // Monitor for unexpected exit
-    proc.exited.then((exitCode) => {
-      const current = this.bindings.get(laneId);
-      if (current && current.status === "active") {
-        current.status = "terminated";
-        this.registry.update(laneId, { parTaskPid: null });
-        this.processHandles.delete(laneId);
-        this.emitParEvent("lane.par_task.terminated", laneId, lane.workspaceId, {
-          parTaskId,
-          pid,
-          exitCode,
-          reason: "unexpected_exit",
-        });
-      }
-    }).catch(() => {
-      // Process monitoring failed - will be caught by health check
-    });
+    proc.exited
+      .then(exitCode => {
+        const current = this.bindings.get(laneId);
+        if (current && current.status === "active") {
+          current.status = "terminated";
+          this.registry.update(laneId, { parTaskPid: null });
+          this.processHandles.delete(laneId);
+          this.emitParEvent("lane.par_task.terminated", laneId, lane.workspaceId, {
+            parTaskId,
+            pid,
+            exitCode,
+            reason: "unexpected_exit",
+          });
+        }
+      })
+      .catch(() => {
+        // Process monitoring failed - will be caught by health check
+      });
 
     await this.emitParEvent("lane.par_task.bound", laneId, lane.workspaceId, {
       parTaskId,
@@ -251,9 +162,7 @@ export class ParManager {
       // Wait for graceful exit or force kill
       const exited = await Promise.race([
         proc.exited.then(() => true).catch(() => true),
-        new Promise<false>((resolve) =>
-          setTimeout(() => resolve(false), this.forceKillTimeoutMs),
-        ),
+        new Promise<false>(resolve => setTimeout(() => resolve(false), this.forceKillTimeoutMs)),
       ]);
 
       if (!exited) {
@@ -314,19 +223,20 @@ export class ParManager {
       const start = performance.now();
 
       try {
-        const proc = this.spawnFn(
-          ["par", "exec", "--task", binding.parTaskId, "--", ...command],
-          { cwd: binding.worktreePath, stdout: "pipe", stderr: "pipe" },
-        );
+        const proc = this.spawnFn(["par", "exec", "--task", binding.parTaskId, "--", ...command], {
+          cwd: binding.worktreePath,
+          stdout: "pipe",
+          stderr: "pipe",
+        });
 
         // Race execution against timeout
-        const timeoutPromise = new Promise<"timeout">((resolve) =>
-          setTimeout(() => resolve("timeout"), this.execTimeoutMs),
+        const timeoutPromise = new Promise<"timeout">(resolve =>
+          setTimeout(() => resolve("timeout"), this.execTimeoutMs)
         );
 
         const exitPromise = proc.exited;
         const result = await Promise.race([
-          exitPromise.then((code) => ({ type: "done" as const, code })),
+          exitPromise.then(code => ({ type: "done" as const, code })),
           timeoutPromise.then(() => ({ type: "timeout" as const, code: -1 })),
         ]);
 
@@ -480,7 +390,7 @@ export class ParManager {
   }
 
   getAllBindings(): ParBinding[] {
-    return [...this.bindings.values()].map((b) => ({ ...b }));
+    return [...this.bindings.values()].map(b => ({ ...b }));
   }
 
   // ── Event Publishing ──────────────────────────────────────────────────
@@ -489,7 +399,7 @@ export class ParManager {
     topic: string,
     laneId: string,
     workspaceId: string,
-    extra: Record<string, unknown>,
+    extra: Record<string, unknown>
   ): Promise<void> {
     if (!this.bus) return;
 
@@ -514,16 +424,5 @@ export class ParManager {
     } catch {
       // Bus failures do not block par operations
     }
-  }
-}
-
-// ── Helpers ─────────────────────────────────────────────────────────────────
-
-function isProcessAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch {
-    return false;
   }
 }

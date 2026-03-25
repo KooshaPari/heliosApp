@@ -35,9 +35,15 @@ describe("TopologyTracker", () => {
     });
 
     it("uses custom initial dimensions", () => {
-      const topo = tracker.initializeTopology("session-1", { cols: 120, rows: 40 });
+      const topo = tracker.initializeTopology("session-1", {
+        cols: 120,
+        rows: 40,
+      });
 
-      expect(topo.tabs[0]!.panes[0]!.dimensions).toEqual({ cols: 120, rows: 40 });
+      expect(topo.tabs[0]!.panes[0]!.dimensions).toEqual({
+        cols: 120,
+        rows: 40,
+      });
     });
   });
 
@@ -47,10 +53,10 @@ describe("TopologyTracker", () => {
       tracker.addPane("s1", 1, { cols: 40, rows: 24 }, "pty-1");
 
       const topo = tracker.getTopology("s1")!;
-      const activeTab = topo.tabs.find((t) => t.tabId === topo.activeTabId)!;
+      const activeTab = topo.tabs.find(t => t.tabId === topo.activeTabId)!;
       expect(activeTab.panes).toHaveLength(2);
 
-      const newPane = activeTab.panes.find((p) => p.paneId === 1)!;
+      const newPane = activeTab.panes.find(p => p.paneId === 1)!;
       expect(newPane.ptyId).toBe("pty-1");
       expect(newPane.focused).toBe(true);
       // Previous pane should be unfocused
@@ -63,7 +69,7 @@ describe("TopologyTracker", () => {
       tracker.removePane("s1", 1);
 
       const topo = tracker.getTopology("s1")!;
-      const activeTab = topo.tabs.find((t) => t.tabId === topo.activeTabId)!;
+      const activeTab = topo.tabs.find(t => t.tabId === topo.activeTabId)!;
       expect(activeTab.panes).toHaveLength(1);
       expect(activeTab.panes[0]!.focused).toBe(true);
     });
@@ -136,7 +142,7 @@ describe("TopologyTracker", () => {
       tracker.bindPty("s1", 0, "pty-preserved");
 
       const topo = await tracker.refreshTopology("s1");
-      const pane = topo.tabs[0]?.panes.find((p) => p.paneId === 0);
+      const pane = topo.tabs[0]?.panes.find(p => p.paneId === 0);
       expect(pane?.ptyId).toBe("pty-preserved");
     });
   });

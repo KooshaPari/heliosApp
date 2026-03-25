@@ -1,9 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import {
-  SafeMode,
-  CrashLoopDetector,
-  type SafeModeConfig,
-} from "../safe-mode.js";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+import { SafeMode, CrashLoopDetector, type SafeModeConfig } from "../safe-mode.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { promises as fs } from "fs";
 import path from "path";
@@ -60,7 +56,7 @@ describe("CrashLoopDetector", () => {
     detector.recordCrash(now + 1000);
 
     // Create new detector instance and load history
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
     const detector2 = new CrashLoopDetector(tempDir, 3, 60000);
     await detector2.initialize();
 
@@ -130,7 +126,7 @@ describe("SafeMode", () => {
 
   it("should notify state change listeners", async () => {
     const states: boolean[] = [];
-    safeMode.onStateChange((active) => states.push(active));
+    safeMode.onStateChange(active => states.push(active));
 
     await safeMode.enter();
     await safeMode.exit();
@@ -177,7 +173,7 @@ describe("SafeMode", () => {
   it("should work without bus", async () => {
     const safeModeNoBus = new SafeMode();
     const states: boolean[] = [];
-    safeModeNoBus.onStateChange((active) => states.push(active));
+    safeModeNoBus.onStateChange(active => states.push(active));
 
     await safeModeNoBus.enter();
     await safeModeNoBus.exit();

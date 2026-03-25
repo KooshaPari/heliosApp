@@ -3,10 +3,7 @@
  * @see FR-010-007
  */
 import { describe, expect, it } from "bun:test";
-import {
-  queryCapabilities,
-  compareCapabilities,
-} from "../../../src/renderer/capabilities.js";
+import { queryCapabilities, compareCapabilities } from "../../../src/renderer/capabilities.js";
 import type { RendererCapabilities } from "../../../src/renderer/capabilities.js";
 import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
 
@@ -58,24 +55,30 @@ describe("compareCapabilities", () => {
   it("detects scalar differences", () => {
     const diff = compareCapabilities(CAPS_A, CAPS_B);
     expect(diff.equal).toBe(false);
-    expect(diff.differences.some((d) => d.field === "gpuAccelerated")).toBe(true);
-    expect(diff.differences.some((d) => d.field === "colorDepth")).toBe(true);
-    expect(diff.differences.some((d) => d.field === "ligatureSupport")).toBe(true);
+    expect(diff.differences.some(d => d.field === "gpuAccelerated")).toBe(true);
+    expect(diff.differences.some(d => d.field === "colorDepth")).toBe(true);
+    expect(diff.differences.some(d => d.field === "ligatureSupport")).toBe(true);
   });
 
   it("detects maxDimensions differences", () => {
     const diff = compareCapabilities(CAPS_A, CAPS_B);
-    expect(diff.differences.some((d) => d.field === "maxDimensions")).toBe(true);
+    expect(diff.differences.some(d => d.field === "maxDimensions")).toBe(true);
   });
 
   it("detects inputModes differences", () => {
     const diff = compareCapabilities(CAPS_A, CAPS_B);
-    expect(diff.differences.some((d) => d.field === "inputModes")).toBe(true);
+    expect(diff.differences.some(d => d.field === "inputModes")).toBe(true);
   });
 
   it("order-independent inputModes comparison", () => {
-    const a = { ...CAPS_A, inputModes: ["cooked", "raw"] as ("raw" | "cooked" | "application")[] };
-    const b = { ...CAPS_A, inputModes: ["raw", "cooked"] as ("raw" | "cooked" | "application")[] };
+    const a = {
+      ...CAPS_A,
+      inputModes: ["cooked", "raw"] as ("raw" | "cooked" | "application")[],
+    };
+    const b = {
+      ...CAPS_A,
+      inputModes: ["raw", "cooked"] as ("raw" | "cooked" | "application")[],
+    };
     const diff = compareCapabilities(a, b);
     expect(diff.equal).toBe(true);
   });
@@ -84,6 +87,6 @@ describe("compareCapabilities", () => {
     const g = new MockGhosttyAdapter();
     const r = new MockRioAdapter();
     const diff = compareCapabilities(g.queryCapabilities(), r.queryCapabilities());
-    expect(diff.differences.some((d) => d.field === "sixelSupport")).toBe(true);
+    expect(diff.differences.some(d => d.field === "sixelSupport")).toBe(true);
   });
 });

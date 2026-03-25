@@ -109,9 +109,18 @@ describe("RendererStateMachine", () => {
     sm.transition("stop_complete");
 
     const events: RendererEvent[] = [
-      "init", "init_success", "init_failure", "switch_request",
-      "stop_request", "crash", "switch_success", "switch_rollback",
-      "switch_failure", "stop_complete", "recovery_attempt", "give_up",
+      "init",
+      "init_success",
+      "init_failure",
+      "switch_request",
+      "stop_request",
+      "crash",
+      "switch_success",
+      "switch_rollback",
+      "switch_failure",
+      "stop_complete",
+      "recovery_attempt",
+      "give_up",
     ];
 
     for (const event of events) {
@@ -188,7 +197,9 @@ describe("transition (pure function)", () => {
   });
 
   it("throws for invalid transitions", () => {
-    expect(() => transition("uninitialized", "init_success")).toThrow(InvalidRendererTransitionError);
+    expect(() => transition("uninitialized", "init_success")).toThrow(
+      InvalidRendererTransitionError
+    );
     expect(() => transition("stopped", "init")).toThrow(InvalidRendererTransitionError);
   });
 });

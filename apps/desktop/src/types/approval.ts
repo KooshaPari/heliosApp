@@ -3,10 +3,10 @@
  */
 
 export enum ApprovalStatus {
-  Pending = 'pending',
-  Approved = 'approved',
-  Rejected = 'rejected',
-  Expired = 'expired'
+  Pending = "pending",
+  Approved = "approved",
+  Rejected = "rejected",
+  Expired = "expired",
 }
 
 export interface ApprovalRequest {

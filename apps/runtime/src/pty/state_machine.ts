@@ -8,13 +8,7 @@
  */
 
 /** All possible PTY states. */
-export type PtyState =
-  | "idle"
-  | "spawning"
-  | "active"
-  | "throttled"
-  | "errored"
-  | "stopped";
+export type PtyState = "idle" | "spawning" | "active" | "throttled" | "errored" | "stopped";
 
 /** Events that trigger PTY state transitions. */
 export type PtyEvent =
@@ -38,7 +32,7 @@ export class InvalidTransitionError extends Error {
 
   constructor(ptyId: string, currentState: PtyState, event: PtyEvent) {
     super(
-      `Invalid PTY transition: cannot apply event '${event}' in state '${currentState}' (ptyId=${ptyId})`,
+      `Invalid PTY transition: cannot apply event '${event}' in state '${currentState}' (ptyId=${ptyId})`
     );
     this.name = "InvalidTransitionError";
     this.ptyId = ptyId;
@@ -51,44 +45,37 @@ export class InvalidTransitionError extends Error {
  * Transition table: maps `(currentState, event)` pairs to the next state.
  * Any pair not in this table is an invalid transition.
  */
-const TRANSITION_TABLE: ReadonlyMap<PtyState, ReadonlyMap<PtyEvent, PtyState>> =
-  new Map<PtyState, ReadonlyMap<PtyEvent, PtyState>>([
-    [
-      "idle",
-      new Map<PtyEvent, PtyState>([["spawn_requested", "spawning"]]),
-    ],
-    [
-      "spawning",
-      new Map<PtyEvent, PtyState>([
-        ["spawn_succeeded", "active"],
-        ["spawn_failed", "errored"],
-      ]),
-    ],
-    [
-      "active",
-      new Map<PtyEvent, PtyState>([
-        ["idle_timeout", "throttled"],
-        ["unexpected_exit", "errored"],
-        ["graceful_terminate", "stopped"],
-      ]),
-    ],
-    [
-      "throttled",
-      new Map<PtyEvent, PtyState>([
-        ["output_resume", "active"],
-        ["terminate", "stopped"],
-      ]),
-    ],
-    [
-      "errored",
-      new Map<PtyEvent, PtyState>([["cleanup", "stopped"]]),
-    ],
-    // "stopped" is terminal — no outgoing transitions.
-    [
-      "stopped",
-      new Map<PtyEvent, PtyState>(),
-    ],
-  ]);
+const TRANSITION_TABLE: ReadonlyMap<PtyState, ReadonlyMap<PtyEvent, PtyState>> = new Map<
+  PtyState,
+  ReadonlyMap<PtyEvent, PtyState>
+>([
+  ["idle", new Map<PtyEvent, PtyState>([["spawn_requested", "spawning"]])],
+  [
+    "spawning",
+    new Map<PtyEvent, PtyState>([
+      ["spawn_succeeded", "active"],
+      ["spawn_failed", "errored"],
+    ]),
+  ],
+  [
+    "active",
+    new Map<PtyEvent, PtyState>([
+      ["idle_timeout", "throttled"],
+      ["unexpected_exit", "errored"],
+      ["graceful_terminate", "stopped"],
+    ]),
+  ],
+  [
+    "throttled",
+    new Map<PtyEvent, PtyState>([
+      ["output_resume", "active"],
+      ["terminate", "stopped"],
+    ]),
+  ],
+  ["errored", new Map<PtyEvent, PtyState>([["cleanup", "stopped"]])],
+  // "stopped" is terminal — no outgoing transitions.
+  ["stopped", new Map<PtyEvent, PtyState>()],
+]);
 
 /**
  * Compute the next state for a PTY given the current state and an event.
@@ -99,11 +86,7 @@ const TRANSITION_TABLE: ReadonlyMap<PtyState, ReadonlyMap<PtyEvent, PtyState>> =
  * @returns The next {@link PtyState}.
  * @throws {@link InvalidTransitionError} if the transition is not valid.
  */
-export function transition(
-  currentState: PtyState,
-  event: PtyEvent,
-  ptyId: string,
-): PtyState {
+export function transition(currentState: PtyState, event: PtyEvent, ptyId: string): PtyState {
   const stateTransitions = TRANSITION_TABLE.get(currentState);
   const nextState = stateTransitions?.get(event);
 

@@ -1,8 +1,4 @@
-import type {
-  SettingsSchema,
-  SettingsStore,
-  SettingChangeEvent,
-} from "./types.js";
+import type { SettingsSchema, SettingsStore, SettingChangeEvent } from "./types.js";
 import { getAllDefaults, validateValue } from "./schema.js";
 
 type BusPublishFn = (topic: string, payload: SettingChangeEvent) => void;
@@ -22,11 +18,7 @@ export class SettingsManager {
   private changedRestartKeys: Set<string> = new Set();
   private unwatch: (() => void) | undefined;
 
-  constructor(
-    schema: SettingsSchema,
-    store: SettingsStore,
-    busPublish?: BusPublishFn,
-  ) {
+  constructor(schema: SettingsSchema, store: SettingsStore, busPublish?: BusPublishFn) {
     this.schema = schema;
     this.store = store;
     this.busPublish = busPublish;

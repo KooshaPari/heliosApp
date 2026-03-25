@@ -11,11 +11,7 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type { ProviderAdapter, ProviderRegistration, ProviderHealthStatus } from "./adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-  PROVIDER_ERROR_CODES,
-} from "./errors.js";
+import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
 
 /**
  * Registered provider instance with metadata.

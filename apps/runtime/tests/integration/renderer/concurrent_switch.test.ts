@@ -8,9 +8,17 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { createSwitchOrchestrator, ConcurrentSwitchError } from "../../../src/renderer/switch_transaction.js";
+import {
+  createSwitchOrchestrator,
+  ConcurrentSwitchError,
+} from "../../../src/renderer/switch_transaction.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
-import { MockGhosttyAdapter, MockRioAdapter, TEST_CONFIG, TEST_SURFACE } from "../../helpers/mock_adapter.js";
+import {
+  MockGhosttyAdapter,
+  MockRioAdapter,
+  TEST_CONFIG,
+  TEST_SURFACE,
+} from "../../helpers/mock_adapter.js";
 import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 
 describe("Concurrent switch rejection", () => {
@@ -21,7 +29,17 @@ describe("Concurrent switch rejection", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     // Start first switch (will be slow)
@@ -65,7 +83,17 @@ describe("Concurrent switch rejection", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const firstSwitchPromise = orchestrator.startSwitch({
@@ -108,7 +136,17 @@ describe("Concurrent switch rejection", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     // First switch: ghostty -> rio
@@ -147,7 +185,17 @@ describe("Concurrent switch rejection", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     // Initially, no switch in progress
@@ -180,7 +228,17 @@ describe("Concurrent switch rejection", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const firstSwitch = orchestrator.startSwitch({

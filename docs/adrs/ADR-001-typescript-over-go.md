@@ -6,7 +6,7 @@ Proposed (requires 3 approvals per constitution L116-118)
 
 ## Context
 
-The heliosApp constitution (`.kittify/memory/constitution.md`) states: "Prefer Go where feasible for core systems." This ADR documents a permanent exception to that rule for the heliosApp repository.
+The heliosApp constitution (`docs/reference/constitution.md`) states: "Prefer Go where feasible for core systems." This ADR documents a permanent exception to that rule for the heliosApp repository.
 
 heliosApp is a desktop control-plane application built on **ElectroBun**, an Electron alternative that is TypeScript-native. The project forks from **co(lab)**, an existing TypeScript codebase. The desktop shell, renderer integration (ghostty/rio), and UI surface all require deep JavaScript/TypeScript interop at every integration boundary.
 

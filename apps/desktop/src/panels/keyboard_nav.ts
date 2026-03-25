@@ -75,35 +75,35 @@ export class KeyboardNav {
       this.handleKeydown(e);
     };
 
-    this.container.addEventListener('keydown', this.keydownHandler);
+    this.container.addEventListener("keydown", this.keydownHandler);
   }
 
   private detachEventListeners(): void {
     if (!this.container || !this.keydownHandler) return;
-    this.container.removeEventListener('keydown', this.keydownHandler);
+    this.container.removeEventListener("keydown", this.keydownHandler);
   }
 
   private handleKeydown(event: KeyboardEvent): void {
     const key = event.key;
 
     switch (key) {
-      case 'ArrowUp':
+      case "ArrowUp":
         this.handleNavigateUp(event);
         break;
-      case 'ArrowDown':
+      case "ArrowDown":
         this.handleNavigateDown(event);
         break;
-      case 'Home':
+      case "Home":
         this.handleNavigateHome(event);
         break;
-      case 'End':
+      case "End":
         this.handleNavigateEnd(event);
         break;
-      case 'Enter':
+      case "Enter":
         this.handleSelect(event);
         break;
-      case 'Delete':
-      case 'Backspace':
+      case "Delete":
+      case "Backspace":
         this.handleDelete(event);
         break;
       default:
