@@ -31,3 +31,5 @@ kitty-specs/
 .github/copilot-instructions.md
 .claudeignore
 .llmignore
+packages/logger/
+worktrees/
