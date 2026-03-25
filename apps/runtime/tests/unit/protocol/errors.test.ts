@@ -1,9 +1,5 @@
 import { describe, expect, it } from "bun:test";
 import {
-  validationError,
-  methodNotFound,
-  handlerError,
-  timeoutError,
   backpressureError,
 } from "../../../src/protocol/errors.js";
 

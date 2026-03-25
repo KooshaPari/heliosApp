@@ -220,6 +220,9 @@ async function checkTestCoverage(files: string[]): Promise<Finding[]> {
   const sectionLine = sections.get(section) || 0;
 
   for (const filePath of files) {
+    if (GENERATED_FILE_PATTERNS.some(p => p.test(filePath))) {
+      continue;
+    }
     // Only check source files, not test files
     if (filePath.includes('.test.') || filePath.includes('.spec.')) {
       continue;

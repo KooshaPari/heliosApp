@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Slice1CheckpointStorePlaceholder } from "../../../src/sessions/checkpoint_store";
+import { Slice1CheckpointStorePlaceholder } from "../../../src/sessions/checkpoint_store.ts";
 
 describe("checkpoint store placeholder", () => {
   test("stays non-operational in slice-1", async () => {

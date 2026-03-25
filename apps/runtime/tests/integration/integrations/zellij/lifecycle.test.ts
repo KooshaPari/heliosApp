@@ -15,11 +15,12 @@ import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js
 import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
 import { ZellijTabManager } from "../../../../src/integrations/zellij/tabs.js";
 import {
-  MuxEventEmitter,
-  MuxEventType,
   type EventBus,
   type MuxEvent,
+  MuxEventEmitter,
+  MuxEventType,
 } from "../../../../src/integrations/zellij/events.js";
+import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
 import { reconcile } from "../../../../src/integrations/zellij/reconciliation.js";
 import type { ZellijCli } from "../../../../src/integrations/zellij/cli.js";
 import type {

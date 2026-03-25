@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { METHODS } from "../../../src/protocol/methods";
-import { TOPICS } from "../../../src/protocol/topics";
+import { METHODS } from "../../../src/protocol/methods.ts";
+import { TOPICS } from "../../../src/protocol/topics.ts";
 
 type StringCollectionDoc = {
   methods?: string[];

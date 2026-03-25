@@ -173,7 +173,7 @@ export class AuditLedger {
           this.batchedNotifications.set(subscription.callback, []);
         }
 
-        this.batchedNotifications.get(subscription.callback)!.push(event);
+        this.batchedNotifications.get(subscription.callback)?.push(event);
 
         // Start batch timer if not already running
         if (this.batchTimer === null) {
@@ -232,7 +232,6 @@ export class AuditLedger {
     const events = Array.from(eventMap.values());
 
     if (events.length === 0) {
-      console.warn(`[AuditLedger] No events found for correlation ID: ${correlationId}`);
       return;
     }
 

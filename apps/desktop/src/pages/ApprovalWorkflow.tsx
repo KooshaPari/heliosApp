@@ -51,19 +51,19 @@ export function ApprovalWorkflowPage() {
             <div class="workflow-stats">
               <div class="stat">
                 <span class="label">Total</span>
-                <span class="value">{workflow()!.totalRequests}</span>
+                <span class="value">{workflow()?.totalRequests}</span>
               </div>
               <div class="stat">
                 <span class="label">Pending</span>
-                <span class="value pending">{workflow()!.pendingRequests}</span>
+                <span class="value pending">{workflow()?.pendingRequests}</span>
               </div>
               <div class="stat">
                 <span class="label">Approved</span>
-                <span class="value approved">{workflow()!.approvedRequests}</span>
+                <span class="value approved">{workflow()?.approvedRequests}</span>
               </div>
               <div class="stat">
                 <span class="label">Rejected</span>
-                <span class="value rejected">{workflow()!.rejectedRequests}</span>
+                <span class="value rejected">{workflow()?.rejectedRequests}</span>
               </div>
             </div>
           )}

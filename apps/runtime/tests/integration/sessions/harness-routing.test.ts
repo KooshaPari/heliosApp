@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { createRuntime } from "../../../src/index";
+import { createRuntime } from "../../../src/index.ts";
 
 function jsonRequest(url: string, body: Record<string, unknown>): Request {
   return new Request(url, {
@@ -9,7 +9,7 @@ function jsonRequest(url: string, body: Record<string, unknown>): Request {
   });
 }
 
-async function createLane(runtime: ReturnType<typeof createRuntime>): Promise<string> {
+async function createLane(runtime: any): Promise<string> {
   const response = await runtime.fetch(
     jsonRequest("http://localhost/v1/workspaces/ws_1/lanes", {
       project_context_id: "project_1",
@@ -22,7 +22,7 @@ async function createLane(runtime: ReturnType<typeof createRuntime>): Promise<st
 }
 
 async function ensureSession(
-  runtime: ReturnType<typeof createRuntime>,
+  runtime: any,
   laneId: string,
   body: Record<string, unknown> = { provider: "codex" }
 ): Promise<Response> {

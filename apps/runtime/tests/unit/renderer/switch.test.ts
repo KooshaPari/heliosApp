@@ -3,11 +3,7 @@
  * @see FR-010-004, SC-010-001
  */
 import { describe, expect, it } from "bun:test";
-import {
-  switchRenderer,
-  SwitchSameRendererError,
-  SwitchTimeoutError,
-} from "../../../src/renderer/switch.js";
+import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
 import { RendererRegistry } from "../../../src/renderer/registry.js";
 import { RendererStateMachine } from "../../../src/renderer/state_machine.js";
 import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
@@ -49,7 +45,7 @@ describe("switchRenderer", () => {
 
     expect(reg.getActive()?.id).toBe("rio");
     expect(sm.state).toBe("running");
-    expect(events[0]!.type).toBe("renderer.switched");
+    expect(events[0]?.type).toBe("renderer.switched");
   });
 
   it("throws SwitchSameRendererError for same renderer", async () => {

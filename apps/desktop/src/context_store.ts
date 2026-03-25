@@ -1,4 +1,4 @@
-import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
+import type { RuntimeState } from "../../runtime/src/sessions/state_machine.ts";
 
 export type ActiveTab = "terminal" | "agent" | "session" | "chat" | "project";
 

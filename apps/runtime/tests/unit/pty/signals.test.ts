@@ -9,8 +9,15 @@ import {
 import type { SignalHistoryMap } from "../../../src/pty/signals.js";
 import { PtyRegistry } from "../../../src/pty/registry.js";
 import type { PtyRecord } from "../../../src/pty/registry.js";
+import {
+  InvalidDimensionsError,
+  SignalHistory,
+  resize,
+  sendSighup,
+  terminate,
+} from "../../../src/pty/signals.js";
+import type { SignalHistoryMap } from "../../../src/pty/signals.js";
 import { PtyLifecycle } from "../../../src/pty/state_machine.js";
-import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   return {
@@ -61,7 +68,7 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(h.length).toBe(2);
-    expect(h.getAll()[0]!.signal).toBe("SIGTERM");
+    expect(h.getAll()[0]?.signal).toBe("SIGTERM");
   });
 
   it("bounds history to maxRecords", () => {
@@ -88,7 +95,7 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(h.length).toBe(2);
-    expect(h.getAll()[0]!.signal).toBe("SIGTERM");
+    expect(h.getAll()[0]?.signal).toBe("SIGTERM");
   });
 });
 

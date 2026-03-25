@@ -16,6 +16,9 @@ import type {
   RendererState,
 } from "../../../../src/renderer/adapter.js";
 import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
+import { RendererRegistry } from "../../../../src/renderer/registry.js";
+import { RioBackend } from "../../../../src/renderer/rio/backend.js";
+import { detectRioBinary, registerRio } from "../../../../src/renderer/rio/index.js";
 
 // ---------------------------------------------------------------------------
 // Skip if rio not available
@@ -69,7 +72,7 @@ function createMockGhostty(): RendererAdapter & { _state: RendererState } {
   return adapter;
 }
 
-const DEFAULT_CONFIG: RendererConfig = {
+const _DEFAULT_CONFIG: RendererConfig = {
   gpuAcceleration: false,
   colorDepth: 24,
   maxDimensions: { cols: 200, rows: 50 },
@@ -96,7 +99,6 @@ describe("Rio registration — feature flag off", () => {
 describe("Rio registration — feature flag on", () => {
   it("registers when flag enabled and binary available", async () => {
     if (!rioAvailable) {
-      console.log("SKIP: rio binary not available");
       return;
     }
     const registry = new RendererRegistry();

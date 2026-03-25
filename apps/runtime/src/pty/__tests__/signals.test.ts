@@ -9,8 +9,15 @@ import {
 import type { SignalHistoryMap } from "../signals.js";
 import { PtyRegistry } from "../registry.js";
 import type { PtyRecord } from "../registry.js";
+import {
+  InvalidDimensionsError,
+  SignalHistory,
+  resize,
+  sendSighup,
+  terminate,
+} from "../signals.js";
+import type { SignalHistoryMap } from "../signals.js";
 import { PtyLifecycle } from "../state_machine.js";
-import { InMemoryBusPublisher } from "../events.js";
 
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   return {
@@ -61,7 +68,7 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(history.length).toBe(2);
-    expect(history.getAll()[0]!.signal).toBe("SIGTERM");
+    expect(history.getAll()[0]?.signal).toBe("SIGTERM");
   });
 
   it("bounds history to maxRecords", () => {
@@ -88,7 +95,7 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(history.length).toBe(2);
-    expect(history.getAll()[0]!.signal).toBe("SIGTERM");
+    expect(history.getAll()[0]?.signal).toBe("SIGTERM");
   });
 });
 
@@ -119,7 +126,7 @@ describe("resize", () => {
       cols: 80,
       rows: 24,
     });
-    expect(resizeEvt?.payload["newDimensions"]).toEqual({
+    expect(resizeEvt?.payload.newDimensions).toEqual({
       cols: 120,
       rows: 40,
     });

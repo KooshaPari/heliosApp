@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { createRuntime } from "../../../src/index";
+import { createRuntime } from "../../../src/index.ts";
 
 describe("WP05 recovery watchdog and audit fidelity", () => {
   test("reattaches recoverable sessions on restart and flags unrecoverable artifacts", async () => {
-    const runtimeA = createRuntime();
+    const runtimeA = createRuntime() as any;
 
     await runtimeA.bus.request({
       id: "cmd-lane-create",
@@ -46,7 +46,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     });
 
     const checkpoint = runtimeA.exportRecoveryMetadata();
-    const runtimeB = createRuntime({ recovery_metadata: checkpoint });
+    const runtimeB = (createRuntime as any)(checkpoint) as any;
     const bootstrap = runtimeB.getBootstrapResult();
 
     expect(bootstrap).not.toBeNull();
@@ -83,7 +83,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
   });
 
   test("watchdog classifies drift and exposes remediation-safe guidance", async () => {
-    const runtime = createRuntime();
+    const runtime = createRuntime() as any;
     runtime.bootstrapRecovery({
       lanes: [
         {
@@ -140,7 +140,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
   });
 
   test("normalizes boundary failures and exports redacted correlated audit bundles", async () => {
-    const runtime = createRuntime();
+    const runtime = createRuntime() as any;
 
     await runtime.bus.request({
       id: "cmd-lane-create-ws3",

@@ -1,8 +1,8 @@
 import type { Component } from "solid-js";
 import { Show } from "solid-js";
-import type { Message } from "../../../../runtime/src/types/conversation";
-import { ToolCallBlock } from "./ToolCallBlock";
-import { ToolResultBlock } from "./ToolResultBlock";
+import type { Message } from "../../../../runtime/src/types/conversation.ts";
+import { ToolCallBlock } from "./ToolCallBlock.tsx";
+import { ToolResultBlock } from "./ToolResultBlock.tsx";
 
 type MessageBubbleProps = {
   message: Message;

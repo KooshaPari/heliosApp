@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createRuntime } from "../../../runtime/src";
-import { bootDesktop } from "../../src";
+import { createRuntime } from "../../../runtime/src.ts";
+import { bootDesktop } from "../../src.ts";
 
 describe("EditorlessControlPlane", () => {
   test("wires lane/session/terminal actions and keeps context in sync", async () => {
@@ -34,7 +34,7 @@ describe("EditorlessControlPlane", () => {
     const tabs = controlPlane.getTabs();
     expect(tabs.terminal.context.laneId).toBe(laneId);
     expect(tabs.agent.context.sessionId).toBe(sessionId);
-    expect(tabs.project.context.terminalId).toBe(terminalResult.terminalId);
+    expect(tabs.project.context.terminalId).toBe(terminalResult.terminalId as string);
     expect(tabs.chat.diagnostics.resolvedTransport).toBe("cliproxy_harness");
     expect(tabs.chat.diagnostics.degradedReason).toBeNull();
   });

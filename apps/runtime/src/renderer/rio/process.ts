@@ -47,13 +47,14 @@ export class RioProcess {
         args.push("--no-gpu");
       }
 
-      this._proc = Bun.spawn(args, {
-        stdin: "pipe",
-        stdout: "pipe",
-        stderr: "pipe",
-      });
+      const spawnOpts = {
+        stdin: "pipe" as const,
+        stdout: "pipe" as const,
+        stderr: "pipe" as const,
+      };
+      this._proc = Bun.spawn(args, spawnOpts) as any;
 
-      this._pid = this._proc.pid;
+      this._pid = this._proc?.pid;
       this._running = true;
       this._startedAt = Date.now();
 
@@ -85,7 +86,7 @@ export class RioProcess {
    * Stop the rio process with SIGTERM -> SIGKILL escalation.
    */
   async stop(): Promise<void> {
-    if (!this._proc || !this._running) {
+    if (!(this._proc && this._running)) {
       return;
     }
 
@@ -117,7 +118,9 @@ export class RioProcess {
   }
 
   getUptime(): number | undefined {
-    if (this._startedAt === undefined) return undefined;
+    if (this._startedAt === undefined) {
+      return undefined;
+    }
     return Date.now() - this._startedAt;
   }
 
@@ -132,7 +135,9 @@ export class RioProcess {
    * Write data to the rio process stdin.
    */
   writeToStdin(data: Uint8Array): void {
-    if (!this._proc || !this._running) return;
+    if (!(this._proc && this._running)) {
+      return;
+    }
     try {
       const stdin = this._proc.stdin;
       if (stdin && typeof stdin === "object" && "write" in stdin) {

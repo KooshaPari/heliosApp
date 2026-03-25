@@ -9,6 +9,7 @@
 import { describe, it, expect, beforeEach } from "bun:test";
 import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
 import { NormalizedProviderError } from "../errors.js";
 
 /**
@@ -76,7 +77,7 @@ describe("ACP Client Adapter", () => {
         timeout: 30000,
       };
 
-      await expect(adapter.init(config)).rejects.toThrow(/init failed/i);
+      await expect(adapter.init(config as any)).rejects.toThrow(/init failed/i);
     });
 
     it("should reject missing apiKeyRef", async () => {
@@ -88,7 +89,7 @@ describe("ACP Client Adapter", () => {
         timeout: 30000,
       };
 
-      await expect(adapter.init(config)).rejects.toThrow(/init failed/i);
+      await expect(adapter.init(config as any)).rejects.toThrow(/init failed/i);
     });
 
     it("should reject missing model", async () => {
@@ -100,7 +101,7 @@ describe("ACP Client Adapter", () => {
         timeout: 30000,
       };
 
-      await expect(adapter.init(config)).rejects.toThrow(/init failed/i);
+      await expect(adapter.init(config as any)).rejects.toThrow(/init failed/i);
     });
 
     it("should emit initialization event", async () => {
@@ -262,7 +263,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
@@ -448,7 +449,7 @@ describe("ACP Client Adapter", () => {
         model: "claude-3-sonnet",
         timeoutMs: 100, // Short timeout for timeout tests
       };
-      await adapter.init(config);
+      await adapter.init(config as any);
     });
 
     it("should throw NormalizedProviderError on policy denial", async () => {
@@ -467,7 +468,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 

@@ -116,6 +116,11 @@ export interface ACPConfig {
   model: string;
   baseUrl?: string;
   timeout?: number;
+  endpoint?: string;
+  apiKeyRef?: string;
+  timeoutMs?: number;
+  maxRetries?: number;
+  healthCheckIntervalMs?: number;
 }
 
 /** ACP execute input */
@@ -171,10 +176,11 @@ export type MCPAdapter = ProviderAdapter<MCPConfig, MCPExecuteInput, MCPExecuteO
 
 /** A2A provider configuration input */
 export interface A2AConfig {
-  agentId: string;
-  endpoint: string;
+  agentId?: string;
+  endpoint?: string;
   apiKey?: string;
   timeout?: number;
+  timeoutMs?: number;
 }
 
 /** A2A execute input */

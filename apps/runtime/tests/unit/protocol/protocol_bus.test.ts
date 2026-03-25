@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { InMemoryLocalBus } from "../../../src/protocol/bus";
-import { ProtocolValidationError, type LocalBusEnvelope } from "../../../src/protocol/types";
-import { validateEnvelope } from "../../../src/protocol/validator";
+import { InMemoryLocalBus } from "../../../src/protocol/bus.ts";
+import { type LocalBusEnvelope, ProtocolValidationError } from "../../../src/protocol/types.ts";
+import { validateEnvelope } from "../../../src/protocol/validator.ts";
 
 function createLifecycleCommand(overrides: Partial<LocalBusEnvelope> = {}): LocalBusEnvelope {
   return {
@@ -157,8 +157,8 @@ describe("protocol sequencing and audit", () => {
     expect(events).toHaveLength(2);
     expect(events[0]?.topic).toBe("session.attach.started");
     expect(events[1]?.topic).toBe("session.attached");
-    expect(events[0]?.sequence).toBe(1);
-    expect(events[1]?.sequence).toBe(2);
+    expect((events[0] as any)?.sequence).toBe(1);
+    expect((events[1] as any)?.sequence).toBe(2);
   });
 
   test("rejects out-of-order lifecycle topic events", async () => {
@@ -220,7 +220,7 @@ describe("protocol sequencing and audit", () => {
       code: "ORDERING_VIOLATION",
     });
 
-    const records = await bus.getAuditRecords();
+    const records = await (bus as any).getAuditRecords();
     expect(records).toHaveLength(2);
     expect(records[0]?.outcome).toBe("accepted");
     expect(records[1]?.outcome).toBe("rejected");
@@ -351,7 +351,7 @@ describe("protocol sequencing and audit", () => {
 
     expect(response.type).toBe("response");
     expect(response.status).toBe("error");
-    expect(bus.getState().session).toBe("detached");
+    expect((bus as any).getState().session).toBe("detached");
 
     const events = bus.getEvents();
     expect(events).toHaveLength(2);

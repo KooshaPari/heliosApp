@@ -1,23 +1,23 @@
 // Integration test for false positive rate validation
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import { ResourceClassifier } from "../../../../src/lanes/watchdog/resource_classifier.js";
 import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
+import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
 
 describe("False Positive Rate", () => {
   let engine: RemediationEngine;
   let bus: InMemoryLocalBus;
   let laneRegistry: LaneRegistry;
-  let classifier: ResourceClassifier;
+  let _classifier: ResourceClassifier;
 
   beforeEach(() => {
     bus = new InMemoryLocalBus();
     laneRegistry = new LaneRegistry();
     engine = new RemediationEngine(laneRegistry, bus);
-    classifier = new ResourceClassifier();
+    _classifier = new ResourceClassifier();
   });
 
   it("should have zero false positives with healthy system", async () => {
@@ -27,7 +27,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: `ws-${i}`,
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -56,7 +56,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: "ws1",
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -91,7 +91,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: `ws-${i}`,
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],
@@ -123,7 +123,7 @@ describe("False Positive Rate", () => {
       laneRegistry.register({
         laneId,
         workspaceId: "ws1",
-        state: "active",
+        state: "running",
         worktreePath: `/tmp/${laneId}`,
         parTaskPid: null,
         attachedAgents: [],

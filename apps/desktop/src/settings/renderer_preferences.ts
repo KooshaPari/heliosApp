@@ -20,7 +20,7 @@ const DEFAULT_PREFERENCES: RendererPreferences = {
 export class RendererPreferencesManager {
   private preferencesPath: string;
   private preferences: RendererPreferences = { ...DEFAULT_PREFERENCES };
-  private isDirty: boolean = false;
+  private isDirty = false;
 
   constructor(preferencesPath?: string) {
     if (preferencesPath) {
@@ -42,13 +42,13 @@ export class RendererPreferencesManager {
         // Validate loaded preferences
         if (this.isValidPreferences(loaded)) {
           this.preferences = loaded;
-          const loadTime = performance.now() - startTime;
-          console.log(`Renderer preferences loaded in ${loadTime.toFixed(2)}ms`);
+          const _loadTime = performance.now() - startTime;
           return { ...this.preferences };
         } else {
           console.warn("Invalid preferences file, using defaults");
           return { ...DEFAULT_PREFERENCES };
         }
+        return { ...DEFAULT_PREFERENCES };
       }
     } catch (error) {
       console.warn("Failed to load renderer preferences, using defaults", error);

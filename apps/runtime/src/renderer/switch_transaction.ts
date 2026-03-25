@@ -10,11 +10,11 @@
  * @see FR-010-008, FR-010-009, SC-010-002
  */
 
-import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.js";
+import type { RenderSurface, RendererAdapter, RendererConfig } from "./adapter.js";
+import { type TerminalContext, executeHotSwap } from "./hot_swap.js";
 import type { RendererEventBus } from "./index.js";
-import { executeHotSwap, type TerminalContext } from "./hot_swap.js";
-import { executeRollback } from "./rollback.js";
 import { executeRestartWithRestore } from "./restart_restore.js";
+import { executeRollback } from "./rollback.js";
 import type { SwitchBuffer } from "./stream_binding.js";
 
 // ---------------------------------------------------------------------------
@@ -219,14 +219,13 @@ export class SwitchTransactionOrchestrator {
         request.onProgress?.("committed");
 
         return transaction;
-      } else {
-        // Hot-swap failed, rollback was triggered
-        this._transitionState(transaction, "rolled-back");
-        request.onProgress?.("rolled-back");
-
-        transaction.error = result.error;
-        return transaction;
       }
+      // Hot-swap failed, rollback was triggered
+      this._transitionState(transaction, "rolled-back");
+      request.onProgress?.("rolled-back");
+
+      transaction.error = result.error;
+      return transaction;
     } catch (error: unknown) {
       // Unexpected error during hot-swap
       this._transitionState(transaction, "failed");
@@ -282,14 +281,13 @@ export class SwitchTransactionOrchestrator {
         request.onProgress?.("committed");
 
         return transaction;
-      } else {
-        // Restart-with-restore failed, rollback was triggered
-        this._transitionState(transaction, "rolled-back");
-        request.onProgress?.("rolled-back");
-
-        transaction.error = result.error;
-        return transaction;
       }
+      // Restart-with-restore failed, rollback was triggered
+      this._transitionState(transaction, "rolled-back");
+      request.onProgress?.("rolled-back");
+
+      transaction.error = result.error;
+      return transaction;
     } catch (error: unknown) {
       // Unexpected error during restart-with-restore
       this._transitionState(transaction, "failed");

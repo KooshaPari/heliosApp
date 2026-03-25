@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { InMemoryLocalBus } from "../../../src/protocol/bus";
+import { InMemoryLocalBus } from "../../../src/protocol/bus.ts";
 
 test("captures lane create latency metrics", async () => {
   const bus = new InMemoryLocalBus();
@@ -48,7 +48,7 @@ test("captures session restore latency metrics", async () => {
 
   expect(response.status).toBe("ok");
 
-  const report = bus.getMetricsReport();
+  const report = (bus as any).getMetricsReport();
   const restoreSummary = report.summaries.find(
     metric => metric.metric === "session_restore_latency_ms"
   );
@@ -81,7 +81,7 @@ test("captures terminal output backlog depth", async () => {
     },
   });
 
-  const report = bus.getMetricsReport();
+  const report = (bus as any).getMetricsReport();
   const backlogSummary = report.summaries.find(
     metric => metric.metric === "terminal_output_backlog_depth"
   );

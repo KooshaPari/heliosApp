@@ -5,16 +5,17 @@
  */
 
 import type { ZellijCli } from "./cli.js";
-import type { MuxRegistry } from "./registry.js";
-import type { TopologyTracker } from "./topology.js";
+import { SessionAlreadyExistsError, SessionNotFoundError, ZellijCliError } from "./errors.js";
 import type { MuxEventEmitter } from "./events.js";
 import { MuxEventType } from "./events.js";
+import type { MuxRegistry } from "./registry.js";
+import type { TopologyTracker } from "./topology.js";
 import type {
   MuxSession,
-  SessionOptions,
   PaneRecord,
-  TabRecord,
   PtyManagerInterface,
+  SessionOptions,
+  TabRecord,
 } from "./types.js";
 import { SessionNotFoundError, SessionAlreadyExistsError } from "./errors.js";
 
@@ -88,10 +89,7 @@ export class ZellijSessionManager {
     const postSessions = await this.cli.listSessions();
     const created = postSessions.find(s => s.name === sessionName);
 
-    const durationMs = performance.now() - startMs;
-    console.debug(
-      `[zellij-session] createSession(${laneId}) completed in ${durationMs.toFixed(1)}ms`
-    );
+    const _durationMs = performance.now() - startMs;
 
     const muxSession: MuxSession = {
       sessionName,
@@ -205,7 +203,7 @@ export class ZellijSessionManager {
         laneId,
         recoveredPaneCount: panes.length,
         recoveredTabCount: tabs.length,
-      });
+      } as any);
     }
 
     return muxSession;

@@ -79,7 +79,9 @@ export class AuditSink {
    */
   async ingest(envelope: LocalBusEnvelope): Promise<AuditRecord | null> {
     const topic = envelope.topic ?? "";
-    if (!this.watchedTopics.has(topic)) return null;
+    if (!this.watchedTopics.has(topic)) {
+      return null;
+    }
 
     const correlationId: string =
       (envelope.payload?.correlationId as string | undefined) ?? randomBytes(8).toString("hex");
@@ -130,12 +132,13 @@ export class AuditSink {
   wrapBus(bus: LocalBus): LocalBus {
     const sink = this;
     return {
+      ...bus,
       async publish(event: LocalBusEnvelope): Promise<void> {
         await sink.ingest(event);
         await bus.publish(event);
       },
       async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
-        return bus.request(command);
+        return bus.request?.(command);
       },
       registerMethod: bus.registerMethod.bind(bus),
       send: bus.send.bind(bus),

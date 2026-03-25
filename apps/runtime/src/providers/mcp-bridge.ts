@@ -10,19 +10,19 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
   MCPConfig,
   MCPExecuteInput,
   MCPExecuteOutput,
   MCPTool,
+  ProviderAdapter,
+  ProviderHealthStatus,
 } from "./adapter.js";
 import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * MCP server connection state.
  */
-interface MCPConnection {
+interface McpConnection {
   connected: boolean;
   lastConnectionAttempt: Date;
   reconnectAttempts: number;
@@ -53,7 +53,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
 > {
   private config: MCPConfig | null = null;
   private bus: LocalBus | null = null;
-  private connection: MCPConnection = {
+  private connection: McpConnection = {
     connected: false,
     lastConnectionAttempt: new Date(),
     reconnectAttempts: 0,
@@ -178,7 +178,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
    * @throws NormalizedProviderError on failure
    */
   async execute(input: MCPExecuteInput, correlationId: string): Promise<MCPExecuteOutput> {
-    if (!this.config || !this.connection.connected) {
+    if (!(this.config && this.connection.connected)) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
         "MCP bridge not initialized or disconnected",
@@ -465,7 +465,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
    */
   private async invokeTool(
     toolName: string,
-    toolArguments: Record<string, unknown>,
+    _toolArguments: Record<string, unknown>,
     signal: AbortSignal
   ): Promise<unknown> {
     // Check for abort
@@ -502,8 +502,6 @@ export class MCPBridgeAdapter implements ProviderAdapter<
         topic,
         payload,
       });
-    } catch (error) {
-      console.warn(`Failed to publish MCP event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }

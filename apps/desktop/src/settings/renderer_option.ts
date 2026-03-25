@@ -37,7 +37,9 @@ export class RendererOption {
   }
 
   private render(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
@@ -132,7 +134,9 @@ export class RendererOption {
   }
 
   private attachEventListeners(): void {
-    if (!this.container) return;
+    if (!this.container) {
+      return;
+    }
 
     const option = this.container.querySelector(".renderer-option") as HTMLElement;
     if (!option) return;

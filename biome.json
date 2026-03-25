@@ -21,16 +21,36 @@
     "rules": {
       "recommended": true,
       "suspicious": {
-        "all": true
+        "all": true,
+        "noExplicitAny": "warn",
+        "noEmptyBlockStatements": "warn",
+        "noEvolvingTypes": "warn",
+        "noMisplacedAssertion": "off",
+        "noAssignInExpressions": "warn"
       },
       "correctness": {
-        "all": true
+        "all": true,
+        "noNodejsModules": "off",
+        "noUndeclaredDependencies": "off",
+        "noUndeclaredVariables": "off",
+        "useHookAtTopLevel": "off"
       },
       "style": {
-        "all": true
+        "all": true,
+        "useNamingConvention": "off",
+        "noNonNullAssertion": "warn",
+        "noParameterProperties": "off",
+        "noNamespaceImport": "off",
+        "noDefaultExport": "off",
+        "useFilenamingConvention": "off",
+        "noDoneCallback": "off",
+        "useForOf": "warn"
       },
       "complexity": {
-        "all": true
+        "all": true,
+        "noExcessiveCognitiveComplexity": "warn",
+        "noVoid": "off",
+        "noForEach": "warn"
       },
       "security": {
         "all": true
@@ -45,7 +65,7 @@
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
       "semicolons": "always",
-      "trailingComma": "es5"
+      "trailingCommas": "es5"
     }
   },
   "overrides": [

@@ -1,8 +1,8 @@
-import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
-import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
-import type { LocalBus } from "../../runtime/src/protocol/bus";
-import type { RendererEngine } from "./settings";
-import type { TransportDiagnostics } from "./context_store";
+import type { LocalBus } from "../../runtime/src/protocol/bus.ts";
+import type { LocalBusEnvelope } from "../../runtime/src/protocol/types.ts";
+import type { RuntimeState } from "../../runtime/src/sessions/state_machine.ts";
+import type { TransportDiagnostics } from "./context_store.ts";
+import type { RendererEngine } from "./settings.ts";
 
 type RuntimeResponse<T extends Record<string, unknown>> = {
   ok: boolean;
@@ -99,7 +99,7 @@ export class DesktopRuntimeClient {
     forceError?: boolean;
   }): Promise<LifecycleResult> {
     const requestedLaneId = `${input.workspaceId}:lane`;
-    const response = await this.bus.request(
+    const response = await this.bus.request?.(
       toCommandEnvelope(
         "lane.create",
         {
@@ -166,7 +166,7 @@ export class DesktopRuntimeClient {
     forceError?: boolean;
   }): Promise<LifecycleResult> {
     const requestedTerminalId = `${input.sessionId}:terminal`;
-    const response = await this.bus.request(
+    const response = await this.bus.request?.(
       toCommandEnvelope(
         "terminal.spawn",
         {
@@ -193,7 +193,7 @@ export class DesktopRuntimeClient {
   }
 
   async getRendererCapabilities(workspaceId: string | null): Promise<RendererCapabilities> {
-    const response = await this.bus.request(
+    const response = await this.bus.request?.(
       toCommandEnvelope("renderer.capabilities", {}, workspaceId, null, null, null)
     );
     const parsed = toResponse<Record<string, unknown>>(response);
@@ -215,7 +215,7 @@ export class DesktopRuntimeClient {
     targetEngine: RendererEngine;
     forceError?: boolean;
   }): Promise<RendererSwitchResult> {
-    const response = await this.bus.request(
+    const response = await this.bus.request?.(
       toCommandEnvelope(
         "renderer.switch",
         {

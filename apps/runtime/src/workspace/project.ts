@@ -128,7 +128,9 @@ export async function detectStaleProjects(workspace: Workspace): Promise<Workspa
 
   const changed = updatedProjects.some((p, i) => p.status !== workspace.projects[i]!.status);
 
-  if (!changed) return workspace;
+  if (!changed) {
+    return workspace;
+  }
 
   return {
     ...workspace,

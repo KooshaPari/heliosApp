@@ -2,9 +2,9 @@
  * Unit tests for GhosttySurface (T003).
  */
 
-import { describe, test, expect, beforeEach } from "bun:test";
-import { GhosttySurface } from "../surface.js";
+import { beforeEach, describe, expect, test } from "bun:test";
 import type { RenderSurface } from "../../adapter.js";
+import { GhosttySurface } from "../surface.js";
 
 const TEST_SURFACE: RenderSurface = {
   windowId: "win-1",

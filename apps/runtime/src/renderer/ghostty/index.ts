@@ -51,10 +51,11 @@ export type { PtyWriter, GhosttyInputEvent, InputEventListener } from "./input.j
  */
 export async function isGhosttyAvailable(binaryPath = "ghostty"): Promise<boolean> {
   try {
-    const proc = Bun.spawn(["which", binaryPath], {
-      stdout: "ignore",
-      stderr: "ignore",
-    });
+    const whichOpts = {
+      stdout: "ignore" as const,
+      stderr: "ignore" as const,
+    };
+    const proc = Bun.spawn(["which", binaryPath], whichOpts);
     await proc.exited;
     return proc.exitCode === 0;
   } catch {
@@ -69,10 +70,11 @@ export async function isGhosttyAvailable(binaryPath = "ghostty"): Promise<boolea
  */
 export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<string> {
   try {
-    const proc = Bun.spawn([binaryPath, "--version"], {
-      stdout: "pipe",
-      stderr: "ignore",
-    });
+    const versionOpts = {
+      stdout: "pipe" as const,
+      stderr: "ignore" as const,
+    };
+    const proc = Bun.spawn([binaryPath, "--version"], versionOpts);
     const text = await new Response(proc.stdout).text();
     await proc.exited;
     const trimmed = text.trim();
@@ -102,7 +104,6 @@ export async function registerGhostty(
   const available = await isGhosttyAvailable(binaryPath);
 
   if (!available) {
-    console.warn("[ghostty] Ghostty binary not found; skipping registration.");
     return;
   }
 

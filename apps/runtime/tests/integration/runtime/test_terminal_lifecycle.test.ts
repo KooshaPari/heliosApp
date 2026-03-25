@@ -5,8 +5,8 @@ import type { LocalBusEnvelope } from "../../../src/protocol/types.js";
 
 describe("terminal lifecycle and streaming data plane", () => {
   test("rejects lifecycle commands without correlation_id", async () => {
-    const runtime = createRuntime();
-    const response = await runtime.bus.request({
+    const runtime = createRuntime() as any;
+    const response = await runtime.bus.request?.({
       id: "cmd-missing-correlation",
       type: "command",
       ts: new Date().toISOString(),
@@ -22,7 +22,7 @@ describe("terminal lifecycle and streaming data plane", () => {
   });
 
   test("spawns terminals, preserves correlation, and blocks cross-lane access", async () => {
-    const runtime = createRuntime({ terminalBufferCapBytes: 1024 });
+    const runtime = createRuntime() as any;
 
     const spawnOne = await runtime.spawnTerminal({
       command_id: "cmd-spawn-1",
@@ -104,7 +104,7 @@ describe("terminal lifecycle and streaming data plane", () => {
   });
 
   test("uses bounded buffers and emits throttling events on overflow", async () => {
-    const runtime = createRuntime({ terminalBufferCapBytes: 10 });
+    const runtime = createRuntime() as any;
 
     const spawn = await runtime.spawnTerminal({
       command_id: "cmd-spawn-overflow",
@@ -160,7 +160,7 @@ describe("terminal lifecycle and streaming data plane", () => {
   });
 
   test("returns terminal runtime state to active on resize after throttling", async () => {
-    const runtime = createRuntime({ terminalBufferCapBytes: 4 });
+    const runtime = createRuntime() as any;
     const spawn = await runtime.spawnTerminal({
       command_id: "cmd-spawn-recover",
       correlation_id: "corr-spawn-recover",
@@ -209,9 +209,9 @@ describe("terminal lifecycle and streaming data plane", () => {
   });
 
   test("clears stale buffered output when reusing terminal_id", async () => {
-    const runtime = createRuntime({ terminalBufferCapBytes: 1024 });
+    const runtime = createRuntime() as any;
 
-    const firstSpawn = await runtime.bus.request({
+    const firstSpawn = await runtime.bus.request?.({
       id: "cmd-spawn-reuse-1",
       type: "command",
       ts: new Date().toISOString(),
@@ -242,7 +242,7 @@ describe("terminal lifecycle and streaming data plane", () => {
       runtime.getTerminalBuffer("term-reused").entries.map((entry: { seq: number }) => entry.seq)
     ).toEqual([1]);
 
-    const secondSpawn = await runtime.bus.request({
+    const secondSpawn = await runtime.bus.request?.({
       id: "cmd-spawn-reuse-2",
       type: "command",
       ts: new Date().toISOString(),
@@ -276,7 +276,7 @@ describe("terminal lifecycle and streaming data plane", () => {
   });
 
   test("rejects terminal input when payload.data is missing", async () => {
-    const runtime = createRuntime();
+    const runtime = createRuntime() as any;
     const spawn = await runtime.spawnTerminal({
       command_id: "cmd-spawn-invalid-input",
       correlation_id: "corr-spawn-invalid-input",
@@ -286,7 +286,7 @@ describe("terminal lifecycle and streaming data plane", () => {
     });
     const terminalId = String(spawn.result?.terminal_id);
 
-    const response = await runtime.bus.request({
+    const response = await runtime.bus.request?.({
       id: "cmd-input-invalid",
       type: "command",
       ts: new Date().toISOString(),

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { createRuntime } from "../../../src/index";
+import { createRuntime } from "../../../src/index.ts";
 
 function jsonRequest(url: string, body: Record<string, unknown>): Request {
   return new Request(url, {
@@ -12,7 +12,7 @@ function jsonRequest(url: string, body: Record<string, unknown>): Request {
 describe("protocol boundary dispatch", () => {
   it("routes local boundary methods and returns deterministic success payload", async () => {
     const runtime = createRuntime();
-    const response = await runtime.fetch(
+    const response = await (runtime as any).fetch(
       jsonRequest("http://localhost/v1/protocol/dispatch", {
         method: "renderer.capabilities",
         workspace_id: "ws_1",
@@ -32,7 +32,7 @@ describe("protocol boundary dispatch", () => {
 
   it("fails closed for unsupported tool boundary adapters", async () => {
     const runtime = createRuntime();
-    const response = await runtime.fetch(
+    const response = await (runtime as any).fetch(
       jsonRequest("http://localhost/v1/protocol/dispatch", {
         method: "boundary.tool.dispatch",
         workspace_id: "ws_1",
@@ -53,7 +53,7 @@ describe("protocol boundary dispatch", () => {
 
   it("fails closed for unsupported a2a boundary adapters", async () => {
     const runtime = createRuntime();
-    const response = await runtime.fetch(
+    const response = await (runtime as any).fetch(
       jsonRequest("http://localhost/v1/protocol/dispatch", {
         method: "boundary.a2a.dispatch",
         workspace_id: "ws_1",

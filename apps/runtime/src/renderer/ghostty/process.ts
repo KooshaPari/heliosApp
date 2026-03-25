@@ -74,7 +74,9 @@ export class GhosttyProcess {
 
   /** Uptime in milliseconds, or 0 if not running. */
   getUptime(): number {
-    if (this._startedAt === undefined) return 0;
+    if (this._startedAt === undefined) {
+      return 0;
+    }
     return Date.now() - this._startedAt;
   }
 
@@ -100,16 +102,19 @@ export class GhosttyProcess {
 
     // Verify binary exists
     try {
-      const which = Bun.spawn(["which", binaryPath], {
-        stdout: "pipe",
-        stderr: "ignore",
-      });
+      const whichOpts = {
+        stdout: "pipe" as const,
+        stderr: "ignore" as const,
+      };
+      const which = Bun.spawn(["which", binaryPath], whichOpts);
       await which.exited;
       if (which.exitCode !== 0) {
         throw new GhosttyBinaryNotFoundError(binaryPath);
       }
     } catch (e) {
-      if (e instanceof GhosttyBinaryNotFoundError) throw e;
+      if (e instanceof GhosttyBinaryNotFoundError) {
+        throw e;
+      }
       throw new GhosttyBinaryNotFoundError(binaryPath);
     }
 
@@ -122,11 +127,12 @@ export class GhosttyProcess {
       args.push(...options.extraArgs);
     }
 
-    const proc = Bun.spawn(args, {
-      stdout: "pipe",
-      stderr: "pipe",
+    const procOpts = {
+      stdout: "pipe" as const,
+      stderr: "pipe" as const,
       env: { ...process.env, ...options.env },
-    });
+    };
+    const proc = Bun.spawn(args, procOpts);
 
     this._proc = proc;
     this._pid = proc.pid;

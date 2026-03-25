@@ -1,4 +1,4 @@
-import { type Component, createSignal, Show } from "solid-js";
+import { type Component, Show, createSignal } from "solid-js";
 
 type SetupWizardProps = {
   isOpen: boolean;

@@ -7,7 +7,6 @@
 
 import type { RegistryQueryInterface, TerminalBinding } from "./binding_triple.js";
 import { BindingState, validateBindingTriple } from "./binding_triple.js";
-import { TerminalNotFound, InvalidBinding } from "./terminal_registry.js";
 import type { TerminalRegistry } from "./terminal_registry.js";
 
 export interface ValidationError {

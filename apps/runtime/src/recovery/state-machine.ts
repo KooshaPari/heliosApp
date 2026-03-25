@@ -1,7 +1,7 @@
+import { randomUUID } from "node:crypto";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
-import { randomUUID } from "crypto";
 
 export enum RecoveryStage {
   CRASHED = "CRASHED",
@@ -179,9 +179,7 @@ export class RecoveryStateMachine {
       // Atomic write
       await fs.writeFile(tempPath, JSON.stringify(this.currentState, null, 2));
       await fs.rename(tempPath, statePath);
-    } catch (err) {
-      console.error("Failed to persist recovery state:", err);
-    }
+    } catch (_err) {}
   }
 
   private async deleteState(): Promise<void> {
@@ -230,11 +228,6 @@ export class RecoveryStateMachine {
       [RecoveryStage.RESTORING]: RecoveryStage.RESTORATION_FAILED,
       [RecoveryStage.RECONCILING]: RecoveryStage.RECONCILIATION_FAILED,
       [RecoveryStage.CRASHED]: RecoveryStage.CRASHED,
-      [RecoveryStage.LIVE]: undefined,
-      [RecoveryStage.DETECTION_FAILED]: undefined,
-      [RecoveryStage.INVENTORY_FAILED]: undefined,
-      [RecoveryStage.RESTORATION_FAILED]: undefined,
-      [RecoveryStage.RECONCILIATION_FAILED]: undefined,
     };
     return failureMap[stage];
   }

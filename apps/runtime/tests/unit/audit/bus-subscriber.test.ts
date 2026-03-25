@@ -17,7 +17,7 @@ describe("BusAuditSubscriber", () => {
     let subscriptionHandler: ((event: BusEvent) => Promise<void>) | null = null;
 
     mockBus = {
-      subscribe: (topic: string, handler: (event: BusEvent) => Promise<void>) => {
+      subscribe: (_topic: string, handler: (event: BusEvent) => Promise<void>) => {
         subscriptionHandler = handler;
         return () => {
           subscriptionHandler = null;

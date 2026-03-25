@@ -1,12 +1,12 @@
 // T001 - Orphan watchdog scheduler with checkpoint persistence
 
-import { CheckpointManager, type WatchdogCheckpoint } from "./checkpoint.js";
-import { ResourceClassifier, type ClassifiedOrphan } from "./resource_classifier.js";
-import { WorktreeDetector } from "./worktree_detector.js";
-import { ZellijDetector, type SessionRegistry } from "./zellij_detector.js";
-import { PtyDetector, type TerminalRegistry } from "./pty_detector.js";
 import type { LocalBus } from "../../protocol/bus.js";
 import type { LaneRegistry } from "../registry.js";
+import { CheckpointManager, type WatchdogCheckpoint } from "./checkpoint.js";
+import { PtyDetector, type TerminalRegistry } from "./pty_detector.js";
+import { type ClassifiedOrphan, ResourceClassifier } from "./resource_classifier.js";
+import { WorktreeDetector } from "./worktree_detector.js";
+import { type SessionRegistry, ZellijDetector } from "./zellij_detector.js";
 
 export interface WatchdogConfig {
   detectionInterval: number; // milliseconds
@@ -45,7 +45,6 @@ export class OrphanWatchdog {
 
   async start(): Promise<void> {
     if (this.isRunning) {
-      console.warn("Watchdog is already running");
       return;
     }
 
@@ -55,11 +54,7 @@ export class OrphanWatchdog {
     const checkpoint = await this.checkpointManager.load();
     if (checkpoint) {
       this.cycleNumber = checkpoint.cycleNumber;
-      console.log(
-        `[Watchdog] Resumed from checkpoint: cycle ${this.cycleNumber}, last run: ${checkpoint.lastCycleTimestamp}`
-      );
     } else {
-      console.log("[Watchdog] Starting fresh with no checkpoint");
     }
 
     console.log(`[Watchdog] Started with ${this.detectionInterval}ms interval`);
@@ -78,8 +73,6 @@ export class OrphanWatchdog {
       clearTimeout(this.detectionTimer);
       this.detectionTimer = null;
     }
-
-    console.log("[Watchdog] Stopped");
   }
 
   getLastDetectionDuration(): number {
@@ -91,7 +84,9 @@ export class OrphanWatchdog {
   }
 
   private scheduleNextCycle(): void {
-    if (!this.isRunning) return;
+    if (!this.isRunning) {
+      return;
+    }
 
     this.detectionTimer = setTimeout(() => {
       this.runDetectionCycle();

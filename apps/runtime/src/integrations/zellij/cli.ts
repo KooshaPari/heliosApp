@@ -5,13 +5,8 @@
  * using Bun.spawn for process execution.
  */
 
+import { ZellijNotFoundError, ZellijTimeoutError, ZellijVersionError } from "./errors.js";
 import type { AvailabilityResult, CliResult, ZellijSession } from "./types.js";
-import {
-  ZellijNotFoundError,
-  ZellijVersionError,
-  ZellijCliError,
-  ZellijTimeoutError,
-} from "./errors.js";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const MINIMUM_VERSION = "0.40.0";
@@ -26,8 +21,12 @@ function compareSemver(a: string, b: string): number {
   for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
     const va = pa[i] ?? 0;
     const vb = pb[i] ?? 0;
-    if (va < vb) return -1;
-    if (va > vb) return 1;
+    if (va < vb) {
+      return -1;
+    }
+    if (va > vb) {
+      return 1;
+    }
   }
   return 0;
 }
@@ -51,10 +50,11 @@ export class ZellijCli {
 
     let proc: ReturnType<typeof Bun.spawn>;
     try {
-      proc = Bun.spawn([this.zellijPath, ...args], {
-        stdout: "pipe",
-        stderr: "pipe",
-      });
+      const spawnOpts = {
+        stdout: "pipe" as const,
+        stderr: "pipe" as const,
+      };
+      proc = Bun.spawn([this.zellijPath, ...args], spawnOpts) as any;
     } catch (error) {
       const caught = error as { code?: string; message?: string };
       if (caught?.code === "ENOENT" || caught?.message?.includes("spawn ENOENT")) {
@@ -83,19 +83,14 @@ export class ZellijCli {
     }
 
     const [stdoutBuf, stderrBuf, exitCode] = await Promise.all([
-      new Response(proc.stdout as ReadableStream).arrayBuffer(),
-      new Response(proc.stderr as ReadableStream).arrayBuffer(),
+      new Response(proc.stdout as unknown as ReadableStream).arrayBuffer(),
+      new Response(proc.stderr as unknown as ReadableStream).arrayBuffer(),
       proc.exited,
     ]);
 
-    const durationMs = performance.now() - startMs;
+    const _durationMs = performance.now() - startMs;
     const stdout = new TextDecoder().decode(stdoutBuf);
     const stderr = new TextDecoder().decode(stderrBuf);
-
-    // Debug logging for all CLI calls
-    console.debug(
-      `[zellij-cli] ${command} -> exit=${exitCode} duration=${durationMs.toFixed(1)}ms`
-    );
 
     return { stdout, stderr, exitCode };
   }
@@ -167,12 +162,16 @@ export class ZellijCli {
    */
   private parseSessionLine(line: string): ZellijSession | undefined {
     const trimmed = line.trim();
-    if (trimmed === "") return undefined;
+    if (trimmed === "") {
+      return undefined;
+    }
 
     // The session name is the first whitespace-delimited token
     const parts = trimmed.split(/\s+/);
     const name = parts[0];
-    if (!name) return undefined;
+    if (!name) {
+      return undefined;
+    }
 
     const attached = /\(ATTACHED\)/i.test(trimmed) || trimmed.includes("ATTACHED");
 

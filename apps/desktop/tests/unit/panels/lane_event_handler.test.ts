@@ -10,7 +10,7 @@ describe("LaneEventHandler", () => {
   beforeEach(() => {
     busHandlers = new Map();
     mockBus = {
-      subscribe: vi.fn((topic, handler) => {
+      subscribe: vi.fn((topic: string, handler: (event: BusEvent) => void) => {
         busHandlers.set(topic, handler);
       }),
       unsubscribe: vi.fn(topic => {

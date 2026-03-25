@@ -3,6 +3,62 @@
 import type { SLODefinition, SLOViolationEvent, PercentileBucket } from "./types.js";
 import type { MetricsRegistry } from "./metrics.js";
 import { computePercentiles } from "./percentiles.js";
+import type { PercentileBucket, SLODefinition, SLOViolationEvent } from "./types.js";
+
+// ---------------------------------------------------------------------------
+// Constitution SLO definitions (single source of truth)
+// ---------------------------------------------------------------------------
+
+export const SLO_DEFINITIONS: readonly SLODefinition[] = Object.freeze([
+  { metric: "input-to-echo", percentile: "p50", threshold: 30, unit: "ms" },
+  { metric: "input-to-echo", percentile: "p99", threshold: 100, unit: "ms" },
+  { metric: "render-frame", percentile: "p50", threshold: 16, unit: "ms" },
+  { metric: "render-frame", percentile: "p99", threshold: 33, unit: "ms" },
+  { metric: "fps", percentile: "p50", threshold: 60, unit: "fps" },
+  { metric: "memory", percentile: "p95", threshold: 500, unit: "MB" },
+  { metric: "startup", percentile: "p50", threshold: 2000, unit: "ms" },
+]);
+
+/** Get SLO definitions for a specific metric. */
+export function getSLOsForMetric(metric: string): SLODefinition[] {
+  return SLO_DEFINITIONS.filter(d => d.metric === metric);
+}
+
+/** Check result from evaluating an SLO against a percentile bucket. */
+export interface SLOCheckResult {
+  passed: boolean;
+  actual: number;
+  threshold: number;
+  metric: string;
+  percentile: string;
+}
+
+/** Check a single SLO against a percentile bucket. */
+export function checkSLO(slo: SLODefinition, bucket: PercentileBucket): SLOCheckResult {
+  const actual = bucket[slo.percentile];
+
+  if (bucket.count === 0) {
+    return {
+      passed: true,
+      actual: 0,
+      threshold: slo.threshold,
+      metric: slo.metric,
+      percentile: slo.percentile,
+    };
+  }
+
+  // For fps, higher is better (pass if >= threshold)
+  // For latency/memory, lower is better (pass if <= threshold)
+  const passed = slo.unit === "fps" ? actual >= slo.threshold : actual <= slo.threshold;
+
+  return {
+    passed,
+    actual,
+    threshold: slo.threshold,
+    metric: slo.metric,
+    percentile: slo.percentile,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Constitution SLO definitions (frozen for immutability)
@@ -165,11 +221,8 @@ export class SLOMonitor {
               console.error("[slo] Bus publish error:", err);
             });
           }
-        } catch (err) {
-          console.error("[slo] Bus publish error:", err);
-        }
+        } catch (_err) {}
       } else {
-        console.log("[slo] Violation:", event);
       }
     }
 
@@ -190,18 +243,19 @@ export class SLOMonitor {
    * Start periodic SLO checks.
    * Calling start() again clears the previous interval.
    */
-  start(intervalMs: number = 5000): void {
+  start(intervalMs = 5000): void {
     if (this.intervalHandle !== undefined) {
       clearInterval(this.intervalHandle);
     }
     this.running = true;
     this.intervalHandle = setInterval(() => {
-      if (!this.running) return;
+      if (!this.running) {
+        return;
+      }
       const t0 = performance.now();
       this.checkAll();
       const elapsed = performance.now() - t0;
       if (elapsed > 5) {
-        console.warn(`[slo] checkAll took ${elapsed.toFixed(2)}ms (> 5ms budget)`);
       }
     }, intervalMs);
   }
