@@ -63,7 +63,9 @@ export const TerminalPanel: Component<TerminalPanelProps> = props => {
 
   return (
     <div
-      ref={el => (ref = el)}
+      ref={el => {
+        ref = el;
+      }}
       style={{
         display: props.isActive ? "block" : "none",
         width: "100%",

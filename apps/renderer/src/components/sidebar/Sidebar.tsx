@@ -54,6 +54,7 @@ export const Sidebar: Component = () => {
         }}
       >
         <button
+          type="button"
           onClick={newChat}
           style={{
             width: "100%",

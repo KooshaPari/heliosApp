@@ -188,7 +188,7 @@ describe("TabBar", () => {
     it("should show stale context indicator", () => {
       const tab = mockTabs[0];
       // Simulate stale context by making it return true
-      (tab as any).hasStaleContext = () => true;
+      (tab as unknown).hasStaleContext = () => true;
 
       const element = tabBar.render();
       const indicatorEl = element.querySelector("[data-tab-id='tab1']");

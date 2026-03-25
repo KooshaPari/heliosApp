@@ -78,6 +78,7 @@ export const ChatInput: Component<ChatInputProps> = props => {
           when={props.isStreaming}
           fallback={
             <button
+              type="button"
               onClick={handleSend}
               disabled={!text().trim()}
               style={{
@@ -96,6 +97,7 @@ export const ChatInput: Component<ChatInputProps> = props => {
           }
         >
           <button
+            type="button"
             onClick={() => props.onCancel?.()}
             style={{
               background: "#f38ba8",

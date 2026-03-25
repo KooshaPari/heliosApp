@@ -83,7 +83,9 @@ export class AuditLedger {
     // Merge and deduplicate results by event ID
     const merged = new Map<string, AuditEvent>();
 
-    rbResults.forEach(event => merged.set(event.id, event));
+    rbResults.forEach(event => {
+      merged.set(event.id, event);
+    });
     dbResults.forEach(event => {
       if (!merged.has(event.id)) {
         merged.set(event.id, event);

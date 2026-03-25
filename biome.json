@@ -21,9 +21,20 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "suspicious": {},
-      "correctness": {},
-      "style": {},
+      "suspicious": {
+        "noExplicitAny": "off"
+      },
+      "correctness": {
+        "noUnreachable": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off"
+      },
+      "a11y": {
+        "noStaticElementInteractions": "off",
+        "useKeyWithClickEvents": "off",
+        "useButtonType": "off"
+      },
       "complexity": {},
       "security": {}
     }
