@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
-import type { LocalBus } from "../protocol/bus.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
-import type { RedactionRule } from "./redaction-engine.js";
+import type { LocalBus } from '../protocol/bus';
+import type { LocalBusEnvelope } from '../protocol/types';
+import type { RedactionRule } from './redaction-engine';
 
 export type { RedactionRule };
 

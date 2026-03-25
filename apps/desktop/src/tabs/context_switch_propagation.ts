@@ -1,5 +1,5 @@
-import type { ActiveContext } from "./context_switch.ts";
-import type { TabSurface } from "./tab_surface.ts";
+import type { ActiveContext } from './context_switch';
+import type { TabSurface } from './tab_surface';
 
 export interface PropagationResult {
   successful: string[];

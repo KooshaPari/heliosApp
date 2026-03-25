@@ -8,7 +8,7 @@ import {
   recordTransition,
   transition,
   withLaneLock,
-} from "../../src/lanes/state_machine.js";
+} from '../../src/lanes/state_machine';
 
 describe("Lane State Machine", () => {
   describe("valid transitions", () => {

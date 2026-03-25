@@ -1,4 +1,4 @@
-import type { LocalBusEnvelope } from "../../protocol/types.ts";
+import type { LocalBusEnvelope } from '../../protocol/types';
 
 type MuxerSession = {
   id: string;

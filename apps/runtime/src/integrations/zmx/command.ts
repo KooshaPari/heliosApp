@@ -1,5 +1,5 @@
-import { execCommand } from "../exec.ts";
-import type { ZmxAdapter } from "./adapter.ts";
+import { execCommand } from '../exec';
+import type { ZmxAdapter } from './adapter';
 
 export class ZmxCommandAdapter implements ZmxAdapter {
   async checkpoint(sessionId: string): Promise<string> {

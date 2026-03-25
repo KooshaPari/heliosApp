@@ -3,9 +3,9 @@
  * @see FR-010-007
  */
 import { describe, expect, it } from "bun:test";
-import { queryCapabilities, compareCapabilities } from "../../../src/renderer/capabilities.js";
-import type { RendererCapabilities } from "../../../src/renderer/capabilities.js";
-import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
+import { queryCapabilities, compareCapabilities } from '../../../src/renderer/capabilities';
+import type { RendererCapabilities } from '../../../src/renderer/capabilities';
+import { MockGhosttyAdapter, MockRioAdapter } from '../../helpers/mock_adapter';
 
 const CAPS_A: RendererCapabilities = {
   gpuAccelerated: true,

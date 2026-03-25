@@ -1,7 +1,7 @@
 import { type FSWatcher, watch as fsWatch } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import type { SettingsSchema, SettingsStore } from "./types.js";
+import type { SettingsSchema, SettingsStore } from './types';
 
 /**
  * JSON-file-backed settings store with in-memory unknown-key preservation

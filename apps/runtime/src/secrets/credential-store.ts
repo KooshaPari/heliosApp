@@ -11,9 +11,9 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join, resolve, sep } from "node:path";
-import type { LocalBus } from "../protocol/bus.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
-import { EncryptionService } from "./encryption.js";
+import type { LocalBus } from '../protocol/bus';
+import type { LocalBusEnvelope } from '../protocol/types';
+import { EncryptionService } from './encryption';
 
 // ---------------------------------------------------------------------------
 // Types

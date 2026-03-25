@@ -11,7 +11,7 @@ import {
   clearCapabilityCache,
   detectCapabilities,
   getCachedCapabilities,
-} from "../../../../src/renderer/ghostty/capabilities.js";
+} from '../../../../src/renderer/ghostty/capabilities';
 
 // Mock Bun.spawn to avoid slow system_profiler calls in tests
 const originalSpawn = Bun.spawn;

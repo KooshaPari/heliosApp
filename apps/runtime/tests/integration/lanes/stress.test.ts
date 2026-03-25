@@ -4,9 +4,9 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { LaneManager, _resetIdCounter } from "../../../src/lanes/index.js";
-import { LaneCapacityExceededError } from "../../../src/lanes/registry.js";
-import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
+import { LaneManager, _resetIdCounter } from '../../../src/lanes/index';
+import { LaneCapacityExceededError } from '../../../src/lanes/registry';
+import { InMemoryLocalBus } from '../../../src/protocol/bus';
 
 async function runGit(args: string[], cwd: string): Promise<string> {
   const proc = Bun.spawn(["git", ...args], {

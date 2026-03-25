@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "bun:test";
-import { RedactionEngine } from "../redaction-engine.js";
-import { getDefaultRules } from "../redaction-rules.js";
+import { RedactionEngine } from '../redaction-engine';
+import { getDefaultRules } from '../redaction-rules';
 
 function makeEngine(): RedactionEngine {
   const engine = new RedactionEngine();

@@ -5,14 +5,14 @@
  * to the abstract contract defined in spec 010.
  */
 
-import type { RendererAdapter, RendererConfig, RendererState, RenderSurface } from "../adapter.js";
-import type { RendererCapabilities } from "../capabilities.js";
-import type { RendererRegistry } from "../registry.js";
-import { RioCapabilities } from "./capabilities.js";
-import { RioInputRelay } from "./input.js";
-import { RioMetrics } from "./metrics.js";
-import { RioProcess } from "./process.js";
-import { RioSurface } from "./surface.js";
+import type { RendererAdapter, RendererConfig, RendererState, RenderSurface } from '../adapter';
+import type { RendererCapabilities } from '../capabilities';
+import type { RendererRegistry } from '../registry';
+import { RioCapabilities } from './capabilities';
+import { RioInputRelay } from './input';
+import { RioMetrics } from './metrics';
+import { RioProcess } from './process';
+import { RioSurface } from './surface';
 
 // ---------------------------------------------------------------------------
 // Error

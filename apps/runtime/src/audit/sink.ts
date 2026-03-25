@@ -1,7 +1,7 @@
 import type { AuditEvent } from "./event";
 import { AuditRingBuffer } from "./ring-buffer";
 import type { AuditFilter } from "./ring-buffer";
-import type { LocalBusEnvelope } from "../protocol/types.js";
+import type { LocalBusEnvelope } from '../protocol/types';
 import {
   type AuditOutcome,
   type AuditRecord,
@@ -18,7 +18,7 @@ import {
   inferType,
   getRecordPayload,
   isSensitiveKey,
-} from "./sink-helpers.js";
+} from './sink-helpers';
 
 export type {
   AuditOutcome,
@@ -27,7 +27,7 @@ export type {
   RetentionPolicyConfig,
   AuditBundle,
   AuditSinkMetrics,
-} from "./sink-helpers.js";
+} from './sink-helpers';
 
 /**
  * Storage backend interface for persisting audit events.

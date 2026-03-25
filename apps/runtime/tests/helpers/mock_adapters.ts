@@ -10,8 +10,8 @@ import type {
   RendererAdapter,
   RendererConfig,
   RendererState,
-} from "../../src/renderer/adapter.js";
-import type { RendererCapabilities } from "../../src/renderer/capabilities.js";
+} from '../../src/renderer/adapter';
+import type { RendererCapabilities } from '../../src/renderer/capabilities';
 
 // ---------------------------------------------------------------------------
 // Configuration

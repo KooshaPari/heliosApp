@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { RedactionAuditTrail } from "../audit-trail.js";
-import { RedactionEngine } from "../redaction-engine.js";
-import { getDefaultRules } from "../redaction-rules.js";
+import { InMemoryLocalBus } from '../../protocol/bus';
+import { RedactionAuditTrail } from '../audit-trail';
+import { RedactionEngine } from '../redaction-engine';
+import { getDefaultRules } from '../redaction-rules';
 
 function makeEngine(): RedactionEngine {
   const engine = new RedactionEngine();

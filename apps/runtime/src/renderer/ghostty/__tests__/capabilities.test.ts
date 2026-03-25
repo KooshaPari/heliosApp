@@ -7,13 +7,13 @@ import {
   getCachedCapabilities,
   clearCapabilityCache,
   detectCapabilities,
-} from "../capabilities.js";
-import type { RendererCapabilities } from "../../capabilities.js";
+} from '../capabilities';
+import type { RendererCapabilities } from '../../capabilities';
 import {
   clearCapabilityCache,
   detectCapabilities,
   getCachedCapabilities,
-} from "../capabilities.js";
+} from '../capabilities';
 
 describe("Ghostty Capabilities", () => {
   beforeEach(() => {

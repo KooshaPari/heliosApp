@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import { ZellijCli } from "../cli.js";
-import { SessionAlreadyExistsError, SessionNotFoundError } from "../errors.js";
-import { MuxRegistry } from "../registry.js";
-import { ZellijSessionManager, sessionNameForLane } from "../session.js";
-import { SessionAlreadyExistsError, SessionNotFoundError } from "../errors.js";
+import { ZellijCli } from '../cli';
+import { SessionAlreadyExistsError, SessionNotFoundError } from '../errors';
+import { MuxRegistry } from '../registry';
+import { ZellijSessionManager, sessionNameForLane } from '../session';
+import { SessionAlreadyExistsError, SessionNotFoundError } from '../errors';
 
 // Helper to create a mock spawn result
 function makeMockProc(stdout: string, stderr: string, exitCode: number) {

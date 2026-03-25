@@ -3,9 +3,9 @@
 // FR-009: Bus error isolation
 
 import { describe, test, expect, mock, beforeEach } from "bun:test";
-import { WorkspaceService } from "../../../src/workspace/workspace.js";
-import { createInMemoryStore } from "../../../src/workspace/store.js";
-import type { WorkspaceStore } from "../../../src/workspace/types.js";
+import { WorkspaceService } from '../../../src/workspace/workspace';
+import { createInMemoryStore } from '../../../src/workspace/store';
+import type { WorkspaceStore } from '../../../src/workspace/types';
 
 let store: WorkspaceStore;
 let events: Array<{ topic: string; payload: Record<string, unknown> }>;

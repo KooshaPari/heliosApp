@@ -8,7 +8,7 @@
  */
 
 import { beforeEach, describe, expect, test } from "bun:test";
-import { GhosttyProcess } from "../../../../src/renderer/ghostty/process.js";
+import { GhosttyProcess } from '../../../../src/renderer/ghostty/process';
 
 describe("GhosttyProcess", () => {
   let proc: GhosttyProcess;

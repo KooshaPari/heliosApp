@@ -4,7 +4,7 @@
 
 import { readFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import type { Workspace, WorkspaceStore } from "./types.js";
+import type { Workspace, WorkspaceStore } from './types';
 import {
   PRIMARY_FILE,
   atomicWrite,
@@ -13,7 +13,7 @@ import {
   detectCorruption,
   recoverFromSnapshot,
   PRIMARY_FILE,
-} from "./snapshot.js";
+} from './snapshot';
 
 export class InMemoryWorkspaceStore implements WorkspaceStore {
   private readonly data = new Map<string, Workspace>();

@@ -3,8 +3,8 @@
  */
 
 import { describe, expect, test } from "bun:test";
-import { RendererRegistry } from "../../registry.js";
-import { GhosttyBackend, isGhosttyAvailable } from "../index.js";
+import { RendererRegistry } from '../../registry';
+import { GhosttyBackend, isGhosttyAvailable } from '../index';
 
 describe("Ghostty Module Exports", () => {
   test("GhosttyBackend is exported and constructable", () => {

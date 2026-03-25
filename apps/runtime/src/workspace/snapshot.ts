@@ -5,7 +5,7 @@
 import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
-import type { Workspace } from "./types.js";
+import type { Workspace } from './types';
 
 const SNAPSHOT_FILE = "workspaces.snapshot.json";
 const PRIMARY_FILE = "workspaces.json";

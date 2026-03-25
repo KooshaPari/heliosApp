@@ -7,10 +7,10 @@
  * @see FR-010-010, SC-010-003
  */
 
-import type { RenderSurface, RendererAdapter, RendererConfig } from "./adapter.js";
-import type { TerminalContext } from "./hot_swap.js";
-import type { RendererEventBus } from "./index.js";
-import type { SwitchBuffer } from "./stream_binding.js";
+import type { RenderSurface, RendererAdapter, RendererConfig } from './adapter';
+import type { TerminalContext } from './hot_swap';
+import type { RendererEventBus } from './index';
+import type { SwitchBuffer } from './stream_binding';
 
 // ---------------------------------------------------------------------------
 // Types

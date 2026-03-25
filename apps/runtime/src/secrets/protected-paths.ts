@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import type { LocalBus } from "../protocol/bus.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
+import type { LocalBus } from '../protocol/bus';
+import type { LocalBusEnvelope } from '../protocol/types';
 
 // ---------------------------------------------------------------------------
 // Types

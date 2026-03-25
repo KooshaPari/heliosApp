@@ -1,6 +1,6 @@
 // T006, T007, T008 — Project binding, stale detection, and git clone delegation
 
-import type { Workspace, ProjectBinding } from "./types.js";
+import type { Workspace, ProjectBinding } from './types';
 import { existsSync, realpathSync, accessSync, constants } from "node:fs";
 import { isAbsolute } from "node:path";
 

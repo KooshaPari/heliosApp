@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { DuplicateBindingError } from "../errors.js";
-import { MuxRegistry } from "../registry.js";
-import type { MuxSession } from "../types.js";
+import { DuplicateBindingError } from '../errors';
+import { MuxRegistry } from '../registry';
+import type { MuxSession } from '../types';
 
 function makeMockSession(sessionName: string, laneId: string): MuxSession {
   return {

@@ -7,11 +7,11 @@
  * @module
  */
 
-import type { BusPublisher, PtyEventCorrelation } from "./events.js";
-import { emitPtyEvent } from "./events.js";
-import type { PtyRecord } from "./registry.js";
-import type { PtyRegistry } from "./registry.js";
-import type { PtyLifecycle } from "./state_machine.js";
+import type { BusPublisher, PtyEventCorrelation } from './events';
+import { emitPtyEvent } from './events';
+import type { PtyRecord } from './registry';
+import type { PtyRegistry } from './registry';
+import type { PtyLifecycle } from './state_machine';
 
 // ── Signal Envelope ──────────────────────────────────────────────────────────
 

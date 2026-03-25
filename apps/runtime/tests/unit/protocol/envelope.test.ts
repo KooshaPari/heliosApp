@@ -5,8 +5,8 @@ import {
   createEvent,
   createResponse,
   setMaxPayloadSize,
-} from "../../../src/protocol/envelope.js";
-import type { CommandEnvelope } from "../../../src/protocol/types.js";
+} from '../../../src/protocol/envelope';
+import type { CommandEnvelope } from '../../../src/protocol/types';
 
 // FR-001: Canonical envelope schema
 // FR-006: Strict validation rejects malformed envelopes

@@ -7,9 +7,9 @@
  */
 
 import { beforeEach, describe, expect, it } from "bun:test";
-import { RendererRegistry } from "../../../../src/renderer/registry.js";
-import { FeatureFlagDisabledError, RioBackend } from "../../../../src/renderer/rio/backend.js";
-import { isRioEnabled, registerRio } from "../../../../src/renderer/rio/index.js";
+import { RendererRegistry } from '../../../../src/renderer/registry';
+import { FeatureFlagDisabledError, RioBackend } from '../../../../src/renderer/rio/backend';
+import { isRioEnabled, registerRio } from '../../../../src/renderer/rio/index';
 
 // ---------------------------------------------------------------------------
 // Zero-cost: flag off means no registration

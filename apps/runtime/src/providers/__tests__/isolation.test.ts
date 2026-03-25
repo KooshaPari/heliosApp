@@ -7,9 +7,9 @@
  */
 
 import { describe, it, expect } from "bun:test";
-import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
-import { NormalizedProviderError, normalizeError } from "../errors.js";
-import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from '../adapter';
+import { NormalizedProviderError, normalizeError } from '../errors';
+import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from '../adapter';
 
 /**
  * Mock isolated provider for testing lane isolation behavior.

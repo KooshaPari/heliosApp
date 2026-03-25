@@ -6,14 +6,14 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import type { RenderSurface, RendererConfig } from "../adapter.js";
-import { FeatureFlagDisabledError, RioBackend } from "../rio/backend.js";
-import { RioCapabilities } from "../rio/capabilities.js";
-import { isRioEnabled } from "../rio/index.js";
-import { RioInputRelay } from "../rio/input.js";
-import { RioMetrics } from "../rio/metrics.js";
-import { RioProcess } from "../rio/process.js";
-import { RioSurface } from "../rio/surface.js";
+import type { RenderSurface, RendererConfig } from '../adapter';
+import { FeatureFlagDisabledError, RioBackend } from '../rio/backend';
+import { RioCapabilities } from '../rio/capabilities';
+import { isRioEnabled } from '../rio/index';
+import { RioInputRelay } from '../rio/input';
+import { RioMetrics } from '../rio/metrics';
+import { RioProcess } from '../rio/process';
+import { RioSurface } from '../rio/surface';
 
 // ---------------------------------------------------------------------------
 // Helpers

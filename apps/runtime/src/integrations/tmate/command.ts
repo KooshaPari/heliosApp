@@ -1,5 +1,5 @@
-import { execCommand } from "../exec.ts";
-import type { TmateAdapter } from "./adapter.ts";
+import { execCommand } from '../exec';
+import type { TmateAdapter } from './adapter';
 
 export class TmateCommandAdapter implements TmateAdapter {
   async startShare(terminalId: string): Promise<{ sshCommand: string; webUrl?: string }> {

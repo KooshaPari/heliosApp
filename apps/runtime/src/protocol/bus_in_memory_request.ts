@@ -1,5 +1,5 @@
-import type { LocalBusEnvelope } from "./types.js";
-import type { BusState } from "./bus_in_memory.js";
+import type { LocalBusEnvelope } from './types';
+import type { BusState } from './bus_in_memory';
 
 type InMemoryRequestContext = {
   getState(): BusState;

@@ -3,17 +3,17 @@
  * @see FR-010-004, SC-010-001
  */
 import { describe, expect, it } from "bun:test";
-import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
-import { RendererRegistry } from "../../../src/renderer/registry.js";
-import { RendererStateMachine } from "../../../src/renderer/state_machine.js";
-import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
+import type { RendererEventBus, RendererLifecycleEvent } from '../../../src/renderer/index';
+import { RendererRegistry } from '../../../src/renderer/registry';
+import { RendererStateMachine } from '../../../src/renderer/state_machine';
+import type { RendererEventBus, RendererLifecycleEvent } from '../../../src/renderer/index';
 import {
   MockGhosttyAdapter,
   MockRioAdapter,
   MockRendererAdapter,
   TEST_SURFACE,
   TEST_CONFIG,
-} from "../../helpers/mock_adapter.js";
+} from '../../helpers/mock_adapter';
 
 function setup(from: MockRendererAdapter, to: MockRendererAdapter) {
   const reg = new RendererRegistry();

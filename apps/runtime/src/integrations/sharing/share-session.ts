@@ -6,7 +6,7 @@
  * FR-026-003: Policy gate integration.
  */
 
-import type { LocalBus } from "../../protocol/bus.js";
+import type { LocalBus } from '../../protocol/bus';
 
 /**
  * Share session state.

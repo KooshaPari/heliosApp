@@ -1,5 +1,5 @@
-import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference.ts";
-import type { InferenceEngine } from "./engine.ts";
+import type { InferenceRequest, InferenceResponse, ModelInfo } from '../../types/inference';
+import type { InferenceEngine } from './engine';
 
 export class AnthropicInferenceEngine implements InferenceEngine {
   readonly id = "anthropic";

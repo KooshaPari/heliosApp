@@ -3,12 +3,12 @@
 // T011-T015 - Par task binding, termination, execution, stale detection, lifecycle events
 
 import * as path from "node:path";
-import type { LocalBus } from "../protocol/bus.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
-import { LaneNotFoundError, type LaneRecord, LaneRegistry } from "./registry.js";
-import { SharedLaneCleanupError, attachAgent, detachAgent, shareLane } from "./sharing.js";
-import { type LaneState, recordTransition, transition, withLaneLock } from "./state_machine.js";
-import { provisionWorktree, reconcileOrphanedWorktrees, removeWorktree } from "./worktree.js";
+import type { LocalBus } from '../protocol/bus';
+import type { LocalBusEnvelope } from '../protocol/types';
+import { LaneNotFoundError, type LaneRecord, LaneRegistry } from './registry';
+import { SharedLaneCleanupError, attachAgent, detachAgent, shareLane } from './sharing';
+import { type LaneState, recordTransition, transition, withLaneLock } from './state_machine';
+import { provisionWorktree, reconcileOrphanedWorktrees, removeWorktree } from './worktree';
 
 // ── T016: Full Reconciliation Result ─────────────────────────────────────────
 
@@ -551,15 +551,15 @@ export class LaneManager {
 }
 
 // Re-export public types
-export { LaneRegistry, type LaneRecord, LaneNotFoundError } from "./registry.js";
-export type { LaneState, LaneEvent } from "./state_machine.js";
+export { LaneRegistry, type LaneRecord, LaneNotFoundError } from './registry';
+export type { LaneState, LaneEvent } from './state_machine';
 export {
   InvalidLaneTransitionError,
   transition,
   withLaneLock,
   getTransitionHistory,
-} from "./state_machine.js";
-export { LaneClosedError, SharedLaneCleanupError } from "./sharing.js";
+} from './state_machine';
+export { LaneClosedError, SharedLaneCleanupError } from './sharing';
 export {
   provisionWorktree,
   removeWorktree,
@@ -571,7 +571,7 @@ export {
   type WorktreeOptions,
   type WorktreeResult,
   type ReconciliationResult,
-} from "./worktree.js";
+} from './worktree';
 export {
   ParManager,
   ParNotFoundError,
@@ -584,4 +584,4 @@ export {
   type ParManagerOptions,
   type SpawnFn,
   type SpawnResult,
-} from "./par.js";
+} from './par';

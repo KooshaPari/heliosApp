@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
-import type { RenderSurface, RendererAdapter, RendererConfig, RendererState } from "../adapter.js";
-import type { RendererCapabilities } from "../capabilities.js";
-import type { RendererEventBus, RendererLifecycleEvent } from "../index.js";
-import { RendererRegistry } from "../registry.js";
-import { RendererStateMachine } from "../state_machine.js";
-import { SwitchSameRendererError, switchRenderer } from "../switch.js";
+import type { RenderSurface, RendererAdapter, RendererConfig, RendererState } from '../adapter';
+import type { RendererCapabilities } from '../capabilities';
+import type { RendererEventBus, RendererLifecycleEvent } from '../index';
+import { RendererRegistry } from '../registry';
+import { RendererStateMachine } from '../state_machine';
+import { SwitchSameRendererError, switchRenderer } from '../switch';
 
 const DEFAULT_CAPS: RendererCapabilities = {
   gpuAccelerated: true,

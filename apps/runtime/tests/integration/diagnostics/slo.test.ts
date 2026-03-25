@@ -1,9 +1,9 @@
 // FR-004, FR-010: Integration tests for SLO violation detection, rate limiting, and bus emission.
 
 import { afterEach, describe, expect, it } from "bun:test";
-import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
-import { SLOMonitor } from "../../../src/diagnostics/slo.js";
-import type { SLODefinition } from "../../../src/diagnostics/types.js";
+import { MetricsRegistry } from '../../../src/diagnostics/metrics';
+import { SLOMonitor } from '../../../src/diagnostics/slo';
+import type { SLODefinition } from '../../../src/diagnostics/types';
 
 const METRIC_NAME = "input-to-echo";
 

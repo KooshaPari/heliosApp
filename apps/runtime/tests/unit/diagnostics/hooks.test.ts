@@ -7,8 +7,8 @@ import {
   markEnd,
   markStart,
   monotonicNow,
-} from "../../../src/diagnostics/hooks.js";
-import type { MonotonicClock } from "../../../src/diagnostics/hooks.js";
+} from '../../../src/diagnostics/hooks';
+import type { MonotonicClock } from '../../../src/diagnostics/hooks';
 
 // ── Helper: deterministic mock clock ───────────────────────────────────
 

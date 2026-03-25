@@ -1,8 +1,8 @@
 // FR-005, FR-006: Unit tests for memory and frame timing samplers.
 
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
-import { FrameTimingSampler, MemorySampler } from "../../../src/diagnostics/samplers.js";
+import { MetricsRegistry } from '../../../src/diagnostics/metrics';
+import { FrameTimingSampler, MemorySampler } from '../../../src/diagnostics/samplers';
 
 describe("MemorySampler", () => {
   let registry: MetricsRegistry;

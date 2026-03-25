@@ -8,8 +8,8 @@ import {
   GhosttyNotInitializedError,
   GhosttyNotRunningError,
   GhosttyAlreadyInitializedError,
-} from "../backend.js";
-import type { RendererConfig, RenderSurface } from "../../adapter.js";
+} from '../backend';
+import type { RendererConfig, RenderSurface } from '../../adapter';
 
 const TEST_CONFIG: RendererConfig = {
   gpuAcceleration: true,

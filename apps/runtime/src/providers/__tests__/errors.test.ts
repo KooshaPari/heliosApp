@@ -12,7 +12,7 @@ import {
   getErrorMessage,
   isRetryable,
   normalizeError,
-} from "../errors.js";
+} from '../errors';
 
 describe("NormalizedProviderError", () => {
   it("should create error with required fields", () => {

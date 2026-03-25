@@ -5,7 +5,7 @@ import {
   InvalidBinding,
   TerminalNotFound,
   TerminalRegistry,
-} from "../../../src/registry/terminal_registry.js";
+} from '../../../src/registry/terminal_registry';
 
 describe("TerminalRegistry", () => {
   let registry: TerminalRegistry;

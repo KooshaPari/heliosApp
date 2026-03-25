@@ -5,7 +5,7 @@ import {
   PtyLifecycle,
   type PtyState,
   transition,
-} from "../../../src/pty/state_machine.js";
+} from '../../../src/pty/state_machine';
 
 // ── All valid transitions ────────────────────────────────────────────────────
 

@@ -6,8 +6,8 @@
 import { describe, test, expect } from "bun:test";
 import {
   WorkspaceService,
-} from "../../../src/workspace/workspace.js";
-import { createInMemoryStore } from "../../../src/workspace/store.js";
+} from '../../../src/workspace/workspace';
+import { createInMemoryStore } from '../../../src/workspace/store';
 
 // ── Entity function tests ───────────────────────────────────────────
 

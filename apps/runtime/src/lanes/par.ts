@@ -1,9 +1,9 @@
 // T011-T014 - Par task binding, termination, execution, and stale detection
 
-import type { LocalBus } from "../protocol/bus.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
-import type { LaneRegistry } from "./registry.js";
-import { transition, withLaneLock, recordTransition, type LaneState } from "./state_machine.js";
+import type { LocalBus } from '../protocol/bus';
+import type { LocalBusEnvelope } from '../protocol/types';
+import type { LaneRegistry } from './registry';
+import { transition, withLaneLock, recordTransition, type LaneState } from './state_machine';
 import {
   type ParBinding,
   type ExecResult,
@@ -17,7 +17,7 @@ import {
   generateParTaskId,
   isProcessAlive,
   defaultSpawn,
-} from "./par-types.js";
+} from './par-types';
 
 export type {
   ParBinding,
@@ -25,14 +25,14 @@ export type {
   ParManagerOptions,
   SpawnFn,
   SpawnResult,
-} from "./par-types.js";
+} from './par-types';
 export {
   ParNotFoundError,
   ParSpawnError,
   LaneNotReadyError,
   ExecTimeoutError,
   _resetParIdCounter,
-} from "./par-types.js";
+} from './par-types';
 
 // ── Par Manager ─────────────────────────────────────────────────────────────
 

@@ -1,6 +1,6 @@
-import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference.ts";
-import type { InferenceEngine } from "./engine.ts";
-import { detectHardware } from "./hardware.ts";
+import type { InferenceRequest, InferenceResponse, ModelInfo } from '../../types/inference';
+import type { InferenceEngine } from './engine';
+import { detectHardware } from './hardware';
 
 export class MlxInferenceEngine implements InferenceEngine {
   readonly id = "mlx";

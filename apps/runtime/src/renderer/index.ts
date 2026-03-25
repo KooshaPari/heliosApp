@@ -10,51 +10,51 @@
 // Re-exports
 // ---------------------------------------------------------------------------
 
-export type { RendererAdapter, RendererConfig, RenderSurface, RendererState } from "./adapter.js";
+export type { RendererAdapter, RendererConfig, RenderSurface, RendererState } from './adapter';
 
-export type { RendererCapabilities, CapabilityDiff, CapabilityComparison } from "./capabilities.js";
-export { queryCapabilities, compareCapabilities } from "./capabilities.js";
+export type { RendererCapabilities, CapabilityDiff, CapabilityComparison } from './capabilities';
+export { queryCapabilities, compareCapabilities } from './capabilities';
 
-export type { RendererEvent, TransitionRecord } from "./state_machine.js";
+export type { RendererEvent, TransitionRecord } from './state_machine';
 export {
   RendererStateMachine,
   InvalidRendererTransitionError,
   transition,
-} from "./state_machine.js";
+} from './state_machine';
 
-export type { RegistrationMeta } from "./registry.js";
-export { RendererRegistry, DuplicateRendererError, RendererNotFoundError } from "./registry.js";
+export type { RegistrationMeta } from './registry';
+export { RendererRegistry, DuplicateRendererError, RendererNotFoundError } from './registry';
 
-export type { SwitchContext } from "./switch.js";
-export { switchRenderer, SwitchTimeoutError, SwitchSameRendererError } from "./switch.js";
+export type { SwitchContext } from './switch';
+export { switchRenderer, SwitchTimeoutError, SwitchSameRendererError } from './switch';
 
 export type {
   StreamBinding,
   BufferOverflowEvent,
   StreamBindingEventBus,
-} from "./stream_binding.js";
-export { StreamBindingManager, SwitchBuffer } from "./stream_binding.js";
+} from './stream_binding';
+export { StreamBindingManager, SwitchBuffer } from './stream_binding';
 
-export type { HotSwapResult, TerminalContext } from "./hot_swap.js";
-export { executeHotSwap, HotSwapError, HotSwapCapabilityError } from "./hot_swap.js";
+export type { HotSwapResult, TerminalContext } from './hot_swap';
+export { executeHotSwap, HotSwapError, HotSwapCapabilityError } from './hot_swap';
 
-export type { RollbackResult, RollbackTerminalStatus } from "./rollback.js";
-export { executeRollback, RollbackError } from "./rollback.js";
+export type { RollbackResult, RollbackTerminalStatus } from './rollback';
+export { executeRollback, RollbackError } from './rollback';
 
 export type {
   SwitchTransaction,
   SwitchTransactionRequest,
   SwitchTransactionState,
-} from "./switch_transaction.js";
+} from './switch_transaction';
 export {
   SwitchTransactionOrchestrator,
   createSwitchOrchestrator,
   ConcurrentSwitchError,
   InvalidTransitionError,
-} from "./switch_transaction.js";
+} from './switch_transaction';
 
-export type { ZmxCheckpoint, RestartRestoreResult } from "./restart_restore.js";
-export { executeRestartWithRestore, RestartRestoreError } from "./restart_restore.js";
+export type { ZmxCheckpoint, RestartRestoreResult } from './restart_restore';
+export { executeRestartWithRestore, RestartRestoreError } from './restart_restore';
 
 // ---------------------------------------------------------------------------
 // Lifecycle event types

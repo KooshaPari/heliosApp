@@ -5,10 +5,10 @@ import {
   ParNotFoundError,
   ParSpawnError,
   _resetParIdCounter,
-} from "../../src/lanes/par.js";
-import type { SpawnFn, SpawnResult } from "../../src/lanes/par.js";
-import { LaneRegistry } from "../../src/lanes/registry.js";
-import { InMemoryLocalBus } from "../../src/protocol/bus.js";
+} from '../../src/lanes/par';
+import type { SpawnFn, SpawnResult } from '../../src/lanes/par';
+import { LaneRegistry } from '../../src/lanes/registry';
+import { InMemoryLocalBus } from '../../src/protocol/bus';
 
 // ── Mock spawn factory ──────────────────────────────────────────────────────
 

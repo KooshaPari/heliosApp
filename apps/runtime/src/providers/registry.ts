@@ -9,9 +9,9 @@
  * FR-025-008: Binding providers to lanes for failure isolation.
  */
 
-import type { LocalBus } from "../protocol/bus.js";
-import type { ProviderAdapter, ProviderRegistration, ProviderHealthStatus } from "./adapter.js";
-import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
+import type { LocalBus } from '../protocol/bus';
+import type { ProviderAdapter, ProviderRegistration, ProviderHealthStatus } from './adapter';
+import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from './errors';
 
 /**
  * Registered provider instance with metadata.

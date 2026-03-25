@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, test } from "bun:test";
-import type { RenderSurface } from "../../adapter.js";
-import { GhosttySurface } from "../surface.js";
+import type { RenderSurface } from '../../adapter';
+import { GhosttySurface } from '../surface';
 
 const TEST_SURFACE: RenderSurface = {
   windowId: "win-1",

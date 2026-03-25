@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { createMcpBridgeFixture, initMcpBridge } from "./mcp-bridge-test-helpers.js";
-import { NormalizedProviderError } from "../errors.js";
+import { createMcpBridgeFixture, initMcpBridge } from './mcp-bridge-test-helpers';
+import { NormalizedProviderError } from '../errors';
 
 describe("MCP Bridge Adapter - Error Handling", () => {
   let adapter: ReturnType<typeof createMcpBridgeFixture>["adapter"];

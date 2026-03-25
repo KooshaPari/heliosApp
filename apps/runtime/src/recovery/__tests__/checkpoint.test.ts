@@ -5,7 +5,7 @@ import {
   type CheckpointSession,
   CheckpointWriter,
   estimateCheckpointSize,
-} from "../checkpoint.js";
+} from '../checkpoint';
 
 describe("CheckpointWriter and CheckpointReader", () => {
   let writer: CheckpointWriter;

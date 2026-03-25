@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import { InMemoryBusPublisher } from "../events.js";
-import { IdleMonitor } from "../idle_monitor.js";
-import { PtyRegistry } from "../registry.js";
-import type { PtyRecord } from "../registry.js";
-import { PtyLifecycle } from "../state_machine.js";
+import { InMemoryBusPublisher } from '../events';
+import { IdleMonitor } from '../idle_monitor';
+import { PtyRegistry } from '../registry';
+import type { PtyRecord } from '../registry';
+import { PtyLifecycle } from '../state_machine';
 
 function makeRecord(
   registry: PtyRegistry,

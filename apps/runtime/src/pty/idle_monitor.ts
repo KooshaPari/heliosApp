@@ -7,10 +7,10 @@
  * @module
  */
 
-import type { BusPublisher, PtyEventCorrelation } from "./events.js";
-import { emitPtyEvent } from "./events.js";
-import type { PtyRegistry } from "./registry.js";
-import type { PtyLifecycle } from "./state_machine.js";
+import type { BusPublisher, PtyEventCorrelation } from './events';
+import { emitPtyEvent } from './events';
+import type { PtyRegistry } from './registry';
+import type { PtyLifecycle } from './state_machine';
 
 /** Configuration for the idle monitor. */
 export interface IdleMonitorConfig {

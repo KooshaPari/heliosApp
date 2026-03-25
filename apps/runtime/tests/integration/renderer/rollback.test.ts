@@ -8,10 +8,10 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
-import { executeRollback } from "../../../src/renderer/rollback.js";
-import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
-import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
+import type { TerminalContext } from '../../../src/renderer/hot_swap';
+import { executeRollback } from '../../../src/renderer/rollback';
+import { SwitchBuffer } from '../../../src/renderer/stream_binding';
+import { MockGhosttyAdapter, MockRioAdapter } from '../../helpers/mock_adapter';
 
 describe("Rollback integration", () => {
   it("successfully restores single terminal to original renderer", async () => {

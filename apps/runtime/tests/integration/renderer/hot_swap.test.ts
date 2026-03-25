@@ -8,14 +8,14 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { type TerminalContext, executeHotSwap } from "../../../src/renderer/hot_swap.js";
-import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
+import { type TerminalContext, executeHotSwap } from '../../../src/renderer/hot_swap';
+import { SwitchBuffer } from '../../../src/renderer/stream_binding';
 import {
   MockGhosttyAdapter,
   MockRioAdapter,
   TEST_CONFIG,
   TEST_SURFACE,
-} from "../../helpers/mock_adapter.js";
+} from '../../helpers/mock_adapter';
 
 describe("Hot-swap integration", () => {
   it("successfully hot-swaps single terminal", async () => {

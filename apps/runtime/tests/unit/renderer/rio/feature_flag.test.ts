@@ -10,17 +10,17 @@ import type {
   RendererAdapter,
   RendererConfig,
   RendererState,
-} from "../../../../src/renderer/adapter.js";
-import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
-import { RendererRegistry } from "../../../../src/renderer/registry.js";
-import { RioBackend } from "../../../../src/renderer/rio/backend.js";
+} from '../../../../src/renderer/adapter';
+import type { RendererCapabilities } from '../../../../src/renderer/capabilities';
+import { RendererRegistry } from '../../../../src/renderer/registry';
+import { RioBackend } from '../../../../src/renderer/rio/backend';
 import type {
   RendererAdapter,
   RendererConfig,
   RenderSurface,
   RendererState,
-} from "../../../../src/renderer/adapter.js";
-import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
+} from '../../../../src/renderer/adapter';
+import type { RendererCapabilities } from '../../../../src/renderer/capabilities';
 
 // ---------------------------------------------------------------------------
 // Mock ghostty

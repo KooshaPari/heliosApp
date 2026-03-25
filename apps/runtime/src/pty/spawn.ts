@@ -5,9 +5,9 @@
  * @module
  */
 
-import type { PtyDimensions, PtyRecord } from "./registry.js";
-import type { PtyRegistry } from "./registry.js";
-import { PtyLifecycle } from "./state_machine.js";
+import type { PtyDimensions, PtyRecord } from './registry';
+import type { PtyRegistry } from './registry';
+import { PtyLifecycle } from './state_machine';
 
 /** Options for spawning a new PTY. */
 export interface SpawnOptions {

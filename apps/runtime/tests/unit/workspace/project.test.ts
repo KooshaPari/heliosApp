@@ -12,9 +12,9 @@ import {
   bindLocalProject,
   detectStaleProjects,
   gitClone,
-} from "../../../src/workspace/project.js";
-import { createWorkspace } from "../../../src/workspace/workspace.js";
-import type { Workspace } from "../../../src/workspace/types.js";
+} from '../../../src/workspace/project';
+import { createWorkspace } from '../../../src/workspace/workspace';
+import type { Workspace } from '../../../src/workspace/types';
 
 let tempDir: string;
 let ws: Workspace;

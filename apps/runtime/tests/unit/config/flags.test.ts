@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { type FeatureFlag, FlagRegistry, RENDERER_ENGINE_FLAG } from "../../../src/config/flags.js";
-import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
-import { SettingsManager } from "../../../src/config/settings.js";
-import { FlagRegistry, RENDERER_ENGINE_FLAG, type FeatureFlag } from "../../../src/config/flags.js";
+import { type FeatureFlag, FlagRegistry, RENDERER_ENGINE_FLAG } from '../../../src/config/flags';
+import { SETTINGS_SCHEMA } from '../../../src/config/schema';
+import { SettingsManager } from '../../../src/config/settings';
+import { FlagRegistry, RENDERER_ENGINE_FLAG, type FeatureFlag } from '../../../src/config/flags';
 
 let tempDir: string;
 let filePath: string;

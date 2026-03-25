@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { RestorationPipeline, type RestorationResult } from "../restoration.js";
-import { RecoveryStateMachine, RecoveryStage } from "../state-machine.js";
-import { CheckpointWriter, type Checkpoint, type CheckpointSession } from "../checkpoint.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import type { Checkpoint, CheckpointSession } from "../checkpoint.js";
-import { RestorationPipeline } from "../restoration.js";
-import { RecoveryStage, RecoveryStateMachine } from "../state-machine.js";
+import { RestorationPipeline, type RestorationResult } from '../restoration';
+import { RecoveryStateMachine, RecoveryStage } from '../state-machine';
+import { CheckpointWriter, type Checkpoint, type CheckpointSession } from '../checkpoint';
+import { InMemoryLocalBus } from '../../protocol/bus';
+import type { Checkpoint, CheckpointSession } from '../checkpoint';
+import { RestorationPipeline } from '../restoration';
+import { RecoveryStage, RecoveryStateMachine } from '../state-machine';
 
 describe("Integration Tests - Crash to Live Recovery", () => {
   let tempDir: string;

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { RendererRegistry, DuplicateRendererError, RendererNotFoundError } from "../registry.js";
-import type { RendererAdapter, RendererState } from "../adapter.js";
-import type { RendererCapabilities } from "../capabilities.js";
-import { DuplicateRendererError, RendererNotFoundError, RendererRegistry } from "../registry.js";
+import { RendererRegistry, DuplicateRendererError, RendererNotFoundError } from '../registry';
+import type { RendererAdapter, RendererState } from '../adapter';
+import type { RendererCapabilities } from '../capabilities';
+import { DuplicateRendererError, RendererNotFoundError, RendererRegistry } from '../registry';
 
 function mockAdapter(id: string, version = "1.0.0"): RendererAdapter {
   const caps: RendererCapabilities = {

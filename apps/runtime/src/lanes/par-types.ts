@@ -1,7 +1,7 @@
 // Par task types, errors, and helpers — extracted from par.ts for static analysis compliance.
 
-import type { LaneRegistry } from "./registry.js";
-import type { LocalBus } from "../protocol/bus.js";
+import type { LaneRegistry } from './registry';
+import type { LocalBus } from '../protocol/bus';
 
 // ── Types ───────────────────────────────────────────────────────────────────
 

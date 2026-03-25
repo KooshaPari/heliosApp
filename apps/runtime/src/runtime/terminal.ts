@@ -1,7 +1,7 @@
-import { METHODS } from "../protocol/methods.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
-import type { InMemoryLocalBus } from "../protocol/bus.js";
-import type { RuntimeAuditRecord, TerminalBuffer } from "./types.js";
+import { METHODS } from '../protocol/methods';
+import type { LocalBusEnvelope } from '../protocol/types';
+import type { InMemoryLocalBus } from '../protocol/bus';
+import type { RuntimeAuditRecord, TerminalBuffer } from './types';
 
 export type RuntimeTerminalContext = {
   bus: InMemoryLocalBus;

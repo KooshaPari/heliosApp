@@ -5,10 +5,10 @@
  */
 
 import { beforeEach, describe, expect, it } from "bun:test";
-import type { RendererAdapter, RendererState } from "../adapter.js";
-import type { RendererCapabilities } from "../capabilities.js";
-import { StreamBindingManager, SwitchBuffer } from "../stream_binding.js";
-import type { BufferOverflowEvent, StreamBindingEventBus } from "../stream_binding.js";
+import type { RendererAdapter, RendererState } from '../adapter';
+import type { RendererCapabilities } from '../capabilities';
+import { StreamBindingManager, SwitchBuffer } from '../stream_binding';
+import type { BufferOverflowEvent, StreamBindingEventBus } from '../stream_binding';
 
 // ---------------------------------------------------------------------------
 // Helpers

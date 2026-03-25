@@ -6,19 +6,19 @@
  */
 
 import { describe, it, expect, beforeAll, beforeEach, afterEach } from "bun:test";
-import { RioBackend } from "../../../../src/renderer/rio/backend.js";
-import { RendererRegistry } from "../../../../src/renderer/registry.js";
-import { detectRioBinary, isRioEnabled, registerRio } from "../../../../src/renderer/rio/index.js";
+import { RioBackend } from '../../../../src/renderer/rio/backend';
+import { RendererRegistry } from '../../../../src/renderer/registry';
+import { detectRioBinary, isRioEnabled, registerRio } from '../../../../src/renderer/rio/index';
 import type {
   RendererAdapter,
   RendererConfig,
   RenderSurface,
   RendererState,
-} from "../../../../src/renderer/adapter.js";
-import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
-import { RendererRegistry } from "../../../../src/renderer/registry.js";
-import { RioBackend } from "../../../../src/renderer/rio/backend.js";
-import { detectRioBinary, registerRio } from "../../../../src/renderer/rio/index.js";
+} from '../../../../src/renderer/adapter';
+import type { RendererCapabilities } from '../../../../src/renderer/capabilities';
+import { RendererRegistry } from '../../../../src/renderer/registry';
+import { RioBackend } from '../../../../src/renderer/rio/backend';
+import { detectRioBinary, registerRio } from '../../../../src/renderer/rio/index';
 
 // ---------------------------------------------------------------------------
 // Skip if rio not available

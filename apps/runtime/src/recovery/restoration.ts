@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
-import type { LocalBus } from "../protocol/bus.js";
-import type { Checkpoint, CheckpointSession } from "./checkpoint.js";
+import type { LocalBus } from '../protocol/bus';
+import type { Checkpoint, CheckpointSession } from './checkpoint';
 
 export interface RestoredSession {
   sessionId: string;

@@ -11,9 +11,9 @@ export type {
   EventEnvelope,
   ResponseEnvelope,
   LocalBusEnvelopeWithSequence,
-} from "./types.js";
+} from './types';
 
-export { InMemoryLocalBus, CommandBusImpl, createBus } from "./emitter.js";
+export { InMemoryLocalBus, CommandBusImpl, createBus } from './emitter';
 
 export {
   LIFECYCLE_SEQUENCES,
@@ -23,8 +23,8 @@ export {
   isStartTopic,
   resolveExpectedStartTopic,
   publishLifecycleEvent,
-} from "./lifecycle.js";
+} from './lifecycle';
 
-export { MetricsRecorder } from "./metrics.js";
+export { MetricsRecorder } from './metrics';
 
-export { isCommandEnvelope, isEventEnvelope, hasTopLevelDataField } from "./validation.js";
+export { isCommandEnvelope, isEventEnvelope, hasTopLevelDataField } from './validation';

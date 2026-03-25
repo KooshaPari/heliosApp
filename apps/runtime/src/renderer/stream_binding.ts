@@ -7,7 +7,7 @@
  * @see FR-010-005
  */
 
-import type { RendererAdapter } from "./adapter.js";
+import type { RendererAdapter } from './adapter';
 
 // ---------------------------------------------------------------------------
 // Types

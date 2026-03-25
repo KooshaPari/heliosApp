@@ -1,7 +1,7 @@
 // T003 - Stale zellij session detector
 
-import { execCommand } from "../../integrations/exec.js";
-import type { OrphanedResource } from "./resource_classifier.js";
+import { execCommand } from '../../integrations/exec';
+import type { OrphanedResource } from './resource_classifier';
 
 export interface SessionRegistry {
   getSession(sessionId: string): { laneId?: string } | null;

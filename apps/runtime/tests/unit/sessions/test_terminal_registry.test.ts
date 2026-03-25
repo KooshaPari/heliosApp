@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { TerminalRegistry } from "../../../src/sessions/terminal_registry.ts";
+import { TerminalRegistry } from '../../../src/sessions/terminal_registry';
 
 describe("TerminalRegistry", () => {
   test("stores and queries terminal context", () => {

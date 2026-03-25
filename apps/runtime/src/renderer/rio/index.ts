@@ -6,8 +6,8 @@
  * allocation, no process spawning.
  */
 
-import type { RendererRegistry } from "../registry.js";
-import type { RioBackend } from "./backend.js";
+import type { RendererRegistry } from '../registry';
+import type { RioBackend } from './backend';
 
 // ---------------------------------------------------------------------------
 // Config types

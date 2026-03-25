@@ -1,10 +1,10 @@
 import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import type { LocalBus } from "../protocol/bus.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
-import { DEFAULT_PATTERNS } from "./protected-paths-matching.js";
-import type { ProtectedPathPattern } from "./protected-paths-types.js";
+import type { LocalBus } from '../protocol/bus';
+import type { LocalBusEnvelope } from '../protocol/types';
+import { DEFAULT_PATTERNS } from './protected-paths-matching';
+import type { ProtectedPathPattern } from './protected-paths-types';
 
 export class ProtectedPathConfig {
   private patterns: Map<string, ProtectedPathPattern> = new Map();

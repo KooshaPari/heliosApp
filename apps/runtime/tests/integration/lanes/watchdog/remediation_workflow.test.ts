@@ -1,10 +1,10 @@
 // Integration tests for remediation workflow
 
 import { beforeEach, describe, expect, it } from "bun:test";
-import { LaneRegistry } from "../../../../src/lanes/registry.js";
-import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
-import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { LaneRegistry } from '../../../../src/lanes/registry';
+import { RemediationEngine } from '../../../../src/lanes/watchdog/remediation';
+import type { ClassifiedOrphan } from '../../../../src/lanes/watchdog/resource_classifier';
+import { InMemoryLocalBus } from '../../../../src/protocol/bus';
 
 describe("Remediation Workflow", () => {
   let engine: RemediationEngine;

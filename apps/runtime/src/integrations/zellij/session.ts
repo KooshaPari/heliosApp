@@ -4,19 +4,19 @@
  * Manages the lifecycle of zellij sessions bound to lanes.
  */
 
-import type { ZellijCli } from "./cli.js";
-import { SessionAlreadyExistsError, SessionNotFoundError } from "./errors.js";
-import type { MuxEventEmitter } from "./events.js";
-import { MuxEventType } from "./events.js";
-import type { MuxRegistry } from "./registry.js";
-import type { TopologyTracker } from "./topology.js";
+import type { ZellijCli } from './cli';
+import { SessionAlreadyExistsError, SessionNotFoundError } from './errors';
+import type { MuxEventEmitter } from './events';
+import { MuxEventType } from './events';
+import type { MuxRegistry } from './registry';
+import type { TopologyTracker } from './topology';
 import type {
   MuxSession,
   PaneRecord,
   PtyManagerInterface,
   SessionOptions,
   TabRecord,
-} from "./types.js";
+} from './types';
 
 /**
  * Generate the canonical session name for a lane.

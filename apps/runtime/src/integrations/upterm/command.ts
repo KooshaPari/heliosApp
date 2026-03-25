@@ -1,5 +1,5 @@
-import { execCommand } from "../exec.ts";
-import type { UptermAdapter } from "./adapter.ts";
+import { execCommand } from '../exec';
+import type { UptermAdapter } from './adapter';
 
 export class UptermCommandAdapter implements UptermAdapter {
   async startShare(terminalId: string): Promise<{ shareUrl: string }> {

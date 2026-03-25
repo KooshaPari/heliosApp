@@ -14,14 +14,14 @@ import { randomBytes } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { AuditSink } from "../../audit/audit-sink.js";
-import { InMemoryLocalBus, type LocalBus } from "../../protocol/bus.js";
-import { RedactionAuditTrail } from "../audit-trail.js";
-import { CredentialAccessDeniedError, CredentialStore } from "../credential-store.js";
-import { EncryptionService } from "../encryption.js";
-import { ProtectedPathConfig, ProtectedPathDetector } from "../protected-paths.js";
-import { RedactionEngine } from "../redaction-engine.js";
-import { getDefaultRules } from "../redaction-rules.js";
+import { AuditSink } from '../../audit/audit-sink';
+import { InMemoryLocalBus, type LocalBus } from '../../protocol/bus';
+import { RedactionAuditTrail } from '../audit-trail';
+import { CredentialAccessDeniedError, CredentialStore } from '../credential-store';
+import { EncryptionService } from '../encryption';
+import { ProtectedPathConfig, ProtectedPathDetector } from '../protected-paths';
+import { RedactionEngine } from '../redaction-engine';
+import { getDefaultRules } from '../redaction-rules';
 
 // ---------------------------------------------------------------------------
 // Test helpers

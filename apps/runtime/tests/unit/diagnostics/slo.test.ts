@@ -1,8 +1,8 @@
 // FR-003: Unit tests for SLO definitions and checks.
 
 import { describe, expect, it } from "bun:test";
-import { SLO_DEFINITIONS, checkSLO, getSLOsForMetric } from "../../../src/diagnostics/slo.js";
-import type { PercentileBucket, SLODefinition } from "../../../src/diagnostics/types.js";
+import { SLO_DEFINITIONS, checkSLO, getSLOsForMetric } from '../../../src/diagnostics/slo';
+import type { PercentileBucket, SLODefinition } from '../../../src/diagnostics/types';
 
 function makeBucket(overrides: Partial<PercentileBucket> = {}): PercentileBucket {
   return { p50: 0, p95: 0, p99: 0, min: 0, max: 0, count: 100, ...overrides };

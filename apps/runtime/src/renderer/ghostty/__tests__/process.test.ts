@@ -3,7 +3,7 @@
  */
 
 import { beforeEach, describe, expect, test } from "bun:test";
-import { GhosttyProcess, GhosttyProcessError } from "../process.js";
+import { GhosttyProcess, GhosttyProcessError } from '../process';
 
 describe("GhosttyProcess", () => {
   let proc: GhosttyProcess;

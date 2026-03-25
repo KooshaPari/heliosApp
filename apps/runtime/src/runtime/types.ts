@@ -1,4 +1,4 @@
-import type { RecoveryBootstrapResult, RecoveryMetadata, WatchdogScanResult } from "../sessions/types.js";
+import type { RecoveryBootstrapResult, RecoveryMetadata, WatchdogScanResult } from '../sessions/types';
 
 export interface HealthCheckResult {
   readonly ok: boolean;

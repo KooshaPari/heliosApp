@@ -7,8 +7,8 @@ import {
   InvalidRendererTransitionError,
   RendererStateMachine,
   transition,
-} from "../../../src/renderer/state_machine.js";
-import type { RendererEvent } from "../../../src/renderer/state_machine.js";
+} from '../../../src/renderer/state_machine';
+import type { RendererEvent } from '../../../src/renderer/state_machine';
 
 describe("RendererStateMachine", () => {
   it("starts in uninitialized state", () => {

@@ -1,6 +1,6 @@
 // Audit sink types and helper functions — extracted from sink.ts for static analysis compliance.
 
-import type { LocalBusEnvelope } from "../protocol/types.js";
+import type { LocalBusEnvelope } from '../protocol/types';
 
 export type AuditOutcome = "accepted" | "rejected";
 

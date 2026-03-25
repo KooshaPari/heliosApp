@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it } from "bun:test";
-import { RioProcess } from "../../../../src/renderer/rio/process.js";
+import { RioProcess } from '../../../../src/renderer/rio/process';
 
 describe("RioProcess — initial state", () => {
   let proc: RioProcess;

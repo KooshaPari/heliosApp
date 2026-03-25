@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { randomBytes } from "node:crypto";
-import { EncryptionService } from "../encryption.js";
+import { EncryptionService } from '../encryption';
 
 function makeFixedKeyService(): EncryptionService {
   const fixedKey = randomBytes(32);

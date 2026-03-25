@@ -8,7 +8,7 @@
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { createCommand, createResponse, createEvent } from "../../../src/protocol/envelope.js";
+import { createCommand, createResponse, createEvent } from '../../../src/protocol/envelope';
 
 // ---------------------------------------------------------------------------
 // Minimal JSON Schema draft-07 validator (subset needed for envelope schema)

@@ -4,7 +4,7 @@ import {
   getAllDefaults,
   getDefault,
   validateValue,
-} from "../../../src/config/schema.js";
+} from '../../../src/config/schema';
 
 // FR-001: Settings schema with typed defaults
 describe("getDefault", () => {

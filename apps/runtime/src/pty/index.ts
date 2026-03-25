@@ -14,7 +14,7 @@ export {
   PtyLifecycle,
   InvalidTransitionError,
   transition,
-} from "./state_machine.js";
+} from './state_machine';
 
 export {
   type PtyRecord,
@@ -23,9 +23,9 @@ export {
   PtyRegistry,
   DuplicatePtyError,
   RegistryCapacityError,
-} from "./registry.js";
+} from './registry';
 
-export { type SpawnOptions, type SpawnResult, spawnPty } from "./spawn.js";
+export { type SpawnOptions, type SpawnResult, spawnPty } from './spawn';
 
 export {
   type SignalEnvelope,
@@ -36,7 +36,7 @@ export {
   resize,
   terminate,
   sendSighup,
-} from "./signals.js";
+} from './signals';
 
 export {
   type PtyEventCorrelation,
@@ -46,11 +46,11 @@ export {
   NoOpBusPublisher,
   InMemoryBusPublisher,
   emitPtyEvent,
-} from "./events.js";
+} from './events';
 
-export { InvalidStateError, type WriteResult, type ProcessMap, writeInput } from "./io.js";
+export { InvalidStateError, type WriteResult, type ProcessMap, writeInput } from './io';
 
-export { IdleMonitor, type IdleMonitorConfig } from "./idle_monitor.js";
+export { IdleMonitor, type IdleMonitorConfig } from './idle_monitor';
 
 export {
   RingBuffer,
@@ -58,40 +58,40 @@ export {
   OutputBuffer,
   type OutputBufferConfig,
   type BufferStats,
-} from "./buffers.js";
+} from './buffers';
 
 import {
   type BufferStats as _BufferStats,
   OutputBuffer as _OutputBuffer,
   type OutputBufferConfig as _OutputBufferConfig,
-} from "./buffers.js";
-import type { BusPublisher as _BusPublisher } from "./events.js";
-import { NoOpBusPublisher as _NoOpBusPublisher, emitPtyEvent as _emitPtyEvent } from "./events.js";
+} from './buffers';
+import type { BusPublisher as _BusPublisher } from './events';
+import { NoOpBusPublisher as _NoOpBusPublisher, emitPtyEvent as _emitPtyEvent } from './events';
 import {
   IdleMonitor as _IdleMonitor,
   type IdleMonitorConfig as _IdleMonitorConfig,
-} from "./idle_monitor.js";
-import { type ProcessMap as _ProcessMap, writeInput as _writeInput } from "./io.js";
+} from './idle_monitor';
+import { type ProcessMap as _ProcessMap, writeInput as _writeInput } from './io';
 // Local imports for use in PtyManager class body.
-import { PtyRegistry as _PtyRegistry } from "./registry.js";
-import type { PtyRecord as _PtyRecord } from "./registry.js";
-import type { ReconciliationSummary as _ReconciliationSummary } from "./registry.js";
-import type { SignalHistoryMap as _SignalHistoryMap } from "./signals.js";
+import { PtyRegistry as _PtyRegistry } from './registry';
+import type { PtyRecord as _PtyRecord } from './registry';
+import type { ReconciliationSummary as _ReconciliationSummary } from './registry';
+import type { SignalHistoryMap as _SignalHistoryMap } from './signals';
 import {
   type TerminateOptions as _TerminateOptions,
   resize as _resize,
   terminate as _terminate,
-} from "./signals.js";
-import { writeInput as _writeInput, type ProcessMap as _ProcessMap } from "./io.js";
+} from './signals';
+import { writeInput as _writeInput, type ProcessMap as _ProcessMap } from './io';
 import {
   IdleMonitor as _IdleMonitor,
   type IdleMonitorConfig as _IdleMonitorConfig,
-} from "./idle_monitor.js";
+} from './idle_monitor';
 import {
   OutputBuffer as _OutputBuffer,
   type OutputBufferConfig as _OutputBufferConfig,
   type BufferStats as _BufferStats,
-} from "./buffers.js";
+} from './buffers';
 
 /**
  * High-level facade for PTY operations.

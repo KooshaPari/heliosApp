@@ -5,8 +5,8 @@
  */
 
 import { afterEach, describe, expect, it } from "bun:test";
-import { InMemoryBusPublisher } from "../../../src/pty/events.js";
-import { PtyManager } from "../../../src/pty/index.js";
+import { InMemoryBusPublisher } from '../../../src/pty/events';
+import { PtyManager } from '../../../src/pty/index';
 
 const pidsToCleanup: number[] = [];
 

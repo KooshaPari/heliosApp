@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { InMemoryBusPublisher } from "../events.js";
-import { InvalidStateError, writeInput } from "../io.js";
-import type { ProcessMap } from "../io.js";
-import type { PtyRecord } from "../registry.js";
+import { InMemoryBusPublisher } from '../events';
+import { InvalidStateError, writeInput } from '../io';
+import type { ProcessMap } from '../io';
+import type { PtyRecord } from '../registry';
 
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   return {

@@ -1,16 +1,16 @@
 import { describe, expect, it } from "bun:test";
-import { InMemoryBusPublisher } from "../../../src/pty/events.js";
-import { PtyRegistry } from "../../../src/pty/registry.js";
-import type { PtyRecord } from "../../../src/pty/registry.js";
+import { InMemoryBusPublisher } from '../../../src/pty/events';
+import { PtyRegistry } from '../../../src/pty/registry';
+import type { PtyRecord } from '../../../src/pty/registry';
 import {
   InvalidDimensionsError,
   SignalHistory,
   resize,
   sendSighup,
   terminate,
-} from "../../../src/pty/signals.js";
-import type { SignalHistoryMap } from "../../../src/pty/signals.js";
-import { PtyLifecycle } from "../../../src/pty/state_machine.js";
+} from '../../../src/pty/signals';
+import type { SignalHistoryMap } from '../../../src/pty/signals';
+import { PtyLifecycle } from '../../../src/pty/state_machine';
 
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   return {

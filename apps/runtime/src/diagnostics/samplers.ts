@@ -1,6 +1,6 @@
 // FR-005, FR-006: Memory and frame timing samplers.
 
-import type { MetricsRegistry } from "./metrics.js";
+import type { MetricsRegistry } from './metrics';
 
 // ── Memory Sampler ──────────────────────────────────────────────────────
 

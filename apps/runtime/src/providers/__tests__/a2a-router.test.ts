@@ -7,11 +7,11 @@
  */
 
 import { describe, it, expect, beforeEach } from "bun:test";
-import { A2ARouterAdapter, HealthMonitoringCoordinator, type A2AEndpoint } from "../a2a-router.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { A2ARouterAdapter, HealthMonitoringCoordinator } from "../a2a-router.js";
-import type { ProviderHealthStatus } from "../adapter.js";
-import { NormalizedProviderError } from "../errors.js";
+import { A2ARouterAdapter, HealthMonitoringCoordinator, type A2AEndpoint } from '../a2a-router';
+import { InMemoryLocalBus } from '../../protocol/bus';
+import { A2ARouterAdapter, HealthMonitoringCoordinator } from '../a2a-router';
+import type { ProviderHealthStatus } from '../adapter';
+import { NormalizedProviderError } from '../errors';
 
 type RouterConfig = {
   endpoints: Array<{

@@ -4,7 +4,7 @@ import { describe, expect, it } from "bun:test";
 import {
   type OrphanedResource,
   ResourceClassifier,
-} from "../../../../src/lanes/watchdog/resource_classifier.js";
+} from '../../../../src/lanes/watchdog/resource_classifier';
 
 describe("ResourceClassifier", () => {
   it("should classify resource with low risk (recent, known owner)", () => {

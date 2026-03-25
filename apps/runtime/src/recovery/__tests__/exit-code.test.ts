@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { Watchdog, CrashReason, type CrashEvent } from "../watchdog.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { type CrashEvent, CrashReason, Watchdog } from "../watchdog.js";
+import { Watchdog, CrashReason, type CrashEvent } from '../watchdog';
+import { InMemoryLocalBus } from '../../protocol/bus';
+import { type CrashEvent, CrashReason, Watchdog } from '../watchdog';
 
 describe("Exit Code Monitoring", () => {
   let watchdog: Watchdog;

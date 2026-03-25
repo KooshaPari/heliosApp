@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import type { RecoveryState } from "./state-machine-types.js";
+import type { RecoveryState } from './state-machine-types';
 
 export function getRecoveryStatePath(recoveryDataDir: string): string {
   return path.join(recoveryDataDir, "recovery", "recovery-state.json");

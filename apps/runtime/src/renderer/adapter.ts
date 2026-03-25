@@ -6,7 +6,7 @@
  * implementation.
  */
 
-import type { RendererCapabilities } from "./capabilities.js";
+import type { RendererCapabilities } from './capabilities';
 
 // ---------------------------------------------------------------------------
 // Supporting types

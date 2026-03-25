@@ -1,4 +1,4 @@
-import type { Conversation, Message } from "../../types/conversation.ts";
+import type { Conversation, Message } from '../../types/conversation';
 
 export class ConversationStore {
   private filePath: string;

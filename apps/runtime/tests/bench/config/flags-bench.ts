@@ -10,10 +10,10 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { FlagRegistry, RENDERER_ENGINE_FLAG } from "../../../src/config/flags.js";
-import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
-import { SettingsManager } from "../../../src/config/settings.js";
-import { JsonSettingsStore } from "../../../src/config/store.js";
+import { FlagRegistry, RENDERER_ENGINE_FLAG } from '../../../src/config/flags';
+import { SETTINGS_SCHEMA } from '../../../src/config/schema';
+import { SettingsManager } from '../../../src/config/settings';
+import { JsonSettingsStore } from '../../../src/config/store';
 
 // CI slowdown factor — 2x threshold multiplier
 const CI_FACTOR = process.env.CI ? 2 : 1;

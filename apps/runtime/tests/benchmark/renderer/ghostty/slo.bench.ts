@@ -13,10 +13,10 @@
  */
 
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import type { RendererConfig } from "../../../../src/renderer/adapter.js";
-import { GhosttyBackend } from "../../../../src/renderer/ghostty/backend.js";
-import { isGhosttyAvailable } from "../../../../src/renderer/ghostty/index.js";
-import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
+import type { RendererConfig } from '../../../../src/renderer/adapter';
+import { GhosttyBackend } from '../../../../src/renderer/ghostty/backend';
+import { isGhosttyAvailable } from '../../../../src/renderer/ghostty/index';
+import { GhosttyMetrics } from '../../../../src/renderer/ghostty/metrics';
 
 // ---------------------------------------------------------------------------
 // SLO targets

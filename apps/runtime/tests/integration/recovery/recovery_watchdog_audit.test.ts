@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { createRuntime } from "../../../src/index.ts";
+import { createRuntime } from '../../../src/index';
 
 describe("WP05 recovery watchdog and audit fidelity", () => {
   test("reattaches recoverable sessions on restart and flags unrecoverable artifacts", async () => {

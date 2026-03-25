@@ -1,7 +1,7 @@
-import { createBoundaryDispatcher } from "../protocol/boundary_adapter.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
-import type { InMemoryLocalBus } from "../protocol/bus.js";
-import type { RuntimeAuditRecord } from "./types.js";
+import { createBoundaryDispatcher } from '../protocol/boundary_adapter';
+import type { LocalBusEnvelope } from '../protocol/types';
+import type { InMemoryLocalBus } from '../protocol/bus';
+import type { RuntimeAuditRecord } from './types';
 
 function normalizePayload(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {

@@ -1,6 +1,6 @@
 import { type Component, createSignal } from "solid-js";
 import { Show } from "solid-js";
-import type { Message } from "../../../../runtime/src/types/conversation.ts";
+import type { Message } from '../../../../runtime/src/types/conversation';
 
 type ToolResultBlockProps = { message: Message };
 

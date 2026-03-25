@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
-import type { ZellijCli } from "../cli.js";
-import { PaneTooSmallError, PtyBindingError } from "../errors.js";
-import { ZellijPaneManager } from "../panes.js";
-import { TopologyTracker } from "../topology.js";
-import type { PtyManagerInterface } from "../types.js";
+import type { ZellijCli } from '../cli';
+import { PaneTooSmallError, PtyBindingError } from '../errors';
+import { ZellijPaneManager } from '../panes';
+import { TopologyTracker } from '../topology';
+import type { PtyManagerInterface } from '../types';
 
 /**
  * Unit tests for ZellijPaneManager.

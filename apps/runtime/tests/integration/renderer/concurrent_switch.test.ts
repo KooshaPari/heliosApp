@@ -11,26 +11,26 @@ import { describe, expect, it } from "bun:test";
 import {
   createSwitchOrchestrator,
   ConcurrentSwitchError,
-} from "../../../src/renderer/switch_transaction.js";
-import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
+} from '../../../src/renderer/switch_transaction';
+import { SwitchBuffer } from '../../../src/renderer/stream_binding';
 import {
   MockGhosttyAdapter,
   MockRioAdapter,
   TEST_CONFIG,
   TEST_SURFACE,
-} from "../../helpers/mock_adapter.js";
-import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
-import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
+} from '../../helpers/mock_adapter';
+import type { TerminalContext } from '../../../src/renderer/hot_swap';
+import { SwitchBuffer } from '../../../src/renderer/stream_binding';
 import {
   ConcurrentSwitchError,
   createSwitchOrchestrator,
-} from "../../../src/renderer/switch_transaction.js";
+} from '../../../src/renderer/switch_transaction';
 import {
   MockGhosttyAdapter,
   MockRioAdapter,
   TEST_CONFIG,
   TEST_SURFACE,
-} from "../../helpers/mock_adapter.js";
+} from '../../helpers/mock_adapter';
 
 describe("Concurrent switch rejection", () => {
   it("rejects concurrent switch with error details", async () => {

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import { ZellijCli } from "../cli.js";
-import { ZellijVersionError } from "../errors.js";
+import { ZellijCli } from '../cli';
+import { ZellijVersionError } from '../errors';
 
 /**
  * Unit tests for ZellijCli.

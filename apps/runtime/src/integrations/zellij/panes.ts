@@ -7,17 +7,17 @@
  * integration (spec 007) and dimension enforcement (FR-009-007).
  */
 
-import type { ZellijCli } from "./cli.js";
-import { PaneTooSmallError, PtyBindingError, ZellijCliError } from "./errors.js";
-import type { TopologyTracker } from "./topology.js";
+import type { ZellijCli } from './cli';
+import { PaneTooSmallError, PtyBindingError, ZellijCliError } from './errors';
+import type { TopologyTracker } from './topology';
 import type {
   CreatePaneOptions,
   MinPaneDimensions,
   PaneDimensions,
   PaneRecord,
   PtyManagerInterface,
-} from "./types.js";
-import { PaneTooSmallError, PaneNotFoundError, PtyBindingError, ZellijCliError } from "./errors.js";
+} from './types';
+import { PaneTooSmallError, PaneNotFoundError, PtyBindingError, ZellijCliError } from './errors';
 
 /** Default minimum pane dimensions. */
 const DEFAULT_MIN_DIMENSIONS: MinPaneDimensions = {

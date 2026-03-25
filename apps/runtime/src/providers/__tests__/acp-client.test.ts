@@ -7,10 +7,10 @@
  */
 
 import { describe, it, expect, beforeEach } from "bun:test";
-import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
-import { NormalizedProviderError } from "../errors.js";
+import { ACPClientAdapter, type PolicyGate } from '../acp-client';
+import { InMemoryLocalBus } from '../../protocol/bus';
+import { ACPClientAdapter, type PolicyGate } from '../acp-client';
+import { NormalizedProviderError } from '../errors';
 
 /**
  * Mock policy gate for testing.

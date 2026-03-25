@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import type { LocalBus } from "../protocol/bus.js";
+import type { LocalBus } from '../protocol/bus';
 
 export interface CrashRecord {
   timestamp: number;

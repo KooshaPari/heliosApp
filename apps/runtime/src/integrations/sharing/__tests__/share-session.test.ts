@@ -8,11 +8,11 @@
  */
 
 import { describe, it, expect, beforeEach } from "bun:test";
-import { ShareSessionManager, type PolicyGate, type ShareSession } from "../share-session.js";
-import { UptermAdapter, TmateAdapter, getBackendAdapter } from "../adapters.js";
-import { InMemoryLocalBus } from "../../../protocol/bus.js";
-import { TmateAdapter, UptermAdapter, getBackendAdapter } from "../adapters.js";
-import { type PolicyGate, ShareSessionManager } from "../share-session.js";
+import { ShareSessionManager, type PolicyGate, type ShareSession } from '../share-session';
+import { UptermAdapter, TmateAdapter, getBackendAdapter } from '../adapters';
+import { InMemoryLocalBus } from '../../../protocol/bus';
+import { TmateAdapter, UptermAdapter, getBackendAdapter } from '../adapters';
+import { type PolicyGate, ShareSessionManager } from '../share-session';
 
 /**
  * Mock policy gate for testing.

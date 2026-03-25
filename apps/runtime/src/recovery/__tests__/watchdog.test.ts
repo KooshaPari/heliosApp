@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { Watchdog, CrashReason, type CrashEvent } from "../watchdog.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { Watchdog, CrashReason, type CrashEvent } from '../watchdog';
+import { InMemoryLocalBus } from '../../protocol/bus';
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";

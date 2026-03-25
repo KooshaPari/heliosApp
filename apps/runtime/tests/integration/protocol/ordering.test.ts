@@ -7,10 +7,10 @@
  */
 
 import { describe, expect, it, beforeEach } from "bun:test";
-import { createBus } from "../../../src/protocol/bus.js";
-import type { LocalBus } from "../../../src/protocol/bus.js";
-import { createCommand, createEvent, createResponse } from "../../../src/protocol/envelope.js";
-import type { LocalBusEnvelope } from "../../../src/protocol/types.js";
+import { createBus } from '../../../src/protocol/bus';
+import type { LocalBus } from '../../../src/protocol/bus';
+import { createCommand, createEvent, createResponse } from '../../../src/protocol/envelope';
+import type { LocalBusEnvelope } from '../../../src/protocol/types';
 
 describe("Event ordering — per-topic monotonic sequences", () => {
   let bus: LocalBus;

@@ -1,6 +1,6 @@
 // FR-002: Rolling percentile computation over ring buffer values.
 
-import type { PercentileBucket } from "./types.js";
+import type { PercentileBucket } from './types';
 
 interface ValueBufferLike {
   getValues(): Float64Array;

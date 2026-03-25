@@ -1,12 +1,12 @@
 // FR-002: Unit tests for rolling percentile computation.
 
 import { describe, expect, it } from "bun:test";
-import { RingBuffer } from "../../../src/diagnostics/metrics.js";
+import { RingBuffer } from '../../../src/diagnostics/metrics';
 import {
   EMPTY_PERCENTILE_BUCKET,
   computePercentiles,
-} from "../../../src/diagnostics/percentiles.js";
-import type { PercentileBucket } from "../../../src/diagnostics/types.js";
+} from '../../../src/diagnostics/percentiles';
+import type { PercentileBucket } from '../../../src/diagnostics/types';
 
 describe("computePercentiles", () => {
   // FR-002: Known distribution [1..100]

@@ -9,15 +9,15 @@
  * FR-025-009: Health checks with configurable intervals.
  */
 
-import type { LocalBus } from "../protocol/bus.js";
+import type { LocalBus } from '../protocol/bus';
 import type {
   ACPConfig,
   ACPExecuteInput,
   ACPExecuteOutput,
   ProviderAdapter,
   ProviderHealthStatus,
-} from "./adapter.js";
-import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
+} from './adapter';
+import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from './errors';
 
 /**
  * Policy gate interface for access control.

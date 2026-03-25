@@ -4,7 +4,7 @@ import {
   type PtyRecord,
   PtyRegistry,
   RegistryCapacityError,
-} from "../registry.js";
+} from '../registry';
 
 function makeRecord(overrides: Partial<PtyRecord> = {}): PtyRecord {
   const now = Date.now();

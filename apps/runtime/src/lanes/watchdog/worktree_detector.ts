@@ -2,8 +2,8 @@
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import type { LaneRecord, LaneRegistry } from "../registry.js";
-import type { OrphanedResource } from "./resource_classifier.js";
+import type { LaneRecord, LaneRegistry } from '../registry';
+import type { OrphanedResource } from './resource_classifier';
 
 export class WorktreeDetector {
   constructor(

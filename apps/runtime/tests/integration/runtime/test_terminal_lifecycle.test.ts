@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { createRuntime } from "../../../src";
-import type { LocalBusEnvelope } from "../../../src/protocol/types.js";
+import type { LocalBusEnvelope } from '../../../src/protocol/types';
 
 describe("terminal lifecycle and streaming data plane", () => {
   test("rejects lifecycle commands without correlation_id", async () => {

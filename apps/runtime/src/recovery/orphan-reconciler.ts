@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { LocalBus } from "../protocol/bus.js";
+import type { LocalBus } from '../protocol/bus';
 
 export interface OrphanItem {
   type: "pty" | "zellij_session" | "par_lane" | "share_worker" | "temp_file";

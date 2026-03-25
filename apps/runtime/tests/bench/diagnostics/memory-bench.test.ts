@@ -1,7 +1,7 @@
 // NFR-004: Memory overhead test — 20 metrics x 10k samples must stay under 10 MB.
 
 import { describe, expect, it } from "bun:test";
-import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
+import { MetricsRegistry } from '../../../src/diagnostics/metrics';
 
 describe("Memory Overhead", () => {
   it("20 metrics x 10k samples stays under 10 MB", () => {

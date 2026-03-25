@@ -10,7 +10,7 @@
  * - GPU driver reset / crash recovery.
  */
 
-import type { RenderSurface } from "../adapter.js";
+import type { RenderSurface } from '../adapter';
 
 // ---------------------------------------------------------------------------
 // Errors

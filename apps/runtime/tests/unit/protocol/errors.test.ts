@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import {
   backpressureError,
-} from "../../../src/protocol/errors.js";
+} from '../../../src/protocol/errors';
 
 // FR-007: Error taxonomy covers all bus failure modes.
 

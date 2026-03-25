@@ -5,9 +5,9 @@
  * Enforces a one-to-one relationship: one session per lane, one lane per session.
  */
 
-import type { ZellijCli } from "./cli.js";
-import { DuplicateBindingError } from "./errors.js";
-import type { MuxBinding, MuxSession } from "./types.js";
+import type { ZellijCli } from './cli';
+import { DuplicateBindingError } from './errors';
+import type { MuxBinding, MuxSession } from './types';
 
 export class MuxRegistry {
   private readonly bySession = new Map<string, MuxBinding>();

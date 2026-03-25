@@ -1,5 +1,5 @@
-import type { MetricSample, MetricSummary, MetricsReport } from "./types.js";
-import type { LocalBusEnvelope } from "../types.js";
+import type { MetricSample, MetricSummary, MetricsReport } from './types';
+import type { LocalBusEnvelope } from '../types';
 
 // ---------------------------------------------------------------------------
 // Metrics Accumulator and Recorder

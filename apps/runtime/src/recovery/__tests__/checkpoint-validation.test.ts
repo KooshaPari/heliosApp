@@ -4,7 +4,7 @@ import {
   type Checkpoint,
   type CheckpointSession,
   validateCheckpoint,
-} from "../checkpoint.js";
+} from '../checkpoint';
 
 describe("Checkpoint Validation", () => {
   const createValidCheckpoint = (overrides?: Partial<Checkpoint>): Checkpoint => {

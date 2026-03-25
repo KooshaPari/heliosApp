@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
-import type { ZellijCli } from "../cli.js";
-import { TabNotFoundError } from "../errors.js";
-import { ZellijPaneManager } from "../panes.js";
-import { ZellijTabManager } from "../tabs.js";
-import { TopologyTracker } from "../topology.js";
-import type { PtyManagerInterface } from "../types.js";
+import type { ZellijCli } from '../cli';
+import { TabNotFoundError } from '../errors';
+import { ZellijPaneManager } from '../panes';
+import { ZellijTabManager } from '../tabs';
+import { TopologyTracker } from '../topology';
+import type { PtyManagerInterface } from '../types';
 
 /**
  * Unit tests for ZellijTabManager.

@@ -1,8 +1,8 @@
 // FR-007: Metrics query API for retrieving current statistics.
 
-import type { MetricsRegistry } from "./metrics.js";
-import { EMPTY_PERCENTILE_BUCKET, computePercentiles } from "./percentiles.js";
-import type { PercentileBucket, Sample } from "./types.js";
+import type { MetricsRegistry } from './metrics';
+import { EMPTY_PERCENTILE_BUCKET, computePercentiles } from './percentiles';
+import type { PercentileBucket, Sample } from './types';
 
 /**
  * Read API for retrieving computed statistics from the metrics registry.

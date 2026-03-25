@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
-import { SettingsManager } from "../../../src/config/settings.js";
-import { JsonSettingsStore } from "../../../src/config/store.js";
-import type { SettingChangeEvent } from "../../../src/config/types.js";
+import { SETTINGS_SCHEMA } from '../../../src/config/schema';
+import { SettingsManager } from '../../../src/config/settings';
+import { JsonSettingsStore } from '../../../src/config/store';
+import type { SettingChangeEvent } from '../../../src/config/types';
 
 let tempDir: string;
 let filePath: string;

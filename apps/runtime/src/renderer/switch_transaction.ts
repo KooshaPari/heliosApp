@@ -10,12 +10,12 @@
  * @see FR-010-008, FR-010-009, SC-010-002
  */
 
-import type { RenderSurface, RendererAdapter, RendererConfig } from "./adapter.js";
-import { type TerminalContext, executeHotSwap } from "./hot_swap.js";
-import type { RendererEventBus } from "./index.js";
-import { executeRestartWithRestore } from "./restart_restore.js";
-import { executeRollback } from "./rollback.js";
-import type { SwitchBuffer } from "./stream_binding.js";
+import type { RenderSurface, RendererAdapter, RendererConfig } from './adapter';
+import { type TerminalContext, executeHotSwap } from './hot_swap';
+import type { RendererEventBus } from './index';
+import { executeRestartWithRestore } from './restart_restore';
+import { executeRollback } from './rollback';
+import type { SwitchBuffer } from './stream_binding';
 
 // ---------------------------------------------------------------------------
 // State and error types

@@ -6,8 +6,8 @@ import {
   LaneCapacityExceededError,
   LaneNotFoundError,
   LaneRegistry,
-} from "../../../src/lanes/registry.js";
-import type { LaneRecord } from "../../../src/lanes/registry.js";
+} from '../../../src/lanes/registry';
+import type { LaneRecord } from '../../../src/lanes/registry';
 
 function makeRecord(overrides: Partial<LaneRecord> = {}): LaneRecord {
   const now = new Date().toISOString();

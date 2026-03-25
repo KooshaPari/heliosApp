@@ -8,8 +8,8 @@
  * @module
  */
 
-import type { BusPublisher, PtyEventCorrelation } from "./events.js";
-import { emitPtyEvent } from "./events.js";
+import type { BusPublisher, PtyEventCorrelation } from './events';
+import { emitPtyEvent } from './events';
 
 // ── Ring Buffer ──────────────────────────────────────────────────────────────
 

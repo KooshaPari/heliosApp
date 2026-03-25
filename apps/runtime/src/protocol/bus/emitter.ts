@@ -1,4 +1,4 @@
-import type { LocalBusEnvelope } from "../types.js";
+import type { LocalBusEnvelope } from '../types';
 import type {
   LocalBus,
   AuditRecord,
@@ -8,12 +8,12 @@ import type {
   EventEnvelope,
   ResponseEnvelope,
   LocalBusEnvelopeWithSequence,
-} from "./types.js";
-import type { MethodHandler } from "../methods.js";
-import { ProtocolValidationError } from "../types.js";
-import { validateEnvelope } from "../validator.js";
-import { isTerminalTopic, isStartTopic, resolveExpectedStartTopic } from "./lifecycle.js";
-import { MetricsRecorder } from "./metrics.js";
+} from './types';
+import type { MethodHandler } from '../methods';
+import { ProtocolValidationError } from '../types';
+import { validateEnvelope } from '../validator';
+import { isTerminalTopic, isStartTopic, resolveExpectedStartTopic } from './lifecycle';
+import { MetricsRecorder } from './metrics';
 import {
   handleLaneAttach,
   handleLaneCreate,
@@ -23,9 +23,9 @@ import {
   handleRendererCapabilities,
   handleRendererSwitch,
   type RequestHandlerContext,
-} from "./request-handlers.js";
+} from './request-handlers';
 
-export { CommandBusImpl, createBus } from "./command-bus.js";
+export { CommandBusImpl, createBus } from './command-bus';
 
 // ---------------------------------------------------------------------------
 // InMemoryLocalBus — protocol lifecycle implementation

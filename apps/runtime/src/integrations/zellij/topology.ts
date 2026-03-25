@@ -5,8 +5,8 @@
  * including tabs, panes, dimensions, focus state, and PTY bindings.
  */
 
-import type { ZellijCli } from "./cli.js";
-import type { LayoutTopology, TabTopology, PaneTopology, PaneDimensions } from "./types.js";
+import type { ZellijCli } from './cli';
+import type { LayoutTopology, TabTopology, PaneTopology, PaneDimensions } from './types';
 
 /**
  * Manages layout topology for all tracked sessions.

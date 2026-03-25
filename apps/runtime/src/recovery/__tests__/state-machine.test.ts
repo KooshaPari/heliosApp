@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { RecoveryStateMachine, RecoveryStage, type RecoveryState } from "../state-machine.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { RecoveryStateMachine, RecoveryStage, type RecoveryState } from '../state-machine';
+import { InMemoryLocalBus } from '../../protocol/bus';
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";

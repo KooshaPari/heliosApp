@@ -11,7 +11,7 @@ import type {
   RendererCapabilities,
   RendererConfig,
   RendererState,
-} from "../../src/renderer/index.js";
+} from '../../src/renderer/index';
 
 export interface MockAdapterOptions {
   initFail?: boolean;

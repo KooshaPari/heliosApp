@@ -6,10 +6,10 @@
  */
 
 import { v4 as uuidv4 } from "node:crypto";
-import type { LocalBus } from "../protocol/bus.js";
+import type { LocalBus } from '../protocol/bus';
 import { randomUUID } from "node:crypto";
 const uuidv4 = randomUUID;
-import type { BindingTriple, TerminalBinding } from "./binding_triple.js";
+import type { BindingTriple, TerminalBinding } from './binding_triple';
 
 // Event topics
 export const BINDING_TOPICS = {

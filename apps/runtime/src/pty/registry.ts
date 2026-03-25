@@ -4,7 +4,7 @@
  * @module
  */
 
-import type { PtyState } from "./state_machine.js";
+import type { PtyState } from './state_machine';
 
 /** Dimensions of a PTY viewport. */
 export interface PtyDimensions {

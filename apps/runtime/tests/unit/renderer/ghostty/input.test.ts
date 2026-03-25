@@ -8,10 +8,10 @@
  */
 
 import { beforeEach, describe, expect, test } from "bun:test";
-import { GhosttyInputRelay } from "../../../../src/renderer/ghostty/input.js";
-import type { GhosttyInputEvent, PtyWriter } from "../../../../src/renderer/ghostty/input.js";
-import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
-import { GhosttyProcess } from "../../../../src/renderer/ghostty/process.js";
+import { GhosttyInputRelay } from '../../../../src/renderer/ghostty/input';
+import type { GhosttyInputEvent, PtyWriter } from '../../../../src/renderer/ghostty/input';
+import { GhosttyMetrics } from '../../../../src/renderer/ghostty/metrics';
+import { GhosttyProcess } from '../../../../src/renderer/ghostty/process';
 
 function makeEvent(data: number[]): GhosttyInputEvent {
   return {

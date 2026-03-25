@@ -4,7 +4,7 @@
  * Manages ordered subscriber lists per topic with deterministic delivery.
  */
 
-import type { EventEnvelope } from "./types.js";
+import type { EventEnvelope } from './types';
 
 // ---------------------------------------------------------------------------
 // Types

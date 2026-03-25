@@ -1,5 +1,5 @@
-import type { LaneRegistry } from "./registry.js";
-import { type LaneState, recordTransition, transition, withLaneLock } from "./state_machine.js";
+import type { LaneRegistry } from './registry';
+import { type LaneState, recordTransition, transition, withLaneLock } from './state_machine';
 
 export class LaneClosedError extends Error {
   constructor(laneId: string) {

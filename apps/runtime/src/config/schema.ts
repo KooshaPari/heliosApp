@@ -1,4 +1,4 @@
-import type { SettingDefinition, SettingsSchema } from "./types.js";
+import type { SettingDefinition, SettingsSchema } from './types';
 
 /** Initial application settings schema. */
 export const SETTINGS_SCHEMA: SettingsSchema = {

@@ -6,10 +6,10 @@
  */
 
 import { describe, it, expect, beforeEach } from "bun:test";
-import { MCPBridgeAdapter } from "../mcp-bridge.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { NormalizedProviderError } from "../errors.js";
-import { MCPBridgeAdapter } from "../mcp-bridge.js";
+import { MCPBridgeAdapter } from '../mcp-bridge';
+import { InMemoryLocalBus } from '../../protocol/bus';
+import { NormalizedProviderError } from '../errors';
+import { MCPBridgeAdapter } from '../mcp-bridge';
 
 describe("MCP Bridge Adapter", () => {
   let adapter: MCPBridgeAdapter;

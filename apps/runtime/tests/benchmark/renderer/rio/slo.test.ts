@@ -14,8 +14,8 @@
  */
 
 import { beforeAll, describe, expect, it } from "bun:test";
-import { detectRioBinary } from "../../../../src/renderer/rio/index.js";
-import { RioMetrics } from "../../../../src/renderer/rio/metrics.js";
+import { detectRioBinary } from '../../../../src/renderer/rio/index';
+import { RioMetrics } from '../../../../src/renderer/rio/metrics';
 
 // ---------------------------------------------------------------------------
 // Skip control

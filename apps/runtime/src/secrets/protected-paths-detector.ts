@@ -1,13 +1,13 @@
 import { randomBytes } from "node:crypto";
-import type { LocalBus } from "../protocol/bus.js";
-import type { ProtectedPathAcknowledgment, ProtectedPathMatch } from "./protected-paths-types.js";
-import { ProtectedPathConfig } from "./protected-paths-config.js";
+import type { LocalBus } from '../protocol/bus';
+import type { ProtectedPathAcknowledgment, ProtectedPathMatch } from './protected-paths-types';
+import { ProtectedPathConfig } from './protected-paths-config';
 import {
   extractFilePaths,
   matchesPattern,
   redactCommandForAudit,
-} from "./protected-paths-matching.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
+} from './protected-paths-matching';
+import type { LocalBusEnvelope } from '../protocol/types';
 
 const DEBOUNCE_MS = 5 * 60 * 1000; // 5 minutes
 

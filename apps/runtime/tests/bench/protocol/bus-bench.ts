@@ -10,13 +10,13 @@
  * Output: JSON for CI gate consumption.
  */
 
-import { createBus } from "../../../src/protocol/bus.js";
+import { createBus } from '../../../src/protocol/bus';
 import {
   createCommand,
   createEvent,
   createResponse,
   validateEnvelope,
-} from "../../../src/protocol/envelope.js";
+} from '../../../src/protocol/envelope';
 
 // ---------------------------------------------------------------------------
 // Helpers

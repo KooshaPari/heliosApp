@@ -1,5 +1,5 @@
-import { execCommand } from "../exec.ts";
-import type { ZellijAdapter } from "./adapter.ts";
+import { execCommand } from '../exec';
+import type { ZellijAdapter } from './adapter';
 
 export class ZellijCommandAdapter implements ZellijAdapter {
   async ensureSession(sessionName: string): Promise<void> {

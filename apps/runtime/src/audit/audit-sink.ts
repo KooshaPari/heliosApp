@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
-import type { LocalBus } from "../protocol/bus.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
+import type { LocalBus } from '../protocol/bus';
+import type { LocalBusEnvelope } from '../protocol/types';
 
 // ---------------------------------------------------------------------------
 // Types

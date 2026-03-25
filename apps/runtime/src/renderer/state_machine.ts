@@ -5,7 +5,7 @@
  * invalid ones with a descriptive error.
  */
 
-import type { RendererState } from "./adapter.js";
+import type { RendererState } from './adapter';
 
 // Re-export for convenience
 export type { RendererState };

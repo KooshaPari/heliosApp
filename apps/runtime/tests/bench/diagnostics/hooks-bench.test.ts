@@ -1,11 +1,11 @@
 // FR-008, NFR-001: Microbenchmarks proving instrumentation overhead < 0.1ms per measurement.
 
 import { describe, expect, it } from "bun:test";
-import { createInstrumentationHooks } from "../../../src/diagnostics/hooks.js";
-import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
-import { computePercentiles } from "../../../src/diagnostics/percentiles.js";
-import { SLOMonitor } from "../../../src/diagnostics/slo.js";
-import type { SLODefinition } from "../../../src/diagnostics/types.js";
+import { createInstrumentationHooks } from '../../../src/diagnostics/hooks';
+import { MetricsRegistry } from '../../../src/diagnostics/metrics';
+import { computePercentiles } from '../../../src/diagnostics/percentiles';
+import { SLOMonitor } from '../../../src/diagnostics/slo';
+import type { SLODefinition } from '../../../src/diagnostics/types';
 
 const WARMUP = 100;
 const CI_FACTOR = 2; // relaxed threshold for CI machines

@@ -1,19 +1,19 @@
 // Export watchdog modules
 
-export { OrphanWatchdog, type WatchdogConfig } from "./orphan_watchdog.js";
-export { CheckpointManager, type WatchdogCheckpoint } from "./checkpoint.js";
+export { OrphanWatchdog, type WatchdogConfig } from './orphan_watchdog';
+export { CheckpointManager, type WatchdogCheckpoint } from './checkpoint';
 export {
   ResourceClassifier,
   type OrphanedResource,
   type ClassifiedOrphan,
   type ResourceType,
   type RiskLevel,
-} from "./resource_classifier.js";
-export { WorktreeDetector } from "./worktree_detector.js";
-export { ZellijDetector, type SessionRegistry } from "./zellij_detector.js";
-export { PtyDetector, type TerminalRegistry } from "./pty_detector.js";
+} from './resource_classifier';
+export { WorktreeDetector } from './worktree_detector';
+export { ZellijDetector, type SessionRegistry } from './zellij_detector';
+export { PtyDetector, type TerminalRegistry } from './pty_detector';
 export {
   RemediationEngine,
   type RemediationSuggestion,
   type CleanupResult,
-} from "./remediation.js";
+} from './remediation';

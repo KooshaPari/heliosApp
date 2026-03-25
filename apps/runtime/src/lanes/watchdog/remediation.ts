@@ -3,10 +3,10 @@
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { execCommand } from "../../integrations/exec.js";
-import type { LocalBus } from "../../protocol/bus.js";
-import type { LaneRegistry } from "../registry.js";
-import type { ClassifiedOrphan, ResourceType } from "./resource_classifier.js";
+import { execCommand } from '../../integrations/exec';
+import type { LocalBus } from '../../protocol/bus';
+import type { LaneRegistry } from '../registry';
+import type { ClassifiedOrphan, ResourceType } from './resource_classifier';
 
 export interface RemediationSuggestion {
   id: string;

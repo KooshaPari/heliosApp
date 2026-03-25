@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
-import type { ZellijCli } from "../cli.js";
-import { TopologyTracker } from "../topology.js";
+import type { ZellijCli } from '../cli';
+import { TopologyTracker } from '../topology';
 
 /**
  * Unit tests for TopologyTracker.

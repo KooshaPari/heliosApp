@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
-import type { TerminalBinding } from "./binding_triple.js";
+import type { TerminalBinding } from './binding_triple';
 
 export interface PersistenceStore {
   save(bindings: TerminalBinding[]): Promise<void>;

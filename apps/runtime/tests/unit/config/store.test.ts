@@ -3,8 +3,8 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
-import { JsonSettingsStore } from "../../../src/config/store.js";
+import { SETTINGS_SCHEMA } from '../../../src/config/schema';
+import { JsonSettingsStore } from '../../../src/config/store';
 
 let tempDir: string;
 let filePath: string;

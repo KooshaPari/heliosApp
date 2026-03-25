@@ -5,17 +5,17 @@
  */
 
 import { describe, it, expect, beforeEach } from "bun:test";
-import { RioBackend, FeatureFlagDisabledError } from "../../../../src/renderer/rio/backend.js";
-import { RendererRegistry } from "../../../../src/renderer/registry.js";
+import { RioBackend, FeatureFlagDisabledError } from '../../../../src/renderer/rio/backend';
+import { RendererRegistry } from '../../../../src/renderer/registry';
 import type {
   RendererAdapter,
   RendererConfig,
   RenderSurface,
   RendererState,
-} from "../../../../src/renderer/adapter.js";
-import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
-import { RendererRegistry } from "../../../../src/renderer/registry.js";
-import { FeatureFlagDisabledError, RioBackend } from "../../../../src/renderer/rio/backend.js";
+} from '../../../../src/renderer/adapter';
+import type { RendererCapabilities } from '../../../../src/renderer/capabilities';
+import { RendererRegistry } from '../../../../src/renderer/registry';
+import { FeatureFlagDisabledError, RioBackend } from '../../../../src/renderer/rio/backend';
 
 // ---------------------------------------------------------------------------
 // Mock ghostty adapter

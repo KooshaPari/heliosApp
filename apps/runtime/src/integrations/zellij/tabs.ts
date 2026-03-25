@@ -5,11 +5,11 @@
  * for context separation (FR-009-004).
  */
 
-import type { ZellijCli } from "./cli.js";
-import { TabNotFoundError, ZellijCliError } from "./errors.js";
-import type { ZellijPaneManager } from "./panes.js";
-import type { TopologyTracker } from "./topology.js";
-import type { PtyManagerInterface, TabRecord } from "./types.js";
+import type { ZellijCli } from './cli';
+import { TabNotFoundError, ZellijCliError } from './errors';
+import type { ZellijPaneManager } from './panes';
+import type { TopologyTracker } from './topology';
+import type { PtyManagerInterface, TabRecord } from './types';
 
 /**
  * Manages tab lifecycle within zellij sessions.

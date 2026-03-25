@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import type { Conversation, Message } from "../../../runtime/src/types/conversation.ts";
+import type { Conversation, Message } from '../../../runtime/src/types/conversation';
 
 const [conversations, setConversations] = createSignal<Conversation[]>([]);
 const [activeConversationId, setActiveConversationId] = createSignal<string | null>(null);

@@ -1,8 +1,8 @@
 // FR-001, FR-009: Unit tests for RingBuffer and MetricsRegistry.
 
 import { beforeEach, describe, expect, it } from "bun:test";
-import { MetricsRegistry, RingBuffer } from "../../../src/diagnostics/metrics.js";
-import type { MetricDefinition } from "../../../src/diagnostics/types.js";
+import { MetricsRegistry, RingBuffer } from '../../../src/diagnostics/metrics';
+import type { MetricDefinition } from '../../../src/diagnostics/types';
 
 // ── RingBuffer ─────────────────────────────────────────────────────────
 

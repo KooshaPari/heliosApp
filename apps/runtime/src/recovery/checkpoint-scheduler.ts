@@ -1,5 +1,5 @@
-import type { Checkpoint } from "./checkpoint.js";
-import type { CheckpointWriter } from "./checkpoint.js";
+import type { Checkpoint } from './checkpoint';
+import type { CheckpointWriter } from './checkpoint';
 
 const DEFAULT_CHECKPOINT_INTERVAL_MS = 60000; // 60 seconds
 const ACTIVITY_THRESHOLD = 50; // Activity events before triggering checkpoint

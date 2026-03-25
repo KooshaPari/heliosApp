@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { createMcpBridgeFixture, initMcpBridge, MCP_BRIDGE_CONFIG } from "./mcp-bridge-test-helpers.js";
+import { createMcpBridgeFixture, initMcpBridge, MCP_BRIDGE_CONFIG } from './mcp-bridge-test-helpers';
 
 describe("MCP Bridge Adapter - Init and Health", () => {
   let adapter: ReturnType<typeof createMcpBridgeFixture>["adapter"];

@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach } from "bun:test";
-import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
-import { BindingEventEmitter } from "../../../src/registry/binding_events.js";
-import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
-import { BindingEventEmitter } from "../../../src/registry/binding_events.js";
-import type { BindingTriple } from "../../../src/registry/binding_triple.js";
-import { BindingState } from "../../../src/registry/binding_triple.js";
-import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
+import { TerminalRegistry } from '../../../src/registry/terminal_registry';
+import { BindingEventEmitter } from '../../../src/registry/binding_events';
+import { InMemoryLocalBus } from '../../../src/protocol/bus';
+import { BindingEventEmitter } from '../../../src/registry/binding_events';
+import type { BindingTriple } from '../../../src/registry/binding_triple';
+import { BindingState } from '../../../src/registry/binding_triple';
+import { TerminalRegistry } from '../../../src/registry/terminal_registry';
 
 describe("Binding Lifecycle Integration", () => {
   let registry: TerminalRegistry;

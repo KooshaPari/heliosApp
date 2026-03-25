@@ -1,7 +1,7 @@
 // T004 - Leaked PTY process detector
 
-import { execCommand } from "../../integrations/exec.js";
-import type { OrphanedResource } from "./resource_classifier.js";
+import { execCommand } from '../../integrations/exec';
+import type { OrphanedResource } from './resource_classifier';
 
 export interface TerminalRegistry {
   getTerminal(terminalId: string): { laneId?: string } | null;

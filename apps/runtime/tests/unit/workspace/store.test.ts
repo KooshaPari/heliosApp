@@ -3,8 +3,8 @@
 // FR-002: Case-insensitive name lookup
 
 import { describe, test, expect } from "bun:test";
-import { createInMemoryStore } from "../../../src/workspace/store.js";
-import type { Workspace } from "../../../src/workspace/types.js";
+import { createInMemoryStore } from '../../../src/workspace/store';
+import type { Workspace } from '../../../src/workspace/types';
 
 function makeWorkspace(overrides: Partial<Workspace> = {}): Workspace {
   return {

@@ -3,13 +3,13 @@ import { randomBytes } from "node:crypto";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { InMemoryLocalBus } from '../../protocol/bus';
 import {
   CredentialAlreadyExistsError,
   CredentialNotFoundError,
   CredentialStore,
-} from "../credential-store.js";
-import { EncryptionService } from "../encryption.js";
+} from '../credential-store';
+import { EncryptionService } from '../encryption';
 
 function makeStore(dataDir: string, bus: InMemoryLocalBus): CredentialStore {
   const fixedKey = randomBytes(32);

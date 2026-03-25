@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { RedactionEngine } from "../redaction-engine.js";
-import { RedactionRuleManager, getDefaultRules } from "../redaction-rules.js";
+import { InMemoryLocalBus } from '../../protocol/bus';
+import { RedactionEngine } from '../redaction-engine';
+import { RedactionRuleManager, getDefaultRules } from '../redaction-rules';
 
 const ctx = {
   artifactId: "art-1",

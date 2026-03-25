@@ -1,6 +1,6 @@
 // T002 - In-memory lane registry with secondary indexes
 
-import type { LaneState } from "./state_machine.js";
+import type { LaneState } from './state_machine';
 
 export interface LaneRecord {
   laneId: string;

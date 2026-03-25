@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { OutputBuffer, RingBuffer } from "../../../src/pty/buffers.js";
-import { InMemoryBusPublisher } from "../../../src/pty/events.js";
-import type { PtyEventCorrelation } from "../../../src/pty/events.js";
+import { OutputBuffer, RingBuffer } from '../../../src/pty/buffers';
+import { InMemoryBusPublisher } from '../../../src/pty/events';
+import type { PtyEventCorrelation } from '../../../src/pty/events';
 
 function makeCorrelation(): PtyEventCorrelation {
   return {

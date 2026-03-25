@@ -5,7 +5,7 @@ import {
   PtyLifecycle,
   type PtyState,
   transition,
-} from "../state_machine.js";
+} from '../state_machine';
 
 describe("transition()", () => {
   const validTransitions: [PtyState, PtyEvent, PtyState][] = [

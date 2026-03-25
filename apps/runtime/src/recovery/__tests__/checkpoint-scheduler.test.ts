@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { CheckpointScheduler } from "../checkpoint-scheduler.js";
-import { CheckpointWriter, type Checkpoint, type CheckpointSession } from "../checkpoint.js";
+import { CheckpointScheduler } from '../checkpoint-scheduler';
+import { CheckpointWriter, type Checkpoint, type CheckpointSession } from '../checkpoint';
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";

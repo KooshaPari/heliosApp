@@ -1,7 +1,7 @@
 // T017 - Unit tests for worktree operations (FR-008-002, FR-008-005)
 
 import { describe, test, expect } from "bun:test";
-import { computeWorktreePath, computeBranchName } from "../../../src/lanes/worktree.js";
+import { computeWorktreePath, computeBranchName } from '../../../src/lanes/worktree';
 
 describe("Worktree Utilities (FR-008-002)", () => {
   test("computeWorktreePath builds correct path", () => {

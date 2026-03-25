@@ -1,6 +1,6 @@
-import type { SettingsSchema, SettingsStore, SettingChangeEvent } from "./types.js";
-import { getAllDefaults, validateValue } from "./schema.js";
-import type { SettingChangeEvent, SettingsSchema, SettingsStore } from "./types.js";
+import type { SettingsSchema, SettingsStore, SettingChangeEvent } from './types';
+import { getAllDefaults, validateValue } from './schema';
+import type { SettingChangeEvent, SettingsSchema, SettingsStore } from './types';
 
 type BusPublishFn = (topic: string, payload: SettingChangeEvent) => void;
 type ChangeListener = (event: SettingChangeEvent) => void;

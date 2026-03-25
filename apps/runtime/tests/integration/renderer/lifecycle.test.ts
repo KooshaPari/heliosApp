@@ -3,17 +3,17 @@
  * @see SC-010-001, SC-010-002, SC-010-003
  */
 import { beforeEach, describe, expect, it } from "bun:test";
-import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
-import { RendererRegistry } from "../../../src/renderer/registry.js";
-import { RendererStateMachine } from "../../../src/renderer/state_machine.js";
-import { StreamBindingManager } from "../../../src/renderer/stream_binding.js";
-import { switchRenderer } from "../../../src/renderer/switch.js";
+import type { RendererEventBus, RendererLifecycleEvent } from '../../../src/renderer/index';
+import { RendererRegistry } from '../../../src/renderer/registry';
+import { RendererStateMachine } from '../../../src/renderer/state_machine';
+import { StreamBindingManager } from '../../../src/renderer/stream_binding';
+import { switchRenderer } from '../../../src/renderer/switch';
 import {
   MockGhosttyAdapter,
   MockRioAdapter,
   TEST_CONFIG,
   TEST_SURFACE,
-} from "../../helpers/mock_adapter.js";
+} from '../../helpers/mock_adapter';
 
 describe("Renderer lifecycle integration", () => {
   let registry: RendererRegistry;

@@ -1,4 +1,4 @@
-import type { TabSurface } from "./tab_surface.ts";
+import type { TabSurface } from './tab_surface';
 
 export interface TabBarConfig {
   onTabSelected?: (tabId: string) => void;

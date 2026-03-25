@@ -1,8 +1,8 @@
 // FR-007: Unit tests for metrics query API.
 
 import { beforeEach, describe, expect, it } from "bun:test";
-import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
-import { MetricsQuery } from "../../../src/diagnostics/query.js";
+import { MetricsRegistry } from '../../../src/diagnostics/metrics';
+import { MetricsQuery } from '../../../src/diagnostics/query';
 
 describe("MetricsQuery", () => {
   let registry: MetricsRegistry;

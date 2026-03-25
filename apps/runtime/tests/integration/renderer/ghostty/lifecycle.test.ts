@@ -8,10 +8,10 @@
  */
 
 import { afterEach, beforeAll, describe, expect, test } from "bun:test";
-import type { RenderSurface, RendererConfig } from "../../../../src/renderer/adapter.js";
-import { GhosttyBackend } from "../../../../src/renderer/ghostty/backend.js";
-import { isGhosttyAvailable } from "../../../../src/renderer/ghostty/index.js";
-import { RendererRegistry } from "../../../../src/renderer/registry.js";
+import type { RenderSurface, RendererConfig } from '../../../../src/renderer/adapter';
+import { GhosttyBackend } from '../../../../src/renderer/ghostty/backend';
+import { isGhosttyAvailable } from '../../../../src/renderer/ghostty/index';
+import { RendererRegistry } from '../../../../src/renderer/registry';
 
 const TEST_CONFIG: RendererConfig = {
   gpuAcceleration: true,

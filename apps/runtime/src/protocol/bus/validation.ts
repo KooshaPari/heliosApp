@@ -1,4 +1,4 @@
-import type { CommandEnvelope, EventEnvelope } from "./types.js";
+import type { CommandEnvelope, EventEnvelope } from './types';
 
 // ---------------------------------------------------------------------------
 // Envelope Validation Functions

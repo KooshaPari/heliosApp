@@ -4,8 +4,8 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
-import type { PtyManager } from "../../src/lanes/index.js";
+import { LaneManager, _resetIdCounter } from '../../src/lanes/index';
+import type { PtyManager } from '../../src/lanes/index';
 import {
   WorktreeProvisionError,
   computeBranchName,
@@ -15,8 +15,8 @@ import {
   reconcileOrphanedWorktrees,
   removeWorktree,
   resetMetrics,
-} from "../../src/lanes/worktree.js";
-import { InMemoryLocalBus } from "../../src/protocol/bus.js";
+} from '../../src/lanes/worktree';
+import { InMemoryLocalBus } from '../../src/protocol/bus';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

@@ -13,8 +13,8 @@ import {
   GhosttyBackend,
   GhosttyNotInitializedError,
   GhosttyNotRunningError,
-} from "../../../../src/renderer/ghostty/backend.js";
-import type { PtyWriter } from "../../../../src/renderer/ghostty/input.js";
+} from '../../../../src/renderer/ghostty/backend';
+import type { PtyWriter } from '../../../../src/renderer/ghostty/input';
 
 // Mock Bun.spawn to avoid slow system_profiler calls during detectCapabilities
 const originalSpawn = Bun.spawn;

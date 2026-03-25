@@ -8,17 +8,17 @@
  * FR-025-010: Failover routing for degraded providers.
  */
 
-import type { LocalBus } from "../protocol/bus.js";
+import type { LocalBus } from '../protocol/bus';
 import type {
   ProviderAdapter,
   ProviderHealthStatus,
   A2AConfig,
   A2AExecuteInput,
   A2AExecuteOutput,
-} from "./adapter.js";
-import { NormalizedProviderError, normalizeError } from "./errors.js";
+} from './adapter';
+import { NormalizedProviderError, normalizeError } from './errors';
 
-export { HealthMonitoringCoordinator } from "./health-monitor.js";
+export { HealthMonitoringCoordinator } from './health-monitor';
 
 /**
  * A2A endpoint configuration.

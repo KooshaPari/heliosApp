@@ -5,8 +5,8 @@
  * and clean up orphaned sessions and stale registry entries.
  */
 
-import type { ZellijCli } from "./cli.js";
-import type { MuxRegistry } from "./registry.js";
+import type { ZellijCli } from './cli';
+import type { MuxRegistry } from './registry';
 
 /** Result of a reconciliation pass. */
 export interface ReconciliationResult {

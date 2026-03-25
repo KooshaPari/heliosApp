@@ -1,8 +1,8 @@
 // T002 & T004 — Workspace entity functions and service
 // T009 — Bus event emission for workspace lifecycle
 
-import type { CreateWorkspaceInput, Workspace, WorkspaceStore } from "./types.js";
-import { detectStaleProjects } from "./project.js";
+import type { CreateWorkspaceInput, Workspace, WorkspaceStore } from './types';
+import { detectStaleProjects } from './project';
 
 // Stub ID generator — uses spec 005 format ws_{ulid}
 function generateWorkspaceId(): string {

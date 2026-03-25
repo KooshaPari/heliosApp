@@ -9,7 +9,7 @@ import {
   type SessionCreatedEvent,
   type TabSwitchedEvent,
   generateCorrelationId,
-} from "../events.js";
+} from '../events';
 
 function makeBus(): EventBus & { events: MuxEvent[] } {
   const events: MuxEvent[] = [];

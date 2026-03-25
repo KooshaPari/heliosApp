@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "bun:test";
-import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
-import { BindingMiddleware } from "../../../src/registry/binding_middleware.js";
-import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
+import { TerminalRegistry } from '../../../src/registry/terminal_registry';
+import { BindingMiddleware } from '../../../src/registry/binding_middleware';
+import { TerminalRegistry } from '../../../src/registry/terminal_registry';
 
 /**
  * Latency Benchmarks for Registry Operations

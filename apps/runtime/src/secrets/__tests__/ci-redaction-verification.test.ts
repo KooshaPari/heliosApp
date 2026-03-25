@@ -10,11 +10,11 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { AuditSink } from "../../audit/audit-sink.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { RedactionAuditTrail } from "../audit-trail.js";
-import { RedactionEngine } from "../redaction-engine.js";
-import { getDefaultRules } from "../redaction-rules.js";
+import { AuditSink } from '../../audit/audit-sink';
+import { InMemoryLocalBus } from '../../protocol/bus';
+import { RedactionAuditTrail } from '../audit-trail';
+import { RedactionEngine } from '../redaction-engine';
+import { getDefaultRules } from '../redaction-rules';
 
 // ---------------------------------------------------------------------------
 // Fixtures

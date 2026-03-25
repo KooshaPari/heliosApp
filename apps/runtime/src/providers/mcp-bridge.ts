@@ -8,7 +8,7 @@
  * FR-025-007: Process-level isolation for tool execution.
  */
 
-import type { LocalBus } from "../protocol/bus.js";
+import type { LocalBus } from '../protocol/bus';
 import type {
   MCPConfig,
   MCPExecuteInput,
@@ -16,8 +16,8 @@ import type {
   MCPTool,
   ProviderAdapter,
   ProviderHealthStatus,
-} from "./adapter.js";
-import { NormalizedProviderError, normalizeError } from "./errors.js";
+} from './adapter';
+import { NormalizedProviderError, normalizeError } from './errors';
 
 /**
  * MCP server connection state.
