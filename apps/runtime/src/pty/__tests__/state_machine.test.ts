@@ -20,17 +20,12 @@ describe("transition()", () => {
     ["errored", "cleanup", "stopped"],
   ];
 
-  it.each(validTransitions)(
-    "%s + %s -> %s",
-    (from, event, expected) => {
-      expect(transition(from, event, "test-pty")).toBe(expected);
-    },
-  );
+  it.each(validTransitions)("%s + %s -> %s", (from, event, expected) => {
+    expect(transition(from, event, "test-pty")).toBe(expected);
+  });
 
   it("rejects invalid transitions with InvalidTransitionError", () => {
-    expect(() => transition("idle", "spawn_succeeded", "pty-1")).toThrow(
-      InvalidTransitionError,
-    );
+    expect(() => transition("idle", "spawn_succeeded", "pty-1")).toThrow(InvalidTransitionError);
   });
 
   it("includes diagnostic context in error", () => {
@@ -62,9 +57,7 @@ describe("transition()", () => {
       "cleanup",
     ];
     for (const event of events) {
-      expect(() => transition("stopped", event, "pty-x")).toThrow(
-        InvalidTransitionError,
-      );
+      expect(() => transition("stopped", event, "pty-x")).toThrow(InvalidTransitionError);
     }
   });
 });

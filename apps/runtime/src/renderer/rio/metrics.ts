@@ -46,10 +46,7 @@ export class RioMetrics {
   private readonly _windowSize: number;
   private readonly _intervalMs: number;
 
-  constructor(
-    windowSize: number = DEFAULT_WINDOW_SIZE,
-    intervalMs: number = DEFAULT_INTERVAL_MS,
-  ) {
+  constructor(windowSize: number = DEFAULT_WINDOW_SIZE, intervalMs: number = DEFAULT_INTERVAL_MS) {
     this._windowSize = windowSize;
     this._intervalMs = intervalMs;
   }
@@ -148,9 +145,9 @@ export class RioMetrics {
 
     return {
       rendererId: "rio",
-      frameTime: percentiles(snaps.map((s) => s.frameTimeMs)),
-      fps: percentiles(snaps.map((s) => s.fps)),
-      inputLatency: percentiles(snaps.map((s) => s.inputLatencyMs)),
+      frameTime: percentiles(snaps.map(s => s.frameTimeMs)),
+      fps: percentiles(snaps.map(s => s.fps)),
+      inputLatency: percentiles(snaps.map(s => s.inputLatencyMs)),
       totalFrames: this._frameCount,
       totalDroppedFrames: this._droppedFrames,
       windowDurationMs: this._startedAt ? Date.now() - this._startedAt : 0,

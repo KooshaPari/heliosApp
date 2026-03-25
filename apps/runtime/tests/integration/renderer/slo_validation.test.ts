@@ -11,7 +11,12 @@ import { executeHotSwap } from "../../../src/renderer/hot_swap.js";
 import { executeRestartWithRestore } from "../../../src/renderer/restart_restore.js";
 import { executeRollback } from "../../../src/renderer/rollback.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
-import { MockGhosttyAdapter, MockRioAdapter, TEST_CONFIG, TEST_SURFACE } from "../../helpers/mock_adapter.js";
+import {
+  MockGhosttyAdapter,
+  MockRioAdapter,
+  TEST_CONFIG,
+  TEST_SURFACE,
+} from "../../helpers/mock_adapter.js";
 import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 
 /**
@@ -35,7 +40,17 @@ describe("SLO validation - hot-swap", () => {
       const buffer = new SwitchBuffer();
 
       const terminals = new Map<string, TerminalContext>([
-        ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+        [
+          "pty-1",
+          {
+            ptyId: "pty-1",
+            scrollback: [],
+            cursorX: 0,
+            cursorY: 0,
+            env: {},
+            cwd: "/",
+          },
+        ],
       ]);
 
       const startTime = Date.now();
@@ -46,7 +61,7 @@ describe("SLO validation - hot-swap", () => {
         buffer,
         TEST_CONFIG,
         TEST_SURFACE,
-        async () => {},
+        async () => {}
       );
       durations.push(Date.now() - startTime);
     }
@@ -84,7 +99,7 @@ describe("SLO validation - hot-swap", () => {
         buffer,
         TEST_CONFIG,
         TEST_SURFACE,
-        async () => {},
+        async () => {}
       );
       durations.push(Date.now() - startTime);
     }
@@ -105,7 +120,17 @@ describe("SLO validation - restart-with-restore", () => {
       const buffer = new SwitchBuffer();
 
       const terminals = new Map<string, TerminalContext>([
-        ["pty-1", { ptyId: "pty-1", scrollback: [new Uint8Array(100)], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+        [
+          "pty-1",
+          {
+            ptyId: "pty-1",
+            scrollback: [new Uint8Array(100)],
+            cursorX: 0,
+            cursorY: 0,
+            env: {},
+            cwd: "/",
+          },
+        ],
       ]);
 
       const startTime = Date.now();
@@ -116,7 +141,7 @@ describe("SLO validation - restart-with-restore", () => {
         buffer,
         TEST_CONFIG,
         TEST_SURFACE,
-        async () => {},
+        async () => {}
       );
       durations.push(Date.now() - startTime);
     }
@@ -154,7 +179,7 @@ describe("SLO validation - restart-with-restore", () => {
         buffer,
         TEST_CONFIG,
         TEST_SURFACE,
-        async () => {},
+        async () => {}
       );
       durations.push(Date.now() - startTime);
     }
@@ -175,7 +200,17 @@ describe("SLO validation - rollback", () => {
       const buffer = new SwitchBuffer();
 
       const terminals = new Map<string, TerminalContext>([
-        ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+        [
+          "pty-1",
+          {
+            ptyId: "pty-1",
+            scrollback: [],
+            cursorX: 0,
+            cursorY: 0,
+            env: {},
+            cwd: "/",
+          },
+        ],
       ]);
 
       const startTime = Date.now();

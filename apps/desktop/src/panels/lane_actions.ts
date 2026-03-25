@@ -54,7 +54,7 @@ export class LaneActions {
         this.options.onLaneCreated(result.id);
       }
     } catch (error) {
-      this.handleActionError('CREATE_FAILED', error, onOptimistic);
+      this.handleActionError("CREATE_FAILED", error, onOptimistic);
     }
   }
 
@@ -72,7 +72,7 @@ export class LaneActions {
         this.options.onLaneAttached(laneId);
       }
     } catch (error) {
-      this.handleActionError('ATTACH_FAILED', error, onOptimistic);
+      this.handleActionError("ATTACH_FAILED", error, onOptimistic);
     }
   }
 
@@ -90,7 +90,7 @@ export class LaneActions {
         this.options.onLaneDetached(laneId);
       }
     } catch (error) {
-      this.handleActionError('DETACH_FAILED', error, onOptimistic);
+      this.handleActionError("DETACH_FAILED", error, onOptimistic);
     }
   }
 
@@ -114,16 +114,12 @@ export class LaneActions {
 
       return true;
     } catch (error) {
-      this.handleActionError('CLEANUP_FAILED', error);
+      this.handleActionError("CLEANUP_FAILED", error);
       return false;
     }
   }
 
-  private handleActionError(
-    code: string,
-    error: any,
-    revertFn?: ActionCallback
-  ): void {
+  private handleActionError(code: string, error: any, revertFn?: ActionCallback): void {
     const message = error instanceof Error ? error.message : String(error);
     const actionError: LaneActionError = {
       code,
@@ -155,7 +151,7 @@ export class LaneActions {
   }
 
   clearAllErrors(): void {
-    this.errorTimeouts.forEach((timeout) => clearTimeout(timeout));
+    this.errorTimeouts.forEach(timeout => clearTimeout(timeout));
     this.errorTimeouts.clear();
   }
 

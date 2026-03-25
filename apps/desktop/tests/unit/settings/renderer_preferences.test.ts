@@ -1,14 +1,14 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { RendererPreferencesManager } from '../../../src/settings/renderer_preferences';
-import { writeFileSync, unlinkSync, mkdirSync } from 'fs';
-import { resolve } from 'path';
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+import { RendererPreferencesManager } from "../../../src/settings/renderer_preferences";
+import { writeFileSync, unlinkSync, mkdirSync } from "fs";
+import { resolve } from "path";
 
-describe('RendererPreferencesManager', () => {
+describe("RendererPreferencesManager", () => {
   let tempPath: string;
   let manager: RendererPreferencesManager;
 
   beforeEach(() => {
-    tempPath = resolve('/tmp/test-renderer-prefs.json');
+    tempPath = resolve("/tmp/test-renderer-prefs.json");
     manager = new RendererPreferencesManager(tempPath);
   });
 
@@ -20,66 +20,66 @@ describe('RendererPreferencesManager', () => {
     }
   });
 
-  it('should load default preferences when file does not exist', () => {
+  it("should load default preferences when file does not exist", () => {
     const prefs = manager.load();
 
-    expect(prefs.activeRenderer).toBe('ghostty');
+    expect(prefs.activeRenderer).toBe("ghostty");
     expect(prefs.hotSwapEnabled).toBe(true);
   });
 
-  it('should save and load preferences', () => {
+  it("should save and load preferences", () => {
     manager.save({
-      activeRenderer: 'rio',
+      activeRenderer: "rio",
       hotSwapEnabled: false,
     });
 
     const newManager = new RendererPreferencesManager(tempPath);
     const prefs = newManager.load();
 
-    expect(prefs.activeRenderer).toBe('rio');
+    expect(prefs.activeRenderer).toBe("rio");
     expect(prefs.hotSwapEnabled).toBe(false);
   });
 
-  it('should handle corrupted JSON file', () => {
-    writeFileSync(tempPath, 'invalid json {{{');
+  it("should handle corrupted JSON file", () => {
+    writeFileSync(tempPath, "invalid json {{{");
 
     const prefs = manager.load();
 
-    expect(prefs.activeRenderer).toBe('ghostty');
+    expect(prefs.activeRenderer).toBe("ghostty");
     expect(prefs.hotSwapEnabled).toBe(true);
   });
 
-  it('should handle missing required fields', () => {
-    const corruptData = { activeRenderer: 'rio' }; // Missing hotSwapEnabled
+  it("should handle missing required fields", () => {
+    const corruptData = { activeRenderer: "rio" }; // Missing hotSwapEnabled
     writeFileSync(tempPath, JSON.stringify(corruptData));
 
     const prefs = manager.load();
 
-    expect(prefs.activeRenderer).toBe('ghostty');
+    expect(prefs.activeRenderer).toBe("ghostty");
     expect(prefs.hotSwapEnabled).toBe(true);
   });
 
-  it('should get active renderer', () => {
-    manager.save({ activeRenderer: 'rio' });
+  it("should get active renderer", () => {
+    manager.save({ activeRenderer: "rio" });
 
-    expect(manager.getActiveRenderer()).toBe('rio');
+    expect(manager.getActiveRenderer()).toBe("rio");
   });
 
-  it('should set active renderer', () => {
+  it("should set active renderer", () => {
     manager.load();
-    manager.setActiveRenderer('rio');
+    manager.setActiveRenderer("rio");
 
-    expect(manager.getActiveRenderer()).toBe('rio');
+    expect(manager.getActiveRenderer()).toBe("rio");
     expect(manager.isDirtyCheck()).toBe(true);
   });
 
-  it('should get hot-swap enabled status', () => {
+  it("should get hot-swap enabled status", () => {
     manager.load();
 
     expect(manager.isHotSwapEnabled()).toBe(true);
   });
 
-  it('should set hot-swap enabled status', () => {
+  it("should set hot-swap enabled status", () => {
     manager.load();
     manager.setHotSwapEnabled(false);
 
@@ -87,7 +87,7 @@ describe('RendererPreferencesManager', () => {
     expect(manager.isDirtyCheck()).toBe(true);
   });
 
-  it('should mark as dirty', () => {
+  it("should mark as dirty", () => {
     manager.load();
 
     expect(manager.isDirtyCheck()).toBe(false);
@@ -97,20 +97,20 @@ describe('RendererPreferencesManager', () => {
     expect(manager.isDirtyCheck()).toBe(true);
   });
 
-  it('should get all preferences', () => {
-    manager.save({ activeRenderer: 'rio', hotSwapEnabled: false });
+  it("should get all preferences", () => {
+    manager.save({ activeRenderer: "rio", hotSwapEnabled: false });
 
     const prefs = manager.getPreferences();
 
-    expect(prefs.activeRenderer).toBe('rio');
+    expect(prefs.activeRenderer).toBe("rio");
     expect(prefs.hotSwapEnabled).toBe(false);
   });
 
-  it('should not mark dirty if value does not change', () => {
+  it("should not mark dirty if value does not change", () => {
     manager.load();
     expect(manager.isDirtyCheck()).toBe(false);
 
-    manager.setActiveRenderer('ghostty'); // Same as default
+    manager.setActiveRenderer("ghostty"); // Same as default
 
     expect(manager.isDirtyCheck()).toBe(false);
   });

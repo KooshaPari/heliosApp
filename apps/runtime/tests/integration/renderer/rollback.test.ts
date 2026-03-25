@@ -33,13 +33,7 @@ describe("Rollback integration", () => {
       ],
     ]);
 
-    const result = await executeRollback(
-      original,
-      failed,
-      terminals,
-      buffer,
-      "target init failed",
-    );
+    const result = await executeRollback(original, failed, terminals, buffer, "target init failed");
 
     expect(result.success).toBe(true);
     expect(result.terminalStatuses.length).toBe(1);
@@ -53,9 +47,39 @@ describe("Rollback integration", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
-      ["pty-2", { ptyId: "pty-2", scrollback: [], cursorX: 5, cursorY: 10, env: {}, cwd: "/" }],
-      ["pty-3", { ptyId: "pty-3", scrollback: [], cursorX: 15, cursorY: 20, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+      [
+        "pty-2",
+        {
+          ptyId: "pty-2",
+          scrollback: [],
+          cursorX: 5,
+          cursorY: 10,
+          env: {},
+          cwd: "/",
+        },
+      ],
+      [
+        "pty-3",
+        {
+          ptyId: "pty-3",
+          scrollback: [],
+          cursorX: 15,
+          cursorY: 20,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const result = await executeRollback(
@@ -63,7 +87,7 @@ describe("Rollback integration", () => {
       failed,
       terminals,
       buffer,
-      "target start failed",
+      "target start failed"
     );
 
     expect(result.success).toBe(true);
@@ -80,18 +104,22 @@ describe("Rollback integration", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const failureReason = "target renderer crash during initialization";
 
-    const result = await executeRollback(
-      original,
-      failed,
-      terminals,
-      buffer,
-      failureReason,
-    );
+    const result = await executeRollback(original, failed, terminals, buffer, failureReason);
 
     expect(result.failureReason).toBe(failureReason);
   });
@@ -114,13 +142,7 @@ describe("Rollback integration", () => {
     }
 
     const startTime = Date.now();
-    const result = await executeRollback(
-      original,
-      failed,
-      terminals,
-      buffer,
-      "test failure",
-    );
+    const result = await executeRollback(original, failed, terminals, buffer, "test failure");
 
     const elapsed = Date.now() - startTime;
     expect(result.success).toBe(true);
@@ -133,21 +155,35 @@ describe("Rollback integration", () => {
     const buffer = new SwitchBuffer();
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
-      ["pty-2", { ptyId: "pty-2", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
+      [
+        "pty-2",
+        {
+          ptyId: "pty-2",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
-    const result = await executeRollback(
-      original,
-      failed,
-      terminals,
-      buffer,
-      "test failure",
-    );
+    const result = await executeRollback(original, failed, terminals, buffer, "test failure");
 
     expect(result.terminalStatuses.length).toBe(2);
     // All should be restored since mock adapters succeed
-    expect(result.terminalStatuses.every((s) => s.restored)).toBe(true);
+    expect(result.terminalStatuses.every(s => s.restored)).toBe(true);
   });
 
   it("preserves terminal context during rollback", async () => {
@@ -176,13 +212,7 @@ describe("Rollback integration", () => {
       ],
     ]);
 
-    const result = await executeRollback(
-      original,
-      failed,
-      terminals,
-      buffer,
-      "target init failed",
-    );
+    const result = await executeRollback(original, failed, terminals, buffer, "target init failed");
 
     expect(result.success).toBe(true);
     // Context should be passed through (in real implementation, would be restored)
@@ -204,7 +234,17 @@ describe("Rollback integration", () => {
     };
 
     const terminals = new Map<string, TerminalContext>([
-      ["pty-1", { ptyId: "pty-1", scrollback: [], cursorX: 0, cursorY: 0, env: {}, cwd: "/" }],
+      [
+        "pty-1",
+        {
+          ptyId: "pty-1",
+          scrollback: [],
+          cursorX: 0,
+          cursorY: 0,
+          env: {},
+          cwd: "/",
+        },
+      ],
     ]);
 
     const result = await executeRollback(
@@ -213,7 +253,7 @@ describe("Rollback integration", () => {
       terminals,
       buffer,
       "test failure",
-      mockBus,
+      mockBus
     );
 
     expect(result.success).toBe(true);
@@ -227,13 +267,7 @@ describe("Rollback integration", () => {
 
     const terminals = new Map<string, TerminalContext>();
 
-    const result = await executeRollback(
-      original,
-      failed,
-      terminals,
-      buffer,
-      "test failure",
-    );
+    const result = await executeRollback(original, failed, terminals, buffer, "test failure");
 
     expect(result.success).toBe(true);
     expect(result.terminalStatuses.length).toBe(0);

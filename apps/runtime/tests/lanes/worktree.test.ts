@@ -111,7 +111,7 @@ describe("T006 - provisionWorktree", () => {
         workspaceRepoPath: repo,
         laneId: "lane_bad_base",
         baseBranch: "nonexistent-branch",
-      }),
+      })
     ).rejects.toThrow(WorktreeProvisionError);
   });
 
@@ -201,7 +201,7 @@ describe("T008 - PTY termination during cleanup", () => {
     expect(terminated).toContain("pty2");
 
     const events = bus.getEvents();
-    const ptyEvent = events.find((e) => e.topic === "lane.ptys_terminated");
+    const ptyEvent = events.find(e => e.topic === "lane.ptys_terminated");
     expect(ptyEvent).toBeDefined();
   });
 
@@ -221,7 +221,9 @@ describe("T008 - PTY termination during cleanup", () => {
   test("cleanup proceeds when ptyManager.getByLane throws", async () => {
     _resetIdCounter();
     const mockPtyManager: PtyManager = {
-      getByLane: () => { throw new Error("PTY manager down"); },
+      getByLane: () => {
+        throw new Error("PTY manager down");
+      },
       terminate: async () => {},
     };
 
@@ -288,15 +290,13 @@ describe("T010 - Partial provisioning failure", () => {
     const lane = await mgr.create("ws-1", "main");
 
     // Try to provision with a non-existent repo path
-    await expect(
-      mgr.provision(lane.laneId, "/nonexistent/repo/path"),
-    ).rejects.toThrow();
+    await expect(mgr.provision(lane.laneId, "/nonexistent/repo/path")).rejects.toThrow();
 
     const updated = mgr.getRegistry().get(lane.laneId);
     expect(updated?.state).toBe("closed");
 
     const events = bus.getEvents();
-    const failEvent = events.find((e) => e.topic === "lane.provision_failed");
+    const failEvent = events.find(e => e.topic === "lane.provision_failed");
     expect(failEvent).toBeDefined();
   });
 

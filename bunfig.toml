@@ -12,3 +12,6 @@ exact = true
 [install.lockfile]
 # Deterministic builds: always save lockfile
 save = true
+
+[test]
+preload = ["./apps/desktop/tests/unit/dom-shim.ts"]

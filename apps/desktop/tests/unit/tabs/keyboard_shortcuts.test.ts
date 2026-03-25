@@ -1,5 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { KeyboardShortcuts, type ShortcutAction, resetKeyboardShortcuts } from "../../../src/tabs/keyboard_shortcuts";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import {
+  KeyboardShortcuts,
+  type ShortcutAction,
+  resetKeyboardShortcuts,
+} from "../../../src/tabs/keyboard_shortcuts";
 import * as path from "path";
 import { promises as fs } from "fs";
 import { tmpdir } from "os";
@@ -74,32 +78,32 @@ describe("KeyboardShortcuts", () => {
     it("should handle keyboard events", () => {
       let handledAction: ShortcutAction | null = null;
 
-      shortcuts.setHandler((action) => {
+      shortcuts.setHandler(action => {
         handledAction = action;
       });
 
       const event = new KeyboardEvent("keydown", {
         key: "1",
         metaKey: true,
-        bubbles: true
+        bubbles: true,
       });
 
       shortcuts.handleKeyboardEvent(event);
 
-      expect(handledAction).toBe("select-terminal");
+      expect(handledAction!).toBe("select-terminal");
     });
 
     it("should support shortcut listeners", () => {
       let actions: ShortcutAction[] = [];
 
-      shortcuts.onShortcut((action) => {
+      shortcuts.onShortcut(action => {
         actions.push(action);
       });
 
       const event = new KeyboardEvent("keydown", {
         key: "2",
         metaKey: true,
-        bubbles: true
+        bubbles: true,
       });
 
       shortcuts.handleKeyboardEvent(event);
@@ -117,7 +121,7 @@ describe("KeyboardShortcuts", () => {
       const event = new KeyboardEvent("keydown", {
         key: "1",
         metaKey: true,
-        bubbles: true
+        bubbles: true,
       });
 
       shortcuts.handleKeyboardEvent(event);

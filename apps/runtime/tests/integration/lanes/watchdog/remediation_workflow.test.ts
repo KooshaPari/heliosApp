@@ -121,9 +121,7 @@ describe("Remediation Workflow", () => {
     await engine.generateSuggestions(orphans);
     const events = bus.getEvents();
 
-    const suggestionEvent = events.find(
-      (e) => e.topic === "orphan.remediation.suggested"
-    );
+    const suggestionEvent = events.find(e => e.topic === "orphan.remediation.suggested");
     expect(suggestionEvent).toBeDefined();
     expect(suggestionEvent?.payload?.resourceType).toBe("pty_process");
   });
@@ -144,7 +142,7 @@ describe("Remediation Workflow", () => {
     engine.declineCleanup(suggestions[0].id);
 
     const events = bus.getEvents();
-    const declineEvent = events.find((e) => e.topic === "orphan.remediation.declined");
+    const declineEvent = events.find(e => e.topic === "orphan.remediation.declined");
     expect(declineEvent).toBeDefined();
   });
 
@@ -192,7 +190,7 @@ describe("Remediation Workflow", () => {
     ];
 
     const suggestions = await engine.generateSuggestions(orphans);
-    const ids = suggestions.map((s) => s.id);
+    const ids = suggestions.map(s => s.id);
 
     expect(ids.length).toBe(2);
     expect(new Set(ids).size).toBe(2); // All IDs are unique

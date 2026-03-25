@@ -1,7 +1,11 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { BindingMiddleware } from "../../../src/registry/binding_middleware.js";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
-import { BindingState, type BindingTriple } from "../../../src/registry/binding_triple.js";
+import {
+  BindingState,
+  type BindingTriple,
+  type TerminalBinding,
+} from "../../../src/registry/binding_triple.js";
 
 describe("BindingMiddleware", () => {
   let registry: TerminalRegistry;
@@ -45,7 +49,7 @@ describe("BindingMiddleware", () => {
       };
 
       const binding = registry.register("terminal-1", triple);
-      binding.state = BindingState.Unbound;
+      binding.state = BindingState.unbound;
 
       const result = middleware.validateBeforeOperation("terminal-1", "write");
 
@@ -62,7 +66,7 @@ describe("BindingMiddleware", () => {
       };
 
       const binding = registry.register("terminal-1", triple);
-      binding.state = BindingState.ValidationFailed;
+      binding.state = BindingState.validation_failed;
 
       const result = middleware.validateBeforeOperation("terminal-1", "write");
 
@@ -79,7 +83,7 @@ describe("BindingMiddleware", () => {
       };
 
       const binding = registry.register("terminal-1", triple);
-      binding.state = BindingState.Rebound;
+      binding.state = BindingState.rebound;
 
       const result = middleware.validateBeforeOperation("terminal-1", "write");
 
@@ -107,7 +111,7 @@ describe("BindingMiddleware", () => {
 
       expect(result.valid).toBe(false);
       expect(result.error?.code).toBe("STALE_BINDING");
-      expect(result.binding?.state).toBe(BindingState.ValidationFailed);
+      expect(result.binding?.state).toBe(BindingState.validation_failed);
     });
   });
 
@@ -137,7 +141,7 @@ describe("BindingMiddleware", () => {
       const handler = async () => "success";
 
       await expect(middleware.wrapOperation("terminal-nonexistent", handler)).rejects.toThrow(
-        /TERMINAL_NOT_FOUND/,
+        /TERMINAL_NOT_FOUND/
       );
     });
 
@@ -187,7 +191,7 @@ describe("BindingMiddleware", () => {
       const handler = () => "success";
 
       expect(() => middleware.wrapOperationSync("terminal-nonexistent", handler)).toThrow(
-        /TERMINAL_NOT_FOUND/,
+        /TERMINAL_NOT_FOUND/
       );
     });
   });
@@ -231,7 +235,7 @@ describe("BindingMiddleware", () => {
       };
 
       const binding = registry.register("terminal-1", triple);
-      expect(binding.state).toBe(BindingState.Bound);
+      expect(binding.state).toBe(BindingState.bound);
 
       registry.rebind("terminal-1", {
         workspaceId: "ws-1",
@@ -240,7 +244,7 @@ describe("BindingMiddleware", () => {
       });
 
       const rebound = registry.get("terminal-1");
-      expect(rebound?.state).toBe(BindingState.Rebound);
+      expect(rebound?.state).toBe(BindingState.rebound);
     });
 
     it("should validate middleware rejects stale bindings", () => {
@@ -262,7 +266,7 @@ describe("BindingMiddleware", () => {
       const result = middleware.validateBeforeOperation("terminal-1");
 
       expect(result.valid).toBe(false);
-      expect(result.binding?.state).toBe(BindingState.ValidationFailed);
+      expect(result.binding?.state).toBe(BindingState.validation_failed);
     });
   });
 });

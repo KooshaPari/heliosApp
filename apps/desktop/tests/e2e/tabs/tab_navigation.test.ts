@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 
 describe("Tab Navigation E2E", () => {
   it("should display all 5 tabs in tab bar", async () => {

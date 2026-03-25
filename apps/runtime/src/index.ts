@@ -73,7 +73,11 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
   }
 
   if (Array.isArray(value)) {
+<<<<<<< HEAD
     return value.map((item) => redactStructuredValue(item));
+=======
+    return value.map(item => redactStructuredValue(item));
+>>>>>>> origin/main
   }
 
   if (value && typeof value === "object") {
@@ -81,7 +85,11 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
       Object.entries(value as Record<string, unknown>).map(([entryKey, entryValue]) => [
         entryKey,
         redactStructuredValue(entryValue, entryKey),
+<<<<<<< HEAD
       ]),
+=======
+      ])
+>>>>>>> origin/main
     );
   }
 
@@ -91,7 +99,11 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
 function redactPayload(
   engine: RedactionEngine,
   payload: Record<string, unknown>,
+<<<<<<< HEAD
   correlationId: string,
+=======
+  correlationId: string
+>>>>>>> origin/main
 ): Record<string, unknown> {
   const structured = redactStructuredValue(payload) as Record<string, unknown>;
   const serialized = JSON.stringify(structured);
@@ -138,7 +150,11 @@ export function createRuntime(options: RuntimeOptions = {}) {
       payload: redactPayload(
         redactionEngine,
         normalizePayload(envelope.payload),
+<<<<<<< HEAD
         envelope.correlation_id ?? envelope.id,
+=======
+        envelope.correlation_id ?? envelope.id
+>>>>>>> origin/main
       ),
       error: null,
     });
@@ -153,7 +169,11 @@ export function createRuntime(options: RuntimeOptions = {}) {
       payload: redactPayload(
         redactionEngine,
         normalizePayload(envelope.result ?? envelope.payload),
+<<<<<<< HEAD
         envelope.correlation_id ?? envelope.id,
+=======
+        envelope.correlation_id ?? envelope.id
+>>>>>>> origin/main
       ),
       error: envelope.error ?? null,
     });
@@ -172,17 +192,35 @@ export function createRuntime(options: RuntimeOptions = {}) {
       lane_id:
         command.lane_id ??
         (typeof payload.lane_id === "string" ? payload.lane_id : undefined) ??
+<<<<<<< HEAD
         (typeof payload.id === "string" && command.method === "lane.create" ? payload.id : undefined) ??
+=======
+        (typeof payload.id === "string" && command.method === "lane.create"
+          ? payload.id
+          : undefined) ??
+>>>>>>> origin/main
         (typeof result.lane_id === "string" ? result.lane_id : undefined),
       session_id:
         command.session_id ??
         (typeof payload.session_id === "string" ? payload.session_id : undefined) ??
+<<<<<<< HEAD
         (typeof payload.id === "string" && command.method === "session.attach" ? payload.id : undefined) ??
+=======
+        (typeof payload.id === "string" && command.method === "session.attach"
+          ? payload.id
+          : undefined) ??
+>>>>>>> origin/main
         (typeof result.session_id === "string" ? result.session_id : undefined),
       terminal_id:
         command.terminal_id ??
         (typeof payload.terminal_id === "string" ? payload.terminal_id : undefined) ??
+<<<<<<< HEAD
         (typeof payload.id === "string" && command.method === "terminal.spawn" ? payload.id : undefined) ??
+=======
+        (typeof payload.id === "string" && command.method === "terminal.spawn"
+          ? payload.id
+          : undefined) ??
+>>>>>>> origin/main
         (typeof result.terminal_id === "string" ? result.terminal_id : undefined),
       codex_session_id:
         typeof payload.codex_session_id === "string" ? payload.codex_session_id : undefined,
@@ -270,7 +308,11 @@ export function createRuntime(options: RuntimeOptions = {}) {
             error: result.error?.code ?? "dispatch_error",
             details: result.error?.details ?? null,
           },
+<<<<<<< HEAD
           { status },
+=======
+          { status }
+>>>>>>> origin/main
         );
       }
 
@@ -282,7 +324,11 @@ export function createRuntime(options: RuntimeOptions = {}) {
 
   function exportAuditBundle(filter?: { correlation_id?: string }): RuntimeAuditBundle {
     const records = filter?.correlation_id
+<<<<<<< HEAD
       ? auditRecords.filter((record) => record.correlation_id === filter.correlation_id)
+=======
+      ? auditRecords.filter(record => record.correlation_id === filter.correlation_id)
+>>>>>>> origin/main
       : [...auditRecords];
     return {
       count: records.length,

@@ -17,11 +17,7 @@ import type {
   ACPExecuteInput,
   ACPExecuteOutput,
 } from "./adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-  PROVIDER_ERROR_CODES,
-} from "./errors.js";
+import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
 
 /**
  * Policy gate interface for access control.
@@ -83,7 +79,11 @@ interface ACPResponse {
  *
  * FR-025-003: ACP protocol client for Claude.
  */
-export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput> {
+export class ACPClientAdapter implements ProviderAdapter<
+  ACPConfig,
+  ACPExecuteInput,
+  ACPExecuteOutput
+> {
   private config: ACPConfig | null = null;
   private bus: LocalBus | null = null;
   private policyGate: PolicyGate;
@@ -117,11 +117,19 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
     try {
       // Validate config
       if (!config.baseUrl || typeof config.baseUrl !== "string") {
+<<<<<<< HEAD
         throw new Error("Missing or invalid baseUrl");
       }
 
       if (!config.apiKey || typeof config.apiKey !== "string") {
         throw new Error("Missing or invalid apiKey");
+=======
+        throw new Error("Missing or invalid endpoint");
+      }
+
+      if (!config.apiKey || typeof config.apiKey !== "string") {
+        throw new Error("Missing or invalid apiKeyRef");
+>>>>>>> origin/main
       }
 
       if (!config.model || typeof config.model !== "string") {
@@ -129,11 +137,20 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
       }
 
       // Validate timeout
+<<<<<<< HEAD
       if (config.timeout && config.timeout <= 0) {
         throw new Error("timeout must be > 0ms");
       }
 
       // Simulate endpoint reachability check with timeout
+=======
+      if (config.timeout && config.timeout < 1000) {
+        throw new Error("timeout must be >= 1000ms");
+      }
+
+      // Simulate endpoint reachability check with timeout
+      const probeTimeout = config.timeout || 10000;
+>>>>>>> origin/main
       const probeResult = await Promise.race([
         this.probeEndpoint(config.baseUrl),
         new Promise<boolean>((_, reject) =>
@@ -146,7 +163,10 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
       }
 
       this.config = config;
+<<<<<<< HEAD
       this.terminated = false;
+=======
+>>>>>>> origin/main
       this.healthCheckInterval = 30000;
 
       this.healthStatus = {
@@ -161,7 +181,11 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
       }
 
       await this.publishEvent("provider.acp.initialized", {
+<<<<<<< HEAD
         baseUrl: config.baseUrl,
+=======
+        endpoint: config.baseUrl,
+>>>>>>> origin/main
         model: config.model,
       });
     } catch (error) {
@@ -205,7 +229,11 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
     try {
       // Perform lightweight health check
       const probeSuccess = await Promise.race([
+<<<<<<< HEAD
         this.probeEndpoint(this.config.baseUrl),
+=======
+        this.probeEndpoint(this.config.baseUrl ?? ""),
+>>>>>>> origin/main
         new Promise<boolean>((_, reject) =>
           setTimeout(() => reject(new Error("Health check timeout")), 5000)
         ),
@@ -287,10 +315,10 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
 
     try {
       // Check policy gate
-      const policyDecision = await this.policyGate.evaluate(
-        "provider.acp.execute",
-        { correlationId, prompt: input.prompt }
-      );
+      const policyDecision = await this.policyGate.evaluate("provider.acp.execute", {
+        correlationId,
+        prompt: input.prompt,
+      });
 
       if (!policyDecision.allowed) {
         const reason = policyDecision.reason || "Policy denied";
@@ -488,17 +516,14 @@ export class ACPClientAdapter implements ProviderAdapter<ACPConfig, ACPExecuteIn
    * @param signal Abort signal
    * @returns ACP response
    */
-  private async sendACPRequest(
-    request: ACPRequest,
-    signal: AbortSignal
-  ): Promise<ACPResponse> {
+  private async sendACPRequest(request: ACPRequest, signal: AbortSignal): Promise<ACPResponse> {
     // Check for abort
     if (signal.aborted) {
       throw new Error("Request aborted");
     }
 
     // Mock implementation: simulate ACP processing
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const timeout = setTimeout(() => {
         resolve({
           taskId: `task-${request.correlationId}`,
