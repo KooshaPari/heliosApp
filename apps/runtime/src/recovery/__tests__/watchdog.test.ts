@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { Watchdog, CrashReason, type CrashEvent } from "../watchdog.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { InMemoryLocalBus, type LocalBus } from "../../protocol/bus.js";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
@@ -8,13 +8,13 @@ import os from "os";
 describe("Watchdog", () => {
   let watchdog: Watchdog;
   let tempDir: string;
-  let bus: InMemoryLocalBus;
+  let bus: LocalBus;
 
   beforeEach(async () => {
     vi.useFakeTimers();
     tempDir = path.join(os.tmpdir(), `watchdog-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
-    bus = new InMemoryLocalBus();
+    bus = new InMemoryLocalBus() as LocalBus;
     watchdog = new Watchdog(tempDir, bus);
   });
 
@@ -33,9 +33,9 @@ describe("Watchdog", () => {
     vi.advanceTimersByTime(4100); // 2 * 2000 + 100ms
 
     expect(crashEvents.length).toBe(1);
-    expect(crashEvents[0].reason).toBe(CrashReason.HEARTBEAT_TIMEOUT);
-    expect(crashEvents[0].name).toBe("test-proc");
-    expect(crashEvents[0].pid).toBe(1234);
+    expect(crashEvents.at(0)?.reason).toBe(CrashReason.HEARTBEAT_TIMEOUT);
+    expect(crashEvents.at(0)?.name).toBe("test-proc");
+    expect(crashEvents.at(0)?.pid).toBe(1234);
   });
 
   it("should reset timeout on heartbeat", async () => {
@@ -69,17 +69,18 @@ describe("Watchdog", () => {
     vi.advanceTimersByTime(2100);
 
     expect(crashEvents.length).toBe(1);
-    expect(crashEvents[0].reason).toBeDefined();
+    expect(crashEvents.at(0)?.reason).toBeDefined();
   });
 
   it("should publish crash event to bus", async () => {
     watchdog.registerProcess("test-proc", 1234, 1000);
     vi.advanceTimersByTime(2100);
 
-    const events = bus.getEvents();
-    expect(events.length).toBeGreaterThan(0);
-    expect(events[0].topic).toBe("recovery.crash.detected");
-    expect(events[0].payload?.name).toBe("test-proc");
+    const event = bus.getEvents().at(0);
+    expect(event).toBeDefined();
+    expect(event).not.toBeUndefined();
+    expect(event?.topic).toBe("recovery.crash.detected");
+    expect((event?.payload as { name?: string }).name).toBe("test-proc");
   });
 
   it("should write crash record to filesystem", async () => {
@@ -106,8 +107,13 @@ describe("Watchdog", () => {
     await watchdog.handleProcessExit("test-proc", 1234, 1);
 
     expect(crashEvents.length).toBe(1);
+<<<<<<< HEAD
+    expect(crashEvents.at(0)?.reason).toBe(CrashReason.EXIT_CODE);
+    expect(crashEvents.at(0)?.exitCode).toBe(1);
+=======
     expect(crashEvents[0].reason).toBe(CrashReason.EXIT_CODE);
     expect(crashEvents[0].exitCode).toBe(1);
+>>>>>>> origin/main
   });
 
   it("should not trigger crash on graceful exit code 0", async () => {
@@ -138,7 +144,11 @@ describe("Watchdog", () => {
     await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGKILL");
 
     expect(crashEvents.length).toBe(1);
+<<<<<<< HEAD
+    expect(crashEvents.at(0)?.reason).toBe(CrashReason.SIGNAL);
+=======
     expect(crashEvents[0].reason).toBe(CrashReason.SIGNAL);
+>>>>>>> origin/main
   });
 
   it("should handle multiple process monitoring", async () => {

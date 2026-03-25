@@ -1,8 +1,27 @@
 import type { LocalBus } from "../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
 import { randomUUID } from "crypto";
+import {
+  deleteRecoveryState,
+  loadRecoveryState,
+  persistRecoveryState,
+} from "./state-machine-persistence.js";
+import {
+  getFailureStateFor,
+  isFailureState,
+  LEGAL_TRANSITIONS,
+} from "./state-machine-transitions.js";
+import {
+  MAX_RETRIES_PER_STAGE,
+  RecoveryStage,
+  type RecoveryState,
+  STAGE_TIMEOUT_MS,
+  type StageChangeListener,
+} from "./state-machine-types.js";
 
+<<<<<<< HEAD
+export { RecoveryStage } from "./state-machine-types.js";
+export type { RecoveryState, StageChangeListener } from "./state-machine-types.js";
+=======
 export enum RecoveryStage {
   CRASHED = "CRASHED",
   DETECTING = "DETECTING",
@@ -44,6 +63,7 @@ const LEGAL_TRANSITIONS: Record<RecoveryStage, RecoveryStage[]> = {
 
 const MAX_RETRIES_PER_STAGE = 3;
 const STAGE_TIMEOUT_MS = 30000; // 30 seconds
+>>>>>>> origin/main
 
 export class RecoveryStateMachine {
   private currentStage: RecoveryStage = RecoveryStage.CRASHED;
@@ -74,24 +94,20 @@ export class RecoveryStateMachine {
   async transition(to: RecoveryStage): Promise<void> {
     const from = this.currentStage;
 
-    // Validate transition
     const legalTransitions = LEGAL_TRANSITIONS[from] || [];
     if (!legalTransitions.includes(to)) {
       throw new Error(
-        `Illegal transition from ${from} to ${to}. Legal: ${legalTransitions.join(", ")}`
+        `Illegal transition from ${from} to ${to}. Legal: ${legalTransitions.join(", ")}`,
       );
     }
 
-    // Update state
-    const isRetry = this.isFailureState(from) && this.isFailureState(to) === false;
+    const isRetry = isFailureState(from) && isFailureState(to) === false;
     if (isRetry) {
-      // Retrying - increment attempt count
       this.currentState.attemptCount++;
       if (this.currentState.attemptCount > MAX_RETRIES_PER_STAGE) {
         throw new Error(`Max retries (${MAX_RETRIES_PER_STAGE}) exceeded for stage ${from}`);
       }
-    } else if (from !== to) {
-      // New stage - reset attempt count
+    } else if (from !== to && !isFailureState(to)) {
       this.currentState.attemptCount = 0;
     }
 
@@ -99,10 +115,8 @@ export class RecoveryStateMachine {
     this.currentState.stage = to;
     this.currentState.timestamp = Date.now();
 
-    // Persist state
-    await this.persistState();
+    await persistRecoveryState(this.recoveryDataDir, this.currentState);
 
-    // Publish event
     if (this.bus) {
       await this.bus.publish({
         id: randomUUID(),
@@ -118,10 +132,7 @@ export class RecoveryStateMachine {
       });
     }
 
-    // Notify listeners
     this.notifyListeners(from, to, this.currentState.attemptCount);
-
-    // Set stage timeout
     this.startStageTimeout();
   }
 
@@ -137,7 +148,7 @@ export class RecoveryStateMachine {
       timestamp: Date.now(),
       attemptCount: 0,
     };
-    await this.deleteState();
+    await deleteRecoveryState(this.recoveryDataDir);
     this.clearStageTimeout();
   }
 
@@ -145,17 +156,14 @@ export class RecoveryStateMachine {
     this.listeners.push(listener);
   }
 
-  private isFailureState(stage: RecoveryStage): boolean {
-    return stage.includes("FAILED");
-  }
-
   private async loadState(): Promise<void> {
-    try {
-      const statePath = path.join(this.recoveryDataDir, "recovery", "recovery-state.json");
-      const data = await fs.readFile(statePath, "utf-8");
-      const state = JSON.parse(data) as RecoveryState;
+    const state = await loadRecoveryState(this.recoveryDataDir);
+    if (state) {
       this.currentStage = state.stage;
       this.currentState = state;
+<<<<<<< HEAD
+      return;
+=======
     } catch {
       // No persisted state - start fresh
       this.currentStage = RecoveryStage.CRASHED;
@@ -164,9 +172,19 @@ export class RecoveryStateMachine {
         timestamp: Date.now(),
         attemptCount: 0,
       };
+>>>>>>> origin/main
     }
+
+    this.currentStage = RecoveryStage.CRASHED;
+    this.currentState = {
+      stage: RecoveryStage.CRASHED,
+      timestamp: Date.now(),
+      attemptCount: 0,
+    };
   }
 
+<<<<<<< HEAD
+=======
   private async persistState(): Promise<void> {
     try {
       await fs.mkdir(path.join(this.recoveryDataDir, "recovery"), {
@@ -193,6 +211,7 @@ export class RecoveryStateMachine {
     }
   }
 
+>>>>>>> origin/main
   private notifyListeners(from: RecoveryStage, to: RecoveryStage, attemptCount: number): void {
     for (const listener of this.listeners) {
       listener(from, to, attemptCount);
@@ -203,9 +222,8 @@ export class RecoveryStateMachine {
     this.clearStageTimeout();
 
     this.stageTimeoutId = setTimeout(() => {
-      // Transition to failure state if not already in one
-      if (!this.isFailureState(this.currentStage)) {
-        const failureStage = this.getFailureStateFor(this.currentStage);
+      if (!isFailureState(this.currentStage)) {
+        const failureStage = getFailureStateFor(this.currentStage);
         if (failureStage) {
           this.currentState.lastError = `Stage timeout after ${STAGE_TIMEOUT_MS}ms`;
           this.transition(failureStage).catch(err => {
@@ -222,6 +240,8 @@ export class RecoveryStateMachine {
       this.stageTimeoutId = undefined;
     }
   }
+<<<<<<< HEAD
+=======
 
   private getFailureStateFor(stage: RecoveryStage): RecoveryStage | undefined {
     const failureMap: Record<RecoveryStage, RecoveryStage | undefined> = {
@@ -238,4 +258,5 @@ export class RecoveryStateMachine {
     };
     return failureMap[stage];
   }
+>>>>>>> origin/main
 }

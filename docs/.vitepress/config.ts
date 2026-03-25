@@ -1,69 +1,92 @@
-import { defineConfig } from "vitepress";
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { defineConfig } from 'vitepress'
+
+const docsDir = dirname(fileURLToPath(import.meta.url))
+const phenodocsRoot = resolve(docsDir, '../../../phenodocs')
+const phenodocsTheme = resolve(phenodocsRoot, '.vitepress/theme/index.ts')
 
 export default defineConfig({
-  title: "Documentation",
-  description: "Unified documentation",
-  base: process.env.GITHUB_ACTIONS ? "/heliosApp/" : "/",
-  srcDir: ".",
+  title: 'Documentation',
+  description: 'Unified documentation',
+  srcDir: '.',
   lastUpdated: true,
   cleanUrls: true,
   ignoreDeadLinks: true,
+  vite: {
+    resolve: {
+      alias: {
+        '@phenodocs-theme': phenodocsTheme,
+      },
+    },
+    server: {
+      fs: {
+        allow: [phenodocsRoot],
+      },
+    },
+  },
   themeConfig: {
     nav: [
-      { text: "Home", link: "/" },
-      { text: "Wiki", link: "/wiki/" },
-      { text: "Development Guide", link: "/development/" },
-      { text: "DevOps", link: "/wiki/devops-cicd" },
-      { text: "Document Index", link: "/index/" },
-      { text: "API", link: "/api/" },
-      { text: "Roadmap", link: "/roadmap/" },
+      { text: 'Home', link: '/' },
+      { text: 'Wiki', link: '/wiki/' },
+      { text: 'Development Guide', link: '/development/' },
+      { text: 'DevOps', link: '/wiki/devops-cicd' },
+      { text: 'Document Index', link: '/index/' },
+      { text: 'API', link: '/api/' },
+      { text: 'Roadmap', link: '/roadmap/' },
     ],
     sidebar: {
-      "/wiki/": [
+      '/wiki/': [
         {
-          text: "Wiki",
+          text: 'Wiki',
           items: [
-            { text: "Overview", link: "/wiki/" },
-            { text: "DevOps and CI/CD", link: "/wiki/devops-cicd" },
+            { text: 'Overview', link: '/wiki/' },
+            { text: 'DevOps and CI/CD', link: '/wiki/devops-cicd' },
           ],
         },
       ],
+<<<<<<< HEAD
+      '/development/': [
+        { text: 'Development Guide', items: [{ text: 'Overview', link: '/development/' }] },
+=======
       "/development/": [
         {
           text: "Development Guide",
           items: [{ text: "Overview", link: "/development/" }],
         },
+>>>>>>> origin/main
       ],
-      "/index/": [
+      '/index/': [
         {
-          text: "Document Index",
+          text: 'Document Index',
           items: [
-            { text: "Overview", link: "/index/" },
-            { text: "Raw/All", link: "/index/raw-all" },
-            { text: "Planning", link: "/index/planning" },
-            { text: "Specs", link: "/index/specs" },
-            { text: "Research", link: "/index/research" },
-            { text: "Worklogs", link: "/index/worklogs" },
-            { text: "Other", link: "/index/other" },
+            { text: 'Overview', link: '/index/' },
+            { text: 'Raw/All', link: '/index/raw-all' },
+            { text: 'Planning', link: '/index/planning' },
+            { text: 'Specs', link: '/index/specs' },
+            { text: 'Research', link: '/index/research' },
+            { text: 'Worklogs', link: '/index/worklogs' },
+            { text: 'Other', link: '/index/other' },
           ],
         },
       ],
-      "/api/": [{ text: "API", items: [{ text: "Overview", link: "/api/" }] }],
-      "/roadmap/": [{ text: "Roadmap", items: [{ text: "Overview", link: "/roadmap/" }] }],
-      "/": [
+      '/api/': [{ text: 'API', items: [{ text: 'Overview', link: '/api/' }] }],
+      '/roadmap/': [{ text: 'Roadmap', items: [{ text: 'Overview', link: '/roadmap/' }] }],
+      '/': [
         {
-          text: "Quick Links",
+          text: 'Quick Links',
           items: [
-            { text: "Wiki", link: "/wiki/" },
-            { text: "Development Guide", link: "/development/" },
-            { text: "DevOps", link: "/wiki/devops-cicd" },
-            { text: "Document Index", link: "/index/" },
-            { text: "API", link: "/api/" },
-            { text: "Roadmap", link: "/roadmap/" },
+            { text: 'Wiki', link: '/wiki/' },
+            { text: 'Development Guide', link: '/development/' },
+            { text: 'DevOps', link: '/wiki/devops-cicd' },
+            { text: 'Document Index', link: '/index/' },
+            { text: 'API', link: '/api/' },
+            { text: 'Roadmap', link: '/roadmap/' },
           ],
         },
       ],
     },
-    search: { provider: "local" },
+    search: { provider: 'local' },
   },
-});
+})

@@ -102,7 +102,7 @@ describe("Instrumentation Overhead Benchmarks", () => {
       defs.push({ metric: name, percentile: "p95", threshold: 50, unit: "ms" });
     }
 
-    const monitor = new SLOMonitor(registry, defs);
+    const monitor = new SLOMonitor(registry, defs, () => {});
 
     const result = benchmarkLoop(1_000, WARMUP, () => {
       monitor.resetRateLimiter(); // allow re-check each iteration

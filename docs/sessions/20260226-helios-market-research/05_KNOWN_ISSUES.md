@@ -25,3 +25,10 @@
 - Add soak and fault-injection tests early.
 - Enforce strict scope guardrails in milestone planning.
 - Default to conservative approval mode until confidence metrics are met.
+
+## Release Closure Risks
+
+- RC-1: Cleared locally on 2026-03-12 via Gate 1 policy, approval, and redaction reruns.
+- RC-2: Cleared locally on 2026-03-12 via Gate 2 recovery and audit replay validation.
+- RC-3: Cleared locally on 2026-03-12 via Gate 3 provider conformance and isolation reruns.
+- RC-4: Cleared locally on 2026-03-12 via Gate 4 startup, soak, benchmark, and renderer-switch reliability reruns; a separate reference-hardware replay is still advisable before external launch signoff.
