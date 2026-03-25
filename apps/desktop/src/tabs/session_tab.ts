@@ -32,11 +32,11 @@ export class SessionTab extends TabSurface {
     super("session-tab", "session", "Session");
   }
 
-  async onContextChange(context: ActiveContext | null): Promise<void> {
+  onContextChange(context: ActiveContext | null): Promise<void> {
     // When context changes, query session metadata
     if (!context) {
       this.metadata = null;
-      return;
+      return Promise.resolve();
     }
 
     // In a real implementation, query session registry:
@@ -52,6 +52,8 @@ export class SessionTab extends TabSurface {
       terminalCount: 2,
       degradationReason: undefined,
     };
+
+    return Promise.resolve();
   }
 
   render(): HTMLElement {

@@ -70,8 +70,66 @@ export class SwitchStatus {
     this.container.appendChild(status);
   }
 
+  private isProgressPhase(): boolean {
+    return (
+      this.props.phase === "started" ||
+      this.props.phase === "initializing" ||
+      this.props.phase === "swapping" ||
+      this.props.phase === "committing"
+    );
+  }
+
+  private getStatusConfig(): {
+    backgroundColor: string;
+    borderColor: string;
+    textColor: string;
+    icon: string;
+    message: string;
+  } {
+    const currentPhase = this.props.phase;
+
+    switch (currentPhase) {
+      case "started":
+      case "initializing":
+      case "swapping":
+      case "committing":
+        return {
+          backgroundColor: "#dbeafe",
+          borderColor: "#93c5fd",
+          textColor: "#0c4a6e",
+          icon: "⟳",
+          message: `Switching renderer... ${this.getElapsedTime()}`,
+        };
+      case "rolled_back":
+        return {
+          backgroundColor: "#fed7aa",
+          borderColor: "#fb923c",
+          textColor: "#92400e",
+          icon: "⚠",
+          message: `Switch rolled back${this.props.failureReason ? `: ${this.props.failureReason}` : ""}`,
+        };
+      case "failed":
+        return {
+          backgroundColor: "#fee2e2",
+          borderColor: "#fca5a5",
+          textColor: "#7f1d1d",
+          icon: "✕",
+          message: `Switch failed${this.props.failureReason ? `: ${this.props.failureReason}` : ""}`,
+        };
+      default:
+        return {
+          backgroundColor: "#f0fdf4",
+          borderColor: "#86efac",
+          textColor: "#166534",
+          icon: "✓",
+          message: "Switch successful",
+        };
+    }
+  }
+
   private createStatusElement(): HTMLElement {
     const container = document.createElement("div");
+    const statusConfig = this.getStatusConfig();
     container.className = "switch-status";
     container.style.padding = "12px";
     container.style.marginTop = "12px";
@@ -120,17 +178,12 @@ export class SwitchStatus {
     // Icon
     const statusIcon = document.createElement("span");
     statusIcon.className = "switch-status-icon";
-    statusIcon.textContent = icon;
+    statusIcon.textContent = statusConfig.icon;
     statusIcon.style.fontSize = "18px";
     statusIcon.style.fontWeight = "bold";
     statusIcon.style.minWidth = "24px";
 
-    if (
-      this.props.phase === "started" ||
-      this.props.phase === "initializing" ||
-      this.props.phase === "swapping" ||
-      this.props.phase === "committing"
-    ) {
+    if (this.isProgressPhase()) {
       statusIcon.style.animation = "spin 1s linear infinite";
     }
 
@@ -139,7 +192,7 @@ export class SwitchStatus {
     // Message
     const messageSpan = document.createElement("span");
     messageSpan.className = "switch-status-message";
-    messageSpan.textContent = message;
+    messageSpan.textContent = statusConfig.message;
     messageSpan.style.fontSize = "13px";
     messageSpan.style.fontWeight = "500";
     messageSpan.style.flex = "1";
@@ -147,12 +200,7 @@ export class SwitchStatus {
     container.appendChild(messageSpan);
 
     // Progress bar
-    if (
-      this.props.phase === "started" ||
-      this.props.phase === "initializing" ||
-      this.props.phase === "swapping" ||
-      this.props.phase === "committing"
-    ) {
+    if (this.isProgressPhase()) {
       const progressContainer = document.createElement("div");
       progressContainer.style.width = "100%";
       progressContainer.style.marginTop = "8px";
@@ -168,7 +216,7 @@ export class SwitchStatus {
 
       progress.style.width = percentage + "%";
       progress.style.height = "100%";
-      progress.style.backgroundColor = textColor;
+      progress.style.backgroundColor = statusConfig.textColor;
       progress.style.transition = "width 100ms linear";
 
       progressContainer.appendChild(progress);

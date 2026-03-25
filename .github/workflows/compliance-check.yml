@@ -87,6 +87,9 @@ jobs:
             const findings = JSON.parse('${{ steps.results.outputs.findings }}');
             
             let comment = '## Compliance Check - Violations Found\n\n';
+            if (parseError) {
+              comment += `### Parser Error\n${parseError}\n\n`;
+            }
             comment += `Found ${findings.length} constitution violation(s):\n\n`;
             
             findings.forEach((f, i) => {

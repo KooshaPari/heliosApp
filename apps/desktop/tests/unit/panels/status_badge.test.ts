@@ -150,7 +150,7 @@ describe("StatusBadge", () => {
       "orphaned",
     ];
 
-    states.forEach(state => {
+    for (const state of states) {
       badge = new StatusBadge({ state });
       badge.mount(container);
 
@@ -162,7 +162,7 @@ describe("StatusBadge", () => {
       while (container.firstChild) {
         container.removeChild(container.firstChild);
       }
-    });
+    }
   });
 
   it("should have status role attribute", () => {

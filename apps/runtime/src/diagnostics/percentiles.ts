@@ -22,8 +22,8 @@ export function computePercentiles(values: Float64Array): PercentileBucket | und
     p50: percentileFromSorted(sorted, 0.5),
     p95: percentileFromSorted(sorted, 0.95),
     p99: percentileFromSorted(sorted, 0.99),
-    min: sorted[0]!,
-    max: sorted[count - 1]!,
+    min: sorted[0],
+    max: sorted[count - 1],
     count,
   };
 }

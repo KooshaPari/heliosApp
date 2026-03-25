@@ -117,7 +117,7 @@ export class DefaultAuditSink implements AuditSink {
     const evicted = this.ringBuffer.push(event);
 
     if (evicted) {
-      this.metrics.eventsOverflowed!++;
+      this.metrics.eventsOverflowed++;
       this.overflowQueue.push(evicted);
 
       this.persistOverflow().catch(err => {
@@ -144,10 +144,7 @@ export class DefaultAuditSink implements AuditSink {
     }
 
     let retries = 0;
-    while (
-      (this.buffer.length > 0 || this.overflowQueue.length > 0) &&
-      retries < this.MAX_RETRIES
-    ) {
+    while ((this.buffer.length > 0 || this.overflowQueue.length > 0) && retries < this.maxRetries) {
       try {
         if (this.overflowQueue.length > 0) {
           await this.persistOverflow();
@@ -158,8 +155,8 @@ export class DefaultAuditSink implements AuditSink {
         break;
       } catch (err) {
         retries++;
-        if (retries >= this.MAX_RETRIES) {
-          throw new Error(`[AuditSink] Failed to flush after ${this.MAX_RETRIES} retries: ${err}`);
+        if (retries >= this.maxRetries) {
+          throw new Error(`[AuditSink] Failed to flush after ${this.maxRetries} retries: ${err}`);
         }
         await new Promise(resolve => setTimeout(resolve, this.RETRY_BACKOFF_MS * retries));
       }
@@ -243,7 +240,7 @@ export class DefaultAuditSink implements AuditSink {
           console.error("[AuditSink] Periodic flush failed:", err);
         });
       }
-    }, this.FLUSH_INTERVAL_MS) as unknown as number;
+    }, this.flushIntervalMs) as unknown as number;
   }
 
   private stopPeriodicFlush(): void {

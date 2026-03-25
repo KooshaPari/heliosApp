@@ -78,13 +78,13 @@ export class LanePanel {
 
     // Set up event handlers for list items
     const items = this.container.querySelectorAll("[data-lane-item]");
-    items.forEach(item => {
+    for (const item of items) {
       const laneId = item.getAttribute("data-lane-item");
       if (!laneId) return;
 
       item.addEventListener("click", () => this.handleLaneSelect(laneId));
       item.addEventListener("contextmenu", e => this.handleLaneContextMenu(e, laneId));
-    });
+    }
   }
 
   private createPanelElement(): HTMLElement {
@@ -134,9 +134,9 @@ export class LanePanel {
       const listDiv = document.createElement("div");
       listDiv.className = "lane-list";
 
-      filteredLanes.forEach(lane => {
+      for (const lane of filteredLanes) {
         listDiv.appendChild(this.createLaneItemElement(lane));
-      });
+      }
 
       scrollDiv.appendChild(listDiv);
       panel.appendChild(scrollDiv);

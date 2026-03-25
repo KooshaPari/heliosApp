@@ -39,12 +39,12 @@ export class ProjectTab extends TabSurface {
     super("project-tab", "project", "Project");
   }
 
-  async onContextChange(context: ActiveContext | null): Promise<void> {
+  onContextChange(context: ActiveContext | null): Promise<void> {
     // When context changes, query workspace/project metadata
     this.metadata = null;
 
     if (!context) {
-      return;
+      return Promise.resolve();
     }
 
     // In a real implementation, query workspace registry:
@@ -79,6 +79,8 @@ export class ProjectTab extends TabSurface {
       gitStatus: "On branch main, 3 commits ahead of origin/main",
       recentActivity: "Last update 10 minutes ago",
     };
+
+    return Promise.resolve();
   }
 
   render(): HTMLElement {

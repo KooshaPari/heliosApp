@@ -13,6 +13,7 @@ export class ConversationStore {
    * Load conversations from persistent storage
    */
   async loadConversations(): Promise<Conversation[]> {
+    await Promise.resolve();
     try {
       // In a real implementation, this would read from Bun.file(this.filePath)
       // For now, we'll return an empty array as a placeholder
@@ -28,6 +29,7 @@ export class ConversationStore {
    * Save all conversations to persistent storage
    */
   async saveConversations(conversations: Conversation[]): Promise<void> {
+    await Promise.resolve();
     try {
       this.conversations.clear();
       for (const conv of conversations) {
@@ -44,6 +46,7 @@ export class ConversationStore {
    * Save a single conversation
    */
   async saveConversation(conversation: Conversation): Promise<void> {
+    await Promise.resolve();
     try {
       this.conversations.set(conversation.id, conversation);
       // In a real implementation, this would update the persisted file
@@ -57,6 +60,7 @@ export class ConversationStore {
    * Delete a conversation by ID
    */
   async deleteConversation(id: string): Promise<void> {
+    await Promise.resolve();
     try {
       this.conversations.delete(id);
       // In a real implementation, this would update the persisted file
@@ -102,6 +106,7 @@ export class ConversationStore {
    * Clear all conversations
    */
   async clearConversations(): Promise<void> {
+    await Promise.resolve();
     try {
       this.conversations.clear();
       // In a real implementation, this would clear the persisted file

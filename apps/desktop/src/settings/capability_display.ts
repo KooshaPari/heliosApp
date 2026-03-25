@@ -217,14 +217,14 @@ export class CapabilityDisplay {
       featuresList.style.margin = "0";
       featuresList.style.padding = "0 0 0 16px";
 
-      capability.features.forEach(feature => {
+      for (const feature of capability.features) {
         const item = document.createElement("li");
         item.textContent = feature;
         item.style.fontSize = "13px";
         item.style.color = "#374151";
         item.style.marginBottom = "4px";
         featuresList.appendChild(item);
-      });
+      }
 
       featuresSection.appendChild(featuresList);
       content.appendChild(featuresSection);

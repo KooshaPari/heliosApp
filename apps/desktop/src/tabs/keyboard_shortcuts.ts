@@ -47,10 +47,8 @@ export class KeyboardShortcuts {
   private configPath: string;
 
   constructor(configDir?: string) {
-    this.configPath = path.join(
-      configDir ?? path.join(homedir(), ".helios", "data"),
-      "keyboard_shortcuts.json"
-    );
+    const defaultConfigDir = configDir ?? join(homedir(), ".helios", "data");
+    this.configPath = join(defaultConfigDir, "keyboard_shortcuts.json");
     this.shortcuts = { ...DEFAULT_SHORTCUTS };
     this.buildReverseMap();
   }
@@ -83,7 +81,7 @@ export class KeyboardShortcuts {
    */
   async save(): Promise<void> {
     try {
-      const dir = path.dirname(this.configPath);
+      const dir = dirname(this.configPath);
       await fs.mkdir(dir, { recursive: true });
       const data = JSON.stringify(this.shortcuts, null, 2);
       await fs.writeFile(this.configPath, data, "utf-8");

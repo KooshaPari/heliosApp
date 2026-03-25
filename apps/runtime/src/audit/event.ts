@@ -5,15 +5,25 @@ import { randomUUID } from "crypto";
  * These categorize the event for filtering, searching, and analysis.
  */
 export const AUDIT_EVENT_TYPES = {
+  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   COMMAND_EXECUTED: "command.executed",
+  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   POLICY_EVALUATION: "policy.evaluation",
+  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   SESSION_CREATED: "session.created",
+  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   TERMINAL_OUTPUT: "terminal.output",
+  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   APPROVAL_RESOLVED: "approval.resolved",
+  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   LANE_LIFECYCLE: "lane.lifecycle",
+  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   SESSION_LIFECYCLE: "session.lifecycle",
+  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   TERMINAL_LIFECYCLE: "terminal.lifecycle",
+  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   POLICY_LIFECYCLE: "policy.lifecycle",
+  // biome-ignore lint/style/useNamingConvention: API constant uses event-code naming for external consistency.
   APPROVAL_LIFECYCLE: "approval.lifecycle",
 } as const;
 
@@ -23,10 +33,15 @@ export type AuditEventType = (typeof AUDIT_EVENT_TYPES)[keyof typeof AUDIT_EVENT
  * Result values for audit events indicating the outcome of an action.
  */
 export const AUDIT_EVENT_RESULTS = {
+  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
   SUCCESS: "success",
+  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
   FAILURE: "failure",
+  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
   DENIED: "denied",
+  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
   TIMEOUT: "timeout",
+  // biome-ignore lint/style/useNamingConvention: API result constants keep uppercase result tags.
   PENDING: "pending",
 } as const;
 

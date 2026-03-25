@@ -52,27 +52,49 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
   }
 
   async listModels(): Promise<ModelInfo[]> {
-    // Scan model directory for .gguf files
     try {
       const glob = new Bun.Glob("**/*.gguf");
       const models: ModelInfo[] = [];
       for await (const path of glob.scan(this.modelDir)) {
         const name =
-          path
+          modelPath
             .replace(/\.gguf$/, "")
             .split("/")
-            .pop() ?? path;
-        models.push({
-          id: `${this.modelDir}/${path}`,
+            .pop() ?? modelPath;
+        return {
+          id: `${this.modelDir}/${modelPath}`,
           name,
           contextWindow: 4096,
           providerId: "llamacpp",
-        });
-      }
-      return models;
+        };
+      });
     } catch {
       return [];
     }
+  }
+
+  private async collectModelsFromDirectory(
+    baseDir: string,
+    currentDir = baseDir
+  ): Promise<string[]> {
+    const entries = await readdir(currentDir, { withFileTypes: true });
+    const models: string[] = [];
+
+    for (const entry of entries) {
+      const entryPath = join(currentDir, entry.name);
+
+      if (entry.isDirectory()) {
+        const nested = await this.collectModelsFromDirectory(baseDir, entryPath);
+        models.push(...nested);
+        continue;
+      }
+
+      if (entry.isFile() && entry.name.endsWith(".gguf")) {
+        models.push(relative(baseDir, entryPath));
+      }
+    }
+
+    return models;
   }
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
@@ -84,5 +106,7 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
     }
   }
 
-  async terminate(): Promise<void> {}
+  terminate(): Promise<void> {
+    return Promise.resolve();
+  }
 }

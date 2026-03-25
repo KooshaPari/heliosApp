@@ -23,16 +23,19 @@ describe("RioMetrics — schema identity with ghostty", () => {
 
   it("snapshot has all required fields", () => {
     metrics.recordFrame(16.6, 5, false);
-    const snap = metrics.getSnapshots()[0]!;
+    const snap = metrics.getSnapshots()[0];
+    if (!snap) {
+      throw new Error("Snapshot is expected after recording a frame");
+    }
 
     // Verify all MetricsSnapshot fields exist.
-    expect(snap.rendererId).toBe("rio");
-    expect(typeof snap.timestamp).toBe("number");
-    expect(typeof snap.frameTimeMs).toBe("number");
-    expect(typeof snap.fps).toBe("number");
-    expect(typeof snap.inputLatencyMs).toBe("number");
-    expect(typeof snap.frameCount).toBe("number");
-    expect(typeof snap.droppedFrames).toBe("number");
+    expect(snap?.rendererId).toBe("rio");
+    expect(typeof snap?.timestamp).toBe("number");
+    expect(typeof snap?.frameTimeMs).toBe("number");
+    expect(typeof snap?.fps).toBe("number");
+    expect(typeof snap?.inputLatencyMs).toBe("number");
+    expect(typeof snap?.frameCount).toBe("number");
+    expect(typeof snap?.droppedFrames).toBe("number");
   });
 
   it("summary has all required fields", () => {
@@ -55,14 +58,20 @@ describe("RioMetrics — schema identity with ghostty", () => {
 
   it("rendererId is 'rio' (not 'ghostty')", () => {
     metrics.recordFrame(16.6, 5, false);
-    const snap = metrics.getSnapshots()[0]!;
+    const snap = metrics.getSnapshots()[0];
+    if (!snap) {
+      throw new Error("Snapshot is expected after recording a frame");
+    }
     expect(snap.rendererId).toBe("rio");
     expect(metrics.getSummary().rendererId).toBe("rio");
   });
 
   it("fps calculation is correct", () => {
     metrics.recordFrame(16.666, 5, false);
-    const snap = metrics.getSnapshots()[0]!;
+    const snap = metrics.getSnapshots()[0];
+    if (!snap) {
+      throw new Error("Snapshot is expected after recording a frame");
+    }
     expect(snap.fps).toBeCloseTo(60, 0); // ~60 FPS at 16.666ms
   });
 

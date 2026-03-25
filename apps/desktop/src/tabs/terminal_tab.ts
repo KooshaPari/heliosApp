@@ -26,13 +26,13 @@ export class TerminalTab extends TabSurface {
     super("terminal-tab", "terminal", "Terminal");
   }
 
-  async onContextChange(context: ActiveContext | null): Promise<void> {
+  onContextChange(context: ActiveContext | null): Promise<void> {
     // When context changes, we would query the terminal registry
     // For now, simulate terminal availability
     if (!context) {
       this.terminalId = null;
       this.outputBuffer = [];
-      return;
+      return Promise.resolve();
     }
 
     // In a real implementation, query terminal registry:
@@ -42,6 +42,8 @@ export class TerminalTab extends TabSurface {
     // Simulate: always have a terminal in the active context
     this.terminalId = `term-${context.laneId}-${context.sessionId}`;
     this.outputBuffer = this.generateMockTerminalOutput(context);
+
+    return Promise.resolve();
   }
 
   render(): HTMLElement {

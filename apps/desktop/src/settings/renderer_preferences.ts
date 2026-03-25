@@ -125,13 +125,13 @@ export class RendererPreferencesManager {
     }
   }
 
-  private isValidPreferences(obj: any): boolean {
-    return (
-      obj &&
-      typeof obj === "object" &&
-      typeof obj.activeRenderer === "string" &&
-      typeof obj.hotSwapEnabled === "boolean"
-    );
+  private isValidPreferences(obj: unknown): boolean {
+    if (!obj || typeof obj !== "object") {
+      return false;
+    }
+
+    const value = obj as Partial<RendererPreferences> & { [key: string]: unknown };
+    return typeof value.activeRenderer === "string" && typeof value.hotSwapEnabled === "boolean";
   }
 }
 

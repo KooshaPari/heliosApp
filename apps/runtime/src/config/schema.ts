@@ -2,6 +2,7 @@ import type { SettingDefinition, SettingsSchema } from "./types.js";
 
 /** Initial application settings schema. */
 export const SETTINGS_SCHEMA: SettingsSchema = {
+  // biome-ignore lint/style/useNamingConvention: Setting keys mirror external configuration schema names.
   renderer_engine: {
     key: "renderer_engine",
     type: "enum",
@@ -68,19 +69,34 @@ export function validateValue(key: string, value: unknown): { valid: boolean; re
     };
   }
 
-  switch (def.type) {
-    case "string": {
-      if (typeof value !== "string") {
-        return { valid: false, reason: `${key}: expected string` };
+  const validators: Record<
+    string,
+    (key: string, value: unknown, allowed: readonly string[]) => { valid: boolean; reason?: string }
+  > = {
+    string: (settingKey, settingValue) =>
+      typeof settingValue === "string"
+        ? { valid: true }
+        : { valid: false, reason: `${settingKey}: expected string` },
+    number: (settingKey, settingValue, _allowed) => {
+      if (
+        typeof settingValue !== "number" ||
+        Number.isNaN(settingValue) ||
+        !Number.isFinite(settingValue)
+      ) {
+        return { valid: false, reason: `${settingKey}: expected finite number` };
       }
-      break;
-    }
-    case "number": {
-      if (typeof value !== "number" || Number.isNaN(value) || !Number.isFinite(value)) {
-        return { valid: false, reason: `${key}: expected finite number` };
+      if (def.validation && !def.validation(settingValue)) {
+        return { valid: false, reason: `${settingKey}: failed range validation` };
       }
-      if (def.validation && !def.validation(value)) {
-        return { valid: false, reason: `${key}: failed range validation` };
+      return { valid: true };
+    },
+    boolean: (settingKey, settingValue) =>
+      typeof settingValue === "boolean"
+        ? { valid: true }
+        : { valid: false, reason: `${settingKey}: expected boolean` },
+    enum: (settingKey, settingValue, allowed) => {
+      if (allowed.includes(String(settingValue))) {
+        return { valid: true };
       }
       break;
     }
@@ -101,5 +117,7 @@ export function validateValue(key: string, value: unknown): { valid: boolean; re
     }
   }
 
-  return { valid: true };
+  const enumValues = (def.enumValues ?? []) as readonly string[];
+  const validator = validators[def.type] ?? validators.default;
+  return validator(key, value, enumValues);
 }

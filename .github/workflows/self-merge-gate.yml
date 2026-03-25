@@ -35,7 +35,7 @@ jobs:
             const pr = await github.rest.pulls.get({
               owner,
               repo,
-              pull_number: number
+              pull_number: pullRequestNumber
             });
 
             // Check if author is the actor
@@ -45,7 +45,7 @@ jobs:
             const reviews = await github.rest.pulls.listReviews({
               owner,
               repo,
-              pull_number: number
+              pull_number: pullRequestNumber
             });
 
             // Track latest review state per reviewer to handle DISMISSED/CHANGES_REQUESTED

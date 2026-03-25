@@ -9,6 +9,17 @@ export const ToolResultBlock: Component<ToolResultBlockProps> = props => {
   const isError = () => props.message.metadata?.status === "error";
   const output = () => props.message.metadata?.toolOutput ?? props.message.content;
 
+  const toggleExpanded = () => {
+    setExpanded(!expanded());
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      toggleExpanded();
+    }
+  };
+
   return (
     <div
       style={{
@@ -18,8 +29,11 @@ export const ToolResultBlock: Component<ToolResultBlockProps> = props => {
         overflow: "hidden",
       }}
     >
-      <div
-        onClick={() => setExpanded(!expanded())}
+      <button
+        type="button"
+        aria-expanded={expanded()}
+        onKeyDown={handleKeyDown}
+        onClick={toggleExpanded}
         style={{
           display: "flex",
           "align-items": "center",
@@ -34,7 +48,7 @@ export const ToolResultBlock: Component<ToolResultBlockProps> = props => {
         <span>{isError() ? "\u274C" : "\u2705"}</span>
         <span style={{ flex: "1" }}>{isError() ? "Error" : "Result"}</span>
         <span>{expanded() ? "\u25B2" : "\u25BC"}</span>
-      </div>
+      </button>
       <Show when={expanded()}>
         <div
           style={{

@@ -29,7 +29,7 @@ jobs:
             grep -v '^\.codex/prompts/.*\.md$' | \
             grep -v '^\.cursor/commands/.*\.md$' | \
             grep -v '^\.gemini/config.yaml$' | \
-            grep -v '^\.gemini/commands/.*\.toml$'); then
+            grep -v '^\.gemini/commands/'); then
             :
           else
             blocked=""

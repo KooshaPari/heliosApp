@@ -5,7 +5,7 @@
 
 export interface BusEvent {
   topic: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   sequenceNumber?: number;
   timestamp: number;
 }
@@ -34,6 +34,18 @@ export class LaneEventHandler {
   private rafId?: number | undefined;
   private lastSequenceNumbers: Map<string, number> = new Map();
   private isConnected: boolean = true;
+
+  private static asString(value: unknown): string | undefined {
+    return typeof value === "string" && value.length > 0 ? value : undefined;
+  }
+
+  private static asStringArray(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value.filter((entry): entry is string => typeof entry === "string" && entry.length > 0);
+  }
 
   constructor(options: LaneEventHandlerOptions) {
     this.options = {
@@ -95,8 +107,8 @@ export class LaneEventHandler {
   private handleStateChanged(event: BusEvent): void {
     this.recordEventReceived();
 
-    const laneId = event.payload.laneId;
-    const newState = event.payload.state;
+    const laneId = LaneEventHandler.asString(event.payload.laneId);
+    const newState = LaneEventHandler.asString(event.payload.state);
 
     if (!laneId || !newState) return;
 
@@ -119,8 +131,8 @@ export class LaneEventHandler {
   private handleLaneCreated(event: BusEvent): void {
     this.recordEventReceived();
 
-    const laneId = event.payload.laneId;
-    const name = event.payload.name || "New Lane";
+    const laneId = LaneEventHandler.asString(event.payload.laneId);
+    const name = LaneEventHandler.asString(event.payload.name) ?? "New Lane";
 
     if (!laneId) return;
 
@@ -132,7 +144,7 @@ export class LaneEventHandler {
   private handleLaneCleaned(event: BusEvent): void {
     this.recordEventReceived();
 
-    const laneId = event.payload.laneId;
+    const laneId = LaneEventHandler.asString(event.payload.laneId);
 
     if (!laneId) return;
 
@@ -144,7 +156,7 @@ export class LaneEventHandler {
   private handleOrphanDetectionCycle(event: BusEvent): void {
     this.recordEventReceived();
 
-    const orphanedLanes = event.payload.orphanedLanes || [];
+    const orphanedLanes = LaneEventHandler.asStringArray(event.payload.orphanedLanes);
 
     // Notify about orphan status changes
     if (this.options.onOrphanStatusChanged) {
@@ -204,12 +216,16 @@ export class LaneEventHandler {
   }
 
   private processPendingUpdates(): void {
-    this.pendingUpdates.forEach((event, laneId) => {
-      const newState = event.payload.state;
+    for (const [laneId, event] of this.pendingUpdates.entries()) {
+      const newState = LaneEventHandler.asString(event.payload.state);
+      if (!newState) {
+        continue;
+      }
+
       if (this.options.onStateChanged) {
         this.options.onStateChanged(laneId, newState);
       }
-    });
+    }
 
     this.pendingUpdates.clear();
   }

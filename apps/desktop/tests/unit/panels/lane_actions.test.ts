@@ -61,7 +61,7 @@ describe("LaneActions", () => {
     await actions.createLane("ws-1");
 
     expect(onError).toHaveBeenCalled();
-    const errorArg = (onError as any).mock.calls[0][0];
+    const errorArg = onError.mock.calls[0][0] as { code: string };
     expect(errorArg.code).toBe("CREATE_FAILED");
   });
 
@@ -90,7 +90,7 @@ describe("LaneActions", () => {
     await actions.attachLane("lane-1");
 
     expect(onError).toHaveBeenCalled();
-    const errorArg = (onError as any).mock.calls[0][0];
+    const errorArg = onError.mock.calls[0][0] as { code: string };
     expect(errorArg.code).toBe("ATTACH_FAILED");
   });
 

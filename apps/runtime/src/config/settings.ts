@@ -32,7 +32,9 @@ export class SettingsManager {
 
     // Wire external-edit detection.
     this.unwatch = this.store.watch(() => {
-      void this.handleExternalChange();
+      this.handleExternalChange().catch(() => {
+        // Ignore transient file-watch failures to keep settings pipeline non-blocking.
+      });
     });
   }
 
@@ -79,7 +81,7 @@ export class SettingsManager {
   }
 
   /** Reset a key to its schema default. */
-  async reset(key: string): Promise<SettingChangeEvent> {
+  reset(key: string): Promise<SettingChangeEvent> {
     const def = this.schema[key];
     const defaultVal: unknown = def?.default;
     return this.set(key, defaultVal);

@@ -33,7 +33,8 @@ export const ToastContainer: Component<ToastContainerProps> = props => {
     >
       <For each={props.toasts}>
         {toast => (
-          <div
+          <button
+            type="button"
             onClick={() => props.onDismiss(toast.id)}
             onKeyDown={e => {
               if (e.key === "Enter" || e.key === " ") {
@@ -50,10 +51,13 @@ export const ToastContainer: Component<ToastContainerProps> = props => {
               "font-size": "13px",
               "max-width": "360px",
               "box-shadow": "0 4px 12px rgba(0,0,0,0.3)",
+              border: "none",
+              width: "100%",
+              "text-align": "left",
             }}
           >
             {toast.message}
-          </div>
+          </button>
         )}
       </For>
     </div>

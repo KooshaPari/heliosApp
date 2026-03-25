@@ -8,7 +8,7 @@ export interface HardwareCapabilities {
   gpuName?: string;
   gpuMemoryMB?: number;
   cpuCores: number;
-  ramMB: number;
+  ramMb: number;
 }
 
 let cached: HardwareCapabilities | null = null;
@@ -52,7 +52,7 @@ export async function detectHardware(): Promise<HardwareCapabilities> {
     gpuName,
     gpuMemoryMB,
     cpuCores: cpus().length,
-    ramMB: Math.round(totalmem() / (1024 * 1024)),
+    ramMb: Math.round(totalmem() / (1024 * 1024)),
   };
   return cached;
 }

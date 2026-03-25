@@ -31,10 +31,11 @@ export class TabBar {
     this.tabs = tabs;
     this.tabOrder = tabs.map(t => t.getTabId());
     this.selectedTabId = tabs.length > 0 ? tabs[0].getTabId() : null;
+    const noop = () => undefined;
     this.config = {
-      onTabSelected: config.onTabSelected ?? (() => {}),
-      onTabReordered: config.onTabReordered ?? (() => {}),
-      onTabPinned: config.onTabPinned ?? (() => {}),
+      onTabSelected: config.onTabSelected ?? noop,
+      onTabReordered: config.onTabReordered ?? noop,
+      onTabPinned: config.onTabPinned ?? noop,
     };
   }
 
@@ -296,11 +297,11 @@ export class TabBar {
 
       // Update other tabs' tabindex
       const allTabs = this.container.querySelectorAll("[data-tab-id]");
-      allTabs.forEach(el => {
+      for (const el of allTabs) {
         if (el !== tabEl) {
           (el as HTMLElement).setAttribute("tabindex", "-1");
         }
-      });
+      }
     }
   }
 

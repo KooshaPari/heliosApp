@@ -62,7 +62,10 @@ export class ReplayEngine {
     const cacheKey = timestamp.toISOString();
 
     if (this.stateCache.has(cacheKey)) {
-      return this.stateCache.get(cacheKey)!;
+      const cachedState = this.stateCache.get(cacheKey);
+      if (cachedState) {
+        return cachedState;
+      }
     }
 
     // Find nearest snapshot before timestamp

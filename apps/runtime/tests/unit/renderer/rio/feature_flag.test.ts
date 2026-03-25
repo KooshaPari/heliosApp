@@ -33,18 +33,29 @@ function createMockGhostty(): RendererAdapter & { _state: RendererState } {
     _state: "uninitialized" as RendererState,
 
     async init(_config: RendererConfig): Promise<void> {
+      await Promise.resolve();
       adapter._state = "running";
     },
     async start(_surface: RenderSurface): Promise<void> {
+      await Promise.resolve();
       adapter._state = "running";
     },
     async stop(): Promise<void> {
+      await Promise.resolve();
       adapter._state = "stopped";
     },
-    bindStream(_ptyId: string, _stream: ReadableStream<Uint8Array>): void {},
-    unbindStream(_ptyId: string): void {},
-    handleInput(_ptyId: string, _data: Uint8Array): void {},
-    resize(_ptyId: string, _cols: number, _rows: number): void {},
+    bindStream(_ptyId: string, _stream: ReadableStream<Uint8Array>): void {
+      // No-op in this test stub.
+    },
+    unbindStream(_ptyId: string): void {
+      // No-op in this test stub.
+    },
+    handleInput(_ptyId: string, _data: Uint8Array): void {
+      // No-op in this test stub.
+    },
+    resize(_ptyId: string, _cols: number, _rows: number): void {
+      // No-op in this test stub.
+    },
     queryCapabilities(): RendererCapabilities {
       return {
         gpuAccelerated: false,
@@ -60,7 +71,9 @@ function createMockGhostty(): RendererAdapter & { _state: RendererState } {
     getState(): RendererState {
       return adapter._state;
     },
-    onCrash(_handler: (error: Error) => void): void {},
+    onCrash(_handler: (error: Error) => void): void {
+      // No-op in this test stub.
+    },
   };
   return adapter;
 }

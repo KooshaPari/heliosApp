@@ -167,11 +167,49 @@ export class AuditRingBuffer {
    * @returns true if event matches
    */
   private matchesFilter(event: AuditEvent, filter: AuditFilter): boolean {
-    if (filter.workspaceId && event.workspaceId !== filter.workspaceId) {
+    return (
+      this.matchesWorkspace(event, filter) &&
+      this.matchesLane(event, filter) &&
+      this.matchesSession(event, filter) &&
+      this.matchesActor(event, filter) &&
+      this.matchesEventType(event, filter) &&
+      this.matchesCorrelationId(event, filter) &&
+      this.matchesTimeWindow(event, filter)
+    );
+  }
+
+  private matchesWorkspace(event: AuditEvent, filter: AuditFilter): boolean {
+    return !filter.workspaceId || event.workspaceId === filter.workspaceId;
+  }
+
+  private matchesLane(event: AuditEvent, filter: AuditFilter): boolean {
+    return !filter.laneId || event.laneId === filter.laneId;
+  }
+
+  private matchesSession(event: AuditEvent, filter: AuditFilter): boolean {
+    return !filter.sessionId || event.sessionId === filter.sessionId;
+  }
+
+  private matchesActor(event: AuditEvent, filter: AuditFilter): boolean {
+    return !filter.actor || event.actor === filter.actor;
+  }
+
+  private matchesEventType(event: AuditEvent, filter: AuditFilter): boolean {
+    return !filter.eventType || event.eventType === filter.eventType;
+  }
+
+  private matchesCorrelationId(event: AuditEvent, filter: AuditFilter): boolean {
+    return !filter.correlationId || event.correlationId === filter.correlationId;
+  }
+
+  private matchesTimeWindow(event: AuditEvent, filter: AuditFilter): boolean {
+    const eventTime = new Date(event.timestamp);
+
+    if (filter.startTime && eventTime < filter.startTime) {
       return false;
     }
 
-    if (filter.laneId && event.laneId !== filter.laneId) {
+    if (filter.endTime && eventTime > filter.endTime) {
       return false;
     }
 

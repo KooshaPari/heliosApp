@@ -33,14 +33,14 @@ export class AgentTab extends TabSurface {
     super("agent-tab", "agent", "Agent");
   }
 
-  async onContextChange(context: ActiveContext | null): Promise<void> {
+  onContextChange(context: ActiveContext | null): Promise<void> {
     // When context changes, query agent state for this session
     this.actions = [];
     this.errorMessage = null;
 
     if (!context) {
       this.agentStatus = "idle";
-      return;
+      return Promise.resolve();
     }
 
     // In a real implementation, query agent registry:
@@ -51,6 +51,7 @@ export class AgentTab extends TabSurface {
     // Simulate: generate mock agent activity
     this.agentStatus = "idle";
     this.generateMockAgentActions(context);
+    return Promise.resolve();
   }
 
   render(): HTMLElement {

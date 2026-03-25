@@ -33,8 +33,8 @@ export class TabPersistence {
   private lastLoadTime: number = 0;
 
   constructor(storageDir?: string) {
-    this.storageDir = storageDir ?? path.join(homedir(), ".helios", "data");
-    this.storagePath = path.join(this.storageDir, "tab_state.json");
+    this.storageDir = storageDir ?? join(homedir(), ".helios", "data");
+    this.storagePath = join(this.storageDir, "tab_state.json");
   }
 
   /**

@@ -14,7 +14,7 @@ describe("KeyboardShortcuts", () => {
 
   beforeEach(async () => {
     resetKeyboardShortcuts();
-    tempDir = path.join(tmpdir(), `keyboard-test-${Date.now()}`);
+    tempDir = join(tmpdir(), `keyboard-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
     shortcuts = new KeyboardShortcuts(tempDir);
   });
@@ -153,7 +153,7 @@ describe("KeyboardShortcuts", () => {
     });
 
     it("should handle invalid JSON gracefully", async () => {
-      const configPath = path.join(tempDir, "keyboard_shortcuts.json");
+      const configPath = join(tempDir, "keyboard_shortcuts.json");
       await fs.writeFile(configPath, "invalid json {", "utf-8");
 
       const newShortcuts = new KeyboardShortcuts(tempDir);

@@ -43,9 +43,9 @@ export class AuditLedger {
   private subscriptions: Subscription[] = [];
   private batchedNotifications: Map<SubscriptionCallback, AuditEvent[]> = new Map();
   private batchTimer: number | null = null;
-  private readonly BATCH_INTERVAL_MS = 100;
-  private readonly DEFAULT_LIMIT = 100;
-  private readonly MAX_LIMIT = 1000;
+  private readonly batchIntervalMs = 100;
+  private readonly defaultLimit = 100;
+  private readonly maxLimit = 1000;
 
   constructor(
     private ringBuffer: AuditRingBuffer,
@@ -60,7 +60,7 @@ export class AuditLedger {
    * @returns Matching events in chronological order
    */
   search(filter: AuditFilter): AuditEvent[] {
-    const limit = Math.min(filter.limit || this.DEFAULT_LIMIT, this.MAX_LIMIT);
+    const limit = Math.min(filter.limit || this.defaultLimit, this.maxLimit);
     const offset = filter.offset || 0;
 
     // Convert AuditFilter to ring buffer filter
@@ -83,12 +83,14 @@ export class AuditLedger {
     // Merge and deduplicate results by event ID
     const merged = new Map<string, AuditEvent>();
 
-    rbResults.forEach(event => merged.set(event.id, event));
-    dbResults.forEach(event => {
+    for (const event of rbResults) {
+      merged.set(event.id, event);
+    }
+    for (const event of dbResults) {
       if (!merged.has(event.id)) {
         merged.set(event.id, event);
       }
-    });
+    }
 
     // Convert to array, sort chronologically, apply pagination
     const combined = Array.from(merged.values()).sort(
@@ -179,7 +181,7 @@ export class AuditLedger {
         if (this.batchTimer === null) {
           this.batchTimer = setTimeout(() => {
             this.deliverBatchedNotifications();
-          }, this.BATCH_INTERVAL_MS) as unknown as number;
+          }, this.batchIntervalMs) as unknown as number;
         }
       }
     }
@@ -192,7 +194,7 @@ export class AuditLedger {
     this.batchedNotifications.forEach((events, callback) => {
       // Invoke callback asynchronously to avoid blocking
       setImmediate(() => {
-        events.forEach(event => {
+        for (const event of events) {
           try {
             callback(event);
           } catch (err) {
@@ -236,7 +238,7 @@ export class AuditLedger {
       return;
     }
 
-    events.forEach(event => {
+    for (const event of events) {
       if (!chain.find(e => e.id === event.id)) {
         chain.push(event);
       }
@@ -246,7 +248,7 @@ export class AuditLedger {
       if (parentCorrelationId && typeof parentCorrelationId === "string") {
         this.traverseCorrelationChain(parentCorrelationId, visited, chain);
       }
-    });
+    }
   }
 
   /**
@@ -287,40 +289,56 @@ export class AuditLedger {
    * Check if an event matches a filter.
    */
   private matchesFilter(event: AuditEvent, filter: AuditFilter): boolean {
-    if (filter.workspaceId && event.workspaceId !== filter.workspaceId) {
-      return false;
+    return (
+      this.matchesWorkspace(event, filter) &&
+      this.matchesLane(event, filter) &&
+      this.matchesSession(event, filter) &&
+      this.matchesActor(event, filter) &&
+      this.matchesEventType(event, filter) &&
+      this.matchesCorrelationId(event, filter) &&
+      this.matchesTimeRange(event, filter)
+    );
+  }
+
+  private matchesWorkspace(event: AuditEvent, filter: AuditFilter): boolean {
+    return !filter.workspaceId || event.workspaceId === filter.workspaceId;
+  }
+
+  private matchesLane(event: AuditEvent, filter: AuditFilter): boolean {
+    return !filter.laneId || event.laneId === filter.laneId;
+  }
+
+  private matchesSession(event: AuditEvent, filter: AuditFilter): boolean {
+    return !filter.sessionId || event.sessionId === filter.sessionId;
+  }
+
+  private matchesActor(event: AuditEvent, filter: AuditFilter): boolean {
+    return !filter.actor || event.actor === filter.actor;
+  }
+
+  private matchesEventType(event: AuditEvent, filter: AuditFilter): boolean {
+    if (!filter.eventType) {
+      return true;
+    }
+    return Array.isArray(filter.eventType)
+      ? filter.eventType.includes(event.eventType)
+      : filter.eventType === event.eventType;
+  }
+
+  private matchesCorrelationId(event: AuditEvent, filter: AuditFilter): boolean {
+    return !filter.correlationId || event.correlationId === filter.correlationId;
+  }
+
+  private matchesTimeRange(event: AuditEvent, filter: AuditFilter): boolean {
+    if (!filter.timeRange) {
+      return true;
     }
 
-    if (filter.laneId && event.laneId !== filter.laneId) {
-      return false;
-    }
+    const eventTime = new Date(event.timestamp);
+    return eventTime >= filter.timeRange.from && eventTime <= filter.timeRange.to;
+  }
 
-    if (filter.sessionId && event.sessionId !== filter.sessionId) {
-      return false;
-    }
-
-    if (filter.actor && event.actor !== filter.actor) {
-      return false;
-    }
-
-    if (filter.eventType) {
-      const eventTypes = Array.isArray(filter.eventType) ? filter.eventType : [filter.eventType];
-      if (!eventTypes.includes(event.eventType as any)) {
-        return false;
-      }
-    }
-
-    if (filter.correlationId && event.correlationId !== filter.correlationId) {
-      return false;
-    }
-
-    if (filter.timeRange) {
-      const eventTime = new Date(event.timestamp);
-      if (eventTime < filter.timeRange.from || eventTime > filter.timeRange.to) {
-        return false;
-      }
-    }
-
-    return true;
+  private handleNotificationError(_error: unknown): void {
+    // Intentionally ignored. Notification failures should not block event flow.
   }
 }

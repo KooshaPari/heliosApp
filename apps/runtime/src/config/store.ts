@@ -82,7 +82,7 @@ export class JsonSettingsStore implements SettingsStore {
       });
     } catch {
       // File may not exist yet — return no-op unsubscribe.
-      return () => {};
+      return () => undefined;
     }
 
     return () => {
