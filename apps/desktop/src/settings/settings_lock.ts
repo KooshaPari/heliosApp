@@ -80,7 +80,7 @@ export class SettingsLock {
         element.style.cursor = "";
         element.removeAttribute("title");
       }
-    });
+    }
 
     this.lockedElements.clear();
     container.style.opacity = "";

@@ -151,7 +151,9 @@ export class LaneActions {
   }
 
   clearAllErrors(): void {
-    this.errorTimeouts.forEach(timeout => clearTimeout(timeout));
+    for (const timeout of this.errorTimeouts.values()) {
+      clearTimeout(timeout);
+    }
     this.errorTimeouts.clear();
   }
 
