@@ -67,13 +67,13 @@ function containsKnownSecret(text: string): boolean {
   ];
 
   // For aws_secret_keys and bearer/generic keys, extract the secret value part
-  const awsSecretValues = knownSecrets.aws_secret_keys.map((s) => {
+  const awsSecretValues = knownSecrets.aws_secret_keys.map(s => {
     const match = s.match(/=(.+)$/);
     return match ? match[1] : s;
   });
   allSecrets.push(...awsSecretValues);
 
-  return allSecrets.some((secret) => text.includes(secret));
+  return allSecrets.some(secret => text.includes(secret));
 }
 
 // ---------------------------------------------------------------------------
@@ -113,7 +113,7 @@ describe("CI Redaction Verification (T014) [FR-028-011]", () => {
     it("redacts all GitHub tokens", () => {
       // Only test ghp_ and ghs_ tokens (not github_pat_ which has a stricter pattern)
       const standardTokens = knownSecrets.github_tokens.filter(
-        (t) => t.startsWith("ghp_") || t.startsWith("ghs_")
+        t => t.startsWith("ghp_") || t.startsWith("ghs_")
       );
       for (const token of standardTokens) {
         const text = `GITHUB_TOKEN=${token}`;
@@ -167,10 +167,7 @@ describe("CI Redaction Verification (T014) [FR-028-011]", () => {
       const trailWithSink = new RedactionAuditTrail({ bus: wrappedBus });
 
       // Inject known secrets into audit events
-      const injectedSecrets = [
-        ...knownSecrets.aws_access_keys,
-        ...knownSecrets.gcp_api_keys,
-      ];
+      const injectedSecrets = [...knownSecrets.aws_access_keys, ...knownSecrets.gcp_api_keys];
 
       for (const secret of injectedSecrets) {
         const fakeResult = {
@@ -202,11 +199,15 @@ describe("CI Redaction Verification (T014) [FR-028-011]", () => {
       const trail = new RedactionAuditTrail({ bus: wrappedBus2 });
 
       const normalOutput = "Deployment completed successfully in 1.2s";
-      trail.record("artifact:normal", {
-        redacted: normalOutput,
-        matches: [],
-        latencyMs: 1.2,
-      }, makeContext("normal"));
+      trail.record(
+        "artifact:normal",
+        {
+          redacted: normalOutput,
+          matches: [],
+          latencyMs: 1.2,
+        },
+        makeContext("normal")
+      );
 
       const bundle = sink.export();
       const bundleStr = JSON.stringify(bundle);
@@ -309,7 +310,8 @@ describe("CI Redaction Verification (T014) [FR-028-011]", () => {
     });
 
     it("already-redacted placeholders are not double-redacted", () => {
-      const alreadyRedacted = "Output: [REDACTED:AWS_ACCESS_KEY] was used at [REDACTED:GCP_API_KEY]";
+      const alreadyRedacted =
+        "Output: [REDACTED:AWS_ACCESS_KEY] was used at [REDACTED:GCP_API_KEY]";
       const result = engine.redact(alreadyRedacted, makeContext("double-redact"));
       // Placeholders should be preserved unchanged
       expect(result.redacted).toBe(alreadyRedacted);

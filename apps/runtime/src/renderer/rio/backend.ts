@@ -5,12 +5,7 @@
  * to the abstract contract defined in spec 010.
  */
 
-import type {
-  RendererAdapter,
-  RendererConfig,
-  RendererState,
-  RenderSurface,
-} from "../adapter.js";
+import type { RendererAdapter, RendererConfig, RendererState, RenderSurface } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
 import type { RendererRegistry } from "../registry.js";
 import { RioProcess } from "./process.js";
@@ -136,7 +131,7 @@ export class RioBackend implements RendererAdapter {
     this._surface.bind(surface, pid.pid);
 
     // Set up crash detection forwarding with fallback.
-    this._process!.onExit((code) => {
+    this._process!.onExit(code => {
       if (this._state === "running") {
         this._crashCount++;
         const error = new Error(`Rio process exited unexpectedly with code ${code}`);
@@ -320,8 +315,8 @@ export class RioBackend implements RendererAdapter {
 
       // Switch to ghostty with timeout.
       const switchPromise = this._switchToGhostty(ghostty, boundPtyIds);
-      const timeout = new Promise<"timeout">((resolve) =>
-        setTimeout(() => resolve("timeout"), RioBackend.FALLBACK_TIMEOUT_MS),
+      const timeout = new Promise<"timeout">(resolve =>
+        setTimeout(() => resolve("timeout"), RioBackend.FALLBACK_TIMEOUT_MS)
       );
 
       const result = await Promise.race([switchPromise, timeout]);
@@ -340,12 +335,13 @@ export class RioBackend implements RendererAdapter {
     }
   }
 
-  private async _switchToGhostty(
-    ghostty: RendererAdapter,
-    _boundPtyIds: string[],
-  ): Promise<void> {
+  private async _switchToGhostty(ghostty: RendererAdapter, _boundPtyIds: string[]): Promise<void> {
     const ghosttyState = ghostty.getState();
-    if (ghosttyState === "uninitialized" || ghosttyState === "stopped" || ghosttyState === "errored") {
+    if (
+      ghosttyState === "uninitialized" ||
+      ghosttyState === "stopped" ||
+      ghosttyState === "errored"
+    ) {
       // Use stored config or sensible defaults.
       const config: RendererConfig = this._config ?? {
         gpuAcceleration: false,

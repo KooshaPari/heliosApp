@@ -53,10 +53,7 @@ function generatePtyId(): string {
  * @returns The spawn result including the PTY record and latency.
  * @throws If the shell binary is not found or spawn fails.
  */
-export async function spawnPty(
-  options: SpawnOptions,
-  registry: PtyRegistry,
-): Promise<SpawnResult> {
+export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Promise<SpawnResult> {
   const startTime = performance.now();
   const ptyId = generatePtyId();
   const lifecycle = new PtyLifecycle(ptyId);

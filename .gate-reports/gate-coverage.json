@@ -2,8 +2,8 @@
   "gateName": "coverage",
   "status": "pass",
   "findings": [],
-  "duration": 1,
-  "timestamp": "2026-03-03T01:14:25.557Z",
+  "duration": 0,
+  "timestamp": "2026-03-24T12:49:57.793Z",
   "summary": {
     "errors": 0,
     "warnings": 0,

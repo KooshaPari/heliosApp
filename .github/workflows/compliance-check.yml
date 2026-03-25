@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.2.20"
 
@@ -56,8 +56,12 @@ jobs:
         run: |
           FILES='${{ steps.files.outputs.files }}'
           FILES_ARRAY=$(echo "$FILES" | jq -r '.[]' | tr '\n' ' ')
-          tsx scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>&1
+          bun run scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>compliance-stderr.log
           cat compliance-result.json
+          if [ -s compliance-stderr.log ]; then
+            echo "::warning::Compliance checker stderr:"
+            cat compliance-stderr.log
+          fi
 
       - name: Parse compliance results
         id: results
@@ -67,10 +71,11 @@ jobs:
             const fs = require('fs');
             try {
               const result = JSON.parse(fs.readFileSync('compliance-result.json', 'utf-8'));
-              core.setOutput('passed', result.passed);
-              core.setOutput('findings', JSON.stringify(result.findings));
+              core.setOutput('passed', String(result.passed));
+              core.setOutput('findings', JSON.stringify(result.findings || []));
             } catch (e) {
-              core.setOutput('passed', false);
+              core.warning(`Failed to parse compliance results: ${e.message}`);
+              core.setOutput('passed', 'false');
               core.setOutput('findings', JSON.stringify([]));
             }
 

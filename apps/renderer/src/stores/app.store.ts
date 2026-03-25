@@ -29,11 +29,17 @@ export function updateAppState(partial: Partial<AppState>): void {
 }
 
 export function toggleSidebar(): void {
-  setAppState((prev: AppState) => ({ ...prev, sidebarVisible: !prev.sidebarVisible }));
+  setAppState((prev: AppState) => ({
+    ...prev,
+    sidebarVisible: !prev.sidebarVisible,
+  }));
 }
 
 export function toggleTerminal(): void {
-  setAppState((prev: AppState) => ({ ...prev, terminalVisible: !prev.terminalVisible }));
+  setAppState((prev: AppState) => ({
+    ...prev,
+    terminalVisible: !prev.terminalVisible,
+  }));
 }
 
 export function newChat(): void {

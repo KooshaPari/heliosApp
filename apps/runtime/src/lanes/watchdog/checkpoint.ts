@@ -18,8 +18,8 @@ export interface WatchdogCheckpoint {
 export class CheckpointManager {
   private readonly checkpointPath: string;
 
-  constructor() {
-    const heliosDataDir = path.join(os.homedir(), ".helios", "data");
+  constructor(baseDir?: string) {
+    const heliosDataDir = baseDir ?? path.join(os.homedir(), ".helios", "data");
     this.checkpointPath = path.join(heliosDataDir, "watchdog_checkpoint.json");
   }
 
@@ -27,10 +27,7 @@ export class CheckpointManager {
     try {
       const dir = path.dirname(this.checkpointPath);
       await fs.mkdir(dir, { recursive: true });
-      await fs.writeFile(
-        this.checkpointPath,
-        JSON.stringify(checkpoint, null, 2)
-      );
+      await fs.writeFile(this.checkpointPath, JSON.stringify(checkpoint, null, 2));
     } catch (error) {
       console.error("Failed to save checkpoint:", error);
       throw error;

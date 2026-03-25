@@ -6,18 +6,19 @@
  * SC-025-002: Provider crash isolation across lanes.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
-import {
-  A2ARouterAdapter,
-  HealthMonitoringCoordinator,
-  type A2AEndpoint,
-} from "../a2a-router.js";
+import { describe, it, expect, beforeEach } from "bun:test";
+import { A2ARouterAdapter, HealthMonitoringCoordinator, type A2AEndpoint } from "../a2a-router.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { NormalizedProviderError } from "../errors.js";
 import type { ProviderHealthStatus } from "../adapter.js";
 
 type RouterConfig = {
-  endpoints: Array<{ id: string; url: string; priority: number; capabilities: string[] }>;
+  endpoints: Array<{
+    id: string;
+    url: string;
+    priority: number;
+    capabilities: string[];
+  }>;
   timeout: number;
   failoverEnabled: boolean;
 };
@@ -48,7 +49,7 @@ describe("A2A Router Adapter", () => {
             capabilities: ["task-execution"],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
 
@@ -61,7 +62,7 @@ describe("A2A Router Adapter", () => {
     it("should reject missing endpoints", async () => {
       const config: RouterConfig = {
         endpoints: [],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
 
@@ -92,7 +93,7 @@ describe("A2A Router Adapter", () => {
             capabilities: [],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
 
@@ -114,14 +115,14 @@ describe("A2A Router Adapter", () => {
             capabilities: [],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
 
       await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
 
       const events = bus.getEvents();
-      const initEvent = events.find((e) => e.topic === "provider.a2a.initialized");
+      const initEvent = events.find(e => e.topic === "provider.a2a.initialized");
       expect(initEvent).toBeDefined();
       expect(initEvent?.payload?.endpointCount).toBe(1);
     });
@@ -144,7 +145,7 @@ describe("A2A Router Adapter", () => {
             capabilities: ["inference"],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
       await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
@@ -219,9 +220,7 @@ describe("A2A Router Adapter", () => {
       );
 
       const events = bus.getEvents();
-      const completedEvent = events.find(
-        (e) => e.topic === "provider.a2a.delegation.completed"
-      );
+      const completedEvent = events.find(e => e.topic === "provider.a2a.delegation.completed");
       expect(completedEvent).toBeDefined();
       expect(completedEvent?.payload?.correlationId).toBe("corr-123");
     });
@@ -257,7 +256,7 @@ describe("A2A Router Adapter", () => {
             capabilities: ["inference"],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
       await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
@@ -330,7 +329,7 @@ describe("A2A Router Adapter", () => {
             capabilities: [],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
       await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
@@ -359,7 +358,7 @@ describe("A2A Router Adapter", () => {
             capabilities: [],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
       await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
@@ -381,7 +380,7 @@ describe("A2A Router Adapter", () => {
       await adapter.terminate();
 
       const events = bus.getEvents();
-      const terminatedEvent = events.find((e) => e.topic === "provider.a2a.terminated");
+      const terminatedEvent = events.find(e => e.topic === "provider.a2a.terminated");
       expect(terminatedEvent).toBeDefined();
     });
 
@@ -412,7 +411,7 @@ describe("A2A Router Adapter", () => {
             capabilities: ["inference"],
           },
         ],
-        timeoutMs: 30000,
+        timeout: 30000,
         failoverEnabled: true,
       };
       await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
@@ -435,9 +434,7 @@ describe("A2A Router Adapter", () => {
       }
 
       const events = bus.getEvents();
-      const errorEvent = events.find(
-        (e) => e.topic === "provider.a2a.delegation.failed"
-      );
+      const errorEvent = events.find(e => e.topic === "provider.a2a.delegation.failed");
       expect(errorEvent).toBeDefined();
     });
   });
@@ -575,7 +572,7 @@ describe("Provider Crash Isolation (SC-025-002)", () => {
           capabilities: ["task"],
         },
       ],
-      timeoutMs: 30000,
+      timeout: 30000,
       failoverEnabled: true,
     };
 
@@ -627,7 +624,7 @@ describe("Error Taxonomy Completeness (SC-025-004)", () => {
           capabilities: ["task"],
         },
       ],
-      timeoutMs: 30000,
+      timeout: 30000,
       failoverEnabled: true,
     };
     await adapter.init(config as unknown as Parameters<A2ARouterAdapter["init"]>[0]);
@@ -644,7 +641,7 @@ describe("Error Taxonomy Completeness (SC-025-004)", () => {
         },
         "corr-123"
       )
-      .catch((e) => e);
+      .catch(e => e);
 
     expect(error).toBeInstanceOf(NormalizedProviderError);
     expect((error as NormalizedProviderError).code).toBeTruthy();

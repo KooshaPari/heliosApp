@@ -14,8 +14,8 @@ test("retention hook keeps exempt deletion-proof topic", async () => {
       type: "event",
       ts: "2026-01-01T00:00:00.000Z",
       topic: "session.attached",
-      payload: {}
-    }
+      payload: {},
+    },
   });
   await sink.append({
     recorded_at: "2026-01-01T00:00:00.000Z",
@@ -27,16 +27,15 @@ test("retention hook keeps exempt deletion-proof topic", async () => {
       type: "event",
       ts: "2026-01-01T00:00:00.000Z",
       topic: "audit.retention.deleted",
-      payload: { deleted_count: 1 }
-    }
+      payload: { deleted_count: 1 },
+    },
   });
 
   await sink.enforceRetention(new Date("2026-02-27T00:00:00.000Z"));
   const topics = sink
     .getRecords()
-    .map((record) => (record.envelope as Record<string, unknown>).topic)
+    .map(record => (record.envelope as Record<string, unknown>).topic)
     .filter((value): value is string => typeof value === "string");
 
   expect(topics).toContain("audit.retention.deleted");
 });
-

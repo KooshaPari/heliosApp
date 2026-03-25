@@ -76,15 +76,24 @@ export function computePercentiles(
   }
 
   return {
+<<<<<<< HEAD
     p50,
     p95,
     p99,
     min,
     max,
+=======
+    p50: percentileFromSorted(sorted, 0.5),
+    p95: percentileFromSorted(sorted, 0.95),
+    p99: percentileFromSorted(sorted, 0.99),
+    min: sorted[0]!,
+    max: sorted[count - 1]!,
+>>>>>>> origin/main
     count,
   };
 }
 
+<<<<<<< HEAD
 function percentileIndex(count: number, p: number): number {
   return Math.min(count - 1, Math.max(0, Math.ceil(p * (count + 1)) - 1));
 }
@@ -150,4 +159,10 @@ function swap(values: Float64Array, a: number, b: number): void {
   const tmp = values[a]!;
   values[a] = values[b]!;
   values[b] = tmp;
+=======
+/** Nearest-rank percentile on a pre-sorted Float64Array. */
+function percentileFromSorted(sorted: Float64Array, p: number): number {
+  const index = Math.ceil(p * sorted.length);
+  return sorted[Math.min(index, sorted.length - 1)]!;
+>>>>>>> origin/main
 }

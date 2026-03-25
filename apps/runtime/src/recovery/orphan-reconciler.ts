@@ -65,7 +65,7 @@ export class OrphanReconciler {
             try {
               process.kill(item.pid, "SIGTERM");
               // Wait 3s for graceful shutdown
-              await new Promise((resolve) => setTimeout(resolve, 3000));
+              await new Promise(resolve => setTimeout(resolve, 3000));
               // Check if process is still alive
               try {
                 process.kill(item.pid, 0);
@@ -92,7 +92,9 @@ export class OrphanReconciler {
     const reviewPending = report.needsReview.length;
 
     // Log cleanup result
-    console.log(`Orphan cleanup: ${terminated} terminated, ${removed} removed, ${reviewPending} pending review`);
+    console.log(
+      `Orphan cleanup: ${terminated} terminated, ${removed} removed, ${reviewPending} pending review`
+    );
 
     // Publish cleanup event
     if (this.bus) {

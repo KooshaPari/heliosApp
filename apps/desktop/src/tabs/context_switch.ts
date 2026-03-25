@@ -1,4 +1,7 @@
-import type { LocalBus } from "../../runtime/src/protocol/bus";
+/** Minimal subset of runtime LocalBus used for context events. */
+interface LocalBus {
+  publish(event: Record<string, unknown>): Promise<void>;
+}
 
 export interface ActiveContext {
   workspaceId: string;
@@ -67,7 +70,7 @@ export class ActiveContextStore {
     this.pendingContext = context;
 
     // Debounce: wait 50ms for any additional changes before committing
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       this.debounceTimer = setTimeout(async () => {
         this.debounceTimer = null;
 
@@ -85,7 +88,7 @@ export class ActiveContextStore {
                 type: "event",
                 ts: new Date().toISOString(),
                 topic: "context.validation.failed",
-                payload: { context: contextToSet }
+                payload: { context: contextToSet },
               });
             }
             resolve();
@@ -102,7 +105,7 @@ export class ActiveContextStore {
         // Emit change event to listeners
         const changeEvent: ContextChangeEvent = {
           previous: previousContext,
-          current: this.currentContext
+          current: this.currentContext,
         };
 
         for (const listener of this.listeners) {
@@ -119,7 +122,7 @@ export class ActiveContextStore {
             workspace_id: contextToSet?.workspaceId,
             lane_id: contextToSet?.laneId,
             session_id: contextToSet?.sessionId,
-            payload: changeEvent
+            payload: changeEvent,
           });
         }
 

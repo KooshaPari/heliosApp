@@ -77,7 +77,7 @@ describe("MuxEventEmitter", () => {
     });
 
     // Wait for async publish
-    await new Promise((r) => setTimeout(r, 10));
+    await new Promise(r => setTimeout(r, 10));
     expect(bus.events).toHaveLength(1);
     const evt = bus.events[0]!;
     expect(evt.timestamp).toBeGreaterThan(0);
@@ -97,7 +97,7 @@ describe("MuxEventEmitter", () => {
       correlationId: "custom-123",
     });
 
-    await new Promise((r) => setTimeout(r, 10));
+    await new Promise(r => setTimeout(r, 10));
     expect(bus.events[0]!.correlationId).toBe("custom-123");
   });
 
@@ -114,7 +114,7 @@ describe("MuxEventEmitter", () => {
       minDimensions: { cols: 10, rows: 3 },
     });
 
-    await new Promise((r) => setTimeout(r, 10));
+    await new Promise(r => setTimeout(r, 10));
     expect(bus.events[0]!.type).toBe("mux.pane.dimension_rejected");
   });
 
@@ -136,7 +136,7 @@ describe("MuxEventEmitter", () => {
     });
 
     // Wait for the catch path
-    await new Promise((r) => setTimeout(r, 20));
+    await new Promise(r => setTimeout(r, 20));
     expect(failingBus.publish).toHaveBeenCalledTimes(1);
   });
 
@@ -168,7 +168,7 @@ describe("MuxEventEmitter", () => {
       paneId: 2,
     } as MuxEvent);
 
-    await new Promise((r) => setTimeout(r, 20));
+    await new Promise(r => setTimeout(r, 20));
     expect(bus.publish).toHaveBeenCalledTimes(2);
   });
 });

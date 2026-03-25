@@ -1,9 +1,9 @@
 name: GCA Review
 
+# Disabled: requires paid GCA_TOKEN API access.
+# Re-enable pull_request trigger when GCA billing is configured.
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: gca-${{ github.event.pull_request.number || github.ref }}
