@@ -131,7 +131,11 @@ async function benchSettingsWrite(): Promise<BenchResult> {
 async function benchHotReloadPropagation(): Promise<BenchResult> {
   const { tempDir, settings, flags } = await setup();
   // Register theme as a hot-reloadable flag
-  flags.register({ key: "theme", defaultValue: "system", description: "Theme" });
+  flags.register({
+    key: "theme",
+    defaultValue: "system",
+    description: "Theme",
+  });
   flags.dispose();
   flags.init();
 
@@ -225,11 +229,13 @@ async function main() {
   console.log(JSON.stringify({ benchmarks: results }, null, 2));
 
   // Assert thresholds
-  const failures = results.filter((r) => !r.pass);
+  const failures = results.filter(r => !r.pass);
   if (failures.length > 0) {
     console.error("\nBenchmark threshold breaches:");
     for (const f of failures) {
-      console.error(`  FAIL: ${f.name} — p95=${f.p95_ms.toFixed(4)} > threshold=${f.threshold_p95_ms}`);
+      console.error(
+        `  FAIL: ${f.name} — p95=${f.p95_ms.toFixed(4)} > threshold=${f.threshold_p95_ms}`
+      );
     }
     process.exit(1);
   }
@@ -237,7 +243,7 @@ async function main() {
   console.log("\nAll benchmarks passed.");
 }
 
-main().catch((err) => {
+main().catch(err => {
   console.error(err);
   process.exit(1);
 });

@@ -1,18 +1,8 @@
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  mock,
-} from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import { ZellijCli } from "../cli.js";
 import { MuxRegistry } from "../registry.js";
 import { ZellijSessionManager, sessionNameForLane } from "../session.js";
-import {
-  SessionAlreadyExistsError,
-  SessionNotFoundError,
-} from "../errors.js";
+import { SessionAlreadyExistsError, SessionNotFoundError } from "../errors.js";
 
 // Helper to create a mock spawn result
 function makeMockProc(stdout: string, stderr: string, exitCode: number) {
@@ -87,30 +77,20 @@ describe("ZellijSessionManager", () => {
 
     it("throws SessionAlreadyExistsError if session exists", async () => {
       // @ts-expect-error mock override
-      Bun.spawn = mock(() =>
-        makeMockProc("helios-lane-dup  2026-02-27 10:00:00", "", 0)
-      );
+      Bun.spawn = mock(() => makeMockProc("helios-lane-dup  2026-02-27 10:00:00", "", 0));
 
       const cli = new ZellijCli();
       const registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
-      await expect(manager.createSession("dup")).rejects.toThrow(
-        SessionAlreadyExistsError
-      );
+      await expect(manager.createSession("dup")).rejects.toThrow(SessionAlreadyExistsError);
     });
   });
 
   describe("reattachSession", () => {
     it("reattaches to an existing session", async () => {
       // @ts-expect-error mock override
-      Bun.spawn = mock(() =>
-        makeMockProc(
-          "helios-lane-reattach  2026-02-27 10:00:00",
-          "",
-          0
-        )
-      );
+      Bun.spawn = mock(() => makeMockProc("helios-lane-reattach  2026-02-27 10:00:00", "", 0));
 
       const cli = new ZellijCli();
       const registry = new MuxRegistry();
@@ -133,9 +113,9 @@ describe("ZellijSessionManager", () => {
       const registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
-      await expect(
-        manager.reattachSession("helios-lane-missing")
-      ).rejects.toThrow(SessionNotFoundError);
+      await expect(manager.reattachSession("helios-lane-missing")).rejects.toThrow(
+        SessionNotFoundError
+      );
     });
   });
 
@@ -147,11 +127,7 @@ describe("ZellijSessionManager", () => {
         callCount++;
         if (callCount <= 2) {
           // listSessions for reattach (called twice - panes + tabs query may also call)
-          return makeMockProc(
-            "helios-lane-term  2026-02-27 10:00:00",
-            "",
-            0
-          );
+          return makeMockProc("helios-lane-term  2026-02-27 10:00:00", "", 0);
         }
         if (callCount <= 5) {
           // kill-session or subsequent listSessions (empty)
@@ -177,9 +153,7 @@ describe("ZellijSessionManager", () => {
 
     it("is idempotent for non-existent sessions", async () => {
       // @ts-expect-error mock override
-      Bun.spawn = mock(() =>
-        makeMockProc("", "No session named 'foo' found.", 1)
-      );
+      Bun.spawn = mock(() => makeMockProc("", "No session named 'foo' found.", 1));
 
       const cli = new ZellijCli();
       const registry = new MuxRegistry();

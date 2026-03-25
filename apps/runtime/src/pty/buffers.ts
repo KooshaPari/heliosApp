@@ -199,11 +199,7 @@ export class OutputBuffer {
   /** Whether the first overflow warning has been logged. */
   private firstOverflowLogged = false;
 
-  constructor(
-    bus: BusPublisher,
-    correlation: PtyEventCorrelation,
-    config?: OutputBufferConfig,
-  ) {
+  constructor(bus: BusPublisher, correlation: PtyEventCorrelation, config?: OutputBufferConfig) {
     const capacity = config?.capacityBytes ?? 4 * 1024 * 1024;
     this.ring = new RingBuffer(capacity);
     this.bus = bus;

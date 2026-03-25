@@ -5,6 +5,8 @@ export type LaneState =
   | "provisioning"
   | "ready"
   | "running"
+  | "active"
+  | "recovering"
   | "blocked"
   | "shared"
   | "cleaning"
@@ -27,11 +29,9 @@ export class InvalidLaneTransitionError extends Error {
   constructor(
     public readonly laneId: string,
     public readonly currentState: LaneState,
-    public readonly attemptedEvent: LaneEvent,
+    public readonly attemptedEvent: LaneEvent
   ) {
-    super(
-      `Invalid lane transition: lane=${laneId} state=${currentState} event=${attemptedEvent}`,
-    );
+    super(`Invalid lane transition: lane=${laneId} state=${currentState} event=${attemptedEvent}`);
     this.name = "InvalidLaneTransitionError";
   }
 }
@@ -44,37 +44,56 @@ type TransitionEntry = {
 };
 
 // Transition table: Map<currentState, Map<event, nextState>>
-const TRANSITION_TABLE: ReadonlyMap<LaneState, ReadonlyMap<LaneEvent, LaneState>> = new Map<LaneState, Map<LaneEvent, LaneState>>([
-  ["new", new Map([
-    ["create", "provisioning"],
-  ])],
-  ["provisioning", new Map([
-    ["provision_complete", "ready"],
-    ["provision_failed", "closed"],
-  ])],
-  ["ready", new Map([
-    ["start_running", "running"],
-    ["share", "shared"],
-    ["request_cleanup", "cleaning"],
-  ])],
-  ["running", new Map([
-    ["command_complete", "ready"],
-    ["block", "blocked"],
-    ["request_cleanup", "cleaning"],
-  ])],
-  ["blocked", new Map([
-    ["unblock", "running"],
-    ["request_cleanup", "cleaning"],
-  ])],
-  ["shared", new Map([
-    ["unshare", "ready"],
-    ["request_cleanup", "cleaning"],
-  ])],
-  ["cleaning", new Map([
-    ["cleanup_complete", "closed"],
-    // Idempotent: duplicate cleanup request on cleaning lane is a no-op
-    ["request_cleanup", "cleaning"],
-  ])],
+const TRANSITION_TABLE: ReadonlyMap<LaneState, ReadonlyMap<LaneEvent, LaneState>> = new Map<
+  LaneState,
+  Map<LaneEvent, LaneState>
+>([
+  ["new", new Map([["create", "provisioning"]])],
+  [
+    "provisioning",
+    new Map([
+      ["provision_complete", "ready"],
+      ["provision_failed", "closed"],
+    ]),
+  ],
+  [
+    "ready",
+    new Map([
+      ["start_running", "running"],
+      ["share", "shared"],
+      ["request_cleanup", "cleaning"],
+    ]),
+  ],
+  [
+    "running",
+    new Map([
+      ["command_complete", "ready"],
+      ["block", "blocked"],
+      ["request_cleanup", "cleaning"],
+    ]),
+  ],
+  [
+    "blocked",
+    new Map([
+      ["unblock", "running"],
+      ["request_cleanup", "cleaning"],
+    ]),
+  ],
+  [
+    "shared",
+    new Map([
+      ["unshare", "ready"],
+      ["request_cleanup", "cleaning"],
+    ]),
+  ],
+  [
+    "cleaning",
+    new Map([
+      ["cleanup_complete", "closed"],
+      // Idempotent: duplicate cleanup request on cleaning lane is a no-op
+      ["request_cleanup", "cleaning"],
+    ]),
+  ],
   // closed is terminal - no outgoing transitions
   ["closed", new Map()],
 ]);
@@ -99,7 +118,9 @@ const laneLocks = new Map<string, Promise<void>>();
 export async function withLaneLock<T>(laneId: string, fn: () => Promise<T>): Promise<T> {
   const prev = laneLocks.get(laneId) ?? Promise.resolve();
   let resolve: () => void;
-  const next = new Promise<void>((r) => { resolve = r; });
+  const next = new Promise<void>(r => {
+    resolve = r;
+  });
   laneLocks.set(laneId, next);
 
   await prev;
@@ -121,14 +142,19 @@ export function recordTransition(
   laneId: string,
   fromState: LaneState,
   event: LaneEvent,
-  toState: LaneState,
+  toState: LaneState
 ): void {
   let history = transitionHistories.get(laneId);
   if (!history) {
     history = [];
     transitionHistories.set(laneId, history);
   }
-  history.push({ fromState, event, toState, timestamp: new Date().toISOString() });
+  history.push({
+    fromState,
+    event,
+    toState,
+    timestamp: new Date().toISOString(),
+  });
   if (history.length > MAX_HISTORY) {
     history.splice(0, history.length - MAX_HISTORY);
   }

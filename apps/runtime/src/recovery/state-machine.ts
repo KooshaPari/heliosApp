@@ -18,8 +18,52 @@ import {
   type StageChangeListener,
 } from "./state-machine-types.js";
 
+<<<<<<< HEAD
 export { RecoveryStage } from "./state-machine-types.js";
 export type { RecoveryState, StageChangeListener } from "./state-machine-types.js";
+=======
+export enum RecoveryStage {
+  CRASHED = "CRASHED",
+  DETECTING = "DETECTING",
+  INVENTORYING = "INVENTORYING",
+  RESTORING = "RESTORING",
+  RECONCILING = "RECONCILING",
+  LIVE = "LIVE",
+  DETECTION_FAILED = "DETECTION_FAILED",
+  INVENTORY_FAILED = "INVENTORY_FAILED",
+  RESTORATION_FAILED = "RESTORATION_FAILED",
+  RECONCILIATION_FAILED = "RECONCILIATION_FAILED",
+}
+
+export interface RecoveryState {
+  stage: RecoveryStage;
+  timestamp: number;
+  attemptCount: number;
+  lastError?: string;
+}
+
+type StageChangeListener = (
+  previous: RecoveryStage,
+  current: RecoveryStage,
+  attemptCount: number
+) => void;
+
+const LEGAL_TRANSITIONS: Record<RecoveryStage, RecoveryStage[]> = {
+  [RecoveryStage.CRASHED]: [RecoveryStage.DETECTING],
+  [RecoveryStage.DETECTING]: [RecoveryStage.INVENTORYING, RecoveryStage.DETECTION_FAILED],
+  [RecoveryStage.INVENTORYING]: [RecoveryStage.RESTORING, RecoveryStage.INVENTORY_FAILED],
+  [RecoveryStage.RESTORING]: [RecoveryStage.RECONCILING, RecoveryStage.RESTORATION_FAILED],
+  [RecoveryStage.RECONCILING]: [RecoveryStage.LIVE, RecoveryStage.RECONCILIATION_FAILED],
+  [RecoveryStage.LIVE]: [], // Terminal state
+  [RecoveryStage.DETECTION_FAILED]: [RecoveryStage.DETECTING], // Retry
+  [RecoveryStage.INVENTORY_FAILED]: [RecoveryStage.INVENTORYING],
+  [RecoveryStage.RESTORATION_FAILED]: [RecoveryStage.RESTORING],
+  [RecoveryStage.RECONCILIATION_FAILED]: [RecoveryStage.RECONCILING],
+};
+
+const MAX_RETRIES_PER_STAGE = 3;
+const STAGE_TIMEOUT_MS = 30000; // 30 seconds
+>>>>>>> origin/main
 
 export class RecoveryStateMachine {
   private currentStage: RecoveryStage = RecoveryStage.CRASHED;
@@ -117,7 +161,18 @@ export class RecoveryStateMachine {
     if (state) {
       this.currentStage = state.stage;
       this.currentState = state;
+<<<<<<< HEAD
       return;
+=======
+    } catch {
+      // No persisted state - start fresh
+      this.currentStage = RecoveryStage.CRASHED;
+      this.currentState = {
+        stage: RecoveryStage.CRASHED,
+        timestamp: Date.now(),
+        attemptCount: 0,
+      };
+>>>>>>> origin/main
     }
 
     this.currentStage = RecoveryStage.CRASHED;
@@ -128,6 +183,35 @@ export class RecoveryStateMachine {
     };
   }
 
+<<<<<<< HEAD
+=======
+  private async persistState(): Promise<void> {
+    try {
+      await fs.mkdir(path.join(this.recoveryDataDir, "recovery"), {
+        recursive: true,
+      });
+
+      const statePath = path.join(this.recoveryDataDir, "recovery", "recovery-state.json");
+      const tempPath = `${statePath}.tmp`;
+
+      // Atomic write
+      await fs.writeFile(tempPath, JSON.stringify(this.currentState, null, 2));
+      await fs.rename(tempPath, statePath);
+    } catch (err) {
+      console.error("Failed to persist recovery state:", err);
+    }
+  }
+
+  private async deleteState(): Promise<void> {
+    try {
+      const statePath = path.join(this.recoveryDataDir, "recovery", "recovery-state.json");
+      await fs.unlink(statePath);
+    } catch {
+      // File doesn't exist - ok
+    }
+  }
+
+>>>>>>> origin/main
   private notifyListeners(from: RecoveryStage, to: RecoveryStage, attemptCount: number): void {
     for (const listener of this.listeners) {
       listener(from, to, attemptCount);
@@ -142,7 +226,7 @@ export class RecoveryStateMachine {
         const failureStage = getFailureStateFor(this.currentStage);
         if (failureStage) {
           this.currentState.lastError = `Stage timeout after ${STAGE_TIMEOUT_MS}ms`;
-          this.transition(failureStage).catch((err) => {
+          this.transition(failureStage).catch(err => {
             console.error("Failed to transition to failure state:", err);
           });
         }
@@ -156,4 +240,23 @@ export class RecoveryStateMachine {
       this.stageTimeoutId = undefined;
     }
   }
+<<<<<<< HEAD
+=======
+
+  private getFailureStateFor(stage: RecoveryStage): RecoveryStage | undefined {
+    const failureMap: Record<RecoveryStage, RecoveryStage | undefined> = {
+      [RecoveryStage.DETECTING]: RecoveryStage.DETECTION_FAILED,
+      [RecoveryStage.INVENTORYING]: RecoveryStage.INVENTORY_FAILED,
+      [RecoveryStage.RESTORING]: RecoveryStage.RESTORATION_FAILED,
+      [RecoveryStage.RECONCILING]: RecoveryStage.RECONCILIATION_FAILED,
+      [RecoveryStage.CRASHED]: RecoveryStage.CRASHED,
+      [RecoveryStage.LIVE]: undefined,
+      [RecoveryStage.DETECTION_FAILED]: undefined,
+      [RecoveryStage.INVENTORY_FAILED]: undefined,
+      [RecoveryStage.RESTORATION_FAILED]: undefined,
+      [RecoveryStage.RECONCILIATION_FAILED]: undefined,
+    };
+    return failureMap[stage];
+  }
+>>>>>>> origin/main
 }

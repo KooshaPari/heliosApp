@@ -1,5 +1,5 @@
-import { AuditEvent } from './event';
-import { SessionSnapshot } from './snapshot';
+import type { AuditEvent } from "./event";
+import type { SessionSnapshot } from "./snapshot";
 
 /**
  * Redaction rule for sensitive data masking.
@@ -40,23 +40,23 @@ export class AuditExporter {
     this.redactionRules = [
       {
         pattern: /api[_-]?key[=:]\s*['"]?[a-zA-Z0-9-]+['"]?/gi,
-        replacement: 'API_KEY_REDACTED',
-        description: 'API keys',
+        replacement: "API_KEY_REDACTED",
+        description: "API keys",
       },
       {
         pattern: /password[=:]\s*['"]?[^'"\s]+['"]?/gi,
-        replacement: 'PASSWORD_REDACTED',
-        description: 'Passwords',
+        replacement: "PASSWORD_REDACTED",
+        description: "Passwords",
       },
       {
         pattern: /token[=:]\s*['"]?[a-zA-Z0-9-]+['"]?/gi,
-        replacement: 'TOKEN_REDACTED',
-        description: 'Tokens',
+        replacement: "TOKEN_REDACTED",
+        description: "Tokens",
       },
       {
         pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
-        replacement: 'EMAIL_REDACTED',
-        description: 'Email addresses',
+        replacement: "EMAIL_REDACTED",
+        description: "Email addresses",
       },
     ];
   }
@@ -70,17 +70,17 @@ export class AuditExporter {
    */
   exportWorkspace(workspaceId: string, events: AuditEvent[]): ExportBundle {
     if (this.redactionRules.length === 0) {
-      throw new Error('Redaction rules required before export is permitted.');
+      throw new Error("Redaction rules required before export is permitted.");
     }
 
-    const redactedEvents = events.map((event) => this.redactEvent(event));
+    const redactedEvents = events.map(event => this.redactEvent(event));
 
     return {
       metadata: {
         workspaceId,
         exportTimestamp: new Date().toISOString(),
         eventCount: events.length,
-        redactionRulesApplied: this.redactionRules.map((r) => r.description),
+        redactionRulesApplied: this.redactionRules.map(r => r.description),
       },
       events: redactedEvents,
     };
@@ -97,21 +97,21 @@ export class AuditExporter {
   exportSession(
     sessionId: string,
     events: AuditEvent[],
-    snapshots?: SessionSnapshot[],
+    snapshots?: SessionSnapshot[]
   ): ExportBundle {
     if (this.redactionRules.length === 0) {
-      throw new Error('Redaction rules required before export is permitted.');
+      throw new Error("Redaction rules required before export is permitted.");
     }
 
-    const redactedEvents = events.map((event) => this.redactEvent(event));
-    const redactedSnapshots = snapshots?.map((snap) => this.redactSnapshot(snap));
+    const redactedEvents = events.map(event => this.redactEvent(event));
+    const redactedSnapshots = snapshots?.map(snap => this.redactSnapshot(snap));
 
     return {
       metadata: {
-        workspaceId: events[0]?.workspaceId || 'unknown',
+        workspaceId: events[0]?.workspaceId || "unknown",
         exportTimestamp: new Date().toISOString(),
         eventCount: events.length,
-        redactionRulesApplied: this.redactionRules.map((r) => r.description),
+        redactionRulesApplied: this.redactionRules.map(r => r.description),
       },
       events: redactedEvents,
       snapshots: redactedSnapshots,
@@ -142,8 +142,8 @@ export class AuditExporter {
     redacted.metadata = Object.fromEntries(
       Object.entries(redacted.metadata || {}).map(([key, value]) => [
         key,
-        typeof value === 'string' ? this.redactString(value) : value,
-      ]),
+        typeof value === "string" ? this.redactString(value) : value,
+      ])
     );
 
     return redacted;

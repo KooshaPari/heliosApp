@@ -19,7 +19,7 @@ export function createTerminal(): string {
 }
 
 export function closeTerminal(id: string): void {
-  setTerminals((prev: TerminalInfo[]) => prev.filter((t) => t.id !== id));
+  setTerminals((prev: TerminalInfo[]) => prev.filter(t => t.id !== id));
   const remaining = terminals();
   if (activeTerminalId() === id) {
     setActiveTerminalId(remaining.length > 0 ? remaining[remaining.length - 1].id : null);

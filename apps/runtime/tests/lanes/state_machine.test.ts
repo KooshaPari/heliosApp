@@ -44,7 +44,7 @@ describe("Lane State Machine", () => {
 
     it("throws for new + provision_complete", () => {
       expect(() => transition("new", "provision_complete", "lane-1")).toThrow(
-        InvalidLaneTransitionError,
+        InvalidLaneTransitionError
       );
     });
 
@@ -67,7 +67,7 @@ describe("Lane State Machine", () => {
       const order: number[] = [];
 
       const p1 = withLaneLock("lane-a", async () => {
-        await new Promise((r) => setTimeout(r, 50));
+        await new Promise(r => setTimeout(r, 50));
         order.push(1);
       });
 
@@ -83,7 +83,7 @@ describe("Lane State Machine", () => {
       const order: string[] = [];
 
       const p1 = withLaneLock("lane-x", async () => {
-        await new Promise((r) => setTimeout(r, 50));
+        await new Promise(r => setTimeout(r, 50));
         order.push("x");
       });
 

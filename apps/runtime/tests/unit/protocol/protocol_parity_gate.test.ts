@@ -6,7 +6,7 @@ const gate = "tools/gates/protocol-parity.mjs";
 function runGate(fixtureRoot: string): { ok: boolean; output: string } {
   try {
     const stdout = execFileSync("node", [gate, "--fixture-root", fixtureRoot], {
-      encoding: "utf8"
+      encoding: "utf8",
     });
     return { ok: true, output: stdout };
   } catch (error) {

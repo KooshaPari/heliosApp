@@ -4,7 +4,11 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { RioMetrics, type MetricsSnapshot, type MetricsSummary } from "../../../../src/renderer/rio/metrics.js";
+import {
+  RioMetrics,
+  type MetricsSnapshot,
+  type MetricsSummary,
+} from "../../../../src/renderer/rio/metrics.js";
 
 describe("RioMetrics — schema identity with ghostty", () => {
   let metrics: RioMetrics;
