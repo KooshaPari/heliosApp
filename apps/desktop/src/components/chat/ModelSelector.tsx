@@ -61,6 +61,7 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
   return (
     <div style={{ position: "relative" }}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen())}
         style={{
           background: "none",
