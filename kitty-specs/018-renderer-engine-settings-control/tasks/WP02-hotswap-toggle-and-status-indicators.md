@@ -1,12 +1,12 @@
 ---
 work_package_id: WP02
 title: Hot-Swap Toggle, Status Indicators, and Tests
-lane: "planned"
+lane: "done"
 dependencies:
 - WP01
-base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00+00:00'
+base_branch: 018-renderer-engine-settings-control-WP01
+base_commit: 8663047c1750d2b636db06c3c9aa41be2ba72918
+created_at: '2026-03-01T13:36:36.576698+00:00'
 subtasks:
 - T007
 - T008
@@ -15,10 +15,10 @@ subtasks:
 - T011
 phase: Phase 2 - Interaction and Hardening
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: "claude-haiku"
+shell_pid: "84824"
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -45,7 +45,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/018-renderer-engine-settings-control/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/018-renderer-engine-settings-control/spec.md`
 - Settings panel: `apps/desktop/src/settings/` (WP01)
@@ -213,3 +213,5 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-03-01T13:36:36Z – claude-haiku – shell_pid=84824 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T13:37:52Z – claude-haiku – shell_pid=84824 – lane=done – Implemented

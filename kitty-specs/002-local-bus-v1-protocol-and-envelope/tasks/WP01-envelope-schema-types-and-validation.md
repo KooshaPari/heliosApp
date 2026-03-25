@@ -1,7 +1,7 @@
 ---
 work_package_id: WP01
 title: Envelope Schema, Types, and Validation
-lane: "for_review"
+lane: "done"
 dependencies: []
 base_branch: main
 base_commit: d89dc4f54d56d98a0ded78813aeffc0ed68d1dd0
@@ -11,6 +11,8 @@ phase: Phase 1 - Foundation
 assignee: ''
 agent: "wp01-bus-agent"
 shell_pid: "22522"
+reviewed_by: "Koosha Paridehpour"
+review_status: "approved"
 ---
 
 # Work Package Prompt: WP01 - Envelope Schema, Types, and Validation
@@ -31,7 +33,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/002-local-bus-v1-protocol-and-envelope/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/002-local-bus-v1-protocol-and-envelope/spec.md`
 - Existing protocol code:
@@ -205,3 +207,5 @@ Implementation command:
 - 2026-02-27 – system – lane=planned – Prompt generated.
 - 2026-02-27T11:19:15Z – wp01-bus-agent – shell_pid=22522 – lane=doing – Assigned agent via workflow command
 - 2026-02-27T11:24:07Z – wp01-bus-agent – shell_pid=22522 – lane=for_review – Ready for review: Envelope schema types, error taxonomy, creation helpers, strict validation, JSON schema, and 54 unit tests
+- 2026-03-01T13:20:10Z – wp01-bus-agent – shell_pid=22522 – lane=done – Review passed: auto-approved
+- 2026-03-01T13:23:19Z – wp01-bus-agent – shell_pid=22522 – lane=done – Merged to main

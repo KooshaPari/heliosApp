@@ -3,6 +3,7 @@ import { defineConfig } from "vitepress";
 export default defineConfig({
   title: "Documentation",
   description: "Unified documentation",
+  base: process.env.GITHUB_ACTIONS ? "/heliosApp/" : "/",
   srcDir: ".",
   lastUpdated: true,
   cleanUrls: true,
@@ -12,14 +13,26 @@ export default defineConfig({
       { text: "Home", link: "/" },
       { text: "Wiki", link: "/wiki/" },
       { text: "Development Guide", link: "/development/" },
+      { text: "DevOps", link: "/wiki/devops-cicd" },
       { text: "Document Index", link: "/index/" },
       { text: "API", link: "/api/" },
       { text: "Roadmap", link: "/roadmap/" },
     ],
     sidebar: {
-      "/wiki/": [{ text: "Wiki", items: [{ text: "Overview", link: "/wiki/" }] }],
+      "/wiki/": [
+        {
+          text: "Wiki",
+          items: [
+            { text: "Overview", link: "/wiki/" },
+            { text: "DevOps and CI/CD", link: "/wiki/devops-cicd" },
+          ],
+        },
+      ],
       "/development/": [
-        { text: "Development Guide", items: [{ text: "Overview", link: "/development/" }] },
+        {
+          text: "Development Guide",
+          items: [{ text: "Overview", link: "/development/" }],
+        },
       ],
       "/index/": [
         {
@@ -43,6 +56,7 @@ export default defineConfig({
           items: [
             { text: "Wiki", link: "/wiki/" },
             { text: "Development Guide", link: "/development/" },
+            { text: "DevOps", link: "/wiki/devops-cicd" },
             { text: "Document Index", link: "/index/" },
             { text: "API", link: "/api/" },
             { text: "Roadmap", link: "/roadmap/" },

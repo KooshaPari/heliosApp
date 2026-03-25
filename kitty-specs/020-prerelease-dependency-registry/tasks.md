@@ -24,11 +24,11 @@
 **Estimated Prompt Size**: ~310 lines
 
 ### Included Subtasks
-- [ ] T001 Create `deps-registry.json` manifest schema with fields: name, current pin, channel (alpha/beta/RC/stable), upstream source URL, known-good version history array, and last-updated timestamp
-- [ ] T002 Populate initial manifest entries for tracked prerelease dependencies (ElectroBun, ghostty, zellij) with current pins and channels
-- [ ] T003 Implement `scripts/deps-status.ts` command that reads the manifest, queries upstream registries for latest versions, and reports tabular output with current pin, latest available, channel, and days since last update
-- [ ] T004 Create `deps-changelog.json` structured log schema and append utility for recording all upgrade attempts with timestamp, versions, gate results, and actor
-- [ ] T005 [P] Add Vitest unit tests for manifest parsing, status reporting, and changelog append logic
+- [x] T001 Create `deps-registry.json` manifest schema with fields: name, current pin, channel (alpha/beta/RC/stable), upstream source URL, known-good version history array, and last-updated timestamp
+- [x] T002 Populate initial manifest entries for tracked prerelease dependencies (ElectroBun, ghostty, zellij) with current pins and channels
+- [x] T003 Implement `scripts/deps-status.ts` command that reads the manifest, queries upstream registries for latest versions, and reports tabular output with current pin, latest available, channel, and days since last update
+- [x] T004 Create `deps-changelog.json` structured log schema and append utility for recording all upgrade attempts with timestamp, versions, gate results, and actor
+- [x] T005 [P] Add Vitest unit tests for manifest parsing, status reporting, and changelog append logic
 
 ### Implementation Notes
 - The manifest must be version-controlled alongside the codebase (FR-004 / NFR-004).
@@ -55,12 +55,12 @@
 **Estimated Prompt Size**: ~350 lines
 
 ### Included Subtasks
-- [ ] T006 Implement `scripts/deps-rollback.ts` with atomic lockfile reversion to last known-good pin for a named dependency, including lockfile regeneration
-- [ ] T007 Implement `scripts/deps-canary.ts` canary process: create isolated branch, apply upgrade, run full quality gate suite (spec 021), auto-merge on pass or open issue on fail
-- [ ] T008 Wire canary results into `deps-changelog.json` with pass/fail status, gate details, and branch references
-- [ ] T009 [P] Add integration tests for rollback: simulate breaking upgrade, execute rollback, verify lockfile state and passing gates
-- [ ] T010 [P] Add integration tests for canary: simulate available upgrade, run canary, verify branch creation, gate execution, and merge/issue outcome
-- [ ] T011 Validate NFR compliance: rollback < 60s including lockfile regen, status < 10s warm cache, canary does not block unrelated CI
+- [x] T006 Implement `scripts/deps-rollback.ts` with atomic lockfile reversion to last known-good pin for a named dependency, including lockfile regeneration
+- [x] T007 Implement `scripts/deps-canary.ts` canary process: create isolated branch, apply upgrade, run full quality gate suite (spec 021), auto-merge on pass or open issue on fail
+- [x] T008 Wire canary results into `deps-changelog.json` with pass/fail status, gate details, and branch references
+- [x] T009 [P] Add integration tests for rollback: simulate breaking upgrade, execute rollback, verify lockfile state and passing gates
+- [x] T010 [P] Add integration tests for canary: simulate available upgrade, run canary, verify branch creation, gate execution, and merge/issue outcome
+- [x] T011 Validate NFR compliance: rollback < 60s including lockfile regen, status < 10s warm cache, canary does not block unrelated CI
 
 ### Implementation Notes
 - Rollback must be atomic: full reversion succeeds or no lockfile changes are persisted (FR-005).

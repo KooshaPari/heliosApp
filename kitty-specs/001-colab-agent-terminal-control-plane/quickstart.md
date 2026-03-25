@@ -1,25 +1,23 @@
-# Quickstart: Colab Agent Terminal Control Plane (Slice 1)
+# 001 Colab Agent Terminal Control Plane - Quickstart
 
-## Goal
+## WP08 Compliance Checks
 
-Validate the first end-to-end vertical slice for `codex` CLI orchestration with `cliproxyapi++` harness and native fallback.
+Run targeted WP08 suites:
 
-## Prerequisites
+```bash
+bun test apps/runtime/tests/unit/audit
+bun test apps/runtime/tests/unit/sessions/test_checkpoint_store.test.ts
+bun test apps/runtime/tests/integration/recovery
+```
 
-1. Bun installed and available in PATH.
-2. Codex CLI authenticated for native OpenAI path.
-3. `cliproxyapi++` harness installed and startable in local environment.
-4. Repository root: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp`.
+## Slice-2 Placeholder Verification
 
-## Scenario A: Canonical Harness Path
+- Checkpoint interface exists and is non-operational in slice-1:
+  - `apps/runtime/src/sessions/checkpoint_store.ts`
+- Audit durability interface exists and is non-operational in slice-1:
+  - `apps/runtime/src/audit/durable_store.ts`
 
-1. Start runtime services for `apps/runtime` and `apps/desktop`.
-2. Open control plane and create a workspace.
-3. Create lane from workspace.
-4. Ensure session using provider `codex` and preferred transport `cliproxy_harness`.
-5. Spawn terminal and run a simple command.
-6. Confirm all tabs (terminal, agent, session, chat, project) display same active lane/session context.
-7. Confirm lifecycle events include consistent `correlation_id` values.
+## Retention/Export Verification
 
 Expected result:
 - Session transport resolves to `cliproxy_harness`.
@@ -57,3 +55,18 @@ Expected result:
 5. Run protocol parity checks against formal assets (`specs/protocol/v1/methods.json`, `specs/protocol/v1/topics.json`) and verify no unmapped entries.
 
 Feature is ready for `/spec-kitty.tasks` when all scenarios and gates pass.
+
+## Formal Protocol Parity Verification (WP09)
+
+Run parity checks after any protocol contract/runtime/task update:
+
+```bash
+node tools/gates/protocol-parity.mjs
+bun test apps/runtime/tests/unit/protocol/protocol_parity_gate.test.ts
+```
+
+Valid annotations in `contracts/protocol-parity-matrix.json`:
+
+- `status: implemented` for shipped surfaces.
+- `status: deferred` with at least one `Txxx` task reference.
+- `status: extension` for explicit Helios deltas (for example `harness.status.changed`, `lane.attached`).

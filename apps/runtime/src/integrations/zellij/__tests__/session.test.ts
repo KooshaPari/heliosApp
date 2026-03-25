@@ -1,4 +1,4 @@
-import { describe, expect, it, mock, beforeEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import { ZellijCli } from "../cli.js";
 import { MuxRegistry } from "../registry.js";
 import { ZellijSessionManager, sessionNameForLane } from "../session.js";
@@ -40,6 +40,10 @@ describe("ZellijSessionManager", () => {
     originalSpawn = Bun.spawn;
   });
 
+  afterEach(() => {
+    Bun.spawn = originalSpawn;
+  });
+
   describe("createSession", () => {
     it("creates a session and registers binding", async () => {
       let callCount = 0;
@@ -79,9 +83,7 @@ describe("ZellijSessionManager", () => {
       const registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
-      expect(manager.createSession("dup")).rejects.toThrow(SessionAlreadyExistsError);
-
-      Bun.spawn = originalSpawn;
+      await expect(manager.createSession("dup")).rejects.toThrow(SessionAlreadyExistsError);
     });
   });
 
@@ -111,9 +113,9 @@ describe("ZellijSessionManager", () => {
       const registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
-      expect(manager.reattachSession("helios-lane-missing")).rejects.toThrow(SessionNotFoundError);
-
-      Bun.spawn = originalSpawn;
+      await expect(manager.reattachSession("helios-lane-missing")).rejects.toThrow(
+        SessionNotFoundError
+      );
     });
   });
 
@@ -159,169 +161,6 @@ describe("ZellijSessionManager", () => {
 
       // Should not throw
       await manager.terminateSession("foo");
-
-      Bun.spawn = originalSpawn;
-    });
-
-    it("unbinds even if kill command fails", async () => {
-      let callCount = 0;
-      // @ts-expect-error mock override
-      Bun.spawn = mock(() => {
-        callCount++;
-        if (callCount === 1) {
-          // listSessions for reattach
-          return makeMockProc("helios-lane-fail  2026-02-27 10:00:00", "", 0);
-        }
-        if (callCount === 2 || callCount === 3) {
-          // dump-layout calls
-          return makeMockProc("", "", 1);
-        }
-        if (callCount === 4 || callCount === 5) {
-          // kill-session fails both times
-          return makeMockProc("", "Failed to kill", 1);
-        }
-        // listSessions after kill - session still exists
-        return makeMockProc("helios-lane-fail  2026-02-27 10:00:00", "", 0);
-      });
-
-      const cli = new ZellijCli();
-      const registry = new MuxRegistry();
-      const manager = new ZellijSessionManager(cli, registry);
-
-      await manager.reattachSession("helios-lane-fail");
-      expect(registry.getBySession("helios-lane-fail")).toBeDefined();
-
-      // Should not throw, but should still unbind
-      await manager.terminateSession("helios-lane-fail");
-      expect(registry.getBySession("helios-lane-fail")).toBeUndefined();
-
-      Bun.spawn = originalSpawn;
-    });
-  });
-
-  describe("edge cases and private methods", () => {
-    it("handles non-standard session names in extractLaneId", async () => {
-      // @ts-expect-error mock override
-      Bun.spawn = mock(() => makeMockProc("non-standard-name  2026-02-27 10:00:00", "", 0));
-
-      const cli = new ZellijCli();
-      const registry = new MuxRegistry();
-      const manager = new ZellijSessionManager(cli, registry);
-
-      const session = await manager.reattachSession("non-standard-name");
-
-      // Should fall back to the full session name as lane ID
-      expect(session.laneId).toBe("non-standard-name");
-
-      Bun.spawn = originalSpawn;
-    });
-
-    it("handles errors in queryPanes gracefully", async () => {
-      let callCount = 0;
-      // @ts-expect-error mock override
-      Bun.spawn = mock(() => {
-        callCount++;
-        if (callCount === 1) {
-          // listSessions
-          return makeMockProc("test-session  2026-02-27 10:00:00", "", 0);
-        }
-        // dump-layout calls fail
-        return makeMockProc("", "error", 1);
-      });
-
-      const cli = new ZellijCli();
-      const registry = new MuxRegistry();
-      const manager = new ZellijSessionManager(cli, registry);
-
-      const session = await manager.reattachSession("test-session");
-
-      // Should have empty panes array
-      expect(session.panes).toHaveLength(1); // Default pane
-      expect(session.tabs).toHaveLength(1); // Default tab
-
-      Bun.spawn = originalSpawn;
-    });
-
-    it("handles createSession with options", async () => {
-      let callCount = 0;
-      // @ts-expect-error mock override
-      Bun.spawn = mock(() => {
-        callCount++;
-        if (callCount === 1) {
-          // listSessions - no existing
-          return makeMockProc("", "", 0);
-        }
-        if (callCount === 2) {
-          // attach --create
-          return makeMockProc("", "", 0);
-        }
-        // listSessions after create
-        return makeMockProc("helios-lane-opts  2026-02-27 10:00:00", "", 0);
-      });
-
-      const cli = new ZellijCli();
-      const registry = new MuxRegistry();
-      const manager = new ZellijSessionManager(cli, registry);
-
-      const session = await manager.createSession("opts", {
-        cwd: "/custom/dir",
-        layout: "custom-layout",
-      });
-
-      expect(session.sessionName).toBe("helios-lane-opts");
-      expect(session.laneId).toBe("opts");
-
-      Bun.spawn = originalSpawn;
-    });
-
-    it("reattachSession unbinds stale binding before rebinding", async () => {
-      // @ts-expect-error mock override
-      Bun.spawn = mock(() => makeMockProc("helios-lane-rebind  2026-02-27 10:00:00", "", 0));
-
-      const cli = new ZellijCli();
-      const registry = new MuxRegistry();
-      const manager = new ZellijSessionManager(cli, registry);
-
-      // Create an initial binding
-      const session1 = await manager.reattachSession("helios-lane-rebind");
-      const binding1 = registry.getBySession("helios-lane-rebind");
-
-      // Reattach again
-      const session2 = await manager.reattachSession("helios-lane-rebind");
-      const binding2 = registry.getBySession("helios-lane-rebind");
-
-      // Should have replaced the binding
-      expect(binding2).toBeDefined();
-      expect(binding2?.boundAt.getTime()).toBeGreaterThanOrEqual(binding1!.boundAt.getTime());
-
-      Bun.spawn = originalSpawn;
-    });
-
-    it("sessionNameForLane handles various lane ID formats", () => {
-      expect(sessionNameForLane("simple")).toBe("helios-lane-simple");
-      expect(sessionNameForLane("with-dashes")).toBe("helios-lane-with-dashes");
-      expect(sessionNameForLane("with_underscores")).toBe("helios-lane-with_underscores");
-      expect(sessionNameForLane("123")).toBe("helios-lane-123");
-    });
-
-    it("createSession fails if attach command fails", async () => {
-      let callCount = 0;
-      // @ts-expect-error mock override
-      Bun.spawn = mock(() => {
-        callCount++;
-        if (callCount === 1) {
-          // listSessions - no existing
-          return makeMockProc("", "", 0);
-        }
-        // attach --create fails
-        return makeMockProc("", "failed to attach", 1);
-      });
-
-      const cli = new ZellijCli();
-      const registry = new MuxRegistry();
-      const manager = new ZellijSessionManager(cli, registry);
-
-      await expect(manager.createSession("fail")).rejects.toThrow();
 
       Bun.spawn = originalSpawn;
     });

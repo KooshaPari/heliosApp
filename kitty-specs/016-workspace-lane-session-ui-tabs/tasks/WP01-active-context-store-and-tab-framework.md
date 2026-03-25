@@ -1,11 +1,11 @@
 ---
 work_package_id: WP01
 title: Active Context Store and Tab Surface Framework
-lane: "planned"
+lane: "done"
 dependencies: []
 base_branch: main
-base_commit: ""
-created_at: '2026-02-27T00:00:00+00:00'
+base_commit: d96fb53a83841cde41a446e6c69ba26e888cd207
+created_at: '2026-03-01T13:29:17.148173+00:00'
 subtasks:
 - T001
 - T002
@@ -14,10 +14,10 @@ subtasks:
 - T005
 phase: Phase 1 - Foundation
 assignee: ''
-agent: ""
-shell_pid: ""
-review_status: ""
-reviewed_by: ""
+agent: "claude-haiku"
+shell_pid: "53948"
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-27T00:00:00Z'
   lane: planned
@@ -43,7 +43,7 @@ Success criteria:
 
 ## Context & Constraints
 
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/016-workspace-lane-session-ui-tabs/plan.md`
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/016-workspace-lane-session-ui-tabs/spec.md`
 - Internal event bus: `apps/runtime/src/protocol/bus.ts` (spec 001)
@@ -219,3 +219,5 @@ Implementation command:
 ## Activity Log
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
+- 2026-03-01T13:29:17Z – claude-haiku – shell_pid=53948 – lane=doing – Assigned agent via workflow command
+- 2026-03-01T13:32:31Z – claude-haiku – shell_pid=53948 – lane=done – Implemented WP01

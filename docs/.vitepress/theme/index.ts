@@ -1,5 +1,5 @@
-import DefaultTheme from "vitepress/theme";
 import type { Theme } from "vitepress";
+import DefaultTheme from "vitepress/theme";
 import CategorySwitcher from "./components/CategorySwitcher.vue";
 import "./custom.css";
 

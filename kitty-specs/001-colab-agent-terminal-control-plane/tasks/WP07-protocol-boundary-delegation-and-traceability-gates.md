@@ -1,7 +1,7 @@
 ---
 work_package_id: WP07
 title: Protocol Boundary Delegation and Traceability Gates
-lane: "for_review"
+lane: "done"
 dependencies:
 - WP06
 base_branch: 001-colab-agent-terminal-control-plane-WP06
@@ -18,8 +18,8 @@ phase: Phase 4 - Boundary completeness
 assignee: ''
 agent: ''
 shell_pid: "25766"
-review_status: ''
-reviewed_by: ''
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-26T13:19:35Z'
   lane: planned
@@ -45,7 +45,7 @@ Success criteria:
 - Spec: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/001-colab-agent-terminal-control-plane/spec.md`
 - Plan: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/001-colab-agent-terminal-control-plane/plan.md`
 - Tasks: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/kitty-specs/001-colab-agent-terminal-control-plane/tasks.md`
-- Constitution: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/.kittify/memory/constitution.md`
+- Constitution: `docs/reference/constitution.md`
 
 Implementation command:
 - `spec-kitty implement WP07 --base WP06`
@@ -125,3 +125,4 @@ Implementation command:
 
 - 2026-02-26T13:19:35Z – system – lane=planned – Prompt created.
 - 2026-02-27T08:00:41Z – unknown – shell_pid=25766 – lane=for_review – Implemented with boundary adapter + coverage/traceability gates; ready for review.
+- 2026-03-01T13:23:01Z – unknown – shell_pid=25766 – lane=done – Merged to main

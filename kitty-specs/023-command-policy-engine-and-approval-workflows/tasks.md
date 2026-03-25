@@ -24,11 +24,11 @@
 **Estimated Prompt Size**: ~320 lines
 
 ### Included Subtasks
-- [ ] T001 Define `PolicyRule` type: pattern (glob/regex), classification (safe/needs-approval/blocked), scope (workspace ID), priority, and description
-- [ ] T002 Implement `PolicyRuleSet` with ordered evaluation, denylist-wins conflict resolution, and deny-by-default for unmatched commands
-- [ ] T003 Implement rule storage with in-memory hot cache and file-backed persistence for durability
-- [ ] T004 Implement hot-swap rule updates: policy changes take effect within 1 second without process restart (NFR-023-003)
-- [ ] T005 [P] Add unit tests for rule matching, classification, conflict resolution (denylist-wins), deny-by-default, and hot-swap update propagation
+- [x] T001 Define `PolicyRule` type: pattern (glob/regex), classification (safe/needs-approval/blocked), scope (workspace ID), priority, and description
+- [x] T002 Implement `PolicyRuleSet` with ordered evaluation, denylist-wins conflict resolution, and deny-by-default for unmatched commands
+- [x] T003 Implement rule storage with in-memory hot cache and file-backed persistence for durability
+- [x] T004 Implement hot-swap rule updates: policy changes take effect within 1 second without process restart (NFR-023-003)
+- [x] T005 [P] Add unit tests for rule matching, classification, conflict resolution (denylist-wins), deny-by-default, and hot-swap update propagation
 
 ### Implementation Notes
 - Deny-by-default is non-negotiable: unclassified commands must never execute.
@@ -55,11 +55,11 @@
 **Estimated Prompt Size**: ~340 lines
 
 ### Included Subtasks
-- [ ] T006 Implement `PolicyEvaluationEngine` that accepts command context (command text, workspace ID, agent ID, affected paths) and returns classification + matched rule
-- [ ] T007 Integrate policy evaluation into lane execution pipeline (spec 008) as a pre-execution hook
-- [ ] T008 Integrate policy evaluation into terminal command dispatch as a pre-execution hook
-- [ ] T009 Wire every evaluation result to the audit sink (spec 024) with PolicyEvaluationResult record
-- [ ] T010 [P] Add deny-by-default verification: 1000 randomized unclassified commands, all denied; benchmarked evaluation latency < 50ms p95
+- [x] T006 Implement `PolicyEvaluationEngine` that accepts command context (command text, workspace ID, agent ID, affected paths) and returns classification + matched rule
+- [x] T007 Integrate policy evaluation into lane execution pipeline (spec 008) as a pre-execution hook
+- [x] T008 Integrate policy evaluation into terminal command dispatch as a pre-execution hook
+- [x] T009 Wire every evaluation result to the audit sink (spec 024) with PolicyEvaluationResult record
+- [x] T010 [P] Add deny-by-default verification: 1000 randomized unclassified commands, all denied; benchmarked evaluation latency < 50ms p95
 
 ### Implementation Notes
 - The engine must be synchronous or have bounded async latency (< 50ms).
@@ -86,11 +86,11 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T011 Implement `ApprovalRequest` model: command text, affected paths, risk classification, agent rationale, status (pending/approved/denied/timed-out), timestamps
-- [ ] T012 Implement durable `ApprovalQueue` backed by SQLite: persist pending requests, survive restart, support concurrent requests from multiple lanes
-- [ ] T013 Implement approval actions: approve (with operator reason), deny (with reason), timeout (configurable, default action = deny)
-- [ ] T014 Implement approval queue UI panel in `apps/desktop/src/panels/approval-queue.ts` showing pending requests with context and approve/deny controls
-- [ ] T015 Wire approved commands to immediate execution (< 500ms from approval to execution)
+- [x] T011 Implement `ApprovalRequest` model: command text, affected paths, risk classification, agent rationale, status (pending/approved/denied/timed-out), timestamps
+- [x] T012 Implement durable `ApprovalQueue` backed by SQLite: persist pending requests, survive restart, support concurrent requests from multiple lanes
+- [x] T013 Implement approval actions: approve (with operator reason), deny (with reason), timeout (configurable, default action = deny)
+- [x] T014 Implement approval queue UI panel in `apps/desktop/src/panels/approval-queue.ts` showing pending requests with context and approve/deny controls
+- [x] T015 Wire approved commands to immediate execution (< 500ms from approval to execution)
 - [ ] T016 [P] Add chaos tests: simulated crash during pending approval, verify queue recovers with zero request loss
 - [ ] T017 [P] Add integration tests: full approval round-trip (request -> approve -> execute), denial flow, timeout flow, concurrent requests, audit trail completeness
 

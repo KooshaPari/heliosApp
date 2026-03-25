@@ -24,11 +24,11 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T001 Define `ProviderAdapter` typed interface with init, health, execute, terminate lifecycle methods in `apps/runtime/src/providers/adapter.ts`
-- [ ] T002 Implement provider registry with configuration validation, credential binding, and concurrency limits in `apps/runtime/src/providers/registry.ts`
-- [ ] T003 Implement normalized error taxonomy mapping all provider error types to common codes in `apps/runtime/src/providers/errors.ts`
-- [ ] T004 [P] Implement process-level isolation wrapper for provider execution contexts with lane-scoped failure boundaries
-- [ ] T005 [P] Add unit tests for adapter interface contracts, registry lifecycle, and error normalization in `apps/runtime/src/providers/__tests__/`
+- [x] T001 Define `ProviderAdapter` typed interface with init, health, execute, terminate lifecycle methods in `apps/runtime/src/providers/adapter.ts`
+- [x] T002 Implement provider registry with configuration validation, credential binding, and concurrency limits in `apps/runtime/src/providers/registry.ts`
+- [x] T003 Implement normalized error taxonomy mapping all provider error types to common codes in `apps/runtime/src/providers/errors.ts`
+- [x] T004 [P] Implement process-level isolation wrapper for provider execution contexts with lane-scoped failure boundaries
+- [x] T005 [P] Add unit tests for adapter interface contracts, registry lifecycle, and error normalization in `apps/runtime/src/providers/__tests__/`
 
 ### Implementation Notes
 - Keep adapter interface minimal and protocol-agnostic; ACP/MCP/A2A specifics belong in downstream WPs.
@@ -55,11 +55,11 @@
 **Estimated Prompt Size**: ~380 lines
 
 ### Included Subtasks
-- [ ] T006 Implement ACP client adapter implementing `ProviderAdapter` interface with run/cancel lifecycle in `apps/runtime/src/providers/acp-client.ts`
-- [ ] T007 Wire ACP task execution to local bus with correlation ID propagation and result capture
-- [ ] T008 Integrate policy gate pre-execute hook (spec 023) before ACP task dispatch
-- [ ] T009 [P] Implement ACP-specific health check with configurable interval and degraded/unavailable state transitions
-- [ ] T010 [P] Add integration tests for ACP lifecycle (init, execute, cancel, health, terminate) against mock ACP server in `apps/runtime/src/providers/__tests__/`
+- [x] T006 Implement ACP client adapter implementing `ProviderAdapter` interface with run/cancel lifecycle in `apps/runtime/src/providers/acp-client.ts`
+- [x] T007 Wire ACP task execution to local bus with correlation ID propagation and result capture
+- [x] T008 Integrate policy gate pre-execute hook (spec 023) before ACP task dispatch
+- [x] T009 [P] Implement ACP-specific health check with configurable interval and degraded/unavailable state transitions
+- [x] T010 [P] Add integration tests for ACP lifecycle (init, execute, cancel, health, terminate) against mock ACP server in `apps/runtime/src/providers/__tests__/`
 
 ### Implementation Notes
 - ACP client must propagate correlation IDs from originating bus request through to ACP response.
@@ -86,11 +86,11 @@
 **Estimated Prompt Size**: ~400 lines
 
 ### Included Subtasks
-- [ ] T011 Implement MCP bridge adapter implementing `ProviderAdapter` interface with tool discovery and schema registration in `apps/runtime/src/providers/mcp-bridge.ts`
-- [ ] T012 Implement sandboxed tool invocation with execution boundary enforcement and result capture
-- [ ] T013 Wire MCP tool results to local bus with correlation ID propagation
-- [ ] T014 Handle MCP server disconnection with retryable error normalization and reconnection strategy
-- [ ] T015 [P] Add integration tests for MCP tool lifecycle (connect, discover, invoke, disconnect, reconnect) against mock MCP server in `apps/runtime/src/providers/__tests__/`
+- [x] T011 Implement MCP bridge adapter implementing `ProviderAdapter` interface with tool discovery and schema registration in `apps/runtime/src/providers/mcp-bridge.ts`
+- [x] T012 Implement sandboxed tool invocation with execution boundary enforcement and result capture
+- [x] T013 Wire MCP tool results to local bus with correlation ID propagation
+- [x] T014 Handle MCP server disconnection with retryable error normalization and reconnection strategy
+- [x] T015 [P] Add integration tests for MCP tool lifecycle (connect, discover, invoke, disconnect, reconnect) against mock MCP server in `apps/runtime/src/providers/__tests__/`
 
 ### Implementation Notes
 - Tool schema registration must include input/output schemas for validation by downstream consumers.
@@ -117,11 +117,11 @@
 **Estimated Prompt Size**: ~450 lines
 
 ### Included Subtasks
-- [ ] T016 Implement A2A federation router stub with endpoint registration and delegation routing in `apps/runtime/src/providers/a2a-router.ts`
-- [ ] T017 Implement cross-provider health monitoring with configurable intervals, degraded/unavailable transitions, and bus status publication in `apps/runtime/src/providers/health.ts`
-- [ ] T018 Implement failover routing logic that reroutes traffic from degraded providers to healthy alternatives
-- [ ] T019 [P] Add chaos tests for provider crash isolation (SC-025-002): crash in lane A must produce zero effect on lane B
-- [ ] T020 [P] Add integration tests for A2A delegation, failover routing, credential rotation without restart (SC-025-005), and normalized error completeness (SC-025-004)
+- [x] T016 Implement A2A federation router stub with endpoint registration and delegation routing in `apps/runtime/src/providers/a2a-router.ts`
+- [x] T017 Implement cross-provider health monitoring with configurable intervals, degraded/unavailable transitions, and bus status publication in `apps/runtime/src/providers/health.ts`
+- [x] T018 Implement failover routing logic that reroutes traffic from degraded providers to healthy alternatives
+- [x] T019 [P] Add chaos tests for provider crash isolation (SC-025-002): crash in lane A must produce zero effect on lane B
+- [x] T020 [P] Add integration tests for A2A delegation, failover routing, credential rotation without restart (SC-025-005), and normalized error completeness (SC-025-004)
 
 ### Implementation Notes
 - A2A router is a stub in slice-1; full multi-endpoint failover is deferred to slice-2 but the interface must be designed for it.

@@ -1,0 +1,6 @@
+[allowlist]
+paths = [
+  '''__fixtures__/''',
+  '''__tests__/__fixtures__/''',
+  '''apps/runtime/src/secrets/__tests__/__fixtures__/known-secrets\.json''',
+]

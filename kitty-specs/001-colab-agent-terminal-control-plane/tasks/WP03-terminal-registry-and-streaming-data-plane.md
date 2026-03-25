@@ -1,7 +1,7 @@
 ---
 work_package_id: WP03
 title: Terminal Registry and Streaming Data Plane
-lane: "for_review"
+lane: "done"
 dependencies:
 - WP02
 base_branch: 001-colab-agent-terminal-control-plane-WP02
@@ -17,8 +17,8 @@ phase: Phase 2 - MVP Core Lifecycle
 assignee: ''
 agent: ''
 shell_pid: "94640"
-review_status: ''
-reviewed_by: ''
+review_status: "approved"
+reviewed_by: "Koosha Paridehpour"
 history:
 - timestamp: '2026-02-26T13:19:35Z'
   lane: planned
@@ -128,3 +128,4 @@ Implementation command:
 - 2026-02-26T13:19:35Z – system – lane=planned – Prompt created.
 - 2026-02-26T16:53:08Z – unknown – shell_pid=94640 – lane=for_review – Ready for review (forced lane move): terminal registry/streaming data plane implemented in worktree commit 3c15ddf.
 - 2026-02-27T07:48:11Z – unknown – shell_pid=94640 – lane=for_review – Restacked and smoke-validated; ready for review.
+- 2026-03-01T13:22:55Z – unknown – shell_pid=94640 – lane=done – Merged to main

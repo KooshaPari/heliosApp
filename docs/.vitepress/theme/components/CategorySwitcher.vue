@@ -12,8 +12,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
 import { useRoute, useRouter } from "vitepress";
+import { ref, watchEffect } from "vue";
 
 const route = useRoute();
 const router = useRouter();
