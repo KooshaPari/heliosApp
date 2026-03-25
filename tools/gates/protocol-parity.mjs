@@ -111,6 +111,12 @@ const formalMethods = readJson(
 	resolve(root, "specs/protocol/v1/methods.json"),
 ).methods;
 const matrix = readJson(
+<<<<<<< HEAD
+  resolve(root, "agileplus/001-colab-agent-terminal-control-plane/contracts/protocol-parity-matrix.json")
+);
+const contract = readJson(
+  resolve(root, "agileplus/001-colab-agent-terminal-control-plane/contracts/orchestration-envelope.schema.json")
+=======
 	resolve(
 		root,
 		"kitty-specs/001-colab-agent-terminal-control-plane/contracts/protocol-parity-matrix.json",
@@ -121,6 +127,7 @@ const contract = readJson(
 		root,
 		"kitty-specs/001-colab-agent-terminal-control-plane/contracts/orchestration-envelope.schema.json",
 	),
+>>>>>>> origin/main
 );
 
 const contractMethods = (contract.properties?.method?.enum ?? []).filter(
