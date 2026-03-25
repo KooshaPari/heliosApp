@@ -77,7 +77,7 @@ export function scanBypassDirectives(
 					scanFile(fullPath, file);
 				}
 			});
-		} catch (e) {
+		} catch  {
 			// Silently skip unreadable directories
 		}
 	}
