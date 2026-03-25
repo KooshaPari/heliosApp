@@ -71,7 +71,7 @@ export class KeyboardShortcuts {
       }
 
       this.buildReverseMap();
-    } catch (error) {
+    } catch  {
       // File not found or parse error, use defaults
       this.shortcuts = { ...DEFAULT_SHORTCUTS };
       this.buildReverseMap();

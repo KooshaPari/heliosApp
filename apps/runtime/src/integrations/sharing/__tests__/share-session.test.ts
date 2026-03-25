@@ -134,7 +134,7 @@ describe("Share Session Management", () => {
 
       try {
         await manager.create("terminal-123", "upterm", 60000, "corr-001");
-      } catch (e) {
+      } catch  {
         // Expected
       }
 
@@ -149,7 +149,7 @@ describe("Share Session Management", () => {
 
       try {
         await manager.create("terminal-123", "upterm", 60000, "corr-001");
-      } catch (e) {
+      } catch  {
         // Expected
       }
 

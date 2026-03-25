@@ -294,7 +294,7 @@ describe("Integration Tests (T015)", () => {
           "ws1",
           "key"
         );
-      } catch (_) {
+      } catch  {
         /* expected */
       }
 
