@@ -6,15 +6,11 @@
  */
 
 import { describe, it, expect, beforeEach } from "bun:test";
-import { ProviderRegistry } from '../registry';
-import { NormalizedProviderError, PROVIDER_ERROR_CODES } from '../errors';
-import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from '../adapter';
-import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from '../adapter';
-import { InMemoryLocalBus } from '../../protocol/bus';
-import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from '../adapter';
-import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from '../adapter';
-import { NormalizedProviderError } from '../errors';
-import { ProviderRegistry } from '../registry';
+import { ProviderRegistry } from "../registry.js";
+import { NormalizedProviderError, PROVIDER_ERROR_CODES } from "../errors.js";
+import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
+import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 
 /**
  * Mock provider for testing registry behavior.
@@ -37,7 +33,7 @@ class TestProvider implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExe
     };
   }
 
-  async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+  async execute(input: ACPExecuteInput, correlationId: string): Promise<ACPExecuteOutput> {
     if (!this.initialized) {
       throw new Error("Not initialized");
     }

@@ -1,6 +1,6 @@
 // T002 - In-memory lane registry with secondary indexes
 
-import type { LaneState } from './state_machine';
+import type { LaneState } from "./state_machine.js";
 
 export interface LaneRecord {
   laneId: string;
@@ -40,7 +40,7 @@ export class LaneRegistry {
   private readonly workspaceIndex = new Map<string, Set<string>>();
   private readonly capacityLimit: number;
 
-  constructor(capacityLimit = 50) {
+  constructor(capacityLimit: number = 50) {
     this.capacityLimit = capacityLimit;
   }
 
@@ -64,9 +64,7 @@ export class LaneRegistry {
 
   getByWorkspace(workspaceId: string): LaneRecord[] {
     const laneIds = this.workspaceIndex.get(workspaceId);
-    if (!laneIds) {
-      return [];
-    }
+    if (!laneIds) return [];
     return [...laneIds]
       .map(id => this.lanes.get(id))
       .filter((r): r is LaneRecord => r !== undefined)

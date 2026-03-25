@@ -1,9 +1,8 @@
 // FR-004, FR-010: SLO violation detection, rate-limited event emission, and periodic check loop.
 
-import type { SLODefinition, SLOViolationEvent, PercentileBucket } from './types';
-import type { MetricsRegistry } from './metrics';
-import { computePercentiles } from './percentiles';
-import type { PercentileBucket, SLODefinition, SLOViolationEvent } from './types';
+import type { SLODefinition, SLOViolationEvent, PercentileBucket } from "./types.js";
+import type { MetricsRegistry } from "./metrics.js";
+import { computePercentiles } from "./percentiles.js";
 
 // ---------------------------------------------------------------------------
 // Constitution SLO definitions (frozen for immutability)
@@ -82,41 +81,6 @@ export function checkSLO(slo: SLODefinition, bucket: PercentileBucket): SLOCheck
 
 /** Function signature for publishing events to the bus. */
 export type BusPublishFn = (topic: string, payload: unknown) => void | Promise<void>;
-
-/** Default SLOs used by diagnostics checks and tests. */
-export const SLO_DEFINITIONS: readonly SLODefinition[] = Object.freeze([
-  { metric: "input-to-echo", percentile: "p50", threshold: 30, unit: "ms" },
-  { metric: "input-to-echo", percentile: "p95", threshold: 80, unit: "ms" },
-  { metric: "tool-exec", percentile: "p95", threshold: 250, unit: "ms" },
-  { metric: "tool-exec", percentile: "p99", threshold: 500, unit: "ms" },
-  { metric: "bus-roundtrip", percentile: "p95", threshold: 20, unit: "ms" },
-  { metric: "memory", percentile: "p95", threshold: 500, unit: "MB" },
-  { metric: "fps", percentile: "p50", threshold: 60, unit: "fps" },
-]);
-
-export interface SLOCheckResult {
-  readonly passed: boolean;
-  readonly actual: number;
-}
-
-/** Return all configured SLOs for a metric name. */
-export function getSLOsForMetric(metric: string): SLODefinition[] {
-  return SLO_DEFINITIONS.filter(slo => slo.metric === metric);
-}
-
-/**
- * Evaluate a single SLO against percentile stats.
- * FPS is treated as a lower-bound objective, all others are upper-bound.
- */
-export function checkSLO(slo: SLODefinition, bucket: PercentileBucket): SLOCheckResult {
-  if (bucket.count === 0) {
-    return { passed: true, actual: 0 };
-  }
-
-  const actual = bucket[slo.percentile];
-  const passed = slo.unit === "fps" ? actual >= slo.threshold : actual <= slo.threshold;
-  return { passed, actual };
-}
 
 /**
  * Monitors registered metrics against SLO definitions, emitting rate-limited
@@ -201,8 +165,11 @@ export class SLOMonitor {
               console.error("[slo] Bus publish error:", err);
             });
           }
-        } catch (_err) {}
+        } catch (err) {
+          console.error("[slo] Bus publish error:", err);
+        }
       } else {
+        console.log("[slo] Violation:", event);
       }
     }
 
@@ -223,19 +190,18 @@ export class SLOMonitor {
    * Start periodic SLO checks.
    * Calling start() again clears the previous interval.
    */
-  start(intervalMs = 5000): void {
+  start(intervalMs: number = 5000): void {
     if (this.intervalHandle !== undefined) {
       clearInterval(this.intervalHandle);
     }
     this.running = true;
     this.intervalHandle = setInterval(() => {
-      if (!this.running) {
-        return;
-      }
+      if (!this.running) return;
       const t0 = performance.now();
       this.checkAll();
       const elapsed = performance.now() - t0;
       if (elapsed > 5) {
+        console.warn(`[slo] checkAll took ${elapsed.toFixed(2)}ms (> 5ms budget)`);
       }
     }, intervalMs);
   }

@@ -1,5 +1,5 @@
-import { InMemoryLocalBus } from '../../protocol/bus';
-import { MCPBridgeAdapter } from '../mcp-bridge';
+import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { MCPBridgeAdapter } from "../mcp-bridge.js";
 
 export const MCP_BRIDGE_CONFIG = {
   serverPath: "stdio",

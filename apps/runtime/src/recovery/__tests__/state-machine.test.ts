@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { RecoveryStateMachine, RecoveryStage, type RecoveryState } from '../state-machine';
-import { InMemoryLocalBus } from '../../protocol/bus';
+import { RecoveryStateMachine, RecoveryStage, type RecoveryState } from "../state-machine.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
@@ -8,13 +8,13 @@ import os from "os";
 describe("RecoveryStateMachine", () => {
   let stateMachine: RecoveryStateMachine;
   let tempDir: string;
-  let bus: LocalBus;
+  let bus: InMemoryLocalBus;
 
   beforeEach(async () => {
     vi.useFakeTimers();
     tempDir = path.join(os.tmpdir(), `state-machine-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
-    bus = new InMemoryLocalBus() as LocalBus;
+    bus = new InMemoryLocalBus();
     stateMachine = new RecoveryStateMachine(tempDir, bus);
     await stateMachine.initialize();
   });
@@ -33,7 +33,7 @@ describe("RecoveryStateMachine", () => {
     it("should progress through all stages in order", async () => {
       const stages: RecoveryStage[] = [];
 
-      stateMachine.onStageChange((_from, to) => {
+      stateMachine.onStageChange((from, to) => {
         stages.push(to);
       });
 
@@ -191,7 +191,7 @@ describe("RecoveryStateMachine", () => {
       await stateMachine.transition(RecoveryStage.DETECTING);
       const events = bus.getEvents();
       expect(events.length).toBeGreaterThan(0);
-      expect(events.at(0)?.topic).toBe("recovery.stage.changed");
+      expect(events[0].topic).toBe("recovery.stage.changed");
     });
 
     it("should include correct payload in stage change event", async () => {
@@ -216,7 +216,7 @@ describe("RecoveryStateMachine", () => {
 
   describe("listener notifications", () => {
     it("should notify listeners on stage change", async () => {
-      const changes: [string, string, number][] = [];
+      const changes: Array<[string, string, number]> = [];
 
       stateMachine.onStageChange((from, to, attemptCount) => {
         changes.push([from, to, attemptCount]);

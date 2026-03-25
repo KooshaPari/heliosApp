@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createRuntime } from '../../../runtime/src';
-import { bootDesktop } from '../../src';
+import { createRuntime } from "../../../runtime/src";
+import { bootDesktop } from "../../src";
 
 describe("EditorlessControlPlane", () => {
   test("wires lane/session/terminal actions and keeps context in sync", async () => {

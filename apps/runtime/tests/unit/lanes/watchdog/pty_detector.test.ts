@@ -1,9 +1,9 @@
 // Unit tests for PtyDetector
 
 import { describe, it, expect, beforeEach, mock } from "bun:test";
-import * as execModule from '../../../../src/integrations/exec';
-import { PtyDetector } from '../../../../src/lanes/watchdog/pty_detector';
-import type { TerminalRegistry } from '../../../../src/lanes/watchdog/pty_detector';
+import * as execModule from "../../../../src/integrations/exec.js";
+import { PtyDetector } from "../../../../src/lanes/watchdog/pty_detector.js";
+import type { TerminalRegistry } from "../../../../src/lanes/watchdog/pty_detector.js";
 
 describe("PtyDetector", () => {
   let detector: PtyDetector;

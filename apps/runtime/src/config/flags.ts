@@ -1,6 +1,6 @@
-import { SETTINGS_SCHEMA } from './schema';
-import type { SettingsManager } from './settings';
-import type { SettingChangeEvent } from './types';
+import type { SettingChangeEvent } from "./types.js";
+import type { SettingsManager } from "./settings.js";
+import { SETTINGS_SCHEMA } from "./schema.js";
 
 // FR-008: Feature flag definition
 /** Typed feature flag descriptor. */

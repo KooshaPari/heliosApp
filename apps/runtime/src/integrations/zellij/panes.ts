@@ -7,17 +7,16 @@
  * integration (spec 007) and dimension enforcement (FR-009-007).
  */
 
-import type { ZellijCli } from './cli';
-import { PaneTooSmallError, PtyBindingError, ZellijCliError } from './errors';
-import type { TopologyTracker } from './topology';
+import type { ZellijCli } from "./cli.js";
+import type { TopologyTracker } from "./topology.js";
 import type {
+  PaneRecord,
+  PaneDimensions,
   CreatePaneOptions,
   MinPaneDimensions,
-  PaneDimensions,
-  PaneRecord,
   PtyManagerInterface,
-} from './types';
-import { PaneTooSmallError, PaneNotFoundError, PtyBindingError, ZellijCliError } from './errors';
+} from "./types.js";
+import { PaneTooSmallError, PaneNotFoundError, PtyBindingError, ZellijCliError } from "./errors.js";
 
 /** Default minimum pane dimensions. */
 const DEFAULT_MIN_DIMENSIONS: MinPaneDimensions = {
@@ -276,7 +275,7 @@ export class ZellijPaneManager {
 
     if (result.exitCode !== 0) {
       // If pane doesn't exist, treat as success (idempotent)
-      if (!(result.stderr.includes("no pane") || result.stderr.includes("not found"))) {
+      if (!result.stderr.includes("no pane") && !result.stderr.includes("not found")) {
         throw new ZellijCliError(
           `close-pane --session ${sessionName}`,
           result.exitCode,
@@ -300,13 +299,13 @@ export class ZellijPaneManager {
         result.cols = Math.max(1, result.cols - amount);
         break;
       case "right":
-        result.cols += amount;
+        result.cols = result.cols + amount;
         break;
       case "up":
         result.rows = Math.max(1, result.rows - amount);
         break;
       case "down":
-        result.rows += amount;
+        result.rows = result.rows + amount;
         break;
     }
     return result;

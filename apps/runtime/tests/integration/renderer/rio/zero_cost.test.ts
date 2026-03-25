@@ -6,10 +6,10 @@
  * Verifies that disabled rio has absolutely zero runtime impact.
  */
 
-import { beforeEach, describe, expect, it } from "bun:test";
-import { RendererRegistry } from '../../../../src/renderer/registry';
-import { FeatureFlagDisabledError, RioBackend } from '../../../../src/renderer/rio/backend';
-import { isRioEnabled, registerRio } from '../../../../src/renderer/rio/index';
+import { describe, it, expect, beforeEach } from "bun:test";
+import { RendererRegistry } from "../../../../src/renderer/registry.js";
+import { registerRio, isRioEnabled } from "../../../../src/renderer/rio/index.js";
+import { RioBackend, FeatureFlagDisabledError } from "../../../../src/renderer/rio/backend.js";
 
 // ---------------------------------------------------------------------------
 // Zero-cost: flag off means no registration

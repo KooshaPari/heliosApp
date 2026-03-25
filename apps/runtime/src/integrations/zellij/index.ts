@@ -1,9 +1,9 @@
-export { ZellijCli } from './cli';
-export { ZellijSessionManager, sessionNameForLane } from './session';
-export { MuxRegistry } from './registry';
-export { ZellijPaneManager } from './panes';
-export { ZellijTabManager } from './tabs';
-export { TopologyTracker } from './topology';
+export { ZellijCli } from "./cli.js";
+export { ZellijSessionManager, sessionNameForLane } from "./session.js";
+export { MuxRegistry } from "./registry.js";
+export { ZellijPaneManager } from "./panes.js";
+export { ZellijTabManager } from "./tabs.js";
+export { TopologyTracker } from "./topology.js";
 export {
   MuxEventEmitter,
   MuxEventType,
@@ -22,8 +22,8 @@ export {
   type TabCreatedEvent,
   type TabClosedEvent,
   type TabSwitchedEvent,
-} from './events';
-export { reconcile, type ReconciliationResult } from './reconciliation';
+} from "./events.js";
+export { reconcile, type ReconciliationResult } from "./reconciliation.js";
 export type {
   ZellijSession,
   SessionOptions,
@@ -40,7 +40,7 @@ export type {
   TabTopology,
   LayoutTopology,
   PtyManagerInterface,
-} from './types';
+} from "./types.js";
 export {
   ZellijNotFoundError,
   ZellijVersionError,
@@ -53,4 +53,4 @@ export {
   PaneNotFoundError,
   TabNotFoundError,
   PtyBindingError,
-} from './errors';
+} from "./errors.js";

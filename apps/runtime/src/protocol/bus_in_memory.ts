@@ -1,7 +1,7 @@
-import { ProtocolValidationError } from './types';
-import type { LocalBusEnvelope } from './types';
-import { handleInMemoryRequest } from './bus_in_memory_request';
-import { validateEnvelope } from './validator';
+import { ProtocolValidationError } from "./types.js";
+import type { LocalBusEnvelope } from "./types.js";
+import { handleInMemoryRequest } from "./bus_in_memory_request.js";
+import { validateEnvelope } from "./validator.js";
 
 type LocalBusEnvelopeWithSequence = LocalBusEnvelope & { sequence?: number };
 

@@ -4,7 +4,7 @@
  * Manages ordered subscriber lists per topic with deterministic delivery.
  */
 
-import type { EventEnvelope } from './types';
+import type { EventEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -105,14 +105,10 @@ export class TopicRegistry {
 
     let removed = false;
     return () => {
-      if (removed) {
-        return; // idempotent unsubscribe
-      }
+      if (removed) return; // idempotent unsubscribe
       removed = true;
       const current = this.subs.get(topic);
-      if (!current) {
-        return;
-      }
+      if (!current) return;
       const idx = current.indexOf(entry);
       if (idx !== -1) {
         current.splice(idx, 1);

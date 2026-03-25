@@ -9,25 +9,24 @@ import { describe, expect, it, mock, beforeEach } from "bun:test";
 import {
   ZellijSessionManager,
   sessionNameForLane,
-} from '../../../../src/integrations/zellij/session';
-import { MuxRegistry } from '../../../../src/integrations/zellij/registry';
-import { TopologyTracker } from '../../../../src/integrations/zellij/topology';
-import { ZellijPaneManager } from '../../../../src/integrations/zellij/panes';
-import { ZellijTabManager } from '../../../../src/integrations/zellij/tabs';
+} from "../../../../src/integrations/zellij/session.js";
+import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
+import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
+import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
+import { ZellijTabManager } from "../../../../src/integrations/zellij/tabs.js";
 import {
-  type EventBus,
-  type MuxEvent,
   MuxEventEmitter,
   MuxEventType,
-} from '../../../../src/integrations/zellij/events';
-import { ZellijPaneManager } from '../../../../src/integrations/zellij/panes';
-import { reconcile } from '../../../../src/integrations/zellij/reconciliation';
-import type { ZellijCli } from '../../../../src/integrations/zellij/cli';
+  type EventBus,
+  type MuxEvent,
+} from "../../../../src/integrations/zellij/events.js";
+import { reconcile } from "../../../../src/integrations/zellij/reconciliation.js";
+import type { ZellijCli } from "../../../../src/integrations/zellij/cli.js";
 import type {
   CliResult,
   ZellijSession,
   PtyManagerInterface,
-} from '../../../../src/integrations/zellij/types';
+} from "../../../../src/integrations/zellij/types.js";
 
 // ---------------------------------------------------------------------------
 // Fake CLI that tracks sessions in memory

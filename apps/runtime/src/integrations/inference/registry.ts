@@ -1,4 +1,4 @@
-import type { InferenceEngine } from './engine';
+import type { InferenceEngine } from "./engine";
 
 export class EngineRegistry {
   private engines: Map<string, InferenceEngine> = new Map();

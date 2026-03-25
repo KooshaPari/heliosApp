@@ -4,23 +4,23 @@
  * FR-012-008, SC-012-004.
  */
 
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach } from "bun:test";
+import {
+  isRioEnabled,
+  registerRio,
+  handleRioToggle,
+  RioToggleQueue,
+  type RioFeatureFlagConfig,
+} from "../../../../src/renderer/rio/index.js";
+import { RendererRegistry } from "../../../../src/renderer/registry.js";
+import { RioBackend } from "../../../../src/renderer/rio/backend.js";
 import type {
-  RenderSurface,
   RendererAdapter,
   RendererConfig,
-  RendererState,
-} from '../../../../src/renderer/adapter';
-import type { RendererCapabilities } from '../../../../src/renderer/capabilities';
-import { RendererRegistry } from '../../../../src/renderer/registry';
-import { RioBackend } from '../../../../src/renderer/rio/backend';
-import type {
-  RendererAdapter,
-  RendererConfig,
   RenderSurface,
   RendererState,
-} from '../../../../src/renderer/adapter';
-import type { RendererCapabilities } from '../../../../src/renderer/capabilities';
+} from "../../../../src/renderer/adapter.js";
+import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
 
 // ---------------------------------------------------------------------------
 // Mock ghostty

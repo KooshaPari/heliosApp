@@ -5,7 +5,7 @@
  * event emitter that publishes to an event bus without blocking callers.
  */
 
-import type { PaneDimensions } from './types';
+import type { PaneDimensions } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Event type constants

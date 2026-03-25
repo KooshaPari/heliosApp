@@ -122,7 +122,7 @@ describe("ContextPropagator", () => {
   describe("Propagation Cancellation", () => {
     it("should cancel previous propagation on new context", async () => {
       const slowTab = mockTabs[0];
-      let _callCount = 0;
+      let callCount = 0;
 
       slowTab.onContextChange = async () => {
         callCount++;
@@ -142,7 +142,7 @@ describe("ContextPropagator", () => {
       };
 
       // Start first propagation
-      const _promise1 = propagator.propagateContext(context1);
+      const promise1 = propagator.propagateContext(context1);
 
       // Immediately start second propagation (should cancel first)
       await new Promise(resolve => setTimeout(resolve, 50));

@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import {
   CheckpointManager,
   type WatchdogCheckpoint,
-} from '../../../../src/lanes/watchdog/checkpoint';
+} from "../../../../src/lanes/watchdog/checkpoint.js";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";

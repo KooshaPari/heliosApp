@@ -9,7 +9,7 @@ export interface SettingsLockOptions {
 }
 
 export class SettingsLock {
-  private isLocked = false;
+  private isLocked: boolean = false;
   private options: SettingsLockOptions;
   private lockTimeoutId?: NodeJS.Timeout;
   private lockedElements: Set<HTMLElement> = new Set();
@@ -22,9 +22,7 @@ export class SettingsLock {
   }
 
   lock(settingsContainer: HTMLElement): void {
-    if (this.isLocked) {
-      return;
-    }
+    if (this.isLocked) return;
 
     this.isLocked = true;
     this.applyLock(settingsContainer);
@@ -32,9 +30,7 @@ export class SettingsLock {
   }
 
   unlock(settingsContainer: HTMLElement): void {
-    if (!this.isLocked) {
-      return;
-    }
+    if (!this.isLocked) return;
 
     this.isLocked = false;
     this.removeLock(settingsContainer);

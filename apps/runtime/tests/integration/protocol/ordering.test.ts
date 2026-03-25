@@ -7,10 +7,10 @@
  */
 
 import { describe, expect, it, beforeEach } from "bun:test";
-import { createBus } from '../../../src/protocol/bus';
-import type { LocalBus } from '../../../src/protocol/bus';
-import { createCommand, createEvent, createResponse } from '../../../src/protocol/envelope';
-import type { LocalBusEnvelope } from '../../../src/protocol/types';
+import { createBus } from "../../../src/protocol/bus.js";
+import type { LocalBus } from "../../../src/protocol/bus.js";
+import { createCommand, createEvent, createResponse } from "../../../src/protocol/envelope.js";
+import type { LocalBusEnvelope } from "../../../src/protocol/types.js";
 
 describe("Event ordering — per-topic monotonic sequences", () => {
   let bus: LocalBus;
@@ -103,7 +103,7 @@ describe("Event ordering — per-topic monotonic sequences", () => {
     }
     await Promise.all(promises);
 
-    for (const [_topic, seqs] of topicEvents) {
+    for (const [topic, seqs] of topicEvents) {
       expect(seqs.length).toBe(100);
       expect(seqs[0]).toBe(1);
       for (let i = 1; i < seqs.length; i++) {

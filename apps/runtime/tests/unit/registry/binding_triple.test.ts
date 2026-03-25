@@ -4,7 +4,8 @@ import {
   type BindingTriple,
   createBinding,
   validateBindingTriple,
-} from '../../../src/registry/binding_triple';
+  type RegistryQueryInterface,
+} from "../../../src/registry/binding_triple.js";
 
 /**
  * Mock registry query interface for testing.

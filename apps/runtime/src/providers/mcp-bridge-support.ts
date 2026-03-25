@@ -1,12 +1,12 @@
-import type { LocalBus } from '../protocol/bus';
+import type { LocalBus } from "../protocol/bus.js";
 import type {
   MCPConfig,
   ProviderHealthStatus,
-} from './adapter';
+} from "./adapter.js";
 import {
   NormalizedProviderError,
   normalizeError,
-} from './errors';
+} from "./errors.js";
 
 /**
  * MCP server connection state.

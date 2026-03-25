@@ -9,9 +9,9 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import { OutputBuffer } from '../../../src/pty/buffers';
-import { InMemoryBusPublisher } from '../../../src/pty/events';
-import type { PtyEventCorrelation } from '../../../src/pty/events';
+import { OutputBuffer } from "../../../src/pty/buffers.js";
+import { InMemoryBusPublisher } from "../../../src/pty/events.js";
+import type { PtyEventCorrelation } from "../../../src/pty/events.js";
 
 function makeCorrelation(): PtyEventCorrelation {
   return {
@@ -30,17 +30,17 @@ describe("Buffer stress test — 50MB into 4MB buffer", () => {
 
     try {
       const bus = new InMemoryBusPublisher();
-      const capacity = 4 * 1024 * 1024; // 4MB
+      const CAPACITY = 4 * 1024 * 1024; // 4MB
       const ob = new OutputBuffer(bus, makeCorrelation(), {
-        capacityBytes: capacity,
+        capacityBytes: CAPACITY,
         overflowDebounceMs: 0, // allow all overflow events for testing
       });
 
-      const totalData = 50 * 1024 * 1024; // 50MB
-      const chunkSize = 64 * 1024; // 64KB chunks
-      const chunk = new Uint8Array(chunkSize);
+      const TOTAL_DATA = 50 * 1024 * 1024; // 50MB
+      const CHUNK_SIZE = 64 * 1024; // 64KB chunks
+      const chunk = new Uint8Array(CHUNK_SIZE);
       // Fill chunk with recognizable pattern.
-      for (let i = 0; i < chunkSize; i++) {
+      for (let i = 0; i < CHUNK_SIZE; i++) {
         chunk[i] = i & 0xff;
       }
 
@@ -51,13 +51,13 @@ describe("Buffer stress test — 50MB into 4MB buffer", () => {
       let lastResponsivenessCheck = startTime;
       let maxTimeBetweenChecks = 0;
 
-      for (let offset = 0; offset < totalData; offset += chunkSize) {
+      for (let offset = 0; offset < TOTAL_DATA; offset += CHUNK_SIZE) {
         const result = ob.write(chunk);
         totalWritten += result.written;
         totalDropped += result.dropped;
 
         // Verify capacity invariant on every write.
-        expect(ob.available).toBeLessThanOrEqual(capacity);
+        expect(ob.available).toBeLessThanOrEqual(CAPACITY);
 
         // Track event loop responsiveness.
         const now = performance.now();
@@ -78,19 +78,19 @@ describe("Buffer stress test — 50MB into 4MB buffer", () => {
       // ── Assertions ──────────────────────────────────────────────
 
       // 1. Total written + dropped = total data.
-      expect(totalWritten + totalDropped).toBe(totalData);
+      expect(totalWritten + totalDropped).toBe(TOTAL_DATA);
 
       // 2. Drops were counted (buffer is 4MB, wrote 50MB with periodic drain).
       expect(totalDropped).toBeGreaterThan(0);
 
       // 3. Buffer never exceeded capacity.
-      expect(ob.available).toBeLessThanOrEqual(capacity);
+      expect(ob.available).toBeLessThanOrEqual(CAPACITY);
 
       // 4. Stats match.
       const stats = ob.getStats();
       expect(stats.totalWritten).toBe(totalWritten);
       expect(stats.totalDropped).toBe(totalDropped);
-      expect(stats.capacity).toBe(capacity);
+      expect(stats.capacity).toBe(CAPACITY);
 
       // 5. Overflow events were emitted.
       const overflowEvts = bus.events.filter(e => e.topic === "pty.buffer.overflow");
@@ -118,26 +118,26 @@ describe("Buffer stress test — 50MB into 4MB buffer", () => {
 
     try {
       const bus = new InMemoryBusPublisher();
-      const capacity = 4 * 1024 * 1024;
+      const CAPACITY = 4 * 1024 * 1024;
       const ob = new OutputBuffer(bus, makeCorrelation(), {
-        capacityBytes: capacity,
+        capacityBytes: CAPACITY,
         overflowDebounceMs: 0,
       });
 
-      const chunkSize = 128 * 1024;
-      const chunk = new Uint8Array(chunkSize);
-      const iterations = 500; // ~62.5MB
+      const CHUNK_SIZE = 128 * 1024;
+      const chunk = new Uint8Array(CHUNK_SIZE);
+      const ITERATIONS = 500; // ~62.5MB
 
-      for (let i = 0; i < iterations; i++) {
+      for (let i = 0; i < ITERATIONS; i++) {
         ob.write(chunk);
-        expect(ob.available).toBeLessThanOrEqual(capacity);
+        expect(ob.available).toBeLessThanOrEqual(CAPACITY);
       }
 
       const stats = ob.getStats();
-      const totalData = chunkSize * iterations;
+      const totalData = CHUNK_SIZE * ITERATIONS;
       expect(stats.totalWritten + stats.totalDropped).toBe(totalData);
       // After first fill, almost everything should be dropped.
-      expect(stats.totalDropped).toBeGreaterThan(totalData - capacity - chunkSize);
+      expect(stats.totalDropped).toBeGreaterThan(totalData - CAPACITY - CHUNK_SIZE);
       expect(stats.overflowEvents).toBeGreaterThan(0);
 
       // Backpressure should be active.

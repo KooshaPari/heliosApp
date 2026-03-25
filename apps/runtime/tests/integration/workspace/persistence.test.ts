@@ -7,9 +7,9 @@ import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { mkdtemp, rm, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { createJsonStore, JsonWorkspaceStore } from '../../../src/workspace/store';
-import { createSnapshot } from '../../../src/workspace/snapshot';
-import type { Workspace } from '../../../src/workspace/types';
+import { createJsonStore, JsonWorkspaceStore } from "../../../src/workspace/store.js";
+import { createSnapshot } from "../../../src/workspace/snapshot.js";
+import type { Workspace } from "../../../src/workspace/types.js";
 
 function makeWorkspace(overrides: Partial<Workspace> = {}): Workspace {
   return {

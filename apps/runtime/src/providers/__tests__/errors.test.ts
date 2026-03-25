@@ -8,11 +8,11 @@
 import { describe, it, expect } from "bun:test";
 import {
   NormalizedProviderError,
-  PROVIDER_ERROR_CODES,
-  getErrorMessage,
-  isRetryable,
   normalizeError,
-} from '../errors';
+  isRetryable,
+  getErrorMessage,
+  PROVIDER_ERROR_CODES,
+} from "../errors.js";
 
 describe("NormalizedProviderError", () => {
   it("should create error with required fields", () => {

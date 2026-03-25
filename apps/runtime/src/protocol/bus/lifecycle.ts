@@ -1,4 +1,4 @@
-import type { LocalBusEnvelope } from '../types';
+import type { LocalBusEnvelope } from "../types.js";
 
 // ---------------------------------------------------------------------------
 // Lifecycle Sequences and Topic Sets

@@ -1,4 +1,4 @@
-import { RecoveryStage } from './state-machine-types';
+import { RecoveryStage } from "./state-machine-types.js";
 
 export const LEGAL_TRANSITIONS: Record<RecoveryStage, RecoveryStage[]> = {
   [RecoveryStage.CRASHED]: [RecoveryStage.DETECTING],

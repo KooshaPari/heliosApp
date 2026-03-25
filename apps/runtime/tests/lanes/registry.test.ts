@@ -4,8 +4,8 @@ import {
   DuplicateLaneError,
   LaneNotFoundError,
   LaneCapacityExceededError,
-} from '../../src/lanes/registry';
-import type { LaneRecord } from '../../src/lanes/registry';
+} from "../../src/lanes/registry.js";
+import type { LaneRecord } from "../../src/lanes/registry.js";
 
 function makeRecord(overrides: Partial<LaneRecord> = {}): LaneRecord {
   const now = new Date().toISOString();
@@ -30,7 +30,7 @@ describe("LaneRegistry", () => {
     reg.register(rec);
     const got = reg.get("lane-1");
     expect(got).toBeDefined();
-    expect(got?.laneId).toBe("lane-1");
+    expect(got!.laneId).toBe("lane-1");
   });
 
   test("duplicate lane throws", () => {
@@ -59,7 +59,7 @@ describe("LaneRegistry", () => {
     const reg = new LaneRegistry();
     reg.register(makeRecord({ laneId: "l-upd", state: "new" }));
     reg.update("l-upd", { state: "provisioning" });
-    expect(reg.get("l-upd")?.state).toBe("provisioning");
+    expect(reg.get("l-upd")!.state).toBe("provisioning");
   });
 
   test("update non-existent throws", () => {
@@ -101,7 +101,7 @@ describe("LaneRegistry", () => {
     reg.register(makeRecord({ laneId: "closed-1", state: "closed" }));
     const active = reg.getActive();
     expect(active.length).toBe(1);
-    expect(active[0]?.laneId).toBe("active-1");
+    expect(active[0]!.laneId).toBe("active-1");
   });
 
   test("capacity limit enforced", () => {
@@ -127,6 +127,6 @@ describe("LaneRegistry", () => {
     reg.register(rec);
     const got = reg.get("ref-test")!;
     got.state = "closed";
-    expect(reg.get("ref-test")?.state).toBe("new"); // original unchanged
+    expect(reg.get("ref-test")!.state).toBe("new"); // original unchanged
   });
 });

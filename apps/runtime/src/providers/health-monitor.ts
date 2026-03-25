@@ -8,8 +8,8 @@
  * FR-025-010: Failover routing based on health state.
  */
 
-import type { LocalBus } from '../protocol/bus';
-import type { ProviderHealthStatus } from './adapter';
+import type { LocalBus } from "../protocol/bus.js";
+import type { ProviderHealthStatus } from "./adapter.js";
 
 export class HealthMonitoringCoordinator {
   private providerHealthMap = new Map<string, ProviderHealthStatus>();

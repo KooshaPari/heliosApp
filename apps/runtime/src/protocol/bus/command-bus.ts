@@ -1,15 +1,15 @@
 // CommandBusImpl — extracted from emitter.ts for static analysis compliance.
 
-import type { LocalBusEnvelope } from '../types';
+import type { LocalBusEnvelope } from "../types.js";
 import type {
   LocalBus,
   CommandBusOptions,
   CommandEnvelope,
   EventEnvelope,
   ResponseEnvelope,
-} from './types';
-import type { MethodHandler } from '../methods';
-import { isCommandEnvelope, isEventEnvelope } from './validation';
+} from "./types.js";
+import type { MethodHandler } from "../methods.js";
+import { isCommandEnvelope, isEventEnvelope } from "./validation.js";
 
 // ---------------------------------------------------------------------------
 // Helpers

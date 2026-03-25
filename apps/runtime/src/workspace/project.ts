@@ -1,6 +1,6 @@
 // T006, T007, T008 — Project binding, stale detection, and git clone delegation
 
-import type { Workspace, ProjectBinding } from './types';
+import type { Workspace, ProjectBinding } from "./types.js";
 import { existsSync, realpathSync, accessSync, constants } from "node:fs";
 import { isAbsolute } from "node:path";
 
@@ -128,9 +128,7 @@ export async function detectStaleProjects(workspace: Workspace): Promise<Workspa
 
   const changed = updatedProjects.some((p, i) => p.status !== workspace.projects[i]!.status);
 
-  if (!changed) {
-    return workspace;
-  }
+  if (!changed) return workspace;
 
   return {
     ...workspace,

@@ -40,9 +40,7 @@ export class RendererSettings {
   }
 
   private render(): void {
-    if (!this.container) {
-      return;
-    }
+    if (!this.container) return;
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);

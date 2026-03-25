@@ -7,7 +7,7 @@ import {
   SessionNotFoundError,
   SessionAlreadyExistsError,
   DuplicateBindingError,
-} from '../errors';
+} from "../errors.js";
 
 /**
  * Unit tests for custom error classes.

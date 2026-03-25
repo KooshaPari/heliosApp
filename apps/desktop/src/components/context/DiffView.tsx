@@ -1,4 +1,4 @@
-import { type Component, For, Show } from "solid-js";
+import { type Component, For, Show, createSignal } from "solid-js";
 
 type DiffLine = {
   type: "add" | "remove" | "context";
@@ -15,12 +15,8 @@ type DiffViewProps = {
 
 export const DiffView: Component<DiffViewProps> = props => {
   const lineColor = (type: string) => {
-    if (type === "add") {
-      return { bg: "rgba(166,227,161,0.1)", color: "#a6e3a1" };
-    }
-    if (type === "remove") {
-      return { bg: "rgba(243,139,168,0.1)", color: "#f38ba8" };
-    }
+    if (type === "add") return { bg: "rgba(166,227,161,0.1)", color: "#a6e3a1" };
+    if (type === "remove") return { bg: "rgba(243,139,168,0.1)", color: "#f38ba8" };
     return { bg: "transparent", color: "#a6adc8" };
   };
 

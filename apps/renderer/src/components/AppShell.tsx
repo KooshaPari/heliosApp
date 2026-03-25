@@ -1,8 +1,8 @@
 import type { Component } from "solid-js";
 import { Show, createSignal } from "solid-js";
+import { Sidebar } from "./sidebar/Sidebar";
+import { StatusBar } from "./common/StatusBar";
 import { getAppState } from "../stores/app.store";
-import { StatusBar } from './common/StatusBar';
-import { Sidebar } from './sidebar/Sidebar';
 
 const TERMINAL_MIN_HEIGHT = 80;
 const TERMINAL_DEFAULT_HEIGHT = 220;

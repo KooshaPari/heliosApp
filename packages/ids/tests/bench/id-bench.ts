@@ -77,6 +77,9 @@ results.push({
 	ops_per_sec: throughputOps,
 });
 
+// Output structured JSON
+console.log(JSON.stringify(results, null, 2));
+
 // Assert SLOs
 const genResult = results[0];
 const valResult = results[1];

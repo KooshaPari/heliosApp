@@ -14,9 +14,7 @@ export interface HardwareCapabilities {
 let cached: HardwareCapabilities | null = null;
 
 export async function detectHardware(): Promise<HardwareCapabilities> {
-  if (cached) {
-    return cached;
-  }
+  if (cached) return cached;
 
   const platform = process.platform;
   const arch = process.arch;
@@ -24,7 +22,7 @@ export async function detectHardware(): Promise<HardwareCapabilities> {
 
   let hasNvidiaGpu = false;
   let gpuName: string | undefined;
-  let gpuMemoryMb: number | undefined;
+  let gpuMemoryMB: number | undefined;
 
   try {
     const proc = Bun.spawn(
@@ -40,7 +38,7 @@ export async function detectHardware(): Promise<HardwareCapabilities> {
       const [name, memStr] = output.trim().split(", ");
       hasNvidiaGpu = true;
       gpuName = name;
-      gpuMemoryMb = Number.parseInt(memStr, 10);
+      gpuMemoryMB = Number.parseInt(memStr, 10);
     }
   } catch {
     // nvidia-smi not available
@@ -52,7 +50,7 @@ export async function detectHardware(): Promise<HardwareCapabilities> {
     hasAppleSilicon,
     hasNvidiaGpu,
     gpuName,
-    gpuMemoryMB: gpuMemoryMb,
+    gpuMemoryMB,
     cpuCores: cpus().length,
     ramMB: Math.round(totalmem() / (1024 * 1024)),
   };

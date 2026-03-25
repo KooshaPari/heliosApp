@@ -1,7 +1,7 @@
 import type { AuditEvent } from "./event";
 import { AuditRingBuffer } from "./ring-buffer";
 import type { AuditFilter } from "./ring-buffer";
-import type { LocalBusEnvelope } from '../protocol/types';
+import type { LocalBusEnvelope } from "../protocol/types.js";
 import {
   type AuditOutcome,
   type AuditRecord,
@@ -18,7 +18,7 @@ import {
   inferType,
   getRecordPayload,
   isSensitiveKey,
-} from './sink-helpers';
+} from "./sink-helpers.js";
 
 export type {
   AuditOutcome,
@@ -27,7 +27,7 @@ export type {
   RetentionPolicyConfig,
   AuditBundle,
   AuditSinkMetrics,
-} from './sink-helpers';
+} from "./sink-helpers.js";
 
 /**
  * Storage backend interface for persisting audit events.
@@ -189,7 +189,7 @@ export class DefaultAuditSink implements AuditSink {
           await this.storage.persist(eventsToPersist);
           this.buffer = [];
           break;
-        } catch (_err) {
+        } catch (err) {
           this.metrics.persistenceFailures++;
           this.metrics.retryCount++;
           retries++;
@@ -223,7 +223,7 @@ export class DefaultAuditSink implements AuditSink {
         await this.storage.persist(eventsToPersist);
         this.overflowQueue = [];
         break;
-      } catch (_err) {
+      } catch (err) {
         this.metrics.sqliteWriteFailures!++;
         this.metrics.sqliteRetryCount!++;
         retries++;

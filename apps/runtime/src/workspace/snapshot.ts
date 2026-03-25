@@ -5,7 +5,7 @@
 import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
-import type { Workspace } from './types';
+import type { Workspace } from "./types.js";
 
 const SNAPSHOT_FILE = "workspaces.snapshot.json";
 const PRIMARY_FILE = "workspaces.json";
@@ -114,14 +114,10 @@ export async function recoverFromSnapshot(dataDir: string): Promise<Workspace[] 
     return null;
   }
 
-  if (!isValidEnvelope(parsed)) {
-    return null;
-  }
+  if (!isValidEnvelope(parsed)) return null;
 
   const expected = computeChecksum(parsed.workspaces);
-  if (parsed._checksum !== expected) {
-    return null;
-  }
+  if (parsed._checksum !== expected) return null;
 
   return parsed.workspaces;
 }

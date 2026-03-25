@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
-import type { LocalBus } from '../protocol/bus';
-import type { LocalBusEnvelope } from '../protocol/types';
+import type { LocalBus } from "../protocol/bus.js";
+import type { LocalBusEnvelope } from "../protocol/types.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -79,9 +79,7 @@ export class AuditSink {
    */
   async ingest(envelope: LocalBusEnvelope): Promise<AuditRecord | null> {
     const topic = envelope.topic ?? "";
-    if (!this.watchedTopics.has(topic)) {
-      return null;
-    }
+    if (!this.watchedTopics.has(topic)) return null;
 
     const correlationId: string =
       (envelope.payload?.correlationId as string | undefined) ?? randomBytes(8).toString("hex");

@@ -28,4 +28,4 @@ export {
   isCommandEnvelope,
   isEventEnvelope,
   hasTopLevelDataField,
-} from './bus/index';
+} from "./bus/index.js";

@@ -7,10 +7,10 @@
  * @see FR-010-009, SC-010-002
  */
 
-import type { RendererAdapter } from './adapter';
-import type { TerminalContext } from './hot_swap';
-import type { RendererEventBus } from './index';
-import type { SwitchBuffer } from './stream_binding';
+import type { RendererAdapter } from "./adapter.js";
+import type { SwitchBuffer } from "./stream_binding.js";
+import type { RendererEventBus } from "./index.js";
+import type { TerminalContext } from "./hot_swap.js";
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -90,7 +90,7 @@ export async function executeRollback(
     }
 
     // ===== Phase 3: Re-attach original renderer =====
-    for (const [ptyId, _context] of terminals) {
+    for (const [ptyId, context] of terminals) {
       try {
         // In real implementation, would restore full context:
         // - scrollback history

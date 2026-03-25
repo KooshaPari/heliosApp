@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { SafeMode, CrashLoopDetector, type SafeModeConfig } from '../safe-mode';
-import { InMemoryLocalBus } from '../../protocol/bus';
-import { CrashLoopDetector, SafeMode, type SafeModeConfig } from '../safe-mode';
+import { SafeMode, CrashLoopDetector, type SafeModeConfig } from "../safe-mode.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { promises as fs } from "fs";
+import path from "path";
+import os from "os";
 
 describe("CrashLoopDetector", () => {
   let detector: CrashLoopDetector;

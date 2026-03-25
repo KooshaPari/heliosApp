@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it } from "bun:test";
-import { InMemoryBusPublisher, PtyManager } from '../index';
+import { describe, expect, it, afterEach } from "bun:test";
+import { PtyManager, InMemoryBusPublisher } from "../index.js";
 
 describe("PtyManager", () => {
   const pidsToCleanup: number[] = [];

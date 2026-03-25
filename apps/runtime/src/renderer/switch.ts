@@ -5,10 +5,10 @@
  * start new -> rebind streams. On failure the old renderer is restored.
  */
 
-import type { RenderSurface, RendererAdapter, RendererConfig } from './adapter';
-import type { RendererEventBus } from './index';
-import type { RendererRegistry } from './registry';
-import type { RendererStateMachine } from './state_machine';
+import type { RendererAdapter, RenderSurface, RendererConfig } from "./adapter.js";
+import type { RendererRegistry } from "./registry.js";
+import type { RendererStateMachine } from "./state_machine.js";
+import type { RendererEventBus } from "./index.js";
 
 // ---------------------------------------------------------------------------
 // Errors

@@ -22,7 +22,7 @@ export interface SwitchStatusProps {
 export class SwitchStatus {
   private container: HTMLElement | null = null;
   private props: SwitchStatusProps = { isActive: false };
-  private startTime = 0;
+  private startTime: number = 0;
   private updateInterval?: NodeJS.Timeout;
 
   mount(container: HTMLElement): void {
@@ -58,17 +58,13 @@ export class SwitchStatus {
   }
 
   private render(): void {
-    if (!this.container) {
-      return;
-    }
+    if (!this.container) return;
 
     while (this.container.firstChild) {
       this.container.removeChild(this.container.firstChild);
     }
 
-    if (!this.props.isActive) {
-      return;
-    }
+    if (!this.props.isActive) return;
 
     const status = this.createStatusElement();
     this.container.appendChild(status);

@@ -127,7 +127,7 @@ export async function withLaneLock<T>(laneId: string, fn: () => Promise<T>): Pro
   try {
     return await fn();
   } finally {
-    resolve?.();
+    resolve!();
     // Clean up if this is the last in chain
     if (laneLocks.get(laneId) === next) {
       laneLocks.delete(laneId);

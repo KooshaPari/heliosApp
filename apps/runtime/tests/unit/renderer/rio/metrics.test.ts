@@ -8,7 +8,7 @@ import {
   RioMetrics,
   type MetricsSnapshot,
   type MetricsSummary,
-} from '../../../../src/renderer/rio/metrics';
+} from "../../../../src/renderer/rio/metrics.js";
 
 describe("RioMetrics — schema identity with ghostty", () => {
   let metrics: RioMetrics;

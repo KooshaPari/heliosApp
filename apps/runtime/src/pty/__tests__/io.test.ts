@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { InMemoryBusPublisher } from '../events';
-import { InvalidStateError, writeInput } from '../io';
-import type { ProcessMap } from '../io';
-import type { PtyRecord } from '../registry';
+import { writeInput, InvalidStateError } from "../io.js";
+import type { ProcessMap } from "../io.js";
+import type { PtyRecord } from "../registry.js";
+import { InMemoryBusPublisher } from "../events.js";
 
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   return {
@@ -116,6 +116,6 @@ describe("writeInput", () => {
 
     expect(errorCalled).toBe(true);
     expect(bus.events).toHaveLength(1);
-    expect(bus.events[0]?.topic).toBe("pty.error");
+    expect(bus.events[0]!.topic).toBe("pty.error");
   });
 });

@@ -8,13 +8,14 @@ import { mkdtempSync, mkdirSync, rmdirSync, symlinkSync, realpathSync } from "no
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-  bindGitProject,
   bindLocalProject,
+  bindGitProject,
+  unbindProject,
   detectStaleProjects,
   gitClone,
-} from '../../../src/workspace/project';
-import { createWorkspace } from '../../../src/workspace/workspace';
-import type { Workspace } from '../../../src/workspace/types';
+} from "../../../src/workspace/project.js";
+import { createWorkspace } from "../../../src/workspace/workspace.js";
+import type { Workspace } from "../../../src/workspace/types.js";
 
 let tempDir: string;
 let ws: Workspace;
@@ -66,7 +67,7 @@ describe("bindLocalProject", () => {
     symlinkSync(realDir, linkPath);
 
     const updated = bindLocalProject(ws, linkPath);
-    expect(updated.projects[0]?.rootPath).toBe(realpathSync(realDir));
+    expect(updated.projects[0]!.rootPath).toBe(realpathSync(realDir));
   });
 
   test("path with spaces works", () => {
@@ -88,7 +89,7 @@ describe("bindLocalProject", () => {
 describe("unbindProject", () => {
   test("removes existing binding", () => {
     const bound = bindLocalProject(ws, tempDir);
-    const projectId = bound.projects[0]?.id;
+    const projectId = bound.projects[0]!.id;
     const unbound = unbindProject(bound, projectId);
     expect(unbound.projects).toHaveLength(0);
   });

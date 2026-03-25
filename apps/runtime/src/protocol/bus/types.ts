@@ -1,5 +1,5 @@
-import type { LocalBusEnvelope } from '../types';
-import type { MethodHandler } from '../methods';
+import type { LocalBusEnvelope } from "../types.js";
+import type { MethodHandler } from "../methods.js";
 
 // ---------------------------------------------------------------------------
 // LocalBus Interface

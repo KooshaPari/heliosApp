@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { compareCapabilities } from '../capabilities';
-import type { RendererCapabilities } from '../capabilities';
+import { compareCapabilities } from "../capabilities.js";
+import type { RendererCapabilities } from "../capabilities.js";
 
 function baseCaps(): RendererCapabilities {
   return {

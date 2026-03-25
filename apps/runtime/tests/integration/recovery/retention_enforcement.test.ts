@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { InMemoryAuditSink } from '../../../src/audit/sink';
+import { InMemoryAuditSink } from "../../../src/audit/sink";
 
 test("retention hook keeps exempt deletion-proof topic", async () => {
   const sink = new InMemoryAuditSink({ retention_days: 30 });

@@ -1,10 +1,10 @@
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, expect, it, beforeEach } from "bun:test";
 import {
-  DuplicatePtyError,
-  type PtyRecord,
   PtyRegistry,
+  DuplicatePtyError,
   RegistryCapacityError,
-} from '../registry';
+  type PtyRecord,
+} from "../registry.js";
 
 function makeRecord(overrides: Partial<PtyRecord> = {}): PtyRecord {
   const now = Date.now();

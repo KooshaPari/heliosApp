@@ -4,7 +4,7 @@ import {
   type RegistryQueryInterface,
   type TerminalBinding,
   type ValidationResult,
-} from './binding_triple_types';
+} from "./binding_triple_types.js";
 
 export type BindingTripleValidationOptions = {
   skipReferenceChecks?: boolean;

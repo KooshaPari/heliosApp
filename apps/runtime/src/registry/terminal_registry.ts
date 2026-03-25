@@ -5,8 +5,8 @@
  * Maintains fast lookups by terminal_id, lane_id, session_id, or workspace_id.
  */
 
-import type { BindingTriple, RegistryQueryInterface, TerminalBinding } from './binding_triple';
-import { BindingState, createBinding, validateBindingTriple } from './binding_triple';
+import type { BindingTriple, RegistryQueryInterface, TerminalBinding } from "./binding_triple.js";
+import { BindingState, createBinding, validateBindingTriple } from "./binding_triple.js";
 
 export class RegistryError extends Error {
   constructor(
@@ -245,7 +245,7 @@ export class TerminalRegistry implements RegistryQueryInterface {
     if (!index.has(key)) {
       index.set(key, new Set());
     }
-    index.get(key)?.add(value);
+    index.get(key)!.add(value);
   }
 
   private removeFromIndex(index: Map<string, Set<string>>, key: string, value: string): void {

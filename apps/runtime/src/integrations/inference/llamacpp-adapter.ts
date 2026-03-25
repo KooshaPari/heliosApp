@@ -1,5 +1,5 @@
-import type { InferenceRequest, InferenceResponse, ModelInfo } from '../../types/inference';
-import type { InferenceEngine } from './engine';
+import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
+import type { InferenceEngine } from "./engine";
 
 export class LlamaCppInferenceEngine implements InferenceEngine {
   readonly id = "llamacpp";
@@ -27,9 +27,7 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
     const prompt = request.messages.map(m => `${m.role}: ${m.content}`).join("\n");
     const args = [this.binaryPath, "-m", request.model, "-p", prompt, "--no-display-prompt"];
-    if (request.maxTokens) {
-      args.push("-n", String(request.maxTokens));
-    }
+    if (request.maxTokens) args.push("-n", String(request.maxTokens));
 
     const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
     const output = await new Response(proc.stdout).text();

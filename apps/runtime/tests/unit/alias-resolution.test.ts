@@ -5,18 +5,20 @@
  * context, matching the paths configured in tsconfig.base.json.
  */
 import { describe, expect, test } from "bun:test";
-import { VERSION, healthCheck, type HealthCheckResult } from "@helios/runtime";
 
 describe("path alias resolution", () => {
-  test("@helios/runtime resolves and exports VERSION", () => {
-    expect(VERSION).toBe("0.0.1");
+  test("@helios/runtime resolves and exports VERSION", async () => {
+    const runtime = await import("@helios/runtime");
+    expect(runtime.VERSION).toBe("0.0.1");
   });
 
-  test("@helios/runtime exports healthCheck function", () => {
-    expect(typeof healthCheck).toBe("function");
+  test("@helios/runtime exports healthCheck function", async () => {
+    const runtime = await import("@helios/runtime");
+    expect(typeof runtime.healthCheck).toBe("function");
   });
 
-  test("healthCheck returns valid HealthCheckResult", () => {
+  test("healthCheck returns valid HealthCheckResult", async () => {
+    const { healthCheck } = await import("@helios/runtime");
     const result = healthCheck();
 
     expect(result.ok).toBe(true);

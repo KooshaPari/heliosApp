@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import {
   SETTINGS_SCHEMA,
-  getAllDefaults,
   getDefault,
+  getAllDefaults,
   validateValue,
-} from '../../../src/config/schema';
+} from "../../../src/config/schema.js";
 
 // FR-001: Settings schema with typed defaults
 describe("getDefault", () => {
@@ -81,11 +81,11 @@ describe("validateValue", () => {
 
   // NaN / Infinity
   it("rejects NaN", () => {
-    expect(validateValue("terminal.scrollback_lines", Number.NaN).valid).toBe(false);
+    expect(validateValue("terminal.scrollback_lines", NaN).valid).toBe(false);
   });
 
   it("rejects Infinity", () => {
-    expect(validateValue("terminal.scrollback_lines", Number.POSITIVE_INFINITY).valid).toBe(false);
+    expect(validateValue("terminal.scrollback_lines", Infinity).valid).toBe(false);
   });
 
   // Unknown key — valid (forward-compat) // FR-005

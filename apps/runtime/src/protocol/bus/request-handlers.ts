@@ -1,10 +1,10 @@
 // Request handler helpers for InMemoryLocalBus — extracted from emitter.ts for static analysis compliance.
 
-import type { LocalBusEnvelope } from '../types';
-import type { AuditRecord, BusState } from './types';
-import { publishLifecycleEvent } from './lifecycle';
-import type { MetricsRecorder } from './metrics';
-import { hasTopLevelDataField } from './validation';
+import type { LocalBusEnvelope } from "../types.js";
+import type { AuditRecord, BusState } from "./types.js";
+import { publishLifecycleEvent } from "./lifecycle.js";
+import type { MetricsRecorder } from "./metrics.js";
+import { hasTopLevelDataField } from "./validation.js";
 
 /**
  * Shared context passed to request handler functions.

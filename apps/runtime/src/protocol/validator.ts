@@ -1,7 +1,7 @@
-import { METHODS } from './methods';
-import { TOPICS } from './topics';
-import type { LocalBusEnvelope } from './types';
-import { ProtocolValidationError } from './types';
+import { METHODS } from "./methods";
+import { TOPICS } from "./topics";
+import type { LocalBusEnvelope } from "./types";
+import { ProtocolValidationError } from "./types";
 
 const METHOD_SET = new Set<string>(METHODS);
 const TOPIC_SET = new Set<string>(TOPICS);

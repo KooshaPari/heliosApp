@@ -12,11 +12,12 @@
  * Tags: SC-011-001, NFR-011-001, NFR-011-004
  */
 
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import type { RendererConfig } from '../../../../src/renderer/adapter';
-import { GhosttyBackend } from '../../../../src/renderer/ghostty/backend';
-import { isGhosttyAvailable } from '../../../../src/renderer/ghostty/index';
-import { GhosttyMetrics } from '../../../../src/renderer/ghostty/metrics';
+import { describe, test, expect, beforeAll, afterAll } from "bun:test";
+import { GhosttyBackend } from "../../../../src/renderer/ghostty/backend.js";
+import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
+import { isGhosttyAvailable } from "../../../../src/renderer/ghostty/index.js";
+import type { RendererConfig } from "../../../../src/renderer/adapter.js";
+import type { MetricsSnapshot } from "../../../../src/renderer/ghostty/metrics.js";
 
 // ---------------------------------------------------------------------------
 // SLO targets
@@ -50,12 +51,16 @@ interface BenchmarkResult {
 }
 
 function reportResults(results: BenchmarkResult[]): void {
-  const _report = {
+  const report = {
     timestamp: new Date().toISOString(),
     renderer: "ghostty",
     results,
     allPassed: results.every(r => r.passed),
   };
+  // Output structured JSON for CI tracking
+  console.log("\n=== SLO BENCHMARK RESULTS ===");
+  console.log(JSON.stringify(report, null, 2));
+  console.log("=== END RESULTS ===\n");
 }
 
 // ---------------------------------------------------------------------------
@@ -68,6 +73,7 @@ const benchResults: BenchmarkResult[] = [];
 beforeAll(async () => {
   ghosttyAvailable = await isGhosttyAvailable();
   if (!ghosttyAvailable) {
+    console.warn("[T014] Ghostty binary not found -- SLO benchmarks will use synthetic data.");
   }
 });
 

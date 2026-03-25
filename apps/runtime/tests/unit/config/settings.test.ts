@@ -1,11 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { SETTINGS_SCHEMA } from '../../../src/config/schema';
-import { SettingsManager } from '../../../src/config/settings';
-import { JsonSettingsStore } from '../../../src/config/store';
-import type { SettingChangeEvent } from '../../../src/config/types';
+import { JsonSettingsStore } from "../../../src/config/store.js";
+import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
+import { SettingsManager } from "../../../src/config/settings.js";
+import type { SettingChangeEvent } from "../../../src/config/types.js";
 
 let tempDir: string;
 let filePath: string;
@@ -123,7 +123,7 @@ describe("SettingsManager — hot-reload", () => {
     await mgr.init();
     await mgr.set("theme", "dark");
     expect(events).toHaveLength(1);
-    expect(events[0]?.key).toBe("theme");
+    expect(events[0]!.key).toBe("theme");
     mgr.dispose();
   });
 
@@ -173,7 +173,7 @@ describe("SettingsManager — getAll", () => {
     const mgr = createManager();
     await mgr.init();
     const all = mgr.getAll();
-    expect(all.theme).toBe("system");
+    expect(all["theme"]).toBe("system");
     expect(Object.keys(all).length).toBeGreaterThanOrEqual(4);
     mgr.dispose();
   });

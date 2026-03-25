@@ -32,12 +32,12 @@ describe("TabBar", () => {
       const tab1 = mockTabs[0];
       const tab2 = mockTabs[1];
 
-      let _tab1Active = false;
+      let tab1Active = false;
       let tab1Deactivated = false;
       let tab2Active = false;
 
       tab1.onActivate = () => {
-        _tab1Active = true;
+        tab1Active = true;
       };
       tab1.onDeactivate = () => {
         tab1Deactivated = true;

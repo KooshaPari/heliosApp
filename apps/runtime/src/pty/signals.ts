@@ -7,11 +7,11 @@
  * @module
  */
 
-import type { BusPublisher, PtyEventCorrelation } from './events';
-import { emitPtyEvent } from './events';
-import type { PtyRecord } from './registry';
-import type { PtyRegistry } from './registry';
-import type { PtyLifecycle } from './state_machine';
+import type { PtyRecord } from "./registry.js";
+import { PtyRegistry } from "./registry.js";
+import { PtyLifecycle } from "./state_machine.js";
+import type { BusPublisher, PtyEventCorrelation } from "./events.js";
+import { emitPtyEvent } from "./events.js";
 
 // ── Signal Envelope ──────────────────────────────────────────────────────────
 
@@ -153,7 +153,7 @@ export function resize(
   if (cols < 1 || cols > 10000 || rows < 1 || rows > 10000) {
     throw new InvalidDimensionsError(cols, rows);
   }
-  if (!(Number.isInteger(cols) && Number.isInteger(rows))) {
+  if (!Number.isInteger(cols) || !Number.isInteger(rows)) {
     throw new InvalidDimensionsError(cols, rows);
   }
 
@@ -264,7 +264,7 @@ export async function terminate(
   });
 
   // Step 1: Send SIGTERM.
-  const _termEnvelope = deliverSignal(
+  const termEnvelope = deliverSignal(
     record.pid,
     "SIGTERM",
     record.ptyId,

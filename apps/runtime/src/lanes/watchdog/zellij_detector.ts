@@ -1,7 +1,7 @@
 // T003 - Stale zellij session detector
 
-import { execCommand } from '../../integrations/exec';
-import type { OrphanedResource } from './resource_classifier';
+import { execCommand } from "../../integrations/exec.js";
+import type { OrphanedResource } from "./resource_classifier.js";
 
 export interface SessionRegistry {
   getSession(sessionId: string): { laneId?: string } | null;
@@ -60,6 +60,7 @@ export class ZellijDetector {
       // Use zellij CLI to list sessions
       const result = await execCommand("zellij", ["list-sessions", "-n"]);
       if (result.code !== 0) {
+        console.warn("zellij list-sessions failed:", result.stderr);
         return [];
       }
 
@@ -73,7 +74,8 @@ export class ZellijDetector {
           };
         });
       return sessions;
-    } catch (_error) {
+    } catch (error) {
+      console.error("Failed to list zellij sessions:", error);
       return [];
     }
   }

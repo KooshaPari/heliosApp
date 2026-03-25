@@ -1,4 +1,4 @@
-import type { ProtectedPathPattern } from './protected-paths-types';
+import type { ProtectedPathPattern } from "./protected-paths-types.js";
 
 export const DEFAULT_PATTERNS: ProtectedPathPattern[] = [
   {

@@ -3,17 +3,18 @@
  * @see SC-010-001, NFR-010-001
  */
 import { describe, expect, it } from "bun:test";
-import type { RendererEventBus, RendererLifecycleEvent } from '../../../src/renderer/index';
-import { RendererRegistry } from '../../../src/renderer/registry';
-import { RendererStateMachine } from '../../../src/renderer/state_machine';
-import { SwitchBuffer } from '../../../src/renderer/stream_binding';
-import { switchRenderer } from '../../../src/renderer/switch';
+import { RendererRegistry } from "../../../src/renderer/registry.js";
+import { RendererStateMachine } from "../../../src/renderer/state_machine.js";
+import { switchRenderer } from "../../../src/renderer/switch.js";
+import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
+import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
 import {
   MockGhosttyAdapter,
   MockRioAdapter,
-  TEST_CONFIG,
+  MockRendererAdapter,
   TEST_SURFACE,
-} from '../../helpers/mock_adapter';
+  TEST_CONFIG,
+} from "../../helpers/mock_adapter.js";
 
 function freshSetup() {
   const registry = new RendererRegistry();
@@ -52,7 +53,7 @@ describe("Switch stress tests", () => {
 
     // Now try rapid switches - sequential since state machine prevents concurrent
     let successCount = 0;
-    let _failCount = 0;
+    let failCount = 0;
     for (let i = 0; i < 10; i++) {
       try {
         const fromId = i % 2 === 0 ? "rio" : "ghostty";
@@ -67,7 +68,7 @@ describe("Switch stress tests", () => {
         });
         successCount++;
       } catch {
-        _failCount++;
+        failCount++;
       }
     }
     // All sequential switches should succeed
@@ -200,7 +201,7 @@ describe("Switch stress tests", () => {
       latencies.push(performance.now() - start);
     }
 
-    const _avg = latencies.reduce((s, l) => s + l, 0) / latencies.length;
+    const avg = latencies.reduce((s, l) => s + l, 0) / latencies.length;
     const max = Math.max(...latencies);
 
     // Report

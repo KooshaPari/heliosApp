@@ -1,13 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { randomBytes } from "node:crypto";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
+import { randomBytes } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { EncryptionService } from '../encryption';
-import { CredentialStore, CredentialAccessDeniedError } from '../credential-store';
-import { InMemoryLocalBus } from '../../protocol/bus';
-import { CredentialAccessDeniedError, CredentialStore } from '../credential-store';
-import { EncryptionService } from '../encryption';
+import { EncryptionService } from "../encryption.js";
+import { CredentialStore, CredentialAccessDeniedError } from "../credential-store.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 
 function makeStore(dataDir: string, bus: InMemoryLocalBus): CredentialStore {
   const fixedKey = randomBytes(32);

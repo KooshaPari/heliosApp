@@ -1,4 +1,4 @@
-import type { AuditRecord } from './sink';
+import type { AuditRecord } from "./sink";
 
 export interface AuditDurableStore {
   append(record: AuditRecord): Promise<void>;

@@ -7,9 +7,9 @@
  */
 
 import { describe, it, expect } from "bun:test";
-import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from '../adapter';
-import { NormalizedProviderError, normalizeError } from '../errors';
-import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from '../adapter';
+import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
+import { NormalizedProviderError, normalizeError } from "../errors.js";
+import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 
 /**
  * Mock isolated provider for testing lane isolation behavior.
@@ -134,7 +134,7 @@ describe("Process-Level Isolation", () => {
       for (let i = 0; i < 100; i++) {
         try {
           await provider.execute({ prompt: `test-${i}` }, `corr-${i}`);
-        } catch (_e) {
+        } catch (e) {
           // Handle error
         }
       }
@@ -271,7 +271,7 @@ describe("Process-Level Isolation", () => {
       for (let i = 0; i < 5; i++) {
         try {
           await providers[1].execute({ prompt: "test" }, `corr-${i}`);
-        } catch (_e) {
+        } catch (e) {
           // Expected
         }
       }
@@ -315,7 +315,7 @@ describe("Process-Level Isolation", () => {
       provider.setCrash(true);
       try {
         await provider.execute({ prompt: "test" }, "corr-123");
-      } catch (_e) {
+      } catch (e) {
         // Expected
       }
 

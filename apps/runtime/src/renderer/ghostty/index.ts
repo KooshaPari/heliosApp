@@ -5,39 +5,39 @@
  * renderer backend.
  */
 
-import type { RendererRegistry } from '../registry';
-import { GhosttyBackend } from './backend';
+import type { RendererRegistry } from "../registry.js";
+import { GhosttyBackend } from "./backend.js";
 
 // ---------------------------------------------------------------------------
 // Re-exports
 // ---------------------------------------------------------------------------
 
-export { GhosttyBackend } from './backend';
+export { GhosttyBackend } from "./backend.js";
 export {
   GhosttyNotInitializedError,
   GhosttyNotRunningError,
   GhosttyAlreadyInitializedError,
-} from './backend';
-export { GhosttyProcess, GhosttyBinaryNotFoundError, GhosttyProcessError } from './process';
-export type { GhosttyOptions } from './process';
-export { GhosttySurface, SurfaceBindingError } from './surface';
-export type { GpuRenderingMode, GpuSurfaceStatus, SurfaceEventHandler } from './surface';
+} from "./backend.js";
+export { GhosttyProcess, GhosttyBinaryNotFoundError, GhosttyProcessError } from "./process.js";
+export type { GhosttyOptions } from "./process.js";
+export { GhosttySurface, SurfaceBindingError } from "./surface.js";
+export type { GpuRenderingMode, GpuSurfaceStatus, SurfaceEventHandler } from "./surface.js";
 export {
   detectCapabilities,
   getCachedCapabilities,
   clearCapabilityCache,
   detectGpu,
-} from './capabilities';
-export { GhosttyMetrics } from './metrics';
+} from "./capabilities.js";
+export { GhosttyMetrics } from "./metrics.js";
 export type {
   FrameSample,
   InputLatencySample,
   MetricsSnapshot,
   MetricsConfig,
   MetricsPublisher,
-} from './metrics';
-export { GhosttyInputRelay, InputRelayError } from './input';
-export type { PtyWriter, GhosttyInputEvent, InputEventListener } from './input';
+} from "./metrics.js";
+export { GhosttyInputRelay, InputRelayError } from "./input.js";
+export type { PtyWriter, GhosttyInputEvent, InputEventListener } from "./input.js";
 
 // ---------------------------------------------------------------------------
 // Binary detection
@@ -102,6 +102,7 @@ export async function registerGhostty(
   const available = await isGhosttyAvailable(binaryPath);
 
   if (!available) {
+    console.warn("[ghostty] Ghostty binary not found; skipping registration.");
     return;
   }
 

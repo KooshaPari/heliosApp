@@ -5,8 +5,8 @@
  * for renderer-agnostic comparison.
  */
 
-import type { RendererConfig } from '../adapter';
-import type { RendererCapabilities } from '../capabilities';
+import type { RendererCapabilities } from "../capabilities.js";
+import type { RendererConfig } from "../adapter.js";
 
 // ---------------------------------------------------------------------------
 // Default capabilities for rio

@@ -74,9 +74,7 @@ export class GhosttyProcess {
 
   /** Uptime in milliseconds, or 0 if not running. */
   getUptime(): number {
-    if (this._startedAt === undefined) {
-      return 0;
-    }
+    if (this._startedAt === undefined) return 0;
     return Date.now() - this._startedAt;
   }
 
@@ -111,9 +109,7 @@ export class GhosttyProcess {
         throw new GhosttyBinaryNotFoundError(binaryPath);
       }
     } catch (e) {
-      if (e instanceof GhosttyBinaryNotFoundError) {
-        throw e;
-      }
+      if (e instanceof GhosttyBinaryNotFoundError) throw e;
       throw new GhosttyBinaryNotFoundError(binaryPath);
     }
 

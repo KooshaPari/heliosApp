@@ -2,8 +2,8 @@
  * Renderer registry (minimal version for rio adapter registration).
  */
 
-import type { RendererAdapter } from './adapter';
-import type { RendererCapabilities } from './capabilities';
+import type { RendererAdapter } from "./adapter.js";
+import type { RendererCapabilities } from "./capabilities.js";
 
 export interface RegistrationMeta {
   id: string;

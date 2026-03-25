@@ -1,12 +1,13 @@
 import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import {
-  MAX_PAYLOAD_SIZE,
   createCommand,
-  createEvent,
   createResponse,
+  createEvent,
+  validateEnvelope,
+  MAX_PAYLOAD_SIZE,
   setMaxPayloadSize,
-} from '../../../src/protocol/envelope';
-import type { CommandEnvelope } from '../../../src/protocol/types';
+} from "../../../src/protocol/envelope.js";
+import type { CommandEnvelope } from "../../../src/protocol/types.js";
 
 // FR-001: Canonical envelope schema
 // FR-006: Strict validation rejects malformed envelopes

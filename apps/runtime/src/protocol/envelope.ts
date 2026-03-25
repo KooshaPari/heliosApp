@@ -5,9 +5,9 @@
  * well-formed envelopes with auto-generated IDs and timestamps.
  */
 
-import type { CommandEnvelope, ResponseEnvelope, EventEnvelope, Envelope } from './types';
-import { validationError, backpressureError } from './errors';
-import type { BusError } from './errors';
+import type { CommandEnvelope, ResponseEnvelope, EventEnvelope, Envelope } from "./types.js";
+import { validationError, backpressureError } from "./errors.js";
+import type { BusError } from "./errors.js";
 
 // ---------------------------------------------------------------------------
 // Configuration

@@ -39,7 +39,7 @@ describe("ChatTab", () => {
 
       await tab.onContextChange(context);
       await tab.onContextChange(null);
-      const _el = tab.render();
+      const el = tab.render();
 
       const state = tab.getState();
       expect(state.messageCount).toBe(0);

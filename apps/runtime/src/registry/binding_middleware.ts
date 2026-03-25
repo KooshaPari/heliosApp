@@ -5,9 +5,10 @@
  * Rejects operations on terminals with invalid or stale bindings.
  */
 
-import type { RegistryQueryInterface, TerminalBinding } from './binding_triple';
-import { BindingState, validateBindingTriple } from './binding_triple';
-import type { TerminalRegistry } from './terminal_registry';
+import type { RegistryQueryInterface, TerminalBinding } from "./binding_triple.js";
+import { BindingState, validateBindingTriple } from "./binding_triple.js";
+import { TerminalNotFound, InvalidBinding } from "./terminal_registry.js";
+import type { TerminalRegistry } from "./terminal_registry.js";
 
 export interface ValidationError {
   code: string;

@@ -5,33 +5,47 @@
  * the current test suite.
  */
 
-import { InMemoryLocalBus } from "./protocol/bus";
-import { createBoundaryDispatcher } from "./protocol/boundary_adapter";
-import { METHODS } from "./protocol/methods";
-import type { LocalBusEnvelope } from "./protocol/types";
-import { RecoveryRegistry } from "./sessions/registry";
+import { InMemoryLocalBus } from "./protocol/bus.js";
+import { createBoundaryDispatcher } from "./protocol/boundary_adapter.js";
+import { METHODS } from "./protocol/methods.js";
+import type { LocalBusEnvelope } from "./protocol/types.js";
+import { RecoveryRegistry } from "./sessions/registry.js";
 import type {
   RecoveryBootstrapResult,
   RecoveryMetadata,
   WatchdogScanResult,
-} from "./sessions/types";
-import { RedactionEngine } from "./secrets/redaction-engine";
-import { getDefaultRules } from "./secrets/redaction-rules";
-import type {
-  HealthCheckResult,
-  RuntimeAuditRecord,
-  RuntimeAuditBundle,
-  RuntimeOptions,
-} from "./runtime/types";
+} from "./sessions/types.js";
+import { RedactionEngine } from "./secrets/redaction-engine.js";
+import { getDefaultRules } from "./secrets/redaction-rules.js";
 
 /** Semantic version of the runtime package. */
 export const VERSION = "0.0.1" as const;
 
-export type {
-  HealthCheckResult,
-  RuntimeAuditRecord,
-  RuntimeAuditBundle,
-  RuntimeOptions,
+/** Result of a runtime health check. */
+export interface HealthCheckResult {
+  readonly ok: boolean;
+  readonly timestamp: number;
+  readonly uptimeMs: number;
+}
+
+export type RuntimeAuditRecord = {
+  recorded_at: string;
+  type: "command" | "response" | "event";
+  method?: string;
+  topic?: string;
+  correlation_id?: string;
+  payload: Record<string, unknown>;
+  error?: { code: string; message: string; retryable?: boolean } | null;
+};
+
+export type RuntimeAuditBundle = {
+  count: number;
+  records: RuntimeAuditRecord[];
+  exported_at: string;
+};
+
+export type RuntimeOptions = {
+  recovery_metadata?: RecoveryMetadata;
 };
 
 type RuntimeInstance = ReturnType<typeof createRuntime>;
@@ -285,7 +299,6 @@ export function createRuntime(options: RuntimeOptions = {}) {
 
   return {
     bus: {
-      ...bus,
       request,
       publish: (event: LocalBusEnvelope) => bus.publish(event),
     },

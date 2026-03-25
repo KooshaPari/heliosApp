@@ -1,19 +1,19 @@
-import { randomBytes } from "node:crypto";
 import {
   chmodSync,
   existsSync,
   mkdirSync,
-  readFileSync,
   readdirSync,
+  readFileSync,
   renameSync,
   rmSync,
   statSync,
   writeFileSync,
 } from "node:fs";
 import { join, resolve, sep } from "node:path";
-import type { LocalBus } from '../protocol/bus';
-import type { LocalBusEnvelope } from '../protocol/types';
-import { EncryptionService } from './encryption';
+import { randomBytes } from "node:crypto";
+import { EncryptionService } from "./encryption.js";
+import type { LocalBus } from "../protocol/bus.js";
+import type { LocalBusEnvelope } from "../protocol/types.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -141,9 +141,7 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
 
     const dir = this.credentialDir(providerId, workspaceId);
-    if (!existsSync(dir)) {
-      return [];
-    }
+    if (!existsSync(dir)) return [];
 
     return readdirSync(dir)
       .filter(f => f.endsWith(".enc"))

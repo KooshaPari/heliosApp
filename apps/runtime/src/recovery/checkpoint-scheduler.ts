@@ -1,5 +1,5 @@
-import type { Checkpoint } from './checkpoint';
-import type { CheckpointWriter } from './checkpoint';
+import type { Checkpoint } from "./checkpoint.js";
+import type { CheckpointWriter } from "./checkpoint.js";
 
 const DEFAULT_CHECKPOINT_INTERVAL_MS = 60000; // 60 seconds
 const ACTIVITY_THRESHOLD = 50; // Activity events before triggering checkpoint
@@ -19,9 +19,7 @@ export class CheckpointScheduler {
   private lastWriteDurationMs = 0;
 
   start(writer: CheckpointWriter, stateGetter: () => Checkpoint): void {
-    if (this.isRunning) {
-      return;
-    }
+    if (this.isRunning) return;
 
     this.writer = writer;
     this.stateGetter = stateGetter;
@@ -47,9 +45,7 @@ export class CheckpointScheduler {
   }
 
   async triggerNow(): Promise<void> {
-    if (!(this.writer && this.stateGetter)) {
-      return;
-    }
+    if (!this.writer || !this.stateGetter) return;
 
     const checkpoint = this.stateGetter();
     const startTime = Date.now();
@@ -62,7 +58,9 @@ export class CheckpointScheduler {
 
       // Adjust interval based on write time
       this.adjustInterval();
-    } catch (_err) {}
+    } catch (err) {
+      console.error("Failed to write checkpoint:", err);
+    }
   }
 
   recordActivity(): void {
@@ -102,9 +100,7 @@ export class CheckpointScheduler {
 
   private async handleShutdown(): Promise<void> {
     // Take final checkpoint synchronously (with timeout)
-    if (!(this.writer && this.stateGetter)) {
-      return;
-    }
+    if (!this.writer || !this.stateGetter) return;
 
     const checkpoint = this.stateGetter();
     const writePromise = this.writer.write(checkpoint);

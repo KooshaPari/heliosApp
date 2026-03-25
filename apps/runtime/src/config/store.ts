@@ -1,7 +1,7 @@
-import { type FSWatcher, watch as fsWatch } from "node:fs";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { watch as fsWatch, type FSWatcher } from "node:fs";
+import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import type { SettingsSchema, SettingsStore } from './types';
+import type { SettingsStore, SettingsSchema } from "./types.js";
 
 /**
  * JSON-file-backed settings store with in-memory unknown-key preservation
@@ -34,6 +34,7 @@ export class JsonSettingsStore implements SettingsStore {
     try {
       parsed = JSON.parse(raw) as Record<string, unknown>;
     } catch {
+      console.warn(`[settings] Corrupted JSON in ${this.filePath}, returning empty.`);
       return {};
     }
 
@@ -55,7 +56,7 @@ export class JsonSettingsStore implements SettingsStore {
   async save(values: Record<string, unknown>): Promise<void> {
     // Merge known values with preserved unknown keys.
     const merged: Record<string, unknown> = { ...values, ...this.unknownKeys };
-    const json = `${JSON.stringify(merged, null, 2)}\n`;
+    const json = JSON.stringify(merged, null, 2) + "\n";
 
     // Atomic write: temp → fsync → rename.
     const dir = dirname(this.filePath);
@@ -76,9 +77,7 @@ export class JsonSettingsStore implements SettingsStore {
         if (Date.now() - this.lastWriteTs < JsonSettingsStore.DEBOUNCE_MS) {
           return;
         }
-        if (debounceTimer) {
-          clearTimeout(debounceTimer);
-        }
+        if (debounceTimer) clearTimeout(debounceTimer);
         debounceTimer = setTimeout(callback, JsonSettingsStore.DEBOUNCE_MS);
       });
     } catch {
@@ -87,9 +86,7 @@ export class JsonSettingsStore implements SettingsStore {
     }
 
     return () => {
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-      }
+      if (debounceTimer) clearTimeout(debounceTimer);
       watcher.close();
     };
   }

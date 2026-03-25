@@ -5,7 +5,7 @@
  * the render surface lifecycle.
  */
 
-import type { RenderSurface } from '../adapter';
+import type { RenderSurface } from "../adapter.js";
 
 // ---------------------------------------------------------------------------
 // Surface
@@ -38,13 +38,9 @@ export class RioSurface {
    * Update the render region bounds.
    */
   resize(bounds: { x: number; y: number; width: number; height: number }): void {
-    if (!this._surface) {
-      return;
-    }
+    if (!this._surface) return;
     // Handle zero-size surface (e.g. minimized window).
-    if (bounds.width <= 0 || bounds.height <= 0) {
-      return;
-    }
+    if (bounds.width <= 0 || bounds.height <= 0) return;
     this._surface = {
       ...this._surface,
       bounds,

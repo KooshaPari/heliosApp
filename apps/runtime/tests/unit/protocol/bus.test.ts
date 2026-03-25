@@ -1,8 +1,8 @@
 import { describe, expect, it, beforeEach } from "bun:test";
-import { createBus } from '../../../src/protocol/bus';
-import type { LocalBus } from '../../../src/protocol/bus';
-import { createCommand, createResponse } from '../../../src/protocol/envelope';
-import type { CommandEnvelope, ResponseEnvelope } from '../../../src/protocol/types';
+import { createBus } from "../../../src/protocol/bus.js";
+import type { LocalBus } from "../../../src/protocol/bus.js";
+import { createCommand, createResponse } from "../../../src/protocol/envelope.js";
+import type { CommandEnvelope, ResponseEnvelope } from "../../../src/protocol/types.js";
 
 // FR-003: Command dispatch pipeline
 // FR-004: Event fan-out

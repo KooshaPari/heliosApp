@@ -8,10 +8,10 @@
  */
 
 import { describe, expect, it } from "bun:test";
-import type { TerminalContext } from '../../../src/renderer/hot_swap';
-import { executeRollback } from '../../../src/renderer/rollback';
-import { SwitchBuffer } from '../../../src/renderer/stream_binding';
-import { MockGhosttyAdapter, MockRioAdapter } from '../../helpers/mock_adapter';
+import { executeRollback } from "../../../src/renderer/rollback.js";
+import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
+import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
+import type { TerminalContext } from "../../../src/renderer/hot_swap.js";
 
 describe("Rollback integration", () => {
   it("successfully restores single terminal to original renderer", async () => {
@@ -37,8 +37,8 @@ describe("Rollback integration", () => {
 
     expect(result.success).toBe(true);
     expect(result.terminalStatuses.length).toBe(1);
-    expect(result.terminalStatuses[0]?.restored).toBe(true);
-    expect(result.terminalStatuses[0]?.degraded).toBe(false);
+    expect(result.terminalStatuses[0]!.restored).toBe(true);
+    expect(result.terminalStatuses[0]!.degraded).toBe(false);
   });
 
   it("restores multiple terminals on rollback", async () => {

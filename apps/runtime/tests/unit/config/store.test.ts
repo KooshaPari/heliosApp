@@ -1,10 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
-import { writeFile } from "node:fs/promises";
+import { describe, expect, it, beforeEach, afterEach } from "bun:test";
+import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { SETTINGS_SCHEMA } from '../../../src/config/schema';
-import { JsonSettingsStore } from '../../../src/config/store';
+import { writeFile } from "node:fs/promises";
+import { JsonSettingsStore } from "../../../src/config/store.js";
+import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
 
 let tempDir: string;
 let filePath: string;
@@ -32,7 +32,7 @@ describe("JsonSettingsStore", () => {
     const values = { theme: "dark", "telemetry.enabled": true };
     await store.save(values);
     const loaded = await store.load();
-    expect(loaded.theme).toBe("dark");
+    expect(loaded["theme"]).toBe("dark");
     expect(loaded["telemetry.enabled"]).toBe(true);
   });
 
@@ -82,6 +82,6 @@ describe("JsonSettingsStore", () => {
     await rm(filePath);
     await store.save({ theme: "dark" });
     const raw = JSON.parse(await readFile(filePath, "utf-8")) as Record<string, unknown>;
-    expect(raw.theme).toBe("dark");
+    expect(raw["theme"]).toBe("dark");
   });
 });

@@ -10,7 +10,7 @@
  * - GPU driver reset / crash recovery.
  */
 
-import type { RenderSurface } from '../adapter';
+import type { RenderSurface } from "../adapter.js";
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -216,9 +216,7 @@ export class GhosttySurface {
    * falls back to software rendering.
    */
   handleGpuReset(): void {
-    if (!this._bound) {
-      return;
-    }
+    if (!this._bound) return;
 
     this._gpuReinitAttempted = true;
 
@@ -236,9 +234,7 @@ export class GhosttySurface {
    * In production this would be triggered by a system event or render stall.
    */
   simulateGpuCrash(): void {
-    if (!this._bound || this._gpuMode !== "gpu") {
-      return;
-    }
+    if (!this._bound || this._gpuMode !== "gpu") return;
     this._gpuMode = "unknown";
     this.handleGpuReset();
   }
@@ -266,9 +262,7 @@ export class GhosttySurface {
   private _startMemoryMonitoring(): void {
     // Poll GPU memory every 2 seconds
     this._memoryCheckTimer = setInterval(() => {
-      if (!this._bound || this._gpuMode !== "gpu") {
-        return;
-      }
+      if (!this._bound || this._gpuMode !== "gpu") return;
       // In a real integration: query system GPU memory APIs
       // For now, the consumer calls updateGpuMemory externally.
     }, 2_000);

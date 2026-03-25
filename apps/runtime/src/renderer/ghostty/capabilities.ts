@@ -5,7 +5,7 @@
  * then caches them for fast (<50ms) queries.
  */
 
-import type { RendererCapabilities } from '../capabilities';
+import type { RendererCapabilities } from "../capabilities.js";
 
 // ---------------------------------------------------------------------------
 // GPU detection
