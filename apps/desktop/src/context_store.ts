@@ -57,7 +57,11 @@ export type ActiveContextAction =
   | { type: "operation.success"; operation: OperationKey }
   | { type: "operation.failure"; operation: OperationKey; error: string }
   | { type: "diagnostics.set"; diagnostics: TransportDiagnostics }
-  | { type: "renderer.switch.started"; previousEngine: string; targetEngine: string }
+  | {
+      type: "renderer.switch.started";
+      previousEngine: string;
+      targetEngine: string;
+    }
   | { type: "renderer.switch.succeeded"; targetEngine: string }
   | { type: "renderer.switch.failed"; message: string }
   | { type: "renderer.switch.rolled_back"; engine: string; message: string };
@@ -66,7 +70,7 @@ export const DEFAULT_TRANSPORT_DIAGNOSTICS: TransportDiagnostics = {
   preferredTransport: "cliproxy_harness",
   resolvedTransport: "cliproxy_harness",
   degradedReason: null,
-  degradedAt: null
+  degradedAt: null,
 };
 
 export const INITIAL_ACTIVE_CONTEXT_STATE: ActiveContextState = {
@@ -82,7 +86,7 @@ export const INITIAL_ACTIVE_CONTEXT_STATE: ActiveContextState = {
     session: "idle",
     terminal: "idle",
     renderer: "idle",
-    error: null
+    error: null,
   },
   trace: [],
   rendererSwitch: {
@@ -90,8 +94,8 @@ export const INITIAL_ACTIVE_CONTEXT_STATE: ActiveContextState = {
     previousEngine: null,
     targetEngine: null,
     lastStatus: "idle",
-    message: null
-  }
+    message: null,
+  },
 };
 
 function appendTrace(
@@ -114,37 +118,45 @@ export function reduceActiveContextState(
         laneId: null,
         sessionId: null,
         terminalId: null,
-        trace: appendTrace(state.trace, action.type, { workspaceId: action.workspaceId })
+        trace: appendTrace(state.trace, action.type, {
+          workspaceId: action.workspaceId,
+        }),
       };
     case "lane.set":
       return {
         ...state,
         laneId: action.laneId,
-        trace: appendTrace(state.trace, action.type, { laneId: action.laneId })
+        trace: appendTrace(state.trace, action.type, { laneId: action.laneId }),
       };
     case "session.set":
       return {
         ...state,
         sessionId: action.sessionId,
-        trace: appendTrace(state.trace, action.type, { sessionId: action.sessionId })
+        trace: appendTrace(state.trace, action.type, {
+          sessionId: action.sessionId,
+        }),
       };
     case "terminal.set":
       return {
         ...state,
         terminalId: action.terminalId,
-        trace: appendTrace(state.trace, action.type, { terminalId: action.terminalId })
+        trace: appendTrace(state.trace, action.type, {
+          terminalId: action.terminalId,
+        }),
       };
     case "tab.set":
       return {
         ...state,
         activeTab: action.tab,
-        trace: appendTrace(state.trace, action.type, { tab: action.tab })
+        trace: appendTrace(state.trace, action.type, { tab: action.tab }),
       };
     case "runtime.state.set":
       return {
         ...state,
         runtimeState: action.runtimeState,
-        trace: appendTrace(state.trace, action.type, { runtimeState: action.runtimeState })
+        trace: appendTrace(state.trace, action.type, {
+          runtimeState: action.runtimeState,
+        }),
       };
     case "operation.start":
       return {
@@ -152,9 +164,11 @@ export function reduceActiveContextState(
         operations: {
           ...state.operations,
           [action.operation]: "loading",
-          error: null
+          error: null,
         },
-        trace: appendTrace(state.trace, action.type, { operation: action.operation })
+        trace: appendTrace(state.trace, action.type, {
+          operation: action.operation,
+        }),
       };
     case "operation.success":
       return {
@@ -162,9 +176,11 @@ export function reduceActiveContextState(
         operations: {
           ...state.operations,
           [action.operation]: "ready",
-          error: null
+          error: null,
         },
-        trace: appendTrace(state.trace, action.type, { operation: action.operation })
+        trace: appendTrace(state.trace, action.type, {
+          operation: action.operation,
+        }),
       };
     case "operation.failure":
       return {
@@ -172,18 +188,20 @@ export function reduceActiveContextState(
         operations: {
           ...state.operations,
           [action.operation]: "error",
-          error: action.error
+          error: action.error,
         },
         trace: appendTrace(state.trace, action.type, {
           operation: action.operation,
-          error: action.error
-        })
+          error: action.error,
+        }),
       };
     case "diagnostics.set":
       return {
         ...state,
         diagnostics: action.diagnostics,
-        trace: appendTrace(state.trace, action.type, { diagnostics: action.diagnostics })
+        trace: appendTrace(state.trace, action.type, {
+          diagnostics: action.diagnostics,
+        }),
       };
     case "renderer.switch.started":
       return {
@@ -191,19 +209,19 @@ export function reduceActiveContextState(
         operations: {
           ...state.operations,
           renderer: "loading",
-          error: null
+          error: null,
         },
         rendererSwitch: {
           inFlight: true,
           previousEngine: action.previousEngine,
           targetEngine: action.targetEngine,
           lastStatus: "started",
-          message: null
+          message: null,
         },
         trace: appendTrace(state.trace, action.type, {
           previousEngine: action.previousEngine,
-          targetEngine: action.targetEngine
-        })
+          targetEngine: action.targetEngine,
+        }),
       };
     case "renderer.switch.succeeded":
       return {
@@ -211,15 +229,17 @@ export function reduceActiveContextState(
         operations: {
           ...state.operations,
           renderer: "ready",
-          error: null
+          error: null,
         },
         rendererSwitch: {
           ...state.rendererSwitch,
           inFlight: false,
           lastStatus: "succeeded",
-          targetEngine: action.targetEngine
+          targetEngine: action.targetEngine,
         },
-        trace: appendTrace(state.trace, action.type, { targetEngine: action.targetEngine })
+        trace: appendTrace(state.trace, action.type, {
+          targetEngine: action.targetEngine,
+        }),
       };
     case "renderer.switch.failed":
       return {
@@ -227,15 +247,17 @@ export function reduceActiveContextState(
         operations: {
           ...state.operations,
           renderer: "error",
-          error: action.message
+          error: action.message,
         },
         rendererSwitch: {
           ...state.rendererSwitch,
           inFlight: false,
           lastStatus: "failed",
-          message: action.message
+          message: action.message,
         },
-        trace: appendTrace(state.trace, action.type, { message: action.message })
+        trace: appendTrace(state.trace, action.type, {
+          message: action.message,
+        }),
       };
     case "renderer.switch.rolled_back":
       return {
@@ -243,16 +265,19 @@ export function reduceActiveContextState(
         operations: {
           ...state.operations,
           renderer: "ready",
-          error: null
+          error: null,
         },
         rendererSwitch: {
           inFlight: false,
           previousEngine: action.engine,
           targetEngine: action.engine,
           lastStatus: "rolled_back",
-          message: action.message
+          message: action.message,
         },
-        trace: appendTrace(state.trace, action.type, { engine: action.engine, message: action.message })
+        trace: appendTrace(state.trace, action.type, {
+          engine: action.engine,
+          message: action.message,
+        }),
       };
     default:
       return state;
@@ -303,7 +328,7 @@ export function selectActiveContext(state: ActiveContextState): ActiveContextIde
     laneId: state.laneId,
     sessionId: state.sessionId,
     terminalId: state.terminalId,
-    activeTab: state.activeTab
+    activeTab: state.activeTab,
   };
 }
 
@@ -311,6 +336,8 @@ export function selectRuntimeDiagnostics(state: ActiveContextState): TransportDi
   return state.diagnostics;
 }
 
-export function selectRendererSwitchStatus(state: ActiveContextState): ActiveContextState["rendererSwitch"] {
+export function selectRendererSwitchStatus(
+  state: ActiveContextState
+): ActiveContextState["rendererSwitch"] {
   return state.rendererSwitch;
 }

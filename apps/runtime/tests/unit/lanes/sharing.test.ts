@@ -91,7 +91,11 @@ describe("Lane Sharing (FR-008-007)", () => {
 
   test("detachAgent removes agent", async () => {
     registry.register(
-      makeRecord({ laneId: "dt1", state: "shared", attachedAgents: ["agent-a", "agent-b"] }),
+      makeRecord({
+        laneId: "dt1",
+        state: "shared",
+        attachedAgents: ["agent-a", "agent-b"],
+      })
     );
     await detachAgent(registry, "dt1", "agent-a");
     expect(registry.get("dt1")!.attachedAgents).toEqual(["agent-b"]);
@@ -99,7 +103,11 @@ describe("Lane Sharing (FR-008-007)", () => {
 
   test("detachAgent is no-op for non-attached agent", async () => {
     registry.register(
-      makeRecord({ laneId: "dt2", state: "shared", attachedAgents: ["agent-a"] }),
+      makeRecord({
+        laneId: "dt2",
+        state: "shared",
+        attachedAgents: ["agent-a"],
+      })
     );
     const result = await detachAgent(registry, "dt2", "agent-z");
     expect(result.transitioned).toBe(false);
@@ -107,7 +115,11 @@ describe("Lane Sharing (FR-008-007)", () => {
 
   test("last agent detach from shared transitions to ready", async () => {
     registry.register(
-      makeRecord({ laneId: "dt3", state: "shared", attachedAgents: ["agent-a"] }),
+      makeRecord({
+        laneId: "dt3",
+        state: "shared",
+        attachedAgents: ["agent-a"],
+      })
     );
     const result = await detachAgent(registry, "dt3", "agent-a");
     expect(result.transitioned).toBe(true);
@@ -122,7 +134,7 @@ describe("Lane Sharing (FR-008-007)", () => {
         laneId: "fd1",
         state: "shared",
         attachedAgents: ["agent-a", "agent-b", "agent-c"],
-      }),
+      })
     );
     const result = await forceDetachAll(registry, "fd1");
     expect(result.detachedAgents).toEqual(["agent-a", "agent-b", "agent-c"]);
@@ -133,7 +145,11 @@ describe("Lane Sharing (FR-008-007)", () => {
 
   test("forceDetachAll on non-shared lane does not transition", async () => {
     registry.register(
-      makeRecord({ laneId: "fd2", state: "ready", attachedAgents: ["agent-a"] }),
+      makeRecord({
+        laneId: "fd2",
+        state: "ready",
+        attachedAgents: ["agent-a"],
+      })
     );
     const result = await forceDetachAll(registry, "fd2");
     expect(result.transitioned).toBe(false);

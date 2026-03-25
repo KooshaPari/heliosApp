@@ -244,7 +244,7 @@ describe("SwitchBuffer", () => {
   it("drops oldest data when buffer exceeds capacity", () => {
     const maxBytes = 10;
     const events: BufferOverflowEvent[] = [];
-    const eventBus: StreamBindingEventBus = { publish: (e) => events.push(e) };
+    const eventBus: StreamBindingEventBus = { publish: e => events.push(e) };
     const buf = new SwitchBuffer(maxBytes, eventBus);
 
     buf.startBuffering();

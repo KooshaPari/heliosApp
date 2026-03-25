@@ -21,7 +21,9 @@ export class VllmInferenceEngine implements InferenceEngine {
   }
 
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
     if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
 
     const response = await fetch(`${this.endpoint}/v1/chat/completions`, {
@@ -39,7 +41,7 @@ export class VllmInferenceEngine implements InferenceEngine {
       throw new Error(`vLLM error (${response.status}): ${await response.text()}`);
     }
 
-    const data = await response.json() as {
+    const data = (await response.json()) as {
       choices: Array<{ message: { content: string }; finish_reason: string }>;
       model: string;
       usage: { prompt_tokens: number; completion_tokens: number };
@@ -48,7 +50,10 @@ export class VllmInferenceEngine implements InferenceEngine {
     return {
       content: data.choices[0]?.message.content ?? "",
       model: data.model,
-      tokenUsage: { input: data.usage.prompt_tokens, output: data.usage.completion_tokens },
+      tokenUsage: {
+        input: data.usage.prompt_tokens,
+        output: data.usage.completion_tokens,
+      },
       finishReason: data.choices[0]?.finish_reason === "stop" ? "end_turn" : "max_tokens",
     };
   }
@@ -64,9 +69,12 @@ export class VllmInferenceEngine implements InferenceEngine {
       if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
       const response = await fetch(`${this.endpoint}/v1/models`, { headers });
       if (!response.ok) return [];
-      const data = await response.json() as { data: Array<{ id: string }> };
+      const data = (await response.json()) as { data: Array<{ id: string }> };
       return data.data.map(m => ({
-        id: m.id, name: m.id, contextWindow: 4096, providerId: "vllm",
+        id: m.id,
+        name: m.id,
+        contextWindow: 4096,
+        providerId: "vllm",
       }));
     } catch {
       return [];
@@ -75,7 +83,9 @@ export class VllmInferenceEngine implements InferenceEngine {
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
     try {
-      const response = await fetch(`${this.endpoint}/v1/models`, { signal: AbortSignal.timeout(3000) });
+      const response = await fetch(`${this.endpoint}/v1/models`, {
+        signal: AbortSignal.timeout(3000),
+      });
       return response.ok ? "healthy" : "degraded";
     } catch {
       return "unavailable";

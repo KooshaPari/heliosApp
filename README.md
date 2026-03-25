@@ -19,6 +19,14 @@ Captured on 2026-02-26 for follow-up validation and prioritization.
 - These entries are intentionally preserved as provided (including possible duplicates) for future source verification.
 - `awesome.ecosyste.ms` projects index: https://awesome.ecosyste.ms/projects
 
+## Quick Start
+
+1. **Install Bun**: `curl -fsSL https://bun.sh/install | bash`
+2. **Setup**: `bun install --frozen-lockfile`
+3. **Build**: `bun run build`
+4. **Test**: `bun test`
+5. **Docs**: `bun run docs:dev`
+
 ## Engineering Baseline
 
 - Install dependencies: `bun install --frozen-lockfile`

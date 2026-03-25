@@ -1,10 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { CheckpointScheduler } from "../checkpoint-scheduler.js";
-import {
-  CheckpointWriter,
-  type Checkpoint,
-  type CheckpointSession,
-} from "../checkpoint.js";
+import { CheckpointWriter, type Checkpoint, type CheckpointSession } from "../checkpoint.js";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
@@ -112,6 +108,8 @@ describe("CheckpointScheduler", () => {
         scheduler.recordActivity();
       }
 
+      // Wait for the async triggerNow to complete (longer timeout for coverage instrumentation)
+      await new Promise(r => setTimeout(r, 200));
       const count1 = writeCount;
 
       // Record 25 more (not enough to trigger again)
@@ -119,7 +117,7 @@ describe("CheckpointScheduler", () => {
         scheduler.recordActivity();
       }
 
-      vi.advanceTimersByTime(1000);
+      await new Promise(r => setTimeout(r, 200));
       expect(writeCount).toBe(count1); // No additional checkpoint
     });
   });
@@ -130,7 +128,7 @@ describe("CheckpointScheduler", () => {
       const slowWriter = new CheckpointWriter(tempDir);
       slowWriter.write = async () => {
         // Simulate 600ms write
-        await new Promise((resolve) => setTimeout(resolve, 600));
+        await new Promise(resolve => setTimeout(resolve, 600));
         writeCount++;
       };
 
@@ -152,7 +150,7 @@ describe("CheckpointScheduler", () => {
 
       slowWriter.write = async (checkpoint: Checkpoint) => {
         if (isSlowWrite) {
-          await new Promise((resolve) => setTimeout(resolve, 600));
+          await new Promise(resolve => setTimeout(resolve, 600));
         }
         writeCount++;
         await fs.mkdir(path.join(tempDir, "recovery"), { recursive: true });

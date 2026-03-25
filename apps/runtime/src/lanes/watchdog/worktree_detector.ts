@@ -33,7 +33,7 @@ export class WorktreeDetector {
 
         // Exclude transient states
         if (lane) {
-          if (lane.state === "cleaning" || lane.state === "recovering") {
+          if (lane.state === "cleaning" || (lane.state as string) === "recovering") {
             continue; // Not orphaned, just in transient state
           }
           // Lane is active and not in transient state
@@ -50,7 +50,8 @@ export class WorktreeDetector {
         });
       }
     } catch (error) {
-      console.error("Failed to detect orphaned worktrees:", error);
+      // biome-ignore lint/suspicious/noConsole: Read failures are expected in some environments and should be surfaced for operator visibility.
+      console.warn(`Failed to read worktree directory ${this.baseDir}: ${String(error)}`);
     }
 
     return orphans;

@@ -150,7 +150,7 @@ export class TerminalTab extends TabSurface {
     inputEl.placeholder = "Type command...";
     inputEl.style.paddingLeft = "4px";
 
-    inputEl.addEventListener("keydown", (e) => {
+    inputEl.addEventListener("keydown", e => {
       if (e.key === "Enter") {
         const command = inputEl.value;
         if (command) {
@@ -178,7 +178,7 @@ export class TerminalTab extends TabSurface {
       ...baseState,
       terminalId: this.terminalId ?? undefined,
       scrollPosition: this.contentEl?.scrollTop,
-      lastOutputLine: this.outputBuffer.length
+      lastOutputLine: this.outputBuffer.length,
     };
   }
 
@@ -212,7 +212,7 @@ export class TerminalTab extends TabSurface {
       `drwxr-xr-x  3 user  staff    96 Mar  1 09:00 ..`,
       `-rw-r--r--  1 user  staff  1024 Mar  1 10:00 README.md`,
       `drwxr-xr-x  2 user  staff    64 Mar  1 10:00 src`,
-      `$ `
+      `$ `,
     ];
   }
 }

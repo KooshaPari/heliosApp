@@ -32,7 +32,10 @@ export async function detectGpu(): Promise<GpuInfo> {
       });
       const text = await new Response(proc.stdout).text();
       const hasMetal = text.includes("Metal");
-      return { available: hasMetal, driverVersion: hasMetal ? "metal" : undefined };
+      return {
+        available: hasMetal,
+        driverVersion: hasMetal ? "metal" : undefined,
+      };
     }
 
     // Linux: probe for OpenGL
@@ -62,9 +65,7 @@ let cachedCapabilities: RendererCapabilities | undefined;
  *
  * @param forceRefresh - If true, discard the cache and re-detect.
  */
-export async function detectCapabilities(
-  forceRefresh = false,
-): Promise<RendererCapabilities> {
+export async function detectCapabilities(forceRefresh = false): Promise<RendererCapabilities> {
   if (cachedCapabilities !== undefined && !forceRefresh) {
     return cachedCapabilities;
   }

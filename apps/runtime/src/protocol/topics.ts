@@ -4,7 +4,7 @@
  * Manages ordered subscriber lists per topic with deterministic delivery.
  */
 
-import type { EventEnvelope } from './types.js';
+import type { EventEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -23,7 +23,7 @@ const TOPIC_NAME_RE = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
 function assertValidTopicName(topic: string): void {
   if (!TOPIC_NAME_RE.test(topic)) {
     throw new Error(
-      `Invalid topic name "${topic}": must be non-empty, alphanumeric segments separated by dots`,
+      `Invalid topic name "${topic}": must be non-empty, alphanumeric segments separated by dots`
     );
   }
 }
@@ -31,6 +31,56 @@ function assertValidTopicName(topic: string): void {
 // ---------------------------------------------------------------------------
 // Registry
 // ---------------------------------------------------------------------------
+
+/** Canonical list of known topic names for validation. */
+export const TOPICS: readonly string[] = [
+  "workspace.opened",
+  "project.ready",
+  "session.created",
+  "session.restore.started",
+  "session.restore.completed",
+  "session.attach.started",
+  "session.attached",
+  "session.attach.failed",
+  "session.restore.started",
+  "session.restore.completed",
+  "session.terminated",
+  "lane.attach.started",
+  "lane.attach.failed",
+  "lane.cleanup.started",
+  "lane.cleanup.failed",
+  "terminal.spawn.started",
+  "terminal.spawned",
+  "terminal.spawn.failed",
+  "terminal.output",
+  "terminal.state.changed",
+  "renderer.switch.started",
+  "renderer.switch.succeeded",
+  "renderer.switch.failed",
+  "agent.run.started",
+  "agent.run.progress",
+  "agent.run.completed",
+  "agent.run.failed",
+  "approval.requested",
+  "approval.resolved",
+  "share.session.started",
+  "share.session.stopped",
+  "lane.create.started",
+  "lane.created",
+  "lane.create.failed",
+  "lane.attached",
+  "lane.cleaned",
+  "harness.status.changed",
+  "boundary.local.dispatched",
+  "boundary.tool.dispatched",
+  "boundary.a2a.delegated",
+  "boundary.dispatch.failed",
+  "audit.recorded",
+  "diagnostics.metric",
+] as const;
+
+/** Type for valid protocol topics. */
+export type ProtocolTopic = (typeof TOPICS)[number];
 
 export class TopicRegistry {
   private readonly subs = new Map<string, TopicSubscriber[]>();
@@ -88,9 +138,7 @@ export class TopicRegistry {
     let next = current + 1;
     // Handle overflow at Number.MAX_SAFE_INTEGER — reset to 1 with warning.
     if (current >= Number.MAX_SAFE_INTEGER) {
-      console.warn(
-        `[topics] Sequence counter overflow for topic "${topic}" — resetting to 1`,
-      );
+      console.warn(`[topics] Sequence counter overflow for topic "${topic}" — resetting to 1`);
       next = 1;
     }
     this.sequenceCounters.set(topic, next);

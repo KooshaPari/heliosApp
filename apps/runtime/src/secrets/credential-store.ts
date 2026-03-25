@@ -58,9 +58,7 @@ const FORBIDDEN_PATTERNS = ["..", "/", "\\", "\0"];
 function validateId(label: string, value: string): void {
   for (const pat of FORBIDDEN_PATTERNS) {
     if (value.includes(pat)) {
-      throw new Error(
-        `Invalid ${label}: contains forbidden character sequence '${pat}'`
-      );
+      throw new Error(`Invalid ${label}: contains forbidden character sequence '${pat}'`);
     }
   }
   if (value.length === 0) {
@@ -83,11 +81,7 @@ export class CredentialStore {
    * @param bus      Optional LocalBus for emitting audit events.
    * @param encryption  Optional EncryptionService (allows injection in tests).
    */
-  constructor(opts: {
-    dataDir: string;
-    bus?: LocalBus;
-    encryption?: EncryptionService;
-  }) {
+  constructor(opts: { dataDir: string; bus?: LocalBus; encryption?: EncryptionService }) {
     this.dataDir = opts.dataDir;
     this.bus = opts.bus ?? null;
     this.encryption = opts.encryption ?? new EncryptionService();
@@ -101,12 +95,7 @@ export class CredentialStore {
    * Encrypts and writes a credential to disk.
    * Uses atomic write (temp file + rename) and sets 0600 permissions.
    */
-  async store(
-    providerId: string,
-    workspaceId: string,
-    name: string,
-    value: string
-  ): Promise<void> {
+  async store(providerId: string, workspaceId: string, name: string, value: string): Promise<void> {
     validateId("providerId", providerId);
     validateId("workspaceId", workspaceId);
     validateId("name", name);
@@ -129,11 +118,7 @@ export class CredentialStore {
   /**
    * Reads and decrypts a credential from disk.
    */
-  async retrieve(
-    providerId: string,
-    workspaceId: string,
-    name: string
-  ): Promise<string> {
+  async retrieve(providerId: string, workspaceId: string, name: string): Promise<string> {
     validateId("providerId", providerId);
     validateId("workspaceId", workspaceId);
     validateId("name", name);
@@ -159,19 +144,15 @@ export class CredentialStore {
     if (!existsSync(dir)) return [];
 
     return readdirSync(dir)
-      .filter((f) => f.endsWith(".enc"))
-      .map((f) => f.slice(0, -4)); // strip ".enc"
+      .filter(f => f.endsWith(".enc"))
+      .map(f => f.slice(0, -4)); // strip ".enc"
   }
 
   /**
    * Overwrites the credential file with random data before removing it
    * to prevent forensic recovery.
    */
-  async delete(
-    providerId: string,
-    workspaceId: string,
-    name: string
-  ): Promise<void> {
+  async delete(providerId: string, workspaceId: string, name: string): Promise<void> {
     validateId("providerId", providerId);
     validateId("workspaceId", workspaceId);
     validateId("name", name);
@@ -363,11 +344,7 @@ export class CredentialStore {
     return dir;
   }
 
-  private credentialPath(
-    providerId: string,
-    workspaceId: string,
-    name: string
-  ): string {
+  private credentialPath(providerId: string, workspaceId: string, name: string): string {
     return join(this.credentialDir(providerId, workspaceId), `${name}.enc`);
   }
 
@@ -375,10 +352,7 @@ export class CredentialStore {
   // Bus helpers
   // -------------------------------------------------------------------------
 
-  private async emit(
-    topic: string,
-    payload: Record<string, unknown>
-  ): Promise<void> {
+  private async emit(topic: string, payload: Record<string, unknown>): Promise<void> {
     if (this.bus === null) return;
     const envelope: LocalBusEnvelope = {
       id: `secrets:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,

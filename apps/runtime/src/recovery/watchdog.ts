@@ -26,7 +26,7 @@ interface ProcessMonitor {
   pid: number;
   heartbeatIntervalMs: number;
   lastHeartbeat: number;
-  timeoutId?: NodeJS.Timeout;
+  timeoutId?: ReturnType<typeof setTimeout>;
 }
 
 export class Watchdog {
@@ -40,11 +40,7 @@ export class Watchdog {
     this.bus = bus;
   }
 
-  registerProcess(
-    name: string,
-    pid: number,
-    heartbeatIntervalMs: number = 2000
-  ): void {
+  registerProcess(name: string, pid: number, heartbeatIntervalMs: number = 2000): void {
     // Clear any existing monitor for this name
     this.unregister(name);
 

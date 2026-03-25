@@ -6,7 +6,7 @@
       "docs/.vitepress/dist/**",
       "docs/.generated/**",
       ".worktrees/**",
-      "kitty-specs/**",
+      "agileplus/**",
       "docs/sessions/**"
     ]
   },
@@ -48,6 +48,18 @@
       "trailingComma": "es5"
     }
   },
+  "overrides": [
+    {
+      "include": ["apps/desktop/src/runtime_client.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": "off"
+          }
+        }
+      }
+    }
+  ],
   "json": {
     "formatter": {
       "trailingCommas": "none"

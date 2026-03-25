@@ -1,5 +1,5 @@
 /**
- * A2A Federation Router, Health Monitoring, and Failover
+ * A2A Federation Router and Failover
  *
  * Implements the A2A protocol client adapter for external agent delegation
  * with endpoint registration, failover routing, and failure isolation.
@@ -9,15 +9,21 @@
  */
 
 import type { LocalBus } from "../protocol/bus.js";
-import type { ProviderAdapter, ProviderHealthStatus, A2AConfig, A2AExecuteInput, A2AExecuteOutput } from "./adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-} from "./errors.js";
+import type {
+  ProviderAdapter,
+  ProviderHealthStatus,
+  A2AConfig,
+  A2AExecuteInput,
+  A2AExecuteOutput,
+} from "./adapter.js";
+import { NormalizedProviderError, normalizeError } from "./errors.js";
+
+export { HealthMonitoringCoordinator } from "./health-monitor.js";
 
 /**
  * A2A endpoint configuration.
  */
+// biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
 export interface A2AEndpoint {
   id: string;
   url: string;
@@ -29,6 +35,7 @@ export interface A2AEndpoint {
 /**
  * A2A delegation context.
  */
+// biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
 export interface A2ADelegation {
   taskDescription: string;
   requiredCapabilities: string[];
@@ -38,6 +45,7 @@ export interface A2ADelegation {
 /**
  * A2A delegation result.
  */
+// biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
 export interface A2AResult {
   endpointId: string;
   result: unknown;
@@ -48,8 +56,14 @@ export interface A2AResult {
 /**
  * A2A Router Configuration.
  */
+// biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
 export interface A2ARouterConfig extends A2AConfig {
-  endpoints?: Array<{ id: string; url: string; priority: number; capabilities: string[] }>;
+  endpoints?: Array<{
+    id: string;
+    url: string;
+    priority: number;
+    capabilities: string[];
+  }>;
 }
 
 /**
@@ -63,13 +77,12 @@ export interface A2ARouterConfig extends A2AConfig {
  *
  * FR-025-005: A2A federation with external agent delegation.
  */
-export class A2ARouterAdapter
-  implements
-    ProviderAdapter<
-      A2ARouterConfig,
-      A2ADelegation & { correlationId?: string },
-      A2AResult
-    > {
+// biome-ignore lint/style/useNamingConvention: A2A acronym is part of the external provider protocol name.
+export class A2ARouterAdapter implements ProviderAdapter<
+  A2ARouterConfig,
+  A2ADelegation & { correlationId?: string },
+  A2AResult
+> {
   private config: A2ARouterConfig | null = null;
   private bus: LocalBus | null = null;
   private endpoints: A2AEndpoint[] = [];
@@ -103,7 +116,7 @@ export class A2ARouterAdapter
 
       // Initialize endpoints sorted by priority
       this.endpoints = config.endpoints
-        .map((ep) => ({
+        .map(ep => ({
           id: ep.id,
           url: ep.url,
           priority: ep.priority,
@@ -168,7 +181,7 @@ export class A2ARouterAdapter
 
     try {
       // Check if any endpoint is healthy
-      const healthyEndpoints = this.endpoints.filter((ep) => ep.healthStatus?.state === "healthy");
+      const healthyEndpoints = this.endpoints.filter(ep => ep.healthStatus?.state === "healthy");
 
       if (healthyEndpoints.length > 0) {
         this.healthStatus = {
@@ -178,8 +191,7 @@ export class A2ARouterAdapter
         };
       } else {
         this.healthStatus.failureCount++;
-        const newState =
-          this.healthStatus.failureCount >= 5 ? "unavailable" : "degraded";
+        const newState = this.healthStatus.failureCount >= 5 ? "unavailable" : "degraded";
         this.healthStatus = {
           state: newState,
           lastCheck: new Date(),
@@ -235,7 +247,7 @@ export class A2ARouterAdapter
 
       // Create abort controller for timeout
       const abortController = new AbortController();
-      const timeoutMs = this.config.timeoutMs || 30000;
+      const timeoutMs = this.config.timeout || 30000;
       const timeoutHandle = setTimeout(() => abortController.abort(), timeoutMs);
       this.inFlightDelegations.set(correlationId, abortController);
 
@@ -274,7 +286,7 @@ export class A2ARouterAdapter
       if (error instanceof Error && error.name === "AbortError") {
         const normalized = new NormalizedProviderError(
           "PROVIDER_TIMEOUT",
-          `A2A delegation timeout after ${this.config?.timeoutMs || 30000}ms`,
+          `A2A delegation timeout after ${this.config?.timeout || 30000}ms`,
           "a2a",
           true,
           correlationId
@@ -353,7 +365,7 @@ export class A2ARouterAdapter
    * @param status New health status
    */
   updateEndpointHealth(endpointId: string, status: ProviderHealthStatus): void {
-    const endpoint = this.endpoints.find((ep) => ep.id === endpointId);
+    const endpoint = this.endpoints.find(ep => ep.id === endpointId);
     if (endpoint) {
       endpoint.healthStatus = status;
     }
@@ -373,25 +385,20 @@ export class A2ARouterAdapter
   private selectEndpoint(requiredCapabilities: string[]): A2AEndpoint | undefined {
     // First pass: look for healthy endpoint with matching capabilities
     let selected = this.endpoints.find(
-      (ep) =>
-        ep.healthStatus?.state === "healthy" &&
-        this.hasCapabilities(ep, requiredCapabilities)
+      ep => ep.healthStatus?.state === "healthy" && this.hasCapabilities(ep, requiredCapabilities)
     );
 
     // Second pass: look for degraded endpoint (for failover)
     if (!selected) {
       selected = this.endpoints.find(
-        (ep) =>
-          ep.healthStatus?.state === "degraded" &&
-          this.hasCapabilities(ep, requiredCapabilities)
+        ep =>
+          ep.healthStatus?.state === "degraded" && this.hasCapabilities(ep, requiredCapabilities)
       );
     }
 
     // Final fallback: any endpoint with matching capabilities
     if (!selected) {
-      selected = this.endpoints.find((ep) =>
-        this.hasCapabilities(ep, requiredCapabilities)
-      );
+      selected = this.endpoints.find(ep => this.hasCapabilities(ep, requiredCapabilities));
     }
 
     return selected;
@@ -404,16 +411,13 @@ export class A2ARouterAdapter
    * @param requiredCapabilities Required capabilities
    * @returns true if endpoint has all required capabilities
    */
-  private hasCapabilities(
-    endpoint: A2AEndpoint,
-    requiredCapabilities: string[]
-  ): boolean {
+  private hasCapabilities(endpoint: A2AEndpoint, requiredCapabilities: string[]): boolean {
     if (requiredCapabilities.length === 0) {
       return true;
     }
 
     const endpointCaps = new Set(endpoint.capabilities);
-    return requiredCapabilities.every((cap) => endpointCaps.has(cap));
+    return requiredCapabilities.every(cap => endpointCaps.has(cap));
   }
 
   /**
@@ -423,6 +427,7 @@ export class A2ARouterAdapter
    * @throws Error if probe fails
    */
   private async probeEndpoint(endpoint: A2AEndpoint): Promise<void> {
+    await Promise.resolve();
     // Mock implementation: always succeeds for localhost/127.0.0.1
     if (endpoint.url.includes("localhost") || endpoint.url.includes("127.0.0.1")) {
       return;
@@ -447,6 +452,7 @@ export class A2ARouterAdapter
     correlationId: string,
     signal: AbortSignal
   ): Promise<unknown> {
+    await Promise.resolve();
     // Check for abort
     if (signal.aborted) {
       throw new Error("Delegation cancelled");

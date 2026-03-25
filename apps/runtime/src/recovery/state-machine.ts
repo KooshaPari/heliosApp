@@ -31,22 +31,10 @@ type StageChangeListener = (
 
 const LEGAL_TRANSITIONS: Record<RecoveryStage, RecoveryStage[]> = {
   [RecoveryStage.CRASHED]: [RecoveryStage.DETECTING],
-  [RecoveryStage.DETECTING]: [
-    RecoveryStage.INVENTORYING,
-    RecoveryStage.DETECTION_FAILED,
-  ],
-  [RecoveryStage.INVENTORYING]: [
-    RecoveryStage.RESTORING,
-    RecoveryStage.INVENTORY_FAILED,
-  ],
-  [RecoveryStage.RESTORING]: [
-    RecoveryStage.RECONCILING,
-    RecoveryStage.RESTORATION_FAILED,
-  ],
-  [RecoveryStage.RECONCILING]: [
-    RecoveryStage.LIVE,
-    RecoveryStage.RECONCILIATION_FAILED,
-  ],
+  [RecoveryStage.DETECTING]: [RecoveryStage.INVENTORYING, RecoveryStage.DETECTION_FAILED],
+  [RecoveryStage.INVENTORYING]: [RecoveryStage.RESTORING, RecoveryStage.INVENTORY_FAILED],
+  [RecoveryStage.RESTORING]: [RecoveryStage.RECONCILING, RecoveryStage.RESTORATION_FAILED],
+  [RecoveryStage.RECONCILING]: [RecoveryStage.LIVE, RecoveryStage.RECONCILIATION_FAILED],
   [RecoveryStage.LIVE]: [], // Terminal state
   [RecoveryStage.DETECTION_FAILED]: [RecoveryStage.DETECTING], // Retry
   [RecoveryStage.INVENTORY_FAILED]: [RecoveryStage.INVENTORYING],
@@ -63,7 +51,7 @@ export class RecoveryStateMachine {
   private recoveryDataDir: string;
   private bus?: LocalBus;
   private listeners: StageChangeListener[] = [];
-  private stageTimeoutId?: NodeJS.Timeout;
+  private stageTimeoutId?: ReturnType<typeof setTimeout> | undefined;
 
   constructor(recoveryDataDir: string, bus?: LocalBus) {
     this.recoveryDataDir = recoveryDataDir;
@@ -100,9 +88,7 @@ export class RecoveryStateMachine {
       // Retrying - increment attempt count
       this.currentState.attemptCount++;
       if (this.currentState.attemptCount > MAX_RETRIES_PER_STAGE) {
-        throw new Error(
-          `Max retries (${MAX_RETRIES_PER_STAGE}) exceeded for stage ${from}`
-        );
+        throw new Error(`Max retries (${MAX_RETRIES_PER_STAGE}) exceeded for stage ${from}`);
       }
     } else if (from !== to) {
       // New stage - reset attempt count
@@ -207,11 +193,7 @@ export class RecoveryStateMachine {
     }
   }
 
-  private notifyListeners(
-    from: RecoveryStage,
-    to: RecoveryStage,
-    attemptCount: number
-  ): void {
+  private notifyListeners(from: RecoveryStage, to: RecoveryStage, attemptCount: number): void {
     for (const listener of this.listeners) {
       listener(from, to, attemptCount);
     }
@@ -226,7 +208,7 @@ export class RecoveryStateMachine {
         const failureStage = this.getFailureStateFor(this.currentStage);
         if (failureStage) {
           this.currentState.lastError = `Stage timeout after ${STAGE_TIMEOUT_MS}ms`;
-          this.transition(failureStage).catch((err) => {
+          this.transition(failureStage).catch(err => {
             console.error("Failed to transition to failure state:", err);
           });
         }
@@ -242,7 +224,7 @@ export class RecoveryStateMachine {
   }
 
   private getFailureStateFor(stage: RecoveryStage): RecoveryStage | undefined {
-    const failureMap: Record<RecoveryStage, RecoveryStage> = {
+    const failureMap: Record<RecoveryStage, RecoveryStage | undefined> = {
       [RecoveryStage.DETECTING]: RecoveryStage.DETECTION_FAILED,
       [RecoveryStage.INVENTORYING]: RecoveryStage.INVENTORY_FAILED,
       [RecoveryStage.RESTORING]: RecoveryStage.RESTORATION_FAILED,

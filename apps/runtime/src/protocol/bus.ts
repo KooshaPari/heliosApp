@@ -1,28 +1,31 @@
-import type { LocalBusEnvelope } from "./types.js";
+// Barrel re-export for backward compatibility
+// The bus module has been decomposed into smaller, focused modules.
+// See ./bus/ directory for the individual module files.
 
-export interface LocalBus {
-  publish(event: LocalBusEnvelope): Promise<void>;
-  request(command: LocalBusEnvelope): Promise<LocalBusEnvelope>;
-}
-
-export class InMemoryLocalBus implements LocalBus {
-  private readonly eventLog: LocalBusEnvelope[] = [];
-
-  getEvents(): LocalBusEnvelope[] {
-    return [...this.eventLog];
-  }
-
-  async publish(event: LocalBusEnvelope): Promise<void> {
-    this.eventLog.push(event);
-  }
-
-  async request(_command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
-    return {
-      id: _command.id,
-      type: "response",
-      ts: new Date().toISOString(),
-      status: "ok",
-      result: {},
-    };
-  }
-}
+export {
+  InMemoryLocalBus,
+  CommandBusImpl,
+  createBus,
+  type LocalBus,
+  type AuditRecord,
+  type MetricSample,
+  type MetricSummary,
+  type MetricsReport,
+  type BusState,
+  type CommandBusOptions,
+  type CommandEnvelope,
+  type EventEnvelope,
+  type ResponseEnvelope,
+  type LocalBusEnvelopeWithSequence,
+  LIFECYCLE_SEQUENCES,
+  TERMINAL_TOPICS,
+  START_TOPICS,
+  isTerminalTopic,
+  isStartTopic,
+  resolveExpectedStartTopic,
+  publishLifecycleEvent,
+  MetricsRecorder,
+  isCommandEnvelope,
+  isEventEnvelope,
+  hasTopLevelDataField,
+} from "./bus/index.js";
