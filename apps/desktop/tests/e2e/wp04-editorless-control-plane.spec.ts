@@ -2,27 +2,35 @@ import { expect, test } from "@playwright/test";
 import { createRuntime } from "../../../runtime/src";
 import { bootDesktop, renderControlPlaneSnapshot } from "../../src";
 
-test("lane/session context remains cohesive across all tabs", async ({ page }) => {
-  const runtime = createRuntime();
+test("desktop reflects provider failover diagnostics across all tabs", async ({ page }) => {
+  const runtime = createRuntime({
+    harnessProbe: {
+      async check() {
+        return { ok: false, reason: "cliproxy_timeout" };
+      }
+    }
+  });
   const controlPlane = bootDesktop({ bus: runtime.bus });
 
   const lane = await controlPlane.createLane({
-    workspaceId: "workspace_e2e",
-    simulateDegrade: true
+    workspaceId: "workspace_e2e"
   });
   expect(lane.ok).toBe(true);
   expect(lane.laneId).not.toBeNull();
+
   const session = await controlPlane.ensureSession({
     workspaceId: "workspace_e2e",
     laneId: lane.laneId as string
   });
   expect(session.ok).toBe(true);
   expect(session.sessionId).not.toBeNull();
-  await controlPlane.spawnTerminal({
+
+  const terminal = await controlPlane.spawnTerminal({
     workspaceId: "workspace_e2e",
     laneId: lane.laneId as string,
     sessionId: session.sessionId as string
   });
+  expect(terminal.ok).toBe(true);
 
   controlPlane.setActiveTab("terminal");
   controlPlane.setActiveTab("agent");
@@ -39,7 +47,9 @@ test("lane/session context remains cohesive across all tabs", async ({ page }) =
   }
 
   await expect(page.getByTestId("tab-chat-transport")).toHaveText("native_openai");
-  await expect(page.getByTestId("tab-chat-degrade")).toHaveText("cliproxy_harness_unhealthy");
+  await expect(page.getByTestId("tab-chat-degrade")).toHaveText("cliproxy_timeout");
+  await expect(page.getByTestId("tab-session-transport")).toHaveText("native_openai");
+  await expect(page.getByTestId("tab-session-degrade")).toHaveText("cliproxy_timeout");
 });
 
 test("renderer switch failure rolls back and reports safe status", async ({ page }) => {
