@@ -135,6 +135,7 @@ async function checkFileSizes(files: string[]): Promise<Finding[]> {
   const sections = await loadConstitution().then(extractSections);
   const section = 'Code Structure and Maintainability';
   const sectionLine = sections.get(section) || 0;
+  const lockfileNames = new Set(["bun.lock", "package-lock.json", "pnpm-lock.yaml", "yarn.lock"]);
 
   for (const filePath of files) {
     if (isLineLimitExempt(filePath)) continue;
