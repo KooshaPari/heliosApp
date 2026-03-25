@@ -5,9 +5,13 @@ import { randomUUID } from "crypto";
 
 export enum CrashReason {
   HEARTBEAT_TIMEOUT = "HEARTBEAT_TIMEOUT",
+  HeartbeatTimeout = "HEARTBEAT_TIMEOUT",
   UNRESPONSIVE = "UNRESPONSIVE",
+  Unresponsive = "UNRESPONSIVE",
   EXIT_CODE = "EXIT_CODE",
+  ExitCode = "EXIT_CODE",
   SIGNAL = "SIGNAL",
+  Signal = "SIGNAL",
 }
 
 export interface CrashEvent {
@@ -26,7 +30,7 @@ interface ProcessMonitor {
   pid: number;
   heartbeatIntervalMs: number;
   lastHeartbeat: number;
-  timeoutId?: NodeJS.Timeout;
+  timeoutId?: ReturnType<typeof setTimeout>;
 }
 
 export class Watchdog {
@@ -40,11 +44,7 @@ export class Watchdog {
     this.bus = bus;
   }
 
-  registerProcess(
-    name: string,
-    pid: number,
-    heartbeatIntervalMs: number = 2000
-  ): void {
+  registerProcess(name: string, pid: number, heartbeatIntervalMs: number = 2000): void {
     // Clear any existing monitor for this name
     this.unregister(name);
 

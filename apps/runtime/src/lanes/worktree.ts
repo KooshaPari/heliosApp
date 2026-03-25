@@ -32,7 +32,7 @@ export interface WorktreeLatencyMetrics {
 export class WorktreeProvisionError extends Error {
   constructor(
     public readonly laneId: string,
-    public readonly stderr: string,
+    public readonly stderr: string
   ) {
     super(`Worktree provisioning failed for lane ${laneId}: ${stderr}`);
     this.name = "WorktreeProvisionError";
@@ -42,7 +42,7 @@ export class WorktreeProvisionError extends Error {
 export class WorktreeCleanupError extends Error {
   constructor(
     public readonly worktreePath: string,
-    public readonly reason: string,
+    public readonly reason: string
   ) {
     super(`Worktree cleanup failed for ${worktreePath}: ${reason}`);
     this.name = "WorktreeCleanupError";
@@ -59,19 +59,46 @@ export function computeBranchName(laneId: string): string {
   return `${BRANCH_PREFIX}${laneId}`;
 }
 
+type SpawnResult = {
+  readonly stdout: ReadableStream<Uint8Array> | null;
+  readonly stderr: ReadableStream<Uint8Array> | null;
+  readonly exited: Promise<number>;
+  readonly pid: number;
+};
+
+type SpawnOptions = {
+  cwd?: string;
+  stdout?: "pipe" | "inherit" | "ignore";
+  stderr?: "pipe" | "inherit" | "ignore";
+  stdin?: "pipe" | "inherit" | "ignore";
+  env?: Record<string, string>;
+};
+
+const spawn: (command: string[], options: SpawnOptions) => SpawnResult =
+  (
+    (globalThis as Record<string, unknown>).Bun as
+      | {
+          spawn: (command: string[], options: SpawnOptions) => SpawnResult;
+        }
+      | undefined
+  )?.spawn ??
+  ((() => {
+    throw new Error("worktree module requires Bun runtime");
+  }) as (command: string[], options: SpawnOptions) => SpawnResult);
+
 async function runGit(
   args: string[],
-  cwd: string,
+  cwd: string
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-  const proc = Bun.spawn(["git", ...args], {
+  const proc = spawn(["git", ...args], {
     cwd,
     stdout: "pipe",
     stderr: "pipe",
   });
 
   const [stdout, stderr] = await Promise.all([
-    new Response(proc.stdout).text(),
-    new Response(proc.stderr).text(),
+    proc.stdout ? new Response(proc.stdout).text() : Promise.resolve(""),
+    proc.stderr ? new Response(proc.stderr).text() : Promise.resolve(""),
   ]);
 
   const exitCode = await proc.exited;
@@ -100,7 +127,7 @@ export async function provisionWorktree(options: WorktreeOptions): Promise<Workt
   // Create worktree with new branch
   const result = await runGit(
     ["worktree", "add", "-b", branchName, worktreePath, baseBranch],
-    workspaceRepoPath,
+    workspaceRepoPath
   );
 
   if (result.exitCode !== 0) {
@@ -129,7 +156,7 @@ export async function provisionWorktree(options: WorktreeOptions): Promise<Workt
 
 export async function removeWorktree(
   worktreePath: string,
-  workspaceRepoPath: string,
+  workspaceRepoPath: string
 ): Promise<void> {
   const start = performance.now();
 
@@ -140,7 +167,7 @@ export async function removeWorktree(
   // Try git worktree remove --force
   const removeResult = await runGit(
     ["worktree", "remove", worktreePath, "--force"],
-    workspaceRepoPath,
+    workspaceRepoPath
   );
 
   // Fallback: force-delete directory if still exists
@@ -152,10 +179,7 @@ export async function removeWorktree(
   await runGit(["worktree", "prune"], workspaceRepoPath);
 
   // Delete the lane branch (best-effort)
-  const branchResult = await runGit(
-    ["branch", "-D", branchName],
-    workspaceRepoPath,
-  );
+  const branchResult = await runGit(["branch", "-D", branchName], workspaceRepoPath);
   if (branchResult.exitCode !== 0 && !branchResult.stderr.includes("not found")) {
     // Log warning but continue - branch may have been manually deleted
   }
@@ -174,7 +198,7 @@ export async function removeWorktree(
 async function cleanupPartialProvision(
   worktreePath: string,
   branchName: string,
-  workspaceRepoPath: string,
+  workspaceRepoPath: string
 ): Promise<void> {
   // Remove partially created worktree directory
   if (fs.existsSync(worktreePath)) {
@@ -194,7 +218,7 @@ async function cleanupPartialProvision(
 
 async function forceRemoveWorktreeDir(
   worktreePath: string,
-  workspaceRepoPath: string,
+  workspaceRepoPath: string
 ): Promise<void> {
   // Try git worktree remove first
   await runGit(["worktree", "remove", worktreePath, "--force"], workspaceRepoPath);
@@ -218,7 +242,7 @@ export interface ReconciliationResult {
 export async function reconcileOrphanedWorktrees(
   workspaceRepoPath: string,
   knownLaneIds: Set<string>,
-  closeLaneRecord: (laneId: string) => void,
+  closeLaneRecord: (laneId: string) => void
 ): Promise<ReconciliationResult> {
   const worktreeRoot = path.join(workspaceRepoPath, WORKTREE_DIR);
   const result: ReconciliationResult = {

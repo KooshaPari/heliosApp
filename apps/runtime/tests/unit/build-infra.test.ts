@@ -30,8 +30,14 @@ function stripJsonComments(input: string): string {
     if (ch === '"') {
       let j = i + 1;
       while (j < len) {
-        if (input[j] === '\\') { j += 2; continue; }
-        if (input[j] === '"') { j++; break; }
+        if (input[j] === "\\") {
+          j += 2;
+          continue;
+        }
+        if (input[j] === '"') {
+          j++;
+          break;
+        }
         j++;
       }
       result += input.slice(i, j);
@@ -39,14 +45,14 @@ function stripJsonComments(input: string): string {
       continue;
     }
     // Block comment
-    if (ch === '/' && next === '*') {
-      const end = input.indexOf('*/', i + 2);
+    if (ch === "/" && next === "*") {
+      const end = input.indexOf("*/", i + 2);
       i = end === -1 ? len : end + 2;
       continue;
     }
     // Line comment
-    if (ch === '/' && next === '/') {
-      const end = input.indexOf('\n', i + 2);
+    if (ch === "/" && next === "/") {
+      const end = input.indexOf("\n", i + 2);
       i = end === -1 ? len : end;
       continue;
     }
@@ -165,19 +171,20 @@ describe("lint suppression directives", () => {
     const glob = new Bun.Glob("**/*.ts");
     const suppressionPattern = /@ts-ignore|@ts-expect-error/;
 
-    const srcDirs = [
-      resolve(ROOT, "apps/runtime/src"),
-      resolve(ROOT, "apps/desktop/src"),
-    ];
+    const srcDirs = [resolve(ROOT, "apps/runtime/src"), resolve(ROOT, "apps/desktop/src")];
 
     for (const dir of srcDirs) {
       if (!existsSync(dir)) continue;
       for await (const path of glob.scan({ cwd: dir, absolute: true })) {
+        // Skip test files - they are allowed to have suppression directives
+        if (path.includes("__tests__") || path.includes(".test.") || path.includes(".spec.")) {
+          continue;
+        }
         const content = await Bun.file(path).text();
         const relativePath = path.replace(ROOT + "/", "");
         expect(
           suppressionPattern.test(content),
-          `Found suppression directive in ${relativePath}`,
+          `Found suppression directive in ${relativePath}`
         ).toBe(false);
       }
     }

@@ -1,5 +1,10 @@
 import { describe, test, expect } from "bun:test";
-import { LaneRegistry, DuplicateLaneError, LaneNotFoundError, LaneCapacityExceededError } from "../../src/lanes/registry.js";
+import {
+  LaneRegistry,
+  DuplicateLaneError,
+  LaneNotFoundError,
+  LaneCapacityExceededError,
+} from "../../src/lanes/registry.js";
 import type { LaneRecord } from "../../src/lanes/registry.js";
 
 function makeRecord(overrides: Partial<LaneRecord> = {}): LaneRecord {

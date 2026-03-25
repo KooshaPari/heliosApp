@@ -1,11 +1,121 @@
-// FR-004, FR-010: SLO violation detection, rate-limited event emission, and periodic check loop.
+// FR-003, FR-004, FR-010: SLO definitions/checks, violation detection,
+// rate-limited event emission, and periodic check loop.
 
-import type { SLODefinition, SLOViolationEvent } from "./types.js";
+import type { PercentileBucket, SLODefinition, SLOViolationEvent } from "./types.js";
 import type { MetricsRegistry } from "./metrics.js";
 import { computePercentiles } from "./percentiles.js";
 
+// ---------------------------------------------------------------------------
+// Constitution SLO definitions (frozen for immutability)
+// ---------------------------------------------------------------------------
+
+export const SLO_DEFINITIONS: readonly SLODefinition[] = Object.freeze([
+  {
+    metric: "input-to-echo",
+    percentile: "p50" as const,
+    threshold: 30,
+    unit: "ms",
+  },
+  {
+    metric: "input-to-echo",
+    percentile: "p95" as const,
+    threshold: 100,
+    unit: "ms",
+  },
+  {
+    metric: "render-frame",
+    percentile: "p95" as const,
+    threshold: 16,
+    unit: "ms",
+  },
+  {
+    metric: "render-frame",
+    percentile: "p99" as const,
+    threshold: 33,
+    unit: "ms",
+  },
+  { metric: "fps", percentile: "p50" as const, threshold: 60, unit: "fps" },
+  { metric: "memory", percentile: "p95" as const, threshold: 500, unit: "MB" },
+  {
+    metric: "bus-dispatch",
+    percentile: "p95" as const,
+    threshold: 1,
+    unit: "ms",
+  },
+]);
+
+/** Return SLO definitions for a given metric name. */
+export function getSLOsForMetric(metric: string): SLODefinition[] {
+  return SLO_DEFINITIONS.filter(d => d.metric === metric);
+}
+
+/** Check result from a single SLO against a percentile bucket. */
+export interface SLOCheckResult {
+  passed: boolean;
+  actual: number;
+  threshold: number;
+  metric: string;
+  percentile: string;
+}
+
+/**
+ * Check a single SLO definition against a percentile bucket.
+ * For "fps" unit, the check is inverted (actual must be >= threshold).
+ */
+export function checkSLO(slo: SLODefinition, bucket: PercentileBucket): SLOCheckResult {
+  const actual = bucket[slo.percentile];
+  const passed =
+    bucket.count === 0
+      ? true
+      : slo.unit === "fps"
+        ? actual >= slo.threshold
+        : actual <= slo.threshold;
+
+  return {
+    passed,
+    actual,
+    threshold: slo.threshold,
+    metric: slo.metric,
+    percentile: slo.percentile,
+  };
+}
+
 /** Function signature for publishing events to the bus. */
 export type BusPublishFn = (topic: string, payload: unknown) => void | Promise<void>;
+
+export const SLO_DEFINITIONS: readonly SLODefinition[] = Object.freeze([
+  { metric: "input-to-echo", percentile: "p50", threshold: 30, unit: "ms" },
+  { metric: "input-to-echo", percentile: "p95", threshold: 60, unit: "ms" },
+  { metric: "input-to-commit", percentile: "p50", threshold: 50, unit: "ms" },
+  { metric: "input-to-commit", percentile: "p95", threshold: 100, unit: "ms" },
+  { metric: "frame-time", percentile: "p95", threshold: 16.7, unit: "ms" },
+  { metric: "fps", percentile: "p50", threshold: 60, unit: "fps" },
+  { metric: "memory", percentile: "p95", threshold: 500, unit: "MB" },
+]);
+
+export interface SLOCheckResult {
+  readonly passed: boolean;
+  readonly actual: number;
+}
+
+export function getSLOsForMetric(metric: string): SLODefinition[] {
+  return SLO_DEFINITIONS.filter((definition) => definition.metric === metric);
+}
+
+export function checkSLO(
+  definition: SLODefinition,
+  stats: PercentileBucket,
+): SLOCheckResult {
+  if (stats.count === 0) {
+    return { passed: true, actual: 0 };
+  }
+
+  const actual = stats[definition.percentile];
+  const passed =
+    definition.unit === "fps" ? actual >= definition.threshold : actual <= definition.threshold;
+
+  return { passed, actual };
+}
 
 /**
  * Monitors registered metrics against SLO definitions, emitting rate-limited
@@ -23,11 +133,7 @@ export class SLOMonitor {
   private intervalHandle: ReturnType<typeof setInterval> | undefined = undefined;
   private running = false;
 
-  constructor(
-    registry: MetricsRegistry,
-    definitions: SLODefinition[],
-    busPublish?: BusPublishFn,
-  ) {
+  constructor(registry: MetricsRegistry, definitions: SLODefinition[], busPublish?: BusPublishFn) {
     this.registry = registry;
     this.definitions = definitions;
     this.busPublish = busPublish;
@@ -58,8 +164,8 @@ export class SLOMonitor {
         continue;
       }
 
-      const actual = stats[def.percentile];
-      if (actual <= def.threshold) {
+      const { actual, passed } = checkSLO(def, stats);
+      if (passed) {
         // Within SLO — no violation.
         continue;
       }
@@ -90,7 +196,7 @@ export class SLOMonitor {
           const result = this.busPublish("perf.slo_violation", event);
           // If async, catch errors without blocking.
           if (result && typeof (result as Promise<void>).catch === "function") {
-            (result as Promise<void>).catch((err) => {
+            (result as Promise<void>).catch(err => {
               console.error("[slo] Bus publish error:", err);
             });
           }

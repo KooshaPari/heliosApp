@@ -1,9 +1,8 @@
-import { AuditEvent } from './event';
+import type { AuditEvent } from './event';
 import { AuditRingBuffer } from './ring-buffer';
+import { createRetentionPolicyConfig, type RetentionPolicyConfig } from '../config/retention.js';
+import type { LocalBusEnvelope } from '../protocol/types.js';
 
-/**
- * Extended metrics including ring buffer and overflow tracking.
- */
 export interface AuditSinkMetrics {
   totalEventsWritten: number;
   bufferHighWaterMark: number;
@@ -14,62 +13,71 @@ export interface AuditSinkMetrics {
   sqliteRetryCount?: number;
 }
 
-/**
- * Storage backend interface for persisting audit events.
- * Implemented by WP02 (SQLite storage).
- */
 export interface AuditStorage {
   persist(events: AuditEvent[]): Promise<void>;
 }
 
-/**
- * Append-only sink for audit events.
- * Never blocks, never drops events, guarantees delivery.
- */
 export interface AuditSink {
-  /**
-   * Write an audit event asynchronously.
-   * Non-blocking: returns immediately, persists in background.
-   * Never throws or drops events; buffers on failure and retries.
-   *
-   * @param event - AuditEvent to persist
-   */
   write(event: AuditEvent): Promise<void>;
-
-  /**
-   * Force flush all buffered events to persistent storage.
-   * Blocks until all events are persisted.
-   *
-   * @throws if persistence fails after retries
-   */
   flush(): Promise<void>;
-
-  /**
-   * Get count of events waiting to be persisted.
-   *
-   * @returns number of buffered events
-   */
   getBufferedCount(): number;
-
-  /**
-   * Get current metrics for monitoring.
-   *
-   * @returns AuditSinkMetrics
-   */
   getMetrics(): AuditSinkMetrics;
 }
 
-/**
- * Default implementation of AuditSink with ring buffer and SQLite persistence.
- * Integrates WP01 (sink) with WP02 (ring buffer and storage).
- */
+export type AuditOutcome = 'accepted' | 'rejected';
+
+export type AuditRecord = {
+  recorded_at: string;
+  sequence: number | null;
+  outcome: AuditOutcome;
+  reason: string | null;
+  envelope: LocalBusEnvelope | Record<string, unknown>;
+};
+
+export type AuditFilter = {
+  workspace_id?: string;
+  lane_id?: string;
+  session_id?: string;
+  correlation_id?: string;
+};
+
+export type AuditBundle = {
+  generated_at: string;
+  filters: AuditFilter;
+  count: number;
+  records: AuditRecord[];
+};
+
+export type AuditExportRecord = {
+  recorded_at: string;
+  sequence: number | null;
+  outcome: AuditOutcome;
+  reason: string | null;
+  envelope_id: string;
+  envelope_type: string;
+  correlation_id: string | null;
+  workspace_id: string | null;
+  lane_id: string | null;
+  session_id: string | null;
+  terminal_id: string | null;
+  method_or_topic: string | null;
+  envelope: LocalBusEnvelope | Record<string, unknown>;
+};
+
 export class DefaultAuditSink implements AuditSink {
   private buffer: AuditEvent[] = [];
   private ringBuffer: AuditRingBuffer;
+  private storage: AuditStorage;
+  readonly records: AuditRecord[] = [];
+  retentionPolicy: RetentionPolicyConfig = {
+    retention_days: 90,
+    redacted_fields: [],
+    exempt_topics: [],
+  };
   private readonly MAX_BUFFER_SIZE = 10_000;
   private readonly RETRY_BACKOFF_MS = 100;
   private readonly MAX_RETRIES = 5;
-  private readonly FLUSH_INTERVAL_MS = 10_000; // 10 seconds
+  private readonly FLUSH_INTERVAL_MS = 10_000;
 
   private metrics: AuditSinkMetrics = {
     totalEventsWritten: 0,
@@ -86,74 +94,83 @@ export class DefaultAuditSink implements AuditSink {
   private overflowQueue: AuditEvent[] = [];
 
   constructor(
-    private storage: AuditStorage,
-    ringBufferCapacity: number = 10_000,
+    storageOrConfig?: AuditStorage | Record<string, unknown>,
+    ringBufferCapacity: number = 10_000
   ) {
+    if (storageOrConfig && typeof (storageOrConfig as AuditStorage).persist === "function") {
+      this.storage = storageOrConfig as AuditStorage;
+    } else {
+      this.storage = new NoOpAuditStorage();
+      if (
+        storageOrConfig &&
+        typeof storageOrConfig === "object" &&
+        "retention_days" in storageOrConfig
+      ) {
+        this.retentionPolicy = {
+          ...this.retentionPolicy,
+          retention_days: storageOrConfig.retention_days as number,
+        };
+      }
+    }
     this.ringBuffer = new AuditRingBuffer(ringBufferCapacity);
     this.startPeriodicFlush();
   }
 
+  async append(record: AuditRecord): Promise<void> {
+    this.records.push(record);
+  }
+
+  getRecords(): AuditRecord[] {
+    return this.records;
+  }
+
   async write(event: AuditEvent): Promise<void> {
-    // Non-blocking: push to ring buffer (< 1ms)
     this.metrics.totalEventsWritten++;
     const evicted = this.ringBuffer.push(event);
 
-    // If an event was evicted from ring buffer, persist it immediately to SQLite
     if (evicted) {
-      this.metrics.eventsOverflowed!++;
+      this.metrics.eventsOverflowed = (this.metrics.eventsOverflowed ?? 0) + 1;
       this.overflowQueue.push(evicted);
-
-      // Try to persist overflow immediately
       this.persistOverflow().catch((err) => {
         console.error('[AuditSink] Overflow persistence failed:', err);
       });
     }
 
-    // Also buffer for periodic flush
     this.buffer.push(event);
-
-    // Update high-water mark
     if (this.buffer.length > this.metrics.bufferHighWaterMark) {
       this.metrics.bufferHighWaterMark = this.buffer.length;
     }
 
-    // Check if buffer is at capacity
     if (this.buffer.length >= this.MAX_BUFFER_SIZE) {
-      // Trigger immediate persistence without awaiting
       this.persistWithRetry().catch((err) => {
-        // Log error but do not throw; event stays in buffer
         console.error('[AuditSink] Persistence failed, events retained in buffer:', err);
       });
     }
   }
 
   async flush(): Promise<void> {
-    // Persist all buffered events and overflow queue
     if (this.buffer.length === 0 && this.overflowQueue.length === 0) {
       return;
     }
 
-    // Keep trying until all events are persisted
     let retries = 0;
-    while ((this.buffer.length > 0 || this.overflowQueue.length > 0) && retries < this.MAX_RETRIES) {
+    while (
+      (this.buffer.length > 0 || this.overflowQueue.length > 0) &&
+      retries < this.MAX_RETRIES
+    ) {
       try {
-        // First flush overflow queue
         if (this.overflowQueue.length > 0) {
           await this.persistOverflow();
         }
-
-        // Then flush main buffer
         if (this.buffer.length > 0) {
           await this.persistWithRetry();
         }
-
         break;
       } catch (err) {
-        retries++;
+        retries += 1;
         if (retries >= this.MAX_RETRIES) {
           throw new Error(`[AuditSink] Failed to flush after ${this.MAX_RETRIES} retries: ${err}`);
         }
-        // Wait before retry
         await new Promise((resolve) => setTimeout(resolve, this.RETRY_BACKOFF_MS * retries));
       }
     }
@@ -167,79 +184,57 @@ export class DefaultAuditSink implements AuditSink {
     return { ...this.metrics };
   }
 
-  /**
-   * Persist buffered events with exponential backoff retry.
-   * Private method for internal use.
-   */
+  destroy(): void {
+    this.stopPeriodicFlush();
+  }
+
   private async persistWithRetry(): Promise<void> {
     if (this.persistenceInProgress || this.buffer.length === 0) {
       return;
     }
 
     this.persistenceInProgress = true;
-
     try {
       let retries = 0;
-
       while (retries < this.MAX_RETRIES) {
         try {
-          // Snapshot buffer for persistence
           const eventsToPersist = [...this.buffer];
-
-          // Persist to storage backend
           await this.storage.persist(eventsToPersist);
-
-          // Clear buffer on success
           this.buffer = [];
           break;
-        } catch (err) {
-          this.metrics.persistenceFailures++;
-          this.metrics.retryCount++;
-
-          retries++;
+        } catch {
+          this.metrics.persistenceFailures += 1;
+          this.metrics.retryCount += 1;
+          retries += 1;
           if (retries < this.MAX_RETRIES) {
-            // Exponential backoff
             await new Promise((resolve) =>
               setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1)),
             );
           }
         }
       }
-
-      if (this.buffer.length > 0) {
-        // Events still in buffer after retries; they will be retried on next write
-        console.warn('[AuditSink] Events retained in buffer after retries; will retry on next write');
-      }
     } finally {
       this.persistenceInProgress = false;
     }
   }
 
-  /**
-   * Persist overflow events to SQLite.
-   */
   private async persistOverflow(): Promise<void> {
     if (this.overflowQueue.length === 0) {
       return;
     }
 
     let retries = 0;
-
     while (retries < this.MAX_RETRIES && this.overflowQueue.length > 0) {
       try {
         const eventsToPersist = [...this.overflowQueue];
         await this.storage.persist(eventsToPersist);
-
-        // Clear overflow queue on success
         this.overflowQueue = [];
         break;
-      } catch (err) {
-        this.metrics.sqliteWriteFailures!++;
-        this.metrics.sqliteRetryCount!++;
-
-        retries++;
+      } catch {
+        this.metrics.sqliteWriteFailures = (this.metrics.sqliteWriteFailures ?? 0) + 1;
+        this.metrics.sqliteRetryCount = (this.metrics.sqliteRetryCount ?? 0) + 1;
+        retries += 1;
         if (retries < this.MAX_RETRIES) {
-          // Exponential backoff
           await new Promise((resolve) =>
             setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1)),
           );
@@ -248,43 +243,192 @@ export class DefaultAuditSink implements AuditSink {
     }
   }
 
-  /**
-   * Start periodic flush timer.
-   */
   private startPeriodicFlush(): void {
     this.flushTimer = setInterval(() => {
       if (this.buffer.length > 0 || this.overflowQueue.length > 0) {
-        this.persistWithRetry().catch((err) => {
-          console.error('[AuditSink] Periodic flush failed:', err);
+        this.persistWithRetry().catch(err => {
+          console.error("[AuditSink] Periodic flush failed:", err);
         });
       }
     }, this.FLUSH_INTERVAL_MS) as unknown as number;
   }
 
-  /**
-   * Stop periodic flush timer.
-   */
   private stopPeriodicFlush(): void {
     if (this.flushTimer !== null) {
       clearInterval(this.flushTimer);
       this.flushTimer = null;
     }
   }
+}
 
-  /**
-   * Cleanup resources.
-   */
-  destroy(): void {
-    this.stopPeriodicFlush();
+export class NoOpAuditStorage implements AuditStorage {
+  async persist(_events: AuditEvent[]): Promise<void> {
+    // Intentionally discarded.
   }
 }
 
-/**
- * No-op storage for testing and development.
- * Events are buffered but never persisted.
- */
-export class NoOpAuditStorage implements AuditStorage {
-  async persist(_events: AuditEvent[]): Promise<void> {
-    // Do nothing; events are discarded
+export class InMemoryAuditSink {
+  private readonly retentionPolicy: RetentionPolicyConfig;
+  private readonly records: AuditRecord[] = [];
+
+  constructor(input: Partial<RetentionPolicyConfig> = {}) {
+    this.retentionPolicy = createRetentionPolicyConfig(input);
   }
+
+  async append(record: AuditRecord): Promise<void> {
+    this.records.push({
+      ...record,
+      envelope: sanitizeEnvelope(record.envelope, this.retentionPolicy.redacted_fields),
+    });
+  }
+
+  getRecords(): AuditRecord[] {
+    return [...this.records];
+  }
+
+  query(filter: AuditFilter = {}): AuditRecord[] {
+    return this.records.filter((record) => {
+      const envelope = record.envelope as Record<string, unknown>;
+      if (filter.workspace_id && getString(envelope.workspace_id) !== filter.workspace_id) {
+        return false;
+      }
+      if (filter.lane_id && getString(envelope.lane_id) !== filter.lane_id) {
+        return false;
+      }
+      if (filter.session_id && getString(envelope.session_id) !== filter.session_id) {
+        return false;
+      }
+      if (filter.correlation_id && getString(envelope.correlation_id) !== filter.correlation_id) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  exportBundle(filter: AuditFilter = {}): AuditBundle {
+    const records = this.query(filter);
+    return {
+      generated_at: new Date().toISOString(),
+      filters: { ...filter },
+      count: records.length,
+      records,
+    };
+  }
+
+  async enforceRetention(now: Date = new Date()): Promise<{ deleted_count: number }> {
+    const keep: AuditRecord[] = [];
+    const expired: AuditRecord[] = [];
+
+    for (const record of this.records) {
+      if (shouldRetainRecord(record, this.retentionPolicy, now)) {
+        keep.push(record);
+      } else {
+        expired.push(record);
+      }
+    }
+
+    this.records.length = 0;
+    this.records.push(...keep);
+
+    if (expired.length > 0) {
+      this.records.push(buildDeletionProofRecord(expired.length, now));
+    }
+
+    return { deleted_count: expired.length };
+  }
+
+  async exportRecords(): Promise<AuditExportRecord[]> {
+    return this.records.map(record => toExportRecord(record, this.retentionPolicy));
+  }
+}
+
+function toExportRecord(record: AuditRecord, policy: RetentionPolicyConfig): AuditExportRecord {
+  const envelope = sanitizeEnvelope(record.envelope, policy.redacted_fields);
+  const envelopeObject = envelope as Record<string, unknown>;
+  const methodOrTopic = getString(envelopeObject.method) ?? getString(envelopeObject.topic) ?? null;
+
+  return {
+    recorded_at: record.recorded_at,
+    sequence: record.sequence,
+    outcome: record.outcome,
+    reason: record.reason,
+    envelope_id: getString(envelopeObject.id) ?? 'unknown',
+    envelope_type: getString(envelopeObject.type) ?? 'unknown',
+    correlation_id: getString(envelopeObject.correlation_id) ?? null,
+    workspace_id: getString(envelopeObject.workspace_id) ?? null,
+    lane_id: getString(envelopeObject.lane_id) ?? null,
+    session_id: getString(envelopeObject.session_id) ?? null,
+    terminal_id: getString(envelopeObject.terminal_id) ?? null,
+    method_or_topic: methodOrTopic,
+    envelope,
+  };
+}
+
+function shouldRetainRecord(record: AuditRecord, policy: RetentionPolicyConfig, now: Date): boolean {
+  const topic = readEnvelopeTopic(record.envelope);
+  if (topic && policy.exempt_topics.includes(topic)) {
+    return true;
+  }
+
+  const recordedAtMs = Date.parse(record.recorded_at);
+  if (Number.isNaN(recordedAtMs)) {
+    return true;
+  }
+
+  const ttlMs = policy.retention_days * 24 * 60 * 60 * 1000;
+  return now.getTime() - recordedAtMs <= ttlMs;
+}
+
+function readEnvelopeTopic(envelope: LocalBusEnvelope | Record<string, unknown>): string | null {
+  if (!envelope || typeof envelope !== 'object') {
+    return null;
+  }
+  return getString((envelope as Record<string, unknown>).topic) ?? null;
+}
+
+function buildDeletionProofRecord(expiredCount: number, now: Date): AuditRecord {
+  return {
+    recorded_at: now.toISOString(),
+    sequence: null,
+    outcome: 'accepted',
+    reason: 'retention_enforced',
+    envelope: {
+      id: `audit.retention.deleted:${now.getTime()}`,
+      type: 'event',
+      ts: now.toISOString(),
+      topic: 'audit.retention.deleted',
+      payload: {
+        deleted_count: expiredCount,
+      },
+    },
+  };
+}
+
+function sanitizeEnvelope(
+  envelope: LocalBusEnvelope | Record<string, unknown>,
+  redactedFields: string[],
+): LocalBusEnvelope | Record<string, unknown> {
+  const redactionSet = new Set(redactedFields.map((field) => field.toLowerCase()));
+  return deepRedact(envelope, redactionSet) as LocalBusEnvelope | Record<string, unknown>;
+}
+
+function deepRedact(value: unknown, redactionSet: ReadonlySet<string>): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => deepRedact(entry, redactionSet));
+  }
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => {
+        if (redactionSet.has(key.toLowerCase())) {
+          return [key, '[REDACTED]'];
+        }
+        return [key, deepRedact(item, redactionSet)];
+      }),
+    );
+  }
+  return value;
+}
+
+function getString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
 }

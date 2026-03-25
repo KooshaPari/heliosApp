@@ -4,7 +4,11 @@
 
 import { createSignal, onMount } from 'solid-js';
 import { ApprovalPanel } from '../components/approval/ApprovalPanel';
-import type { ApprovalRequest, ApprovalWorkflow } from '../types/approval';
+import {
+  ApprovalStatus,
+  type ApprovalRequest,
+  type ApprovalWorkflow,
+} from '../types/approval';
 
 export function ApprovalWorkflowPage() {
   const [requests, setRequests] = createSignal<ApprovalRequest[]>([]);
@@ -14,25 +18,23 @@ export function ApprovalWorkflowPage() {
   onMount(async () => {
     setRequests([]);
     setWorkflow({
-      userId: 'current-user',
+      userId: "current-user",
       totalRequests: 0,
       pendingRequests: 0,
       approvedRequests: 0,
-      rejectedRequests: 0
+      rejectedRequests: 0,
     });
     setLoading(false);
   });
 
-  const handleApprove = async (id: string) => {
-    setRequests(
-      requests().map(r => r.id === id ? { ...r, status: 'approved' as const } : r)
-    );
+  const handleApprove = (id: string) => {
+    setRequests(requests().map(r => (r.id === id ? { ...r, status: ApprovalStatus.Approved } : r)));
   };
 
-  const handleReject = async (id: string, reason: string) => {
+  const handleReject = (id: string, reason: string) => {
     setRequests(
       requests().map(r =>
-        r.id === id ? { ...r, status: 'rejected' as const, rejectedReason: reason } : r
+        r.id === id ? { ...r, status: ApprovalStatus.Rejected, rejectedReason: reason } : r
       )
     );
   };
@@ -69,11 +71,7 @@ export function ApprovalWorkflowPage() {
             </div>
           )}
 
-          <ApprovalPanel
-            requests={requests()}
-            onApprove={handleApprove}
-            onReject={handleReject}
-          />
+          <ApprovalPanel requests={requests()} onApprove={handleApprove} onReject={handleReject} />
         </div>
       )}
 

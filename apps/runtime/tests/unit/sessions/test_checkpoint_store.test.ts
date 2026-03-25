@@ -9,4 +9,3 @@ describe("checkpoint store placeholder", () => {
     await expect(store.list("session-1")).resolves.toEqual([]);
   });
 });
-

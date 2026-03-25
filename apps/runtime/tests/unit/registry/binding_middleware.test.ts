@@ -1,7 +1,11 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { BindingMiddleware } from "../../../src/registry/binding_middleware.js";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
-import { BindingState, type BindingTriple } from "../../../src/registry/binding_triple.js";
+import {
+  BindingState,
+  type BindingTriple,
+  type TerminalBinding,
+} from "../../../src/registry/binding_triple.js";
 
 describe("BindingMiddleware", () => {
   let registry: TerminalRegistry;
@@ -122,9 +126,9 @@ describe("BindingMiddleware", () => {
       registry.register("terminal-1", triple);
 
       let called = false;
-      const handler = async () => {
+      const handler = () => {
         called = true;
-        return "success";
+        return Promise.resolve("success");
       };
 
       const result = await middleware.wrapOperation("terminal-1", handler, "test");
@@ -137,7 +141,7 @@ describe("BindingMiddleware", () => {
       const handler = async () => "success";
 
       await expect(middleware.wrapOperation("terminal-nonexistent", handler)).rejects.toThrow(
-        /TERMINAL_NOT_FOUND/,
+        /TERMINAL_NOT_FOUND/
       );
     });
 
@@ -150,16 +154,14 @@ describe("BindingMiddleware", () => {
 
       registry.register("terminal-1", triple);
 
-      let receivedBinding = null;
-      const handler = async (binding) => {
-        receivedBinding = binding;
-        return "success";
-      };
+      const receivedBinding = await middleware.wrapOperation(
+        "terminal-1",
+        (binding: TerminalBinding) => {
+          return Promise.resolve(binding);
+        }
+      );
 
-      await middleware.wrapOperation("terminal-1", handler);
-
-      expect(receivedBinding).toBeDefined();
-      expect(receivedBinding?.terminalId).toBe("terminal-1");
+      expect(receivedBinding.terminalId).toBe("terminal-1");
     });
   });
 
@@ -189,7 +191,7 @@ describe("BindingMiddleware", () => {
       const handler = () => "success";
 
       expect(() => middleware.wrapOperationSync("terminal-nonexistent", handler)).toThrow(
-        /TERMINAL_NOT_FOUND/,
+        /TERMINAL_NOT_FOUND/
       );
     });
   });

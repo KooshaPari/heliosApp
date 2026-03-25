@@ -12,7 +12,11 @@ const pidsToCleanup: number[] = [];
 
 afterEach(() => {
   for (const pid of pidsToCleanup) {
-    try { process.kill(pid, "SIGKILL"); } catch { /* already exited */ }
+    try {
+      process.kill(pid, "SIGKILL");
+    } catch {
+      /* already exited */
+    }
   }
   pidsToCleanup.length = 0;
 });
@@ -38,12 +42,12 @@ describe("PTY lifecycle integration", () => {
     expect(record.pid).toBeGreaterThan(0);
 
     // Verify spawned event was emitted.
-    const spawnedEvt = bus.events.find((e) => e.topic === "pty.spawned");
+    const spawnedEvt = bus.events.find(e => e.topic === "pty.spawned");
     expect(spawnedEvt).toBeDefined();
     expect(spawnedEvt!.payload["pid"]).toBe(record.pid);
 
     // Verify state.changed event.
-    const stateEvt = bus.events.find((e) => e.topic === "pty.state.changed");
+    const stateEvt = bus.events.find(e => e.topic === "pty.state.changed");
     expect(stateEvt).toBeDefined();
 
     // Clean up.
@@ -74,14 +78,19 @@ describe("PTY lifecycle integration", () => {
     pidsToCleanup.push(record.pid);
 
     // Register the external process for write operations.
-    mgr.registerProcess(record.ptyId, proc);
+    mgr.registerProcess(
+      record.ptyId,
+      proc as unknown as {
+        readonly stdin: { write(data: Uint8Array | string): number };
+      }
+    );
 
     // Write input.
     const input = new TextEncoder().encode("echo hello\n");
     mgr.writeInput(record.ptyId, input);
 
     // Give it a moment.
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 200));
 
     await mgr.terminate(record.ptyId, { gracePeriodMs: 500 });
   });
@@ -104,9 +113,12 @@ describe("PTY lifecycle integration", () => {
 
     mgr.resize(record.ptyId, 120, 40);
 
-    const resizeEvt = bus.events.find((e) => e.topic === "pty.resized");
+    const resizeEvt = bus.events.find(e => e.topic === "pty.resized");
     expect(resizeEvt).toBeDefined();
-    expect(resizeEvt!.payload["newDimensions"]).toEqual({ cols: 120, rows: 40 });
+    expect(resizeEvt!.payload["newDimensions"]).toEqual({
+      cols: 120,
+      rows: 40,
+    });
 
     const updated = mgr.get(record.ptyId);
     expect(updated?.dimensions).toEqual({ cols: 120, rows: 40 });
@@ -136,7 +148,7 @@ describe("PTY lifecycle integration", () => {
     }
 
     // Wait for process to die.
-    await new Promise((r) => setTimeout(r, 300));
+    await new Promise(r => setTimeout(r, 300));
 
     // Terminate should be idempotent / handle dead process gracefully.
     await mgr.terminate(record.ptyId, { gracePeriodMs: 200 });
@@ -150,9 +162,24 @@ describe("PTY lifecycle integration", () => {
     const mgr = new PtyManager(10, bus);
 
     const records = await Promise.all([
-      mgr.spawn({ shell: "/bin/sh", laneId: "lane-1", sessionId: "sess-1", terminalId: "term-1" }),
-      mgr.spawn({ shell: "/bin/sh", laneId: "lane-1", sessionId: "sess-1", terminalId: "term-2" }),
-      mgr.spawn({ shell: "/bin/sh", laneId: "lane-2", sessionId: "sess-2", terminalId: "term-3" }),
+      mgr.spawn({
+        shell: "/bin/sh",
+        laneId: "lane-1",
+        sessionId: "sess-1",
+        terminalId: "term-1",
+      }),
+      mgr.spawn({
+        shell: "/bin/sh",
+        laneId: "lane-1",
+        sessionId: "sess-1",
+        terminalId: "term-2",
+      }),
+      mgr.spawn({
+        shell: "/bin/sh",
+        laneId: "lane-2",
+        sessionId: "sess-2",
+        terminalId: "term-3",
+      }),
     ]);
 
     for (const r of records) {
@@ -163,7 +190,7 @@ describe("PTY lifecycle integration", () => {
     expect(mgr.getByLane("lane-2")).toHaveLength(1);
 
     // Verify each has a unique ptyId.
-    const ids = new Set(records.map((r) => r.ptyId));
+    const ids = new Set(records.map(r => r.ptyId));
     expect(ids.size).toBe(3);
 
     // Verify each has a buffer.
@@ -173,7 +200,7 @@ describe("PTY lifecycle integration", () => {
     }
 
     // Terminate all.
-    await Promise.all(records.map((r) => mgr.terminate(r.ptyId, { gracePeriodMs: 500 })));
+    await Promise.all(records.map(r => mgr.terminate(r.ptyId, { gracePeriodMs: 500 })));
 
     for (const r of records) {
       expect(mgr.get(r.ptyId)).toBeUndefined();

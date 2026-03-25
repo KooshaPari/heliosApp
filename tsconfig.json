@@ -11,7 +11,7 @@
     "resolveJsonModule": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["bun-types", "node", "@playwright/test"]
+    "types": ["bun-types", "node", "@playwright/test", "vitest/globals"]
   },
   "include": [
     "apps/**/*.ts",

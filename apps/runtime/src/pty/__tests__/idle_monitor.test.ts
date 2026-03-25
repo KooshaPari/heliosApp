@@ -8,7 +8,7 @@ import { InMemoryBusPublisher } from "../events.js";
 function makeRecord(
   registry: PtyRegistry,
   ptyId: string,
-  overrides?: Partial<PtyRecord>,
+  overrides?: Partial<PtyRecord>
 ): PtyRecord {
   const record: PtyRecord = {
     ptyId,
@@ -48,7 +48,7 @@ describe("IdleMonitor", () => {
     expect(lifecycle.state).toBe("throttled");
     expect(registry.get("pty-1")?.state).toBe("throttled");
 
-    const topics = bus.events.map((e) => e.topic);
+    const topics = bus.events.map(e => e.topic);
     expect(topics).toContain("pty.idle_timeout");
     expect(topics).toContain("pty.state.changed");
   });

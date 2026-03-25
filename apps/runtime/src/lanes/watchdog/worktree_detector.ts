@@ -31,12 +31,8 @@ export class WorktreeDetector {
         // Check if lane is active in registry
         const lane = this.findActiveLane(laneId);
 
-        // Exclude transient states
+        // Any lane that still exists in the registry is not orphaned.
         if (lane) {
-          if (lane.state === "cleaning" || lane.state === "recovering") {
-            continue; // Not orphaned, just in transient state
-          }
-          // Lane is active and not in transient state
           continue;
         }
 
@@ -50,15 +46,16 @@ export class WorktreeDetector {
         });
       }
     } catch (error) {
-      console.error("Failed to detect orphaned worktrees:", error);
+      // biome-ignore lint/suspicious/noConsole: Read failures are expected in some environments and should be surfaced for operator visibility.
+      console.warn(`Failed to read worktree directory ${this.baseDir}: ${String(error)}`);
     }
 
     return orphans;
   }
 
   private extractLaneId(dirName: string): string | null {
-    // Lane IDs are typically in directory names like "lane-abc123"
-    const match = dirName.match(/^(lane-[a-z0-9]+)$/i);
+    // Accept both legacy `lane-...` and current `lane_...` naming.
+    const match = dirName.match(/^(lane[-_][a-z0-9_]+)$/i);
     return match ? match[1] : null;
   }
 

@@ -8,13 +8,17 @@ function createLifecycleCommand(overrides: Partial<LocalBusEnvelope> = {}): Loca
     id: "cmd-1",
     type: "command",
     ts: "2026-02-26T00:00:00.000Z",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
     workspace_id: "ws-1",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
     lane_id: "lane-1",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
     session_id: "session-1",
+    // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
     correlation_id: "corr-1",
     method: "session.attach",
     payload: {},
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -35,7 +39,7 @@ describe("protocol validator", () => {
     await expect(bus.request(command)).resolves.toMatchObject({
       type: "response",
       status: "error",
-      error: { code: "MISSING_CORRELATION_ID" }
+      error: { code: "MISSING_CORRELATION_ID" },
     });
   });
 
@@ -46,7 +50,7 @@ describe("protocol validator", () => {
         type: "event",
         ts: "2026-02-26T00:00:00",
         topic: "workspace.opened",
-        payload: {}
+        payload: {},
       })
     ).toThrow("Envelope field 'ts' must be an RFC3339 timestamp with timezone");
   });
@@ -57,7 +61,7 @@ describe("protocol validator", () => {
       type: "event",
       ts: "2026-02-26T00:00:00+00:00",
       topic: "workspace.opened",
-      payload: {}
+      payload: {},
     });
 
     expect(envelope.ts).toBe("2026-02-26T00:00:00+00:00");
@@ -71,7 +75,7 @@ describe("protocol validator", () => {
         ts: "2026-02-26T00:00:00.000Z",
         timestamp: "2026-02-26T00:00:00",
         topic: "workspace.opened",
-        payload: {}
+        payload: {},
       })
     ).toThrow("Envelope field 'timestamp' must be an RFC3339 timestamp with timezone");
   });
@@ -83,10 +87,60 @@ describe("protocol validator", () => {
       ts: "2026-02-26T00:00:00.000Z",
       timestamp: "2026-02-26T00:00:00+00:00",
       topic: "workspace.opened",
-      payload: {}
+      payload: {},
     });
 
-    expect(envelope.timestamp).toBe("2026-02-26T00:00:00+00:00");
+    expect(envelope.timestamp as unknown).toBe("2026-02-26T00:00:00+00:00");
+  });
+
+  test("rejects timestamps without RFC3339 timezone", () => {
+    expect(() =>
+      validateEnvelope({
+        id: "evt-1",
+        type: "event",
+        ts: "2026-02-26T00:00:00",
+        topic: "workspace.opened",
+        payload: {},
+      })
+    ).toThrow("Envelope field 'ts' must be an RFC3339 timestamp with timezone");
+  });
+
+  test("accepts RFC3339 timestamps with explicit timezone offset", () => {
+    const envelope = validateEnvelope({
+      id: "evt-1",
+      type: "event",
+      ts: "2026-02-26T00:00:00+00:00",
+      topic: "workspace.opened",
+      payload: {},
+    });
+
+    expect(envelope.ts).toBe("2026-02-26T00:00:00+00:00");
+  });
+
+  test("rejects optional timestamp without RFC3339 timezone", () => {
+    expect(() =>
+      validateEnvelope({
+        id: "evt-1",
+        type: "event",
+        ts: "2026-02-26T00:00:00.000Z",
+        timestamp: "2026-02-26T00:00:00",
+        topic: "workspace.opened",
+        payload: {},
+      })
+    ).toThrow("Envelope field 'timestamp' must be an RFC3339 timestamp with timezone");
+  });
+
+  test("accepts optional timestamp with RFC3339 timezone", () => {
+    const envelope = validateEnvelope({
+      id: "evt-1",
+      type: "event",
+      ts: "2026-02-26T00:00:00.000Z",
+      timestamp: "2026-02-26T00:00:00+00:00",
+      topic: "workspace.opened",
+      payload: {},
+    });
+
+    expect(envelope.timestamp as unknown).toBe("2026-02-26T00:00:00+00:00");
   });
 });
 
@@ -114,16 +168,20 @@ describe("protocol sequencing and audit", () => {
         id: "evt-1",
         type: "event",
         ts: "2026-02-26T00:00:00.000Z",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         workspace_id: "ws-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         lane_id: "lane-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         session_id: "session-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         correlation_id: "corr-1",
         topic: "session.attached",
-        payload: {}
+        payload: {},
       })
     ).rejects.toMatchObject({
       name: "ProtocolValidationError",
-      code: "ORDERING_VIOLATION"
+      code: "ORDERING_VIOLATION",
     });
   });
 
@@ -133,11 +191,14 @@ describe("protocol sequencing and audit", () => {
       id: "evt-accepted",
       type: "event",
       ts: "2026-02-26T00:00:00.000Z",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
       workspace_id: "ws-1",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
       lane_id: "lane-1",
+      // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
       correlation_id: "corr-accepted",
       topic: "lane.create.started",
-      payload: {}
+      payload: {},
     });
 
     await expect(
@@ -145,15 +206,18 @@ describe("protocol sequencing and audit", () => {
         id: "evt-rejected",
         type: "event",
         ts: "2026-02-26T00:00:00.000Z",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         workspace_id: "ws-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         lane_id: "lane-1",
+        // biome-ignore lint/style/useNamingConvention: Protocol fixtures use protocol envelope snake_case keys.
         correlation_id: "corr-accepted",
         topic: "lane.create.started",
-        payload: {}
+        payload: {},
       })
     ).rejects.toMatchObject({
       name: "ProtocolValidationError",
-      code: "ORDERING_VIOLATION"
+      code: "ORDERING_VIOLATION",
     });
 
     const records = await bus.getAuditRecords();
@@ -174,7 +238,7 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-lane-attach",
         topic: "lane.attach.started",
-        payload: {}
+        payload: {},
       })
     ).resolves.toBeUndefined();
 
@@ -187,7 +251,7 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-lane-attach",
         topic: "lane.attached",
-        payload: {}
+        payload: {},
       })
     ).resolves.toBeUndefined();
 
@@ -200,7 +264,7 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-lane-attach",
         topic: "lane.attach.started",
-        payload: {}
+        payload: {},
       })
     ).resolves.toBeUndefined();
 
@@ -213,7 +277,7 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-lane-cleanup",
         topic: "lane.cleanup.started",
-        payload: {}
+        payload: {},
       })
     ).resolves.toBeUndefined();
 
@@ -226,7 +290,7 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-lane-cleanup",
         topic: "lane.cleaned",
-        payload: {}
+        payload: {},
       })
     ).resolves.toBeUndefined();
 
@@ -239,7 +303,7 @@ describe("protocol sequencing and audit", () => {
         lane_id: "lane-1",
         correlation_id: "corr-lane-cleanup",
         topic: "lane.cleanup.started",
-        payload: {}
+        payload: {},
       })
     ).resolves.toBeUndefined();
   });
@@ -254,7 +318,7 @@ describe("protocol sequencing and audit", () => {
         method: "lane.attach",
         lane_id: laneId,
         correlation_id: "corr-lane-authoritative",
-        payload: {}
+        payload: {},
       })
     );
 
@@ -267,7 +331,7 @@ describe("protocol sequencing and audit", () => {
         method: "session.attach",
         session_id: sessionId,
         correlation_id: "corr-session-authoritative",
-        payload: {}
+        payload: {},
       })
     );
 
@@ -280,7 +344,8 @@ describe("protocol sequencing and audit", () => {
     const bus = new InMemoryLocalBus();
     const response = await bus.request(
       createLifecycleCommand({
-        payload: { force_error: true }
+        // biome-ignore lint/style/useNamingConvention: Protocol fixture payload uses snake_case.
+        payload: { force_error: true },
       })
     );
 

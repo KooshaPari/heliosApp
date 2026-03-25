@@ -24,18 +24,12 @@ export class MuxRegistry {
   bind(sessionName: string, laneId: string, session: MuxSession): void {
     const existingBySession = this.bySession.get(sessionName);
     if (existingBySession) {
-      throw new DuplicateBindingError(
-        `session=${sessionName}`,
-        `lane=${existingBySession.laneId}`
-      );
+      throw new DuplicateBindingError(`session=${sessionName}`, `lane=${existingBySession.laneId}`);
     }
 
     const existingByLane = this.byLane.get(laneId);
     if (existingByLane) {
-      throw new DuplicateBindingError(
-        `lane=${laneId}`,
-        `session=${existingByLane.sessionName}`
-      );
+      throw new DuplicateBindingError(`lane=${laneId}`, `session=${existingByLane.sessionName}`);
     }
 
     const binding: MuxBinding = {
@@ -82,6 +76,40 @@ export class MuxRegistry {
   }
 
   /**
+   * Compatibility shim for watchdog SessionRegistry interface.
+   * Accepts either a session name or a lane id.
+   */
+  getSession(sessionId: string): { id: string; laneId?: string } | null {
+    const bySession = this.bySession.get(sessionId);
+    if (bySession) {
+      return { id: bySession.sessionName, laneId: bySession.laneId };
+    }
+
+    const byLane = this.byLane.get(sessionId);
+    if (byLane) {
+      return { id: byLane.sessionName, laneId: byLane.laneId };
+    }
+
+    const canonicalName = `helios-lane-${sessionId}`;
+    const byCanonicalName = this.bySession.get(canonicalName);
+    if (byCanonicalName) {
+      return { id: byCanonicalName.sessionName, laneId: byCanonicalName.laneId };
+    }
+
+    return null;
+  }
+
+  /**
+   * Compatibility shim for watchdog SessionRegistry interface.
+   */
+  getSessions(): Array<{ id: string; laneId?: string }> {
+    return this.list().map((binding) => ({
+      id: binding.sessionName,
+      laneId: binding.laneId,
+    }));
+  }
+
+  /**
    * Return bindings whose sessions no longer exist in zellij.
    * Requires a ZellijCli instance to query live sessions.
    */
@@ -94,8 +122,8 @@ export class MuxRegistry {
     }
 
     const liveSessions = await this.cli.listSessions();
-    const liveNames = new Set(liveSessions.map((s) => s.name));
+    const liveNames = new Set(liveSessions.map(s => s.name));
 
-    return this.list().filter((b) => !liveNames.has(b.sessionName));
+    return this.list().filter(b => !liveNames.has(b.sessionName));
   }
 }

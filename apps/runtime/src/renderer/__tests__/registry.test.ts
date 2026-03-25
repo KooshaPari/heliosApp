@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 import {
   RendererRegistry,
   DuplicateRendererError,
@@ -7,10 +7,7 @@ import {
 import type { RendererAdapter, RendererState } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
 
-function mockAdapter(
-  id: string,
-  version = "1.0.0",
-): RendererAdapter {
+function mockAdapter(id: string, version = "1.0.0"): RendererAdapter {
   const caps: RendererCapabilities = {
     gpuAccelerated: true,
     colorDepth: 24,
@@ -56,9 +53,7 @@ describe("RendererRegistry", () => {
   it("throws on duplicate registration", () => {
     const reg = new RendererRegistry();
     reg.register(mockAdapter("ghostty"));
-    expect(() => reg.register(mockAdapter("ghostty"))).toThrow(
-      DuplicateRendererError,
-    );
+    expect(() => reg.register(mockAdapter("ghostty"))).toThrow(DuplicateRendererError);
   });
 
   it("returns undefined for unknown id", () => {

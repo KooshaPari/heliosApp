@@ -51,7 +51,8 @@ export class PtyDetector {
         });
       }
     } catch (error) {
-      console.error("Failed to detect leaked PTY processes:", error);
+      // biome-ignore lint/suspicious/noConsole: PTY detection failures are intentionally logged for operational diagnostics.
+      console.warn(`PTY leak detection failed: ${String(error)}`);
     }
 
     return orphans;
@@ -62,11 +63,7 @@ export class PtyDetector {
   > {
     try {
       // Use ps to list processes with PTY
-      const result = await execCommand("ps", [
-        "-ef",
-        "-o",
-        "pid,tty,etime,comm",
-      ]);
+      const result = await execCommand("ps", ["-ef", "-o", "pid,tty,etime,comm"]);
 
       if (result.code !== 0) {
         console.warn("ps command failed:", result.stderr);
@@ -107,7 +104,8 @@ export class PtyDetector {
 
       return processes;
     } catch (error) {
-      console.error("Failed to list PTY processes:", error);
+      // biome-ignore lint/suspicious/noConsole: PTY process enumeration is best-effort and should remain observable.
+      console.warn(`Failed to list PTY processes: ${String(error)}`);
       return [];
     }
   }
@@ -123,7 +121,7 @@ export class PtyDetector {
       if (parts.length >= 3) {
         const hourOrDay = parts[2];
         if (hourOrDay.includes("-")) {
-          const [day, hour] = hourOrDay.split("-").map((x) => parseInt(x, 10));
+          const [day, hour] = hourOrDay.split("-").map(x => parseInt(x, 10));
           seconds += (day * 24 + hour) * 3600;
         } else {
           seconds += parseInt(hourOrDay, 10) * 3600;
@@ -137,16 +135,13 @@ export class PtyDetector {
     }
   }
 
-  private isSystemProcess(proc: {
-    pid: number;
-    command: string;
-  }): boolean {
+  private isSystemProcess(proc: { pid: number; command: string }): boolean {
     // Filter out common system processes that typically have PTY
     const systemPatterns = [
       /^(kernel_task|launchd|sshd|bash|sh|zsh|tmux|screen)/i,
       /^\/usr\/libexec\//,
     ];
 
-    return systemPatterns.some((pattern) => pattern.test(proc.command));
+    return systemPatterns.some(pattern => pattern.test(proc.command));
   }
 }

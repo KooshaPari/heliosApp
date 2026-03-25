@@ -115,6 +115,7 @@ export interface ACPConfig {
   apiKey: string;
   model: string;
   baseUrl?: string;
+  healthCheckIntervalMs?: number;
   timeout?: number;
 }
 
@@ -202,7 +203,7 @@ export type A2AAdapter = ProviderAdapter<A2AConfig, A2AExecuteInput, A2AExecuteO
 export abstract class BaseProviderAdapter<
   TConfig,
   TExecuteInput,
-  TExecuteOutput
+  TExecuteOutput,
 > implements ProviderAdapter<TConfig, TExecuteInput, TExecuteOutput> {
   protected config: TConfig | null = null;
   protected healthStatus: ProviderHealthStatus = {

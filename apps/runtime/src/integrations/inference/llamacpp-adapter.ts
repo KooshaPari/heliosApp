@@ -30,11 +30,11 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
     if (request.maxTokens) args.push("-n", String(request.maxTokens));
 
     const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
-    const output = await new Response(proc.stdout).text();
+    const output = proc.stdout ? await new Response(proc.stdout).text() : "";
     const exitCode = await proc.exited;
 
     if (exitCode !== 0) {
-      const stderr = await new Response(proc.stderr).text();
+      const stderr = proc.stderr ? await new Response(proc.stderr).text() : "";
       throw new Error(`llama.cpp inference failed: ${stderr}`);
     }
 
@@ -57,8 +57,17 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
       const glob = new Bun.Glob("**/*.gguf");
       const models: ModelInfo[] = [];
       for await (const path of glob.scan(this.modelDir)) {
-        const name = path.replace(/\.gguf$/, "").split("/").pop() ?? path;
-        models.push({ id: `${this.modelDir}/${path}`, name, contextWindow: 4096, providerId: "llamacpp" });
+        const name =
+          path
+            .replace(/\.gguf$/, "")
+            .split("/")
+            .pop() ?? path;
+        models.push({
+          id: `${this.modelDir}/${path}`,
+          name,
+          contextWindow: 4096,
+          providerId: "llamacpp",
+        });
       }
       return models;
     } catch {

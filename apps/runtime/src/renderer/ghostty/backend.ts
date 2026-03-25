@@ -5,12 +5,7 @@
  * ghostty terminal emulator backend.
  */
 
-import type {
-  RendererAdapter,
-  RendererConfig,
-  RendererState,
-  RenderSurface,
-} from "../adapter.js";
+import type { RendererAdapter, RendererConfig, RendererState, RenderSurface } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
 import { GhosttyProcess } from "./process.js";
 import { GhosttySurface } from "./surface.js";
@@ -79,7 +74,7 @@ export class GhosttyBackend implements RendererAdapter {
     this.version = version;
 
     // Wire process crash events to the adapter crash handler
-    this._process.onCrash((error) => {
+    this._process.onCrash(error => {
       this._state = "errored";
       this._crashHandler?.(error);
     });
@@ -413,7 +408,7 @@ export class GhosttyBackend implements RendererAdapter {
       // Check if the process is alive
       if (this._process.isRunning()) {
         console.warn(
-          `[ghostty] Render stall detected: no frames for ${elapsed}ms, but process is alive.`,
+          `[ghostty] Render stall detected: no frames for ${elapsed}ms, but process is alive.`
         );
       }
       // If process is dead, crash detection in WP01 T002 handles it.
@@ -435,7 +430,7 @@ export class GhosttyBackend implements RendererAdapter {
   private async _pumpStream(
     ptyId: string,
     reader: ReadableStreamDefaultReader<Uint8Array>,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): Promise<void> {
     try {
       while (!signal.aborted) {

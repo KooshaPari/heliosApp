@@ -29,7 +29,13 @@ export {
   detectGpu,
 } from "./capabilities.js";
 export { GhosttyMetrics } from "./metrics.js";
-export type { FrameSample, InputLatencySample, MetricsSnapshot, MetricsConfig, MetricsPublisher } from "./metrics.js";
+export type {
+  FrameSample,
+  InputLatencySample,
+  MetricsSnapshot,
+  MetricsConfig,
+  MetricsPublisher,
+} from "./metrics.js";
 export { GhosttyInputRelay, InputRelayError } from "./input.js";
 export type { PtyWriter, GhosttyInputEvent, InputEventListener } from "./input.js";
 
@@ -67,7 +73,9 @@ export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<stri
       stdout: "pipe",
       stderr: "ignore",
     });
-    const text = await new Response(proc.stdout).text();
+    const text = await new Response(
+      proc.stdout instanceof ReadableStream ? proc.stdout : null
+    ).text();
     await proc.exited;
     const trimmed = text.trim();
     return trimmed.length > 0 ? trimmed : "unknown";
@@ -91,7 +99,7 @@ export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<stri
  */
 export async function registerGhostty(
   registry: RendererRegistry,
-  binaryPath?: string | undefined,
+  binaryPath?: string | undefined
 ): Promise<void> {
   const available = await isGhosttyAvailable(binaryPath);
 

@@ -1,15 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { LaneActions, RuntimeAPI } from '../../../src/panels/lane_actions';
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { LaneActions } from '../../../src/panels/lane_actions';
+import type { RuntimeAPI } from '../../../src/panels/lane_actions';
 
-describe('LaneActions', () => {
+describe("LaneActions", () => {
   let actions: LaneActions;
   let mockAPI: RuntimeAPI;
 
   const createMockAPI = (): RuntimeAPI => ({
-    createLane: vi.fn().mockResolvedValue({ id: 'lane-new', name: 'New Lane' }),
-    attachLane: vi.fn().mockResolvedValue(undefined),
-    detachLane: vi.fn().mockResolvedValue(undefined),
-    cleanupLane: vi.fn().mockResolvedValue(undefined),
+    createLane: mock().mockResolvedValue({ id: 'lane-new', name: 'New Lane' }),
+    attachLane: mock().mockResolvedValue(undefined),
+    detachLane: mock().mockResolvedValue(undefined),
+    cleanupLane: mock().mockResolvedValue(undefined),
   });
 
   beforeEach(() => {
@@ -23,161 +24,161 @@ describe('LaneActions', () => {
   });
 
   it('should create lane successfully', async () => {
-    const onLaneCreated = vi.fn();
+    const onLaneCreated = mock();
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onLaneCreated,
     });
 
-    await actions.createLane('ws-1');
+    await actions.createLane("ws-1");
 
-    expect(mockAPI.createLane).toHaveBeenCalledWith('ws-1');
-    expect(onLaneCreated).toHaveBeenCalledWith('lane-new');
+    expect(mockAPI.createLane).toHaveBeenCalledWith("ws-1");
+    expect(onLaneCreated).toHaveBeenCalledWith("lane-new");
   });
 
-  it('should call optimistic callback on create', async () => {
+  it("should call optimistic callback on create", async () => {
     actions = new LaneActions({
       runtimeAPI: mockAPI,
     });
 
-    const optimisticCallback = vi.fn();
+    const optimisticCallback = mock();
 
-    await actions.createLane('ws-1', optimisticCallback);
+    await actions.createLane("ws-1", optimisticCallback);
 
     expect(optimisticCallback).toHaveBeenCalled();
   });
 
   it('should handle create lane error', async () => {
     const error = new Error('API error');
-    mockAPI.createLane = vi.fn().mockRejectedValue(error);
-    const onError = vi.fn();
+    mockAPI.createLane = mock().mockRejectedValue(error);
+    const onError = mock();
 
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onError,
     });
 
-    await actions.createLane('ws-1');
+    await actions.createLane("ws-1");
 
     expect(onError).toHaveBeenCalled();
     const errorArg = (onError as any).mock.calls[0][0];
-    expect(errorArg.code).toBe('CREATE_FAILED');
+    expect(errorArg.code).toBe("CREATE_FAILED");
   });
 
   it('should attach lane successfully', async () => {
-    const onLaneAttached = vi.fn();
+    const onLaneAttached = mock();
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onLaneAttached,
     });
 
-    await actions.attachLane('lane-1');
+    await actions.attachLane("lane-1");
 
-    expect(mockAPI.attachLane).toHaveBeenCalledWith('lane-1');
-    expect(onLaneAttached).toHaveBeenCalledWith('lane-1');
+    expect(mockAPI.attachLane).toHaveBeenCalledWith("lane-1");
+    expect(onLaneAttached).toHaveBeenCalledWith("lane-1");
   });
 
   it('should handle attach lane error', async () => {
-    mockAPI.attachLane = vi.fn().mockRejectedValue(new Error('Attach failed'));
-    const onError = vi.fn();
+    mockAPI.attachLane = mock().mockRejectedValue(new Error('Attach failed'));
+    const onError = mock();
 
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onError,
     });
 
-    await actions.attachLane('lane-1');
+    await actions.attachLane("lane-1");
 
     expect(onError).toHaveBeenCalled();
     const errorArg = (onError as any).mock.calls[0][0];
-    expect(errorArg.code).toBe('ATTACH_FAILED');
+    expect(errorArg.code).toBe("ATTACH_FAILED");
   });
 
   it('should detach lane successfully', async () => {
-    const onLaneDetached = vi.fn();
+    const onLaneDetached = mock();
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onLaneDetached,
     });
 
-    await actions.detachLane('lane-1');
+    await actions.detachLane("lane-1");
 
-    expect(mockAPI.detachLane).toHaveBeenCalledWith('lane-1');
-    expect(onLaneDetached).toHaveBeenCalledWith('lane-1');
+    expect(mockAPI.detachLane).toHaveBeenCalledWith("lane-1");
+    expect(onLaneDetached).toHaveBeenCalledWith("lane-1");
   });
 
   it('should handle detach lane error', async () => {
-    mockAPI.detachLane = vi.fn().mockRejectedValue(new Error('Detach failed'));
-    const onError = vi.fn();
+    mockAPI.detachLane = mock().mockRejectedValue(new Error('Detach failed'));
+    const onError = mock();
 
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onError,
     });
 
-    await actions.detachLane('lane-1');
+    await actions.detachLane("lane-1");
 
     expect(onError).toHaveBeenCalled();
   });
 
   it('should cleanup lane successfully', async () => {
-    const onLaneCleaned = vi.fn();
+    const onLaneCleaned = mock();
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onLaneCleaned,
     });
 
-    const result = await actions.cleanupLane('lane-1', false);
+    const result = await actions.cleanupLane("lane-1", false);
 
-    expect(mockAPI.cleanupLane).toHaveBeenCalledWith('lane-1');
-    expect(onLaneCleaned).toHaveBeenCalledWith('lane-1');
+    expect(mockAPI.cleanupLane).toHaveBeenCalledWith("lane-1");
+    expect(onLaneCleaned).toHaveBeenCalledWith("lane-1");
     expect(result).toBe(true);
   });
 
   it('should handle cleanup lane error', async () => {
-    mockAPI.cleanupLane = vi.fn().mockRejectedValue(new Error('Cleanup failed'));
-    const onError = vi.fn();
+    mockAPI.cleanupLane = mock().mockRejectedValue(new Error('Cleanup failed'));
+    const onError = mock();
 
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onError,
     });
 
-    const result = await actions.cleanupLane('lane-1', false);
+    const result = await actions.cleanupLane("lane-1", false);
 
     expect(onError).toHaveBeenCalled();
     expect(result).toBe(false);
   });
 
   it('should dismiss error by code', async () => {
-    const onError = vi.fn();
+    const onError = mock();
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onError,
       errorDismissTimeout: 10000,
     });
 
-    mockAPI.createLane = vi.fn().mockRejectedValue(new Error('Create failed'));
+    mockAPI.createLane = mock().mockRejectedValue(new Error('Create failed'));
     await actions.createLane('ws-1');
 
     expect(onError).toHaveBeenCalled();
 
-    actions.dismissError('CREATE_FAILED');
+    actions.dismissError("CREATE_FAILED");
     // Error should be dismissed (test passes if no exception thrown)
   });
 
   it('should clear all errors', async () => {
-    const onError = vi.fn();
+    const onError = mock();
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onError,
       errorDismissTimeout: 10000,
     });
 
-    mockAPI.createLane = vi.fn().mockRejectedValue(new Error('Create failed'));
+    mockAPI.createLane = mock().mockRejectedValue(new Error('Create failed'));
     await actions.createLane('ws-1');
 
-    mockAPI.attachLane = vi.fn().mockRejectedValue(new Error('Attach failed'));
+    mockAPI.attachLane = mock().mockRejectedValue(new Error('Attach failed'));
     await actions.attachLane('lane-1');
 
     expect(onError).toHaveBeenCalledTimes(2);
@@ -187,16 +188,16 @@ describe('LaneActions', () => {
   });
 
   it('should revert optimistic update on error', async () => {
-    mockAPI.attachLane = vi.fn().mockRejectedValue(new Error('Attach failed'));
-    const onError = vi.fn();
-    const revertCallback = vi.fn();
+    mockAPI.attachLane = mock().mockRejectedValue(new Error('Attach failed'));
+    const onError = mock();
+    const revertCallback = mock();
 
     actions = new LaneActions({
       runtimeAPI: mockAPI,
       onError,
     });
 
-    await actions.attachLane('lane-1', revertCallback);
+    await actions.attachLane("lane-1", revertCallback);
 
     expect(revertCallback).toHaveBeenCalled();
   });

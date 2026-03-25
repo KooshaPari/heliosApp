@@ -9,7 +9,7 @@ export type TerminalPanelProps = {
   onData?: (data: string) => void;
 };
 
-export const TerminalPanel: Component<TerminalPanelProps> = (props) => {
+export const TerminalPanel: Component<TerminalPanelProps> = props => {
   let ref: HTMLDivElement | undefined;
   let terminal: Terminal | undefined;
   let fitAddon: FitAddon | undefined;
@@ -63,7 +63,7 @@ export const TerminalPanel: Component<TerminalPanelProps> = (props) => {
 
   return (
     <div
-      ref={(el) => (ref = el)}
+      ref={el => (ref = el)}
       style={{
         display: props.isActive ? "block" : "none",
         width: "100%",

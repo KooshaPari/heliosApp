@@ -86,11 +86,11 @@ export class RestorationPipeline {
           ...failed,
           ...checkpoint.sessions
             .filter(
-              (s) =>
-                !restored.some((r) => r.sessionId === s.sessionId) &&
-                !failed.some((f) => f.sessionId === s.sessionId)
+              s =>
+                !restored.some(r => r.sessionId === s.sessionId) &&
+                !failed.some(f => f.sessionId === s.sessionId)
             )
-            .map((s) => ({
+            .map(s => ({
               sessionId: s.sessionId,
               terminalId: s.terminalId,
               laneId: s.laneId,
@@ -120,7 +120,7 @@ export class RestorationPipeline {
     sessionName: string,
     survivingSessions: string[]
   ): string | undefined {
-    return survivingSessions.find((s) => s === sessionName);
+    return survivingSessions.find(s => s === sessionName);
   }
 
   private async reattachZelijjSession(

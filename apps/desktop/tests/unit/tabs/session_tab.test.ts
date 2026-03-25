@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { SessionTab } from "../../../src/tabs/session_tab";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
 
@@ -22,7 +22,7 @@ describe("SessionTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -42,7 +42,7 @@ describe("SessionTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session123"
+        sessionId: "session123",
       };
 
       await tab.onContextChange(context);
@@ -54,7 +54,7 @@ describe("SessionTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -66,7 +66,7 @@ describe("SessionTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -80,7 +80,7 @@ describe("SessionTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -92,7 +92,7 @@ describe("SessionTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -106,7 +106,7 @@ describe("SessionTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -118,7 +118,7 @@ describe("SessionTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -132,14 +132,15 @@ describe("SessionTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
       const state = tab.getState();
+      const expandedSections = state.expandedSections ?? [];
 
-      expect(state.expandedSections).toBeDefined();
-      expect(Array.isArray(state.expandedSections)).toBe(true);
+      expect(expandedSections).toBeDefined();
+      expect(Array.isArray(expandedSections)).toBe(true);
     });
   });
 
@@ -148,11 +149,12 @@ describe("SessionTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
       const state = tab.getState();
+      const originalExpandedSections = state.expandedSections ?? [];
 
       expect(state.tabType).toBe("session");
       expect(state.expandedSections).toBeDefined();
@@ -162,16 +164,17 @@ describe("SessionTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
       const originalState = tab.getState();
+      const originalExpandedSections = originalState.expandedSections ?? [];
 
       const newTab = new SessionTab();
       newTab.restoreState(originalState);
 
-      expect(newTab.getState().expandedSections).toEqual(originalState.expandedSections);
+      expect(newTab.getState().expandedSections ?? []).toEqual(originalExpandedSections);
     });
   });
 

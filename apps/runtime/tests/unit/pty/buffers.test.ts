@@ -104,7 +104,9 @@ describe("RingBuffer", () => {
 describe("OutputBuffer", () => {
   it("writes data and tracks stats", () => {
     const bus = new InMemoryBusPublisher();
-    const ob = new OutputBuffer(bus, makeCorrelation(), { capacityBytes: 1024 });
+    const ob = new OutputBuffer(bus, makeCorrelation(), {
+      capacityBytes: 1024,
+    });
 
     ob.write(new Uint8Array(100));
     const stats = ob.getStats();
@@ -133,7 +135,7 @@ describe("OutputBuffer", () => {
     ob.write(new Uint8Array(75));
     expect(ob.isBackpressured).toBe(true);
 
-    const onEvents = bus.events.filter((e) => e.topic === "pty.backpressure.on");
+    const onEvents = bus.events.filter(e => e.topic === "pty.backpressure.on");
     expect(onEvents).toHaveLength(1);
     expect(onEvents[0]!.payload["utilization"]).toBe(0.75);
   });
@@ -147,7 +149,7 @@ describe("OutputBuffer", () => {
 
     ob.write(new Uint8Array(80));
     ob.write(new Uint8Array(5));
-    const onEvents = bus.events.filter((e) => e.topic === "pty.backpressure.on");
+    const onEvents = bus.events.filter(e => e.topic === "pty.backpressure.on");
     expect(onEvents).toHaveLength(1);
   });
 
@@ -170,7 +172,7 @@ describe("OutputBuffer", () => {
     ob.consume(10);
     expect(ob.isBackpressured).toBe(false);
 
-    const offEvents = bus.events.filter((e) => e.topic === "pty.backpressure.off");
+    const offEvents = bus.events.filter(e => e.topic === "pty.backpressure.off");
     expect(offEvents).toHaveLength(1);
   });
 
@@ -183,7 +185,7 @@ describe("OutputBuffer", () => {
     });
 
     ob.write(new Uint8Array(80));
-    const evt = bus.events.find((e) => e.topic === "pty.backpressure.on");
+    const evt = bus.events.find(e => e.topic === "pty.backpressure.on");
     expect(evt?.payload["ptyId"]).toBe(corr.ptyId);
     expect(evt?.payload["laneId"]).toBe(corr.laneId);
   });
@@ -206,7 +208,7 @@ describe("OutputBuffer", () => {
       expect(warns).toHaveLength(1);
       expect(warns[0]).toContain("overflow");
 
-      const overflowEvts = bus.events.filter((e) => e.topic === "pty.buffer.overflow");
+      const overflowEvts = bus.events.filter(e => e.topic === "pty.buffer.overflow");
       expect(overflowEvts).toHaveLength(1);
       expect(overflowEvts[0]!.payload["droppedBytes"]).toBe(5);
 
@@ -221,7 +223,7 @@ describe("OutputBuffer", () => {
   it("debounces overflow events (max 1/sec)", () => {
     const bus = new InMemoryBusPublisher();
     const origWarn = console.warn;
-    console.warn = () => {};
+    console.warn = () => undefined;
 
     try {
       const ob = new OutputBuffer(bus, makeCorrelation(), {
@@ -235,7 +237,7 @@ describe("OutputBuffer", () => {
       ob.consume(10);
       ob.write(new Uint8Array(15));
 
-      const overflowEvts = bus.events.filter((e) => e.topic === "pty.buffer.overflow");
+      const overflowEvts = bus.events.filter(e => e.topic === "pty.buffer.overflow");
       expect(overflowEvts).toHaveLength(1);
     } finally {
       console.warn = origWarn;
@@ -245,10 +247,12 @@ describe("OutputBuffer", () => {
   it("tracks cumulative stats across multiple writes", () => {
     const bus = new InMemoryBusPublisher();
     const origWarn = console.warn;
-    console.warn = () => {};
+    console.warn = () => undefined;
 
     try {
-      const ob = new OutputBuffer(bus, makeCorrelation(), { capacityBytes: 10 });
+      const ob = new OutputBuffer(bus, makeCorrelation(), {
+        capacityBytes: 10,
+      });
       ob.write(new Uint8Array(8));
       ob.write(new Uint8Array(5)); // 3 dropped
       ob.consume(10);
@@ -276,7 +280,7 @@ describe("OutputBuffer", () => {
     expect(ob.isBackpressured).toBe(false);
     expect(ob.available).toBe(0);
 
-    const offEvents = bus.events.filter((e) => e.topic === "pty.backpressure.off");
+    const offEvents = bus.events.filter(e => e.topic === "pty.backpressure.off");
     expect(offEvents).toHaveLength(1);
   });
 });

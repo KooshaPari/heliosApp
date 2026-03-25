@@ -1,4 +1,4 @@
-import { AuditEvent } from './event';
+import type { AuditEvent } from './event';
 
 /**
  * Filter options for ring buffer queries.
@@ -9,6 +9,7 @@ export interface AuditFilter {
   sessionId?: string;
   actor?: string;
   eventType?: string;
+  correlationId?: string;
   startTime?: Date;
   endTime?: Date;
 }
@@ -58,20 +59,17 @@ export class AuditRingBuffer {
     let evicted: AuditEvent | undefined;
 
     if (this.size === this.capacity) {
-      // Buffer is full; evict the oldest event at head
+      // Buffer is full; evict the oldest event at head and advance head
       evicted = this.buffer[this.head];
       this.totalEventsEvicted++;
-    } else {
-      this.size++;
-    }
-
-    // Insert at tail
-    this.buffer[this.tail] = event;
-    this.tail = (this.tail + 1) % this.capacity;
-
-    // Move head if buffer is full
-    if (this.size === this.capacity) {
+      this.buffer[this.tail] = event;
+      this.tail = (this.tail + 1) % this.capacity;
       this.head = (this.head + 1) % this.capacity;
+    } else {
+      // Buffer not yet full; append and grow
+      this.buffer[this.tail] = event;
+      this.tail = (this.tail + 1) % this.capacity;
+      this.size++;
     }
 
     return evicted;
@@ -135,7 +133,7 @@ export class AuditRingBuffer {
    * @returns Array of matching events
    */
   getByCorrelationId(correlationId: string): AuditEvent[] {
-    return this.query({ correlationId: correlationId as any });
+    return this.query({ correlationId });
   }
 
   /**
@@ -189,11 +187,19 @@ export class AuditRingBuffer {
       return false;
     }
 
+    if (filter.correlationId && event.correlationId !== filter.correlationId) {
+      return false;
+    }
+
     if (filter.startTime) {
       const eventTime = new Date(event.timestamp);
       if (eventTime < filter.startTime) {
         return false;
       }
+    }
+
+    if (filter.correlationId && event.correlationId !== filter.correlationId) {
+      return false;
     }
 
     if (filter.endTime) {

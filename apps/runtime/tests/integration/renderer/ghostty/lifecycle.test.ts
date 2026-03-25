@@ -83,7 +83,7 @@ describe("Ghostty integration - lifecycle (T013)", () => {
 
     backend.bindStream("pty-int-1", stream);
     // Wait for pump to consume
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise(r => setTimeout(r, 100));
 
     expect(backend.getBoundStreamCount()).toBe(1);
   });
@@ -111,7 +111,9 @@ describe("Ghostty integration - lifecycle (T013)", () => {
 
     for (let i = 0; i < 10; i++) {
       const stream = new ReadableStream<Uint8Array>({
-        start(c) { c.close(); },
+        start(c) {
+          c.close();
+        },
       });
       backend.bindStream(`pty-${i}`, stream);
     }

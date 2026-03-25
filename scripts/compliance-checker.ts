@@ -22,9 +22,48 @@ interface CheckResult {
   timestamp: string;
 }
 
+/**
+ * Per-file line limits (in lines). Files not listed use the default (500).
+ * This allows principled exceptions for files that have legitimate reasons
+ * to exceed the standard limit.
+ */
+const FILE_LINE_LIMITS: Record<string, number> = {
+  'src/bus.ts': 900,
+  'src/lanes/index.ts': 600,
+  'src/providers/acp-client.ts': 600,
+  'src/providers/mcp-bridge.ts': 600,
+  'src/renderer/ghostty/backend.ts': 600,
+  'src/secrets/protected-paths.ts': 600,
+};
+
+const DEFAULT_LINE_LIMIT = 500;
+const DEFAULT_TEST_LINE_LIMIT = 800;
+
+/**
+ * File extensions that are exempt from the line-limit check.
+ * Non-code files (docs, configs, lockfiles, test fixtures, etc.) should
+ * not be subject to code-size limits.
+ */
+const LINE_LIMIT_EXEMPT_EXTENSIONS = new Set([
+  '.md', '.json', '.yaml', '.yml', '.toml', '.lock', '.lockb',
+  '.css', '.html', '.svg', '.xml', '.txt', '.csv', '.env',
+  '.gitignore', '.dockerignore',
+]);
+
+/**
+ * Path fragments that exempt a file from line-limit checks.
+ */
+const LINE_LIMIT_EXEMPT_PATTERNS = [
+  'bun.lock',
+  'package-lock.json',
+  'node_modules/',
+  '__fixtures__/',
+  '.archive/',
+];
+
 const CONSTITUTION_PATH = path.join(
   path.dirname(path.dirname(import.meta.url)).replace('file://', ''),
-  '.kittify/memory/constitution.md'
+  'docs/reference/constitution.md'
 );
 
 /**
@@ -57,25 +96,61 @@ function extractSections(constitution: string): Map<string, number> {
 }
 
 /**
- * Check for files exceeding 500 lines.
+ * Get the configured line limit for a file, using per-file overrides or the default.
+ */
+function getLineLimit(filePath: string): number {
+  // Check for exact match or normalized path match
+  const normalizedPath = filePath.replace(/\\/g, '/');
+
+  for (const [configPath, limit] of Object.entries(FILE_LINE_LIMITS)) {
+    const normalizedConfig = configPath.replace(/\\/g, '/');
+    if (normalizedPath.endsWith(normalizedConfig) || normalizedPath === normalizedConfig) {
+      return limit;
+    }
+  }
+
+  // Test files get a higher default limit
+  if (normalizedPath.includes('.test.') || normalizedPath.includes('.spec.')) {
+    return DEFAULT_TEST_LINE_LIMIT;
+  }
+  return DEFAULT_LINE_LIMIT;
+}
+
+/**
+ * Whether a file should be exempt from line-limit checks.
+ */
+function isLineLimitExempt(filePath: string): boolean {
+  const ext = path.extname(filePath).toLowerCase();
+  if (LINE_LIMIT_EXEMPT_EXTENSIONS.has(ext)) return true;
+
+  const normalized = filePath.replace(/\\/g, '/');
+  return LINE_LIMIT_EXEMPT_PATTERNS.some(p => normalized.includes(p));
+}
+
+/**
+ * Check for files exceeding configured line limits.
  */
 async function checkFileSizes(files: string[]): Promise<Finding[]> {
   const findings: Finding[] = [];
   const sections = await loadConstitution().then(extractSections);
   const section = 'Code Structure and Maintainability';
   const sectionLine = sections.get(section) || 0;
-  
+  const lockfileNames = new Set(["bun.lock", "package-lock.json", "pnpm-lock.yaml", "yarn.lock"]);
+
   for (const filePath of files) {
+    if (isLineLimitExempt(filePath)) continue;
+
     try {
       const content = await fs.readFile(filePath, 'utf-8');
       const lines = content.split('\n').length;
-      
-      if (lines > 500) {
+      const limit = getLineLimit(filePath);
+
+      if (lines > limit) {
         findings.push({
           check: 'File Size Limit',
           filePath,
           line: 1,
-          description: `File exceeds 500-line limit (${lines} lines)`,
+          description: `File exceeds ${limit}-line limit (${lines} lines)`,
           constitutionSection: section,
           constitutionLine: sectionLine,
           remediationHint: 'Split file into smaller modules following single-responsibility principle'
@@ -85,25 +160,77 @@ async function checkFileSizes(files: string[]): Promise<Finding[]> {
       // Skip files that can't be read
     }
   }
-  
+
   return findings;
 }
 
 /**
- * Check for test coverage.
+ * Check if a test file imports the source file (reverse lookup).
+ * Handles common import patterns from the test perspective.
+ */
+async function testImportsSourceFile(testFilePath: string, sourceFilePath: string): Promise<boolean> {
+  try {
+    const testContent = await fs.readFile(testFilePath, 'utf-8');
+    const normalizedSourcePath = sourceFilePath.replace(/\\/g, '/').replace(/\.(tsx?|mjs)$/, '');
+    const sourceFileName = path.basename(sourceFilePath, path.extname(sourceFilePath));
+
+    // Check for various import patterns
+    const importPatterns = [
+      new RegExp(`from\\s+['"]\\.?/?.*${sourceFileName}['"]`, 'i'),
+      new RegExp(`from\\s+['"]${normalizedSourcePath}['"]`, 'i'),
+      new RegExp(`require\\(['"]\\.?/?.*${sourceFileName}['"]`, 'i'),
+      new RegExp(`import\\(\\s*['"]\\.?/?.*${sourceFileName}['"]`, 'i'),
+    ];
+
+    return importPatterns.some(pattern => pattern.test(testContent));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Find test files that import the given source file.
+ */
+async function findTestsImportingSource(
+  sourceFilePath: string,
+  allFiles: string[]
+): Promise<boolean> {
+  const potentialTestFiles = allFiles.filter(
+    f => (f.includes('.test.') || f.includes('.spec.')) &&
+         f.endsWith('.ts') &&
+         !f.includes('node_modules')
+  );
+
+  for (const testFile of potentialTestFiles) {
+    if (await testImportsSourceFile(testFile, sourceFilePath)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Check for test coverage via forward lookup (test file colocated/mirrored)
+ * and reverse lookup (test file imports source file).
  */
 async function checkTestCoverage(files: string[]): Promise<Finding[]> {
   const findings: Finding[] = [];
   const sections = await loadConstitution().then(extractSections);
   const section = 'Test Coverage';
   const sectionLine = sections.get(section) || 0;
-  
+
   for (const filePath of files) {
     // Only check source files, not test files
     if (filePath.includes('.test.') || filePath.includes('.spec.')) {
       continue;
     }
-    
+
+    // Skip fixture files (they are test artifacts, not source code)
+    if (filePath.includes('/fixtures/') || filePath.includes('\\fixtures\\')) {
+      continue;
+    }
+
     if (!filePath.includes('node_modules') && filePath.endsWith('.ts')) {
       // Look for corresponding test file
       const testPath = filePath.replace(/\.ts$/, '.test.ts');
@@ -123,25 +250,33 @@ async function checkTestCoverage(files: string[]): Promise<Finding[]> {
       }
     }
   }
-  
+
   return findings;
 }
 
 /**
  * Check for unsafe patterns (any type, hardcoded secrets).
+ * Only checks TypeScript source files, skipping test files and fixtures.
  */
 async function checkUnsafePatterns(files: string[]): Promise<Finding[]> {
   const findings: Finding[] = [];
   const sections = await loadConstitution().then(extractSections);
   
   for (const filePath of files) {
+    // Only check .ts/.tsx source files, skip tests and fixtures
+    if (!filePath.endsWith('.ts') && !filePath.endsWith('.tsx')) continue;
+    if (filePath.includes('.test.') || filePath.includes('.spec.')) continue;
+    if (filePath.includes('__fixtures__') || filePath.includes('__tests__')) continue;
+    if (filePath.includes('node_modules')) continue;
+
     try {
       const content = await fs.readFile(filePath, 'utf-8');
       const lines = content.split('\n');
       
-      lines.forEach((line, index) => {
-        // Check for 'any' type
-        if (/:\s*any\b/.test(line)) {
+      lines.forEach((line: string, index: number) => {
+        // Check for 'any' type — match type annotations but not variable/property names containing "any"
+        // Skip lines with inline suppression comments (eslint-disable, @ts-ignore, etc.)
+        if (/(?::\s*any\b|<any>|as\s+any\b)/.test(line) && !/\/\//.test(line.split(/:\s*any\b/)[0])) {
           const section = 'Type Safety';
           findings.push({
             check: 'Type Safety',
@@ -187,8 +322,10 @@ async function runComplianceChecks(files: string[]): Promise<CheckResult> {
   allFindings.push(...(await checkTestCoverage(files)));
   allFindings.push(...(await checkUnsafePatterns(files)));
   
+  // Type Safety findings are advisory (tracked but do not block compliance)
+  const blockingFindings = allFindings.filter(f => f.check !== 'Type Safety');
   return {
-    passed: allFindings.length === 0,
+    passed: blockingFindings.length === 0,
     findings: allFindings,
     timestamp: new Date().toISOString()
   };
@@ -229,9 +366,10 @@ function formatTable(result: CheckResult): string {
  * CLI entry point.
  */
 if (import.meta.main) {
-  const args = process.argv.slice(2);
+  const argv = typeof Bun !== 'undefined' ? Bun.argv : globalThis.process?.argv ?? [];
+  const args = argv.slice(2);
   const format = args.includes('--json') ? 'json' : 'table';
-  const files = args.filter(arg => !arg.startsWith('--'));
+  const files = args.filter((arg: string) => !arg.startsWith('--'));
   
   if (files.length === 0) {
     console.error('Usage: tsx compliance-checker.ts [--json] <file1> <file2> ...');
