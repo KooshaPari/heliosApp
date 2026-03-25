@@ -1,5 +1,1 @@
-import DefaultTheme from "vitepress/theme";
-
-export default {
-  extends: DefaultTheme,
-};
+export { default } from "@phenotype/docs/theme";
