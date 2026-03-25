@@ -20,11 +20,7 @@ Create a `Taskfile.yml` at the co(lab) repository root that provides the full qu
 
 ## Context
 
-<<<<<<< HEAD
 - **Repository**: KooshaPari/colab fork, worktree at `colab-wtrees/helios-integration/`
-=======
-- **Repository**: kooshapari/colab fork, worktree at `colab-wtrees/helios-integration/`
->>>>>>> origin/main
 - **Pattern source**: clipproxyapi++ uses `quality` (canonical), `quality:quick`, `quality:ci`, `quality:pre-push`, `quality:release-lint`
 - **Tools**: Biome (formatter/linter, already configured via biome.json), vitest (test runner), bun (runtime)
 - **Reference**: All Phenotype TypeScript repos use Taskfile.yml with go-task v3.x
@@ -241,10 +237,6 @@ spec-kitty implement WP01
 - Confirm quality:ci has NO --write flags
 - Check that quality:quick and quality:ci are truly non-mutating
 
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
 ## Activity Log
 
 - 2026-02-28T12:35:23Z – unknown – lane=done – Implemented, PR #6 created

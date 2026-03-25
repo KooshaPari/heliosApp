@@ -6,133 +6,73 @@
 
 import type { CommandEnvelope, ResponseEnvelope } from "./types.js";
 
-// ---------------------------------------------------------------------------
-<<<<<<< HEAD
-// Protocol method constants (aligned with specs/protocol/v1/methods.json)
-// ---------------------------------------------------------------------------
-
 export const METHODS = [
-=======
-// Types
-// ---------------------------------------------------------------------------
-
-/** A method handler receives a command and returns a response (sync or async). */
-export type MethodHandler = (
-  command: CommandEnvelope
-) => ResponseEnvelope | Promise<ResponseEnvelope>;
-
-// ---------------------------------------------------------------------------
-// Validation
-// ---------------------------------------------------------------------------
-
-/** Method names must be non-empty, alphanumeric with dots. */
-const METHOD_NAME_RE = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
-
-function assertValidMethodName(method: string): void {
-  if (!METHOD_NAME_RE.test(method)) {
-    throw new Error(
-      `Invalid method name "${method}": must be non-empty, alphanumeric segments separated by dots`
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Registry
-// ---------------------------------------------------------------------------
-
-/** Canonical list of known method names for validation. */
-export const METHODS: readonly string[] = [
->>>>>>> origin/main
-  "workspace.create",
-  "workspace.open",
-  "project.clone",
-  "project.init",
-  "session.create",
-  "session.attach",
-  "session.terminate",
-  "terminal.spawn",
-  "terminal.resize",
-  "terminal.input",
-  "renderer.switch",
-  "renderer.capabilities",
-  "agent.run",
-  "agent.cancel",
-  "approval.request.resolve",
-  "share.upterm.start",
-  "share.upterm.stop",
-  "share.tmate.start",
-  "share.tmate.stop",
-  "zmx.checkpoint",
-  "zmx.restore",
-  "lane.create",
-  "lane.attach",
-  "lane.cleanup",
-<<<<<<< HEAD
-] as const satisfies readonly string[];
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-/** A method handler receives a command and returns a response (sync or async). */
-export type MethodHandler = (
-  command: CommandEnvelope
-) => ResponseEnvelope | Promise<ResponseEnvelope>;
-
-// ---------------------------------------------------------------------------
-// Validation
-// ---------------------------------------------------------------------------
-
-/** Method names must be non-empty, alphanumeric with dots. */
-const METHOD_NAME_RE = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
-
-function assertValidMethodName(method: string): void {
-  if (!METHOD_NAME_RE.test(method)) {
-    throw new Error(
-      `Invalid method name "${method}": must be non-empty, alphanumeric segments separated by dots`
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Registry
-// ---------------------------------------------------------------------------
-=======
-  "boundary.local.dispatch",
-  "boundary.tool.dispatch",
-  "boundary.a2a.dispatch",
+	"workspace.create",
+	"workspace.open",
+	"project.clone",
+	"project.init",
+	"session.create",
+	"session.attach",
+	"session.terminate",
+	"terminal.spawn",
+	"terminal.resize",
+	"terminal.input",
+	"renderer.switch",
+	"renderer.capabilities",
+	"agent.run",
+	"agent.cancel",
+	"approval.request.resolve",
+	"share.upterm.start",
+	"share.upterm.stop",
+	"share.tmate.start",
+	"share.tmate.stop",
+	"zmx.checkpoint",
+	"zmx.restore",
+	"lane.create",
+	"lane.attach",
+	"lane.cleanup",
 ] as const;
->>>>>>> origin/main
+
+export type ProtocolMethod = (typeof METHODS)[number];
+
+export type MethodHandler = (
+	command: CommandEnvelope,
+) => ResponseEnvelope | Promise<ResponseEnvelope>;
+
+const METHOD_NAME_RE = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
+
+function assertValidMethodName(method: string): void {
+	if (!METHOD_NAME_RE.test(method)) {
+		throw new Error(
+			`Invalid method name "${method}": must be non-empty, alphanumeric segments separated by dots`,
+		);
+	}
+}
 
 export class MethodRegistry {
-  private readonly handlers = new Map<string, MethodHandler>();
+	private readonly handlers = new Map<string, MethodHandler>();
 
-  /** Register a handler for a method. Throws if already registered. */
-  register(method: string, handler: MethodHandler): void {
-    assertValidMethodName(method);
-    if (this.handlers.has(method)) {
-      throw new Error(`Method "${method}" is already registered`);
-    }
-    this.handlers.set(method, handler);
-  }
+	register(method: string, handler: MethodHandler): void {
+		assertValidMethodName(method);
+		if (this.handlers.has(method)) {
+			throw new Error(`Method "${method}" is already registered`);
+		}
+		this.handlers.set(method, handler);
+	}
 
-  /** Unregister a method. Returns true if it was registered. */
-  unregister(method: string): boolean {
-    return this.handlers.delete(method);
-  }
+	unregister(method: string): boolean {
+		return this.handlers.delete(method);
+	}
 
-  /** Look up a handler by method name. */
-  resolve(method: string): MethodHandler | undefined {
-    return this.handlers.get(method);
-  }
+	resolve(method: string): MethodHandler | undefined {
+		return this.handlers.get(method);
+	}
 
-  /** List all registered method names. */
-  methods(): string[] {
-    return [...this.handlers.keys()];
-  }
+	methods(): string[] {
+		return [...this.handlers.keys()];
+	}
 
-  /** Remove all registrations. */
-  clear(): void {
-    this.handlers.clear();
-  }
+	clear(): void {
+		this.handlers.clear();
+	}
 }

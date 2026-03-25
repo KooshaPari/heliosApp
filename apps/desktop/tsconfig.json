@@ -1,14 +1,4 @@
 {
-<<<<<<< HEAD
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
-    "composite": true
-  },
-  "include": ["src/**/*.ts"],
-  "references": [{ "path": "../runtime" }]
-=======
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"rootDir": "src",
@@ -17,5 +7,4 @@
 	},
 	"include": ["src/**/*.ts"],
 	"references": [{ "path": "../runtime" }]
->>>>>>> origin/main
 }

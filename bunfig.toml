@@ -14,9 +14,4 @@ exact = true
 save = true
 
 [test]
-<<<<<<< HEAD
-# Provide DOM globals (document, window, etc.) for desktop UI tests
-preload = ["./scripts/test-setup.ts"]
-=======
 preload = ["./apps/desktop/tests/unit/dom-shim.ts"]
->>>>>>> origin/main

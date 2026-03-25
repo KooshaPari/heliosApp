@@ -3,50 +3,46 @@
  * Covers: T009 (unit tests).
  */
 
-<<<<<<< HEAD
 import { beforeEach, describe, expect, it } from "bun:test";
-=======
-import { describe, it, expect, beforeEach } from "bun:test";
->>>>>>> origin/main
 import { RioProcess } from "../../../../src/renderer/rio/process.js";
 
 describe("RioProcess — initial state", () => {
-  let proc: RioProcess;
+	let proc: RioProcess;
 
-  beforeEach(() => {
-    proc = new RioProcess();
-  });
+	beforeEach(() => {
+		proc = new RioProcess();
+	});
 
-  it("starts as not running", () => {
-    expect(proc.isRunning()).toBe(false);
-  });
+	it("starts as not running", () => {
+		expect(proc.isRunning()).toBe(false);
+	});
 
-  it("has undefined PID before start", () => {
-    expect(proc.getPid()).toBeUndefined();
-  });
+	it("has undefined PID before start", () => {
+		expect(proc.getPid()).toBeUndefined();
+	});
 
-  it("has undefined uptime before start", () => {
-    expect(proc.getUptime()).toBeUndefined();
-  });
+	it("has undefined uptime before start", () => {
+		expect(proc.getUptime()).toBeUndefined();
+	});
 
-  it("stop is safe when never started", async () => {
-    await proc.stop(); // should not throw
-    expect(proc.isRunning()).toBe(false);
-  });
+	it("stop is safe when never started", async () => {
+		await proc.stop(); // should not throw
+		expect(proc.isRunning()).toBe(false);
+	});
 
-  it("writeToStdin is safe when not running", () => {
-    // should not throw
-    proc.writeToStdin(new Uint8Array([0x41]));
-    expect(proc.isRunning()).toBe(false);
-  });
+	it("writeToStdin is safe when not running", () => {
+		// should not throw
+		proc.writeToStdin(new Uint8Array([0x41]));
+		expect(proc.isRunning()).toBe(false);
+	});
 });
 
 describe("RioProcess — exit handler registration", () => {
-  it("registers exit handlers", () => {
-    const proc = new RioProcess();
-    const calls: number[] = [];
-    proc.onExit(code => calls.push(code));
-    // Handler registered but not called since process never started.
-    expect(calls.length).toBe(0);
-  });
+	it("registers exit handlers", () => {
+		const proc = new RioProcess();
+		const calls: number[] = [];
+		proc.onExit((code) => calls.push(code));
+		// Handler registered but not called since process never started.
+		expect(calls.length).toBe(0);
+	});
 });

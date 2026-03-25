@@ -1,13 +1,4 @@
 {
-<<<<<<< HEAD
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "rootDir": ".",
-    "outDir": "dist",
-    "composite": true
-  },
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
-=======
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"rootDir": ".",
@@ -19,8 +10,8 @@
 			"@helios/runtime/*": ["apps/runtime/src/*"],
 			"@helios/desktop": ["apps/desktop/src/index.ts"],
 			"@helios/desktop/*": ["apps/desktop/src/*"]
-		}
+		},
+		"types": ["vitest"]
 	},
 	"include": ["src/**/*.ts", "tests/**/*.ts"]
->>>>>>> origin/main
 }

@@ -1,406 +1,258 @@
-<<<<<<< HEAD
-import { afterEach, describe, expect, it } from "bun:test";
-import { InMemoryBusPublisher } from "../../../src/pty/events.js";
-import { PtyRegistry } from "../../../src/pty/registry.js";
-import type { PtyRecord } from "../../../src/pty/registry.js";
-import {
-  InvalidDimensionsError,
-  SignalHistory,
-  resize,
-  sendSighup,
-  terminate,
-} from "../../../src/pty/signals.js";
-import type { SignalHistoryMap } from "../../../src/pty/signals.js";
-import { PtyLifecycle } from "../../../src/pty/state_machine.js";
-=======
 import { describe, expect, it } from "bun:test";
-import {
-  resize,
-  terminate,
-  sendSighup,
-  SignalHistory,
-  InvalidDimensionsError,
-} from "../../../src/pty/signals.js";
-import type { SignalHistoryMap } from "../../../src/pty/signals.js";
+import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 import { PtyRegistry } from "../../../src/pty/registry.js";
 import type { PtyRecord } from "../../../src/pty/registry.js";
+import {
+	InvalidDimensionsError,
+	SignalHistory,
+	resize,
+	sendSighup,
+	terminate,
+} from "../../../src/pty/signals.js";
+import type { SignalHistoryMap } from "../../../src/pty/signals.js";
 import { PtyLifecycle } from "../../../src/pty/state_machine.js";
-import { InMemoryBusPublisher } from "../../../src/pty/events.js";
->>>>>>> origin/main
 
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
-  return {
-    ptyId: "pty-test-1",
-    laneId: "lane-1",
-    sessionId: "session-1",
-    terminalId: "term-1",
-<<<<<<< HEAD
-    pid: 99999, // non-existent PID — avoids signalling the test runner
-=======
-    pid: 99999,
->>>>>>> origin/main
-    state: "active",
-    dimensions: { cols: 80, rows: 24 },
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    env: Object.freeze({}),
-    ...overrides,
-  };
+	return {
+		ptyId: "pty-test-1",
+		laneId: "lane-1",
+		sessionId: "session-1",
+		terminalId: "term-1",
+		pid: 99999,
+		state: "active",
+		dimensions: { cols: 80, rows: 24 },
+		createdAt: Date.now(),
+		updatedAt: Date.now(),
+		env: Object.freeze({}),
+		...overrides,
+	};
 }
 
-<<<<<<< HEAD
-describe("SignalHistory", () => {
-  it("stores and retrieves envelopes", () => {
-    const h = new SignalHistory(3);
-    h.add({ ptyId: "p1", signal: "SIGTERM", timestamp: 1, outcome: "delivered", pid: 1 });
-    h.add({ ptyId: "p1", signal: "SIGKILL", timestamp: 2, outcome: "escalated", pid: 1 });
-    expect(h.length).toBe(2);
-    expect(h.getAll()[0]?.signal).toBe("SIGTERM");
-=======
 function spawnShellProcess(): number {
-  const proc = Bun.spawn(["/bin/sh"], {
-    stdout: "pipe",
-    stderr: "pipe",
-  }) as { pid?: number };
+	const proc = Bun.spawn(["/bin/sh"], {
+		stdout: "pipe",
+		stderr: "pipe",
+	}) as { pid?: number };
 
-  if (proc.pid === undefined) {
-    throw new Error("Bun.spawn did not return a process ID");
-  }
+	if (proc.pid === undefined) {
+		throw new Error("Bun.spawn did not return a process ID");
+	}
 
-  return proc.pid;
+	return proc.pid;
 }
 
 const pidsToCleanup: number[] = [];
 
 describe("SignalHistory", () => {
-  it("stores and retrieves envelopes", () => {
-    const h = new SignalHistory(3);
-    h.add({
-      ptyId: "p1",
-      signal: "SIGTERM",
-      timestamp: 1,
-      outcome: "delivered",
-      pid: 1,
-    });
-    h.add({
-      ptyId: "p1",
-      signal: "SIGKILL",
-      timestamp: 2,
-      outcome: "escalated",
-      pid: 1,
-    });
-    expect(h.length).toBe(2);
-    expect(h.getAll()[0]!.signal).toBe("SIGTERM");
->>>>>>> origin/main
-  });
+	it("stores and retrieves envelopes", () => {
+		const h = new SignalHistory(3);
+		h.add({
+			ptyId: "p1",
+			signal: "SIGTERM",
+			timestamp: 1,
+			outcome: "delivered",
+			pid: 1,
+		});
+		h.add({
+			ptyId: "p1",
+			signal: "SIGKILL",
+			timestamp: 2,
+			outcome: "escalated",
+			pid: 1,
+		});
+		expect(h.length).toBe(2);
+		expect(h.getAll()[0]!.signal).toBe("SIGTERM");
+	});
 
-  it("bounds history to maxRecords", () => {
-    const h = new SignalHistory(2);
-<<<<<<< HEAD
-    h.add({ ptyId: "p1", signal: "SIGWINCH", timestamp: 1, outcome: "delivered", pid: 1 });
-    h.add({ ptyId: "p1", signal: "SIGTERM", timestamp: 2, outcome: "delivered", pid: 1 });
-    h.add({ ptyId: "p1", signal: "SIGKILL", timestamp: 3, outcome: "escalated", pid: 1 });
-    expect(h.length).toBe(2);
-    expect(h.getAll()[0]?.signal).toBe("SIGTERM");
-=======
-    h.add({
-      ptyId: "p1",
-      signal: "SIGWINCH",
-      timestamp: 1,
-      outcome: "delivered",
-      pid: 1,
-    });
-    h.add({
-      ptyId: "p1",
-      signal: "SIGTERM",
-      timestamp: 2,
-      outcome: "delivered",
-      pid: 1,
-    });
-    h.add({
-      ptyId: "p1",
-      signal: "SIGKILL",
-      timestamp: 3,
-      outcome: "escalated",
-      pid: 1,
-    });
-    expect(h.length).toBe(2);
-    expect(h.getAll()[0]!.signal).toBe("SIGTERM");
->>>>>>> origin/main
-  });
+	it("bounds history to maxRecords", () => {
+		const h = new SignalHistory(2);
+		h.add({
+			ptyId: "p1",
+			signal: "SIGWINCH",
+			timestamp: 1,
+			outcome: "delivered",
+			pid: 1,
+		});
+		h.add({
+			ptyId: "p1",
+			signal: "SIGTERM",
+			timestamp: 2,
+			outcome: "delivered",
+			pid: 1,
+		});
+		h.add({
+			ptyId: "p1",
+			signal: "SIGKILL",
+			timestamp: 3,
+			outcome: "escalated",
+			pid: 1,
+		});
+		expect(h.length).toBe(2);
+		expect(h.getAll()[0]!.signal).toBe("SIGTERM");
+	});
 });
 
 describe("resize", () => {
-<<<<<<< HEAD
-  const pidsToCleanup: number[] = [];
+	it("updates dimensions and emits events", () => {
+		// Spawn a real child so SIGWINCH delivery succeeds.
+		const pid = spawnShellProcess();
+		pidsToCleanup.push(pid);
 
-  afterEach(() => {
-    for (const pid of pidsToCleanup) {
-      try {
-        process.kill(pid, "SIGKILL");
-      } catch {
-        /* already exited */
-      }
-    }
-    pidsToCleanup.length = 0;
-  });
+		const registry = new PtyRegistry();
+		const record = makeRecord({ pid });
+		registry.register(record);
+		const historyMap: SignalHistoryMap = new Map();
+		const bus = new InMemoryBusPublisher();
 
-  it("updates dimensions and emits events", () => {
-    // Spawn a real child so SIGWINCH delivery succeeds.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const proc = Bun.spawn(["/bin/sh"], {
-      stdin: "pipe",
-      stdout: "pipe",
-      stderr: "pipe",
-    } as any) as any;
-    pidsToCleanup.push(proc.pid as number);
+		resize(record, 120, 40, registry, historyMap, bus);
 
-    const registry = new PtyRegistry();
-    const record = makeRecord({ pid: proc.pid as number });
-=======
-  it("updates dimensions and emits events", () => {
-    // Spawn a real child so SIGWINCH delivery succeeds.
-    const pid = spawnShellProcess();
-    pidsToCleanup.push(pid);
+		expect(registry.get(record.ptyId)?.dimensions).toEqual({
+			cols: 120,
+			rows: 40,
+		});
+		const topics = bus.events.map((e) => e.topic);
+		expect(topics).toContain("pty.signal.delivered");
+		expect(topics).toContain("pty.resized");
+	});
 
-    const registry = new PtyRegistry();
-    const record = makeRecord({ pid });
->>>>>>> origin/main
-    registry.register(record);
-    const historyMap: SignalHistoryMap = new Map();
-    const bus = new InMemoryBusPublisher();
+	it("rejects zero cols", () => {
+		const registry = new PtyRegistry();
+		const record = makeRecord();
+		registry.register(record);
+		expect(() =>
+			resize(record, 0, 24, registry, new Map(), new InMemoryBusPublisher()),
+		).toThrow(InvalidDimensionsError);
+	});
 
-    resize(record, 120, 40, registry, historyMap, bus);
+	it("rejects zero rows", () => {
+		const registry = new PtyRegistry();
+		const record = makeRecord();
+		registry.register(record);
+		expect(() =>
+			resize(record, 80, 0, registry, new Map(), new InMemoryBusPublisher()),
+		).toThrow(InvalidDimensionsError);
+	});
 
-<<<<<<< HEAD
-    expect(registry.get(record.ptyId)?.dimensions).toEqual({ cols: 120, rows: 40 });
-=======
-    expect(registry.get(record.ptyId)?.dimensions).toEqual({
-      cols: 120,
-      rows: 40,
-    });
->>>>>>> origin/main
-    const topics = bus.events.map(e => e.topic);
-    expect(topics).toContain("pty.signal.delivered");
-    expect(topics).toContain("pty.resized");
-  });
+	it("rejects cols > 10000", () => {
+		const registry = new PtyRegistry();
+		const record = makeRecord();
+		registry.register(record);
+		expect(() =>
+			resize(
+				record,
+				10001,
+				24,
+				registry,
+				new Map(),
+				new InMemoryBusPublisher(),
+			),
+		).toThrow(InvalidDimensionsError);
+	});
 
-  it("rejects zero cols", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord();
-    registry.register(record);
-    expect(() => resize(record, 0, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
-      InvalidDimensionsError
-    );
-  });
+	it("rejects non-integer dimensions", () => {
+		const registry = new PtyRegistry();
+		const record = makeRecord();
+		registry.register(record);
+		expect(() =>
+			resize(record, 80.5, 24, registry, new Map(), new InMemoryBusPublisher()),
+		).toThrow(InvalidDimensionsError);
+	});
 
-  it("rejects zero rows", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord();
-    registry.register(record);
-    expect(() => resize(record, 80, 0, registry, new Map(), new InMemoryBusPublisher())).toThrow(
-      InvalidDimensionsError
-    );
-  });
+	it("rejects resize on errored PTY", () => {
+		const registry = new PtyRegistry();
+		const record = makeRecord({ state: "errored" });
+		registry.register(record);
+		expect(() =>
+			resize(record, 80, 24, registry, new Map(), new InMemoryBusPublisher()),
+		).toThrow("Cannot resize");
+	});
 
-  it("rejects cols > 10000", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord();
-    registry.register(record);
-    expect(() =>
-      resize(record, 10001, 24, registry, new Map(), new InMemoryBusPublisher())
-    ).toThrow(InvalidDimensionsError);
-  });
-
-  it("rejects non-integer dimensions", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord();
-    registry.register(record);
-    expect(() => resize(record, 80.5, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
-      InvalidDimensionsError
-    );
-  });
-
-  it("rejects resize on errored PTY", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord({ state: "errored" });
-    registry.register(record);
-    expect(() => resize(record, 80, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
-      "Cannot resize"
-    );
-  });
-
-  it("rejects resize on stopped PTY", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord({ state: "stopped" });
-    registry.register(record);
-    expect(() => resize(record, 80, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
-      "Cannot resize"
-    );
-  });
+	it("rejects resize on stopped PTY", () => {
+		const registry = new PtyRegistry();
+		const record = makeRecord({ state: "stopped" });
+		registry.register(record);
+		expect(() =>
+			resize(record, 80, 24, registry, new Map(), new InMemoryBusPublisher()),
+		).toThrow("Cannot resize");
+	});
 });
 
 describe("terminate", () => {
-<<<<<<< HEAD
-  const pidsToCleanup: number[] = [];
+	it("terminates with SIGTERM and cleans up", async () => {
+		const registry = new PtyRegistry();
+		const record = makeRecord({ pid: 99998 });
+		registry.register(record);
+		const lifecycle = new PtyLifecycle(record.ptyId, "active");
+		const historyMap: SignalHistoryMap = new Map();
+		const bus = new InMemoryBusPublisher();
 
-  afterEach(() => {
-    for (const pid of pidsToCleanup) {
-      try {
-        process.kill(pid, "SIGKILL");
-      } catch {
-        /* already exited */
-      }
-    }
-    pidsToCleanup.length = 0;
-  });
+		const mockIsAlive = () => false;
+		const mockWait = async () => true;
+		await terminate(
+			record,
+			lifecycle,
+			registry,
+			historyMap,
+			bus,
+			{ gracePeriodMs: 50 },
+			mockIsAlive,
+			mockWait,
+		);
 
-  it("terminates with SIGTERM and cleans up", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const proc = Bun.spawn(["/bin/sh"], {
-      stdin: "pipe",
-      stdout: "pipe",
-      stderr: "pipe",
-    } as any) as any;
-    pidsToCleanup.push(proc.pid as number);
+		expect(registry.get(record.ptyId)).toBeUndefined();
+		const topics = bus.events.map((e) => e.topic);
+		expect(topics).toContain("pty.terminating");
+		expect(topics).toContain("pty.stopped");
+	});
 
-    const registry = new PtyRegistry();
-    const record = makeRecord({ pid: proc.pid });
-=======
-  it("terminates with SIGTERM and cleans up", async () => {
-    const pid = spawnShellProcess() as number;
-    pidsToCleanup.push(pid);
+	it("is idempotent on stopped PTY", async () => {
+		const record = makeRecord({ state: "stopped" });
+		const lifecycle = new PtyLifecycle(record.ptyId, "stopped");
+		const bus = new InMemoryBusPublisher();
+		await terminate(record, lifecycle, new PtyRegistry(), new Map(), bus);
+		expect(bus.events).toHaveLength(0);
+	});
 
-    const registry = new PtyRegistry();
-    const record = makeRecord({ pid });
->>>>>>> origin/main
-    registry.register(record);
-    const lifecycle = new PtyLifecycle(record.ptyId, "active");
-    const historyMap: SignalHistoryMap = new Map();
-    const bus = new InMemoryBusPublisher();
+	it("escalates to SIGKILL after grace period", async () => {
+		const registry = new PtyRegistry();
+		const record = makeRecord({ pid: 99999 });
+		registry.register(record);
+		const lifecycle = new PtyLifecycle(record.ptyId, "active");
+		const bus = new InMemoryBusPublisher();
 
-<<<<<<< HEAD
-    await terminate(record, lifecycle, registry, historyMap, bus, { gracePeriodMs: 500 });
-=======
-    const mockIsAlive = () => false;
-    const mockWait = async () => true;
-    await terminate(
-      record,
-      lifecycle,
-      registry,
-      historyMap,
-      bus,
-      { gracePeriodMs: 50 },
-      mockIsAlive,
-      mockWait
-    );
->>>>>>> origin/main
+		let callCount = 0;
+		const mockWait = (): Promise<boolean> => {
+			callCount++;
+			return Promise.resolve(callCount > 1);
+		};
 
-    expect(registry.get(record.ptyId)).toBeUndefined();
-    const topics = bus.events.map(e => e.topic);
-    expect(topics).toContain("pty.terminating");
-    expect(topics).toContain("pty.stopped");
-  });
+		await terminate(
+			record,
+			lifecycle,
+			registry,
+			new Map(),
+			bus,
+			{ gracePeriodMs: 50 },
+			() => true,
+			mockWait,
+		);
 
-  it("is idempotent on stopped PTY", async () => {
-    const record = makeRecord({ state: "stopped" });
-    const lifecycle = new PtyLifecycle(record.ptyId, "stopped");
-    const bus = new InMemoryBusPublisher();
-    await terminate(record, lifecycle, new PtyRegistry(), new Map(), bus);
-    expect(bus.events).toHaveLength(0);
-  });
-
-  it("escalates to SIGKILL after grace period", async () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord({ pid: 99999 });
-    registry.register(record);
-    const lifecycle = new PtyLifecycle(record.ptyId, "active");
-    const bus = new InMemoryBusPublisher();
-
-    let callCount = 0;
-<<<<<<< HEAD
-    const mockWait = async (): Promise<boolean> => {
-      callCount++;
-      return callCount > 1;
-=======
-    const mockWait = (): Promise<boolean> => {
-      callCount++;
-      return Promise.resolve(callCount > 1);
->>>>>>> origin/main
-    };
-
-    await terminate(
-      record,
-      lifecycle,
-      registry,
-      new Map(),
-      bus,
-      { gracePeriodMs: 50 },
-      () => true,
-      mockWait
-    );
-
-    const topics = bus.events.map(e => e.topic);
-    expect(topics).toContain("pty.force_killed");
-    expect(topics).toContain("pty.stopped");
-  });
+		const topics = bus.events.map((e) => e.topic);
+		expect(topics).toContain("pty.force_killed");
+		expect(topics).toContain("pty.stopped");
+	});
 });
 
 describe("sendSighup", () => {
-<<<<<<< HEAD
-  const pidsToCleanup: number[] = [];
-
-  afterEach(() => {
-    for (const pid of pidsToCleanup) {
-      try {
-        process.kill(pid, "SIGKILL");
-      } catch {
-        /* already exited */
-      }
-    }
-    pidsToCleanup.length = 0;
-  });
-
-  it("records successful delivery", () => {
-    // Spawn a real child so SIGHUP has a valid target (not the test runner).
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const proc = Bun.spawn(["/bin/sh"], {
-      stdin: "pipe",
-      stdout: "pipe",
-      stderr: "pipe",
-    } as any) as any;
-    pidsToCleanup.push(proc.pid as number);
-
-    const record = makeRecord({ pid: proc.pid as number });
-=======
-  it("records successful delivery", () => {
-    // Spawn a real child so SIGHUP has a valid target (not the test runner).
-    const pid = spawnShellProcess();
-    pidsToCleanup.push(pid);
-
-    const record = makeRecord({ pid });
->>>>>>> origin/main
-    const historyMap: SignalHistoryMap = new Map();
-    const bus = new InMemoryBusPublisher();
-    const envelope = sendSighup(record, historyMap, bus);
-    expect(envelope.outcome).toBe("delivered");
-    expect(envelope.signal).toBe("SIGHUP");
-    expect(historyMap.get(record.ptyId)?.length).toBe(1);
-  });
-
-  it("records failed delivery for dead process", () => {
-    const record = makeRecord({ pid: 999999 });
-    const historyMap: SignalHistoryMap = new Map();
-    const bus = new InMemoryBusPublisher();
-    const envelope = sendSighup(record, historyMap, bus);
-<<<<<<< HEAD
-    expect(envelope.outcome).toBe("failed");
-    expect(envelope.error).toBeDefined();
-=======
-    expect(envelope.signal).toBe("SIGHUP");
-    expect(envelope.outcome).toBe("failed");
-    expect(envelope.error).toBeDefined();
-    expect(historyMap.get(record.ptyId)?.length).toBe(1);
->>>>>>> origin/main
-  });
+	it("records signal delivery result", () => {
+		// Use non-existent PID to avoid sending signals to test process
+		const record = makeRecord({ pid: 999999 });
+		const historyMap: SignalHistoryMap = new Map();
+		const bus = new InMemoryBusPublisher();
+		const envelope = sendSighup(record, historyMap, bus);
+		expect(envelope.signal).toBe("SIGHUP");
+		expect(envelope.outcome).toBe("failed");
+		expect(envelope.error).toBeDefined();
+		expect(historyMap.get(record.ptyId)?.length).toBe(1);
+	});
 });

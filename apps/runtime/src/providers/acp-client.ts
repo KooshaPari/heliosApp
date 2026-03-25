@@ -9,40 +9,28 @@
  * FR-025-009: Health checks with configurable intervals.
  */
 
-<<<<<<< HEAD
-import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
-import type {
-  ACPConfig,
-  ACPExecuteInput,
-  ACPExecuteOutput,
-  ProviderAdapter,
-  ProviderHealthStatus,
-} from "./adapter.js";
-import { NormalizedProviderError, normalizeError } from "./errors.js";
-=======
 import type { LocalBus } from "../protocol/bus.js";
 import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
-  ACPConfig,
-  ACPExecuteInput,
-  ACPExecuteOutput,
+	ACPConfig,
+	ACPExecuteInput,
+	ACPExecuteOutput,
+	ProviderAdapter,
+	ProviderHealthStatus,
 } from "./adapter.js";
-import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
->>>>>>> origin/main
+import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * Policy gate interface for access control.
  * Blocks unauthorized provider actions before contacting external endpoints.
  */
 export interface PolicyGate {
-  evaluate(
-    action: string,
-    context: Record<string, unknown>
-  ): Promise<{
-    allowed: boolean;
-    reason?: string;
-  }>;
+	evaluate(
+		action: string,
+		context: Record<string, unknown>,
+	): Promise<{
+		allowed: boolean;
+		reason?: string;
+	}>;
 }
 
 /**
@@ -50,46 +38,33 @@ export interface PolicyGate {
  * Used until spec 023 delivers the real policy engine.
  */
 class DefaultPolicyGate implements PolicyGate {
-  async evaluate(): Promise<{ allowed: boolean }> {
-    return { allowed: true };
-  }
+	async evaluate(): Promise<{ allowed: boolean }> {
+		return { allowed: true };
+	}
 }
 
 /**
  * Mock ACP request for testing/prototyping.
  */
-<<<<<<< HEAD
-interface AcpRequest {
-  correlationId: string;
-  model: string;
-  messages: Array<{ role: string; content: string }>;
-  maxTokens?: number | undefined;
-  temperature?: number | undefined;
-=======
 interface ACPRequest {
-  correlationId: string;
-  model: string;
-  messages: Array<{ role: string; content: string }>;
-  maxTokens?: number;
-  temperature?: number;
->>>>>>> origin/main
+	correlationId: string;
+	model: string;
+	messages: Array<{ role: string; content: string }>;
+	maxTokens?: number;
+	temperature?: number;
 }
 
 /**
  * Mock ACP response.
  */
-<<<<<<< HEAD
-interface AcpResponse {
-=======
 interface ACPResponse {
->>>>>>> origin/main
-  taskId: string;
-  content: string;
-  stopReason: string;
-  usage?: {
-    inputTokens: number;
-    outputTokens: number;
-  };
+	taskId: string;
+	content: string;
+	stopReason: string;
+	usage?: {
+		inputTokens: number;
+		outputTokens: number;
+	};
 }
 
 /**
@@ -104,514 +79,501 @@ interface ACPResponse {
  *
  * FR-025-003: ACP protocol client for Claude.
  */
-<<<<<<< HEAD
 export class ACPClientAdapter
-  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
+	implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
 {
-  private config: ACPConfig | null = null;
-  private bus: LocalBus | null = null;
-  private policyGate: PolicyGate;
-  private terminated = false;
-=======
-export class ACPClientAdapter implements ProviderAdapter<
-  ACPConfig,
-  ACPExecuteInput,
-  ACPExecuteOutput
-> {
-  private config: ACPConfig | null = null;
-  private bus: LocalBus | null = null;
-  private policyGate: PolicyGate;
->>>>>>> origin/main
-  private healthStatus: ProviderHealthStatus = {
-    state: "unavailable",
-    lastCheck: new Date(),
-    failureCount: 0,
-  };
-  private inFlightTasks = new Map<string, AbortController>();
-  private lastHealthCheckTime = 0;
-  private healthCheckInterval = 30000; // Default 30s
+	private config: ACPConfig | null = null;
+	private bus: LocalBus | null = null;
+	private policyGate: PolicyGate;
+	private healthStatus: ProviderHealthStatus = {
+		state: "unavailable",
+		lastCheck: new Date(),
+		failureCount: 0,
+	};
+	private inFlightTasks = new Map<string, AbortController>();
+	private lastHealthCheckTime = 0;
+	private healthCheckInterval = 30000; // Default 30s
 
-  constructor(bus?: LocalBus, policyGate?: PolicyGate) {
-    this.bus = bus || null;
-    this.policyGate = policyGate || new DefaultPolicyGate();
-  }
+	constructor(bus?: LocalBus, policyGate?: PolicyGate) {
+		this.bus = bus || null;
+		this.policyGate = policyGate || new DefaultPolicyGate();
+	}
 
-  /**
-   * Initialize ACP client with configuration.
-   *
-   * FR-025-003: ACP client initialization.
-   * NFR-025-001: Must complete within 5 seconds.
-   *
-   * @param config ACP configuration
-   * @throws NormalizedProviderError if init fails
-   */
-  async init(config: ACPConfig): Promise<void> {
-    const startTime = Date.now();
+	/**
+	 * Initialize ACP client with configuration.
+	 *
+	 * FR-025-003: ACP client initialization.
+	 * NFR-025-001: Must complete within 5 seconds.
+	 *
+	 * @param config ACP configuration
+	 * @throws NormalizedProviderError if init fails
+	 */
+	async init(config: ACPConfig): Promise<void> {
+		const startTime = Date.now();
 
-    try {
-      // Validate config
-      if (!config.baseUrl || typeof config.baseUrl !== "string") {
-        throw new Error("Missing or invalid endpoint");
-      }
+		try {
+			// Validate config
+			if (!config.baseUrl || typeof config.baseUrl !== "string") {
+				throw new Error("Missing or invalid endpoint");
+			}
+			const endpoint = config.baseUrl.trim();
+			if (!endpoint) {
+				throw new Error("Missing or invalid endpoint");
+			}
 
-      if (!config.apiKey || typeof config.apiKey !== "string") {
-        throw new Error("Missing or invalid apiKeyRef");
-      }
+			if (!config.apiKey || typeof config.apiKey !== "string") {
+				throw new Error("Missing or invalid apiKey");
+			}
 
-      if (!config.model || typeof config.model !== "string") {
-        throw new Error("Missing or invalid model");
-      }
+			if (!config.model || typeof config.model !== "string") {
+				throw new Error("Missing or invalid model");
+			}
 
-      // Validate timeout
-      if (config.timeout && config.timeout < 1000) {
-        throw new Error("timeout must be >= 1000ms");
-      }
+			// Validate timeout
+			if (config.timeout && config.timeout < 1000) {
+				throw new Error("timeout must be >= 1000ms");
+			}
 
-      // Simulate endpoint reachability check with timeout
-<<<<<<< HEAD
-      const _probeTimeout = config.timeout || 10000;
-=======
-      const probeTimeout = config.timeout || 10000;
->>>>>>> origin/main
-      const probeResult = await Promise.race([
-        this.probeEndpoint(config.baseUrl),
-        new Promise<boolean>((_, reject) =>
-          setTimeout(() => reject(new Error("Probe timeout")), 2000)
-        ),
-      ]);
+			// Validate optional health check interval
+			if (
+				config.healthCheckIntervalMs !== undefined &&
+				config.healthCheckIntervalMs < 1000
+			) {
+				throw new Error("healthCheckIntervalMs must be >= 1000ms");
+			}
 
-      if (!probeResult) {
-        throw new Error("Endpoint unreachable");
-      }
+			// Simulate endpoint reachability check with timeout
+			const probeTimeout = config.timeout || 10000;
+			const probeResult = await Promise.race([
+				this.probeEndpoint(endpoint),
+				new Promise<boolean>((_, reject) =>
+					setTimeout(() => reject(new Error("Probe timeout")), probeTimeout),
+				),
+			]);
 
-      this.config = config;
-<<<<<<< HEAD
-      this.healthCheckInterval = 30000; // healthCheckIntervalMs not in ACPConfig || 30000;
-=======
-      this.healthCheckInterval = 30000;
->>>>>>> origin/main
+			if (!probeResult) {
+				throw new Error("Endpoint unreachable");
+			}
 
-      this.healthStatus = {
-        state: "healthy",
-        lastCheck: new Date(),
-        failureCount: 0,
-      };
+			this.config = {
+				...config,
+				baseUrl: endpoint,
+			};
+			this.healthCheckInterval = config.healthCheckIntervalMs ?? 30000;
+			this.lastHealthCheckTime = Date.now();
 
-      const elapsed = Date.now() - startTime;
-      if (elapsed > 5000) {
-        throw new Error(`Init exceeded 5s timeout (${elapsed}ms)`);
-      }
+			this.healthStatus = {
+				state: "healthy",
+				lastCheck: new Date(),
+				failureCount: 0,
+			};
 
-      await this.publishEvent("provider.acp.initialized", {
-        endpoint: config.baseUrl,
-        model: config.model,
-      });
-    } catch (error) {
-      const normalized = normalizeError(error, "acp");
+			const elapsed = Date.now() - startTime;
+			if (elapsed > 5000) {
+				throw new Error(`Init exceeded 5s timeout (${elapsed}ms)`);
+			}
 
-      throw new NormalizedProviderError(
-        "PROVIDER_INIT_FAILED",
-        `ACP client init failed: ${normalized.message}`,
-        "acp",
-        false
-      );
-    }
-  }
+			await this.publishEvent("provider.acp.initialized", {
+				endpoint,
+				model: config.model,
+			});
+		} catch (error) {
+			const normalized = normalizeError(error, "acp");
 
-  /**
-   * Get current health status.
-   *
-   * FR-025-009: Health monitoring with state transitions.
-   *
-   * @returns Current health status
-   */
-  async health(): Promise<ProviderHealthStatus> {
-    if (!this.config) {
-<<<<<<< HEAD
-      if (this.terminated) {
-        return { ...this.healthStatus };
-      }
-=======
->>>>>>> origin/main
-      return {
-        state: "unavailable",
-        lastCheck: new Date(),
-        failureCount: 0,
-        message: "Not initialized",
-      };
-    }
+			throw new NormalizedProviderError(
+				"PROVIDER_INIT_FAILED",
+				`ACP client init failed: ${normalized.message}`,
+				"acp",
+				false,
+			);
+		}
+	}
 
-    try {
-      // Perform lightweight health check
-      const probeSuccess = await Promise.race([
-        this.probeEndpoint(this.config.baseUrl ?? ""),
-        new Promise<boolean>((_, reject) =>
-          setTimeout(() => reject(new Error("Health check timeout")), 5000)
-        ),
-      ]);
+	/**
+	 * Get current health status.
+	 *
+	 * FR-025-009: Health monitoring with state transitions.
+	 *
+	 * @returns Current health status
+	 */
+	async health(): Promise<ProviderHealthStatus> {
+		if (!this.config) {
+			return {
+				state: "unavailable",
+				lastCheck: new Date(),
+				failureCount: 0,
+				message: "Not initialized",
+			};
+		}
 
-      if (probeSuccess) {
-        // Reset failure count on success
-        const previousState = this.healthStatus.state;
-        this.healthStatus = {
-          state: "healthy",
-          lastCheck: new Date(),
-          failureCount: 0,
-        };
+		const now = Date.now();
+		if (now - this.lastHealthCheckTime < this.healthCheckInterval) {
+			return { ...this.healthStatus };
+		}
 
-        // Publish state transition event
-        if (previousState !== "healthy") {
-          await this.publishEvent("provider.acp.health.changed", {
-            previousState,
-            newState: "healthy",
-            failureCount: 0,
-          });
-        }
+		try {
+			// Perform lightweight health check
+			const probeSuccess = await Promise.race([
+				this.probeEndpoint(this.config.baseUrl ?? ""),
+				new Promise<boolean>((_, reject) =>
+					setTimeout(() => reject(new Error("Health check timeout")), 5000),
+				),
+			]);
 
-        return { ...this.healthStatus };
-      }
-    } catch (error) {
-      // Increment failure count
-      this.healthStatus.failureCount++;
+			if (probeSuccess) {
+				// Reset failure count on success
+				const previousState = this.healthStatus.state;
+				this.healthStatus = {
+					state: "healthy",
+					lastCheck: new Date(),
+					failureCount: 0,
+				};
 
-      // Transition to degraded/unavailable
-      let newState: "healthy" | "degraded" | "unavailable" = this.healthStatus.state;
+				// Publish state transition event
+				if (previousState !== "healthy") {
+					await this.publishEvent("provider.acp.health.changed", {
+						previousState,
+						newState: "healthy",
+						failureCount: 0,
+					});
+				}
 
-      if (this.healthStatus.failureCount >= 5) {
-        newState = "unavailable";
-      } else if (this.healthStatus.failureCount >= 3) {
-        newState = "degraded";
-      }
+				this.lastHealthCheckTime = now;
+				return { ...this.healthStatus };
+			}
+		} catch (error) {
+			// Increment failure count
+			this.healthStatus.failureCount++;
 
-      const previousState = this.healthStatus.state;
-      this.healthStatus = {
-        state: newState,
-        lastCheck: new Date(),
-        failureCount: this.healthStatus.failureCount,
-        message: `Health check failed: ${normalizeError(error, "acp").message}`,
-      };
+			// Transition to degraded/unavailable
+			let newState: "healthy" | "degraded" | "unavailable" =
+				this.healthStatus.state;
 
-      // Publish state transition event
-      if (previousState !== newState) {
-        await this.publishEvent("provider.acp.health.changed", {
-          previousState,
-          newState,
-          failureCount: this.healthStatus.failureCount,
-        });
-      }
-    }
+			if (this.healthStatus.failureCount >= 5) {
+				newState = "unavailable";
+			} else if (this.healthStatus.failureCount >= 3) {
+				newState = "degraded";
+			}
 
-    return { ...this.healthStatus };
-  }
+			const previousState = this.healthStatus.state;
+			this.healthStatus = {
+				state: newState,
+				lastCheck: new Date(),
+				failureCount: this.healthStatus.failureCount,
+				message: `Health check failed: ${normalizeError(error, "acp").message}`,
+			};
 
-  /**
-   * Execute a task via ACP.
-   *
-   * FR-025-003: Task execution with correlation ID.
-   * FR-025-012: Policy gate integration.
-   *
-   * @param input Task input
-   * @param correlationId Correlation ID for tracing
-   * @returns Task result
-   * @throws NormalizedProviderError on failure
-   */
-  async execute(input: ACPExecuteInput, correlationId: string): Promise<ACPExecuteOutput> {
-    if (!this.config) {
-      throw new NormalizedProviderError(
-        "PROVIDER_UNAVAILABLE",
-<<<<<<< HEAD
-        "ACP client unavailable: not initialized",
-=======
-        "ACP client not initialized",
->>>>>>> origin/main
-        "acp"
-      );
-    }
+			// Publish state transition event
+			if (previousState !== newState) {
+				await this.publishEvent("provider.acp.health.changed", {
+					previousState,
+					newState,
+					failureCount: this.healthStatus.failureCount,
+				});
+			}
+		}
 
-    try {
-      // Check policy gate
-      const policyDecision = await this.policyGate.evaluate("provider.acp.execute", {
-        correlationId,
-        prompt: input.prompt,
-      });
+		this.lastHealthCheckTime = now;
+		return { ...this.healthStatus };
+	}
 
-      if (!policyDecision.allowed) {
-        const reason = policyDecision.reason || "Policy denied";
+	/**
+	 * Execute a task via ACP.
+	 *
+	 * FR-025-003: Task execution with correlation ID.
+	 * FR-025-012: Policy gate integration.
+	 *
+	 * @param input Task input
+	 * @param correlationId Correlation ID for tracing
+	 * @returns Task result
+	 * @throws NormalizedProviderError on failure
+	 */
+	async execute(
+		input: ACPExecuteInput,
+		correlationId: string,
+	): Promise<ACPExecuteOutput> {
+		if (!this.config) {
+			throw new NormalizedProviderError(
+				"PROVIDER_UNAVAILABLE",
+				"ACP client not initialized",
+				"acp",
+			);
+		}
 
-        await this.publishEvent("provider.acp.policy.denied", {
-          correlationId,
-          reason,
-        });
+		try {
+			// Check policy gate
+			const policyDecision = await this.policyGate.evaluate(
+				"provider.acp.execute",
+				{
+					correlationId,
+					prompt: input.prompt,
+				},
+			);
 
-        throw new NormalizedProviderError(
-          "PROVIDER_POLICY_DENIED",
-<<<<<<< HEAD
-          `ACP execution policy denied: ${reason}`,
-=======
-          `ACP execution denied by policy: ${reason}`,
->>>>>>> origin/main
-          "acp",
-          false,
-          correlationId
-        );
-      }
+			if (!policyDecision.allowed) {
+				const reason = policyDecision.reason || "Policy denied";
 
-      // Create abort controller for timeout
-      const abortController = new AbortController();
-      const timeoutMs = this.config.timeout || 30000;
-      const timeoutHandle = setTimeout(() => abortController.abort(), timeoutMs);
-      this.inFlightTasks.set(correlationId, abortController);
+				await this.publishEvent("provider.acp.policy.denied", {
+					correlationId,
+					reason,
+				});
 
-      try {
-        const startTime = Date.now();
+				throw new NormalizedProviderError(
+					"PROVIDER_POLICY_DENIED",
+					`ACP execution denied by policy: ${reason}`,
+					"acp",
+					false,
+					correlationId,
+				);
+			}
 
-        // Construct ACP request
-<<<<<<< HEAD
-        const acpRequest: AcpRequest = {
-=======
-        const acpRequest: ACPRequest = {
->>>>>>> origin/main
-          correlationId,
-          model: this.config.model,
-          messages: [
-            {
-              role: "user",
-              content: input.prompt,
-            },
-          ],
-          maxTokens: input.maxTokens,
-          temperature: input.temperature,
-        };
+			// Create abort controller for timeout
+			const abortController = new AbortController();
+			const timeoutMs = this.config.timeout || 30000;
+			const timeoutHandle = setTimeout(
+				() => abortController.abort(),
+				timeoutMs,
+			);
+			this.inFlightTasks.set(correlationId, abortController);
 
-        // Execute task (mock implementation)
-        const result = await this.sendACPRequest(acpRequest, abortController.signal);
+			try {
+				const startTime = Date.now();
 
-        const duration = Date.now() - startTime;
+				// Construct ACP request
+				const acpRequest: ACPRequest = {
+					correlationId,
+					model: this.config.model,
+					messages: [
+						{
+							role: "user",
+							content: input.prompt,
+						},
+					],
+					maxTokens: input.maxTokens,
+					temperature: input.temperature,
+				};
 
-        // Publish success event
-        await this.publishEvent("provider.acp.execute.completed", {
-          correlationId,
-          taskId: result.taskId,
-          duration,
-          usage: result.usage,
-        });
+				// Execute task (mock implementation)
+				const result = await this.sendACPRequest(
+					acpRequest,
+					abortController.signal,
+				);
 
-        return {
-          content: result.content,
-          stopReason: result.stopReason,
-          usage: result.usage,
-        };
-      } finally {
-        clearTimeout(timeoutHandle);
-        this.inFlightTasks.delete(correlationId);
-      }
-    } catch (error) {
-      // Handle timeout
-      if (error instanceof Error && error.name === "AbortError") {
-        const normalized = new NormalizedProviderError(
-          "PROVIDER_TIMEOUT",
-          `ACP execution timeout after ${this.config.timeout || 30000}ms`,
-          "acp",
-          true,
-          correlationId
-        );
+				const duration = Date.now() - startTime;
 
-        await this.publishEvent("provider.acp.execute.failed", {
-          correlationId,
-          code: normalized.code,
-          retryable: normalized.retryable,
-          message: normalized.message,
-        });
+				// Publish success event
+				await this.publishEvent("provider.acp.execute.completed", {
+					correlationId,
+					taskId: result.taskId,
+					duration,
+					usage: result.usage,
+				});
 
-        throw normalized;
-      }
+				return {
+					content: result.content,
+					stopReason: result.stopReason,
+					usage: result.usage,
+				};
+			} finally {
+				clearTimeout(timeoutHandle);
+				this.inFlightTasks.delete(correlationId);
+			}
+		} catch (error) {
+			// Handle timeout
+			if (error instanceof Error && error.name === "AbortError") {
+				const normalized = new NormalizedProviderError(
+					"PROVIDER_TIMEOUT",
+					`ACP execution timeout after ${this.config.timeout || 30000}ms`,
+					"acp",
+					true,
+					correlationId,
+				);
 
-      // Handle other errors
-      const normalized = normalizeError(error, "acp", correlationId);
+				await this.publishEvent("provider.acp.execute.failed", {
+					correlationId,
+					code: normalized.code,
+					retryable: normalized.retryable,
+					message: normalized.message,
+				});
 
-      await this.publishEvent("provider.acp.execute.failed", {
-        correlationId,
-        code: normalized.code,
-        retryable: normalized.retryable,
-        message: normalized.message,
-      });
+				throw normalized;
+			}
 
-      throw normalized;
-    }
-  }
+			// Handle other errors
+			const normalized = normalizeError(error, "acp", correlationId);
 
-  /**
-   * Cancel a task.
-   *
-   * @param taskId Task ID to cancel
-   * @throws NormalizedProviderError on failure
-   */
-  async cancel(taskId: string): Promise<void> {
-    if (!this.config) {
-      throw new NormalizedProviderError(
-        "PROVIDER_UNAVAILABLE",
-<<<<<<< HEAD
-        "ACP client unavailable: not initialized",
-=======
-        "ACP client not initialized",
->>>>>>> origin/main
-        "acp"
-      );
-    }
+			await this.publishEvent("provider.acp.execute.failed", {
+				correlationId,
+				code: normalized.code,
+				retryable: normalized.retryable,
+				message: normalized.message,
+			});
 
-    try {
-      // Abort in-flight task if found
-      for (const [correlationId, controller] of this.inFlightTasks) {
-        // In a real implementation, we would match the task ID
-        // For now, we just track by correlation ID
-        if (correlationId === taskId) {
-          controller.abort();
-        }
-      }
+			throw normalized;
+		}
+	}
 
-      await this.publishEvent("provider.acp.execute.cancelled", {
-        taskId,
-      });
-    } catch (error) {
-      const normalized = normalizeError(error, "acp");
+	/**
+	 * Cancel a task.
+	 *
+	 * @param taskId Task ID to cancel
+	 * @throws NormalizedProviderError on failure
+	 */
+	async cancel(taskId: string): Promise<void> {
+		if (!this.config) {
+			throw new NormalizedProviderError(
+				"PROVIDER_UNAVAILABLE",
+				"ACP client not initialized",
+				"acp",
+			);
+		}
 
-      throw new NormalizedProviderError(
-        "PROVIDER_EXECUTE_FAILED",
-        `Failed to cancel task ${taskId}: ${normalized.message}`,
-        "acp"
-      );
-    }
-  }
+		try {
+			// Abort in-flight task if found
+			for (const [correlationId, controller] of this.inFlightTasks) {
+				// In a real implementation, we would match the task ID
+				// For now, we just track by correlation ID
+				if (correlationId === taskId) {
+					controller.abort();
+				}
+			}
 
-  /**
-   * Terminate ACP client and cleanup resources.
-   *
-   * NFR-025-004: No resource leaks on termination.
-   */
-  async terminate(): Promise<void> {
-    try {
-      // Cancel all in-flight tasks
-      for (const controller of this.inFlightTasks.values()) {
-        controller.abort();
-      }
-      this.inFlightTasks.clear();
+			await this.publishEvent("provider.acp.execute.cancelled", {
+				taskId,
+			});
+		} catch (error) {
+			const normalized = normalizeError(error, "acp");
 
-      // Clear config
-      this.config = null;
-<<<<<<< HEAD
-      this.terminated = true;
-=======
->>>>>>> origin/main
+			throw new NormalizedProviderError(
+				"PROVIDER_EXECUTE_FAILED",
+				`Failed to cancel task ${taskId}: ${normalized.message}`,
+				"acp",
+			);
+		}
+	}
 
-      this.healthStatus = {
-        state: "unavailable",
-        lastCheck: new Date(),
-        failureCount: 0,
-        message: "Terminated",
-      };
+	/**
+	 * Terminate ACP client and cleanup resources.
+	 *
+	 * NFR-025-004: No resource leaks on termination.
+	 */
+	async terminate(): Promise<void> {
+		try {
+			// Cancel all in-flight tasks
+			for (const controller of this.inFlightTasks.values()) {
+				controller.abort();
+			}
+			this.inFlightTasks.clear();
 
-      await this.publishEvent("provider.acp.terminated", {});
-    } catch (error) {
-      const normalized = normalizeError(error, "acp");
+			// Clear config
+			this.config = null;
 
-      throw new NormalizedProviderError(
-        "PROVIDER_INIT_FAILED",
-        `Failed to terminate ACP client: ${normalized.message}`,
-        "acp",
-        false
-      );
-    }
-  }
+			this.healthStatus = {
+				state: "unavailable",
+				lastCheck: new Date(),
+				failureCount: 0,
+				message: "Terminated",
+			};
 
-  /**
-   * Probe endpoint for reachability.
-   *
-   * @param endpoint Endpoint URL
-   * @returns true if reachable, false otherwise
-   */
-  private async probeEndpoint(endpoint: string): Promise<boolean> {
-    // Mock implementation: always return true for test endpoints
-    if (endpoint.includes("localhost") || endpoint.includes("127.0.0.1")) {
-      return true;
-    }
+			await this.publishEvent("provider.acp.terminated", {});
+		} catch (error) {
+			const normalized = normalizeError(error, "acp");
 
-    // In a real implementation, this would make a lightweight HTTP request
-    return true;
-  }
+			throw new NormalizedProviderError(
+				"PROVIDER_INIT_FAILED",
+				`Failed to terminate ACP client: ${normalized.message}`,
+				"acp",
+				false,
+			);
+		}
+	}
 
-  /**
-   * Send request to ACP endpoint.
-   *
-   * @param request ACP request
-   * @param signal Abort signal
-   * @returns ACP response
-   */
-<<<<<<< HEAD
-  private async sendACPRequest(request: AcpRequest, signal: AbortSignal): Promise<AcpResponse> {
-=======
-  private async sendACPRequest(request: ACPRequest, signal: AbortSignal): Promise<ACPResponse> {
->>>>>>> origin/main
-    // Check for abort
-    if (signal.aborted) {
-      throw new Error("Request aborted");
-    }
+	/**
+	 * Probe endpoint for reachability.
+	 *
+	 * @param endpoint Endpoint URL
+	 * @returns true if reachable, false otherwise
+	 */
+	private async probeEndpoint(endpoint: string): Promise<boolean> {
+		// Mock implementation: always return true for test endpoints
+		if (endpoint.includes("localhost") || endpoint.includes("127.0.0.1")) {
+			return true;
+		}
 
-    // Mock implementation: simulate ACP processing
-<<<<<<< HEAD
-    return new Promise((resolve, reject) => {
-=======
-    return new Promise(resolve => {
->>>>>>> origin/main
-      const timeout = setTimeout(() => {
-        resolve({
-          taskId: `task-${request.correlationId}`,
-          content: "This is a mock ACP response.",
-          stopReason: "end_turn",
-          usage: {
-            inputTokens: 10,
-            outputTokens: 20,
-          },
-        });
-      }, 10);
+		// In a real implementation, this would make a lightweight HTTP request
+		return true;
+	}
 
-      // Clean up on abort
-      signal.addEventListener("abort", () => {
-        clearTimeout(timeout);
-<<<<<<< HEAD
-        reject(new Error("Request cancelled"));
-=======
-        throw new Error("Request cancelled");
->>>>>>> origin/main
-      });
-    });
-  }
+	/**
+	 * Send request to ACP endpoint.
+	 *
+	 * @param request ACP request
+	 * @param signal Abort signal
+	 * @returns ACP response
+	 */
+	private async sendACPRequest(
+		request: ACPRequest,
+		signal: AbortSignal,
+	): Promise<ACPResponse> {
+		// Check for abort
+		if (signal.aborted) {
+			const aborted = new Error("Request aborted");
+			aborted.name = "AbortError";
+			throw aborted;
+		}
 
-  /**
-   * Publish event on the protocol bus.
-   *
-   * @param topic Event topic
-   * @param payload Event payload
-   */
-  private async publishEvent(topic: string, payload: Record<string, unknown>): Promise<void> {
-    if (!this.bus) {
-      return; // Bus not configured, skip event publishing
-    }
+		// Mock implementation: simulate ACP processing
+		return new Promise((resolve, reject) => {
+			const onAbort = () => {
+				clearTimeout(timeout);
+				const aborted = new Error("Request cancelled");
+				aborted.name = "AbortError";
+				reject(aborted);
+			};
 
-    try {
-      await this.bus.publish({
-        id: `acp-${Date.now()}-${Math.random()}`,
-        type: "event",
-        ts: new Date().toISOString(),
-        topic,
-        payload,
-      });
-<<<<<<< HEAD
-    } catch (_error) {}
-=======
-    } catch (error) {
-      // Log but don't throw (event publishing is best-effort)
-      console.warn(`Failed to publish ACP event ${topic}:`, error);
-    }
->>>>>>> origin/main
-  }
+			const timeout = setTimeout(() => {
+				signal.removeEventListener("abort", onAbort);
+				resolve({
+					taskId: `task-${request.correlationId}`,
+					content: "This is a mock ACP response.",
+					stopReason: "end_turn",
+					usage: {
+						inputTokens: 10,
+						outputTokens: 20,
+					},
+				});
+			}, 10);
+
+			// Clean up on abort
+			signal.addEventListener("abort", onAbort, { once: true });
+		});
+	}
+
+	/**
+	 * Publish event on the protocol bus.
+	 *
+	 * @param topic Event topic
+	 * @param payload Event payload
+	 */
+	private async publishEvent(
+		topic: string,
+		payload: Record<string, unknown>,
+	): Promise<void> {
+		if (!this.bus) {
+			return; // Bus not configured, skip event publishing
+		}
+
+		try {
+			await this.bus.publish({
+				id: `acp-${Date.now()}-${Math.random()}`,
+				type: "event",
+				ts: new Date().toISOString(),
+				topic,
+				payload,
+			});
+		} catch (error) {
+			// Log but don't throw (event publishing is best-effort)
+			console.warn(`Failed to publish ACP event ${topic}:`, error);
+		}
+	}
 }

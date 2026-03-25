@@ -12,31 +12,6 @@ review:
   auto: true
   # Trigger review on PR creation and updates
   on: [pull_request]
-<<<<<<< HEAD
-
-  # Review only changes on main branch PRs
-  rules:
-    - branch: main
-      enabled: true
-
-      # Large PR handling
-      max_files: 50
-      max_lines: 2000
-
-      # Timeout with retry
-      timeout_seconds: 300
-
-    # Skip review for specific files/patterns
-    - path: |
-        docs/**
-        **/*.md
-      skip: true
-    - path: |
-        node_modules/**
-        dist/**
-      skip: true
-
-=======
   
   # Review only changes on main branch PRs
   rules:
@@ -50,7 +25,6 @@ review:
       # Timeout with retry
       timeout_seconds: 300
 
->>>>>>> origin/main
 # Chat settings
 chat:
   auto_reply: true
@@ -67,17 +41,11 @@ settings:
     backoff_multiplier: 2
     max_retries: 5
     max_wait_seconds: 900
-<<<<<<< HEAD
-
-=======
     
->>>>>>> origin/main
   # Failure behavior: block merge
   on_failure:
     action: block_merge
     notify_author: true
-<<<<<<< HEAD
-=======
 
 # Skip review for specific files/patterns
 review:
@@ -90,4 +58,3 @@ review:
         node_modules/**
         dist/**
       skip: true
->>>>>>> origin/main

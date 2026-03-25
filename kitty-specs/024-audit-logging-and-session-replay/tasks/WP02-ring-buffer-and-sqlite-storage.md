@@ -178,8 +178,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z – system – lane=planned – Prompt created.
 - 2026-03-01T13:32:19Z – claude-haiku – shell_pid=66147 – lane=doing – Assigned agent via workflow command
-<<<<<<< HEAD
 - 2026-03-01T13:41:20Z – claude-haiku – shell_pid=66147 – lane=done – Merged
-=======
-- 2026-03-01T13:34:26Z – claude-haiku – shell_pid=66147 – lane=done – Implemented: Ring buffer, SQLite storage with WAL, overflow handling, and chaos tests
->>>>>>> origin/main

@@ -280,8 +280,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:34:04Z – claude-haiku – shell_pid=72925 – lane=doing – Assigned agent via workflow command
-<<<<<<< HEAD
 - 2026-03-01T13:41:31Z – claude-haiku – shell_pid=72925 – lane=done – Merged
-=======
-- 2026-03-01T13:35:39Z – claude-haiku – shell_pid=72925 – lane=done – Implemented
->>>>>>> origin/main

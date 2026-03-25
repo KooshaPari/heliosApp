@@ -57,11 +57,7 @@
 
 ### Included Subtasks
 - [x] T007 Implement `scripts/compliance-checker.ts` that validates PR changesets against the constitution review checklist: correctness, tests, docs, types, error handling, performance, security, anti-patterns, library preference, backward-compat avoidance, regression risk
-<<<<<<< HEAD
-- [x] T008 Implement constitution section referencing: each finding links to the specific section in `.kittify/memory/constitution.md`
-=======
 - [x] T008 Implement constitution section referencing: each finding links to the specific section in `docs/reference/constitution.md`
->>>>>>> origin/main
 - [x] T009 Create `.github/workflows/compliance-check.yml` GitHub Action that runs the compliance checker on every PR and reports results as a required status check
 - [x] T010 Implement ADR exception workflow: validate linked ADRs have sunset dates (or permanence justification), require 3 approvals, store ADRs in `docs/adrs/`
 - [x] T011 [P] Add compliance checker unit tests: deliberate violations (missing tests, file > 500 lines, missing types) are caught with correct constitution references

@@ -1,31 +1,27 @@
-<<<<<<< HEAD
-import type { AuditEvent } from "./event.ts";
-=======
 import type { AuditEvent } from "./event";
->>>>>>> origin/main
 
 /**
  * Filter options for ring buffer queries.
  */
 export interface AuditFilter {
-  workspaceId?: string;
-  laneId?: string;
-  sessionId?: string;
-  actor?: string;
-  eventType?: string;
-  correlationId?: string;
-  startTime?: Date;
-  endTime?: Date;
+	workspaceId?: string;
+	laneId?: string;
+	sessionId?: string;
+	actor?: string;
+	eventType?: string;
+	correlationId?: string;
+	startTime?: Date;
+	endTime?: Date;
 }
 
 /**
  * Metrics for ring buffer monitoring.
  */
 export interface RingBufferMetrics {
-  capacity: number;
-  currentSize: number;
-  totalEventsProcessed: number;
-  totalEventsEvicted: number;
+	capacity: number;
+	currentSize: number;
+	totalEventsProcessed: number;
+	totalEventsEvicted: number;
 }
 
 /**
@@ -34,228 +30,185 @@ export interface RingBufferMetrics {
  * Thread-safe for single-threaded Bun runtime.
  */
 export class AuditRingBuffer {
-  private buffer: (AuditEvent | undefined)[];
-<<<<<<< HEAD
-  private head = 0;
-  private tail = 0;
-  private size = 0;
-  private totalEventsProcessed = 0;
-  private totalEventsEvicted = 0;
-=======
-  private head: number = 0;
-  private tail: number = 0;
-  private size: number = 0;
-  private totalEventsProcessed: number = 0;
-  private totalEventsEvicted: number = 0;
->>>>>>> origin/main
+	private buffer: (AuditEvent | undefined)[];
+	private head = 0;
+	private tail = 0;
+	private size = 0;
+	private totalEventsProcessed = 0;
+	private totalEventsEvicted = 0;
 
-  /**
-   * Create a new ring buffer with specified capacity.
-   *
-   * @param capacity - Maximum number of events to hold (default 10,000)
-   */
-<<<<<<< HEAD
-  constructor(private capacity = 10_000) {
-=======
-  constructor(private capacity: number = 10_000) {
->>>>>>> origin/main
-    this.buffer = new Array(capacity);
-  }
+	/**
+	 * Create a new ring buffer with specified capacity.
+	 *
+	 * @param capacity - Maximum number of events to hold (default 10,000)
+	 */
+	constructor(private capacity = 10_000) {
+		this.buffer = new Array(capacity);
+	}
 
-  /**
-   * Push an event into the buffer.
-   * If buffer is full, evicts the oldest event.
-   *
-   * @param event - Event to push
-   * @returns The evicted event if buffer was full, undefined otherwise
-   */
-  push(event: AuditEvent): AuditEvent | undefined {
-    this.totalEventsProcessed++;
+	/**
+	 * Push an event into the buffer.
+	 * If buffer is full, evicts the oldest event.
+	 *
+	 * @param event - Event to push
+	 * @returns The evicted event if buffer was full, undefined otherwise
+	 */
+	push(event: AuditEvent): AuditEvent | undefined {
+		this.totalEventsProcessed++;
 
-    let evicted: AuditEvent | undefined;
+		let evicted: AuditEvent | undefined;
 
-    if (this.size === this.capacity) {
-<<<<<<< HEAD
-      // Buffer is full; evict the oldest event at head
-      evicted = this.buffer[this.head];
-      this.totalEventsEvicted++;
-      this.head = (this.head + 1) % this.capacity;
-    } else {
-      this.size++;
-    }
+		if (this.size === this.capacity) {
+			// Buffer is full; evict the oldest event at head and advance head
+			evicted = this.buffer[this.head];
+			this.totalEventsEvicted++;
+			this.buffer[this.tail] = event;
+			this.tail = (this.tail + 1) % this.capacity;
+			this.head = (this.head + 1) % this.capacity;
+		} else {
+			// Buffer not yet full; append and grow
+			this.buffer[this.tail] = event;
+			this.tail = (this.tail + 1) % this.capacity;
+			this.size++;
+		}
 
-    // Insert at tail
-    this.buffer[this.tail] = event;
-    this.tail = (this.tail + 1) % this.capacity;
+		return evicted;
+	}
 
-=======
-      // Buffer is full; evict the oldest event at head and advance head
-      evicted = this.buffer[this.head];
-      this.totalEventsEvicted++;
-      this.buffer[this.tail] = event;
-      this.tail = (this.tail + 1) % this.capacity;
-      this.head = (this.head + 1) % this.capacity;
-    } else {
-      // Buffer not yet full; append and grow
-      this.buffer[this.tail] = event;
-      this.tail = (this.tail + 1) % this.capacity;
-      this.size++;
-    }
+	/**
+	 * Get the N most recent events.
+	 *
+	 * @param count - Number of events to return
+	 * @returns Array of recent events (most recent last)
+	 */
+	getRecent(count: number): AuditEvent[] {
+		if (count <= 0 || this.size === 0) {
+			return [];
+		}
 
->>>>>>> origin/main
-    return evicted;
-  }
+		const limit = Math.min(count, this.size);
+		const result: AuditEvent[] = [];
 
-  /**
-   * Get the N most recent events.
-   *
-   * @param count - Number of events to return
-   * @returns Array of recent events (most recent last)
-   */
-  getRecent(count: number): AuditEvent[] {
-    if (count <= 0 || this.size === 0) {
-      return [];
-    }
+		// Start from the most recent (tail - 1) and go backwards
+		for (let i = 0; i < limit; i++) {
+			const index = (this.tail - 1 - i + this.capacity * 100) % this.capacity;
+			const event = this.buffer[index];
+			if (event) {
+				result.unshift(event);
+			}
+		}
 
-    const limit = Math.min(count, this.size);
-    const result: AuditEvent[] = [];
+		return result;
+	}
 
-    // Start from the most recent (tail - 1) and go backwards
-    for (let i = 0; i < limit; i++) {
-      const index = (this.tail - 1 - i + this.capacity * 100) % this.capacity;
-      const event = this.buffer[index];
-      if (event) {
-        result.unshift(event);
-      }
-    }
+	/**
+	 * Query events in the buffer by filter criteria.
+	 *
+	 * @param filter - Filter conditions
+	 * @returns Array of matching events
+	 */
+	query(filter: AuditFilter): AuditEvent[] {
+		const result: AuditEvent[] = [];
 
-    return result;
-  }
+		for (let i = 0; i < this.size; i++) {
+			const index = (this.head + i) % this.capacity;
+			const event = this.buffer[index];
 
-  /**
-   * Query events in the buffer by filter criteria.
-   *
-   * @param filter - Filter conditions
-   * @returns Array of matching events
-   */
-  query(filter: AuditFilter): AuditEvent[] {
-    const result: AuditEvent[] = [];
+			if (!event) continue;
 
-    for (let i = 0; i < this.size; i++) {
-      const index = (this.head + i) % this.capacity;
-      const event = this.buffer[index];
+			if (!this.matchesFilter(event, filter)) {
+				continue;
+			}
 
-<<<<<<< HEAD
-      if (!event) {
-        continue;
-      }
-=======
-      if (!event) continue;
->>>>>>> origin/main
+			result.push(event);
+		}
 
-      if (!this.matchesFilter(event, filter)) {
-        continue;
-      }
+		return result;
+	}
 
-      result.push(event);
-    }
+	/**
+	 * Get all events with a given correlation ID.
+	 *
+	 * @param correlationId - Correlation ID to search for
+	 * @returns Array of matching events
+	 */
+	getByCorrelationId(correlationId: string): AuditEvent[] {
+		return this.query({ correlationId });
+	}
 
-    return result;
-  }
+	/**
+	 * Get current size of buffer.
+	 *
+	 * @returns Number of events currently in buffer
+	 */
+	getSize(): number {
+		return this.size;
+	}
 
-  /**
-   * Get all events with a given correlation ID.
-   *
-   * @param correlationId - Correlation ID to search for
-   * @returns Array of matching events
-   */
-  getByCorrelationId(correlationId: string): AuditEvent[] {
-<<<<<<< HEAD
-    return this.query({ correlationId });
-=======
-    return this.query({ correlationId: correlationId as any });
->>>>>>> origin/main
-  }
+	/**
+	 * Get metrics for monitoring.
+	 *
+	 * @returns RingBufferMetrics
+	 */
+	getMetrics(): RingBufferMetrics {
+		return {
+			capacity: this.capacity,
+			currentSize: this.size,
+			totalEventsProcessed: this.totalEventsProcessed,
+			totalEventsEvicted: this.totalEventsEvicted,
+		};
+	}
 
-  /**
-   * Get current size of buffer.
-   *
-   * @returns Number of events currently in buffer
-   */
-  getSize(): number {
-    return this.size;
-  }
+	/**
+	 * Check if an event matches the filter criteria.
+	 *
+	 * @param event - Event to check
+	 * @param filter - Filter criteria
+	 * @returns true if event matches
+	 */
+	private matchesFilter(event: AuditEvent, filter: AuditFilter): boolean {
+		if (filter.workspaceId && event.workspaceId !== filter.workspaceId) {
+			return false;
+		}
 
-  /**
-   * Get metrics for monitoring.
-   *
-   * @returns RingBufferMetrics
-   */
-  getMetrics(): RingBufferMetrics {
-    return {
-      capacity: this.capacity,
-      currentSize: this.size,
-      totalEventsProcessed: this.totalEventsProcessed,
-      totalEventsEvicted: this.totalEventsEvicted,
-    };
-  }
+		if (filter.laneId && event.laneId !== filter.laneId) {
+			return false;
+		}
 
-  /**
-   * Check if an event matches the filter criteria.
-   *
-   * @param event - Event to check
-   * @param filter - Filter criteria
-   * @returns true if event matches
-   */
-  private matchesFilter(event: AuditEvent, filter: AuditFilter): boolean {
-    if (filter.workspaceId && event.workspaceId !== filter.workspaceId) {
-      return false;
-    }
+		if (filter.sessionId && event.sessionId !== filter.sessionId) {
+			return false;
+		}
 
-    if (filter.laneId && event.laneId !== filter.laneId) {
-      return false;
-    }
+		if (filter.actor && event.actor !== filter.actor) {
+			return false;
+		}
 
-    if (filter.sessionId && event.sessionId !== filter.sessionId) {
-      return false;
-    }
+		if (filter.eventType && event.eventType !== filter.eventType) {
+			return false;
+		}
 
-    if (filter.actor && event.actor !== filter.actor) {
-      return false;
-    }
+		if (filter.correlationId && event.correlationId !== filter.correlationId) {
+			return false;
+		}
 
-    if (filter.eventType && event.eventType !== filter.eventType) {
-      return false;
-    }
+		if (filter.startTime) {
+			const eventTime = new Date(event.timestamp);
+			if (eventTime < filter.startTime) {
+				return false;
+			}
+		}
 
-<<<<<<< HEAD
-    if (filter.correlationId && event.correlationId !== filter.correlationId) {
-      return false;
-    }
+		if (filter.correlationId && event.correlationId !== filter.correlationId) {
+			return false;
+		}
 
-=======
->>>>>>> origin/main
-    if (filter.startTime) {
-      const eventTime = new Date(event.timestamp);
-      if (eventTime < filter.startTime) {
-        return false;
-      }
-    }
+		if (filter.endTime) {
+			const eventTime = new Date(event.timestamp);
+			if (eventTime > filter.endTime) {
+				return false;
+			}
+		}
 
-<<<<<<< HEAD
-=======
-    if (filter.correlationId && event.correlationId !== filter.correlationId) {
-      return false;
-    }
-
->>>>>>> origin/main
-    if (filter.endTime) {
-      const eventTime = new Date(event.timestamp);
-      if (eventTime > filter.endTime) {
-        return false;
-      }
-    }
-
-    return true;
-  }
+		return true;
+	}
 }

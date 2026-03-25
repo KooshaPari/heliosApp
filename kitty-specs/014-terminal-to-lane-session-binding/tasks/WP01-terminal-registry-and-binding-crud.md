@@ -193,7 +193,4 @@ Implementation command:
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:29:10Z – claude-haiku – shell_pid=53584 – lane=doing – Assigned agent via workflow command
 - 2026-03-01T13:31:39Z – claude-haiku – shell_pid=53584 – lane=done – Implemented: Terminal registry with CRUD, binding validation middleware, and comprehensive tests
-<<<<<<< HEAD
 - 2026-03-01T13:41:05Z – claude-haiku – shell_pid=53584 – lane=done – Merged
-=======
->>>>>>> origin/main

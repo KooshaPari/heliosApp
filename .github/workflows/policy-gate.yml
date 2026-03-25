@@ -2,11 +2,7 @@ name: Policy Gate
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
-
-permissions:
-  contents: read
-  pull-requests: read
+    branches: ["**"]
 
 jobs:
   policy-gate:
@@ -30,11 +26,7 @@ jobs:
 
           # Prevent merge commits in PR branch diff range
           PR_HEAD="${HEAD_SHA}"
-<<<<<<< HEAD
-          if ! git fetch origin "$BASE_REF" --depth=1; then
-=======
           if ! git fetch origin "$BASE_REF"; then
->>>>>>> origin/main
             echo "ERROR: failed to fetch base ref $BASE_REF."
             exit 1
           fi
@@ -43,11 +35,6 @@ jobs:
             exit 1
           fi
           if [[ -n "$MERGES" ]]; then
-<<<<<<< HEAD
-            echo "ERROR: merge commits detected in PR diff range:"
-            echo "$MERGES"
-            exit 1
-=======
             # Filter out merge commits from GitHub's "Update branch" button
             # These have committer "GitHub <noreply@github.com>"
             REAL_MERGES=""
@@ -63,7 +50,6 @@ jobs:
               echo "$REAL_MERGES"
               exit 1
             fi
->>>>>>> origin/main
           fi
 
           echo "Policy gate passed."

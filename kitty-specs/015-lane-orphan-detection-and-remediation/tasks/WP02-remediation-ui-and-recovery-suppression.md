@@ -221,8 +221,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:32:33Z – claude-haiku – shell_pid=67031 – lane=doing – Assigned agent via workflow command
-<<<<<<< HEAD
 - 2026-03-01T13:41:09Z – claude-haiku – shell_pid=67031 – lane=done – Merged
-=======
-- 2026-03-01T13:34:21Z – claude-haiku – shell_pid=67031 – lane=done – Implemented remediation engine and integration tests
->>>>>>> origin/main

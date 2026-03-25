@@ -1,26 +1,19 @@
-<<<<<<< HEAD
-import type { ProtocolBus as LocalBus } from "@helios/runtime/protocol/bus";
-=======
-/** Minimal subset of runtime LocalBus used for context events. */
-interface LocalBus {
-  publish(event: Record<string, unknown>): Promise<void>;
-}
->>>>>>> origin/main
+import type { LocalBus } from "../../../runtime/src/protocol/bus";
 
 export interface ActiveContext {
-  workspaceId: string;
-  laneId: string;
-  sessionId: string;
+	workspaceId: string;
+	laneId: string;
+	sessionId: string;
 }
 
 export interface ContextChangeEvent {
-  previous: ActiveContext | null;
-  current: ActiveContext | null;
+	previous: ActiveContext | null;
+	current: ActiveContext | null;
 }
 
 export interface ContextValidationResult {
-  valid: boolean;
-  error?: string;
+	valid: boolean;
+	error?: string;
 }
 
 type ContextChangeListener = (event: ContextChangeEvent) => void;
@@ -36,133 +29,132 @@ type ContextChangeListener = (event: ContextChangeEvent) => void;
  * - Emits events on the internal bus for context changes and validation failures.
  */
 export class ActiveContextStore {
-  private currentContext: ActiveContext | null = null;
-  private listeners = new Set<ContextChangeListener>();
-  private debounceTimer: NodeJS.Timeout | null = null;
-  private pendingContext: ActiveContext | null = null;
-  private bus: LocalBus | null = null;
-  private validator: ((ctx: ActiveContext) => Promise<boolean>) | null = null;
+	private currentContext: ActiveContext | null = null;
+	private listeners = new Set<ContextChangeListener>();
+	private debounceTimer: NodeJS.Timeout | null = null;
+	private pendingContext: ActiveContext | null = null;
+	private bus: LocalBus | null = null;
+	private validator: ((ctx: ActiveContext) => Promise<boolean>) | null = null;
 
-  constructor(bus?: LocalBus) {
-    this.bus = bus ?? null;
-  }
+	constructor(bus?: LocalBus) {
+		this.bus = bus ?? null;
+	}
 
-  /**
-   * Set the context validator function. Called before accepting a new context.
-   */
-  setValidator(validator: (ctx: ActiveContext) => Promise<boolean>): void {
-    this.validator = validator;
-  }
+	/**
+	 * Set the context validator function. Called before accepting a new context.
+	 */
+	setValidator(validator: (ctx: ActiveContext) => Promise<boolean>): void {
+		this.validator = validator;
+	}
 
-  /**
-   * Get the current active context.
-   */
-  getContext(): ActiveContext | null {
-    return this.currentContext;
-  }
+	/**
+	 * Get the current active context.
+	 */
+	getContext(): ActiveContext | null {
+		return this.currentContext;
+	}
 
-  /**
-   * Set a new active context. Validates the context and emits a change event.
-   * Debounces rapid calls to only emit the final context.
-   */
-  async setContext(context: ActiveContext | null): Promise<void> {
-    // Clear any pending debounce
-    if (this.debounceTimer) {
-      clearTimeout(this.debounceTimer);
-    }
+	/**
+	 * Set a new active context. Validates the context and emits a change event.
+	 * Debounces rapid calls to only emit the final context.
+	 */
+	async setContext(context: ActiveContext | null): Promise<void> {
+		// Clear any pending debounce
+		if (this.debounceTimer) {
+			clearTimeout(this.debounceTimer);
+		}
 
-    this.pendingContext = context;
+		this.pendingContext = context;
 
-    // Debounce: wait 50ms for any additional changes before committing
-    return new Promise(resolve => {
-      this.debounceTimer = setTimeout(async () => {
-        this.debounceTimer = null;
+		// Debounce: wait 50ms for any additional changes before committing
+		return new Promise((resolve) => {
+			this.debounceTimer = setTimeout(async () => {
+				this.debounceTimer = null;
 
-        const contextToSet = this.pendingContext;
-        this.pendingContext = null;
+				const contextToSet = this.pendingContext;
+				this.pendingContext = null;
 
-        // Validate context if validator is set
-        if (contextToSet !== null && this.validator) {
-          const isValid = await this.validator(contextToSet);
-          if (!isValid) {
-            // Emit validation failure event
-            if (this.bus) {
-              await this.bus.publish({
-                id: `validation-${Date.now()}`,
-                type: "event",
-                ts: new Date().toISOString(),
-                topic: "context.validation.failed",
-                payload: { context: contextToSet },
-              });
-            }
-            resolve();
-            return;
-          }
-        }
+				// Validate context if validator is set
+				if (contextToSet !== null && this.validator) {
+					const isValid = await this.validator(contextToSet);
+					if (!isValid) {
+						// Emit validation failure event
+						if (this.bus) {
+							await this.bus.publish({
+								id: `validation-${Date.now()}`,
+								type: "event",
+								ts: new Date().toISOString(),
+								topic: "context.validation.failed",
+								payload: { context: contextToSet } as Record<string, unknown>,
+							});
+						}
+						resolve();
+						return;
+					}
+				}
 
-        // Store previous context for comparison
-        const previousContext = this.currentContext;
+				// Store previous context for comparison
+				const previousContext = this.currentContext;
 
-        // Update context
-        this.currentContext = contextToSet;
+				// Update context
+				this.currentContext = contextToSet;
 
-        // Emit change event to listeners
-        const changeEvent: ContextChangeEvent = {
-          previous: previousContext,
-          current: this.currentContext,
-        };
+				// Emit change event to listeners
+				const changeEvent: ContextChangeEvent = {
+					previous: previousContext,
+					current: this.currentContext,
+				};
 
-        for (const listener of this.listeners) {
-          listener(changeEvent);
-        }
+				for (const listener of this.listeners) {
+					listener(changeEvent);
+				}
 
-        // Publish to bus
-        if (this.bus) {
-          await this.bus.publish({
-            id: `context-change-${Date.now()}`,
-            type: "event",
-            ts: new Date().toISOString(),
-            topic: "context.active.changed",
-            workspace_id: contextToSet?.workspaceId,
-            lane_id: contextToSet?.laneId,
-            session_id: contextToSet?.sessionId,
-<<<<<<< HEAD
-            payload: changeEvent as unknown as Record<string, unknown>,
-=======
-            payload: changeEvent,
->>>>>>> origin/main
-          });
-        }
+				// Publish to bus
+				if (this.bus) {
+					await this.bus.publish({
+						id: `context-change-${Date.now()}`,
+						type: "event",
+						ts: new Date().toISOString(),
+						topic: "context.active.changed",
+						workspace_id: contextToSet?.workspaceId,
+						lane_id: contextToSet?.laneId,
+						session_id: contextToSet?.sessionId,
+						payload: {
+							previous: changeEvent.previous,
+							current: changeEvent.current,
+						} as Record<string, unknown>,
+					});
+				}
 
-        resolve();
-      }, 50);
-    });
-  }
+				resolve();
+			}, 50);
+		});
+	}
 
-  /**
-   * Clear the current context (set to null).
-   */
-  async clearContext(): Promise<void> {
-    await this.setContext(null);
-  }
+	/**
+	 * Clear the current context (set to null).
+	 */
+	async clearContext(): Promise<void> {
+		await this.setContext(null);
+	}
 
-  /**
-   * Register a listener for context change events.
-   * Returns an unsubscribe function.
-   */
-  onContextChange(callback: ContextChangeListener): () => void {
-    this.listeners.add(callback);
-    return () => {
-      this.listeners.delete(callback);
-    };
-  }
+	/**
+	 * Register a listener for context change events.
+	 * Returns an unsubscribe function.
+	 */
+	onContextChange(callback: ContextChangeListener): () => void {
+		this.listeners.add(callback);
+		return () => {
+			this.listeners.delete(callback);
+		};
+	}
 
-  /**
-   * Get the number of registered listeners (useful for testing).
-   */
-  getListenerCount(): number {
-    return this.listeners.size;
-  }
+	/**
+	 * Get the number of registered listeners (useful for testing).
+	 */
+	getListenerCount(): number {
+		return this.listeners.size;
+	}
 }
 
 /**
@@ -174,15 +166,15 @@ let globalContextStore: ActiveContextStore | null = null;
  * Get the global singleton instance.
  */
 export function getActiveContextStore(bus?: LocalBus): ActiveContextStore {
-  if (!globalContextStore) {
-    globalContextStore = new ActiveContextStore(bus);
-  }
-  return globalContextStore;
+	if (!globalContextStore) {
+		globalContextStore = new ActiveContextStore(bus);
+	}
+	return globalContextStore;
 }
 
 /**
  * Reset the global singleton (for testing).
  */
 export function resetActiveContextStore(): void {
-  globalContextStore = null;
+	globalContextStore = null;
 }

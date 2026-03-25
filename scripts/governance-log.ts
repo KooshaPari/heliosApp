@@ -6,16 +6,6 @@
 import { promises as fs } from "fs";
 import * as path from "path";
 import type {
-<<<<<<< HEAD
-  GovernanceLogEntry,
-  GovernanceLogQueryResult,
-  ValidationResult,
-} from "./governance-types";
-
-const GOVERNANCE_LOG_PATH = path.join(
-  path.dirname(path.dirname(import.meta.url)).replace("file://", ""),
-  "governance-log.jsonl"
-=======
 	GovernanceLogEntry,
 	ValidationResult,
 	GovernanceLogQueryResult,
@@ -24,7 +14,6 @@ const GOVERNANCE_LOG_PATH = path.join(
 const GOVERNANCE_LOG_PATH = path.join(
 	path.dirname(path.dirname(import.meta.url)).replace("file://", ""),
 	"governance-log.jsonl",
->>>>>>> origin/main
 );
 
 /**
@@ -32,40 +21,6 @@ const GOVERNANCE_LOG_PATH = path.join(
  * Validates the entry against the schema before appending.
  * Uses atomic write (temp file + rename) to prevent corruption.
  */
-<<<<<<< HEAD
-export async function appendGovernanceEntry(entry: GovernanceLogEntry): Promise<void> {
-  // Validate entry
-  validateEntry(entry);
-
-  const jsonLine = JSON.stringify(entry);
-  const tempFile = `${GOVERNANCE_LOG_PATH}.tmp`;
-
-  try {
-    // Read existing log
-    let content = "";
-    try {
-      content = await fs.readFile(GOVERNANCE_LOG_PATH, "utf-8");
-    } catch {
-      // File doesn't exist yet, that's ok
-      content = "";
-    }
-
-    // Append new entry
-    const newContent = content ? `${content}\n${jsonLine}\n` : `${jsonLine}\n`;
-
-    // Write to temp file
-    await fs.writeFile(tempFile, newContent, "utf-8");
-
-    // Atomic rename
-    await fs.rename(tempFile, GOVERNANCE_LOG_PATH);
-  } catch (error) {
-    // Clean up temp file
-    try {
-      await fs.unlink(tempFile);
-    } catch {}
-    throw error;
-  }
-=======
 export async function appendGovernanceEntry(
 	entry: GovernanceLogEntry,
 ): Promise<void> {
@@ -100,58 +55,12 @@ export async function appendGovernanceEntry(
 		} catch {}
 		throw error;
 	}
->>>>>>> origin/main
 }
 
 /**
  * Validate a governance log entry against the schema.
  */
 function validateEntry(entry: GovernanceLogEntry): void {
-<<<<<<< HEAD
-  const errors: string[] = [];
-
-  if (!Number.isInteger(entry.prNumber) || entry.prNumber <= 0) {
-    errors.push("prNumber must be a positive integer");
-  }
-  if (!entry.title || typeof entry.title !== "string") {
-    errors.push("title must be a non-empty string");
-  }
-  if (!entry.author || typeof entry.author !== "string") {
-    errors.push("author must be a non-empty string");
-  }
-  if (!Array.isArray(entry.reviewers)) {
-    errors.push("reviewers must be an array");
-  }
-  if (!entry.gateResults || typeof entry.gateResults !== "object") {
-    errors.push("gateResults must be an object");
-  }
-  if (
-    !["qualityGates", "gcaReview", "coderabbitReview", "complianceCheck"].every(
-      key => typeof entry.gateResults[key as keyof typeof entry.gateResults] === "boolean"
-    )
-  ) {
-    errors.push("all gateResults fields must be boolean");
-  }
-  if (typeof entry.complianceAttestation !== "boolean") {
-    errors.push("complianceAttestation must be boolean");
-  }
-  if (!Array.isArray(entry.exceptionADRs)) {
-    errors.push("exceptionADRs must be an array");
-  }
-  if (typeof entry.selfMerge !== "boolean") {
-    errors.push("selfMerge must be boolean");
-  }
-  if (!entry.mergeCommitSha || !/^[a-f0-9]{40}$/.test(entry.mergeCommitSha)) {
-    errors.push("mergeCommitSha must be a valid 40-char SHA");
-  }
-  if (!entry.timestamp || isNaN(Date.parse(entry.timestamp))) {
-    errors.push("timestamp must be a valid ISO 8601 string");
-  }
-
-  if (errors.length > 0) {
-    throw new Error(`Invalid governance entry: ${errors.join("; ")}`);
-  }
-=======
 	const errors: string[] = [];
 
 	if (!Number.isInteger(entry.prNumber) || entry.prNumber <= 0) {
@@ -197,24 +106,11 @@ function validateEntry(entry: GovernanceLogEntry): void {
 	if (errors.length > 0) {
 		throw new Error(`Invalid governance entry: ${errors.join("; ")}`);
 	}
->>>>>>> origin/main
 }
 
 /**
  * Get all self-merges in the past N days.
  */
-<<<<<<< HEAD
-export async function getSelfMerges(days: number): Promise<GovernanceLogQueryResult> {
-  const entries = await readAllEntries();
-  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-
-  const filtered = entries.filter(entry => {
-    const entryDate = new Date(entry.timestamp);
-    return entry.selfMerge && entryDate >= cutoff;
-  });
-
-  return { entries: filtered, count: filtered.length };
-=======
 export async function getSelfMerges(
 	days: number,
 ): Promise<GovernanceLogQueryResult> {
@@ -227,39 +123,22 @@ export async function getSelfMerges(
 	});
 
 	return { entries: filtered, count: filtered.length };
->>>>>>> origin/main
 }
 
 /**
  * Get all merges that used exception ADRs.
  */
 export async function getExceptionADRs(): Promise<GovernanceLogQueryResult> {
-<<<<<<< HEAD
-  const entries = await readAllEntries();
-
-  const filtered = entries.filter(entry => entry.exceptionADRs.length > 0);
-
-  return { entries: filtered, count: filtered.length };
-=======
 	const entries = await readAllEntries();
 
 	const filtered = entries.filter((entry) => entry.exceptionADRs.length > 0);
 
 	return { entries: filtered, count: filtered.length };
->>>>>>> origin/main
 }
 
 /**
  * Get all merges by a specific author.
  */
-<<<<<<< HEAD
-export async function getEntriesByAuthor(author: string): Promise<GovernanceLogQueryResult> {
-  const entries = await readAllEntries();
-
-  const filtered = entries.filter(entry => entry.author === author);
-
-  return { entries: filtered, count: filtered.length };
-=======
 export async function getEntriesByAuthor(
 	author: string,
 ): Promise<GovernanceLogQueryResult> {
@@ -268,23 +147,11 @@ export async function getEntriesByAuthor(
 	const filtered = entries.filter((entry) => entry.author === author);
 
 	return { entries: filtered, count: filtered.length };
->>>>>>> origin/main
 }
 
 /**
  * Get merges within a date range.
  */
-<<<<<<< HEAD
-export async function getEntriesInRange(from: Date, to: Date): Promise<GovernanceLogQueryResult> {
-  const entries = await readAllEntries();
-
-  const filtered = entries.filter(entry => {
-    const entryDate = new Date(entry.timestamp);
-    return entryDate >= from && entryDate <= to;
-  });
-
-  return { entries: filtered, count: filtered.length };
-=======
 export async function getEntriesInRange(
 	from: Date,
 	to: Date,
@@ -297,7 +164,6 @@ export async function getEntriesInRange(
 	});
 
 	return { entries: filtered, count: filtered.length };
->>>>>>> origin/main
 }
 
 /**
@@ -305,46 +171,6 @@ export async function getEntriesInRange(
  * Checks that all entries conform to the schema.
  */
 export async function validateGovernanceLog(): Promise<ValidationResult> {
-<<<<<<< HEAD
-  try {
-    const content = await fs.readFile(GOVERNANCE_LOG_PATH, "utf-8");
-    const lines = content
-      .trim()
-      .split("\n")
-      .filter(line => line.length > 0);
-
-    const invalidEntries: Array<{ line: number; error: string }> = [];
-
-    for (let i = 0; i < lines.length; i++) {
-      try {
-        const entry = JSON.parse(lines[i]) as GovernanceLogEntry;
-        validateEntry(entry);
-      } catch (error) {
-        invalidEntries.push({
-          line: i + 1,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    return {
-      valid: invalidEntries.length === 0,
-      totalEntries: lines.length,
-      invalidEntries,
-    };
-  } catch (error) {
-    return {
-      valid: false,
-      totalEntries: 0,
-      invalidEntries: [
-        {
-          line: 0,
-          error: error instanceof Error ? error.message : "Failed to read governance log",
-        },
-      ],
-    };
-  }
-=======
 	try {
 		const content = await fs.readFile(GOVERNANCE_LOG_PATH, "utf-8");
 		const lines = content
@@ -386,25 +212,12 @@ export async function validateGovernanceLog(): Promise<ValidationResult> {
 			],
 		};
 	}
->>>>>>> origin/main
 }
 
 /**
  * Read all entries from the governance log.
  */
 async function readAllEntries(): Promise<GovernanceLogEntry[]> {
-<<<<<<< HEAD
-  try {
-    const content = await fs.readFile(GOVERNANCE_LOG_PATH, "utf-8");
-    return content
-      .trim()
-      .split("\n")
-      .filter(line => line.length > 0)
-      .map(line => JSON.parse(line) as GovernanceLogEntry);
-  } catch {
-    return [];
-  }
-=======
 	try {
 		const content = await fs.readFile(GOVERNANCE_LOG_PATH, "utf-8");
 		return content
@@ -415,7 +228,6 @@ async function readAllEntries(): Promise<GovernanceLogEntry[]> {
 	} catch {
 		return [];
 	}
->>>>>>> origin/main
 }
 
 /**
@@ -423,56 +235,6 @@ async function readAllEntries(): Promise<GovernanceLogEntry[]> {
  * Usage: tsx scripts/governance-log.ts <command> [args]
  */
 if (import.meta.main) {
-<<<<<<< HEAD
-  const args = process.argv.slice(2);
-  const command = args[0];
-
-  const run = async () => {
-    switch (command) {
-      case "validate":
-        const result = await validateGovernanceLog();
-        console.log(JSON.stringify(result, null, 2));
-        process.exit(result.valid ? 0 : 1);
-        break;
-
-      case "self-merges":
-        const days = Number.parseInt(args[1] || "7", 10);
-        const selfMerges = await getSelfMerges(days);
-        console.log(`Self-merges in last ${days} days:`, selfMerges.count);
-        selfMerges.entries.forEach(e => console.log(`  PR #${e.prNumber}: ${e.author}`));
-        break;
-
-      case "exceptions":
-        const exceptions = await getExceptionADRs();
-        console.log(`Merges with exceptions: ${exceptions.count}`);
-        exceptions.entries.forEach(e => {
-          console.log(`  PR #${e.prNumber}: ${e.exceptionADRs.join(", ")}`);
-        });
-        break;
-
-      case "by-author":
-        const author = args[1];
-        if (!author) {
-          console.error("Usage: governance-log.ts by-author <author>");
-          process.exit(1);
-        }
-        const byAuthor = await getEntriesByAuthor(author);
-        console.log(`Merges by ${author}: ${byAuthor.count}`);
-        byAuthor.entries.forEach(e => console.log(`  PR #${e.prNumber}: ${e.title}`));
-        break;
-
-      default:
-        console.error(`Unknown command: ${command}`);
-        console.error("Available commands: validate, self-merges, exceptions, by-author");
-        process.exit(1);
-    }
-  };
-
-  run().catch(err => {
-    console.error(err);
-    process.exit(1);
-  });
-=======
 	const args = process.argv.slice(2);
 	const command = args[0];
 
@@ -527,5 +289,4 @@ if (import.meta.main) {
 		console.error(err);
 		process.exit(1);
 	});
->>>>>>> origin/main
 }

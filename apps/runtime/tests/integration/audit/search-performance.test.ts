@@ -1,328 +1,271 @@
-<<<<<<< HEAD
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
+import {
+	AUDIT_EVENT_RESULTS,
+	AUDIT_EVENT_TYPES,
+	createAuditEvent,
+} from "../../../src/audit/event";
 import { AuditLedger } from "../../../src/audit/ledger";
 import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
-=======
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { AuditLedger } from "../../../src/audit/ledger";
-import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
-import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
-import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
->>>>>>> origin/main
 
 /**
  * Calculate percentile from array of values.
  */
 function percentile(values: number[], p: number): number {
-  values.sort((a, b) => a - b);
-  const index = Math.ceil((p / 100) * values.length) - 1;
-  return values[Math.max(0, index)];
+	values.sort((a, b) => a - b);
+	const index = Math.ceil((p / 100) * values.length) - 1;
+	return values[Math.max(0, index)];
 }
 
 describe("Audit Search Performance", () => {
-  let ledger: AuditLedger;
-  let ringBuffer: AuditRingBuffer;
-  let store: SQLiteAuditStore;
+	let ledger: AuditLedger;
+	let ringBuffer: AuditRingBuffer;
+	let store: SQLiteAuditStore;
 
-  beforeEach(() => {
-    ringBuffer = new AuditRingBuffer(10_000);
-    store = new SQLiteAuditStore(":memory:");
-    ledger = new AuditLedger(ringBuffer, store);
-  });
+	beforeEach(() => {
+		ringBuffer = new AuditRingBuffer(10_000);
+		store = new SQLiteAuditStore(":memory:");
+		ledger = new AuditLedger(ringBuffer, store);
+	});
 
-  afterEach(() => {
-    store.close();
-  });
+	afterEach(() => {
+		store.close();
+	});
 
-  it("should search with workspace filter in < 500ms p95 for large dataset", () => {
-    // Insert 100k events (sample from 1M scale test)
-    const events = [];
-<<<<<<< HEAD
-    const workspaces = 10;
-    const actors = 50;
-    const eventTypes = 5;
-=======
-    const WORKSPACES = 10;
-    const ACTORS = 50;
-    const EVENT_TYPES = 5;
->>>>>>> origin/main
+	it("should search with workspace filter in < 500ms p95 for large dataset", () => {
+		// Insert 100k events (sample from 1M scale test)
+		const events = [];
+		const WORKSPACES = 10;
+		const ACTORS = 50;
+		const EVENT_TYPES = 5;
 
-    for (let i = 0; i < 100_000; i++) {
-      const event = createAuditEvent({
-        eventType: [
-          AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-          AUDIT_EVENT_TYPES.SESSION_CREATED,
-          AUDIT_EVENT_TYPES.POLICY_EVALUATION,
-          AUDIT_EVENT_TYPES.APPROVAL_RESOLVED,
-          AUDIT_EVENT_TYPES.TERMINAL_OUTPUT,
-<<<<<<< HEAD
-        ][i % eventTypes],
-        actor: `actor-${i % actors}`,
-        action: "test",
-        target: `target-${i}`,
-        result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: `ws-${i % workspaces}`,
-=======
-        ][i % EVENT_TYPES],
-        actor: `actor-${i % ACTORS}`,
-        action: "test",
-        target: `target-${i}`,
-        result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: `ws-${i % WORKSPACES}`,
->>>>>>> origin/main
-        laneId: `lane-${i % 50}`,
-        sessionId: `session-${i % 100}`,
-        correlationId: `corr-${i}`,
-        metadata: { index: i },
-      });
-      events.push(event);
+		for (let i = 0; i < 100_000; i++) {
+			const event = createAuditEvent({
+				eventType: [
+					AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+					AUDIT_EVENT_TYPES.SESSION_CREATED,
+					AUDIT_EVENT_TYPES.POLICY_EVALUATION,
+					AUDIT_EVENT_TYPES.APPROVAL_RESOLVED,
+					AUDIT_EVENT_TYPES.TERMINAL_OUTPUT,
+				][i % EVENT_TYPES],
+				actor: `actor-${i % ACTORS}`,
+				action: "test",
+				target: `target-${i}`,
+				result: AUDIT_EVENT_RESULTS.SUCCESS,
+				workspaceId: `ws-${i % WORKSPACES}`,
+				laneId: `lane-${i % 50}`,
+				sessionId: `session-${i % 100}`,
+				correlationId: `corr-${i}`,
+				metadata: { index: i },
+			});
+			events.push(event);
 
-      // Insert to ring buffer for first 10k
-      if (i < 10_000) {
-        ringBuffer.push(event);
-      }
-    }
+			// Insert to ring buffer for first 10k
+			if (i < 10_000) {
+				ringBuffer.push(event);
+			}
+		}
 
-    // Persist rest to SQLite
-    store.persist(events.slice(10_000));
+		// Persist rest to SQLite
+		store.persist(events.slice(10_000));
 
-    // Run multiple searches and collect latencies
-    const latencies: number[] = [];
+		// Run multiple searches and collect latencies
+		const latencies: number[] = [];
 
-    for (let i = 0; i < 20; i++) {
-      const startTime = Date.now();
-      const results = ledger.search({ workspaceId: "ws-0", limit: 100 });
-      const endTime = Date.now();
+		for (let i = 0; i < 20; i++) {
+			const startTime = Date.now();
+			const results = ledger.search({ workspaceId: "ws-0", limit: 100 });
+			const endTime = Date.now();
 
-      latencies.push(endTime - startTime);
-      expect(results.length).toBeGreaterThan(0);
-    }
+			latencies.push(endTime - startTime);
+			expect(results.length).toBeGreaterThan(0);
+		}
 
-    const p95 = percentile(latencies, 95);
-<<<<<<< HEAD
-=======
+		const p95 = percentile(latencies, 95);
 
-    console.log(`Workspace filter search p95: ${p95}ms`);
->>>>>>> origin/main
-    expect(p95).toBeLessThan(500);
-  });
+		console.log(`Workspace filter search p95: ${p95}ms`);
+		expect(p95).toBeLessThan(500);
+	});
 
-  it("should search with time range filter in < 500ms p95", () => {
-    // Insert events with various timestamps
-    const events = [];
-    const now = new Date();
+	it("should search with time range filter in < 500ms p95", () => {
+		// Insert events with various timestamps
+		const events = [];
+		const now = new Date();
 
-    for (let i = 0; i < 50_000; i++) {
-      // Create events spread across 1 day
-      const timestamp = new Date(now.getTime() - Math.random() * 24 * 60 * 60 * 1000);
+		for (let i = 0; i < 50_000; i++) {
+			// Create events spread across 1 day
+			const timestamp = new Date(
+				now.getTime() - Math.random() * 24 * 60 * 60 * 1000,
+			);
 
-      const event = createAuditEvent({
-        eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-        actor: "agent-1",
-        action: "execute",
-        target: `cmd-${i}`,
-        result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: "ws-1",
-        correlationId: `corr-${i}`,
-        metadata: {},
-      });
+			const event = createAuditEvent({
+				eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+				actor: "agent-1",
+				action: "execute",
+				target: `cmd-${i}`,
+				result: AUDIT_EVENT_RESULTS.SUCCESS,
+				workspaceId: "ws-1",
+				correlationId: `corr-${i}`,
+				metadata: {},
+			});
 
-      // Manually override timestamp
-      (event as any).timestamp = timestamp.toISOString();
-      events.push(event);
-    }
+			// Manually override timestamp
+			(event as any).timestamp = timestamp.toISOString();
+			events.push(event);
+		}
 
-    store.persist(events);
+		store.persist(events);
 
-    // Search with time range
-    const latencies: number[] = [];
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    const now2 = now;
+		// Search with time range
+		const latencies: number[] = [];
+		const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+		const now2 = now;
 
-    for (let i = 0; i < 20; i++) {
-      const startTime = Date.now();
-<<<<<<< HEAD
-      const _results = ledger.search({
-=======
-      const results = ledger.search({
->>>>>>> origin/main
-        timeRange: { from: oneHourAgo, to: now2 },
-        limit: 100,
-      });
-      const endTime = Date.now();
+		for (let i = 0; i < 20; i++) {
+			const startTime = Date.now();
+			const results = ledger.search({
+				timeRange: { from: oneHourAgo, to: now2 },
+				limit: 100,
+			});
+			const endTime = Date.now();
 
-      latencies.push(endTime - startTime);
-    }
+			latencies.push(endTime - startTime);
+		}
 
-    const p95 = percentile(latencies, 95);
-<<<<<<< HEAD
-=======
+		const p95 = percentile(latencies, 95);
 
-    console.log(`Time range filter search p95: ${p95}ms`);
->>>>>>> origin/main
-    expect(p95).toBeLessThan(500);
-  });
+		console.log(`Time range filter search p95: ${p95}ms`);
+		expect(p95).toBeLessThan(500);
+	});
 
-  it("should search with combined filters in < 500ms p95", () => {
-    // Insert diverse events
-    const events = [];
+	it("should search with combined filters in < 500ms p95", () => {
+		// Insert diverse events
+		const events = [];
 
-    for (let i = 0; i < 50_000; i++) {
-      const event = createAuditEvent({
-        eventType:
-          i % 3 === 0 ? AUDIT_EVENT_TYPES.COMMAND_EXECUTED : AUDIT_EVENT_TYPES.SESSION_CREATED,
-        actor: `actor-${i % 20}`,
-        action: "test",
-        target: `target-${i}`,
-        result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: `ws-${i % 5}`,
-        correlationId: `corr-${i}`,
-        metadata: {},
-      });
-      events.push(event);
-    }
+		for (let i = 0; i < 50_000; i++) {
+			const event = createAuditEvent({
+				eventType:
+					i % 3 === 0
+						? AUDIT_EVENT_TYPES.COMMAND_EXECUTED
+						: AUDIT_EVENT_TYPES.SESSION_CREATED,
+				actor: `actor-${i % 20}`,
+				action: "test",
+				target: `target-${i}`,
+				result: AUDIT_EVENT_RESULTS.SUCCESS,
+				workspaceId: `ws-${i % 5}`,
+				correlationId: `corr-${i}`,
+				metadata: {},
+			});
+			events.push(event);
+		}
 
-    store.persist(events);
+		store.persist(events);
 
-    // Run combined filter searches
-    const latencies: number[] = [];
+		// Run combined filter searches
+		const latencies: number[] = [];
 
-    for (let i = 0; i < 20; i++) {
-      const startTime = Date.now();
-<<<<<<< HEAD
-      const _results = ledger.search({
-=======
-      const results = ledger.search({
->>>>>>> origin/main
-        workspaceId: "ws-0",
-        actor: "actor-0",
-        eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-        limit: 100,
-      });
-      const endTime = Date.now();
+		for (let i = 0; i < 20; i++) {
+			const startTime = Date.now();
+			const results = ledger.search({
+				workspaceId: "ws-0",
+				actor: "actor-0",
+				eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+				limit: 100,
+			});
+			const endTime = Date.now();
 
-      latencies.push(endTime - startTime);
-    }
+			latencies.push(endTime - startTime);
+		}
 
-    const p95 = percentile(latencies, 95);
-<<<<<<< HEAD
-=======
+		const p95 = percentile(latencies, 95);
 
-    console.log(`Combined filter search p95: ${p95}ms`);
->>>>>>> origin/main
-    expect(p95).toBeLessThan(500);
-  });
+		console.log(`Combined filter search p95: ${p95}ms`);
+		expect(p95).toBeLessThan(500);
+	});
 
-  it("should traverse correlation chains in < 500ms p95", () => {
-    // Create chains of correlated events
-<<<<<<< HEAD
-    const chainCount = 100;
-    const chainLength = 10;
+	it("should traverse correlation chains in < 500ms p95", () => {
+		// Create chains of correlated events
+		const CHAIN_COUNT = 100;
+		const CHAIN_LENGTH = 10;
 
-    for (let chainIdx = 0; chainIdx < chainCount; chainIdx++) {
-      const events = [];
-      const correlationId = `chain-${chainIdx}`;
+		for (let chainIdx = 0; chainIdx < CHAIN_COUNT; chainIdx++) {
+			const events = [];
+			const correlationId = `chain-${chainIdx}`;
 
-      for (let eventIdx = 0; eventIdx < chainLength; eventIdx++) {
-=======
-    const CHAIN_COUNT = 100;
-    const CHAIN_LENGTH = 10;
+			for (let eventIdx = 0; eventIdx < CHAIN_LENGTH; eventIdx++) {
+				const event = createAuditEvent({
+					eventType: AUDIT_EVENT_TYPES.POLICY_EVALUATION,
+					actor: "system",
+					action: "evaluate",
+					target: `target-${chainIdx}-${eventIdx}`,
+					result: AUDIT_EVENT_RESULTS.SUCCESS,
+					workspaceId: "ws-1",
+					correlationId,
+					metadata: { chainIndex: chainIdx, eventIndex: eventIdx },
+				});
+				events.push(event);
+			}
 
-    for (let chainIdx = 0; chainIdx < CHAIN_COUNT; chainIdx++) {
-      const events = [];
-      const correlationId = `chain-${chainIdx}`;
+			store.persist(events);
+		}
 
-      for (let eventIdx = 0; eventIdx < CHAIN_LENGTH; eventIdx++) {
->>>>>>> origin/main
-        const event = createAuditEvent({
-          eventType: AUDIT_EVENT_TYPES.POLICY_EVALUATION,
-          actor: "system",
-          action: "evaluate",
-          target: `target-${chainIdx}-${eventIdx}`,
-          result: AUDIT_EVENT_RESULTS.SUCCESS,
-          workspaceId: "ws-1",
-          correlationId,
-          metadata: { chainIndex: chainIdx, eventIndex: eventIdx },
-        });
-        events.push(event);
-      }
+		// Traverse chains and measure latency
+		const latencies: number[] = [];
 
-      store.persist(events);
-    }
+		for (let i = 0; i < CHAIN_COUNT; i++) {
+			const startTime = Date.now();
+			const chain = ledger.getCorrelationChain(`chain-${i}`);
+			const endTime = Date.now();
 
-    // Traverse chains and measure latency
-    const latencies: number[] = [];
+			latencies.push(endTime - startTime);
+			expect(chain.length).toBeGreaterThanOrEqual(CHAIN_LENGTH * 0.99); // 99% completeness
+		}
 
-<<<<<<< HEAD
-    for (let i = 0; i < chainCount; i++) {
-=======
-    for (let i = 0; i < CHAIN_COUNT; i++) {
->>>>>>> origin/main
-      const startTime = Date.now();
-      const chain = ledger.getCorrelationChain(`chain-${i}`);
-      const endTime = Date.now();
+		const p95 = percentile(latencies, 95);
 
-      latencies.push(endTime - startTime);
-<<<<<<< HEAD
-      expect(chain.length).toBeGreaterThanOrEqual(chainLength * 0.99); // 99% completeness
-    }
+		console.log(`Correlation chain traversal p95: ${p95}ms`);
+		expect(p95).toBeLessThan(500);
+	});
 
-    const p95 = percentile(latencies, 95);
-=======
-      expect(chain.length).toBeGreaterThanOrEqual(CHAIN_LENGTH * 0.99); // 99% completeness
-    }
+	it("should document storage efficiency", () => {
+		// Insert 100k events
+		const events = [];
 
-    const p95 = percentile(latencies, 95);
+		for (let i = 0; i < 100_000; i++) {
+			const event = createAuditEvent({
+				eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+				actor: `actor-${i % 50}`,
+				action: "execute",
+				target: `cmd-${i}`,
+				result: AUDIT_EVENT_RESULTS.SUCCESS,
+				workspaceId: `ws-${i % 10}`,
+				correlationId: `corr-${i}`,
+				metadata: {
+					index: i,
+					duration: Math.floor(Math.random() * 1000),
+					exitCode: i % 5 === 0 ? 1 : 0,
+				},
+			});
+			events.push(event);
+		}
 
-    console.log(`Correlation chain traversal p95: ${p95}ms`);
->>>>>>> origin/main
-    expect(p95).toBeLessThan(500);
-  });
+		store.persist(events);
 
-  it("should document storage efficiency", () => {
-    // Insert 100k events
-    const events = [];
+		const count = store.count();
+		const size = store.getStorageSize();
+		const sizePerEvent = size / count;
 
-    for (let i = 0; i < 100_000; i++) {
-      const event = createAuditEvent({
-        eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
-        actor: `actor-${i % 50}`,
-        action: "execute",
-        target: `cmd-${i}`,
-        result: AUDIT_EVENT_RESULTS.SUCCESS,
-        workspaceId: `ws-${i % 10}`,
-        correlationId: `corr-${i}`,
-        metadata: {
-          index: i,
-          duration: Math.floor(Math.random() * 1000),
-          exitCode: i % 5 === 0 ? 1 : 0,
-        },
-      });
-      events.push(event);
-    }
+		console.log(
+			`Storage efficiency: ${sizePerEvent.toFixed(2)} bytes per event`,
+		);
+		console.log(`100k events: ${(size / 1024 / 1024).toFixed(2)} MB`);
 
-    store.persist(events);
+		// 3M events should be < 500MB
+		const projectedSize = (3_000_000 / count) * size;
+		console.log(
+			`Projected 3M events: ${(projectedSize / 1024 / 1024).toFixed(2)} MB`,
+		);
 
-    const count = store.count();
-    const size = store.getStorageSize();
-<<<<<<< HEAD
-    const _sizePerEvent = size / count;
-
-    // 3M events should be < 500MB
-    const projectedSize = (3_000_000 / count) * size;
-=======
-    const sizePerEvent = size / count;
-
-    console.log(`Storage efficiency: ${sizePerEvent.toFixed(2)} bytes per event`);
-    console.log(`100k events: ${(size / 1024 / 1024).toFixed(2)} MB`);
-
-    // 3M events should be < 500MB
-    const projectedSize = (3_000_000 / count) * size;
-    console.log(`Projected 3M events: ${(projectedSize / 1024 / 1024).toFixed(2)} MB`);
->>>>>>> origin/main
-
-    expect(projectedSize).toBeLessThan(500 * 1024 * 1024);
-  });
+		expect(projectedSize).toBeLessThan(500 * 1024 * 1024);
+	});
 });

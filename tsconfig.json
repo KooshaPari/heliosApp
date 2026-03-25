@@ -11,14 +11,7 @@
 		"resolveJsonModule": true,
 		"jsx": "preserve",
 		"jsxImportSource": "solid-js",
-		"types": ["bun-types", "node", "@playwright/test"],
-		"baseUrl": ".",
-		"paths": {
-			"@helios/runtime": ["apps/runtime/src/index.ts"],
-			"@helios/runtime/*": ["apps/runtime/src/*"],
-			"@helios/desktop": ["apps/desktop/src/index.ts"],
-			"@helios/desktop/*": ["apps/desktop/src/*"]
-		}
+		"types": ["bun-types", "node", "@playwright/test", "vitest/globals"]
 	},
 	"include": [
 		"apps/**/*.ts",
@@ -27,14 +20,5 @@
 		"docs/.vitepress/**/*.ts",
 		"docs/.vitepress/**/*.d.ts"
 	],
-	"exclude": [
-		"node_modules",
-		"dist",
-		"coverage",
-		".worktrees",
-		"apps/runtime/tests/integration",
-		"apps/desktop/tests/e2e",
-		"apps/desktop/tests/unit/control_plane.test.ts",
-		"apps/desktop/tests/unit/settings.test.ts"
-	]
+	"exclude": ["node_modules", "dist", "coverage", ".worktrees"]
 }

@@ -56,8 +56,6 @@
 - Do not merge any PR while any check is failing, including non-required checks, unless the user gives explicit exception approval.
 - When proposing a quick fix, include a scheduled follow-up path to a stable solution in the same plan.
 ## Child-Agent and Delegation Policy
-- Use child agents for scoped discovery, audits, multi-repo scans, and implementation planning before direct parent-agent edits.
-- Delegate high-context or high-churn tasks to subagents and keep parent-agent writes narrowly focused on integration.
-- Reserve parent-agent direct writes for the final decision layer.
-- Favor clean, auditable handoffs and explicit integration checkpoints.
-
+- Use child agents liberally for scoped discovery, audits, multi-repo scans, and implementation planning before direct parent-agent edits.
+- Prefer delegating high-context or high-churn tasks to subagents, and keep parent-agent changes focused on integration and finalization.
+- Reserve parent-agent direct writes for the narrowest, final decision layer.

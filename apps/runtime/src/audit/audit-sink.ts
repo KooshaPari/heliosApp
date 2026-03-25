@@ -1,27 +1,28 @@
 import { randomBytes } from "node:crypto";
-<<<<<<< HEAD
-import type { ProtocolBus as LocalBus } from "../protocol/bus.js";
-=======
 import type { LocalBus } from "../protocol/bus.js";
->>>>>>> origin/main
-import type { LocalBusEnvelope } from "../protocol/types.js";
+import type { MethodHandler } from "../protocol/methods.js";
+import type {
+	EventEnvelope,
+	LocalBusEnvelope,
+	ResponseEnvelope,
+} from "../protocol/types.js";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 export interface AuditRecord {
-  id: string;
-  timestamp: string;
-  topic: string;
-  payload: Record<string, unknown>;
-  correlationId: string;
+	id: string;
+	timestamp: string;
+	topic: string;
+	payload: Record<string, unknown>;
+	correlationId: string;
 }
 
 export interface AuditExportBundle {
-  exportedAt: string;
-  records: AuditRecord[];
-  redacted: boolean;
+	exportedAt: string;
+	records: AuditRecord[];
+	redacted: boolean;
 }
 
 export type RedactFn = (content: string) => string;
@@ -41,194 +42,192 @@ export type RedactFn = (content: string) => string;
  * constructor options.
  */
 export class AuditSink {
-  private records: AuditRecord[] = [];
-  private redactFn: RedactFn;
-  private watchedTopics: Set<string>;
+	private records: AuditRecord[] = [];
+	private redactFn: RedactFn;
+	private watchedTopics: Set<string>;
 
-  /**
-   * @param opts.bus         LocalBus to subscribe to events from.
-   * @param opts.redactFn    Redaction function applied to serialized payload before persistence.
-   * @param opts.topics      Bus topics to watch. Defaults to all secrets.* topics.
-   */
-  constructor(opts?: {
-    bus?: LocalBus;
-    redactFn?: RedactFn;
-    topics?: string[];
-    persistRecord?: (record: AuditRecord) => Promise<void>;
-  }) {
-    this.redactFn = opts?.redactFn ?? (s => s);
-    this.watchedTopics = new Set(
-      opts?.topics ?? [
-        "secrets.credential.created",
-        "secrets.credential.rotated",
-        "secrets.credential.revoked",
-        "secrets.credential.accessed",
-        "secrets.credential.access.denied",
-        "secrets.redaction.applied",
-        "secrets.protected_path.accessed",
-        "secrets.protected_path.acknowledged",
-        "secrets.redaction.rules.changed",
-        "secrets.protected_paths.config.changed",
-      ]
-    );
-    if (opts?.persistRecord) {
-      this._persistRecord = opts.persistRecord;
-    }
-  }
+	/**
+	 * @param opts.bus         LocalBus to subscribe to events from.
+	 * @param opts.redactFn    Redaction function applied to serialized payload before persistence.
+	 * @param opts.topics      Bus topics to watch. Defaults to all secrets.* topics.
+	 */
+	constructor(opts?: {
+		bus?: LocalBus;
+		redactFn?: RedactFn;
+		topics?: string[];
+		persistRecord?: (record: AuditRecord) => Promise<void>;
+	}) {
+		this.redactFn = opts?.redactFn ?? ((s) => s);
+		this.watchedTopics = new Set(
+			opts?.topics ?? [
+				"secrets.credential.created",
+				"secrets.credential.rotated",
+				"secrets.credential.revoked",
+				"secrets.credential.accessed",
+				"secrets.credential.access.denied",
+				"secrets.redaction.applied",
+				"secrets.protected_path.accessed",
+				"secrets.protected_path.acknowledged",
+				"secrets.redaction.rules.changed",
+				"secrets.protected_paths.config.changed",
+			],
+		);
+		if (opts?.persistRecord) {
+			this._persistRecord = opts.persistRecord;
+		}
+	}
 
-  /**
-   * Persist an event envelope as an audit record.
-   * The payload is serialized to JSON, passed through redaction, and
-   * re-parsed before storage to ensure no secrets persist in memory.
-   */
-  async ingest(envelope: LocalBusEnvelope): Promise<AuditRecord | null> {
-    const topic = envelope.topic ?? "";
-<<<<<<< HEAD
-    if (!this.watchedTopics.has(topic)) {
-      return null;
-    }
-=======
-    if (!this.watchedTopics.has(topic)) return null;
->>>>>>> origin/main
+	/**
+	 * Persist an event envelope as an audit record.
+	 * The payload is serialized to JSON, passed through redaction, and
+	 * re-parsed before storage to ensure no secrets persist in memory.
+	 */
+	async ingest(envelope: LocalBusEnvelope): Promise<AuditRecord | null> {
+		const topic = envelope.topic ?? "";
+		if (!this.watchedTopics.has(topic)) return null;
 
-    const correlationId: string =
-      (envelope.payload?.correlationId as string | undefined) ?? randomBytes(8).toString("hex");
+		const correlationId: string =
+			(envelope.payload?.correlationId as string | undefined) ??
+			randomBytes(8).toString("hex");
 
-    // Serialize payload, apply redaction, re-parse
-    const rawPayload = JSON.stringify(envelope.payload ?? {});
-    const redactedPayload = this.redactFn(rawPayload);
-    let parsedPayload: Record<string, unknown>;
-    try {
-      parsedPayload = JSON.parse(redactedPayload) as Record<string, unknown>;
-    } catch {
-      parsedPayload = { _raw: redactedPayload };
-    }
+		// Serialize payload, apply redaction, re-parse
+		const rawPayload = JSON.stringify(envelope.payload ?? {});
+		const redactedPayload = this.redactFn(rawPayload);
+		let parsedPayload: Record<string, unknown>;
+		try {
+			parsedPayload = JSON.parse(redactedPayload) as Record<string, unknown>;
+		} catch {
+			parsedPayload = { _raw: redactedPayload };
+		}
 
-    const record: AuditRecord = {
-      id: `audit:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
-<<<<<<< HEAD
-      timestamp: envelope.ts,
-=======
-      timestamp: envelope.ts ?? new Date().toISOString(),
->>>>>>> origin/main
-      topic,
-      payload: parsedPayload,
-      correlationId,
-    };
+		const record: AuditRecord = {
+			id: `audit:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
+			timestamp: envelope.ts ?? new Date().toISOString(),
+			topic,
+			payload: parsedPayload,
+			correlationId,
+		};
 
-    await this._persistRecord(record);
-    return record;
-  }
+		await this._persistRecord(record);
+		return record;
+	}
 
-  /**
-   * Process a bus event directly from the LocalBus subscriber pattern.
-   */
-  async processEvent(envelope: LocalBusEnvelope): Promise<void> {
-    await this.ingest(envelope);
-  }
+	/**
+	 * Process a bus event directly from the LocalBus subscriber pattern.
+	 */
+	async processEvent(envelope: LocalBusEnvelope): Promise<void> {
+		await this.ingest(envelope);
+	}
 
-  /**
-   * Wire the audit sink to a LocalBus. All watched topics will be ingested.
-   * Note: LocalBus does not have a native subscribe API in this runtime;
-   * callers should call `processEvent` for each published envelope, or wrap
-   * the bus with an intercepting proxy via `wrapBus`.
-   */
-  wireToBus(_bus: LocalBus): void {
-    // Audit sink is wired via wrapBus pattern; this method is kept for future extensibility
-  }
+	/**
+	 * Wire the audit sink to a LocalBus. All watched topics will be ingested.
+	 * Note: LocalBus does not have a native subscribe API in this runtime;
+	 * callers should call `processEvent` for each published envelope, or wrap
+	 * the bus with an intercepting proxy via `wrapBus`.
+	 */
+	wireToBus(_bus: LocalBus): void {
+		// Audit sink is wired via wrapBus pattern; this method is kept for future extensibility
+	}
 
-  /**
-   * Create a wrapping LocalBus that intercepts all publish calls and feeds
-   * them into this audit sink before forwarding to the underlying bus.
-   */
-  wrapBus(bus: LocalBus): LocalBus {
-    const sink = this;
-    return {
-      async publish(event: LocalBusEnvelope): Promise<void> {
-        await sink.ingest(event);
-        await bus.publish(event);
-      },
-      async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
-        return bus.request(command);
-      },
-<<<<<<< HEAD
-=======
-      registerMethod: bus.registerMethod.bind(bus),
-      send: bus.send.bind(bus),
-      subscribe: bus.subscribe.bind(bus),
-      destroy: bus.destroy.bind(bus),
-      getActiveCorrelationId: bus.getActiveCorrelationId.bind(bus),
->>>>>>> origin/main
-    };
-  }
+	/**
+	 * Create a wrapping LocalBus that intercepts all publish calls and feeds
+	 * them into this audit sink before forwarding to the underlying bus.
+	 */
+	wrapBus(bus: LocalBus): LocalBus {
+		const sink = this;
+		const extBus = bus as unknown as {
+			registerMethod?(method: string, handler: MethodHandler): void;
+			send?(envelope: unknown): Promise<ResponseEnvelope>;
+			subscribe?(
+				topic: string,
+				handler: (evt: EventEnvelope) => void | Promise<void>,
+			): () => void;
+			destroy?(): void;
+			getActiveCorrelationId?(): string | undefined;
+		};
+		return {
+			async publish(event: LocalBusEnvelope): Promise<void> {
+				await sink.ingest(event);
+				await bus.publish(event);
+			},
+			async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+				return bus.request(command);
+			},
+			...(extBus.registerMethod && {
+				registerMethod: extBus.registerMethod.bind(extBus),
+			}),
+			...(extBus.send && { send: extBus.send.bind(extBus) }),
+			...(extBus.subscribe && { subscribe: extBus.subscribe.bind(extBus) }),
+			...(extBus.destroy && { destroy: extBus.destroy.bind(extBus) }),
+			...(extBus.getActiveCorrelationId && {
+				getActiveCorrelationId: extBus.getActiveCorrelationId.bind(extBus),
+			}),
+		};
+	}
 
-  /**
-   * Query stored audit records.
-   */
-<<<<<<< HEAD
-  query(filter?: {
-    topic?: string;
-    correlationId?: string;
-    since?: Date;
-  }): AuditRecord[] {
-=======
-  query(filter?: { topic?: string; correlationId?: string; since?: Date }): AuditRecord[] {
->>>>>>> origin/main
-    let results = [...this.records];
+	/**
+	 * Query stored audit records.
+	 */
+	query(filter?: {
+		topic?: string;
+		correlationId?: string;
+		since?: Date;
+	}): AuditRecord[] {
+		let results = [...this.records];
 
-    if (filter?.topic) {
-      results = results.filter(r => r.topic === filter.topic);
-    }
-    if (filter?.correlationId) {
-      results = results.filter(r => r.correlationId === filter.correlationId);
-    }
-    if (filter?.since) {
-      const since = filter.since;
-      results = results.filter(r => new Date(r.timestamp) >= since);
-    }
+		if (filter?.topic) {
+			results = results.filter((r) => r.topic === filter.topic);
+		}
+		if (filter?.correlationId) {
+			results = results.filter((r) => r.correlationId === filter.correlationId);
+		}
+		if (filter?.since) {
+			const since = filter.since;
+			results = results.filter((r) => new Date(r.timestamp) >= since);
+		}
 
-    return results;
-  }
+		return results;
+	}
 
-  /**
-   * Generate an export bundle. All record payloads pass through the
-   * redaction function a second time (double-redaction safety net).
-   * Redaction is idempotent: already-redacted placeholders (`[REDACTED:*]`)
-   * do not match secret patterns and are preserved verbatim.
-   */
-  export(): AuditExportBundle {
-    const redactedRecords = this.records.map(r => {
-      const rawPayload = JSON.stringify(r.payload);
-      const redactedPayload = this.redactFn(rawPayload);
-      let parsedPayload: Record<string, unknown>;
-      try {
-        parsedPayload = JSON.parse(redactedPayload) as Record<string, unknown>;
-      } catch {
-        parsedPayload = { _raw: redactedPayload };
-      }
-      return { ...r, payload: parsedPayload };
-    });
+	/**
+	 * Generate an export bundle. All record payloads pass through the
+	 * redaction function a second time (double-redaction safety net).
+	 * Redaction is idempotent: already-redacted placeholders (`[REDACTED:*]`)
+	 * do not match secret patterns and are preserved verbatim.
+	 */
+	export(): AuditExportBundle {
+		const redactedRecords = this.records.map((r) => {
+			const rawPayload = JSON.stringify(r.payload);
+			const redactedPayload = this.redactFn(rawPayload);
+			let parsedPayload: Record<string, unknown>;
+			try {
+				parsedPayload = JSON.parse(redactedPayload) as Record<string, unknown>;
+			} catch {
+				parsedPayload = { _raw: redactedPayload };
+			}
+			return { ...r, payload: parsedPayload };
+		});
 
-    return {
-      exportedAt: new Date().toISOString(),
-      records: redactedRecords,
-      redacted: true,
-    };
-  }
+		return {
+			exportedAt: new Date().toISOString(),
+			records: redactedRecords,
+			redacted: true,
+		};
+	}
 
-  /**
-   * Clear all records (primarily for testing).
-   */
-  clear(): void {
-    this.records = [];
-  }
+	/**
+	 * Clear all records (primarily for testing).
+	 */
+	clear(): void {
+		this.records = [];
+	}
 
-  getRecordCount(): number {
-    return this.records.length;
-  }
+	getRecordCount(): number {
+		return this.records.length;
+	}
 
-  // Overrideable persistence hook
-  private async _persistRecord(record: AuditRecord): Promise<void> {
-    this.records.push(record);
-  }
+	// Overrideable persistence hook
+	private async _persistRecord(record: AuditRecord): Promise<void> {
+		this.records.push(record);
+	}
 }
