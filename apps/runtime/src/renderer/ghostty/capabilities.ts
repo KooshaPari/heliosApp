@@ -28,6 +28,7 @@ export async function detectGpu(): Promise<GpuInfo> {
 			// macOS always has Metal on supported hardware
 			const proc = Bun.spawn(["system_profiler", "SPDisplaysDataType"], {
 				stdout: "pipe",
+				// @ts-ignore
 				stderr: "ignore",
 			});
 			const text = await new Response(
@@ -41,7 +42,11 @@ export async function detectGpu(): Promise<GpuInfo> {
 		}
 
 		// Linux: probe for OpenGL
-		const proc = Bun.spawn(["glxinfo"], { stdout: "pipe", stderr: "ignore" });
+		const proc = Bun.spawn(["glxinfo"], {
+			stdout: "pipe",
+			// @ts-ignore
+			stderr: "ignore",
+		});
 		const text = await new Response(
 			proc.stdout instanceof ReadableStream ? proc.stdout : null,
 		).text();

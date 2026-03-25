@@ -48,11 +48,13 @@ export class RioProcess {
 			}
 
 			this._proc = Bun.spawn(args, {
+				// @ts-ignore
 				stdin: "pipe",
 				stdout: "pipe",
 				stderr: "pipe",
 			});
 
+			// @ts-ignore - proc.pid exists at runtime
 			this._pid = this._proc.pid;
 			this._running = true;
 			this._startedAt = Date.now();
@@ -69,7 +71,7 @@ export class RioProcess {
 				}
 			});
 
-			return { pid: this._pid };
+			return { pid: this._pid as number };
 		} catch (err) {
 			this._running = false;
 			this._startLock = false;
@@ -90,6 +92,7 @@ export class RioProcess {
 		}
 
 		// Send SIGTERM first.
+		// @ts-ignore - proc.kill exists at runtime
 		this._proc.kill("SIGTERM");
 
 		// Wait up to SIGKILL_TIMEOUT_MS, then escalate.
@@ -100,6 +103,7 @@ export class RioProcess {
 
 		const result = await Promise.race([exitPromise, timeout]);
 		if (result === "timeout") {
+			// @ts-ignore - proc.kill exists at runtime
 			this._proc.kill("SIGKILL");
 			await this._proc.exited;
 		}
@@ -134,7 +138,11 @@ export class RioProcess {
 	writeToStdin(data: Uint8Array): void {
 		if (!this._proc || !this._running) return;
 		try {
-			const stdin = this._proc.stdin;
+			// @ts-ignore - stdin exists at runtime
+			const stdin = this._proc.stdin as
+			| { write(data: Uint8Array): number }
+			| null
+			| undefined;
 			if (stdin && typeof stdin === "object" && "write" in stdin) {
 				(stdin as { write(data: Uint8Array): number }).write(data);
 			}

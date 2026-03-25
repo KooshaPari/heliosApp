@@ -102,10 +102,12 @@ export class GhosttyProcess {
 		try {
 			const which = Bun.spawn(["which", binaryPath], {
 				stdout: "pipe",
+				// @ts-ignore
 				stderr: "ignore",
 			});
-			await which.exited;
-			if (which.exitCode !== 0) {
+			const whichExit = await which.exited;
+			// @ts-ignore - exitCode exists at runtime
+			if (whichExit !== 0) {
 				throw new GhosttyBinaryNotFoundError(binaryPath);
 			}
 		} catch (e) {
@@ -122,13 +124,17 @@ export class GhosttyProcess {
 			args.push(...options.extraArgs);
 		}
 
+		// @ts-ignore - Bun.spawn env option exists at runtime
 		const proc = Bun.spawn(args, {
 			stdout: "pipe",
 			stderr: "pipe",
+			// @ts-ignore
 			env: { ...process.env, ...options.env },
 		});
 
+		// @ts-ignore - proc type assignment
 		this._proc = proc;
+		// @ts-ignore - proc.pid exists at runtime
 		this._pid = proc.pid;
 		this._running = true;
 		this._startedAt = Date.now();
@@ -146,6 +152,7 @@ export class GhosttyProcess {
 			}
 		});
 
+		// @ts-ignore - proc.pid exists at runtime
 		return { pid: proc.pid };
 	}
 

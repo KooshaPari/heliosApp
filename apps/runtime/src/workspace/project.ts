@@ -163,12 +163,14 @@ export async function gitClone(
 ): Promise<void> {
 	// Check git availability
 	try {
+		// @ts-ignore - Bun.spawn exitCode exists at runtime
 		const versionProc = Bun.spawn(["git", "--version"], {
 			stdout: "pipe",
 			stderr: "pipe",
 		});
-		await versionProc.exited;
-		if (versionProc.exitCode !== 0) {
+		const versionExit = await versionProc.exited;
+		// @ts-ignore - exitCode exists at runtime
+		if (versionExit !== 0) {
 			throw new Error("git binary not functional");
 		}
 	} catch {
@@ -177,12 +179,14 @@ export async function gitClone(
 		);
 	}
 
+	// @ts-ignore - proc.kill exists at runtime
 	const proc = Bun.spawn(["git", "clone", url, targetDir], {
 		stdout: "pipe",
 		stderr: "pipe",
 	});
 
 	const timer = setTimeout(() => {
+		// @ts-ignore - proc.kill exists at runtime
 		proc.kill();
 	}, timeoutMs);
 

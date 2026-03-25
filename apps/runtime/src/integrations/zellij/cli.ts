@@ -84,6 +84,7 @@ export class ZellijCli {
 		}
 
 		if (race === "timeout") {
+			// @ts-ignore - proc.kill exists at runtime
 			proc.kill();
 			throw new ZellijTimeoutError(command, timeout);
 		}

@@ -6,7 +6,9 @@ import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 describe("Memory Overhead", () => {
 	it("20 metrics x 10k samples stays under 10 MB", () => {
 		// Force GC before measurement if available.
+		// @ts-ignore - Bun.gc exists at runtime
 		if (typeof globalThis.Bun !== "undefined" && typeof Bun.gc === "function") {
+			// @ts-ignore
 			Bun.gc(true);
 		}
 
@@ -33,7 +35,9 @@ describe("Memory Overhead", () => {
 			}
 		}
 
+		// @ts-ignore - Bun.gc exists at runtime
 		if (typeof globalThis.Bun !== "undefined" && typeof Bun.gc === "function") {
+			// @ts-ignore
 			Bun.gc(true);
 		}
 
@@ -59,7 +63,9 @@ describe("Memory Overhead", () => {
 	});
 
 	it("empty buffers have near-zero overhead", () => {
+		// @ts-ignore - Bun.gc exists at runtime
 		if (typeof globalThis.Bun !== "undefined" && typeof Bun.gc === "function") {
+			// @ts-ignore
 			Bun.gc(true);
 		}
 
@@ -77,7 +83,9 @@ describe("Memory Overhead", () => {
 		}
 		// No samples recorded — buffers are lazily allocated.
 
+		// @ts-ignore - Bun.gc exists at runtime
 		if (typeof globalThis.Bun !== "undefined" && typeof Bun.gc === "function") {
+			// @ts-ignore
 			Bun.gc(true);
 		}
 

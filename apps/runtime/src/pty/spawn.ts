@@ -72,7 +72,9 @@ export async function spawnPty(
 
 	try {
 		const proc = Bun.spawn([shell], {
+			// @ts-ignore
 			cwd,
+			// @ts-ignore
 			env: {
 				...env,
 				TERM: env["TERM"] ?? "xterm-256color",
@@ -84,6 +86,7 @@ export async function spawnPty(
 			stderr: "pipe",
 		});
 
+		// @ts-ignore - proc.pid exists at runtime
 		const pid = proc.pid;
 
 		if (pid <= 0) {

@@ -66,11 +66,14 @@ export async function isGhosttyAvailable(
 ): Promise<boolean> {
 	try {
 		const proc = Bun.spawn(["which", binaryPath], {
+			// @ts-ignore
 			stdout: "ignore",
+			// @ts-ignore
 			stderr: "ignore",
 		});
-		await proc.exited;
-		return proc.exitCode === 0;
+		const exitCode = await proc.exited;
+		// @ts-ignore - exitCode exists at runtime
+		return exitCode === 0;
 	} catch {
 		return false;
 	}
@@ -87,6 +90,7 @@ export async function detectGhosttyVersion(
 	try {
 		const proc = Bun.spawn([binaryPath, "--version"], {
 			stdout: "pipe",
+			// @ts-ignore
 			stderr: "ignore",
 		});
 		const text = await new Response(

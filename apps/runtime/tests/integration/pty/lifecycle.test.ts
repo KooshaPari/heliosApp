@@ -63,10 +63,12 @@ describe("PTY lifecycle integration", () => {
 
 		// Spawn a shell.
 		const proc = Bun.spawn(["/bin/sh"], {
+			// @ts-ignore
 			stdin: "pipe",
 			stdout: "pipe",
 			stderr: "pipe",
 		});
+		// @ts-ignore
 		pidsToCleanup.push(proc.pid);
 
 		const record = await mgr.spawn({

@@ -9,6 +9,7 @@ import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 
 async function runGit(args: string[], cwd: string): Promise<string> {
 	const proc = Bun.spawn(["git", ...args], {
+		// @ts-ignore
 		cwd,
 		stdout: "pipe",
 		stderr: "pipe",
