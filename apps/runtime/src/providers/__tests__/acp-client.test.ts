@@ -6,41 +6,42 @@
  * FR-025-012: Policy gate integration.
  */
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { ACPClientAdapter, type PolicyGate } from "../acp-client.js";
 import { NormalizedProviderError } from "../errors.js";
 
 /**
  * Mock policy gate for testing.
  */
 class MockPolicyGate implements PolicyGate {
-  private shouldDeny = false;
-  private denialReason = "Test denial";
+	private shouldDeny = false;
+	private denialReason = "Test denial";
 
-  setShouldDeny(deny: boolean, reason?: string): void {
-    this.shouldDeny = deny;
-    if (reason) {
-      this.denialReason = reason;
-    }
-  }
+	setShouldDeny(deny: boolean, reason?: string): void {
+		this.shouldDeny = deny;
+		if (reason) {
+			this.denialReason = reason;
+		}
+	}
 
-  async evaluate(
-    _action: string,
-    _context: Record<string, unknown>
-  ): Promise<{ allowed: boolean; reason?: string }> {
-    await Promise.resolve();
-    if (this.shouldDeny) {
-      return {
-        allowed: false,
-        reason: this.denialReason,
-      };
-    }
-    return { allowed: true };
-  }
+	async evaluate(
+		_action: string,
+		_context: Record<string, unknown>,
+	): Promise<{ allowed: boolean; reason?: string }> {
+		await Promise.resolve();
+		if (this.shouldDeny) {
+			return {
+				allowed: false,
+				reason: this.denialReason,
+			};
+		}
+		return { allowed: true };
+	}
 }
 
 describe("ACP Client Adapter", () => {
+<<<<<<< HEAD
   let adapter: ACPClientAdapter;
   let bus: InMemoryLocalBus;
   let policyGate: MockPolicyGate;
@@ -406,87 +407,97 @@ describe("ACP Client Adapter", () => {
     });
   });
 
-  describe("Correlation ID Propagation", () => {
-    beforeEach(async () => {
-      const config = {
-        baseUrl: "http://localhost:8080/acp",
-        apiKey: "acp-key",
-        model: "claude-3-sonnet",
-        timeout: 30000,
-      };
-      await adapter.init(config);
-    });
+	describe("Correlation ID Propagation", () => {
+		beforeEach(async () => {
+			const config = {
+				baseUrl: "http://localhost:8080/acp",
+				apiKey: "acp-key",
+				model: "claude-3-sonnet",
+				timeout: 30000,
+			};
+			await adapter.init(config);
+		});
 
-    it("should include correlation ID in all bus events", async () => {
-      const correlationId = "unique-trace-id";
+		it("should include correlation ID in all bus events", async () => {
+			const correlationId = "unique-trace-id";
 
-      await adapter.execute({ prompt: "Test" }, correlationId);
+			await adapter.execute({ prompt: "Test" }, correlationId);
 
-      const events = bus.getEvents();
-      const relevantEvents = events.filter(e => e.topic?.startsWith("provider.acp.execute"));
+			const events = bus.getEvents();
+			const relevantEvents = events.filter((e) =>
+				e.topic?.startsWith("provider.acp.execute"),
+			);
 
-      for (const event of relevantEvents) {
-        expect(event.payload?.correlationId).toBe(correlationId);
-      }
-    });
+			for (const event of relevantEvents) {
+				expect(event.payload?.correlationId).toBe(correlationId);
+			}
+		});
 
-    it("should preserve correlation ID through error cases", async () => {
-      policyGate.setShouldDeny(true);
+		it("should preserve correlation ID through error cases", async () => {
+			policyGate.setShouldDeny(true);
 
-      const correlationId = "error-trace-id";
+			const correlationId = "error-trace-id";
 
-      try {
-        await adapter.execute({ prompt: "Test" }, correlationId);
-      } catch (e) {
-        if (e instanceof NormalizedProviderError) {
-          expect(e.correlationId).toBe(correlationId);
-        }
-      }
+			try {
+				await adapter.execute({ prompt: "Test" }, correlationId);
+			} catch (e) {
+				if (e instanceof NormalizedProviderError) {
+					expect(e.correlationId).toBe(correlationId);
+				}
+			}
 
-      const events = bus.getEvents();
-      const policyEvent = events.find(e => e.topic === "provider.acp.policy.denied");
-      expect(policyEvent?.payload?.correlationId).toBe(correlationId);
-    });
-  });
+			const events = bus.getEvents();
+			const policyEvent = events.find(
+				(e) => e.topic === "provider.acp.policy.denied",
+			);
+			expect(policyEvent?.payload?.correlationId).toBe(correlationId);
+		});
+	});
 
-  describe("Error Handling", () => {
-    beforeEach(async () => {
-      const config = {
-        baseUrl: "http://localhost:8080/acp",
-        apiKey: "acp-key",
+	describe("Error Handling", () => {
+		beforeEach(async () => {
+			const config = {
+				baseUrl: "http://localhost:8080/acp",
+				apiKey: "acp-key",
 
-        model: "claude-3-sonnet",
-        timeout: 100, // Short timeout for timeout tests
-        maxRetries: 3,
-        healthCheckIntervalMs: 30000,
-      };
-      await adapter.init(config);
-    });
+				model: "claude-3-sonnet",
+				timeout: 100, // Short timeout for timeout tests
+				maxRetries: 3,
+				healthCheckIntervalMs: 30000,
+			};
+			await adapter.init(config);
+		});
 
-    it("should throw NormalizedProviderError on policy denial", async () => {
-      policyGate.setShouldDeny(true);
+		it("should throw NormalizedProviderError on policy denial", async () => {
+			policyGate.setShouldDeny(true);
 
-      const error = await adapter.execute({ prompt: "Test" }, "corr-123").catch(e => e);
+			const error = await adapter
+				.execute({ prompt: "Test" }, "corr-123")
+				.catch((e) => e);
 
-      expect(error).toBeInstanceOf(NormalizedProviderError);
-      expect((error as NormalizedProviderError).code).toBe("PROVIDER_POLICY_DENIED");
-      expect((error as NormalizedProviderError).retryable).toBe(false);
-    });
+			expect(error).toBeInstanceOf(NormalizedProviderError);
+			expect((error as NormalizedProviderError).code).toBe(
+				"PROVIDER_POLICY_DENIED",
+			);
+			expect((error as NormalizedProviderError).retryable).toBe(false);
+		});
 
-    it("should emit error event on execution failure", async () => {
-      policyGate.setShouldDeny(true);
-      bus.getEvents(); // Clear events
+		it("should emit error event on execution failure", async () => {
+			policyGate.setShouldDeny(true);
+			bus.getEvents(); // Clear events
 
-      try {
-        await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch  {
-        // Expected
-      }
+			try {
+				await adapter.execute({ prompt: "Test" }, "corr-123");
+			} catch {
+				// Expected
+			}
 
-      const events = bus.getEvents();
-      const errorEvent = events.find(e => e.topic === "provider.acp.execute.failed");
-      expect(errorEvent).toBeDefined();
-      expect(errorEvent?.payload?.retryable).toBeDefined();
-    });
-  });
+			const events = bus.getEvents();
+			const errorEvent = events.find(
+				(e) => e.topic === "provider.acp.execute.failed",
+			);
+			expect(errorEvent).toBeDefined();
+			expect(errorEvent?.payload?.retryable).toBeDefined();
+		});
+	});
 });
