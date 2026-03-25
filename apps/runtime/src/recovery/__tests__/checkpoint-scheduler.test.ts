@@ -1,10 +1,10 @@
+<<<<<<< HEAD
 import { describe, it, expect, beforeEach, afterEach, jest as vi } from "bun:test";
+=======
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+>>>>>>> origin/main
 import { CheckpointScheduler } from "../checkpoint-scheduler.js";
-import {
-  CheckpointWriter,
-  type Checkpoint,
-  type CheckpointSession,
-} from "../checkpoint.js";
+import { CheckpointWriter, type Checkpoint, type CheckpointSession } from "../checkpoint.js";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
@@ -132,7 +132,7 @@ describe("CheckpointScheduler", () => {
       const slowWriter = new CheckpointWriter(tempDir);
       slowWriter.write = async () => {
         // Simulate 600ms write
-        await new Promise((resolve) => setTimeout(resolve, 600));
+        await new Promise(resolve => setTimeout(resolve, 600));
         writeCount++;
       };
 
@@ -154,7 +154,7 @@ describe("CheckpointScheduler", () => {
 
       slowWriter.write = async (checkpoint: Checkpoint) => {
         if (isSlowWrite) {
-          await new Promise((resolve) => setTimeout(resolve, 600));
+          await new Promise(resolve => setTimeout(resolve, 600));
         }
         writeCount++;
         await fs.mkdir(path.join(tempDir, "recovery"), { recursive: true });

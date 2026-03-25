@@ -9,7 +9,12 @@ import { describe, it, expect, beforeAll, beforeEach, afterEach } from "bun:test
 import { RioBackend } from "../../../../src/renderer/rio/backend.js";
 import { RendererRegistry } from "../../../../src/renderer/registry.js";
 import { detectRioBinary, isRioEnabled, registerRio } from "../../../../src/renderer/rio/index.js";
-import type { RendererAdapter, RendererConfig, RenderSurface, RendererState } from "../../../../src/renderer/adapter.js";
+import type {
+  RendererAdapter,
+  RendererConfig,
+  RenderSurface,
+  RendererState,
+} from "../../../../src/renderer/adapter.js";
 import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
 
 // ---------------------------------------------------------------------------
@@ -31,22 +36,34 @@ function createMockGhostty(): RendererAdapter & { _state: RendererState } {
     id: "ghostty" as const,
     version: "0.1.0",
     _state: "uninitialized" as RendererState,
-    async init(_config: RendererConfig): Promise<void> { adapter._state = "running"; },
-    async start(_surface: RenderSurface): Promise<void> { adapter._state = "running"; },
-    async stop(): Promise<void> { adapter._state = "stopped"; },
+    async init(_config: RendererConfig): Promise<void> {
+      adapter._state = "running";
+    },
+    async start(_surface: RenderSurface): Promise<void> {
+      adapter._state = "running";
+    },
+    async stop(): Promise<void> {
+      adapter._state = "stopped";
+    },
     bindStream(_ptyId: string, _stream: ReadableStream<Uint8Array>): void {},
     unbindStream(_ptyId: string): void {},
     handleInput(_ptyId: string, _data: Uint8Array): void {},
     resize(_ptyId: string, _cols: number, _rows: number): void {},
     queryCapabilities(): RendererCapabilities {
       return {
-        gpuAccelerated: false, colorDepth: 24, ligatureSupport: true,
+        gpuAccelerated: false,
+        colorDepth: 24,
+        ligatureSupport: true,
         maxDimensions: { cols: 500, rows: 200 },
         inputModes: ["raw", "cooked", "application"],
-        sixelSupport: false, italicSupport: true, strikethroughSupport: true,
+        sixelSupport: false,
+        italicSupport: true,
+        strikethroughSupport: true,
       };
     },
-    getState(): RendererState { return adapter._state; },
+    getState(): RendererState {
+      return adapter._state;
+    },
     onCrash(_handler: (error: Error) => void): void {},
   };
   return adapter;

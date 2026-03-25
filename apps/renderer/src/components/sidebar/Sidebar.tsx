@@ -80,7 +80,7 @@ export const Sidebar: Component = () => {
         }}
       >
         <For each={MOCK_CONVERSATIONS}>
-          {(conv) => (
+          {conv => (
             <ConversationItem
               id={conv.id}
               title={conv.title}

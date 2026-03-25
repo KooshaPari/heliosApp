@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "env": {
     "builtin": true
   },
@@ -12,4 +13,19 @@
     "docs/sessions/**",
     "tsconfig*.json"
   ]
+=======
+	"env": {
+		"builtin": true
+	},
+	"ignorePatterns": [
+		"node_modules/**",
+		"docs/.vitepress/dist/**",
+		"apps/**/dist/**",
+		"docs/.generated/**",
+		".worktrees/**",
+		"kitty-specs/**",
+		"docs/sessions/**",
+		"tsconfig*.json"
+	]
+>>>>>>> origin/main
 }

@@ -175,7 +175,7 @@ describe("Recovery Suppression", () => {
     const suggestions = await engine.generateSuggestions(orphans);
 
     // Active lane should have suggestion, recovering should not
-    const paths = suggestions.map((s) => s.resource.path);
+    const paths = suggestions.map(s => s.resource.path);
     expect(paths).toContain("/tmp/lane-active");
     expect(paths).not.toContain("/tmp/lane-recovering");
   });

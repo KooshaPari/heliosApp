@@ -15,10 +15,11 @@ export interface WatchdogConfig {
   terminalRegistry: TerminalRegistry;
   laneRegistry: LaneRegistry;
   bus: LocalBus;
+  checkpointBaseDir?: string;
 }
 
 export class OrphanWatchdog {
-  private readonly checkpointManager = new CheckpointManager();
+  private readonly checkpointManager: CheckpointManager;
   private readonly resourceClassifier = new ResourceClassifier();
   private readonly worktreeDetector: WorktreeDetector;
   private readonly zellijDetector: ZellijDetector;
@@ -33,13 +34,11 @@ export class OrphanWatchdog {
   private lastClassifiedOrphans: ClassifiedOrphan[] = [];
 
   constructor(config: WatchdogConfig) {
+    this.checkpointManager = new CheckpointManager(config.checkpointBaseDir);
     this.detectionInterval = config.detectionInterval || 60000;
     this.bus = config.bus;
 
-    this.worktreeDetector = new WorktreeDetector(
-      config.worktreeBaseDir,
-      config.laneRegistry
-    );
+    this.worktreeDetector = new WorktreeDetector(config.worktreeBaseDir, config.laneRegistry);
     this.zellijDetector = new ZellijDetector(config.sessionRegistry);
     this.ptyDetector = new PtyDetector(config.terminalRegistry);
   }
@@ -63,9 +62,7 @@ export class OrphanWatchdog {
       console.log("[Watchdog] Starting fresh with no checkpoint");
     }
 
-    console.log(
-      `[Watchdog] Started with ${this.detectionInterval}ms interval`
-    );
+    console.log(`[Watchdog] Started with ${this.detectionInterval}ms interval`);
 
     // Run first cycle immediately
     this.scheduleNextCycle();
@@ -109,22 +106,20 @@ export class OrphanWatchdog {
     this.cycleNumber++;
 
     try {
-      // Run all three detectors in parallel
-      const [worktreeOrphans, zellijOrphans, ptyOrphans] = await Promise.all([
+      // Run all three detectors in parallel (allSettled tolerates individual failures)
+      const results = await Promise.allSettled([
         this.worktreeDetector.detect(),
         this.zellijDetector.detect(),
         this.ptyDetector.detect(),
       ]);
 
-      const allOrphans = [
-        ...worktreeOrphans,
-        ...zellijOrphans,
-        ...ptyOrphans,
-      ];
+      const worktreeOrphans = results[0].status === "fulfilled" ? results[0].value : [];
+      const zellijOrphans = results[1].status === "fulfilled" ? results[1].value : [];
+      const ptyOrphans = results[2].status === "fulfilled" ? results[2].value : [];
+      const allOrphans = [...worktreeOrphans, ...zellijOrphans, ...ptyOrphans];
 
       // Classify all orphans
-      this.lastClassifiedOrphans =
-        this.resourceClassifier.classifyAll(allOrphans);
+      this.lastClassifiedOrphans = this.resourceClassifier.classifyAll(allOrphans);
 
       // Record detection duration
       this.lastDetectionDuration = Date.now() - startTime;

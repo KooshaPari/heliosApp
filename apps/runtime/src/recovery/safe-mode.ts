@@ -14,11 +14,7 @@ export class CrashLoopDetector {
   private thresholdCount: number;
   private windowMs: number;
 
-  constructor(
-    crashDataDir: string,
-    thresholdCount: number = 3,
-    windowMs: number = 60000
-  ) {
+  constructor(crashDataDir: string, thresholdCount: number = 3, windowMs: number = 60000) {
     this.crashDataDir = crashDataDir;
     this.thresholdCount = thresholdCount;
     this.windowMs = windowMs;
@@ -41,9 +37,7 @@ export class CrashLoopDetector {
 
   private cleanOldCrashes(): void {
     const now = Date.now();
-    this.crashHistory = this.crashHistory.filter(
-      (ts) => now - ts < this.windowMs
-    );
+    this.crashHistory = this.crashHistory.filter(ts => now - ts < this.windowMs);
   }
 
   private async loadCrashHistory(): Promise<void> {
@@ -64,8 +58,22 @@ export class CrashLoopDetector {
   private persistCrashHistory(): void {
     try {
       const historyPath = path.join(this.crashDataDir, "recovery", "crash-history.json");
+<<<<<<< HEAD
       mkdirSync(path.dirname(historyPath), { recursive: true });
       writeFileSync(historyPath, JSON.stringify(this.crashHistory), { encoding: "utf-8" });
+=======
+      const tempPath = `${historyPath}.tmp`;
+
+      // Atomic write
+      fs.writeFile(tempPath, JSON.stringify(this.crashHistory), {
+        encoding: "utf-8",
+      })
+        .then(() => fs.rename(tempPath, historyPath))
+        .catch(err => {
+          // Silently fail - don't let history persistence block operations
+          console.error("Failed to persist crash history:", err);
+        });
+>>>>>>> origin/main
     } catch (err) {
       console.error("Failed to persist crash history:", err);
     }

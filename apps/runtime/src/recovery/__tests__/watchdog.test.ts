@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { describe, it, expect, beforeEach, afterEach, jest as vi } from "bun:test";
+=======
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
+>>>>>>> origin/main
 import { Watchdog, CrashReason, type CrashEvent } from "../watchdog.js";
 import { InMemoryLocalBus, type LocalBus } from "../../protocol/bus.js";
 import { promises as fs } from "fs";
@@ -32,7 +36,7 @@ describe("Watchdog", () => {
 
   it("should detect heartbeat timeout when no heartbeat received", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
     vi.advanceTimersByTime(4100); // 2 * 2000 + 100ms
@@ -46,7 +50,7 @@ describe("Watchdog", () => {
 
   it("should reset timeout on heartbeat", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
     vi.advanceTimersByTime(3000);
@@ -60,7 +64,7 @@ describe("Watchdog", () => {
 
   it("should unregister clears timers", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
     watchdog.unregister("test-proc");
@@ -72,7 +76,7 @@ describe("Watchdog", () => {
 
   it("should invoke crash handler with correct reason", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 1000);
     vi.advanceTimersByTime(2100);
@@ -98,29 +102,43 @@ describe("Watchdog", () => {
     watchdog.registerProcess("test-proc", 1234, 1000);
     vi.advanceTimersByTime(2100);
     vi.runAllTimers();
+<<<<<<< HEAD
     await flushAsyncWork();
+=======
+
+    // Give async operations time to complete
+    await new Promise(resolve => setTimeout(resolve, 100));
+>>>>>>> origin/main
 
     const recordPath = path.join(tempDir, "recovery", "last-crash.json");
-    const exists = await fs.access(recordPath).then(() => true).catch(() => false);
+    const exists = await fs
+      .access(recordPath)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(true);
   });
 
   it("should handle process exit with exit code", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
     await watchdog.handleProcessExit("test-proc", 1234, 1);
     await flushAsyncWork();
 
     expect(crashEvents.length).toBe(1);
+<<<<<<< HEAD
     expect(crashEvents.at(0)?.reason).toBe(CrashReason.EXIT_CODE);
     expect(crashEvents.at(0)?.exitCode).toBe(1);
+=======
+    expect(crashEvents[0].reason).toBe(CrashReason.EXIT_CODE);
+    expect(crashEvents[0].exitCode).toBe(1);
+>>>>>>> origin/main
   });
 
   it("should not trigger crash on graceful exit code 0", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
     await watchdog.handleProcessExit("test-proc", 1234, 0);
@@ -130,7 +148,7 @@ describe("Watchdog", () => {
 
   it("should not trigger crash on SIGTERM", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
     await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGTERM");
@@ -141,19 +159,23 @@ describe("Watchdog", () => {
 
   it("should trigger crash on SIGKILL", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("test-proc", 1234, 2000);
     await watchdog.handleProcessExit("test-proc", 1234, undefined, "SIGKILL");
     await flushAsyncWork();
 
     expect(crashEvents.length).toBe(1);
+<<<<<<< HEAD
     expect(crashEvents.at(0)?.reason).toBe(CrashReason.SIGNAL);
+=======
+    expect(crashEvents[0].reason).toBe(CrashReason.SIGNAL);
+>>>>>>> origin/main
   });
 
   it("should handle multiple process monitoring", async () => {
     const crashEvents: CrashEvent[] = [];
-    watchdog.onCrashDetected((event) => crashEvents.push(event));
+    watchdog.onCrashDetected(event => crashEvents.push(event));
 
     watchdog.registerProcess("proc1", 1001, 2000);
     watchdog.registerProcess("proc2", 1002, 2000);
@@ -162,7 +184,7 @@ describe("Watchdog", () => {
     await flushAsyncWork();
 
     expect(crashEvents.length).toBe(2);
-    expect(crashEvents.map((e) => e.name)).toContain("proc1");
-    expect(crashEvents.map((e) => e.name)).toContain("proc2");
+    expect(crashEvents.map(e => e.name)).toContain("proc1");
+    expect(crashEvents.map(e => e.name)).toContain("proc2");
   });
 });
