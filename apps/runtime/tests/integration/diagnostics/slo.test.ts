@@ -112,8 +112,18 @@ describe("Rate Limiting", () => {
   // FR-010: independent rate limiting per metric
   it("rate limits each metric independently", () => {
     const registry = new MetricsRegistry();
-    registry.register({ name: "metric-a", type: "latency", unit: "ms", description: "A" });
-    registry.register({ name: "metric-b", type: "latency", unit: "ms", description: "B" });
+    registry.register({
+      name: "metric-a",
+      type: "latency",
+      unit: "ms",
+      description: "A",
+    });
+    registry.register({
+      name: "metric-b",
+      type: "latency",
+      unit: "ms",
+      description: "B",
+    });
 
     const defs: SLODefinition[] = [
       { metric: "metric-a", percentile: "p95", threshold: 50, unit: "ms" },
@@ -214,7 +224,7 @@ describe("Periodic Check Loop", () => {
     }
 
     monitor.start(50); // 50ms interval
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 150));
     monitor.stop();
 
     expect(events.length).toBeGreaterThanOrEqual(1);
@@ -235,10 +245,10 @@ describe("Periodic Check Loop", () => {
     }
 
     monitor.start(50);
-    await new Promise((r) => setTimeout(r, 80));
+    await new Promise(r => setTimeout(r, 80));
     monitor.stop();
     const countAfterStop = events.length;
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 150));
     // No more events after stop
     expect(events.length).toBe(countAfterStop);
   });
@@ -259,7 +269,7 @@ describe("Periodic Check Loop", () => {
 
     monitor.start(50);
     monitor.start(50); // should not create second interval
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise(r => setTimeout(r, 150));
     monitor.stop();
 
     // With rate limiting, only 1 event should fire regardless
@@ -270,9 +280,24 @@ describe("Periodic Check Loop", () => {
   // FR-010: multiple metrics violating simultaneously
   it("handles multiple simultaneous violations", () => {
     const registry = new MetricsRegistry();
-    registry.register({ name: "m1", type: "latency", unit: "ms", description: "M1" });
-    registry.register({ name: "m2", type: "latency", unit: "ms", description: "M2" });
-    registry.register({ name: "m3", type: "latency", unit: "ms", description: "M3" });
+    registry.register({
+      name: "m1",
+      type: "latency",
+      unit: "ms",
+      description: "M1",
+    });
+    registry.register({
+      name: "m2",
+      type: "latency",
+      unit: "ms",
+      description: "M2",
+    });
+    registry.register({
+      name: "m3",
+      type: "latency",
+      unit: "ms",
+      description: "M3",
+    });
 
     const defs: SLODefinition[] = [
       { metric: "m1", percentile: "p95", threshold: 50, unit: "ms" },
@@ -281,7 +306,9 @@ describe("Periodic Check Loop", () => {
     ];
 
     const events: unknown[] = [];
-    const m = new SLOMonitor(registry, defs, (_, p) => events.push(p));
+    const m = new SLOMonitor(registry, defs, (_: string, p: unknown) => {
+      events.push(p);
+    });
 
     for (let i = 0; i < 100; i++) {
       registry.record("m1", 100, i);

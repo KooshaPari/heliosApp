@@ -9,7 +9,11 @@ import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 import { computeWorktreePath, computeBranchName } from "../../../src/lanes/worktree.js";
 
 async function runGit(args: string[], cwd: string): Promise<string> {
-  const proc = Bun.spawn(["git", ...args], { cwd, stdout: "pipe", stderr: "pipe" });
+  const proc = Bun.spawn(["git", ...args], {
+    cwd,
+    stdout: "pipe",
+    stderr: "pipe",
+  });
   const stdout = await new Response(proc.stdout).text();
   const exitCode = await proc.exited;
   if (exitCode !== 0) {
@@ -22,7 +26,7 @@ async function runGit(args: string[], cwd: string): Promise<string> {
 async function createTempRepo(): Promise<string> {
   const tmpDir = path.join(
     (await import("node:os")).tmpdir(),
-    `helios-test-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    `helios-test-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
   );
   fs.mkdirSync(tmpDir, { recursive: true });
   await runGit(["init"], tmpDir);
@@ -133,7 +137,7 @@ describe("Lane Lifecycle Integration (FR-008-001, FR-008-002)", () => {
     await mgr.cleanup(lane.laneId);
 
     const events = bus.getEvents();
-    const topics = events.map((e) => e.topic);
+    const topics = events.map(e => e.topic);
 
     expect(topics).toContain("lane.created");
     expect(topics).toContain("lane.state.changed");
@@ -156,4 +160,4 @@ describe("Lane Lifecycle Integration (FR-008-001, FR-008-002)", () => {
     await mgr.cleanup(lane.laneId);
     expect(mgr.getRegistry().get(lane.laneId)!.state).toBe("closed");
   });
-}, { timeout: 60_000 });
+});

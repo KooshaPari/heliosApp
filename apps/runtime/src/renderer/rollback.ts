@@ -73,7 +73,7 @@ export async function executeRollback(
   terminals: Map<string, TerminalContext>,
   streamBuffer: SwitchBuffer,
   failureReason: string,
-  eventBus?: RendererEventBus,
+  eventBus?: RendererEventBus
 ): Promise<RollbackResult> {
   const startTime = Date.now();
   const terminalStatuses: RollbackTerminalStatus[] = [];
@@ -121,8 +121,8 @@ export async function executeRollback(
     streamBuffer.stopBuffering(originalAdapter); // Discard and restore
 
     // ===== Phase 5: Verify functionality =====
-    const allRestored = terminalStatuses.every((s) => s.restored);
-    const anyDegraded = terminalStatuses.some((s) => s.degraded);
+    const allRestored = terminalStatuses.every(s => s.restored);
+    const anyDegraded = terminalStatuses.some(s => s.degraded);
 
     // ===== Phase 6: Transition to rolled-back =====
     // (state machine transition handled by caller)

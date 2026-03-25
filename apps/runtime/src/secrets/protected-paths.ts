@@ -320,7 +320,11 @@ export class ProtectedPathConfig {
       isDefault: false,
     };
     this.patterns.set(id, entry);
-    void this._emit("secrets.protected_paths.config.changed", { action: "add", patternId: id, pattern });
+    void this._emit("secrets.protected_paths.config.changed", {
+      action: "add",
+      patternId: id,
+      pattern,
+    });
     return entry;
   }
 
@@ -329,21 +333,30 @@ export class ProtectedPathConfig {
       throw new Error(`Pattern '${id}' not found`);
     }
     this.patterns.delete(id);
-    void this._emit("secrets.protected_paths.config.changed", { action: "remove", patternId: id });
+    void this._emit("secrets.protected_paths.config.changed", {
+      action: "remove",
+      patternId: id,
+    });
   }
 
   disablePattern(id: string): void {
     const p = this.patterns.get(id);
     if (!p) throw new Error(`Pattern '${id}' not found`);
     p.enabled = false;
-    void this._emit("secrets.protected_paths.config.changed", { action: "disable", patternId: id });
+    void this._emit("secrets.protected_paths.config.changed", {
+      action: "disable",
+      patternId: id,
+    });
   }
 
   enablePattern(id: string): void {
     const p = this.patterns.get(id);
     if (!p) throw new Error(`Pattern '${id}' not found`);
     p.enabled = true;
-    void this._emit("secrets.protected_paths.config.changed", { action: "enable", patternId: id });
+    void this._emit("secrets.protected_paths.config.changed", {
+      action: "enable",
+      patternId: id,
+    });
   }
 
   listPatterns(): ProtectedPathPattern[] {
@@ -357,7 +370,10 @@ export class ProtectedPathConfig {
       if (!p.id || !p.pattern) continue;
       this.patterns.set(p.id, { ...p });
     }
-    void this._emit("secrets.protected_paths.config.changed", { action: "import", count: parsed.length });
+    void this._emit("secrets.protected_paths.config.changed", {
+      action: "import",
+      count: parsed.length,
+    });
   }
 
   async exportPatterns(path: string): Promise<void> {
@@ -378,7 +394,7 @@ export class ProtectedPathConfig {
   }
 
   getEnabledPatterns(): ProtectedPathPattern[] {
-    return Array.from(this.patterns.values()).filter((p) => p.enabled);
+    return Array.from(this.patterns.values()).filter(p => p.enabled);
   }
 
   private async _emit(topic: string, payload: Record<string, unknown>): Promise<void> {
@@ -420,7 +436,10 @@ export class ProtectedPathDetector {
    * Scans a terminal command for protected path references.
    * Returns all matches and fires warning callbacks + bus events.
    */
-  check(command: string, opts?: { terminalId?: string; correlationId?: string }): ProtectedPathMatch[] {
+  check(
+    command: string,
+    opts?: { terminalId?: string; correlationId?: string }
+  ): ProtectedPathMatch[] {
     const filePaths = extractFilePaths(command);
     if (filePaths.length === 0) return [];
 

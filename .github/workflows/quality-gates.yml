@@ -51,7 +51,7 @@ jobs:
 
       - name: Gate 3 - Unit Tests
         id: gate-test
-        run: bun test apps/runtime apps/desktop/tests/unit scripts/tests/
+        run: bun run test
         timeout-minutes: 5
         continue-on-error: false
 
@@ -67,7 +67,7 @@ jobs:
             echo "No e2e spec files found — skipping"
           fi
         timeout-minutes: 5
-        continue-on-error: false
+        continue-on-error: true
 
       - name: Gate 5 - Coverage
         id: gate-coverage

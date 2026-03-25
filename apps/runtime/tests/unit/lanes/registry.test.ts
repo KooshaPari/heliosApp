@@ -120,7 +120,7 @@ describe("LaneRegistry (FR-008-001)", () => {
     reg.register(makeRecord({ laneId: "act3", state: "running" }));
     const active = reg.getActive();
     expect(active.length).toBe(2);
-    expect(active.map((l) => l.laneId).sort()).toEqual(["act1", "act3"]);
+    expect(active.map(l => l.laneId).sort()).toEqual(["act1", "act3"]);
   });
 
   test("capacity limit enforced on active lanes (NFR-008-003)", () => {
@@ -128,9 +128,7 @@ describe("LaneRegistry (FR-008-001)", () => {
     reg.register(makeRecord({ laneId: "cap1", state: "ready" }));
     reg.register(makeRecord({ laneId: "cap2", state: "running" }));
     reg.register(makeRecord({ laneId: "cap3", state: "provisioning" }));
-    expect(() => reg.register(makeRecord({ laneId: "cap4" }))).toThrow(
-      LaneCapacityExceededError,
-    );
+    expect(() => reg.register(makeRecord({ laneId: "cap4" }))).toThrow(LaneCapacityExceededError);
   });
 
   test("closed lanes do not count toward capacity", () => {
