@@ -33,6 +33,13 @@ export const ShareModal: Component<ShareModalProps> = props => {
           "z-index": "1000",
         }}
         onClick={props.onClose}
+        onKeyDown={(e: KeyboardEvent) => {
+          if (e.key === "Escape") {
+            props.onClose();
+          }
+        }}
+        role="button"
+        tabIndex={0}
       >
         <div
           style={{
@@ -43,6 +50,8 @@ export const ShareModal: Component<ShareModalProps> = props => {
             "max-width": "500px",
           }}
           onClick={(e: MouseEvent) => e.stopPropagation()}
+          onKeyDown={(e: KeyboardEvent) => e.stopPropagation()}
+          role="presentation"
         >
           <h3
             style={{
