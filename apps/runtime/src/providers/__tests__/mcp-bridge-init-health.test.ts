@@ -23,6 +23,7 @@ describe("MCP Bridge Adapter - Init and Health", () => {
       adapter.init({
         ...MCP_BRIDGE_CONFIG,
         serverPath: "",
+        args: [] as string[],
       })
     ).rejects.toThrow(/init failed/i);
   });
@@ -61,7 +62,8 @@ describe("MCP Bridge Adapter - Init and Health", () => {
     const health = await adapter.health();
     expect(health.state).toBe("healthy");
     expect(health.failureCount).toBe(0);
-    expect(health.lastCheck).toBeInstanceOf(Date);
+    expect(health.lastCheck).toBeDefined();
+    expect(health.lastCheck instanceof Date).toBe(true);
     expect(health.lastCheck.getTime()).toBeLessThanOrEqual(Date.now());
   });
 

@@ -2,10 +2,13 @@
  * Approval Workflow Management Page
  */
 
-import { createSignal, onMount } from "solid-js";
-import { ApprovalPanel } from "../components/approval/ApprovalPanel";
-import { ApprovalStatus } from "../types/approval";
-import type { ApprovalRequest, ApprovalWorkflow } from "../types/approval";
+import { createSignal, onMount } from 'solid-js';
+import { ApprovalPanel } from '../components/approval/ApprovalPanel';
+import {
+  ApprovalStatus,
+  type ApprovalRequest,
+  type ApprovalWorkflow,
+} from '../types/approval';
 
 export function ApprovalWorkflowPage() {
   const [requests, setRequests] = createSignal<ApprovalRequest[]>([]);

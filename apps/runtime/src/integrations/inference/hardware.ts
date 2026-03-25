@@ -25,14 +25,11 @@ export async function detectHardware(): Promise<HardwareCapabilities> {
   let gpuMemoryMB: number | undefined;
 
   try {
-    const proc = Bun.spawn(
-      ["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
-      {
-        stdout: "pipe",
-        stderr: "pipe",
-      }
-    );
-    const output = await new Response(proc.stdout).text();
+    const proc = Bun.spawn(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"], {
+      stdout: "pipe",
+      stderr: "pipe",
+    });
+    const output = proc.stdout ? await new Response(proc.stdout).text() : "";
     const exitCode = await proc.exited;
     if (exitCode === 0 && output.trim()) {
       const [name, memStr] = output.trim().split(", ");

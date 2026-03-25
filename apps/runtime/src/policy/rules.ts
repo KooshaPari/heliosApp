@@ -4,12 +4,14 @@
  */
 
 import {
-  type PolicyRule,
   PolicyClassification,
   PolicyPatternType,
-  type CommandContext,
-  type PolicyEvaluationResult,
-} from "./types";
+} from './types';
+import type {
+  PolicyRule,
+  CommandContext,
+  PolicyEvaluationResult
+} from './types';
 
 /**
  * Pattern matcher for glob and regex patterns.

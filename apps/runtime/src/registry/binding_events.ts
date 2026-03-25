@@ -6,8 +6,7 @@
  */
 
 import type { LocalBus } from "../protocol/bus.js";
-import { randomUUID } from "node:crypto";
-const uuidv4 = randomUUID;
+import { randomUUID } from "crypto";
 import type { BindingTriple, TerminalBinding } from "./binding_triple.js";
 
 // Event topics
@@ -46,7 +45,7 @@ export class BindingEventEmitter {
    */
   private async emitEvent(topic: BindingEventTopic, payload: BindingEventPayload): Promise<void> {
     const event = {
-      id: uuidv4(),
+      id: randomUUID(),
       type: "event" as const,
       ts: new Date().toISOString(),
       topic,
@@ -67,7 +66,10 @@ export class BindingEventEmitter {
   /**
    * Emit 'bound' event when a terminal is registered.
    */
-  async emitBound(binding: TerminalBinding, correlationId: string = uuidv4()): Promise<void> {
+  async emitBound(
+    binding: TerminalBinding,
+    correlationId: string = randomUUID(),
+  ): Promise<void> {
     await this.emitEvent(BINDING_TOPICS.BOUND, {
       terminalId: binding.terminalId,
       binding: binding.binding,
@@ -83,7 +85,7 @@ export class BindingEventEmitter {
   async emitRebound(
     binding: TerminalBinding,
     previousBinding: BindingTriple,
-    correlationId: string = uuidv4()
+    correlationId: string = randomUUID(),
   ): Promise<void> {
     await this.emitEvent(BINDING_TOPICS.REBOUND, {
       terminalId: binding.terminalId,
@@ -98,7 +100,10 @@ export class BindingEventEmitter {
   /**
    * Emit 'unbound' event when a terminal is unregistered.
    */
-  async emitUnbound(binding: TerminalBinding, correlationId: string = uuidv4()): Promise<void> {
+  async emitUnbound(
+    binding: TerminalBinding,
+    correlationId: string = randomUUID(),
+  ): Promise<void> {
     await this.emitEvent(BINDING_TOPICS.UNBOUND, {
       terminalId: binding.terminalId,
       binding: binding.binding,
@@ -114,7 +119,7 @@ export class BindingEventEmitter {
   async emitValidationFailed(
     binding: TerminalBinding,
     reason: string,
-    correlationId: string = uuidv4()
+    correlationId: string = randomUUID(),
   ): Promise<void> {
     const payloadWithReason = {
       terminalId: binding.terminalId,
@@ -127,7 +132,7 @@ export class BindingEventEmitter {
 
     // Emit with reason in payload
     const event = {
-      id: uuidv4(),
+      id: randomUUID(),
       type: "event" as const,
       ts: new Date().toISOString(),
       topic: BINDING_TOPICS.VALIDATION_FAILED,

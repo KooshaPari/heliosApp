@@ -485,8 +485,11 @@ export class A2ARouterAdapter implements ProviderAdapter<
         topic,
         payload,
       });
-    } catch (_error) {
-      // Best-effort event publishing should not fail delegation flow.
+    } catch (error) {
+      console.warn(`Failed to publish A2A event ${topic}:`, error);
     }
   }
 }
+
+// Re-export HealthMonitoringCoordinator from its own module for backward compatibility.
+// Note: The primary export is at line 21.

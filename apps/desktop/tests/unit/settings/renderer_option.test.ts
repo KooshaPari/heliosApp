@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { RendererOption } from "../../../src/settings/renderer_option";
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { RendererOption } from '../../../src/settings/renderer_option';
 
 describe("RendererOption", () => {
   let container: HTMLDivElement;
@@ -17,8 +17,8 @@ describe("RendererOption", () => {
     document.body.removeChild(container);
   });
 
-  it("should render available renderer as clickable", () => {
-    const onSelect = vi.fn();
+  it('should render available renderer as clickable', () => {
+    const onSelect = mock();
     option = new RendererOption({
       rendererId: "ghostty",
       name: "Ghostty",
@@ -34,8 +34,8 @@ describe("RendererOption", () => {
     expect(rendererOption?.getAttribute("tabindex")).not.toBe("-1");
   });
 
-  it("should render unavailable renderer as disabled", () => {
-    const onSelect = vi.fn();
+  it('should render unavailable renderer as disabled', () => {
+    const onSelect = mock();
     option = new RendererOption({
       rendererId: "rio",
       name: "Rio",
@@ -54,8 +54,8 @@ describe("RendererOption", () => {
     expect(radio?.disabled).toBeTruthy();
   });
 
-  it("should show active badge when isActive is true", () => {
-    const onSelect = vi.fn();
+  it('should show active badge when isActive is true', () => {
+    const onSelect = mock();
     option = new RendererOption({
       rendererId: "ghostty",
       name: "Ghostty",
@@ -70,8 +70,8 @@ describe("RendererOption", () => {
     expect(activeBadge?.textContent).toBe("Active");
   });
 
-  it("should call onSelect when clicked", () => {
-    const onSelect = vi.fn();
+  it('should call onSelect when clicked', () => {
+    const onSelect = mock();
     option = new RendererOption({
       rendererId: "rio",
       name: "Rio",
@@ -88,8 +88,8 @@ describe("RendererOption", () => {
     expect(onSelect).toHaveBeenCalledWith("rio");
   });
 
-  it("should not call onSelect when already active", () => {
-    const onSelect = vi.fn();
+  it('should not call onSelect when already active', () => {
+    const onSelect = mock();
     option = new RendererOption({
       rendererId: "ghostty",
       name: "Ghostty",
@@ -106,8 +106,8 @@ describe("RendererOption", () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
-  it("should call onSelect when Enter is pressed", () => {
-    const onSelect = vi.fn();
+  it('should call onSelect when Enter is pressed', () => {
+    const onSelect = mock();
     option = new RendererOption({
       rendererId: "rio",
       name: "Rio",
@@ -125,8 +125,8 @@ describe("RendererOption", () => {
     expect(onSelect).toHaveBeenCalledWith("rio");
   });
 
-  it("should update when update() is called", () => {
-    const onSelect = vi.fn();
+  it('should update when update() is called', () => {
+    const onSelect = mock();
     option = new RendererOption({
       rendererId: "ghostty",
       name: "Ghostty",
@@ -146,9 +146,9 @@ describe("RendererOption", () => {
     expect(activeBadge?.textContent).toBe("Active");
   });
 
-  it("should display unavailable reason in title", () => {
-    const onSelect = vi.fn();
-    const reason = "Feature flag disabled for this build";
+  it('should display unavailable reason in title', () => {
+    const onSelect = mock();
+    const reason = 'Feature flag disabled for this build';
     option = new RendererOption({
       rendererId: "rio",
       name: "Rio",
@@ -164,8 +164,8 @@ describe("RendererOption", () => {
     expect(rendererOption?.getAttribute("title")).toBe(reason);
   });
 
-  it("should have proper ARIA attributes", () => {
-    const onSelect = vi.fn();
+  it('should have proper ARIA attributes', () => {
+    const onSelect = mock();
     option = new RendererOption({
       rendererId: "ghostty",
       name: "Ghostty",
@@ -180,8 +180,8 @@ describe("RendererOption", () => {
     expect(rendererOption?.getAttribute("role")).toBe("button");
   });
 
-  it("should show unavailable badge for unavailable renderers", () => {
-    const onSelect = vi.fn();
+  it('should show unavailable badge for unavailable renderers', () => {
+    const onSelect = mock();
     option = new RendererOption({
       rendererId: "rio",
       name: "Rio",

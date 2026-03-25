@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { createRuntime } from "../../../runtime/src";
 import { bootDesktop } from "../../src";
+import type { LocalBus } from "../../../runtime/src/protocol/bus.js";
 
 const ITERATIONS = 25;
 const STARTUP_P95_MS = 2_000;
@@ -19,7 +20,7 @@ test("startup latency stays within the local interactive target", async () => {
   for (let index = 0; index < ITERATIONS; index++) {
     const startedAt = performance.now();
     const runtime = createRuntime();
-    const controlPlane = bootDesktop({ bus: runtime.bus });
+    const controlPlane = bootDesktop({ bus: runtime.bus as LocalBus });
 
     timings.push(performance.now() - startedAt);
     expect(controlPlane.getTabs().terminal.title.length).toBeGreaterThan(0);

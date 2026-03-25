@@ -3,10 +3,10 @@
  * Persists policy rules to disk with in-memory caching and hot-swap support.
  */
 
-import { promises as fs } from "fs";
-import * as path from "path";
-import type { PolicyRule, PolicyRuleInput } from "./types";
-import { PolicyRuleSet } from "./rules";
+import { promises as fs } from 'fs';
+import * as path from 'path';
+import type { PolicyRule, PolicyRuleInput } from './types';
+import { PolicyRuleSet } from './rules';
 
 export type RulesChangedCallback = (workspaceId: string, rules: PolicyRule[]) => void;
 

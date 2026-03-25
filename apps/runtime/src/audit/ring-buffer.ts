@@ -1,4 +1,4 @@
-import type { AuditEvent } from "./event";
+import type { AuditEvent } from './event';
 
 /**
  * Filter options for ring buffer queries.
@@ -133,7 +133,7 @@ export class AuditRingBuffer {
    * @returns Array of matching events
    */
   getByCorrelationId(correlationId: string): AuditEvent[] {
-    return this.query({ correlationId: correlationId as any });
+    return this.query({ correlationId });
   }
 
   /**
@@ -184,6 +184,10 @@ export class AuditRingBuffer {
     }
 
     if (filter.eventType && event.eventType !== filter.eventType) {
+      return false;
+    }
+
+    if (filter.correlationId && event.correlationId !== filter.correlationId) {
       return false;
     }
 

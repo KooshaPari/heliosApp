@@ -12,7 +12,11 @@
 
 export type { RendererAdapter, RendererConfig, RenderSurface, RendererState } from "./adapter.js";
 
-export type { RendererCapabilities, CapabilityDiff, CapabilityComparison } from "./capabilities.js";
+export type {
+  RendererCapabilities,
+  CapabilityDiff,
+  CapabilityComparison,
+} from "./capabilities.js";
 export { queryCapabilities, compareCapabilities } from "./capabilities.js";
 
 export type { RendererEvent, TransitionRecord } from "./state_machine.js";

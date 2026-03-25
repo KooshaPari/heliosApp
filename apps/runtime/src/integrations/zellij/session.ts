@@ -104,6 +104,14 @@ export class ZellijSessionManager {
     // Register in binding registry
     this.registry.bind(sessionName, laneId, muxSession);
 
+    if (this.emitter) {
+      this.emitter.emitTyped({
+        type: MuxEventType.SESSION_CREATED,
+        sessionName,
+        laneId,
+      });
+    }
+
     return muxSession;
   }
 
@@ -215,6 +223,9 @@ export class ZellijSessionManager {
    * T004 - Terminate a zellij session and clean up.
    */
   async terminateSession(sessionName: string): Promise<void> {
+    const binding = this.registry.getBySession(sessionName);
+    const laneId = binding?.laneId ?? this.extractLaneId(sessionName);
+
     // Kill the session
     const result = await this.cli.run(["kill-session", sessionName]);
 
@@ -245,8 +256,17 @@ export class ZellijSessionManager {
     // Remove from binding registry regardless
     this.registry.unbind(sessionName);
 
-    // Publish terminated event (log-based for now; bus integration in later WPs)
-    console.debug(`[zellij-session] mux.session.terminated: ${sessionName}`);
+    if (this.emitter) {
+      this.emitter.emitTyped({
+        type: MuxEventType.SESSION_TERMINATED,
+        sessionName,
+        laneId,
+      });
+    } else {
+      console.debug(
+        `[zellij-session] mux.session.terminated: ${sessionName}`
+      );
+    }
   }
 
   /**
@@ -267,6 +287,18 @@ export class ZellijSessionManager {
     }
   }
 
+  /** Query pane records for a session using dump-layout when available. */
+  private async queryPanes(sessionName: string): Promise<PaneRecord[]> {
+    const layout = await this.queryLayout(sessionName);
+    return this.parsePanesFromLayout(layout);
+  }
+
+  /** Query tab records for a session using dump-layout when available. */
+  private async queryTabs(sessionName: string): Promise<TabRecord[]> {
+    const layout = await this.queryLayout(sessionName);
+    return this.parseTabsFromLayout(layout);
+  }
+
   /** Parse pane records from zellij layout output. */
   private parsePanesFromLayout(_layout: string): PaneRecord[] {
     return [{ id: 0, title: "default" }];
@@ -275,18 +307,6 @@ export class ZellijSessionManager {
   /** Parse tab records from zellij layout output. */
   private parseTabsFromLayout(_layout: string): TabRecord[] {
     return [{ index: 0, name: "Tab #1", panes: [{ id: 0, title: "default" }] }];
-  }
-
-  /** Query panes for a session by dumping layout and parsing. */
-  private async queryPanes(sessionName: string): Promise<PaneRecord[]> {
-    const layout = await this.queryLayout(sessionName);
-    return this.parsePanesFromLayout(layout);
-  }
-
-  /** Query tabs for a session by dumping layout and parsing. */
-  private async queryTabs(sessionName: string): Promise<TabRecord[]> {
-    const layout = await this.queryLayout(sessionName);
-    return this.parseTabsFromLayout(layout);
   }
 
   /**

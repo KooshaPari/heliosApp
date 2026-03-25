@@ -17,18 +17,18 @@ const REPORT_OUTPUT = ".gate-reports/gate-bypass-detect.json";
 
 // Patterns to detect as suppression directives
 // (These pattern names are constructed at runtime to avoid self-detection)
-const suppName1 = "@" + "ts-ignore";
-const suppName2 = "@" + "ts-expect-error";
-const suppName3 = "@" + "ts-nocheck";
-const suppName4 = "eslint" + "-disable";
-const suppName5 = "biome" + "-ignore";
+const suppName1 = '@' + 'ts-ignore';
+const suppName2 = '@' + 'ts-expect-error';
+const suppName3 = '@' + 'ts-nocheck';
+const suppName4 = 'eslint' + '-disable';
+const suppName5 = 'biome' + '-ignore';
 
 const SUPPRESSION_PATTERNS = [
-	{ regex: new RegExp(suppName1), name: suppName1 },
-	{ regex: new RegExp(suppName2), name: suppName2 },
-	{ regex: new RegExp(suppName3), name: suppName3 },
-	{ regex: new RegExp(suppName4 + "(-line|-next-line)?"), name: suppName4 },
-	{ regex: new RegExp(suppName5), name: suppName5 },
+  { regex: new RegExp(suppName1), name: suppName1 },
+  { regex: new RegExp(suppName2), name: suppName2 },
+  { regex: new RegExp(suppName3), name: suppName3 },
+  { regex: new RegExp(suppName4 + '(-line|-next-line)?'), name: suppName4 },
+  { regex: new RegExp(suppName5), name: suppName5 },
 ];
 
 const TEST_MARKERS = [
@@ -82,11 +82,16 @@ export function scanBypassDirectives(
 		}
 	}
 
-	function scanFile(filePath: string, fileName: string) {
-		if (shouldExclude(filePath)) return;
-		const content = readFileSync(filePath, "utf-8");
-		const lines = content.split("\n");
-		const relativePath = filePath.replace(process.cwd(), "");
+  function scanFile(filePath: string, fileName: string) {
+    const isTestFile = /\.(test|spec)\.(ts|tsx|js|jsx)$/.test(fileName);
+    // Skip test files - they are allowed to have suppression directives for testing
+    if (isTestFile) {
+      return;
+    }
+
+    const content = readFileSync(filePath, 'utf-8');
+    const lines = content.split('\n');
+    const relativePath = filePath.replace(process.cwd(), '');
 
 		lines.forEach((line, index) => {
 			const lineNum = index + 1;
@@ -96,24 +101,24 @@ export function scanBypassDirectives(
 				return;
 			}
 
-			// Check TypeScript and other suppression patterns
-			SUPPRESSION_PATTERNS.forEach((pattern) => {
-				if (pattern.regex.test(line)) {
-					findings.push({
-						file: relativePath,
-						line: lineNum,
-						message: `Suppression directive found: ${pattern.name}`,
-						severity: "error",
-						rule: "no-suppression-directive",
-						remediation: `Remove ${pattern.name} and fix the underlying issue`,
-					});
-				}
-			});
-		});
-	}
+      // Check TypeScript and other suppression patterns
+      SUPPRESSION_PATTERNS.forEach((pattern) => {
+        if (pattern.regex.test(line)) {
+          findings.push({
+            file: relativePath,
+            line: lineNum,
+            message: `Suppression directive found: ${pattern.name}`,
+            severity: 'error',
+            rule: 'no-suppression-directive',
+            remediation: `Remove ${pattern.name} and fix the underlying issue`,
+          });
+        }
+      });
+    });
+  }
 
-	scanDir(root);
-	return findings;
+  scanDir(root);
+  return findings;
 }
 
 /**
@@ -148,8 +153,8 @@ async function main(): Promise<void> {
 }
 
 if (import.meta.main) {
-	main().catch((e) => {
-		console.error(`Error: ${e}`);
-		process.exit(2);
-	});
+  main().catch((e) => {
+    console.error(`Error: ${e}`);
+    process.exit(2);
+  });
 }

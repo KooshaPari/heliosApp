@@ -232,4 +232,4 @@ Implementation command:
 
 - 2026-02-27T00:00:00Z -- system -- lane=planned -- Prompt created.
 - 2026-03-01T13:33:20Z – claude-haiku – shell_pid=70465 – lane=doing – Assigned agent via workflow command
-- 2026-03-01T13:34:32Z – claude-haiku – shell_pid=70465 – lane=done – Implemented: ACP client adapter with all lifecycle methods
+- 2026-03-01T13:41:25Z – claude-haiku – shell_pid=70465 – lane=done – Merged

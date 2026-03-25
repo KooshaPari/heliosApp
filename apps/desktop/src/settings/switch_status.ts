@@ -161,9 +161,9 @@ export class SwitchStatus {
       progressContainer.style.borderRadius = "2px";
       progressContainer.style.overflow = "hidden";
 
-      const progress = document.createElement("div");
-      const elapsed = this.props.elapsedMs || Date.now() - this.startTime;
-      const maxDuration = 8000; // progress bar only shown during active phases
+      const progress = document.createElement('div');
+      const elapsed = this.props.elapsedMs || (Date.now() - this.startTime);
+      const maxDuration = this.props.phase === 'committing' ? 3000 : 8000;
       const percentage = Math.min((elapsed / maxDuration) * 100, 100);
 
       progress.style.width = percentage + "%";

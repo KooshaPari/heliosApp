@@ -59,12 +59,12 @@ export class RemediationEngine {
         continue; // Skip resources in cooldown
       }
 
-      // Check if owning lane is recovering
+      // Suppress suggestions while owner lane is in transient cleanup/provisioning.
       if (orphan.estimatedOwner !== "unknown") {
         try {
           const lane = this.laneRegistry.get(orphan.estimatedOwner);
-          if (lane && (lane.state as string) === "recovering") {
-            // Suppress suggestion for recovering lanes
+          if (lane && (lane.state === "cleaning" || lane.state === "provisioning")) {
+            // Suppress suggestion for lanes with in-flight lifecycle transitions.
             continue;
           }
         } catch {

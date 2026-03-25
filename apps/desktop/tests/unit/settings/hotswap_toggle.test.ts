@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { HotSwapToggle } from "../../../src/settings/hotswap_toggle";
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { HotSwapToggle } from '../../../src/settings/hotswap_toggle';
 
 describe("HotSwapToggle", () => {
   let container: HTMLDivElement;
@@ -17,8 +17,8 @@ describe("HotSwapToggle", () => {
     document.body.removeChild(container);
   });
 
-  it("should render toggle in enabled state", () => {
-    const onToggle = vi.fn();
+  it('should render toggle in enabled state', () => {
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: true,
       onToggle,
@@ -30,8 +30,8 @@ describe("HotSwapToggle", () => {
     expect(label?.textContent).toContain("Prefer hot-swap when available");
   });
 
-  it("should render toggle in disabled state", () => {
-    const onToggle = vi.fn();
+  it('should render toggle in disabled state', () => {
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: false,
       onToggle,
@@ -43,8 +43,8 @@ describe("HotSwapToggle", () => {
     expect(label?.textContent).toContain("Always use restart-with-restore");
   });
 
-  it("should toggle when clicked", () => {
-    const onToggle = vi.fn();
+  it('should toggle when clicked', () => {
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: true,
       onToggle,
@@ -58,8 +58,8 @@ describe("HotSwapToggle", () => {
     expect(onToggle).toHaveBeenCalledWith(false);
   });
 
-  it("should show correct tooltip for enabled state", () => {
-    const onToggle = vi.fn();
+  it('should show correct tooltip for enabled state', () => {
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: true,
       onToggle,
@@ -71,8 +71,8 @@ describe("HotSwapToggle", () => {
     expect(tooltip?.getAttribute("title")).toContain("3s");
   });
 
-  it("should show correct tooltip for disabled state", () => {
-    const onToggle = vi.fn();
+  it('should show correct tooltip for disabled state', () => {
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: false,
       onToggle,
@@ -84,8 +84,8 @@ describe("HotSwapToggle", () => {
     expect(tooltip?.getAttribute("title")).toContain("8s");
   });
 
-  it("should update when update() is called", () => {
-    const onToggle = vi.fn();
+  it('should update when update() is called', () => {
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: true,
       onToggle,
@@ -102,8 +102,8 @@ describe("HotSwapToggle", () => {
     expect(label?.textContent).toContain("Always use restart");
   });
 
-  it("should handle keyboard activation", () => {
-    const onToggle = vi.fn();
+  it('should handle keyboard activation', () => {
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: true,
       onToggle,
@@ -118,8 +118,8 @@ describe("HotSwapToggle", () => {
     expect(onToggle).toHaveBeenCalled();
   });
 
-  it("should have proper accessibility attributes", () => {
-    const onToggle = vi.fn();
+  it('should have proper accessibility attributes', () => {
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: true,
       onToggle,

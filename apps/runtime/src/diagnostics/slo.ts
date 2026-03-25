@@ -1,6 +1,7 @@
-// FR-004, FR-010: SLO violation detection, rate-limited event emission, and periodic check loop.
+// FR-003, FR-004, FR-010: SLO definitions/checks, violation detection,
+// rate-limited event emission, and periodic check loop.
 
-import type { SLODefinition, SLOViolationEvent, PercentileBucket } from "./types.js";
+import type { PercentileBucket, SLODefinition, SLOViolationEvent } from "./types.js";
 import type { MetricsRegistry } from "./metrics.js";
 import { computePercentiles } from "./percentiles.js";
 
@@ -129,8 +130,8 @@ export class SLOMonitor {
         continue;
       }
 
-      const actual = stats[def.percentile];
-      if (actual <= def.threshold) {
+      const { actual, passed } = checkSLO(def, stats);
+      if (passed) {
         // Within SLO — no violation.
         continue;
       }

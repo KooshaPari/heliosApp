@@ -56,7 +56,13 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     const unrecoverableCheckpoint = {
       ...checkpoint,
       sessions: [
-        ...(checkpoint.sessions as Array<Record<string, unknown>>),
+        ...(checkpoint.sessions.map(s => ({
+          session_id: s.session_id,
+          workspace_id: s.workspace_id,
+          lane_id: s.lane_id,
+          status: s.status,
+          codex_session_id: s.codex_session_id,
+        }))),
         {
           session_id: "session-orphan",
           workspace_id: "ws-1",

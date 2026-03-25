@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
-import { SettingsLock } from "../../../src/settings/settings_lock";
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
+import { SettingsLock } from '../../../src/settings/settings_lock';
 
 describe("SettingsLock", () => {
   let container: HTMLDivElement;
@@ -66,8 +66,8 @@ describe("SettingsLock", () => {
     expect(container.style.pointerEvents).toBe("none");
   });
 
-  it("should auto-unlock after timeout", async () => {
-    const onAutoUnlocked = vi.fn();
+  it('should auto-unlock after timeout', async () => {
+    const onAutoUnlocked = mock();
     lock = new SettingsLock({
       autoUnlockTimeoutMs: 100,
       onAutoUnlocked,
