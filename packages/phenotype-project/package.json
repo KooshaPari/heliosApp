@@ -1,0 +1,16 @@
+{
+  "name": "@phenotype/project",
+  "version": "0.1.0",
+  "description": "Phenotype domain package for Project management (entities, ports, domain services, use-cases)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "bun test"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
