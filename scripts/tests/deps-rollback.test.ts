@@ -16,7 +16,7 @@ describe('Dependency Rollback Integration', () => {
     // Ensure clean state
     try {
       rmSync(join(REPO_ROOT, '.deps-rollback-backup'), { recursive: true, force: true });
-    } catch (e) {
+    } catch  {
       // Ignore
     }
   });
@@ -28,7 +28,7 @@ describe('Dependency Rollback Integration', () => {
 				recursive: true,
 				force: true,
 			});
-		} catch (e) {
+		} catch  {
 			// Ignore
 		}
 	});
