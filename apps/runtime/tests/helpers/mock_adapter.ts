@@ -6,11 +6,11 @@
  */
 
 import type {
-  RendererAdapter,
-  RendererConfig,
   RenderSurface,
-  RendererState,
+  RendererAdapter,
   RendererCapabilities,
+  RendererConfig,
+  RendererState,
 } from "../../src/renderer/index.js";
 
 export interface MockAdapterOptions {
@@ -38,7 +38,7 @@ const DEFAULT_CAPS: RendererCapabilities = {
 };
 
 function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export class MockRendererAdapter implements RendererAdapter {
@@ -58,7 +58,12 @@ export class MockRendererAdapter implements RendererAdapter {
   startCallCount = 0;
   stopCallCount = 0;
 
-  constructor(id: string, version: string = "1.0.0", opts: MockAdapterOptions = {}, caps?: Partial<RendererCapabilities>) {
+  constructor(
+    id: string,
+    version = "1.0.0",
+    opts: MockAdapterOptions = {},
+    caps?: Partial<RendererCapabilities>
+  ) {
     this.id = id;
     this.version = version;
     this._opts = opts;
@@ -67,24 +72,40 @@ export class MockRendererAdapter implements RendererAdapter {
 
   async init(_config: RendererConfig): Promise<void> {
     this.initCallCount++;
-    if (this._opts.initDelay) await delay(this._opts.initDelay);
-    if (this._opts.initFail) throw new Error(`${this.id} init failed`);
-    if (this._opts.initFailOnCall === this.initCallCount) throw new Error(`${this.id} init failed on call ${this.initCallCount}`);
+    if (this._opts.initDelay) {
+      await delay(this._opts.initDelay);
+    }
+    if (this._opts.initFail) {
+      throw new Error(`${this.id} init failed`);
+    }
+    if (this._opts.initFailOnCall === this.initCallCount) {
+      throw new Error(`${this.id} init failed on call ${this.initCallCount}`);
+    }
     this._state = "running";
   }
 
   async start(_surface: RenderSurface): Promise<void> {
     this.startCallCount++;
-    if (this._opts.startDelay) await delay(this._opts.startDelay);
-    if (this._opts.startFail) throw new Error(`${this.id} start failed`);
-    if (this._opts.startFailOnCall === this.startCallCount) throw new Error(`${this.id} start failed on call ${this.startCallCount}`);
+    if (this._opts.startDelay) {
+      await delay(this._opts.startDelay);
+    }
+    if (this._opts.startFail) {
+      throw new Error(`${this.id} start failed`);
+    }
+    if (this._opts.startFailOnCall === this.startCallCount) {
+      throw new Error(`${this.id} start failed on call ${this.startCallCount}`);
+    }
     this._state = "running";
   }
 
   async stop(): Promise<void> {
     this.stopCallCount++;
-    if (this._opts.stopDelay) await delay(this._opts.stopDelay);
-    if (this._opts.stopFail) throw new Error(`${this.id} stop failed`);
+    if (this._opts.stopDelay) {
+      await delay(this._opts.stopDelay);
+    }
+    if (this._opts.stopFail) {
+      throw new Error(`${this.id} stop failed`);
+    }
     this._state = "stopped";
   }
 

@@ -53,11 +53,9 @@ export interface TransitionRecord {
 export class InvalidRendererTransitionError extends Error {
   constructor(
     public readonly currentState: RendererState,
-    public readonly event: RendererEvent,
+    public readonly event: RendererEvent
   ) {
-    super(
-      `Invalid renderer transition: cannot apply event "${event}" in state "${currentState}"`,
-    );
+    super(`Invalid renderer transition: cannot apply event "${event}" in state "${currentState}"`);
     this.name = "InvalidRendererTransitionError";
   }
 }
@@ -132,9 +130,7 @@ export class RendererStateMachine {
    * @throws {InvalidRendererTransitionError} if the transition is not allowed.
    */
   transition(event: RendererEvent): RendererState {
-    const nextState = TRANSITIONS[this._state][event] as
-      | RendererState
-      | undefined;
+    const nextState = TRANSITIONS[this._state][event] as RendererState | undefined;
     if (nextState === undefined) {
       throw new InvalidRendererTransitionError(this._state, event);
     }
@@ -163,10 +159,7 @@ export class RendererStateMachine {
  * @returns The resulting state.
  * @throws {InvalidRendererTransitionError} if invalid.
  */
-export function transition(
-  current: RendererState,
-  event: RendererEvent,
-): RendererState {
+export function transition(current: RendererState, event: RendererEvent): RendererState {
   const nextState = TRANSITIONS[current][event] as RendererState | undefined;
   if (nextState === undefined) {
     throw new InvalidRendererTransitionError(current, event);

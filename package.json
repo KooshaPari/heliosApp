@@ -4,10 +4,7 @@
   "private": true,
   "type": "module",
   "packageManager": "bun@1.2.20",
-  "workspaces": [
-    "apps/runtime",
-    "apps/desktop"
-  ],
+  "workspaces": ["apps/runtime", "apps/desktop"],
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "biome check apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
@@ -31,15 +28,6 @@
     "@xterm/xterm": "^5.5.0",
     "solid-js": "^1.9.11"
   },
-  "dependencies": {
-    "solid-js": "^1.9.0"
-  },
-  "dependencies": {
-    "@xterm/addon-fit": "^0.10.0",
-    "@xterm/addon-web-links": "^0.11.0",
-    "@xterm/xterm": "^5.5.0",
-    "solid-js": "^1.9.11"
-  },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@playwright/test": "1.58.2",
@@ -50,8 +38,5 @@
     "typescript": "5.8.2",
     "vitepress": "1.6.3",
     "vitest": "4.1.1"
-  },
-  "dependencies": {
-    "solid-js": "^1.9.11"
   }
 }

@@ -29,7 +29,13 @@ export {
   detectGpu,
 } from "./capabilities.js";
 export { GhosttyMetrics } from "./metrics.js";
-export type { FrameSample, InputLatencySample, MetricsSnapshot, MetricsConfig, MetricsPublisher } from "./metrics.js";
+export type {
+  FrameSample,
+  InputLatencySample,
+  MetricsSnapshot,
+  MetricsConfig,
+  MetricsPublisher,
+} from "./metrics.js";
 export { GhosttyInputRelay, InputRelayError } from "./input.js";
 export type { PtyWriter, GhosttyInputEvent, InputEventListener } from "./input.js";
 
@@ -91,12 +97,11 @@ export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<stri
  */
 export async function registerGhostty(
   registry: RendererRegistry,
-  binaryPath?: string | undefined,
+  binaryPath?: string | undefined
 ): Promise<void> {
   const available = await isGhosttyAvailable(binaryPath);
 
   if (!available) {
-    console.warn("[ghostty] Ghostty binary not found; skipping registration.");
     return;
   }
 

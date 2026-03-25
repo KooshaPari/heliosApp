@@ -45,8 +45,12 @@ export interface ValidationResult {
  * Standard format: lowercase alphanumeric with hyphens, 1-36 characters.
  */
 function isValidIdFormat(id: string): boolean {
-  if (!id || typeof id !== "string") return false;
-  if (id.length < 1 || id.length > 36) return false;
+  if (!id || typeof id !== "string") {
+    return false;
+  }
+  if (id.length === 0 || id.length > 36) {
+    return false;
+  }
   return /^[a-z0-9-]+$/.test(id);
 }
 
@@ -61,24 +65,24 @@ function isValidIdFormat(id: string): boolean {
  */
 export function validateBindingTriple(
   triple: BindingTriple,
-  queryInterface: RegistryQueryInterface,
+  queryInterface: RegistryQueryInterface
 ): ValidationResult {
   const errors: string[] = [];
 
   // Validate ID formats
   if (!isValidIdFormat(triple.workspaceId)) {
     errors.push(
-      `Invalid workspace ID format: ${triple.workspaceId} (must be 1-36 lowercase alphanumeric/hyphens)`,
+      `Invalid workspace ID format: ${triple.workspaceId} (must be 1-36 lowercase alphanumeric/hyphens)`
     );
   }
   if (!isValidIdFormat(triple.laneId)) {
     errors.push(
-      `Invalid lane ID format: ${triple.laneId} (must be 1-36 lowercase alphanumeric/hyphens)`,
+      `Invalid lane ID format: ${triple.laneId} (must be 1-36 lowercase alphanumeric/hyphens)`
     );
   }
   if (!isValidIdFormat(triple.sessionId)) {
     errors.push(
-      `Invalid session ID format: ${triple.sessionId} (must be 1-36 lowercase alphanumeric/hyphens)`,
+      `Invalid session ID format: ${triple.sessionId} (must be 1-36 lowercase alphanumeric/hyphens)`
     );
   }
 
@@ -103,14 +107,10 @@ export function validateBindingTriple(
 
   // Validate cross-references
   if (!queryInterface.laneInWorkspace(triple.laneId, triple.workspaceId)) {
-    errors.push(
-      `Lane ${triple.laneId} does not belong to workspace ${triple.workspaceId}`,
-    );
+    errors.push(`Lane ${triple.laneId} does not belong to workspace ${triple.workspaceId}`);
   }
   if (!queryInterface.sessionInLane(triple.sessionId, triple.laneId)) {
-    errors.push(
-      `Session ${triple.sessionId} does not belong to lane ${triple.laneId}`,
-    );
+    errors.push(`Session ${triple.sessionId} does not belong to lane ${triple.laneId}`);
   }
 
   return {
@@ -123,10 +123,7 @@ export function validateBindingTriple(
  * Creates a new terminal binding with the given terminal ID and binding triple.
  * Factory function that initializes all required fields.
  */
-export function createBinding(
-  terminalId: string,
-  triple: BindingTriple,
-): TerminalBinding {
+export function createBinding(terminalId: string, triple: BindingTriple): TerminalBinding {
   const now = Date.now();
   return {
     terminalId,

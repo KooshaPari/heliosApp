@@ -1,10 +1,10 @@
-import { describe, expect, it, beforeEach, afterEach } from "bun:test";
-import { mkdtemp, rm, readFile } from "node:fs/promises";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { writeFile } from "node:fs/promises";
-import { JsonSettingsStore } from "../../../src/config/store.js";
 import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
+import { JsonSettingsStore } from "../../../src/config/store.js";
 
 let tempDir: string;
 let filePath: string;
@@ -32,7 +32,7 @@ describe("JsonSettingsStore", () => {
     const values = { theme: "dark", "telemetry.enabled": true };
     await store.save(values);
     const loaded = await store.load();
-    expect(loaded["theme"]).toBe("dark");
+    expect(loaded.theme).toBe("dark");
     expect(loaded["telemetry.enabled"]).toBe(true);
   });
 
@@ -46,11 +46,7 @@ describe("JsonSettingsStore", () => {
 
   // FR-005: Unknown key preservation
   it("preserves unknown keys through save/load", async () => {
-    await writeFile(
-      filePath,
-      JSON.stringify({ theme: "dark", "future.setting": 42 }),
-      "utf-8",
-    );
+    await writeFile(filePath, JSON.stringify({ theme: "dark", "future.setting": 42 }), "utf-8");
     const store = new JsonSettingsStore(filePath, SETTINGS_SCHEMA);
     const loaded = await store.load();
     // Unknown keys should NOT appear in loaded (known-only).
@@ -65,7 +61,7 @@ describe("JsonSettingsStore", () => {
     await writeFile(
       filePath,
       JSON.stringify({ "future.a": 1, "future.b": 2, theme: "dark" }),
-      "utf-8",
+      "utf-8"
     );
     const store = new JsonSettingsStore(filePath, SETTINGS_SCHEMA);
     await store.load();
@@ -86,6 +82,6 @@ describe("JsonSettingsStore", () => {
     await rm(filePath);
     await store.save({ theme: "dark" });
     const raw = JSON.parse(await readFile(filePath, "utf-8")) as Record<string, unknown>;
-    expect(raw["theme"]).toBe("dark");
+    expect(raw.theme).toBe("dark");
   });
 });

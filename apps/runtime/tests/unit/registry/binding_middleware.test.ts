@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { BindingMiddleware } from "../../../src/registry/binding_middleware.js";
-import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import { BindingState, type BindingTriple } from "../../../src/registry/binding_triple.js";
+import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 
 describe("BindingMiddleware", () => {
   let registry: TerminalRegistry;
@@ -137,7 +137,7 @@ describe("BindingMiddleware", () => {
       const handler = async () => "success";
 
       await expect(middleware.wrapOperation("terminal-nonexistent", handler)).rejects.toThrow(
-        /TERMINAL_NOT_FOUND/,
+        /TERMINAL_NOT_FOUND/
       );
     });
 
@@ -187,7 +187,7 @@ describe("BindingMiddleware", () => {
       const handler = () => "success";
 
       expect(() => middleware.wrapOperationSync("terminal-nonexistent", handler)).toThrow(
-        /TERMINAL_NOT_FOUND/,
+        /TERMINAL_NOT_FOUND/
       );
     });
   });

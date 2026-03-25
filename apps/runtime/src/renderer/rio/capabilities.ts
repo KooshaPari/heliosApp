@@ -5,8 +5,8 @@
  * for renderer-agnostic comparison.
  */
 
-import type { RendererCapabilities } from "../capabilities.js";
 import type { RendererConfig } from "../adapter.js";
+import type { RendererCapabilities } from "../capabilities.js";
 
 // ---------------------------------------------------------------------------
 // Default capabilities for rio
@@ -39,9 +39,10 @@ export class RioCapabilities {
     this._capabilities = {
       ...DEFAULT_RIO_CAPABILITIES,
       gpuAccelerated: config.gpuAcceleration,
-      colorDepth: (config.colorDepth === 8 || config.colorDepth === 16 || config.colorDepth === 24)
-        ? config.colorDepth
-        : 24,
+      colorDepth:
+        config.colorDepth === 8 || config.colorDepth === 16 || config.colorDepth === 24
+          ? config.colorDepth
+          : 24,
       maxDimensions: {
         cols: Math.min(config.maxDimensions.cols, 500),
         rows: Math.min(config.maxDimensions.rows, 200),

@@ -45,7 +45,7 @@
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
       "semicolons": "always",
-      "trailingComma": "es5"
+      "trailingCommas": "es5"
     }
   },
   "overrides": [

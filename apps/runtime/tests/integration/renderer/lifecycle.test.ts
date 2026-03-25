@@ -2,17 +2,17 @@
  * Integration tests for renderer adapter lifecycle with mock backends.
  * @see SC-010-001, SC-010-002, SC-010-003
  */
-import { describe, expect, it, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
+import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
 import { RendererRegistry } from "../../../src/renderer/registry.js";
 import { RendererStateMachine } from "../../../src/renderer/state_machine.js";
-import { switchRenderer } from "../../../src/renderer/switch.js";
 import { StreamBindingManager } from "../../../src/renderer/stream_binding.js";
-import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";
+import { switchRenderer } from "../../../src/renderer/switch.js";
 import {
   MockGhosttyAdapter,
   MockRioAdapter,
-  TEST_SURFACE,
   TEST_CONFIG,
+  TEST_SURFACE,
 } from "../../helpers/mock_adapter.js";
 
 describe("Renderer lifecycle integration", () => {
@@ -30,7 +30,7 @@ describe("Renderer lifecycle integration", () => {
     ghostty = new MockGhosttyAdapter();
     rio = new MockRioAdapter();
     events = [];
-    bus = { publish: (e) => events.push(e) };
+    bus = { publish: e => events.push(e) };
     bindingMgr = new StreamBindingManager();
   });
 
@@ -93,8 +93,12 @@ describe("Renderer lifecycle integration", () => {
     }
 
     await switchRenderer("ghostty", "rio", {
-      registry, stateMachine: sm, surface: TEST_SURFACE,
-      config: TEST_CONFIG, boundStreams, eventBus: bus,
+      registry,
+      stateMachine: sm,
+      surface: TEST_SURFACE,
+      config: TEST_CONFIG,
+      boundStreams,
+      eventBus: bus,
     });
 
     expect(registry.getActive()?.id).toBe("rio");
@@ -120,15 +124,23 @@ describe("Renderer lifecycle integration", () => {
 
     // Switch ghostty -> rio
     await switchRenderer("ghostty", "rio", {
-      registry, stateMachine: sm, surface: TEST_SURFACE,
-      config: TEST_CONFIG, boundStreams, eventBus: bus,
+      registry,
+      stateMachine: sm,
+      surface: TEST_SURFACE,
+      config: TEST_CONFIG,
+      boundStreams,
+      eventBus: bus,
     });
     expect(registry.getActive()?.id).toBe("rio");
 
     // Switch rio -> ghostty
     await switchRenderer("rio", "ghostty", {
-      registry, stateMachine: sm, surface: TEST_SURFACE,
-      config: TEST_CONFIG, boundStreams, eventBus: bus,
+      registry,
+      stateMachine: sm,
+      surface: TEST_SURFACE,
+      config: TEST_CONFIG,
+      boundStreams,
+      eventBus: bus,
     });
     expect(registry.getActive()?.id).toBe("ghostty");
     expect(sm.state).toBe("running");
@@ -147,14 +159,20 @@ describe("Renderer lifecycle integration", () => {
     const boundStreams = new Map<string, ReadableStream<Uint8Array>>();
     boundStreams.set("pty-1", new ReadableStream());
 
-    await expect(switchRenderer("ghostty", "rio", {
-      registry, stateMachine: sm, surface: TEST_SURFACE,
-      config: TEST_CONFIG, boundStreams, eventBus: bus,
-    })).rejects.toThrow();
+    await expect(
+      switchRenderer("ghostty", "rio", {
+        registry,
+        stateMachine: sm,
+        surface: TEST_SURFACE,
+        config: TEST_CONFIG,
+        boundStreams,
+        eventBus: bus,
+      })
+    ).rejects.toThrow();
 
     // Rolled back to ghostty
     expect(registry.getActive()?.id).toBe("ghostty");
     expect(sm.state).toBe("running");
-    expect(events.some((e) => e.type === "renderer.switch_failed")).toBe(true);
+    expect(events.some(e => e.type === "renderer.switch_failed")).toBe(true);
   });
 });

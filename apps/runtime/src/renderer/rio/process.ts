@@ -58,7 +58,7 @@ export class RioProcess {
       this._startedAt = Date.now();
 
       // Monitor for unexpected exit.
-      this._proc.exited.then((code) => {
+      this._proc.exited.then(code => {
         this._running = false;
         for (const handler of this._exitHandlers) {
           try {
@@ -74,7 +74,7 @@ export class RioProcess {
       this._running = false;
       this._startLock = false;
       throw new Error(
-        `Failed to start rio process: ${err instanceof Error ? err.message : String(err)}`,
+        `Failed to start rio process: ${err instanceof Error ? err.message : String(err)}`
       );
     } finally {
       this._startLock = false;
@@ -85,7 +85,7 @@ export class RioProcess {
    * Stop the rio process with SIGTERM -> SIGKILL escalation.
    */
   async stop(): Promise<void> {
-    if (!this._proc || !this._running) {
+    if (!(this._proc && this._running)) {
       return;
     }
 
@@ -94,8 +94,8 @@ export class RioProcess {
 
     // Wait up to SIGKILL_TIMEOUT_MS, then escalate.
     const exitPromise = this._proc.exited;
-    const timeout = new Promise<"timeout">((resolve) =>
-      setTimeout(() => resolve("timeout"), SIGKILL_TIMEOUT_MS),
+    const timeout = new Promise<"timeout">(resolve =>
+      setTimeout(() => resolve("timeout"), SIGKILL_TIMEOUT_MS)
     );
 
     const result = await Promise.race([exitPromise, timeout]);
@@ -117,7 +117,9 @@ export class RioProcess {
   }
 
   getUptime(): number | undefined {
-    if (this._startedAt === undefined) return undefined;
+    if (this._startedAt === undefined) {
+      return undefined;
+    }
     return Date.now() - this._startedAt;
   }
 
@@ -132,7 +134,9 @@ export class RioProcess {
    * Write data to the rio process stdin.
    */
   writeToStdin(data: Uint8Array): void {
-    if (!this._proc || !this._running) return;
+    if (!(this._proc && this._running)) {
+      return;
+    }
     try {
       const stdin = this._proc.stdin;
       if (stdin && typeof stdin === "object" && "write" in stdin) {

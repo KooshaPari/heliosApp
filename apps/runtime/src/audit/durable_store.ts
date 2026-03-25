@@ -1,4 +1,4 @@
-import type { AuditRecord } from "./sink";
+import type { AuditRecord } from "./sink.ts";
 
 export interface AuditDurableStore {
   append(record: AuditRecord): Promise<void>;
@@ -14,4 +14,3 @@ export class Slice1AuditDurabilityPlaceholder implements AuditDurableStore {
     return [];
   }
 }
-

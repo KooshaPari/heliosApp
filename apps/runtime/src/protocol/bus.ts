@@ -456,7 +456,10 @@ export class InMemoryLocalBus implements LocalBus {
         }
         this.state = { session: "attached" };
         const sessionResultId =
-          command.session_id ?? command.payload?.id ?? command.payload?.session_id ?? `session_${Date.now()}`;
+          command.session_id ??
+          command.payload?.id ??
+          command.payload?.session_id ??
+          `session_${Date.now()}`;
         return {
           id: `res-${Date.now()}`,
           type: "response",
@@ -885,10 +888,7 @@ class CommandBusImpl implements LocalBus {
     return getActiveCorrelationId();
   }
 
-  private okResponse(
-    command: CommandEnvelope,
-    result: Record<string, unknown>
-  ): LocalBusEnvelope {
+  private okResponse(command: CommandEnvelope, result: Record<string, unknown>): LocalBusEnvelope {
     return {
       id: command.id,
       type: "response",
@@ -900,7 +900,7 @@ class CommandBusImpl implements LocalBus {
       correlation_id: command.correlation_id,
       method: command.method,
       status: "ok",
-      result
+      result,
     };
   }
 
@@ -927,8 +927,8 @@ class CommandBusImpl implements LocalBus {
         code,
         message,
         retryable,
-        details: details ?? null
-      }
+        details: details ?? null,
+      },
     };
   }
 
@@ -938,7 +938,13 @@ class CommandBusImpl implements LocalBus {
     details?: Record<string, unknown>
   ): LocalBusEnvelope {
     const error = createProtocolError(code, { details });
-    return this.errorResponse(command, error.code, error.message, error.details ?? undefined, error.retryable);
+    return this.errorResponse(
+      command,
+      error.code,
+      error.message,
+      error.details ?? undefined,
+      error.retryable
+    );
   }
 
   private resolveContext(command: CommandEnvelope): {
@@ -951,7 +957,7 @@ class CommandBusImpl implements LocalBus {
       workspace_id: command.workspace_id ?? this.readString(command.payload.workspace_id),
       lane_id: command.lane_id ?? this.readString(command.payload.lane_id),
       session_id: command.session_id ?? this.readString(command.payload.session_id),
-      terminal_id: command.terminal_id ?? this.readString(command.payload.terminal_id)
+      terminal_id: command.terminal_id ?? this.readString(command.payload.terminal_id),
     };
   }
 

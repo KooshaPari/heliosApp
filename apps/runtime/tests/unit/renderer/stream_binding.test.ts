@@ -2,11 +2,8 @@
  * Unit tests for StreamBindingManager and SwitchBuffer.
  * @see FR-010-005, NFR-010-002
  */
-import { describe, expect, it, afterEach } from "bun:test";
-import {
-  StreamBindingManager,
-  SwitchBuffer,
-} from "../../../src/renderer/stream_binding.js";
+import { afterEach, describe, expect, it } from "bun:test";
+import { StreamBindingManager, SwitchBuffer } from "../../../src/renderer/stream_binding.js";
 import type { BufferOverflowEvent } from "../../../src/renderer/stream_binding.js";
 import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
 
@@ -210,8 +207,8 @@ describe("SwitchBuffer", () => {
 
     expect(buf.getBufferedBytes()).toBeLessThanOrEqual(10);
     expect(events.length).toBeGreaterThan(0);
-    expect(events[0]!.type).toBe("renderer.switch.buffer_overflow");
-    expect(events[0]!.ptyId).toBe("pty-1");
+    expect(events[0]?.type).toBe("renderer.switch.buffer_overflow");
+    expect(events[0]?.ptyId).toBe("pty-1");
   });
 
   it("buffers independently per PTY", () => {
@@ -233,6 +230,6 @@ describe("SwitchBuffer", () => {
     buf.write("pty-1", new Uint8Array(3));
     buf.write("pty-1", new Uint8Array(4)); // total 7 > 5
 
-    expect(events.some((e) => e.droppedBytes > 0)).toBe(true);
+    expect(events.some(e => e.droppedBytes > 0)).toBe(true);
   });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createRuntime } from "../../../runtime/src";
-import { bootDesktop } from "../../src";
+import { createRuntime } from "../../../runtime/src.ts";
+import { bootDesktop } from "../../src.ts";
 
 describe("renderer switch transaction", () => {
   test("rolls back to previous renderer on switch failure and keeps active context", async () => {
@@ -11,12 +11,12 @@ describe("renderer switch transaction", () => {
     const laneResult = await controlPlane.createLane({ workspaceId: "ws_renderer" });
     const sessionResult = await controlPlane.ensureSession({
       workspaceId: "ws_renderer",
-      laneId: laneResult.laneId as string
+      laneId: laneResult.laneId as string,
     });
     await controlPlane.spawnTerminal({
       workspaceId: "ws_renderer",
       laneId: laneResult.laneId as string,
-      sessionId: sessionResult.sessionId as string
+      sessionId: sessionResult.sessionId as string,
     });
 
     const beforeSwitch = controlPlane.getActiveContext();
@@ -30,4 +30,3 @@ describe("renderer switch transaction", () => {
     expect(controlPlane.store.getState().rendererSwitch.lastStatus).toBe("rolled_back");
   });
 });
-

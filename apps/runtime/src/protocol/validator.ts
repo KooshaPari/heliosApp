@@ -1,12 +1,11 @@
-import { METHODS } from "./methods";
-import { TOPICS } from "./topics";
-import type { LocalBusEnvelope } from "./types";
-import { ProtocolValidationError } from "./types";
+import { METHODS } from "./methods.ts";
+import { TOPICS } from "./topics.ts";
+import type { LocalBusEnvelope } from "./types.ts";
+import { ProtocolValidationError } from "./types.ts";
 
 const METHOD_SET = new Set<string>(METHODS);
-const TOPIC_SET = new Set<string>(TOPICS);
-const RFC3339_PATTERN =
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
+const _TOPIC_SET = new Set<string>(TOPICS);
+const RFC3339_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 
 const CORRELATION_REQUIRED_METHODS = new Set<string>([
   "lane.attach",
@@ -16,7 +15,7 @@ const CORRELATION_REQUIRED_METHODS = new Set<string>([
   "session.terminate",
   "terminal.spawn",
   "terminal.input",
-  "terminal.resize"
+  "terminal.resize",
 ]);
 
 const CORRELATION_REQUIRED_TOPICS = new Set<string>([
@@ -37,7 +36,7 @@ const CORRELATION_REQUIRED_TOPICS = new Set<string>([
   "terminal.spawned",
   "terminal.spawn.failed",
   "terminal.output",
-  "terminal.state.changed"
+  "terminal.state.changed",
 ]);
 
 const METHOD_CONTEXT_REQUIREMENTS: Record<
@@ -51,7 +50,7 @@ const METHOD_CONTEXT_REQUIREMENTS: Record<
   "session.terminate": ["workspace_id", "lane_id", "session_id"],
   "terminal.spawn": ["workspace_id", "lane_id", "session_id"],
   "terminal.input": ["workspace_id", "lane_id", "session_id", "terminal_id"],
-  "terminal.resize": ["workspace_id", "lane_id", "session_id", "terminal_id"]
+  "terminal.resize": ["workspace_id", "lane_id", "session_id", "terminal_id"],
 };
 
 const TOPIC_CONTEXT_REQUIREMENTS: Record<
@@ -75,7 +74,7 @@ const TOPIC_CONTEXT_REQUIREMENTS: Record<
   "terminal.spawned": ["workspace_id", "lane_id", "session_id", "terminal_id"],
   "terminal.spawn.failed": ["workspace_id", "lane_id", "session_id"],
   "terminal.output": ["workspace_id", "lane_id", "session_id", "terminal_id"],
-  "terminal.state.changed": ["workspace_id", "lane_id", "session_id", "terminal_id"]
+  "terminal.state.changed": ["workspace_id", "lane_id", "session_id", "terminal_id"],
 };
 
 function assertRecord(value: unknown): asserts value is Record<string, unknown> {
@@ -103,7 +102,7 @@ function assertIsoTimestamp(value: string, field: string): void {
       `Envelope field '${field}' must be an RFC3339 timestamp with timezone`,
       {
         field,
-        value
+        value,
       }
     );
   }
@@ -116,7 +115,7 @@ function assertPayloadObject(envelope: Record<string, unknown>): void {
       "MISSING_REQUIRED_FIELD",
       "Envelope field 'payload' must be an object",
       {
-        field: "payload"
+        field: "payload",
       }
     );
   }
@@ -135,7 +134,7 @@ function assertOptionalString(
       "MISSING_CONTEXT_ID",
       `Envelope field '${field}' must be a non-empty string`,
       {
-        field
+        field,
       }
     );
   }
@@ -153,7 +152,7 @@ function assertContext(
         "MISSING_CONTEXT_ID",
         `Envelope field '${field}' is required`,
         {
-          field
+          field,
         }
       );
     }
@@ -174,10 +173,10 @@ function assertErrorPayload(envelope: Record<string, unknown>): void {
 
   const typedError = error as Record<string, unknown>;
   if (typeof typedError.code !== "string" || typeof typedError.message !== "string") {
-      throw new ProtocolValidationError(
-        "INVALID_ERROR_PAYLOAD",
-        "Envelope error payload must include code and message"
-      );
+    throw new ProtocolValidationError(
+      "INVALID_ERROR_PAYLOAD",
+      "Envelope error payload must include code and message"
+    );
   }
   if (typeof typedError.retryable !== "boolean") {
     throw new ProtocolValidationError(
@@ -200,7 +199,7 @@ function assertCorrelationId(
       {
         // biome-ignore lint/style/useNamingConvention: External protocol field names use snake_case.
         required_by: requiredBy,
-        name
+        name,
       }
     );
   }

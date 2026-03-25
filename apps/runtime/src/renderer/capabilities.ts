@@ -41,7 +41,7 @@ function sortedJson(val: unknown): string {
 
 export function compareCapabilities(
   a: RendererCapabilities,
-  b: RendererCapabilities,
+  b: RendererCapabilities
 ): CapabilityComparison {
   const diffs: CapabilityDiff[] = [];
   for (const key of Object.keys(a) as (keyof RendererCapabilities)[]) {

@@ -1,13 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import {
-  RecoveryStateMachine,
-  RecoveryStage,
-  type RecoveryState,
-} from "../state-machine.js";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { InMemoryLocalBus, type LocalBus } from "../../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
+import { RecoveryStage, type RecoveryState, RecoveryStateMachine } from "../state-machine.js";
 
 describe("RecoveryStateMachine", () => {
   let stateMachine: RecoveryStateMachine;
@@ -37,7 +33,7 @@ describe("RecoveryStateMachine", () => {
     it("should progress through all stages in order", async () => {
       const stages: RecoveryStage[] = [];
 
-      stateMachine.onStageChange((from, to) => {
+      stateMachine.onStageChange((_from, to) => {
         stages.push(to);
       });
 
@@ -86,7 +82,10 @@ describe("RecoveryStateMachine", () => {
       await stateMachine.transition(RecoveryStage.INVENTORYING);
 
       const statePath = path.join(tempDir, "recovery", "recovery-state.json");
-      const exists = await fs.access(statePath).then(() => true).catch(() => false);
+      const exists = await fs
+        .access(statePath)
+        .then(() => true)
+        .catch(() => false);
       expect(exists).toBe(true);
 
       const content = await fs.readFile(statePath, "utf-8");
@@ -218,7 +217,7 @@ describe("RecoveryStateMachine", () => {
 
   describe("listener notifications", () => {
     it("should notify listeners on stage change", async () => {
-      const changes: Array<[string, string, number]> = [];
+      const changes: [string, string, number][] = [];
 
       stateMachine.onStageChange((from, to, attemptCount) => {
         changes.push([from, to, attemptCount]);
@@ -231,11 +230,7 @@ describe("RecoveryStateMachine", () => {
       const firstChange = changes.at(0);
       const secondChange = changes.at(1);
       expect(firstChange).toEqual([RecoveryStage.CRASHED, RecoveryStage.DETECTING, 0]);
-      expect(secondChange).toEqual([
-        RecoveryStage.DETECTING,
-        RecoveryStage.INVENTORYING,
-        0,
-      ]);
+      expect(secondChange).toEqual([RecoveryStage.DETECTING, RecoveryStage.INVENTORYING, 0]);
     });
   });
 });

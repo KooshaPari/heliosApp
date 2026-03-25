@@ -1,10 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   BindingState,
   type BindingTriple,
+  type RegistryQueryInterface,
   createBinding,
   validateBindingTriple,
-  type RegistryQueryInterface,
 } from "../../../src/registry/binding_triple.js";
 
 /**
@@ -120,7 +120,7 @@ describe("binding_triple", () => {
       const result = validateBindingTriple(triple, query);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes("Invalid workspace ID format"))).toBe(true);
+      expect(result.errors.some(e => e.includes("Invalid workspace ID format"))).toBe(true);
     });
 
     it("should reject invalid lane ID format", () => {
@@ -134,7 +134,7 @@ describe("binding_triple", () => {
       const result = validateBindingTriple(triple, query);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes("Invalid lane ID format"))).toBe(true);
+      expect(result.errors.some(e => e.includes("Invalid lane ID format"))).toBe(true);
     });
 
     it("should reject invalid session ID format", () => {
@@ -148,7 +148,7 @@ describe("binding_triple", () => {
       const result = validateBindingTriple(triple, query);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes("Invalid session ID format"))).toBe(true);
+      expect(result.errors.some(e => e.includes("Invalid session ID format"))).toBe(true);
     });
 
     it("should reject when workspace does not exist", () => {
@@ -161,7 +161,7 @@ describe("binding_triple", () => {
       const result = validateBindingTriple(triple, query);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes("Workspace does not exist"))).toBe(true);
+      expect(result.errors.some(e => e.includes("Workspace does not exist"))).toBe(true);
     });
 
     it("should reject when lane does not belong to workspace", () => {
@@ -175,9 +175,7 @@ describe("binding_triple", () => {
       const result = validateBindingTriple(triple, query);
 
       expect(result.valid).toBe(false);
-      expect(
-        result.errors.some((e) => e.includes("does not belong to workspace")),
-      ).toBe(true);
+      expect(result.errors.some(e => e.includes("does not belong to workspace"))).toBe(true);
     });
 
     it("should reject when session does not belong to lane", () => {
@@ -191,7 +189,7 @@ describe("binding_triple", () => {
       const result = validateBindingTriple(triple, query);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes("does not belong to lane"))).toBe(true);
+      expect(result.errors.some(e => e.includes("does not belong to lane"))).toBe(true);
     });
 
     it("should reject IDs that are too long", () => {
@@ -205,7 +203,7 @@ describe("binding_triple", () => {
       const result = validateBindingTriple(triple, query);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes("Invalid workspace ID format"))).toBe(true);
+      expect(result.errors.some(e => e.includes("Invalid workspace ID format"))).toBe(true);
     });
 
     it("should reject empty IDs", () => {
@@ -218,7 +216,7 @@ describe("binding_triple", () => {
       const result = validateBindingTriple(triple, query);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes("Invalid workspace ID format"))).toBe(true);
+      expect(result.errors.some(e => e.includes("Invalid workspace ID format"))).toBe(true);
     });
 
     it("should accumulate multiple errors", () => {

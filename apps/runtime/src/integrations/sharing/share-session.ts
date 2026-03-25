@@ -174,10 +174,11 @@ export class ShareSessionManager {
     correlationId: string
   ): Promise<ShareSession> {
     // Check policy gate
-    const policyDecision = await this.policyGate.evaluate(
-      "share.session.create",
-      { terminalId, backend, correlationId }
-    );
+    const policyDecision = await this.policyGate.evaluate("share.session.create", {
+      terminalId,
+      backend,
+      correlationId,
+    });
 
     if (!policyDecision.allowed) {
       const session: ShareSession = {
@@ -220,7 +221,7 @@ export class ShareSessionManager {
     if (!this.sessionsByTerminal.has(terminalId)) {
       this.sessionsByTerminal.set(terminalId, new Set());
     }
-    this.sessionsByTerminal.get(terminalId)!.add(session.id);
+    this.sessionsByTerminal.get(terminalId)?.add(session.id);
 
     await this.publishEvent("share.session.created", {
       sessionId: session.id,
@@ -320,7 +321,7 @@ export class ShareSessionManager {
   listByTerminal(terminalId: string): ShareSession[] {
     const sessionIds = this.sessionsByTerminal.get(terminalId) || new Set();
     return Array.from(sessionIds)
-      .map((id) => this.sessions.get(id))
+      .map(id => this.sessions.get(id))
       .filter((s): s is ShareSession => s !== undefined);
   }
 
@@ -343,8 +344,6 @@ export class ShareSessionManager {
         topic,
         payload,
       });
-    } catch (error) {
-      console.warn(`Failed to publish share event ${topic}:`, error);
-    }
+    } catch (_error) {}
   }
 }

@@ -1,5 +1,5 @@
-import { AuditEvent } from './event';
-import { SessionSnapshot } from './snapshot';
+import type { AuditEvent } from "./event.ts";
+import type { SessionSnapshot } from "./snapshot.ts";
 
 /**
  * Timeline entry for significant events.
@@ -35,7 +35,7 @@ export class ReplayEngine {
    * @param store - Audit store for queries
    * @returns ReplayStream with snapshots and events
    */
-  async loadSession(sessionId: string, store: any): Promise<ReplayStream> {
+  async loadSession(sessionId: string, _store: any): Promise<ReplayStream> {
     // TODO: Integrate with actual store queries
     // For now, return empty replay stream
     const startTime = new Date();
@@ -86,10 +86,10 @@ export class ReplayEngine {
     const state: SessionSnapshot = baseSnapshot
       ? { ...baseSnapshot }
       : {
-          id: 'virtual',
+          id: "virtual",
           sessionId: stream.sessionId,
           timestamp: timestamp.toISOString(),
-          terminalBuffer: '',
+          terminalBuffer: "",
           cursorPosition: { row: 0, col: 0 },
           dimensions: { rows: 24, cols: 80 },
           scrollbackPosition: 0,
@@ -124,8 +124,8 @@ export class ReplayEngine {
     // Add significant events (commands, errors, approvals)
     for (const event of stream.events) {
       if (
-        ['COMMAND_EXECUTED', 'POLICY_EVALUATION', 'APPROVAL_RESOLVED'].includes(
-          event.eventType as any,
+        ["COMMAND_EXECUTED", "POLICY_EVALUATION", "APPROVAL_RESOLVED"].includes(
+          event.eventType as any
         )
       ) {
         entries.push({

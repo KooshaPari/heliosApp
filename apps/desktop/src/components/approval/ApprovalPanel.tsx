@@ -3,8 +3,8 @@
  * Displays pending approval requests and handles approval/rejection.
  */
 
-import { createSignal, For } from 'solid-js';
-import type { ApprovalRequest } from '../../types';
+import { For, createSignal } from "solid-js";
+import type { ApprovalRequest } from "../../types.ts";
 
 interface ApprovalPanelProps {
   requests: ApprovalRequest[];
@@ -14,7 +14,7 @@ interface ApprovalPanelProps {
 
 export function ApprovalPanel(props: ApprovalPanelProps) {
   const [selectedId, setSelectedId] = createSignal<string | null>(null);
-  const [rejectReason, setRejectReason] = createSignal('');
+  const [rejectReason, setRejectReason] = createSignal("");
 
   const selectedRequest = () => {
     const id = selectedId();
@@ -31,22 +31,22 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
     if (id && rejectReason()) {
       props.onReject(id, rejectReason());
       setSelectedId(null);
-      setRejectReason('');
+      setRejectReason("");
     }
   };
 
   return (
     <div class="approval-panel">
       <h2>Pending Approvals ({props.requests.length})</h2>
-      
+
       {props.requests.length === 0 ? (
         <p class="empty-state">No pending approval requests</p>
       ) : (
         <div class="requests-list">
           <For each={props.requests}>
-            {(request) => (
+            {request => (
               <div
-                class={`request-item ${selectedId() === request.id ? 'selected' : ''}`}
+                class={`request-item ${selectedId() === request.id ? "selected" : ""}`}
                 onclick={() => setSelectedId(request.id)}
               >
                 <div class="request-header">
@@ -80,10 +80,7 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
           </div>
 
           <div class="approval-actions">
-            <button
-              class="approve-btn"
-              onclick={() => handleApprove(selectedRequest()?.id ?? "")}
-            >
+            <button class="approve-btn" onclick={() => handleApprove(selectedRequest()?.id ?? "")}>
               Approve
             </button>
             <button type="button" class="reject-btn" onclick={() => setRejectReason("focused")}>
@@ -91,12 +88,12 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
             </button>
           </div>
 
-          {rejectReason() === 'focused' && (
+          {rejectReason() === "focused" && (
             <div class="reject-form">
               <textarea
                 placeholder="Reason for rejection..."
                 value={rejectReason()}
-                oninput={(e) => setRejectReason(e.currentTarget.value)}
+                oninput={e => setRejectReason(e.currentTarget.value)}
               />
               <div class="reject-actions">
                 <button type="button" onclick={handleReject}>

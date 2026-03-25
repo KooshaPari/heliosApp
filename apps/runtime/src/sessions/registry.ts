@@ -5,8 +5,8 @@ import type {
   RecoveryMetadata,
   RecoverySessionRecord,
   RecoveryTerminalRecord,
-  WatchdogScanResult
-} from "./types";
+  WatchdogScanResult,
+} from "./types.ts";
 
 export type SessionTransport = "cliproxy_harness" | "native_openai";
 export type SessionStatus = "detached" | "attaching" | "attached" | "terminated";
@@ -51,9 +51,7 @@ export class InMemorySessionRegistry {
     const activeSessionId = this.activeLaneSessions.get(input.lane_id);
     if (activeSessionId) {
       const active = this.bySessionId.get(activeSessionId);
-      if (!active) {
-        this.activeLaneSessions.delete(input.lane_id);
-      } else {
+      if (active) {
         if (input.codex_session_id && input.codex_session_id !== active.codex_session_id) {
           throw new SessionRegistryError(
             `lane ${input.lane_id} already mapped to codex session ${active.codex_session_id}`
@@ -65,6 +63,7 @@ export class InMemorySessionRegistry {
         active.last_heartbeat_at = nowIso;
         return { session: { ...active }, created: false };
       }
+      this.activeLaneSessions.delete(input.lane_id);
     }
 
     const codexSessionId = input.codex_session_id ?? this.generateCodexSessionId();
@@ -84,7 +83,7 @@ export class InMemorySessionRegistry {
       codex_session_id: codexSessionId,
       transport: input.transport,
       status: "attached",
-      last_heartbeat_at: nowIso
+      last_heartbeat_at: nowIso,
     };
 
     this.bySessionId.set(session.session_id, session);
@@ -147,21 +146,26 @@ export class RecoveryRegistry {
 
   apply(method: string, input: RecoveryLifecycleInput): void {
     switch (method) {
-      case "lane.create":
+      case "lane.create": {
         this.onLaneCreate(input);
         return;
-      case "lane.cleanup":
+      }
+      case "lane.cleanup": {
         this.onLaneCleanup(input);
         return;
-      case "session.attach":
+      }
+      case "session.attach": {
         this.onSessionAttach(input);
         return;
-      case "session.terminate":
+      }
+      case "session.terminate": {
         this.onSessionTerminate(input);
         return;
-      case "terminal.spawn":
+      }
+      case "terminal.spawn": {
         this.onTerminalSpawn(input);
         return;
+      }
       default:
         return;
     }
@@ -183,7 +187,7 @@ export class RecoveryRegistry {
     }
 
     const issues: RecoveryIssue[] = [];
-    const recovered_session_ids: string[] = [];
+    const recoveredSessionIds: string[] = [];
 
     for (const session of this.sessions.values()) {
       if (!session.codex_session_id) {
@@ -192,35 +196,35 @@ export class RecoveryRegistry {
           artifact_id: session.session_id,
           reason: "missing codex_session_id",
           remediation: "cleanup",
-          state: "unrecoverable"
+          state: "unrecoverable",
         });
         continue;
       }
 
-      if (!session.lane_id || !this.lanes.has(session.lane_id)) {
+      if (!(session.lane_id && this.lanes.has(session.lane_id))) {
         session.status = "detached";
         issues.push({
           artifact_type: "session",
           artifact_id: session.session_id,
           reason: "missing lane mapping",
           remediation: "reattach",
-          state: "recoverable"
+          state: "recoverable",
         });
         continue;
       }
 
       session.status = "attached";
-      recovered_session_ids.push(session.session_id);
+      recoveredSessionIds.push(session.session_id);
     }
 
-    return { recovered_session_ids, issues };
+    return { recovered_session_ids: recoveredSessionIds, issues };
   }
 
   snapshot(): RecoveryMetadata {
     return {
-      lanes: [...this.lanes.values()].map((lane) => ({ ...lane })),
-      sessions: [...this.sessions.values()].map((session) => ({ ...session })),
-      terminals: [...this.terminals.values()].map((terminal) => ({ ...terminal }))
+      lanes: [...this.lanes.values()].map(lane => ({ ...lane })),
+      sessions: [...this.sessions.values()].map(session => ({ ...session })),
+      terminals: [...this.terminals.values()].map(terminal => ({ ...terminal })),
     };
   }
 
@@ -234,7 +238,7 @@ export class RecoveryRegistry {
           artifact_id: lane.lane_id,
           reason: "references missing session",
           remediation: "reconcile",
-          state: "recoverable"
+          state: "recoverable",
         });
       }
       if (lane.terminal_id && !this.terminals.has(lane.terminal_id)) {
@@ -243,7 +247,7 @@ export class RecoveryRegistry {
           artifact_id: lane.lane_id,
           reason: "references missing terminal",
           remediation: "reconcile",
-          state: "recoverable"
+          state: "recoverable",
         });
       }
     }
@@ -257,7 +261,7 @@ export class RecoveryRegistry {
             artifact_id: session.session_id,
             reason: "detached session can be reattached by codex_session_id",
             remediation: "reattach",
-            state: "recoverable"
+            state: "recoverable",
           });
         } else {
           issues.push({
@@ -265,7 +269,7 @@ export class RecoveryRegistry {
             artifact_id: session.session_id,
             reason: "session has no valid lane mapping",
             remediation: "cleanup",
-            state: "unrecoverable"
+            state: "unrecoverable",
           });
         }
       }
@@ -276,19 +280,19 @@ export class RecoveryRegistry {
           artifact_id: session.session_id,
           reason: "session references missing terminal",
           remediation: "reconcile",
-          state: "recoverable"
+          state: "recoverable",
         });
       }
     }
 
     for (const terminal of this.terminals.values()) {
-      if (!terminal.session_id || !this.sessions.has(terminal.session_id)) {
+      if (!(terminal.session_id && this.sessions.has(terminal.session_id))) {
         issues.push({
           artifact_type: "terminal",
           artifact_id: terminal.terminal_id,
           reason: "terminal has no valid session mapping",
           remediation: "cleanup",
-          state: "unrecoverable"
+          state: "unrecoverable",
         });
       }
     }
@@ -309,7 +313,7 @@ export class RecoveryRegistry {
   }
 
   private onLaneCreate(input: RecoveryLifecycleInput): void {
-    if (!input.lane_id || !input.workspace_id) {
+    if (!(input.lane_id && input.workspace_id)) {
       return;
     }
 
@@ -318,7 +322,7 @@ export class RecoveryRegistry {
       lane_id: input.lane_id,
       workspace_id: input.workspace_id,
       session_id: existing?.session_id,
-      terminal_id: existing?.terminal_id
+      terminal_id: existing?.terminal_id,
     });
   }
 
@@ -341,7 +345,7 @@ export class RecoveryRegistry {
   }
 
   private onSessionAttach(input: RecoveryLifecycleInput): void {
-    if (!input.session_id || !input.workspace_id) {
+    if (!(input.session_id && input.workspace_id)) {
       return;
     }
 
@@ -360,7 +364,7 @@ export class RecoveryRegistry {
       lane_id: laneId,
       codex_session_id: input.codex_session_id ?? existing?.codex_session_id,
       terminal_id: existing?.terminal_id,
-      status: "attached"
+      status: "attached",
     });
   }
 
@@ -378,7 +382,7 @@ export class RecoveryRegistry {
   }
 
   private onTerminalSpawn(input: RecoveryLifecycleInput): void {
-    if (!input.terminal_id || !input.workspace_id) {
+    if (!(input.terminal_id && input.workspace_id)) {
       return;
     }
 
@@ -399,7 +403,7 @@ export class RecoveryRegistry {
       workspace_id: input.workspace_id,
       lane_id: input.lane_id,
       session_id: input.session_id,
-      status: "active"
+      status: "active",
     });
   }
 }

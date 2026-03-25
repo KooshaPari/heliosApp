@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { ChatTab } from "../../../src/tabs/chat_tab";
-import type { ActiveContext } from "../../../src/tabs/context_switch";
+import { beforeEach, describe, expect, it } from "vitest";
+import { ChatTab } from "../../../src/tabs/chat_tab.ts";
+import type { ActiveContext } from "../../../src/tabs/context_switch.ts";
 
 describe("ChatTab", () => {
   let tab: ChatTab;
@@ -22,7 +22,7 @@ describe("ChatTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -34,12 +34,12 @@ describe("ChatTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
       await tab.onContextChange(null);
-      const el = tab.render();
+      const _el = tab.render();
 
       const state = tab.getState();
       expect(state.messageCount).toBe(0);
@@ -51,7 +51,7 @@ describe("ChatTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -64,7 +64,7 @@ describe("ChatTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -77,7 +77,7 @@ describe("ChatTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -109,7 +109,7 @@ describe("ChatTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -124,7 +124,7 @@ describe("ChatTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -140,7 +140,7 @@ describe("ChatTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -154,7 +154,7 @@ describe("ChatTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);
@@ -167,7 +167,7 @@ describe("ChatTab", () => {
       const context: ActiveContext = {
         workspaceId: "ws1",
         laneId: "lane1",
-        sessionId: "session1"
+        sessionId: "session1",
       };
 
       await tab.onContextChange(context);

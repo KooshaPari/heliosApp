@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { InMemoryLocalBus } from "../../src/protocol/bus";
+import { InMemoryLocalBus } from "../../src/protocol/bus.ts";
 
 const LANE_CREATE_P95_MS = 30;
 const SESSION_RESTORE_P95_MS = 35;
@@ -7,14 +7,18 @@ const BACKLOG_DEPTH_P95 = 64;
 const TERMINAL_COUNT = 25;
 
 function getSummary(bus: InMemoryLocalBus, metric: string) {
-  return bus.getMetricsReport().summaries.find((entry) => entry.metric === metric);
+  return bus.getMetricsReport().summaries.find(entry => entry.metric === metric);
 }
 
-async function runBatches(total: number, batchSize: number, work: (index: number) => Promise<void>) {
+async function runBatches(
+  total: number,
+  batchSize: number,
+  work: (index: number) => Promise<void>
+) {
   for (let offset = 0; offset < total; offset += batchSize) {
     const limit = Math.min(total, offset + batchSize);
     await Promise.all(
-      Array.from({ length: limit - offset }, (_, batchIndex) => work(offset + batchIndex)),
+      Array.from({ length: limit - offset }, (_, batchIndex) => work(offset + batchIndex))
     );
   }
 }
@@ -22,7 +26,7 @@ async function runBatches(total: number, batchSize: number, work: (index: number
 test("soak: lane/session churn and backlog pressure stay within baseline thresholds", async () => {
   const bus = new InMemoryLocalBus();
 
-  await runBatches(200, TERMINAL_COUNT, async (index) => {
+  await runBatches(200, TERMINAL_COUNT, async index => {
     await bus.request({
       id: `lane-create-${index}`,
       type: "command",
@@ -34,7 +38,7 @@ test("soak: lane/session churn and backlog pressure stay within baseline thresho
     });
   });
 
-  await runBatches(200, TERMINAL_COUNT, async (index) => {
+  await runBatches(200, TERMINAL_COUNT, async index => {
     const laneId = `lane-${index % TERMINAL_COUNT}`;
     const sessionId = `session-${index % 40}`;
     await bus.request({
@@ -51,8 +55,7 @@ test("soak: lane/session churn and backlog pressure stay within baseline thresho
   });
 
   for (let index = 0; index < 300; index++) {
-    const backlogDepth =
-      index % 75 === 0 ? 96 : index % 50 === 0 ? 80 : (index % 48) + 1;
+    const backlogDepth = index % 75 === 0 ? 96 : index % 50 === 0 ? 80 : (index % 48) + 1;
     await bus.publish({
       id: `terminal-output-${index}`,
       type: "event",
@@ -84,7 +87,7 @@ test("soak: lane/session churn and backlog pressure stay within baseline thresho
 
   expect(laneCreate?.p95 ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual(LANE_CREATE_P95_MS);
   expect(sessionRestore?.p95 ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual(
-    SESSION_RESTORE_P95_MS,
+    SESSION_RESTORE_P95_MS
   );
   expect(backlog?.p95 ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual(BACKLOG_DEPTH_P95);
 });

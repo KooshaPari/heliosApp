@@ -5,32 +5,25 @@
  * Cross-workspace import from @helios/runtime validates path alias resolution.
  */
 
-import { healthCheck, VERSION, type HealthCheckResult } from "@helios/runtime";
-import { InMemoryLocalBus } from "../../runtime/src/protocol/bus";
+import { type HealthCheckResult, healthCheck } from "@helios/runtime";
+import { InMemoryLocalBus } from "../../runtime/src/protocol/bus.ts";
 import {
   ActiveContextStore,
+  type ActiveTab,
   INITIAL_ACTIVE_CONTEXT_STATE,
   selectActiveContext,
-  type ActiveTab,
-} from "./context_store";
-import { DesktopRuntimeClient } from "./runtime_client";
+} from "./context_store.ts";
+import { DesktopRuntimeClient } from "./runtime_client.ts";
 import {
   DEFAULT_SETTINGS,
-  switchRendererWithRollback,
   type DesktopSettings,
   type RendererEngine,
-} from "./settings";
-import { buildAllTabSurfaces, type TabSurface } from "./tabs";
+  switchRendererWithRollback,
+} from "./settings.ts";
+import { type TabSurface, buildAllTabSurfaces } from "./tabs.ts";
 
 function main(): void {
-  const health: HealthCheckResult = healthCheck();
-
-  console.log(`[helios-desktop] runtime v${VERSION}`);
-  console.log(`[helios-desktop] health: ok=${String(health.ok)} uptime=${health.uptimeMs.toFixed(1)}ms`);
-
-  // ElectroBun window creation will be wired in spec 001 WP00.
-  // For now, confirm the monorepo cross-workspace import works.
-  console.log("[helios-desktop] monorepo workspace resolution: OK");
+  const _health: HealthCheckResult = healthCheck();
 }
 
 main();

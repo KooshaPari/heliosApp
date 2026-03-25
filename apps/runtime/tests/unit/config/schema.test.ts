@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
 import {
   SETTINGS_SCHEMA,
-  getDefault,
   getAllDefaults,
+  getDefault,
   validateValue,
 } from "../../../src/config/schema.js";
 
@@ -32,9 +32,7 @@ describe("getDefault", () => {
 describe("getAllDefaults", () => {
   it("returns an object with all schema keys", () => {
     const defaults = getAllDefaults();
-    expect(Object.keys(defaults).sort()).toEqual(
-      Object.keys(SETTINGS_SCHEMA).sort(),
-    );
+    expect(Object.keys(defaults).sort()).toEqual(Object.keys(SETTINGS_SCHEMA).sort());
   });
 });
 
@@ -83,11 +81,11 @@ describe("validateValue", () => {
 
   // NaN / Infinity
   it("rejects NaN", () => {
-    expect(validateValue("terminal.scrollback_lines", NaN).valid).toBe(false);
+    expect(validateValue("terminal.scrollback_lines", Number.NaN).valid).toBe(false);
   });
 
   it("rejects Infinity", () => {
-    expect(validateValue("terminal.scrollback_lines", Infinity).valid).toBe(false);
+    expect(validateValue("terminal.scrollback_lines", Number.POSITIVE_INFINITY).valid).toBe(false);
   });
 
   // Unknown key — valid (forward-compat) // FR-005

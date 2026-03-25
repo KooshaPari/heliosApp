@@ -6,17 +6,10 @@
  * SC-025-002: Provider crash in lane A must produce zero effect on lane B.
  */
 
-import { describe, it, expect } from "vitest";
-import type {
-  ProviderAdapter,
-  ProviderHealthStatus,
-  ProviderRegistration,
-} from "../adapter.js";
-import {
-  NormalizedProviderError,
-  normalizeError,
-} from "../errors.js";
-import { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import { describe, expect, it } from "vitest";
+import type { ProviderAdapter, ProviderHealthStatus } from "../adapter.js";
+import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import { normalizeError } from "../errors.js";
 
 /**
  * Mock isolated provider for testing lane isolation behavior.
@@ -25,7 +18,8 @@ import { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
  * For testing, we simulate the behavior with in-process state.
  */
 class MockIsolatedProvider
-  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput> {
+  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
+{
   private laneId: string;
   private initialized = false;
   private shouldCrash = false;
@@ -138,7 +132,7 @@ describe("Process-Level Isolation", () => {
       for (let i = 0; i < 100; i++) {
         try {
           await provider.execute({ prompt: `test-${i}` }, `corr-${i}`);
-        } catch (e) {
+        } catch (_e) {
           // Handle error
         }
       }
@@ -209,9 +203,7 @@ describe("Process-Level Isolation", () => {
 
       // Execute in all lanes
       const results = await Promise.all(
-        providers.map((p) =>
-          p.execute({ prompt: "test" }, "corr-123")
-        )
+        providers.map(p => p.execute({ prompt: "test" }, "corr-123"))
       );
 
       // All should succeed
@@ -237,9 +229,7 @@ describe("Process-Level Isolation", () => {
 
       // Execute in all lanes and track results
       const results = await Promise.allSettled(
-        providers.map((p, i) =>
-          p.execute({ prompt: `test-${i}` }, `corr-${i}`)
-        )
+        providers.map((p, i) => p.execute({ prompt: `test-${i}` }, `corr-${i}`))
       );
 
       // Check results: 1 and 3 should fail, others succeed
@@ -272,29 +262,27 @@ describe("Process-Level Isolation", () => {
       }
 
       // Get initial health
-      const initialHealth = await Promise.all(providers.map((p) => p.health()));
+      const initialHealth = await Promise.all(providers.map(p => p.health()));
 
       // Lane B crashes multiple times
       providers[1].setCrash(true);
       for (let i = 0; i < 5; i++) {
         try {
           await providers[1].execute({ prompt: "test" }, `corr-${i}`);
-        } catch (e) {
+        } catch (_e) {
           // Expected
         }
       }
 
       // Check health again
-      const finalHealth = await Promise.all(providers.map((p) => p.health()));
+      const finalHealth = await Promise.all(providers.map(p => p.health()));
 
       // Lanes A and C should be unaffected
       expect(finalHealth[0].failureCount).toBe(initialHealth[0].failureCount);
       expect(finalHealth[2].failureCount).toBe(initialHealth[2].failureCount);
 
       // Lane B should show increased failures
-      expect(finalHealth[1].failureCount).toBeGreaterThan(
-        initialHealth[1].failureCount
-      );
+      expect(finalHealth[1].failureCount).toBeGreaterThan(initialHealth[1].failureCount);
     });
   });
 
@@ -325,7 +313,7 @@ describe("Process-Level Isolation", () => {
       provider.setCrash(true);
       try {
         await provider.execute({ prompt: "test" }, "corr-123");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 

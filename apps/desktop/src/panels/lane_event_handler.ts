@@ -33,7 +33,7 @@ export class LaneEventHandler {
   private connectivityTimeoutId?: ReturnType<typeof setTimeout>;
   private rafId?: number | undefined;
   private lastSequenceNumbers: Map<string, number> = new Map();
-  private isConnected: boolean = true;
+  private isConnected = true;
 
   constructor(options: LaneEventHandlerOptions) {
     this.options = {
@@ -72,15 +72,15 @@ export class LaneEventHandler {
       this.handleOrphanDetectionCycle(event);
     };
 
-    this.subscriptions.set('lane.state.changed', stateChangedHandler);
-    this.subscriptions.set('lane.created', laneCreatedHandler);
-    this.subscriptions.set('lane.cleaned_up', laneCleanedHandler);
-    this.subscriptions.set('orphan.detection.cycle_completed', orphanCycleHandler);
+    this.subscriptions.set("lane.state.changed", stateChangedHandler);
+    this.subscriptions.set("lane.created", laneCreatedHandler);
+    this.subscriptions.set("lane.cleaned_up", laneCleanedHandler);
+    this.subscriptions.set("orphan.detection.cycle_completed", orphanCycleHandler);
 
-    this.options.bus.subscribe('lane.state.changed', stateChangedHandler);
-    this.options.bus.subscribe('lane.created', laneCreatedHandler);
-    this.options.bus.subscribe('lane.cleaned_up', laneCleanedHandler);
-    this.options.bus.subscribe('orphan.detection.cycle_completed', orphanCycleHandler);
+    this.options.bus.subscribe("lane.state.changed", stateChangedHandler);
+    this.options.bus.subscribe("lane.created", laneCreatedHandler);
+    this.options.bus.subscribe("lane.cleaned_up", laneCleanedHandler);
+    this.options.bus.subscribe("orphan.detection.cycle_completed", orphanCycleHandler);
   }
 
   private unsubscribeFromEvents(): void {
@@ -96,7 +96,9 @@ export class LaneEventHandler {
     const laneId = event.payload.laneId;
     const newState = event.payload.state;
 
-    if (!laneId || !newState) return;
+    if (!(laneId && newState)) {
+      return;
+    }
 
     // Check sequence number to prevent out-of-order updates
     const lastSeq = this.lastSequenceNumbers.get(laneId) || -1;
@@ -118,9 +120,11 @@ export class LaneEventHandler {
     this.recordEventReceived();
 
     const laneId = event.payload.laneId;
-    const name = event.payload.name || 'New Lane';
+    const name = event.payload.name || "New Lane";
 
-    if (!laneId) return;
+    if (!laneId) {
+      return;
+    }
 
     if (this.options.onLaneCreated) {
       this.options.onLaneCreated(laneId, name);
@@ -132,7 +136,9 @@ export class LaneEventHandler {
 
     const laneId = event.payload.laneId;
 
-    if (!laneId) return;
+    if (!laneId) {
+      return;
+    }
 
     if (this.options.onLaneCleaned) {
       this.options.onLaneCleaned(laneId);
@@ -179,7 +185,9 @@ export class LaneEventHandler {
     this.stopConnectivityMonitoring();
 
     this.connectivityTimeoutId = setTimeout(() => {
-      if (!this.isConnected) return;
+      if (!this.isConnected) {
+        return;
+      }
 
       this.isConnected = false;
       if (this.options.onBusConnectivityIssue) {
@@ -189,7 +197,9 @@ export class LaneEventHandler {
   }
 
   private scheduleRender(): void {
-    if (this.rafId) return;
+    if (this.rafId) {
+      return;
+    }
 
     this.rafId = requestAnimationFrame(() => {
       this.rafId = undefined;

@@ -1,11 +1,11 @@
 // T017 - Unit tests for lane registry (FR-008-001, NFR-008-003)
 
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import {
-  LaneRegistry,
   DuplicateLaneError,
-  LaneNotFoundError,
   LaneCapacityExceededError,
+  LaneNotFoundError,
+  LaneRegistry,
 } from "../../../src/lanes/registry.js";
 import type { LaneRecord } from "../../../src/lanes/registry.js";
 
@@ -32,10 +32,10 @@ describe("LaneRegistry (FR-008-001)", () => {
     reg.register(rec);
     const got = reg.get("r1");
     expect(got).toBeDefined();
-    expect(got!.laneId).toBe("r1");
+    expect(got?.laneId).toBe("r1");
     // Mutation of returned copy does not affect internal state
     got!.state = "closed";
-    expect(reg.get("r1")!.state).toBe("new");
+    expect(reg.get("r1")?.state).toBe("new");
   });
 
   test("duplicate registration throws DuplicateLaneError", () => {
@@ -63,7 +63,7 @@ describe("LaneRegistry (FR-008-001)", () => {
   test("update modifies record and sets updatedAt", () => {
     const reg = new LaneRegistry();
     reg.register(makeRecord({ laneId: "upd1", state: "new" }));
-    const before = reg.get("upd1")!.updatedAt;
+    const _before = reg.get("upd1")?.updatedAt;
     // Small delay to get different timestamp
     reg.update("upd1", { state: "provisioning" });
     const after = reg.get("upd1")!;
@@ -120,7 +120,7 @@ describe("LaneRegistry (FR-008-001)", () => {
     reg.register(makeRecord({ laneId: "act3", state: "running" }));
     const active = reg.getActive();
     expect(active.length).toBe(2);
-    expect(active.map((l) => l.laneId).sort()).toEqual(["act1", "act3"]);
+    expect(active.map(l => l.laneId).sort()).toEqual(["act1", "act3"]);
   });
 
   test("capacity limit enforced on active lanes (NFR-008-003)", () => {
@@ -128,9 +128,7 @@ describe("LaneRegistry (FR-008-001)", () => {
     reg.register(makeRecord({ laneId: "cap1", state: "ready" }));
     reg.register(makeRecord({ laneId: "cap2", state: "running" }));
     reg.register(makeRecord({ laneId: "cap3", state: "provisioning" }));
-    expect(() => reg.register(makeRecord({ laneId: "cap4" }))).toThrow(
-      LaneCapacityExceededError,
-    );
+    expect(() => reg.register(makeRecord({ laneId: "cap4" }))).toThrow(LaneCapacityExceededError);
   });
 
   test("closed lanes do not count toward capacity", () => {

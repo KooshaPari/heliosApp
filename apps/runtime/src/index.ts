@@ -5,18 +5,18 @@
  * the current test suite.
  */
 
-import { InMemoryLocalBus } from "./protocol/bus.js";
 import { createBoundaryDispatcher } from "./protocol/boundary_adapter.js";
+import { InMemoryLocalBus } from "./protocol/bus.js";
 import { METHODS } from "./protocol/methods.js";
 import type { LocalBusEnvelope } from "./protocol/types.js";
+import { RedactionEngine } from "./secrets/redaction-engine.js";
+import { getDefaultRules } from "./secrets/redaction-rules.js";
 import { RecoveryRegistry } from "./sessions/registry.js";
 import type {
   RecoveryBootstrapResult,
   RecoveryMetadata,
   WatchdogScanResult,
 } from "./sessions/types.js";
-import { RedactionEngine } from "./secrets/redaction-engine.js";
-import { getDefaultRules } from "./secrets/redaction-rules.js";
 
 /** Semantic version of the runtime package. */
 export const VERSION = "0.0.1" as const;
@@ -73,7 +73,7 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
   }
 
   if (Array.isArray(value)) {
-    return value.map((item) => redactStructuredValue(item));
+    return value.map(item => redactStructuredValue(item));
   }
 
   if (value && typeof value === "object") {
@@ -81,7 +81,7 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
       Object.entries(value as Record<string, unknown>).map(([entryKey, entryValue]) => [
         entryKey,
         redactStructuredValue(entryValue, entryKey),
-      ]),
+      ])
     );
   }
 
@@ -91,7 +91,7 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
 function redactPayload(
   engine: RedactionEngine,
   payload: Record<string, unknown>,
-  correlationId: string,
+  correlationId: string
 ): Record<string, unknown> {
   const structured = redactStructuredValue(payload) as Record<string, unknown>;
   const serialized = JSON.stringify(structured);
@@ -138,7 +138,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
       payload: redactPayload(
         redactionEngine,
         normalizePayload(envelope.payload),
-        envelope.correlation_id ?? envelope.id,
+        envelope.correlation_id ?? envelope.id
       ),
       error: null,
     });
@@ -153,7 +153,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
       payload: redactPayload(
         redactionEngine,
         normalizePayload(envelope.result ?? envelope.payload),
-        envelope.correlation_id ?? envelope.id,
+        envelope.correlation_id ?? envelope.id
       ),
       error: envelope.error ?? null,
     });
@@ -172,17 +172,23 @@ export function createRuntime(options: RuntimeOptions = {}) {
       lane_id:
         command.lane_id ??
         (typeof payload.lane_id === "string" ? payload.lane_id : undefined) ??
-        (typeof payload.id === "string" && command.method === "lane.create" ? payload.id : undefined) ??
+        (typeof payload.id === "string" && command.method === "lane.create"
+          ? payload.id
+          : undefined) ??
         (typeof result.lane_id === "string" ? result.lane_id : undefined),
       session_id:
         command.session_id ??
         (typeof payload.session_id === "string" ? payload.session_id : undefined) ??
-        (typeof payload.id === "string" && command.method === "session.attach" ? payload.id : undefined) ??
+        (typeof payload.id === "string" && command.method === "session.attach"
+          ? payload.id
+          : undefined) ??
         (typeof result.session_id === "string" ? result.session_id : undefined),
       terminal_id:
         command.terminal_id ??
         (typeof payload.terminal_id === "string" ? payload.terminal_id : undefined) ??
-        (typeof payload.id === "string" && command.method === "terminal.spawn" ? payload.id : undefined) ??
+        (typeof payload.id === "string" && command.method === "terminal.spawn"
+          ? payload.id
+          : undefined) ??
         (typeof result.terminal_id === "string" ? result.terminal_id : undefined),
       codex_session_id:
         typeof payload.codex_session_id === "string" ? payload.codex_session_id : undefined,
@@ -270,7 +276,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
             error: result.error?.code ?? "dispatch_error",
             details: result.error?.details ?? null,
           },
-          { status },
+          { status }
         );
       }
 
@@ -282,7 +288,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
 
   function exportAuditBundle(filter?: { correlation_id?: string }): RuntimeAuditBundle {
     const records = filter?.correlation_id
-      ? auditRecords.filter((record) => record.correlation_id === filter.correlation_id)
+      ? auditRecords.filter(record => record.correlation_id === filter.correlation_id)
       : [...auditRecords];
     return {
       count: records.length,
