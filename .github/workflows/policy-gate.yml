@@ -6,5 +6,6 @@ on:
 
 jobs:
   policy-gate:
+    name: policy-gate
     uses: ./.github/workflows/reusable-policy-gate.yml
     secrets: inherit
