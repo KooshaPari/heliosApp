@@ -56,9 +56,10 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-
         model: "claude-3-sonnet",
         timeout: 30000,
+        maxRetries: 3,
+        healthCheckIntervalMs: 30000,
       };
 
       await adapter.init(config);
@@ -70,22 +71,24 @@ describe("ACP Client Adapter", () => {
     it("should reject missing endpoint", async () => {
       const config = {
         baseUrl: "",
-        apiKey: "",
-
+        apiKey: "acp-key",
         model: "claude-3-sonnet",
         timeout: 30000,
+        maxRetries: 3,
+        healthCheckIntervalMs: 30000,
       };
 
       await expect(adapter.init(config)).rejects.toThrow(/init failed/i);
     });
 
-    it("should reject missing apiKeyRef", async () => {
+    it("should reject missing apiKey", async () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
-        apiKey: "acp-key",
-
+        apiKey: "",
         model: "claude-3-sonnet",
         timeout: 30000,
+        maxRetries: 3,
+        healthCheckIntervalMs: 30000,
       };
 
       await expect(adapter.init(config)).rejects.toThrow(/init failed/i);
@@ -95,9 +98,10 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-
         model: "",
         timeout: 30000,
+        maxRetries: 3,
+        healthCheckIntervalMs: 30000,
       };
 
       await expect(adapter.init(config)).rejects.toThrow(/init failed/i);
@@ -107,9 +111,10 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-
         model: "claude-3-sonnet",
         timeout: 30000,
+        maxRetries: 3,
+        healthCheckIntervalMs: 30000,
       };
 
       await adapter.init(config);
@@ -126,9 +131,10 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-
         model: "claude-3-sonnet",
         timeout: 30000,
+        maxRetries: 3,
+        healthCheckIntervalMs: 30000,
       };
       await adapter.init(config);
     });
@@ -148,9 +154,10 @@ describe("ACP Client Adapter", () => {
       await brokenAdapter.init({
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-
         model: "claude-3-sonnet",
         timeout: 30000,
+        maxRetries: 3,
+        healthCheckIntervalMs: 30000,
       });
 
       health = await brokenAdapter.health();
@@ -177,9 +184,10 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-
         model: "claude-3-sonnet",
         timeout: 30000,
+        maxRetries: 3,
+        healthCheckIntervalMs: 30000,
       };
       await adapter.init(config);
     });
@@ -241,9 +249,10 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-
         model: "claude-3-sonnet",
         timeout: 30000,
+        maxRetries: 3,
+        healthCheckIntervalMs: 30000,
       };
       await adapter.init(config);
     });
@@ -302,9 +311,10 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-
         model: "claude-3-sonnet",
         timeout: 30000,
+        maxRetries: 3,
+        healthCheckIntervalMs: 30000,
       };
       await adapter.init(config);
     });
@@ -348,9 +358,10 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-
         model: "claude-3-sonnet",
         timeout: 30000,
+        maxRetries: 3,
+        healthCheckIntervalMs: 30000,
       };
       await adapter.init(config);
     });
@@ -400,7 +411,6 @@ describe("ACP Client Adapter", () => {
       const config = {
         baseUrl: "http://localhost:8080/acp",
         apiKey: "acp-key",
-
         model: "claude-3-sonnet",
         timeout: 30000,
       };
@@ -446,7 +456,9 @@ describe("ACP Client Adapter", () => {
         apiKey: "acp-key",
 
         model: "claude-3-sonnet",
-        timeoutMs: 100, // Short timeout for timeout tests
+        timeout: 100, // Short timeout for timeout tests
+        maxRetries: 3,
+        healthCheckIntervalMs: 30000,
       };
       await adapter.init(config);
     });

@@ -200,9 +200,10 @@ describe("ProjectTab", () => {
 
       await tab.onContextChange(context);
       const state = tab.getState();
+      const expandedSections = state.expandedSections ?? [];
 
-      expect(state.expandedSections).toBeDefined();
-      expect(Array.isArray(state.expandedSections)).toBe(true);
+      expect(expandedSections).toBeDefined();
+      expect(Array.isArray(expandedSections)).toBe(true);
     });
   });
 
@@ -230,11 +231,12 @@ describe("ProjectTab", () => {
 
       await tab.onContextChange(context);
       const originalState = tab.getState();
+      const originalExpandedSections = originalState.expandedSections ?? [];
 
       const newTab = new ProjectTab();
       newTab.restoreState(originalState);
 
-      expect(newTab.getState().expandedSections).toEqual(originalState.expandedSections);
+      expect(newTab.getState().expandedSections ?? []).toEqual(originalExpandedSections);
     });
   });
 

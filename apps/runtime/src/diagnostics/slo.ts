@@ -1,6 +1,7 @@
-// FR-004, FR-010: SLO violation detection, rate-limited event emission, and periodic check loop.
+// FR-003, FR-004, FR-010: SLO definitions/checks, violation detection,
+// rate-limited event emission, and periodic check loop.
 
-import type { SLODefinition, SLOViolationEvent, PercentileBucket } from "./types.js";
+import type { PercentileBucket, SLODefinition, SLOViolationEvent } from "./types.js";
 import type { MetricsRegistry } from "./metrics.js";
 import { computePercentiles } from "./percentiles.js";
 
@@ -82,6 +83,40 @@ export function checkSLO(slo: SLODefinition, bucket: PercentileBucket): SLOCheck
 /** Function signature for publishing events to the bus. */
 export type BusPublishFn = (topic: string, payload: unknown) => void | Promise<void>;
 
+export const SLO_DEFINITIONS: readonly SLODefinition[] = Object.freeze([
+  { metric: "input-to-echo", percentile: "p50", threshold: 30, unit: "ms" },
+  { metric: "input-to-echo", percentile: "p95", threshold: 60, unit: "ms" },
+  { metric: "input-to-commit", percentile: "p50", threshold: 50, unit: "ms" },
+  { metric: "input-to-commit", percentile: "p95", threshold: 100, unit: "ms" },
+  { metric: "frame-time", percentile: "p95", threshold: 16.7, unit: "ms" },
+  { metric: "fps", percentile: "p50", threshold: 60, unit: "fps" },
+  { metric: "memory", percentile: "p95", threshold: 500, unit: "MB" },
+]);
+
+export interface SLOCheckResult {
+  readonly passed: boolean;
+  readonly actual: number;
+}
+
+export function getSLOsForMetric(metric: string): SLODefinition[] {
+  return SLO_DEFINITIONS.filter((definition) => definition.metric === metric);
+}
+
+export function checkSLO(
+  definition: SLODefinition,
+  stats: PercentileBucket,
+): SLOCheckResult {
+  if (stats.count === 0) {
+    return { passed: true, actual: 0 };
+  }
+
+  const actual = stats[definition.percentile];
+  const passed =
+    definition.unit === "fps" ? actual >= definition.threshold : actual <= definition.threshold;
+
+  return { passed, actual };
+}
+
 /**
  * Monitors registered metrics against SLO definitions, emitting rate-limited
  * violation events when thresholds are breached.
@@ -129,8 +164,8 @@ export class SLOMonitor {
         continue;
       }
 
-      const actual = stats[def.percentile];
-      if (actual <= def.threshold) {
+      const { actual, passed } = checkSLO(def, stats);
+      if (passed) {
         // Within SLO — no violation.
         continue;
       }

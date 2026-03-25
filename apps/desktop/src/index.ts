@@ -6,22 +6,21 @@
  */
 
 import { healthCheck, VERSION, type HealthCheckResult } from "@helios/runtime";
-import { InMemoryLocalBus } from "../../runtime/src/protocol/bus/emitter.js";
-import type { LocalBus } from "../../runtime/src/protocol/bus.js";
+import { InMemoryLocalBus } from "../../runtime/src/protocol/bus";
 import {
   ActiveContextStore,
-  selectActiveContext,
   INITIAL_ACTIVE_CONTEXT_STATE,
+  selectActiveContext,
   type ActiveTab,
-} from "./context_store.js";
-import { DesktopRuntimeClient } from "./runtime_client.js";
+} from "./context_store";
+import { DesktopRuntimeClient } from "./runtime_client";
 import {
-  type DesktopSettings,
   DEFAULT_SETTINGS,
-  type RendererEngine,
   switchRendererWithRollback,
-} from "./settings.js";
-import { type TabSurface, buildAllTabSurfaces } from "./tabs.js";
+  type DesktopSettings,
+  type RendererEngine,
+} from "./settings";
+import { buildAllTabSurfaces, type TabSurface } from "./tabs";
 
 function main(): void {
   const health: HealthCheckResult = healthCheck();

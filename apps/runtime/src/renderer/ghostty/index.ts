@@ -73,7 +73,9 @@ export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<stri
       stdout: "pipe",
       stderr: "ignore",
     });
-    const text = await new Response(proc.stdout).text();
+    const text = await new Response(
+      proc.stdout instanceof ReadableStream ? proc.stdout : null
+    ).text();
     await proc.exited;
     const trimmed = text.trim();
     return trimmed.length > 0 ? trimmed : "unknown";

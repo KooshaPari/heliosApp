@@ -38,11 +38,11 @@ export class MlxInferenceEngine implements InferenceEngine {
     if (request.maxTokens) args.push("--max-tokens", String(request.maxTokens));
 
     const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
-    const output = await new Response(proc.stdout).text();
+    const output = proc.stdout ? await new Response(proc.stdout).text() : "";
     const exitCode = await proc.exited;
 
     if (exitCode !== 0) {
-      const stderr = await new Response(proc.stderr).text();
+      const stderr = proc.stderr ? await new Response(proc.stderr).text() : "";
       throw new Error(`MLX inference failed: ${stderr}`);
     }
 

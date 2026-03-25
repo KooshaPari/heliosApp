@@ -1,6 +1,7 @@
-import type { AuditEvent } from "./event";
-import { AuditRingBuffer, type AuditFilter as RingBufferFilter } from "./ring-buffer";
-import { SQLiteAuditStore } from "./sqlite-store";
+import type { AuditEvent } from './event';
+import { AuditRingBuffer } from './ring-buffer';
+import type { AuditFilter as RingBufferFilter } from './ring-buffer';
+import { SQLiteAuditStore } from './sqlite-store';
 
 /**
  * Enhanced filter interface for ledger queries.
@@ -273,6 +274,10 @@ export class AuditLedger {
 
     if (filter.eventType) {
       rbFilter.eventType = Array.isArray(filter.eventType) ? filter.eventType[0] : filter.eventType;
+    }
+
+    if (filter.correlationId) {
+      rbFilter.correlationId = filter.correlationId;
     }
 
     if (filter.timeRange) {

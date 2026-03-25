@@ -1,5 +1,9 @@
-import { describe, expect, it } from "bun:test";
-import { RendererRegistry, DuplicateRendererError, RendererNotFoundError } from "../registry.js";
+import { describe, expect, it } from "vitest";
+import {
+  RendererRegistry,
+  DuplicateRendererError,
+  RendererNotFoundError,
+} from "../registry.js";
 import type { RendererAdapter, RendererState } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
 

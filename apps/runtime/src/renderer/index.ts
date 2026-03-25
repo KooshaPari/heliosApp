@@ -15,6 +15,7 @@ export type { RendererAdapter, RendererConfig, RenderSurface, RendererState } fr
 export type {
   RendererCapabilities,
   CapabilityDiff,
+  CapabilityComparison,
 } from "./capabilities.js";
 export { queryCapabilities, compareCapabilities } from "./capabilities.js";
 

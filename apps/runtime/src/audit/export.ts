@@ -1,5 +1,5 @@
-import type { AuditEvent } from "./event";
-import type { SessionSnapshot } from "./snapshot";
+import type { AuditEvent } from './event';
+import type { SessionSnapshot } from './snapshot';
 
 /**
  * Redaction rule for sensitive data masking.

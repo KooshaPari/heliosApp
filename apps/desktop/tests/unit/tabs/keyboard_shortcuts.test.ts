@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import {
-  KeyboardShortcuts,
-  type ShortcutAction,
-  resetKeyboardShortcuts,
-} from "../../../src/tabs/keyboard_shortcuts";
+import { KeyboardShortcuts, type ShortcutAction, resetKeyboardShortcuts } from "../../../src/tabs/keyboard_shortcuts";
 import * as path from "path";
 import { promises as fs } from "fs";
 import { tmpdir } from "os";
@@ -90,7 +86,12 @@ describe("KeyboardShortcuts", () => {
 
       shortcuts.handleKeyboardEvent(event);
 
-      expect(handledAction!).toBe("select-terminal");
+      expect(handledAction).not.toBeNull();
+      if (handledAction === null) {
+        throw new Error("Expected a shortcut action to be handled");
+      }
+      const expectedAction = handledAction;
+      expect<ShortcutAction>(expectedAction).toBe("select-terminal");
     });
 
     it("should support shortcut listeners", () => {

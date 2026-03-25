@@ -1,14 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import {
-  ContextPropagator,
-  resetContextPropagator,
-} from "../../../src/tabs/context_switch_propagation";
+import { ContextPropagator, resetContextPropagator } from "../../../src/tabs/context_switch_propagation";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
 import type { ActiveContext } from "../../../src/tabs/context_switch";
 
 describe("ContextPropagator", () => {
   let propagator: ContextPropagator;
-  let mockTabs: ReturnType<typeof createMockTabSurface>[] = [];
+  let mockTabs: Array<ReturnType<typeof createMockTabSurface>> = [];
 
   beforeEach(() => {
     resetContextPropagator();

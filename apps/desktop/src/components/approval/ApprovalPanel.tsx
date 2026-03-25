@@ -3,8 +3,8 @@
  * Displays pending approval requests and handles approval/rejection.
  */
 
-import { createSignal, For } from "solid-js";
-import type { ApprovalRequest } from "../../types/approval";
+import { createSignal, For } from 'solid-js';
+import type { ApprovalRequest } from '../../types/approval';
 
 interface ApprovalPanelProps {
   requests: ApprovalRequest[];

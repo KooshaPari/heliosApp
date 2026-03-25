@@ -255,7 +255,21 @@ describe("terminate", () => {
 });
 
 describe("sendSighup", () => {
-  it("records signal delivery result", () => {
+  it("records successful delivery", () => {
+    // Spawn a real child so SIGHUP has a valid target (not the test runner).
+    const pid = spawnShellProcess();
+    pidsToCleanup.push(pid);
+
+    const record = makeRecord({ pid });
+    const historyMap: SignalHistoryMap = new Map();
+    const bus = new InMemoryBusPublisher();
+    const envelope = sendSighup(record, historyMap, bus);
+    expect(envelope.outcome).toBe("delivered");
+    expect(envelope.signal).toBe("SIGHUP");
+    expect(historyMap.get(record.ptyId)?.length).toBe(1);
+  });
+
+  it("records failed delivery for dead process", () => {
     // Use a non-existent PID to avoid sending signals to the test process
     const record = makeRecord({ pid: 999999 });
     const historyMap: SignalHistoryMap = new Map();
