@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "lint": "biome check apps playwright.config.ts tsconfig.json package.json",
+    "lint": "oxlint apps/",
     "format": "biome format --write apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
     "test": "bun test apps/runtime/tests/unit scripts/tests/",
     "test:desktop": "bun test apps/desktop/tests/unit",
