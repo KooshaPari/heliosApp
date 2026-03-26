@@ -13,8 +13,6 @@
     "tsconfig*.json"
   ],
   "rules": {
-    "no-complexity": {
-      "level": "off"
-    }
+    "no-complexity": "off"
   }
 }
