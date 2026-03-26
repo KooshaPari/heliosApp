@@ -78,11 +78,8 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
 
     expect(
       brokenBootstrap?.issues.some(
-        (issue: {
-          state: string;
-          remediation?: string;
-          [key: string]: unknown;
-        }) => issue.state === "unrecoverable"
+        (issue: { state: string; remediation?: string; [key: string]: unknown }) =>
+          issue.state === "unrecoverable"
       )
     ).toBe(true);
 
@@ -121,18 +118,12 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
 
     const report = runtime.getOrphanReport();
     const recoverable = report.issues.filter(
-      (issue: {
-        state: string;
-        remediation?: string;
-        [key: string]: unknown;
-      }) => issue.state === "recoverable"
+      (issue: { state: string; remediation?: string; [key: string]: unknown }) =>
+        issue.state === "recoverable"
     );
     const unrecoverable = report.issues.filter(
-      (issue: {
-        state: string;
-        remediation?: string;
-        [key: string]: unknown;
-      }) => issue.state === "unrecoverable"
+      (issue: { state: string; remediation?: string; [key: string]: unknown }) =>
+        issue.state === "unrecoverable"
     );
 
     expect(report.issues.length).toBeGreaterThan(0);
@@ -140,20 +131,14 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     expect(unrecoverable.length).toBeGreaterThan(0);
     expect(
       report.issues.some(
-        (issue: {
-          state: string;
-          remediation?: string;
-          [key: string]: unknown;
-        }) => issue.remediation === "cleanup"
+        (issue: { state: string; remediation?: string; [key: string]: unknown }) =>
+          issue.remediation === "cleanup"
       )
     ).toBe(true);
     expect(
       report.issues.some(
-        (issue: {
-          state: string;
-          remediation?: string;
-          [key: string]: unknown;
-        }) => issue.remediation === "reconcile"
+        (issue: { state: string; remediation?: string; [key: string]: unknown }) =>
+          issue.remediation === "reconcile"
       )
     ).toBe(true);
 
@@ -221,11 +206,8 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
     });
     expect(auditBundle.count).toBeGreaterThan(0);
     const redactedRecord = auditBundle.records.find(
-      (record: {
-        type?: string;
-        payload?: Record<string, unknown>;
-        [key: string]: unknown;
-      }) => record.type === "command"
+      (record: { type?: string; payload?: Record<string, unknown>; [key: string]: unknown }) =>
+        record.type === "command"
     );
     expect(redactedRecord?.payload?.api_key).toBe("[REDACTED]");
 

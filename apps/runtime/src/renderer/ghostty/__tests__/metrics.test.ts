@@ -3,8 +3,8 @@
  */
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { GhosttyMetrics } from "../metrics.js";
 import type { MetricsSnapshot } from "../metrics.js";
+import { GhosttyMetrics } from "../metrics.js";
 
 describe("GhosttyMetrics", () => {
   let metrics: GhosttyMetrics;

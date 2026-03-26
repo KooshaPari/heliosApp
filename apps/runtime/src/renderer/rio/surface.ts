@@ -37,12 +37,7 @@ export class RioSurface {
   /**
    * Update the render region bounds.
    */
-  resize(bounds: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }): void {
+  resize(bounds: { x: number; y: number; width: number; height: number }): void {
     if (!this._surface) {
       return;
     }

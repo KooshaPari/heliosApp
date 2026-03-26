@@ -5,8 +5,8 @@
 
 import type { PolicyRuleSet } from "./rules";
 import { PolicyStorage } from "./storage";
-import { PolicyClassification } from "./types";
 import type { CommandContext, PolicyEvaluationResult } from "./types";
+import { PolicyClassification } from "./types";
 
 /**
  * Policy evaluation engine for commands.

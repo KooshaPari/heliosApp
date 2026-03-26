@@ -157,12 +157,7 @@ export class GhosttySurface {
    *
    * @param bounds - New pixel-space bounding box.
    */
-  resize(bounds: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }): void {
+  resize(bounds: { x: number; y: number; width: number; height: number }): void {
     if (!this._bound || this._surface === undefined) {
       return;
     }

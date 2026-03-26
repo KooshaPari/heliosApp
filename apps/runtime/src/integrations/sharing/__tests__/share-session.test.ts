@@ -9,7 +9,7 @@
 
 import { beforeEach, describe, expect, it } from "bun:test";
 import { InMemoryLocalBus } from "../../../protocol/bus.js";
-import { TmateAdapter, UptermAdapter, getBackendAdapter } from "../adapters.js";
+import { getBackendAdapter, TmateAdapter, UptermAdapter } from "../adapters.js";
 import { type PolicyGate, ShareSessionManager } from "../share-session.js";
 
 /**

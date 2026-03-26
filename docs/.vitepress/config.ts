@@ -46,12 +46,8 @@ export default createPhenotypeConfig({
         ],
       },
     ],
-    "/api/": [
-      { text: "API", items: [{ text: "Overview", link: "/api/" }] },
-    ],
-    "/roadmap/": [
-      { text: "Roadmap", items: [{ text: "Overview", link: "/roadmap/" }] },
-    ],
+    "/api/": [{ text: "API", items: [{ text: "Overview", link: "/api/" }] }],
+    "/roadmap/": [{ text: "Roadmap", items: [{ text: "Overview", link: "/roadmap/" }] }],
     "/": [
       {
         text: "Quick Links",

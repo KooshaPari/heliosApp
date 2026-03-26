@@ -4,12 +4,12 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { LaneManager, _resetIdCounter } from "../../../src/lanes/index.js";
+import { _resetIdCounter, LaneManager } from "../../../src/lanes/index.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 
 async function runGit(args: string[], cwd: string): Promise<string> {
   const proc = Bun.spawn(["git", ...args], {
-    // @ts-ignore
+    // @ts-expect-error
     cwd,
     stdout: "pipe",
     stderr: "pipe",

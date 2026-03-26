@@ -12,7 +12,7 @@ const ROOT = resolve(import.meta.dir, "../../../..");
 
 function readJson(relativePath: string): unknown {
   const fullPath = resolve(ROOT, relativePath);
-  // @ts-ignore - Bun.file exists at runtime
+  // @ts-expect-error - Bun.file exists at runtime
   return JSON.parse((Bun.file(fullPath) as { text(): string }).text() as unknown as string);
 }
 
@@ -65,7 +65,7 @@ function stripJsonComments(input: string): string {
 
 async function readJsonAsync(relativePath: string): Promise<Record<string, unknown>> {
   const fullPath = resolve(ROOT, relativePath);
-  // @ts-ignore - Bun.file exists at runtime
+  // @ts-expect-error - Bun.file exists at runtime
   const text = await (Bun.file(fullPath) as { text(): Promise<string> }).text();
   return JSON.parse(stripJsonComments(text)) as Record<string, unknown>;
 }
@@ -79,7 +79,7 @@ describe("workspace configuration", () => {
   });
 
   test("bunfig.toml exists and contains install settings", async () => {
-    // @ts-ignore - Bun.file exists at runtime
+    // @ts-expect-error - Bun.file exists at runtime
     const content = await (
       Bun.file(resolve(ROOT, "bunfig.toml")) as { text(): Promise<string> }
     ).text();
@@ -173,7 +173,7 @@ describe("workspace dependency graph", () => {
 
 describe("lint suppression directives", () => {
   test("no @ts-ignore or @ts-expect-error in source files", async () => {
-    // @ts-ignore - Bun.Glob exists at runtime
+    // @ts-expect-error - Bun.Glob exists at runtime
     const glob = new (Bun as { Glob: new (s: string) => { scan: Function } }).Glob("**/*.ts");
     const suppressionPattern = /@ts-ignore|@ts-expect-error/;
 
@@ -188,7 +188,7 @@ describe("lint suppression directives", () => {
         if (path.includes("__tests__") || path.includes(".test.") || path.includes(".spec.")) {
           continue;
         }
-        // @ts-ignore - Bun.file exists at runtime
+        // @ts-expect-error - Bun.file exists at runtime
         const content = await (Bun.file(path) as { text(): Promise<string> }).text();
         const relativePath = path.replace(`${ROOT}/`, "");
         expect(

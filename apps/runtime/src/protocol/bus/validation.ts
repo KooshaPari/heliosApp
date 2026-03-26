@@ -25,5 +25,5 @@ export function isEventEnvelope(val: unknown): val is EventEnvelope {
 }
 
 export function hasTopLevelDataField(envelope: Record<string, unknown>): boolean {
-  return Object.prototype.hasOwnProperty.call(envelope, "data");
+  return Object.hasOwn(envelope, "data");
 }

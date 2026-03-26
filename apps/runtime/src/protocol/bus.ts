@@ -84,7 +84,7 @@ const START_TOPICS = new Set([
 ]);
 
 const hasTopLevelDataField = (envelope: LocalBusEnvelope): boolean =>
-  Object.prototype.hasOwnProperty.call(envelope, "data");
+  Object.hasOwn(envelope, "data");
 
 export class InMemoryLocalBus implements LocalBus {
   private readonly eventLog: LocalBusEnvelope[] = [];

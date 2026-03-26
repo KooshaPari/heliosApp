@@ -27,6 +27,13 @@
     "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["hexagonal-architecture", "ports-and-adapters", "template", "phenotype"],
-  "files": ["dist"]
+  "keywords": [
+    "hexagonal-architecture",
+    "ports-and-adapters",
+    "template",
+    "phenotype"
+  ],
+  "files": [
+    "dist"
+  ]
 }

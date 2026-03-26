@@ -5,8 +5,12 @@
  * Cross-workspace import from @helios/runtime validates path alias resolution.
  */
 
-import { type HealthCheckResult, healthCheck } from "@helios/runtime";
-import { InMemoryLocalBus, type LocalBus } from "@helios/runtime";
+import {
+  type HealthCheckResult,
+  healthCheck,
+  InMemoryLocalBus,
+  type LocalBus,
+} from "@helios/runtime";
 import {
   ActiveContextStore,
   type ActiveTab,
@@ -20,7 +24,7 @@ import {
   type RendererEngine,
   switchRendererWithRollback,
 } from "./settings";
-import { type TabSurface, buildAllTabSurfaces } from "./tabs";
+import { buildAllTabSurfaces, type TabSurface } from "./tabs";
 
 function main(): void {
   const _health: HealthCheckResult = healthCheck();

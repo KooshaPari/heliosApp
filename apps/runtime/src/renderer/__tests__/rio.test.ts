@@ -6,7 +6,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import type { RenderSurface, RendererConfig } from "../adapter.js";
+import type { RendererConfig, RenderSurface } from "../adapter.js";
 import { FeatureFlagDisabledError, RioBackend } from "../rio/backend.js";
 import { RioCapabilities } from "../rio/capabilities.js";
 import { isRioEnabled } from "../rio/index.js";

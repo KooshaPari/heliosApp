@@ -7,8 +7,8 @@ import { InMemoryLocalBus } from "./protocol/bus.js";
 import type { LocalBusEnvelope } from "./protocol/types.js";
 
 export { InMemoryAuditSink } from "./audit/sink.js";
-export { InMemoryLocalBus } from "./protocol/bus.js";
 export type { LocalBus } from "./protocol/bus.js";
+export { InMemoryLocalBus } from "./protocol/bus.js";
 
 export const VERSION = "0.1.1" as const;
 

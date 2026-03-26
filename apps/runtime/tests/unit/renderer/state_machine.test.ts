@@ -3,12 +3,12 @@
  * @see FR-010-003
  */
 import { describe, expect, it } from "bun:test";
+import type { RendererEvent } from "../../../src/renderer/state_machine.js";
 import {
   InvalidRendererTransitionError,
   RendererStateMachine,
   transition,
 } from "../../../src/renderer/state_machine.js";
-import type { RendererEvent } from "../../../src/renderer/state_machine.js";
 
 describe("RendererStateMachine", () => {
   it("starts in uninitialized state", () => {
@@ -151,15 +151,11 @@ describe("RendererStateMachine", () => {
   it("limits history to 10 entries", () => {
     const sm = new RendererStateMachine();
     // Create many transitions by cycling through states
-    for (let i = 0; i < 6; i++) {
-      sm.transition("init");
-      sm.transition("init_failure");
-      sm.transition("recovery_attempt");
-      sm.transition("init_failure");
-      sm.transition("give_up");
-      // Reset: stopped has no transitions, so create new SM
-      break;
-    }
+    sm.transition("init");
+    sm.transition("init_failure");
+    sm.transition("recovery_attempt");
+    sm.transition("init_failure");
+    sm.transition("give_up");
     // Do enough transitions to exceed 10
     const sm2 = new RendererStateMachine();
     sm2.transition("init");

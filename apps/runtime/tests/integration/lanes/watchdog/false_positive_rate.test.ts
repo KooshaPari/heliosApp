@@ -3,8 +3,8 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
 import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import { ResourceClassifier } from "../../../../src/lanes/watchdog/resource_classifier.js";
 import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
+import { ResourceClassifier } from "../../../../src/lanes/watchdog/resource_classifier.js";
 import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
 
 describe("False Positive Rate", () => {

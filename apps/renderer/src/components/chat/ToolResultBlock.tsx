@@ -1,5 +1,4 @@
-import { type Component, createSignal } from "solid-js";
-import { Show } from "solid-js";
+import { type Component, createSignal, Show } from "solid-js";
 import type { Message } from "../../../../runtime/src/types/conversation";
 
 type ToolResultBlockProps = { message: Message };
@@ -18,7 +17,8 @@ export const ToolResultBlock: Component<ToolResultBlockProps> = props => {
         overflow: "hidden",
       }}
     >
-      <div
+      <button
+        type="button"
         onClick={() => setExpanded(!expanded())}
         style={{
           display: "flex",
@@ -29,12 +29,15 @@ export const ToolResultBlock: Component<ToolResultBlockProps> = props => {
           cursor: "pointer",
           "font-size": "13px",
           color: isError() ? "#f38ba8" : "#a6e3a1",
+          border: "none",
+          width: "100%",
+          "text-align": "left",
         }}
       >
         <span>{isError() ? "\u274C" : "\u2705"}</span>
         <span style={{ flex: "1" }}>{isError() ? "Error" : "Result"}</span>
         <span>{expanded() ? "\u25B2" : "\u25BC"}</span>
-      </div>
+      </button>
       <Show when={expanded()}>
         <div
           style={{

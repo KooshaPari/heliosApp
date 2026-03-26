@@ -5,7 +5,6 @@ import { validateEnvelope } from "../validator.js";
 import { isStartTopic, isTerminalTopic, resolveExpectedStartTopic } from "./lifecycle.js";
 import { MetricsRecorder } from "./metrics.js";
 import {
-  type RequestHandlerContext,
   handleLaneAttach,
   handleLaneCreate,
   handleRendererCapabilities,
@@ -13,6 +12,7 @@ import {
   handleSessionAttach,
   handleTerminalInput,
   handleTerminalSpawn,
+  type RequestHandlerContext,
 } from "./request-handlers.js";
 import type {
   AuditRecord,

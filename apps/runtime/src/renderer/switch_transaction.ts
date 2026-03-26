@@ -10,8 +10,8 @@
  * @see FR-010-008, FR-010-009, SC-010-002
  */
 
-import type { RenderSurface, RendererAdapter, RendererConfig } from "./adapter.js";
-import { type TerminalContext, executeHotSwap } from "./hot_swap.js";
+import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.js";
+import { executeHotSwap, type TerminalContext } from "./hot_swap.js";
 import type { RendererEventBus } from "./index.js";
 import { executeRestartWithRestore } from "./restart_restore.js";
 import { executeRollback } from "./rollback.js";

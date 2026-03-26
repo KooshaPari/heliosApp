@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
+import type { LaneRecord } from "../../src/lanes/registry.js";
 import {
   DuplicateLaneError,
   LaneCapacityExceededError,
   LaneNotFoundError,
   LaneRegistry,
 } from "../../src/lanes/registry.js";
-import type { LaneRecord } from "../../src/lanes/registry.js";
 
 function makeRecord(overrides: Partial<LaneRecord> = {}): LaneRecord {
   const now = new Date().toISOString();

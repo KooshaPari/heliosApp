@@ -175,7 +175,9 @@ export class PolicyStorage {
 
     // Set new timer
     const timer = setTimeout(() => {
-      this.changeCallbacks.forEach(cb => cb(workspaceId, rules));
+      for (const cb of this.changeCallbacks) {
+        cb(workspaceId, rules);
+      }
       this.debounceTimers.delete(workspaceId);
     }, 100); // Debounce 100ms
 

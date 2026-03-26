@@ -4,9 +4,9 @@
  * Detects and reports all forms of quality gate suppression directives
  */
 
-import { readFileSync, readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { type GateFinding, createGateReport, writeGateReport } from "./gate-report";
+import { createGateReport, type GateFinding, writeGateReport } from "./gate-report";
 
 const REPORT_OUTPUT = ".gate-reports/gate-bypass-detect.json";
 

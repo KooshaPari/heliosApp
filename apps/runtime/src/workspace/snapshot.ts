@@ -150,4 +150,4 @@ export async function recoverFromSnapshot(dataDir: string): Promise<Workspace[] 
   return parsed.workspaces;
 }
 
-export { atomicWrite, computeChecksum, SNAPSHOT_FILE, PRIMARY_FILE };
+export { atomicWrite, computeChecksum, PRIMARY_FILE, SNAPSHOT_FILE };

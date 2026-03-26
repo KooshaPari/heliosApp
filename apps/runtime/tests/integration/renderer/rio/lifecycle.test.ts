@@ -7,10 +7,10 @@
 
 import { beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import type {
-  RenderSurface,
   RendererAdapter,
   RendererConfig,
   RendererState,
+  RenderSurface,
 } from "../../../../src/renderer/adapter.js";
 import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
 import { RendererRegistry } from "../../../../src/renderer/registry.js";

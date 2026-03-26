@@ -6,7 +6,7 @@ import * as path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
 import { LaneNotFoundError, type LaneRecord, LaneRegistry } from "./registry.js";
-import { SharedLaneCleanupError, attachAgent, detachAgent, shareLane } from "./sharing.js";
+import { attachAgent, detachAgent, SharedLaneCleanupError, shareLane } from "./sharing.js";
 import { type LaneState, recordTransition, transition, withLaneLock } from "./state_machine.js";
 import { provisionWorktree, reconcileOrphanedWorktrees, removeWorktree } from "./worktree.js";
 
@@ -548,42 +548,42 @@ export class LaneManager {
   }
 }
 
-// Re-export public types
 export {
-  LaneRegistry,
-  type LaneRecord,
-  LaneNotFoundError,
-} from "./registry.js";
-export type { LaneState, LaneEvent } from "./state_machine.js";
-export {
-  InvalidLaneTransitionError,
-  transition,
-  withLaneLock,
-  getTransitionHistory,
-} from "./state_machine.js";
-export { LaneClosedError, SharedLaneCleanupError } from "./sharing.js";
-export {
-  provisionWorktree,
-  removeWorktree,
-  reconcileOrphanedWorktrees,
-  WorktreeProvisionError,
-  WorktreeCleanupError,
-  computeWorktreePath,
-  computeBranchName,
-  type WorktreeOptions,
-  type WorktreeResult,
-  type ReconciliationResult,
-} from "./worktree.js";
-export {
+  _resetParIdCounter,
+  type ExecResult,
+  ExecTimeoutError,
+  LaneNotReadyError,
+  type ParBinding,
   ParManager,
+  type ParManagerOptions,
   ParNotFoundError,
   ParSpawnError,
-  LaneNotReadyError,
-  ExecTimeoutError,
-  _resetParIdCounter,
-  type ParBinding,
-  type ExecResult,
-  type ParManagerOptions,
   type SpawnFn,
   type SpawnResult,
 } from "./par.js";
+// Re-export public types
+export {
+  LaneNotFoundError,
+  type LaneRecord,
+  LaneRegistry,
+} from "./registry.js";
+export { LaneClosedError, SharedLaneCleanupError } from "./sharing.js";
+export type { LaneEvent, LaneState } from "./state_machine.js";
+export {
+  getTransitionHistory,
+  InvalidLaneTransitionError,
+  transition,
+  withLaneLock,
+} from "./state_machine.js";
+export {
+  computeBranchName,
+  computeWorktreePath,
+  provisionWorktree,
+  type ReconciliationResult,
+  reconcileOrphanedWorktrees,
+  removeWorktree,
+  WorktreeCleanupError,
+  type WorktreeOptions,
+  WorktreeProvisionError,
+  type WorktreeResult,
+} from "./worktree.js";

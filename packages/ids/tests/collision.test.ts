@@ -1,8 +1,8 @@
 // FR-004 — Collision resistance test
 // Generates 10M IDs across 8 concurrent contexts and asserts zero collisions.
 import { describe, expect, test } from "bun:test";
-import { generateId, validateId } from "../src/index.js";
 import type { EntityType } from "../src/index.js";
+import { generateId, validateId } from "../src/index.js";
 
 const TOTAL_IDS = 10_000_000;
 const CONCURRENCY = 8;
