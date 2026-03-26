@@ -437,21 +437,21 @@ if (import.meta.main) {
   const files = args.filter((arg: string) => !arg.startsWith("--"));
 
   if (files.length === 0) {
-    process.exit(1);
+    process.exitCode = 1;
+  } else {
+    runComplianceChecks(files)
+      .then(result => {
+        if (format === "json") {
+          console.log(formatJson(result));
+        } else {
+          console.log(formatTable(result));
+        }
+        process.exitCode = result.passed ? 0 : 1;
+      })
+      .catch(_err => {
+        process.exitCode = 1;
+      });
   }
-
-  runComplianceChecks(files)
-    .then(result => {
-      if (format === "json") {
-        console.log(formatJson(result));
-      } else {
-        console.log(formatTable(result));
-      }
-      process.exit(result.passed ? 0 : 1);
-    })
-    .catch(_err => {
-      process.exit(1);
-    });
 }
 
-export { type CheckResult, type Finding, runComplianceChecks };
+export { runComplianceChecks, type CheckResult, type Finding };
