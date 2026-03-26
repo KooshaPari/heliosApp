@@ -1,4 +1,5 @@
 name: Compliance Check
+name: Compliance Check
 
 on:
   pull_request:
@@ -55,11 +56,11 @@ jobs:
         continue-on-error: true
         run: |
           FILES='${{ steps.files.outputs.files }}'
-          FILES_ARRAY=$(echo "$FILES" | jq -r '.[]')
+          FILES_ARRAY=$(echo "$FILES" | jq -r '.[]' | tr '\n' ' ')
           if [ -z "$FILES_ARRAY" ]; then
             echo '{"passed":true,"findings":[],"timestamp":"'"$(date -Iseconds)"'"}' > compliance-result.json
           else
-            bun run scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>compliance-stderr.log
+            bun scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>compliance-stderr.log
           fi
           cat compliance-result.json
           if [ -s compliance-stderr.log ]; then
@@ -142,4 +143,3 @@ jobs:
             echo "Compliance check FAILED"
             exit 1
           fi
-
