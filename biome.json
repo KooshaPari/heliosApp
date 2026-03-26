@@ -1,15 +1,19 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.9/schema.json",
   "files": {
-    "ignore": [
-      "node_modules/**",
-      "docs/.vitepress/dist/**",
-      "docs/.generated/**",
-      ".worktrees/**",
-      "kitty-specs/**",
-      "agileplus/**",
-      "docs/sessions/**",
-      "tsconfig*.json"
+    "includes": [
+      "**",
+      "!node_modules",
+      "!.archive",
+      "!docs/.vitepress/dist",
+      "!docs/.generated",
+      "!.worktrees",
+      "!kitty-specs",
+      "!agileplus",
+      "!docs/sessions",
+      "!tsconfig*.json",
+      "!all_prs.json",
+      "!pr_details.json"
     ]
   },
   "formatter": {
@@ -23,7 +27,7 @@
     "rules": {
       "recommended": true,
       "suspicious": {
-        "all": true,
+        "recommended": true,
         "noExplicitAny": "off",
         "useAwait": "warn",
         "noEmptyBlockStatements": "warn",
@@ -32,7 +36,7 @@
         "noAssignInExpressions": "warn"
       },
       "correctness": {
-        "all": true,
+        "recommended": true,
         "noNodejsModules": "off",
         "useImportExtensions": "off",
         "noUndeclaredVariables": "off",
@@ -40,11 +44,10 @@
         "useHookAtTopLevel": "warn"
       },
       "style": {
-        "all": true,
+        "recommended": true,
         "useNamingConvention": "off",
         "noNonNullAssertion": "warn",
         "noParameterProperties": "off",
-        "noNamespaceImport": "warn",
         "noDefaultExport": "off",
         "useFilenamingConvention": "off",
         "noDoneCallback": "warn",
@@ -54,13 +57,13 @@
         "useConst": "warn"
       },
       "complexity": {
-        "all": true,
+        "recommended": true,
         "noExcessiveCognitiveComplexity": "warn",
         "noVoid": "warn",
         "noForEach": "warn"
       },
       "security": {
-        "all": true
+        "recommended": true
       },
       "a11y": {
         "useButtonType": "warn",
@@ -83,9 +86,7 @@
   },
   "overrides": [
     {
-      "include": [
-        "apps/desktop/src/runtime_client.ts"
-      ],
+      "includes": ["apps/desktop/src/runtime_client.ts"],
       "linter": {
         "rules": {
           "style": {

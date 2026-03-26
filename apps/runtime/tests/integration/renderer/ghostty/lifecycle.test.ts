@@ -8,7 +8,7 @@
  */
 
 import { afterEach, beforeAll, describe, expect, test } from "bun:test";
-import type { RenderSurface, RendererConfig } from "../../../../src/renderer/adapter.js";
+import type { RendererConfig, RenderSurface } from "../../../../src/renderer/adapter.js";
 import { GhosttyBackend } from "../../../../src/renderer/ghostty/backend.js";
 import { isGhosttyAvailable } from "../../../../src/renderer/ghostty/index.js";
 import { RendererRegistry } from "../../../../src/renderer/registry.js";

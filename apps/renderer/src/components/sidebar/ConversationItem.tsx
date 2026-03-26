@@ -29,7 +29,8 @@ function relativeTime(date: Date): string {
 
 export const ConversationItem: Component<ConversationItemProps> = props => {
   return (
-    <div
+    <button
+      type="button"
       onClick={() => props.onClick(props.id)}
       style={{
         padding: "10px 14px",
@@ -39,6 +40,9 @@ export const ConversationItem: Component<ConversationItemProps> = props => {
         "border-radius": "0 6px 6px 0",
         transition: "background-color 0.15s ease",
         "margin-bottom": "2px",
+        border: "none",
+        width: "100%",
+        "text-align": "left",
       }}
     >
       <div
@@ -62,6 +66,6 @@ export const ConversationItem: Component<ConversationItemProps> = props => {
       >
         {relativeTime(props.updatedAt)}
       </div>
-    </div>
+    </button>
   );
 };

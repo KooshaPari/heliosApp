@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { InMemoryBusPublisher, NoOpBusPublisher, emitPtyEvent } from "../events.js";
 import type { BusPublisher, PtyBusEvent, PtyEventCorrelation } from "../events.js";
+import { emitPtyEvent, InMemoryBusPublisher, NoOpBusPublisher } from "../events.js";
 
 describe("emitPtyEvent", () => {
   const correlation: PtyEventCorrelation = {

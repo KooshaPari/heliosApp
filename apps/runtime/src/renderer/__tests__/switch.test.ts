@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import type { RenderSurface, RendererAdapter, RendererConfig, RendererState } from "../adapter.js";
+import type { RendererAdapter, RendererConfig, RendererState, RenderSurface } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
 import type { RendererEventBus, RendererLifecycleEvent } from "../index.js";
 import { RendererRegistry } from "../registry.js";

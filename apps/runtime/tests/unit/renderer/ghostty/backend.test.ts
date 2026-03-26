@@ -8,7 +8,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import type { RenderSurface, RendererConfig } from "../../../../src/renderer/adapter.js";
+import type { RendererConfig, RenderSurface } from "../../../../src/renderer/adapter.js";
 import {
   GhosttyAlreadyInitializedError,
   GhosttyBackend,

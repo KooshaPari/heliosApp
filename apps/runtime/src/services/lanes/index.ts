@@ -14,75 +14,68 @@
  */
 
 // Full Reconciliation Result
-export type { FullReconciliationResult } from "../../lanes/index.js";
-
-// Errors
-export { NotImplementedError } from "../../lanes/index.js";
-
 // PTY Handle and Manager interfaces
+// Lane Bus Event Topic
+// Lane Manager options and main class
+// Lane state and events
 export type {
+  FullReconciliationResult,
+  LaneBusEventTopic,
+  LaneEvent,
+  LaneManagerOptions,
+  LaneState,
   PtyHandle,
   PtyManager,
 } from "../../lanes/index.js";
-
-// Lane Bus Event Topic
-export type { LaneBusEventTopic } from "../../lanes/index.js";
-
+// Errors
 // Lane Manager utilities
-export { _resetIdCounter } from "../../lanes/index.js";
-
-// Lane Manager options and main class
-export type { LaneManagerOptions } from "../../lanes/index.js";
-export { LaneManager } from "../../lanes/index.js";
-
-// Lane state and events
-export type { LaneState, LaneEvent } from "../../lanes/index.js";
+export { _resetIdCounter, LaneManager, NotImplementedError } from "../../lanes/index.js";
 
 // Registry
 export type { LaneRecord } from "../../lanes/registry.js";
 export {
   DuplicateLaneError,
-  LaneNotFoundError,
   LaneCapacityExceededError,
+  LaneNotFoundError,
   LaneRegistry,
 } from "../../lanes/registry.js";
 
 // Sharing
 export {
+  attachAgent,
+  detachAgent,
+  forceDetachAll,
   LaneClosedError,
   SharedLaneCleanupError,
   type ShareResult,
   shareLane,
-  attachAgent,
-  detachAgent,
-  forceDetachAll,
 } from "../../lanes/sharing.js";
 
 // State Machine
 export {
-  InvalidLaneTransitionError,
-  transition,
-  recordTransition,
-  getTransitionHistory,
   clearTransitionHistory,
+  getTransitionHistory,
+  InvalidLaneTransitionError,
+  recordTransition,
+  transition,
   withLaneLock,
 } from "../../lanes/state_machine.js";
 
 // Worktree
 export type {
+  ReconciliationResult,
+  WorktreeLatencyMetrics,
   WorktreeOptions,
   WorktreeResult,
-  WorktreeLatencyMetrics,
-  ReconciliationResult,
 } from "../../lanes/worktree.js";
 export {
-  WorktreeProvisionError,
-  WorktreeCleanupError,
-  computeWorktreePath,
   computeBranchName,
+  computeWorktreePath,
   lastMetrics,
-  resetMetrics,
   provisionWorktree,
-  removeWorktree,
   reconcileOrphanedWorktrees,
+  removeWorktree,
+  resetMetrics,
+  WorktreeCleanupError,
+  WorktreeProvisionError,
 } from "../../lanes/worktree.js";

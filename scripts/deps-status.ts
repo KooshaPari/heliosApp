@@ -196,7 +196,7 @@ async function generateReport(jsonFormat: boolean): Promise<void> {
       }
     }
 
-    const daysSince = daysSince(dep.lastUpdated);
+    const elapsedDays = daysSince(dep.lastUpdated);
     let status: "up-to-date" | "upgrade-available" | "stale" | "error";
 
     if (latest === null) {
@@ -207,7 +207,7 @@ async function generateReport(jsonFormat: boolean): Promise<void> {
       status = "upgrade-available";
     }
 
-    if (daysSince > 30) {
+    if (elapsedDays > 30) {
       status = "stale";
     }
 
@@ -216,7 +216,7 @@ async function generateReport(jsonFormat: boolean): Promise<void> {
       currentPin: dep.currentPin,
       latestAvailable: latest,
       channel: dep.channel,
-      daysSinceUpdate: daysSince,
+      daysSinceUpdate: elapsedDays,
       status,
     });
   }

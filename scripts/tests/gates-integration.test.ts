@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { type GateFinding, createGateReport } from "../gate-report";
+import { createGateReport, type GateFinding } from "../gate-report";
 
 describe("Gate Integration Tests", () => {
   // Coverage Gate Tests

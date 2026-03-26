@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from "bun:test";
-import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
+import { _resetIdCounter, LaneManager } from "../../src/lanes/index.js";
 import { LaneClosedError, SharedLaneCleanupError } from "../../src/lanes/sharing.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
 

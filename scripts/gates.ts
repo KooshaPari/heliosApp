@@ -4,7 +4,7 @@
  * Usage: bun run gates [--json] [--gate <name>]
  */
 
-import { type GateReport, aggregateGateReports, createGateReport } from "./gate-report";
+import { aggregateGateReports, createGateReport, type GateReport } from "./gate-report";
 
 interface GateResult {
   name: string;

@@ -10,25 +10,25 @@
  */
 import { describe, expect, test } from "bun:test";
 
-// @ts-ignore - These tests require @helios/runtime alias configured externally
+// @ts-expect-error - These tests require @helios/runtime alias configured externally
 describe("path alias resolution (requires external project setup)", () => {
-  // @ts-ignore
+  // @ts-expect-error
   test("@helios/runtime resolves and exports VERSION", async () => {
-    // @ts-ignore
+    // @ts-expect-error
     const runtime = await import("@helios/runtime");
     expect(runtime.VERSION).toBe("0.1.1");
   });
 
-  // @ts-ignore
+  // @ts-expect-error
   test("@helios/runtime exports healthCheck function", async () => {
-    // @ts-ignore
+    // @ts-expect-error
     const runtime = await import("@helios/runtime");
     expect(typeof runtime.healthCheck).toBe("function");
   });
 
-  // @ts-ignore
+  // @ts-expect-error
   test("healthCheck returns valid HealthCheckResult", async () => {
-    // @ts-ignore
+    // @ts-expect-error
     const { healthCheck } = await import("@helios/runtime");
     const result = healthCheck();
 
@@ -39,9 +39,9 @@ describe("path alias resolution (requires external project setup)", () => {
     expect(result.uptimeMs).toBeGreaterThanOrEqual(0);
   });
 
-  // @ts-ignore
+  // @ts-expect-error
   test("@helios/runtime type exports are structurally correct", async () => {
-    // @ts-ignore
+    // @ts-expect-error
     const { healthCheck } = await import("@helios/runtime");
     const result = healthCheck();
 

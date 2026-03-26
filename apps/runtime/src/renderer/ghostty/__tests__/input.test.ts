@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, test } from "bun:test";
-import { GhosttyInputRelay } from "../input.js";
 import type { GhosttyInputEvent, PtyWriter } from "../input.js";
+import { GhosttyInputRelay } from "../input.js";
 import { GhosttyProcess } from "../process.js";
 
 // ---------------------------------------------------------------------------

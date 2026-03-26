@@ -5,7 +5,7 @@
  * to the abstract contract defined in spec 010.
  */
 
-import type { RenderSurface, RendererAdapter, RendererConfig, RendererState } from "../adapter.js";
+import type { RendererAdapter, RendererConfig, RendererState, RenderSurface } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
 import type { RendererRegistry } from "../registry.js";
 import { RioCapabilities } from "./capabilities.js";

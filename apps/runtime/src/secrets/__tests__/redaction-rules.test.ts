@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { RedactionEngine } from "../redaction-engine.js";
-import { RedactionRuleManager, getDefaultRules } from "../redaction-rules.js";
+import { getDefaultRules, RedactionRuleManager } from "../redaction-rules.js";
 
 const ctx = {
   artifactId: "art-1",

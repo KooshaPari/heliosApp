@@ -4,8 +4,8 @@ import { tmpdir } from "node:os";
 import * as path from "node:path";
 import {
   KeyboardShortcuts,
-  type ShortcutAction,
   resetKeyboardShortcuts,
+  type ShortcutAction,
 } from "../../../src/tabs/keyboard_shortcuts";
 
 describe("KeyboardShortcuts", () => {

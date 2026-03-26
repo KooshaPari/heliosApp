@@ -30,26 +30,24 @@
  * ```
  */
 
+// Application layer exports
+export { CreateProjectUseCase, ValidationError } from "./application";
+// Config exports
+export { Container, createContainer } from "./config";
 // Domain layer exports
 export { Entity } from "./domain/entities";
-export { ValueObject } from "./domain/value-objects";
-export { DomainEvent, BaseDomainEvent } from "./domain/events";
-export { ProjectDomainService, type ValidationResult } from "./domain/services";
+export { BaseDomainEvent, DomainEvent } from "./domain/events";
 
 // Port exports
 export type {
-  ICreateProjectInputPort,
   CreateProjectInput,
   CreateProjectOutput,
+  ICreateProjectInputPort,
 } from "./domain/ports/input";
 export type {
   IProjectRepository,
-  ProjectFilter,
   ProjectEntity,
+  ProjectFilter,
 } from "./domain/ports/output";
-
-// Application layer exports
-export { CreateProjectUseCase, ValidationError } from "./application";
-
-// Config exports
-export { Container, createContainer } from "./config";
+export { ProjectDomainService, type ValidationResult } from "./domain/services";
+export { ValueObject } from "./domain/value-objects";

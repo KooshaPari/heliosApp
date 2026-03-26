@@ -304,7 +304,7 @@ async function checkUnsafePatterns(files: string[]): Promise<Finding[]> {
 
       lines.forEach((line: string, index: number) => {
         // Check for 'any' type — match type annotations but not variable/property names containing "any"
-        // Skip lines with inline suppression comments (eslint-disable, @ts-ignore, etc.)
+        // Skip lines with inline suppression comments (eslint-disable, @ts-expect-error, etc.)
         if (
           /(?::\s*any\b|<any>|as\s+any\b)/.test(line) &&
           !/\/\//.test(line.split(/:\s*any\b/)[0])
@@ -419,4 +419,4 @@ if (import.meta.main) {
     });
 }
 
-export { runComplianceChecks, type CheckResult, type Finding };
+export { type CheckResult, type Finding, runComplianceChecks };

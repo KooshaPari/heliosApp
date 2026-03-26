@@ -11,64 +11,56 @@
  * @module services/pty
  */
 
-// Re-export everything from the main PTY module
 export {
-  type PtyState,
-  type PtyEvent,
-  type TransitionRecord,
-  PtyLifecycle,
-  InvalidTransitionError,
-  transition,
-} from "../../pty/state_machine.js";
-
+  type BufferStats,
+  OutputBuffer,
+  type OutputBufferConfig,
+  RingBuffer,
+  type RingWriteResult,
+} from "../../pty/buffers.js";
 export {
-  type PtyRecord,
-  type PtyDimensions,
-  type ReconciliationSummary,
-  PtyRegistry,
+  type BusPublisher,
+  emitPtyEvent,
+  InMemoryBusPublisher,
+  NoOpBusPublisher,
+  type PtyBusEvent,
+  type PtyEventCorrelation,
+  type PtyEventTopic,
+} from "../../pty/events.js";
+export { IdleMonitor, type IdleMonitorConfig } from "../../pty/idle_monitor.js";
+// Main facade for PTY service
+export { PtyManager } from "../../pty/index.js";
+export {
+  InvalidStateError,
+  type ProcessMap,
+  type WriteResult,
+  writeInput,
+} from "../../pty/io.js";
+export {
   DuplicatePtyError,
+  type PtyDimensions,
+  type PtyRecord,
+  PtyRegistry,
+  type ReconciliationSummary,
   RegistryCapacityError,
 } from "../../pty/registry.js";
-
-export { type SpawnOptions, type SpawnResult, spawnPty } from "../../pty/spawn.js";
-
 export {
+  InvalidDimensionsError,
+  resize,
   type SignalEnvelope,
   SignalHistory,
   type SignalHistoryMap,
-  InvalidDimensionsError,
-  type TerminateOptions,
-  resize,
-  terminate,
   sendSighup,
+  type TerminateOptions,
+  terminate,
 } from "../../pty/signals.js";
-
+export { type SpawnOptions, type SpawnResult, spawnPty } from "../../pty/spawn.js";
+// Re-export everything from the main PTY module
 export {
-  type PtyEventCorrelation,
-  type PtyEventTopic,
-  type PtyBusEvent,
-  type BusPublisher,
-  NoOpBusPublisher,
-  InMemoryBusPublisher,
-  emitPtyEvent,
-} from "../../pty/events.js";
-
-export {
-  InvalidStateError,
-  type WriteResult,
-  type ProcessMap,
-  writeInput,
-} from "../../pty/io.js";
-
-export { IdleMonitor, type IdleMonitorConfig } from "../../pty/idle_monitor.js";
-
-export {
-  RingBuffer,
-  type RingWriteResult,
-  OutputBuffer,
-  type OutputBufferConfig,
-  type BufferStats,
-} from "../../pty/buffers.js";
-
-// Main facade for PTY service
-export { PtyManager } from "../../pty/index.js";
+  InvalidTransitionError,
+  type PtyEvent,
+  PtyLifecycle,
+  type PtyState,
+  type TransitionRecord,
+  transition,
+} from "../../pty/state_machine.js";

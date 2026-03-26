@@ -5,11 +5,11 @@
 import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
-  PRIMARY_FILE,
   atomicWrite,
   computeChecksum,
   createSnapshot,
   detectCorruption,
+  PRIMARY_FILE,
   recoverFromSnapshot,
 } from "./snapshot.js";
 import type { Workspace, WorkspaceStore } from "./types.js";

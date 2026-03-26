@@ -1,4 +1,4 @@
-import { type RetentionPolicyConfig, createRetentionPolicyConfig } from "../config/retention.js";
+import { createRetentionPolicyConfig, type RetentionPolicyConfig } from "../config/retention.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
 import type { AuditEvent } from "./event";
 import { AuditRingBuffer } from "./ring-buffer";

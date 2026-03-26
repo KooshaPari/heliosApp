@@ -8,8 +8,8 @@
  */
 
 import { beforeEach, describe, expect, test } from "bun:test";
-import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
 import type { MetricsSnapshot } from "../../../../src/renderer/ghostty/metrics.js";
+import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
 
 describe("GhosttyMetrics - enable/disable", () => {
   let metrics: GhosttyMetrics;

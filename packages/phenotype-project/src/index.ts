@@ -1,2 +1,2 @@
-export { ProjectService, ProjectDomainService } from "./service";
-export type { ProjectEntity, ProjectFilter, IProjectRepository } from "./ports";
+export type { IProjectRepository, ProjectEntity, ProjectFilter } from "./ports";
+export { ProjectDomainService, ProjectService } from "./service";

@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import {
-  type GateFinding,
-  type GateReport,
   aggregateGateReports,
   createGateReport,
   formatGateReport,
   formatPipelineSummary,
+  type GateFinding,
+  type GateReport,
 } from "../gate-report";
 
 describe("Gate Report Generator", () => {

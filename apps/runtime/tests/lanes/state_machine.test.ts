@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import {
+  clearTransitionHistory,
+  getTransitionHistory,
   InvalidLaneTransitionError,
   type LaneEvent,
   type LaneState,
-  clearTransitionHistory,
-  getTransitionHistory,
   recordTransition,
   transition,
   withLaneLock,

@@ -148,8 +148,7 @@ export function assertCorrelationId(
       "MISSING_CORRELATION_ID",
       "Envelope field 'correlation_id' is required",
       {
-        // biome-ignore lint/style/useNamingConvention:
-        // External protocol field names use snake_case.
+        // biome-ignore lint/style/useNamingConvention: External protocol field names use snake_case
         required_by: requiredBy,
         name,
       }

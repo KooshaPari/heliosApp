@@ -3,8 +3,8 @@
 import { describe, expect, it } from "bun:test";
 import { RingBuffer } from "../../../src/diagnostics/metrics.js";
 import {
-  EMPTY_PERCENTILE_BUCKET,
   computePercentiles,
+  EMPTY_PERCENTILE_BUCKET,
 } from "../../../src/diagnostics/percentiles.js";
 
 describe("computePercentiles", () => {

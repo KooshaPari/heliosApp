@@ -209,10 +209,7 @@ export function setGlobalOnSample(
  * Replace the global hooks state — mainly for tests that need to reset
  * between runs. Not intended for production use.
  */
-export function _resetGlobalHooks(opts?: {
-  maxConcurrent?: number;
-  clock?: MonotonicClock;
-}): void {
+export function _resetGlobalHooks(opts?: { maxConcurrent?: number; clock?: MonotonicClock }): void {
   globalState = createState(
     opts?.maxConcurrent ?? DEFAULT_MAX_CONCURRENT_MARKS,
     opts?.clock ?? defaultClock
