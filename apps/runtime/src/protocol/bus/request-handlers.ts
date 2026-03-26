@@ -1,9 +1,9 @@
 // Request handler helpers for InMemoryLocalBus — extracted from emitter.ts for static analysis compliance.
 
 import type { LocalBusEnvelope } from "../types.js";
+import type { AuditRecord, BusState } from "./types.js";
 import { publishLifecycleEvent } from "./lifecycle.js";
 import type { MetricsRecorder } from "./metrics.js";
-import type { AuditRecord, BusState } from "./types.js";
 import { hasTopLevelDataField } from "./validation.js";
 
 /**
@@ -113,7 +113,7 @@ export function handleLaneCreate(
 
 export function handleSessionAttach(
   command: LocalBusEnvelope,
-  _startTime: number,
+  startTime: number,
   ctx: RequestHandlerContext
 ): LocalBusEnvelope {
   const correlationId = command.correlation_id;

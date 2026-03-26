@@ -8,83 +8,83 @@
  */
 
 export {
-  type BufferStats,
-  OutputBuffer,
-  type OutputBufferConfig,
-  RingBuffer,
-  type RingWriteResult,
-} from "./buffers.js";
-export {
-  type BusPublisher,
-  emitPtyEvent,
-  InMemoryBusPublisher,
-  NoOpBusPublisher,
-  type PtyBusEvent,
-  type PtyEventCorrelation,
-  type PtyEventTopic,
-} from "./events.js";
-export { IdleMonitor, type IdleMonitorConfig } from "./idle_monitor.js";
-export {
-  InvalidStateError,
-  type ProcessMap,
-  type WriteResult,
-  writeInput,
-} from "./io.js";
-export {
-  DuplicatePtyError,
-  type PtyDimensions,
-  type PtyRecord,
-  PtyRegistry,
-  type ReconciliationSummary,
-  RegistryCapacityError,
-} from "./registry.js";
-export {
-  InvalidDimensionsError,
-  resize,
-  type SignalEnvelope,
-  SignalHistory,
-  type SignalHistoryMap,
-  sendSighup,
-  type TerminateOptions,
-  terminate,
-} from "./signals.js";
-export { type SpawnOptions, type SpawnResult, spawnPty } from "./spawn.js";
-export {
-  InvalidTransitionError,
-  type PtyEvent,
-  PtyLifecycle,
   type PtyState,
+  type PtyEvent,
   type TransitionRecord,
+  PtyLifecycle,
+  InvalidTransitionError,
   transition,
 } from "./state_machine.js";
 
-import {
-  type BufferStats as _BufferStats,
-  OutputBuffer as _OutputBuffer,
-  type OutputBufferConfig as _OutputBufferConfig,
+export {
+  type PtyRecord,
+  type PtyDimensions,
+  type ReconciliationSummary,
+  PtyRegistry,
+  DuplicatePtyError,
+  RegistryCapacityError,
+} from "./registry.js";
+
+export { type SpawnOptions, type SpawnResult, spawnPty } from "./spawn.js";
+
+export {
+  type SignalEnvelope,
+  SignalHistory,
+  type SignalHistoryMap,
+  InvalidDimensionsError,
+  type TerminateOptions,
+  resize,
+  terminate,
+  sendSighup,
+} from "./signals.js";
+
+export {
+  type PtyEventCorrelation,
+  type PtyEventTopic,
+  type PtyBusEvent,
+  type BusPublisher,
+  NoOpBusPublisher,
+  InMemoryBusPublisher,
+  emitPtyEvent,
+} from "./events.js";
+
+export { InvalidStateError, type WriteResult, type ProcessMap, writeInput } from "./io.js";
+
+export { IdleMonitor, type IdleMonitorConfig } from "./idle_monitor.js";
+
+export {
+  RingBuffer,
+  type RingWriteResult,
+  OutputBuffer,
+  type OutputBufferConfig,
+  type BufferStats,
 } from "./buffers.js";
+
+// Local imports for use in PtyManager class body.
+import { PtyRegistry as _PtyRegistry } from "./registry.js";
+import { PtyLifecycle as _PtyLifecycle } from "./state_machine.js";
+import { spawnPty as _spawnPty } from "./spawn.js";
+import type { SpawnOptions as _SpawnOptions } from "./spawn.js";
+import type { PtyRecord as _PtyRecord } from "./registry.js";
+import type { ReconciliationSummary as _ReconciliationSummary } from "./registry.js";
 import type { BusPublisher as _BusPublisher } from "./events.js";
-import { emitPtyEvent as _emitPtyEvent, NoOpBusPublisher as _NoOpBusPublisher } from "./events.js";
+import { NoOpBusPublisher as _NoOpBusPublisher, emitPtyEvent as _emitPtyEvent } from "./events.js";
+import type { SignalHistoryMap as _SignalHistoryMap } from "./signals.js";
+import {
+  resize as _resize,
+  terminate as _terminate,
+  type TerminateOptions as _TerminateOptions,
+} from "./signals.js";
+import { writeInput as _writeInput, type ProcessMap as _ProcessMap } from "./io.js";
 import {
   IdleMonitor as _IdleMonitor,
   type IdleMonitorConfig as _IdleMonitorConfig,
 } from "./idle_monitor.js";
-import { type ProcessMap as _ProcessMap, writeInput as _writeInput } from "./io.js";
-import type {
-  PtyRecord as _PtyRecord,
-  ReconciliationSummary as _ReconciliationSummary,
-} from "./registry.js";
-// Local imports for use in PtyManager class body.
-import { PtyRegistry as _PtyRegistry } from "./registry.js";
-import type { SignalHistoryMap as _SignalHistoryMap } from "./signals.js";
 import {
-  resize as _resize,
-  type TerminateOptions as _TerminateOptions,
-  terminate as _terminate,
-} from "./signals.js";
-import type { SpawnOptions as _SpawnOptions } from "./spawn.js";
-import { spawnPty as _spawnPty } from "./spawn.js";
-import { PtyLifecycle as _PtyLifecycle } from "./state_machine.js";
+  OutputBuffer as _OutputBuffer,
+  type OutputBufferConfig as _OutputBufferConfig,
+  type BufferStats as _BufferStats,
+} from "./buffers.js";
 
 /**
  * High-level facade for PTY operations.

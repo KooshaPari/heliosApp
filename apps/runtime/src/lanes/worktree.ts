@@ -1,7 +1,7 @@
 // T006, T007, T010 - Git worktree provisioning, cleanup, and partial failure handling
 
-import * as fs from "node:fs";
 import * as path from "node:path";
+import * as fs from "node:fs";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -97,8 +97,8 @@ async function runGit(
   });
 
   const [stdout, stderr] = await Promise.all([
-    proc.stdout ? new Response(proc.stdout).text() : Promise.resolve(""),
-    proc.stderr ? new Response(proc.stderr).text() : Promise.resolve(""),
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
   ]);
 
   const exitCode = await proc.exited;
@@ -165,7 +165,7 @@ export async function removeWorktree(
   const branchName = computeBranchName(laneId);
 
   // Try git worktree remove --force
-  const _removeResult = await runGit(
+  const removeResult = await runGit(
     ["worktree", "remove", worktreePath, "--force"],
     workspaceRepoPath
   );
@@ -242,7 +242,7 @@ export interface ReconciliationResult {
 export async function reconcileOrphanedWorktrees(
   workspaceRepoPath: string,
   knownLaneIds: Set<string>,
-  _closeLaneRecord: (laneId: string) => void
+  closeLaneRecord: (laneId: string) => void
 ): Promise<ReconciliationResult> {
   const worktreeRoot = path.join(workspaceRepoPath, WORKTREE_DIR);
   const result: ReconciliationResult = {
@@ -262,9 +262,7 @@ export async function reconcileOrphanedWorktrees(
     }
 
     for (const entry of entries) {
-      if (!entry.isDirectory()) {
-        continue;
-      }
+      if (!entry.isDirectory()) continue;
       const laneId = entry.name;
       if (!knownLaneIds.has(laneId)) {
         result.orphanedWorktrees++;
@@ -291,6 +289,6 @@ export async function reconcileOrphanedWorktrees(
 export const lastMetrics: WorktreeLatencyMetrics = {};
 
 export function resetMetrics(): void {
-  lastMetrics.provisionMs = undefined;
-  lastMetrics.cleanupMs = undefined;
+  delete lastMetrics.provisionMs;
+  delete lastMetrics.cleanupMs;
 }

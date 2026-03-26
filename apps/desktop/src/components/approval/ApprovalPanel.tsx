@@ -80,11 +80,7 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
           </div>
 
           <div class="approval-actions">
-            <button
-              type="button"
-              class="approve-btn"
-              onclick={() => handleApprove(selectedRequest()?.id ?? "")}
-            >
+            <button class="approve-btn" onclick={() => handleApprove(selectedRequest()?.id ?? "")}>
               Approve
             </button>
             <button type="button" class="reject-btn" onclick={() => setRejectReason("focused")}>

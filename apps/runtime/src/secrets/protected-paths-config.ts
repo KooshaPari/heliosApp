@@ -49,34 +49,21 @@ export class ProtectedPathConfig {
       throw new Error(`Pattern '${id}' not found`);
     }
     this.patterns.delete(id);
-    void this._emit("secrets.protected_paths.config.changed", {
-      action: "remove",
-      patternId: id,
-    });
+    void this._emit("secrets.protected_paths.config.changed", { action: "remove", patternId: id });
   }
 
   disablePattern(id: string): void {
     const p = this.patterns.get(id);
-    if (!p) {
-      throw new Error(`Pattern '${id}' not found`);
-    }
+    if (!p) throw new Error(`Pattern '${id}' not found`);
     p.enabled = false;
-    void this._emit("secrets.protected_paths.config.changed", {
-      action: "disable",
-      patternId: id,
-    });
+    void this._emit("secrets.protected_paths.config.changed", { action: "disable", patternId: id });
   }
 
   enablePattern(id: string): void {
     const p = this.patterns.get(id);
-    if (!p) {
-      throw new Error(`Pattern '${id}' not found`);
-    }
+    if (!p) throw new Error(`Pattern '${id}' not found`);
     p.enabled = true;
-    void this._emit("secrets.protected_paths.config.changed", {
-      action: "enable",
-      patternId: id,
-    });
+    void this._emit("secrets.protected_paths.config.changed", { action: "enable", patternId: id });
   }
 
   listPatterns(): ProtectedPathPattern[] {
@@ -87,9 +74,7 @@ export class ProtectedPathConfig {
     const raw = readFileSync(path, "utf8");
     const parsed = JSON.parse(raw) as ProtectedPathPattern[];
     for (const p of parsed) {
-      if (!(p.id && p.pattern)) {
-        continue;
-      }
+      if (!p.id || !p.pattern) continue;
       this.patterns.set(p.id, { ...p });
     }
     void this._emit("secrets.protected_paths.config.changed", {
@@ -101,34 +86,26 @@ export class ProtectedPathConfig {
   async exportPatterns(path: string): Promise<void> {
     const data = Array.from(this.patterns.values());
     const dir = dirname(path);
-    if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true });
-    }
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
     writeFileSync(path, JSON.stringify(data, null, 2), "utf8");
   }
 
   async loadFromDisk(): Promise<void> {
-    if (!(this.configPath && existsSync(this.configPath))) {
-      return;
-    }
+    if (!this.configPath || !existsSync(this.configPath)) return;
     await this.importPatterns(this.configPath);
   }
 
   async saveToDisk(): Promise<void> {
-    if (!this.configPath) {
-      return;
-    }
+    if (!this.configPath) return;
     await this.exportPatterns(this.configPath);
   }
 
   getEnabledPatterns(): ProtectedPathPattern[] {
-    return Array.from(this.patterns.values()).filter(p => p.enabled);
+    return Array.from(this.patterns.values()).filter((p) => p.enabled);
   }
 
   private async _emit(topic: string, payload: Record<string, unknown>): Promise<void> {
-    if (!this.bus) {
-      return;
-    }
+    if (!this.bus) return;
     const envelope: LocalBusEnvelope = {
       id: `protected-paths:${topic}:${Date.now()}:${randomBytes(4).toString("hex")}`,
       type: "event",

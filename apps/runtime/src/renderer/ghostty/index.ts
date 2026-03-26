@@ -12,44 +12,32 @@ import { GhosttyBackend } from "./backend.js";
 // Re-exports
 // ---------------------------------------------------------------------------
 
+export { GhosttyBackend } from "./backend.js";
 export {
-  GhosttyAlreadyInitializedError,
-  GhosttyBackend,
   GhosttyNotInitializedError,
   GhosttyNotRunningError,
+  GhosttyAlreadyInitializedError,
 } from "./backend.js";
+export { GhosttyProcess, GhosttyBinaryNotFoundError, GhosttyProcessError } from "./process.js";
+export type { GhosttyOptions } from "./process.js";
+export { GhosttySurface, SurfaceBindingError } from "./surface.js";
+export type { GpuRenderingMode, GpuSurfaceStatus, SurfaceEventHandler } from "./surface.js";
 export {
-  clearCapabilityCache,
   detectCapabilities,
-  detectGpu,
   getCachedCapabilities,
+  clearCapabilityCache,
+  detectGpu,
 } from "./capabilities.js";
-export type {
-  GhosttyInputEvent,
-  InputEventListener,
-  PtyWriter,
-} from "./input.js";
-export { GhosttyInputRelay, InputRelayError } from "./input.js";
+export { GhosttyMetrics } from "./metrics.js";
 export type {
   FrameSample,
   InputLatencySample,
+  MetricsSnapshot,
   MetricsConfig,
   MetricsPublisher,
-  MetricsSnapshot,
 } from "./metrics.js";
-export { GhosttyMetrics } from "./metrics.js";
-export type { GhosttyOptions } from "./process.js";
-export {
-  GhosttyBinaryNotFoundError,
-  GhosttyProcess,
-  GhosttyProcessError,
-} from "./process.js";
-export type {
-  GpuRenderingMode,
-  GpuSurfaceStatus,
-  SurfaceEventHandler,
-} from "./surface.js";
-export { GhosttySurface, SurfaceBindingError } from "./surface.js";
+export { GhosttyInputRelay, InputRelayError } from "./input.js";
+export type { PtyWriter, GhosttyInputEvent, InputEventListener } from "./input.js";
 
 // ---------------------------------------------------------------------------
 // Binary detection
@@ -67,8 +55,8 @@ export async function isGhosttyAvailable(binaryPath = "ghostty"): Promise<boolea
       stdout: "ignore",
       stderr: "ignore",
     });
-    const exitCode = await proc.exited;
-    return exitCode === 0;
+    await proc.exited;
+    return proc.exitCode === 0;
   } catch {
     return false;
   }
@@ -85,9 +73,7 @@ export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<stri
       stdout: "pipe",
       stderr: "ignore",
     });
-    const text = await new Response(
-      proc.stdout instanceof ReadableStream ? proc.stdout : null
-    ).text();
+    const text = await new Response(proc.stdout).text();
     await proc.exited;
     const trimmed = text.trim();
     return trimmed.length > 0 ? trimmed : "unknown";
@@ -116,6 +102,7 @@ export async function registerGhostty(
   const available = await isGhosttyAvailable(binaryPath);
 
   if (!available) {
+    console.warn("[ghostty] Ghostty binary not found; skipping registration.");
     return;
   }
 

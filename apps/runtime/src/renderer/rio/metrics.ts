@@ -55,9 +55,7 @@ export class RioMetrics {
    * Start collecting metrics at the configured interval.
    */
   start(): void {
-    if (this._collecting) {
-      return;
-    }
+    if (this._collecting) return;
     this._collecting = true;
     this._startedAt = Date.now();
     this._frameCount = 0;
@@ -72,9 +70,7 @@ export class RioMetrics {
    * Stop collecting metrics.
    */
   stop(): void {
-    if (!this._collecting) {
-      return;
-    }
+    if (!this._collecting) return;
     this._collecting = false;
     if (this._intervalHandle !== undefined) {
       clearInterval(this._intervalHandle);
@@ -87,9 +83,7 @@ export class RioMetrics {
    */
   recordFrame(frameTimeMs: number, inputLatencyMs: number, dropped = false): void {
     this._frameCount++;
-    if (dropped) {
-      this._droppedFrames++;
-    }
+    if (dropped) this._droppedFrames++;
 
     const snapshot: MetricsSnapshot = {
       rendererId: "rio",
@@ -182,9 +176,7 @@ function percentiles(values: number[]): {
   min: number;
   max: number;
 } {
-  if (values.length === 0) {
-    return { p50: 0, p95: 0, min: 0, max: 0 };
-  }
+  if (values.length === 0) return { p50: 0, p95: 0, min: 0, max: 0 };
   const sorted = [...values].sort((a, b) => a - b);
   return {
     p50: sorted[Math.floor(sorted.length * 0.5)] ?? 0,

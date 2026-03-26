@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import { ZellijCli } from "../cli.js";
-import { SessionAlreadyExistsError, SessionNotFoundError } from "../errors.js";
 import { MuxRegistry } from "../registry.js";
-import { sessionNameForLane, ZellijSessionManager } from "../session.js";
+import { ZellijSessionManager, sessionNameForLane } from "../session.js";
+import { SessionAlreadyExistsError, SessionNotFoundError } from "../errors.js";
 
 // Helper to create a mock spawn result
 function makeMockProc(stdout: string, stderr: string, exitCode: number) {
@@ -20,12 +20,9 @@ function makeMockProc(stdout: string, stderr: string, exitCode: number) {
   });
 
   return {
-    pid: 12345,
-    stdin: null,
     stdout: stdoutStream,
     stderr: stderrStream,
     exited: Promise.resolve(exitCode),
-    exitCode: Promise.resolve(exitCode),
     kill: mock(() => {}),
   };
 }
@@ -50,6 +47,7 @@ describe("ZellijSessionManager", () => {
   describe("createSession", () => {
     it("creates a session and registers binding", async () => {
       let callCount = 0;
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => {
         callCount++;
         if (callCount === 1) {
@@ -78,6 +76,7 @@ describe("ZellijSessionManager", () => {
     });
 
     it("throws SessionAlreadyExistsError if session exists", async () => {
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => makeMockProc("helios-lane-dup  2026-02-27 10:00:00", "", 0));
 
       const cli = new ZellijCli();
@@ -90,6 +89,7 @@ describe("ZellijSessionManager", () => {
 
   describe("reattachSession", () => {
     it("reattaches to an existing session", async () => {
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => makeMockProc("helios-lane-reattach  2026-02-27 10:00:00", "", 0));
 
       const cli = new ZellijCli();
@@ -106,6 +106,7 @@ describe("ZellijSessionManager", () => {
     });
 
     it("throws SessionNotFoundError if session does not exist", async () => {
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => makeMockProc("", "", 0));
 
       const cli = new ZellijCli();
@@ -121,6 +122,7 @@ describe("ZellijSessionManager", () => {
   describe("terminateSession", () => {
     it("terminates a session and unbinds", async () => {
       let callCount = 0;
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => {
         callCount++;
         if (callCount <= 2) {
@@ -150,6 +152,7 @@ describe("ZellijSessionManager", () => {
     });
 
     it("is idempotent for non-existent sessions", async () => {
+      // @ts-expect-error mock override
       Bun.spawn = mock(() => makeMockProc("", "No session named 'foo' found.", 1));
 
       const cli = new ZellijCli();

@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import type { Lane } from "../../../src/panels/lane_panel";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { LanePanel } from "../../../src/panels/lane_panel";
+import type { Lane } from "../../../src/panels/lane_panel";
 
 describe("LanePanel", () => {
   let container: HTMLDivElement;
@@ -9,9 +9,9 @@ describe("LanePanel", () => {
   const mockProps = {
     lanes: [] as Lane[],
     activeWorkspaceId: "ws-1",
-    onLaneSelect: mock(),
-    onLaneCreate: mock(),
-    onLaneDelete: mock(),
+    onLaneSelect: vi.fn(),
+    onLaneCreate: vi.fn(),
+    onLaneDelete: vi.fn(),
   };
 
   beforeEach(() => {
@@ -80,7 +80,7 @@ describe("LanePanel", () => {
 
   it("should call onLaneSelect when lane is clicked", () => {
     const lanes: Lane[] = [{ id: "lane-1", name: "Lane 1", state: "idle", workspaceId: "ws-1" }];
-    const onLaneSelect = mock();
+    const onLaneSelect = vi.fn();
 
     panel = new LanePanel({ ...mockProps, lanes, onLaneSelect });
     panel.mount(container);
@@ -92,7 +92,7 @@ describe("LanePanel", () => {
   });
 
   it("should call onLaneCreate when create button is clicked", () => {
-    const onLaneCreate = mock();
+    const onLaneCreate = vi.fn();
 
     panel = new LanePanel({ ...mockProps, onLaneCreate });
     panel.mount(container);
@@ -117,7 +117,7 @@ describe("LanePanel", () => {
     const event = new KeyboardEvent("keydown", { key: "ArrowDown" });
     container.dispatchEvent(event);
 
-    const selectedItems = container.querySelectorAll(".lane-list-item.selected");
+    let selectedItems = container.querySelectorAll(".lane-list-item.selected");
     expect(selectedItems.length).toBeGreaterThan(0);
   });
 
@@ -199,7 +199,7 @@ describe("LanePanel", () => {
 
   it("should call onLaneDelete when Delete key is pressed", () => {
     const lanes: Lane[] = [{ id: "lane-1", name: "Lane 1", state: "idle", workspaceId: "ws-1" }];
-    const onLaneDelete = mock();
+    const onLaneDelete = vi.fn();
 
     panel = new LanePanel({ ...mockProps, lanes, onLaneDelete });
     panel.mount(container);

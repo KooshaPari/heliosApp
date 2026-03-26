@@ -1,328 +1,586 @@
-# heliosApp — Architecture Decision Records
+# Architecture Decision Records — heliosApp
 
-**Version:** 2.0
-**Date:** 2026-03-26
-**Derived from:** Codebase analysis of `apps/runtime`, `apps/desktop`, `apps/renderer`, `packages/`
+This document records key architectural decisions made during the development of heliosApp. Each ADR captures the context, rationale, and consequences of significant design choices visible in the codebase.
 
 ---
 
-## ADR-001: Bun as Runtime, Package Manager, and Test Runner
+## ADR-001 | Local Bus Envelope Protocol | Adopted
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: heliosApp requires a TypeScript-native runtime for the `@helios/runtime` package
-and `@helios/desktop` shell. Node.js adds significant startup latency and requires a separate
-package manager. The project explicitly targets bleeding-edge dependencies via custom canary
-scripts (`scripts/deps-canary.ts`, `deps-rollback.ts`, `deps-status.ts`). A unified
-runtime-and-package-manager reduces toolchain surface area.
-**Decision**: Use Bun (≥1.2.20) as the sole runtime, package manager, and test runner across
-the entire workspace. `bun test` runs unit tests in `apps/runtime/tests/unit`,
-`apps/desktop/tests/unit`, and `scripts/tests/`. `bun build` produces bundles. `bunfig.toml`
-configures Bun-specific settings. Node.js ≥20 declared only for ecosystem compatibility checks.
-**Consequences**: Fast cold-start; native TypeScript without a transpile step; `bun test` replaces
-Vitest for unit-tier tests; some Node.js-specific APIs may behave differently under Bun;
-contributors must install Bun, not Node.js.
-**Alternatives Considered**: Node.js + pnpm (rejected: slower startup, additional toolchain
-layer); Deno (rejected: smaller ecosystem, npm compatibility gaps); tsx + Vitest for all
-tiers (Vitest retained for integration tests where module mocking is richer; Bun test for
-unit tier).
+**Status:** Adopted
 
----
+**Context:**
+heliosApp requires a communication protocol for coordinating commands, events, and responses across workspace, lane, session, and terminal entities. Communication occurs both within the runtime and between the desktop client and runtime.
 
-## ADR-002: Bun Workspaces Monorepo with Turborepo Task Runner
+**Decision:**
+Implement a unified **LocalBusEnvelope** protocol with three envelope types:
+- **Command envelopes**: Method-based requests (e.g., `lane.create`, `session.attach`, `terminal.spawn`)
+- **Event envelopes**: Topic-based pub/sub events (e.g., `session.attached`, `terminal.output`)
+- **Response envelopes**: Responses to commands (success or error)
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: heliosApp has two apps (`apps/runtime`, `apps/desktop`) plus an `apps/renderer`
-and shared packages (`packages/errors`, `packages/ids`, `packages/logger`, `packages/types`,
-`packages/phenotype-metrics`, `packages/phenotype-project`, `packages/template-hexagonal`).
-Build order matters: desktop depends on runtime; runtime types used by desktop and renderer.
-**Decision**: Bun workspaces declare all `apps/` and `packages/` members. Turborepo
-(`turbo.json`) defines task pipelines with explicit `dependsOn` including `^build` (upstream
-packages). Incremental caching is content-hash-based, skipping unchanged packages.
-**Consequences**: Deterministic build ordering via DAG; incremental builds skip unchanged
-packages; cross-package imports use `workspace:*`; Turborepo remote cache not configured
-(local only), so CI cold builds are not accelerated.
-**Alternatives Considered**: Nx (rejected: heavier config, Angular/React-oriented); manually
-ordered scripts (rejected: fragile, unparallelized); separate repos (rejected: cross-app
-dependency management becomes manual).
+All envelopes carry metadata: `id`, `correlation_id`, `type`, `ts`, and context IDs (`workspace_id`, `lane_id`, `session_id`, `terminal_id`).
+
+**Consequences:**
+- **Unified interface**: Commands and events use the same envelope structure, simplifying routing and serialization.
+- **Correlation tracking**: `correlation_id` links commands to their events and responses, enabling distributed tracing.
+- **Loose coupling**: Producers don't depend on consumers; pub/sub topology allows new subscribers without modifying producers.
+- **Lifecycle ordering enforcement**: The protocol enforces state machine transitions (e.g., `session.attach.started` must precede `session.attached`).
+- **Complexity**: The envelope spec requires careful validation; invalid ordering is detected and rejected.
+
+**Code locations:** `/apps/runtime/src/protocol/bus.ts`, `/apps/runtime/src/protocol/types.ts`
 
 ---
 
-## ADR-003: Three-Tier Application Architecture
+## ADR-002 | Monorepo with Bun Workspaces | Adopted
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: heliosApp has distinct concerns across runtime logic (bus, state machines, PTY,
-secrets, policy, audit), desktop shell (lane panels, settings, approval UI), and the
-terminal/chat renderer. Mixing these into a single package would create circular dependencies
-and make the runtime untestable without a UI.
-**Decision**: Split into three tiers:
-1. `apps/runtime` (`@helios/runtime`) — pure TypeScript, no UI dependency, testable with
-   in-memory bus and stub adapters. Owns: protocol bus, workspace/lane/session state machines,
-   terminal buffers, PTY lifecycle, audit sink, secrets vault, policy engine, inference
-   registry, sharing adapters.
-2. `apps/desktop` (`@helios/desktop`) — SolidJS desktop shell. Depends on `@helios/runtime`
-   types. Owns: lane panels, context store, renderer settings, approval UI, runtime HTTP client.
-3. `apps/renderer` — SolidJS UI components for chat and terminal rendering. Owns: xterm.js
-   terminal widget, model selector, chat panel.
-**Consequences**: Runtime is fully headless and independently testable; desktop and renderer
-can be swapped without touching runtime logic; three package boundaries require explicit API
-surface definition.
-**Alternatives Considered**: Monolithic single-package (rejected: untestable without UI);
-two-tier runtime+UI (considered; renderer split further to isolate high-frequency terminal
-rendering from lane management UI).
+**Status:** Adopted
 
----
+**Context:**
+heliosApp comprises multiple loosely coupled packages: runtime (core orchestration), desktop (client UI and platform integration), and renderer (terminal rendering UI). Code sharing between these packages is expected to grow.
 
-## ADR-004: Hexagonal Architecture for Runtime Domain Logic
+**Decision:**
+Use a **Bun monorepo** with npm workspaces (`"workspaces"` in root `package.json`):
+- `apps/runtime`: Core runtime orchestration, bus, protocol, state machines.
+- `apps/desktop`: Tauri-based desktop application shell.
+- Unified `package.json` root with shared `devDependencies`, `biome.json`, and `tsconfig.base.json`.
+- Single `bun.lock` for reproducible installs.
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: The runtime must support pluggable PTY backends, swappable inference adapters,
-and configurable bus implementations. Binding business logic to concrete implementations
-would make testing difficult and replacement costly.
-**Decision**: Apply hexagonal (ports and adapters) architecture to the runtime. Port interfaces
-defined in `protocol/bus.ts` (bus), `providers/adapter.ts` (provider), `pty/` (PTY adapter),
-`integrations/inference/engine.ts` (inference). Concrete adapters implement the port. Domain
-logic in `sessions/`, `workspace/`, `lanes/` depends only on ports. `packages/template-hexagonal`
-codifies the canonical structure for new domain packages.
-**Consequences**: Domain logic testable with in-memory stubs; new providers added by
-implementing the adapter interface; `template-hexagonal` serves as a cookiecutter; adds
-indirection requiring contributors to understand the port/adapter split.
-**Alternatives Considered**: MVC (rejected: does not model event-driven multi-adapter
-runtime well); flat modules (rejected: no boundary enforcement); DI framework (avoided to
-keep architecture explicit and framework-independent).
+**Consequences:**
+- **Single version of dependencies**: All packages use the same versions of TypeScript, Vitest, Biome, etc., ensuring consistency.
+- **Shared tooling**: One linting and formatting config simplifies governance.
+- **Shared build context**: Bun's native workspace support means no separate build orchestration needed.
+- **Cross-workspace imports**: Packages can import from each other via `@helios/*` aliases.
+- **Trade-off**: Monorepos make it harder to release packages independently; used for integration, not distribution.
+
+**Code locations:** `/package.json`, `/apps/runtime/package.json`, `/apps/desktop/package.json`, `/Taskfile.yml`
 
 ---
 
-## ADR-005: InMemoryLocalBus with Typed Envelope Protocol
+## ADR-003 | Renderer Adapter Interface with Pluggable Backends | Adopted
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: Workspace, lane, session, and terminal entities must communicate via commands,
-events, and responses without direct method calls that would create circular dependencies.
-The protocol must enforce lifecycle ordering and support correlation tracking for
-request/response pairs.
-**Decision**: `LocalBus` port defined in `protocol/bus.ts` with `InMemoryLocalBus` as the
-in-process implementation. All messages wrapped in `LocalBusEnvelope` with `correlation_id`,
-type (`command`|`event`|`response`), topic, workspace_id, lane_id, session_id,
-terminal_id, and payload. `protocol/validator.ts` enforces lifecycle rules before dispatch.
-`protocol/topics.ts` and `protocol/methods.ts` define typed topic/method namespaces.
-**Consequences**: Entities fully decoupled; correlation ID enables async request/response
-matching; in-memory implementation is synchronous and testable without I/O; scaling to
-multi-process requires replacing `InMemoryLocalBus` with a NATS or WebSocket adapter without
-changing domain code; validator rules must stay in sync with entity state machines.
-**Alternatives Considered**: Direct method calls (rejected: circular deps); EventEmitter
-(rejected: untyped, no lifecycle enforcement); Redux-style store (rejected: overkill for
-message-passing runtime); NATS from day one (rejected: server dependency for local dev).
+**Status:** Adopted
 
----
+**Context:**
+heliosApp must support multiple terminal rendering engines (Ghostty, Rio, and potentially others). The rendering layer is performance-critical and must be swappable without downtime.
 
-## ADR-006: SolidJS for Desktop and Renderer UI
+**Decision:**
+Define a **RendererAdapter** interface that all backends must implement:
+```typescript
+interface RendererAdapter {
+  init(config): Promise<void>;
+  start(surface): Promise<void>;
+  stop(): Promise<void>;
+  bindStream(ptyId, stream): void;
+  handleInput(ptyId, data): void;
+  resize(ptyId, cols, rows): void;
+  queryCapabilities(): RendererCapabilities;
+  getState(): RendererState;
+  onCrash(handler): void;
+}
+```
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: Both `apps/desktop` and `apps/renderer` require a reactive UI renderer inside
-the Tauri shell. The renderer must handle high-frequency terminal output events (xterm.js)
-and session state transitions without jank. Virtual DOM diffing adds overhead on every
-terminal output tick.
-**Decision**: Use SolidJS (≥1.9.11) for both the desktop shell and renderer. SolidJS
-fine-grained reactivity updates only the affected DOM nodes without virtual DOM diffing.
-xterm.js (`@xterm/xterm`, `@xterm/addon-fit`, `@xterm/addon-web-links`) provides the
-terminal widget. esbuild + `esbuild-plugin-solid` compiles SolidJS JSX. SolidJS signals
-drive the context store in `apps/desktop/src/context_store.ts`.
-**Consequences**: Terminal scroll performance measurably better than VDOM alternatives;
-smaller bundle; smaller ecosystem and fewer off-the-shelf component libraries vs React;
-contributors must understand SolidJS signals vs React hooks.
-**Alternatives Considered**: React (rejected: VDOM overhead for terminal rendering, heavier
-bundle); Vue (rejected: similar VDOM trade-offs); Svelte (considered; SolidJS chosen for
-better TypeScript integration at decision time); vanilla DOM (rejected: not maintainable
-for complex multi-panel layout).
+Concrete backends (ghostty, rio) implement this interface. A **RendererRegistry** manages instantiation and hot-swapping.
+
+**Consequences:**
+- **Backend abstraction**: New renderers can be added without modifying core runtime code.
+- **Hot-swap support**: Renderers can be switched at runtime via `renderer.switch` command with transactional safety.
+- **Capability negotiation**: Each backend declares what it supports (e.g., GPU acceleration, max dimensions).
+- **Stream binding model**: PTY streams are bound to renderer implementations, not global streams.
+- **Testing**: Mocks and stubs can implement the interface for unit testing.
+
+**Code locations:** `/apps/runtime/src/renderer/adapter.ts`, `/apps/runtime/src/renderer/registry.ts`, `/apps/runtime/src/renderer/ghostty/backend.ts`, `/apps/runtime/src/renderer/rio/backend.ts`
 
 ---
 
-## ADR-007: Biome as Unified Linter and Formatter
+## ADR-004 | Lane Orchestration with Par Task Binding | Adopted
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: The project needs consistent code style and lint enforcement across all
-TypeScript packages. ESLint + Prettier involves two tools, two configs, and integration
-overhead.
-**Decision**: Use Biome (1.9.4) as the sole linter and formatter. A single `biome.json`
-at workspace root configures both (`lineWidth: 100`, `indentStyle: space`, `indentWidth: 2`,
-`recommended` ruleset with selective overrides). `bun run lint` → `biome check`,
-`bun run format` → `biome format --write`. oxlint also in devDependencies for supplementary
-checks.
-**Consequences**: Single tool, single config, faster lint (Rust-based); no Prettier/ESLint
-conflicts; Biome's rule set smaller than ESLint plugin ecosystem; switching requires
-migrating both lint and format configs.
-**Alternatives Considered**: ESLint + Prettier (rejected: two-tool overhead, slower); dprint
-(rejected: formatter only); oxlint as primary (retained as supplementary; Biome is primary).
+**Status:** Adopted
 
----
+**Context:**
+heliosApp manages concurrent workstreams ("lanes"), each capable of hosting multiple terminals and potentially running background tasks (par tasks). Lanes must be durable, resumable, and observable.
 
-## ADR-008: Three-Tier Test Strategy (Bun / Vitest / Playwright)
+**Decision:**
+Implement **lanes** as first-class orchestration units:
+- Each lane has a **state machine** (idle → active → stale → terminated).
+- Lanes are registered in a **LaneRegistry** with persistent metadata.
+- Par tasks (background processes) can be bound to lanes via **ParBinding**.
+- Lanes transition through well-defined states with events published to the bus for each transition.
+- A **watchdog** monitors for stale or orphaned lanes and triggers recovery.
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: Three testing tiers have different requirements: unit tests need speed, integration
-tests need rich module mocking, E2E tests need real browser automation against the Tauri
-desktop.
-**Decision**:
-- **Unit**: `bun test` — `apps/runtime/tests/unit`, `apps/desktop/tests/unit`, `scripts/tests/`
-- **Integration**: Vitest (2.1.9) — `apps/runtime/tests/integration`; richer mocking
-- **E2E**: Playwright (1.58.2) — `playwright.config.ts`; browser automation against Tauri
-- **DOM env**: `happy-dom` (20.8.7) for unit tests needing browser-like context
-**Consequences**: Unit tests fast (Bun native); integration tests get Vitest module interception;
-E2E tests exercise the full rendering pipeline; three runners add cognitive overhead; coverage
-must be merged from multiple sources for unified report.
-**Alternatives Considered**: Vitest for all (unit tier slower); Jest (slower, transpiler config
-needed); Cypress for E2E (Playwright has better Tauri integration).
+**Consequences:**
+- **Observable concurrency**: Each lane is a trackable entity with clear lifecycle.
+- **Durability**: Lane state can be checkpointed and restored after crashes.
+- **Background task model**: Par tasks are lightweight processes tied to lanes, enabling scripting and automation.
+- **Governance**: Lane state transitions are logged and auditable via the event bus.
+- **Complexity**: State machine enforces constraints; invalid transitions are rejected.
+
+**Code locations:** `/apps/runtime/src/lanes/`, `/apps/runtime/src/lanes/state_machine.ts`, `/apps/runtime/src/lanes/par.ts`, `/apps/runtime/src/lanes/registry.ts`
 
 ---
 
-## ADR-009: Provider Adapter Registry with Health Monitoring
+## ADR-005 | PTY Lifecycle State Machine with Idle Monitoring | Adopted
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: heliosApp must route agent sessions to multiple AI provider backends (Anthropic,
-MLX, llama.cpp, vLLM, MCP, A2A). New providers should be addable without modifying the core
-runtime. Provider health must be monitored to avoid routing sessions to degraded backends.
-**Decision**: `InferenceEngine` interface in `integrations/inference/engine.ts` is the port.
-`InferenceRegistry` in `integrations/inference/registry.ts` manages discovery and lookup.
-A `HealthMonitor` in `integrations/inference/hardware.ts` polls registered engines and marks
-healthy/degraded. Separate provider namespaces: `integrations/inference/` (cloud and local
-LLM), `integrations/mcp/` (tool bridge), `integrations/a2a/` (agent delegation),
-`integrations/acp_client/` (ACP).
-**Consequences**: New providers added by implementing `InferenceEngine` and registering in
-registry; health monitor routes away from degraded providers; multi-protocol from day one;
-registry must handle concurrent registration safely.
-**Alternatives Considered**: Hard-coded switch/case (rejected: not extensible); WASM plugin
-isolation (deferred to future); direct SDK imports (rejected: tight coupling).
+**Status:** Adopted
 
----
+**Context:**
+PTY processes must be managed with lifecycle awareness, resource cleanup, and detection of stalled processes. The runtime must know when a PTY is actively being used vs. idle.
 
-## ADR-010: PTY Lifecycle Manager with Zellij Mux Adapter
+**Decision:**
+Implement a **PTY state machine** with states: uninitialized → idle → spawning → active → stopping → stopped → errored.
+- PTYs are spawned via `Bun.spawn()` and registered in a **PtyRegistry**.
+- An **IdleMonitor** tracks time since last I/O; idle PTYs can be throttled or reaped.
+- **PtyRecord** captures: process ID, dimensions, lifecycle timestamps, and session/lane bindings.
+- State transitions are published as events for observability.
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: Agent sessions require real PTY processes. The runtime must spawn, monitor, and
-clean up PTY processes across concurrent sessions. A terminal multiplexer provides developers
-a unified view of all running sessions.
-**Decision**: PTY lifecycle manager in `apps/runtime/src/pty/` owns process creation, I/O
-piping (`io.ts`), buffer management (`buffers.ts`), idle monitoring (`idle_monitor.ts`), and
-signal handling (`signals.ts`). Zellij mux adapter (`integrations/zellij/`) provides
-terminal multiplexing. tmate and upterm adapters (`integrations/tmate/`, `integrations/upterm/`)
-provide session sharing. xterm.js handles terminal rendering on the UI side.
-**Consequences**: PTY processes isolated per session; Zellij provides keyboard-driven
-navigation; Zellij is an external dependency that must be installed; PTY adapter is the
-most platform-specific component (Unix PTY differs from Windows ConPTY).
-**Alternatives Considered**: node-pty (rejected: Node.js dependency conflicts with Bun);
-tmux adapter (considered; Zellij chosen for Rust-native design); direct `Bun.spawn` without
-PTY (rejected: agents require interactive terminal).
+**Consequences:**
+- **Resource awareness**: Idle processes don't consume unnecessary CPU or memory.
+- **Debuggability**: Timestamp and state history allow post-mortem analysis.
+- **Graceful cleanup**: Known idle/zombie processes can be terminated cleanly.
+- **Integration point**: Desktop client can throttle rendering for idle terminals.
+- **Overhead**: Idle monitoring requires background polling; tuned via configurable intervals.
+
+**Code locations:** `/apps/runtime/src/pty/`, `/apps/runtime/src/pty/state_machine.ts`, `/apps/runtime/src/pty/spawn.ts`, `/apps/runtime/src/pty/idle_monitor.ts`, `/apps/runtime/src/pty/registry.ts`
 
 ---
 
-## ADR-011: Policy Engine with File-Based Rule Store
+## ADR-006 | Transactional Renderer Switching with Rollback | Adopted
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: Operators need to configure which commands are safe, need approval, or are blocked
-per workspace. Rules must reload without restarting the process. The policy must apply to
-both agent-initiated commands and direct developer commands.
-**Decision**: `PolicyEngine` in `apps/runtime/src/policy/engine.ts` evaluates commands via
-`PolicyStorage` which watches per-workspace rule files. Rules use glob or regex patterns with
-priority ordering. `PolicyClassification`: `safe`, `needs-approval`, `blocked`. Blocked/
-needs-approval commands routed to `approval-queue.ts`. Commands affecting protected paths
-detected by `secrets/protected-paths-detector.ts` and escalated.
-**Consequences**: Per-workspace policy customization; live reload on rule file changes;
-central approval queue decouples blocking from evaluation; protected-paths detector
-integrates secrets security with policy enforcement.
-**Alternatives Considered**: In-memory only rules (rejected: not persistent, ops unfriendly);
-OPA/Rego policy language (deferred as future enhancement); no policy layer (rejected: unsafe
-for agent-generated commands).
+**Status:** Adopted
 
----
+**Context:**
+Switching between rendering backends (Ghostty ↔ Rio) must be atomic and recoverable. If a switch fails mid-flight, the system must revert to the previous engine without losing terminal state or data.
 
-## ADR-012: Secrets Vault with EncryptionService and Redaction Engine
+**Decision:**
+Implement **renderer switching as a transaction**:
+1. Query both engines' capabilities.
+2. Prepare the target engine (pre-allocate resources).
+3. Rebind all PTY streams to the new engine.
+4. Publish transition events.
+5. On failure, **rollback**: rebind streams back to the previous engine and emit error event.
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: AI provider API keys must never appear in audit logs, terminal output, or disk
-in plaintext. The runtime handles credentials across multiple workspaces and providers.
-**Decision**: `CredentialStore` in `apps/runtime/src/secrets/credential-store.ts` encrypts
-all secrets via `EncryptionService` (`secrets/encryption.ts`). Access requires a typed
-`CredentialAccessContext`. `RedactionEngine` (`secrets/redaction-engine.ts`) scans PTY
-output with configurable regex rules from `redaction-rules.ts`. `sanitizePayload` in
-`index.ts` redacts `api_key` fields from all audit payloads. `ProtectedPathsDetector`
-escalates policy classification for commands touching credential files.
-**Consequences**: Defense-in-depth: encryption at rest + redaction in transit + policy
-escalation for protected paths; false positive rate tracked per redaction rule; audit trail
-captures every access attempt.
-**Alternatives Considered**: OS keychain only (not portable to all platforms); no redaction
-(rejected: credentials appear in audit logs); plaintext env file storage (rejected: unsafe).
+State is managed in a **SwitchTransaction** object that encapsulates the operation.
+
+**Consequences:**
+- **Atomicity**: Either the switch completes or it's fully reverted; no partial states.
+- **Observability**: Client sees clear success or failure; no ambiguity.
+- **Reliability**: Terminal sessions remain alive if switching fails.
+- **Complexity**: Transaction logic is intricate and must handle all edge cases (crashed processes, missing streams, etc.).
+- **Performance**: Switching may be slow due to rebinding and sync operations.
+
+**Code locations:** `/apps/runtime/src/renderer/switch_transaction.ts`, `/apps/runtime/src/renderer/switch.ts`, `/apps/runtime/src/renderer/rollback.ts`
 
 ---
 
-## ADR-013: InMemoryAuditSink with Ring Buffer and Recovery Bootstrap
+## ADR-007 | Checkpoint-Based Session Recovery and Orphan Reconciliation | Adopted
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: All bus events must be captured for audit and to support crash recovery. The
-audit sink must not block the main bus dispatch path. Processes may crash and must be able
-to recover session state from persisted metadata.
-**Decision**: `InMemoryAuditSink` (`apps/runtime/src/audit/sink.ts`) uses an `AuditRingBuffer`
-with configurable retention (`config/retention.ts`). `exportRecoveryMetadata()` serializes
-active lanes, sessions, and terminals to a JSON-safe structure. `classifyBootstrap(metadata)`
-on restart classifies entities as recoverable (reconcile) or unrecoverable (cleanup). Session
-checkpoints written to disk by `sessions/checkpoint_store.ts`. `exportAuditBundle` returns
-filtered records with redacted payloads.
-**Consequences**: No synchronous I/O on the audit hot path; session recovery deterministic
-from bootstrap classification; in-memory sink loses data on crash (persistent sink is the
-production target); ring buffer prevents unbounded memory growth.
-**Alternatives Considered**: File-based audit from day one (deferred: sync I/O on hot path);
-OpenTelemetry only (rejected: not designed for session replay); event sourcing via NATS
-(deferred: local bus is intentionally in-process).
+**Status:** Adopted
 
----
+**Context:**
+heliosApp must survive crashes. Sessions, lanes, and terminals must be recoverable from persistent state. Orphaned resources must be detected and cleaned up.
 
-## ADR-014: Canary Dependency Management with Changelog and Rollback
+**Decision:**
+Implement a **multi-layer recovery system**:
+1. **Checkpoint format**: Capture session metadata, scrollback buffers, working directories, and shell state.
+2. **Checkpoint scheduler**: Periodically write checkpoints to disk with atomic file operations (temp file → fsync → rename).
+3. **Restoration on startup**: Load latest valid checkpoint and reattach to surviving PTYs.
+4. **Orphan reconciler**: Scan for processes without corresponding session records; clean up or reconcile.
+5. **Safe mode**: If recovery fails, start in safe mode with reduced functionality.
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: The project explicitly targets bleeding-edge dependencies. Bulk updates risk
-accumulating breaking changes. GitHub Actions billing is broken on this account, making
-automated PR-based update bots (Renovate, Dependabot) impractical.
-**Decision**: Three custom scripts implement structured canary workflow:
-- `scripts/deps-canary.ts` — upgrades one dependency, logs old/new version to
-  `deps-changelog.json` and `deps-registry.json`
-- `scripts/deps-status.ts` — reports current vs latest across all workspace packages
-- `scripts/deps-rollback.ts` — reverts a specific dependency to its logged previous version
-`bun run deps:canary`, `deps:status`, `deps:rollback` are the entry points.
-**Consequences**: Individual dependency updates are trackable and reversible; canary upgrade
-testable on feature branch before merge; `deps-changelog.json` grows over time and must be
-periodically pruned; custom scripts must be maintained.
-**Alternatives Considered**: Renovate (rejected: GitHub Actions billing broken); Dependabot
-(same reason); `bun update` without logging (rejected: no rollback).
+**Consequences:**
+- **Durability**: Sessions survive host crashes or abnormal termination.
+- **Partial recovery**: Some sessions may be lost if checkpoints are stale or corrupt.
+- **Disk space**: Scrollback buffers are capped to prevent unbounded growth.
+- **Complexity**: Recovery logic must handle corrupted checkpoints, clock skew, stale references, and concurrent orphans.
+- **Trade-off**: Frequent checkpoints improve recovery coverage but increase I/O overhead.
+
+**Code locations:** `/apps/runtime/src/recovery/`, `/apps/runtime/src/recovery/checkpoint.ts`, `/apps/runtime/src/recovery/restoration.ts`, `/apps/runtime/src/recovery/orphan-reconciler.ts`, `/apps/runtime/src/recovery/watchdog.ts`
 
 ---
 
-## ADR-015: VitePress Documentation Site with Auto-Generated Navigation Index
+## ADR-008 | Workspace and Project Binding Model | Adopted
 
-**Date**: 2026-03-26
-**Status**: Accepted
-**Context**: The project needs browsable, statically deployable documentation covering
-architecture, APIs, and onboarding. Documentation must be openable via `file://` without
-a web server.
-**Decision**: VitePress (1.6.3) at `docs/`. Shell script
-`docs/scripts/generate-doc-index.sh` auto-generates navigation from the docs directory
-tree before each build. `bun run docs:build` → static site in `docs/.vitepress/dist/`.
-GitHub Pages deployment via `.github/workflows/vitepress-pages.yml`.
-**Consequences**: Offline-browsable docs; auto-index keeps navigation in sync without
-manual sidebar config; VitePress Vue-based renderer supports interactive docs components;
-contributors must run `docs:build` to see final output; index script must work on macOS
-and Linux.
-**Alternatives Considered**: Docusaurus (rejected: React-based, heavier, slower builds);
-GitBook (rejected: SaaS, not locally browsable); MkDocs (considered; VitePress chosen
-for TypeScript ecosystem integration).
+**Status:** Adopted
+
+**Context:**
+heliosApp must support multi-project workflows. Users can work with multiple project repositories within a single workspace, and projects must be persistent across sessions.
+
+**Decision:**
+Define a **workspace/project binding model**:
+- **Workspace**: Top-level container with metadata (name, root path, creation timestamp).
+- **ProjectBinding**: Link from workspace to a project (git repository) with status tracking.
+- **WorkspaceStore interface**: Backend-agnostic persistence (can be memory, file-based, or database).
+- Workspaces are queryable by ID or name; projects are indexed within workspaces.
+
+**Consequences:**
+- **Multi-project support**: Users can organize work across repositories.
+- **Durability**: Workspace metadata survives crashes.
+- **Flexibility**: Store implementation can vary (in-memory for testing, file-based for production).
+- **Loose coupling**: Runtime doesn't depend on specific storage backend.
+- **Minimal overhead**: Binding metadata is lightweight; main content is in PTY/lane state.
+
+**Code locations:** `/apps/runtime/src/workspace/types.ts`, `/apps/runtime/src/workspace/workspace.ts`, `/apps/runtime/src/workspace/store.ts`, `/apps/runtime/src/workspace/project.ts`
+
+---
+
+## ADR-009 | Inference Engine Abstraction with Multi-Backend Support | Adopted
+
+**Status:** Adopted
+
+**Context:**
+heliosApp integrates AI inference for code intelligence, completions, and agent functionality. Inference must support multiple backends: local (MLX, llama.cpp) and cloud (OpenAI, Anthropic).
+
+**Decision:**
+Define an **InferenceEngine interface** with multiple implementations:
+```typescript
+interface InferenceEngine {
+  init(): Promise<void>;
+  infer(request): Promise<InferenceResponse>;
+  inferStream(request): AsyncIterable<string>;
+  listModels(): Promise<ModelInfo[]>;
+  healthCheck(): Promise<"healthy" | "degraded" | "unavailable">;
+  terminate(): Promise<void>;
+}
+```
+
+Implementations: `MLXAdapter`, `LlamaCppAdapter`, `AnthropicAdapter`, `VllmAdapter`.
+
+A **hardware detection module** determines available compute (GPU, RAM, CPU cores) to select appropriate engines.
+
+**Consequences:**
+- **Backend agility**: Switch between local and cloud inference without code changes.
+- **Offline-first design**: Local inference (MLX, llama.cpp) works without internet.
+- **Graceful degradation**: If preferred backend unavailable, fall back to cloud or disable features.
+- **Hardware awareness**: Automatically select engines based on system capabilities.
+- **Dependency complexity**: Multiple inference libraries have heavy dependencies (PyTorch, CUDA, etc.).
+
+**Code locations:** `/apps/runtime/src/integrations/inference/`, `/apps/runtime/src/integrations/inference/engine.ts`, `/apps/runtime/src/integrations/inference/mlx-adapter.ts`, `/apps/runtime/src/integrations/inference/llamacpp-adapter.ts`, `/apps/runtime/src/integrations/inference/hardware.ts`
+
+---
+
+## ADR-010 | MCP (Model Context Protocol) Adapter Interface | Adopted
+
+**Status:** Adopted
+
+**Context:**
+heliosApp must integrate with external AI services and tools via a standard protocol. Model Context Protocol (MCP) provides a standardized interface for tool calling and context passing.
+
+**Decision:**
+Implement a minimal **McpAdapter interface**:
+```typescript
+interface McpAdapter {
+  callTool(serverId: string, toolName: string, args: Record<string, unknown>): Promise<unknown>;
+}
+```
+
+The adapter acts as a gateway between heliosApp's inference engines and MCP-compliant tools/servers. Tool invocations are routed through the adapter, which handles transport, serialization, and error handling.
+
+**Consequences:**
+- **Interoperability**: heliosApp can invoke tools from any MCP-compliant server.
+- **Minimal coupling**: Runtime doesn't implement MCP; adapter is a thin bridge.
+- **Future extensibility**: MCP protocol updates are absorbed by the adapter.
+- **No MCP validation**: This adapter does not validate MCP spec compliance (that's done by servers).
+- **Transport agnostic**: Adapter can use stdio, HTTP, or other transports.
+
+**Code locations:** `/apps/runtime/src/integrations/mcp/adapter.ts`
+
+---
+
+## ADR-011 | Quality Gates with Biome Linter and Vitest | Adopted
+
+**Status:** Adopted
+
+**Context:**
+heliosApp is a complex distributed system requiring strict code quality, type safety, and test coverage. Multiple developers may contribute; CI/CD must enforce standards.
+
+**Decision:**
+Implement a **quality gate pipeline**:
+- **Linting & formatting**: Biome (all rules enabled: suspicious, correctness, style, complexity, security).
+- **Type checking**: TypeScript with strict mode (`tsc --noEmit`).
+- **Unit testing**: Vitest for test execution and coverage reporting.
+- **Test pyramid**: Target 70% unit, 20% integration, 10% E2E.
+- **Taskfile orchestration**: Tasks for `quality:quick`, `quality:strict`, and CI lane.
+
+All checks are runnable locally and enforced in CI.
+
+**Consequences:**
+- **Consistency**: Same standards apply to all contributors.
+- **Fast feedback**: Inner-loop checks (`quality:quick`) run in seconds.
+- **Strict safety**: No disabled linting rules; suppressions require justification.
+- **Test confidence**: Coverage metrics track which code is tested.
+- **CI clarity**: Clear pass/fail signals for PRs.
+
+**Code locations:** `/biome.json`, `/Taskfile.yml`, `/package.json` (scripts), `/apps/runtime/package.json`, `/apps/desktop/package.json`
+
+---
+
+## ADR-012 | Desktop Client with Tauri Framework | Adopted
+
+**Status:** Adopted
+
+**Context:**
+heliosApp requires a native desktop application with access to platform APIs (file system, OS windows, system tray, etc.). A web-based UI is insufficient for performance and OS integration.
+
+**Decision:**
+Use **Tauri** for the desktop shell:
+- Tauri provides a lightweight Rust bridge between JavaScript/TypeScript UI and native system APIs.
+- The desktop app (`apps/desktop`) communicates with the runtime (`apps/runtime`) via IPC.
+- UI framework is flexible; currently using Solid.js for the renderer app.
+
+**Consequences:**
+- **Native integration**: Access to file system, OS windows, keyboard shortcuts, system tray.
+- **Performance**: Rust backend for hot-path operations; JS/TS for UI.
+- **Cross-platform**: Single codebase compiles to macOS, Linux, Windows.
+- **Lightweight**: Tauri bundles are smaller than Electron.
+- **Learning curve**: Developers must understand Rust-JS interop and Tauri APIs.
+- **Vendor lock-in**: Migrating away from Tauri would require significant rework.
+
+**Code locations:** `/apps/desktop/src/`, `/apps/renderer/src/` (Solid.js UI)
+
+---
+
+## ADR-013 | Monorepo Build with Bun, TypeScript, and esbuild | Adopted
+
+**Status:** Adopted
+
+**Context:**
+heliosApp must build quickly, support hot reload during development, and produce optimized bundles for production. Build configuration must be simple and maintainable.
+
+**Decision:**
+Use **Bun as runtime and build orchestrator**:
+- `bun run` executes scripts defined in `package.json`.
+- `bun install` manages dependencies with `bun.lock`.
+- `bun build` compiles TypeScript/JavaScript to bundled output.
+- esbuild plugin (`esbuild-plugin-solid`) for Solid.js JSX support.
+- `bun test` runs Vitest tests.
+
+No external build tool (Webpack, Vite, Turbopack) is needed for the current scope.
+
+**Consequences:**
+- **All-in-one runtime**: Bun replaces Node.js + npm + separate build tools.
+- **Speed**: Bun is faster than Node.js for most operations.
+- **TypeScript natively**: No tsc wrapper needed for execution.
+- **Simplified toolchain**: Fewer dependencies, fewer config files.
+- **Single runtime**: Development and build use the same Bun version.
+- **Limited ecosystem**: Fewer Bun plugins than Node.js; some NPM tools may not work.
+
+**Code locations:** `/package.json`, `/bunfig.toml`, `Taskfile.yml`, `/apps/runtime/package.json`, `/apps/desktop/package.json`
+
+---
+
+## ADR-014 | Protocol-First Development with Envelope Validation | Adopted
+
+**Status:** Adopted
+
+**Context:**
+heliosApp is a distributed system with a runtime and multiple clients (desktop, CLI, tools). The protocol between components must be unambiguous and machine-verifiable.
+
+**Decision:**
+**Define protocols before implementation**:
+- Core protocol: `/specs/protocol/v1/envelope.schema.json` (JSON Schema).
+- Topics (events): `/specs/protocol/v1/topics.json` (enumeration).
+- Methods (commands): `/specs/protocol/v1/methods.json` (command catalog).
+- Validation: Envelope validation is performed at the boundary (`LocalBus.publish`, `LocalBus.request`) before processing.
+
+Protocol version is embedded in envelope structure; breaking changes increment the version.
+
+**Consequences:**
+- **Contract clarity**: Clients and runtime agree on what messages are valid.
+- **Interoperability**: Protocol allows external tooling (e.g., CLI clients, test harnesses) to work with heliosApp.
+- **Testability**: Protocol can be tested in isolation from implementation.
+- **Evolution path**: Version numbers allow gradual protocol migration.
+- **Validation overhead**: All envelopes must be validated; invalid messages are rejected with clear errors.
+
+**Code locations:** `/specs/protocol/v1/`, `/apps/runtime/src/protocol/bus.ts` (validation), `/kitty-specs/002-local-bus-v1-protocol-and-envelope/meta.json`
+
+---
+
+## ADR-015 | Streaming Terminal Output with Backpressure Handling | Adopted
+
+**Status:** Adopted
+
+**Context:**
+PTY output (terminal text) arrives continuously and may exceed consumer processing speed. The system must buffer intelligently, report backlog metrics, and not drop data.
+
+**Decision:**
+Use **ReadableStream<Uint8Array>** for PTY output streams:
+- Streams are bound to renderer implementations via `bindStream(ptyId, stream)`.
+- **Backlog metrics** are tracked (depth, buffered bytes) and published via `terminal.output` events.
+- Renderers consume streams at their own pace; backpressure (slow rendering) is observed via depth metrics.
+- No data is dropped; if a renderer falls behind, output is buffered in memory (with size limits).
+
+**Consequences:**
+- **Resource fairness**: Slow renderers don't affect fast ones; each has its own buffer.
+- **Observability**: Client can monitor backlog depth and adjust rendering or throttle input.
+- **Memory safety**: Buffers are capped to prevent unbounded growth; overflow triggers events.
+- **Async-friendly**: Streams integrate naturally with async/await patterns.
+- **Complexity**: Managing multiple concurrent streams requires careful bookkeeping.
+
+**Code locations:** `/apps/runtime/src/renderer/stream_binding.ts`, `/apps/runtime/src/protocol/bus.ts` (backlog_depth metrics), `/apps/runtime/src/pty/io.ts`
+
+---
+
+## ADR-016 | Provider Adapter Pattern for Extensibility | Adopted
+
+**Status:** Adopted
+
+**Context:**
+heliosApp must support multiple provider types (inference engines, MCP servers, external tools, etc.). Adding a new provider should not require changes to core runtime.
+
+**Decision:**
+Define a **provider adapter interface**:
+```typescript
+interface ProviderAdapter {
+  init(): Promise<void>;
+  invoke(method: string, args: unknown): Promise<unknown>;
+  healthCheck(): Promise<"healthy" | "degraded" | "unavailable">;
+  terminate(): Promise<void>;
+}
+```
+
+Each provider type (inference, MCP, tool) implements this interface. A **ProviderRegistry** manages the lifecycle and routing.
+
+**Consequences:**
+- **Plugin architecture**: New providers can be added without modifying runtime.
+- **Uniform interface**: All providers expose the same methods (init, invoke, health, terminate).
+- **Decoupling**: Core runtime doesn't know about specific providers.
+- **Registration overhead**: Registry must track all providers and their availability.
+- **Testing**: Providers can be stubbed or mocked for testing.
+
+**Code locations:** `/apps/runtime/src/providers/adapter.ts`, `/apps/runtime/src/providers/` (registry, lifecycle management)
+
+---
+
+## ADR-017 | Credential and Secrets Redaction in Event Bus | Adopted
+
+**Status:** Adopted
+
+**Context:**
+heliosApp processes environment variables, API keys, credentials, and other sensitive data. These must never be logged or transmitted in plaintext via the event bus.
+
+**Decision:**
+Implement **secrets redaction at the boundary**:
+- Define a set of sensitive patterns (API keys, passwords, tokens).
+- When events are published via the bus, sensitive fields are scanned and redacted.
+- Redaction is applied before storing events in logs or sending to clients.
+- Configuration allows adding custom patterns for application-specific secrets.
+
+**Consequences:**
+- **Security**: Sensitive data doesn't leak via logs, telemetry, or wire protocols.
+- **Operational visibility**: Non-sensitive information still flows through for debugging.
+- **Performance**: Redaction adds overhead; applied selectively to high-risk events.
+- **Completeness**: False negatives (undetected secrets) are a risk; patterns must be comprehensive.
+- **User education**: Users must not store credentials in terminal commands visible to the system.
+
+**Code locations:** `/apps/runtime/src/secrets/`, `/apps/runtime/src/protocol/boundary_adapter.ts` (redaction layer)
+
+---
+
+## ADR-018 | Event Audit Log with Sequence Numbers | Adopted
+
+**Status:** Adopted
+
+**Context:**
+heliosApp must provide an audit trail of all significant events for debugging, compliance, and forensics. Event order matters; sequence must be preserved.
+
+**Decision:**
+Implement an **audit log**:
+- All events are stored with a monotonic sequence number (per-topic).
+- Events include: ID, type, topic, timestamp, correlation_id, context IDs, payload, and sequence.
+- The audit log is queryable by topic, correlation_id, or time range.
+- Audit records include outcome (accepted/rejected) and validation errors.
+
+**Consequences:**
+- **Debuggability**: Post-mortem analysis can reconstruct system state.
+- **Compliance**: Audit trail satisfies regulatory requirements.
+- **Performance**: Writing audit logs is blocking; async writing or batching mitigates latency.
+- **Storage**: Audit logs can grow large; retention policies must be enforced.
+- **Privacy**: Audit log contains sensitive data; must be protected and redacted.
+
+**Code locations:** `/apps/runtime/src/audit/`, `/apps/runtime/src/audit/bus-subscriber.ts`, `/apps/runtime/src/protocol/bus.ts` (audit recording)
+
+---
+
+## ADR-019 | Zellij Session Multiplexer Integration | Adopted
+
+**Status:** Adopted
+
+**Context:**
+heliosApp must manage multiple concurrent terminal sessions. Zellij is a modern session multiplexer (like tmux/screen) that provides windowing and layout management.
+
+**Decision:**
+Integrate with **Zellij**:
+- Each lane can host a Zellij session for managing multiple panes/tabs.
+- Zellij session lifecycle is tied to lane lifecycle.
+- Terminal bindings map PTY output to Zellij panes.
+- Zellij layout and configuration is managed via heliosApp API.
+
+**Consequences:**
+- **Window management**: Users get native windowing within a lane.
+- **Persistence**: Zellij sessions can be serialized and restored.
+- **Complexity**: Adding a dependency on Zellij and learning its APIs.
+- **Performance**: Zellij adds overhead; suitable for multi-pane workloads, less so for single terminals.
+- **Alternative**: Could use tmux instead (more stable, wider adoption); Zellij chosen for better Rust ecosystem fit.
+
+**Code locations:** `/apps/runtime/src/integrations/zellij/`, `/kitty-specs/009-zellij-mux-session-adapter/meta.json`
+
+---
+
+## ADR-020 | Continuous Integration with GitHub Actions and Quality Gates | Adopted
+
+**Status:** Adopted
+
+**Context:**
+heliosApp is a multi-component system with strict quality requirements. CI must enforce: build, lint, type checking, unit tests, security scanning, and documentation build.
+
+**Decision:**
+Use **GitHub Actions** with quality gates:
+- **lint-test.yml**: Biome linting, TypeScript checking, Vitest unit tests on every PR.
+- **security.yml**: Dependency vulnerability scanning, secret detection, SAST analysis.
+- **build.yml**: Full monorepo build and artifact generation.
+- **docs.yml**: VitePress documentation build validation.
+- Blocking checks: All tests and lints must pass before merge.
+- Non-blocking checks: Security and docs warnings are reported but don't block.
+
+**Consequences:**
+- **Automation**: No manual testing; CI catches regressions and linting issues.
+- **Transparency**: All checks are visible to reviewers; clear pass/fail signals.
+- **Speed**: GitHub Actions is fast for Node.js/TypeScript workloads.
+- **Cost**: Free for open-source; paid for private repos.
+- **Complexity**: Workflow YAML can be verbose; multiple workflows required for full coverage.
+
+**Code locations:** `/.github/workflows/`, `/.oxlintrc.json`, `/biome.json`, `/Taskfile.yml`
+
+---
+
+## Summary Table
+
+| ID | Title | Status | Key Insight |
+|-------|-------|--------|--------------|
+| ADR-001 | Local Bus Envelope Protocol | Adopted | Unified protocol for commands, events, responses with correlation tracking. |
+| ADR-002 | Bun Monorepo with Workspaces | Adopted | Single version of deps, shared tooling, fast builds. |
+| ADR-003 | Pluggable Renderer Backends | Adopted | Adapter pattern for Ghostty/Rio with hot-swap support. |
+| ADR-004 | Lane Orchestration with Par Tasks | Adopted | First-class lanes with state machine and durability. |
+| ADR-005 | PTY Lifecycle State Machine | Adopted | Observable PTY lifecycle with idle monitoring. |
+| ADR-006 | Transactional Renderer Switching | Adopted | Atomic switching with rollback on failure. |
+| ADR-007 | Checkpoint-Based Recovery | Adopted | Crash-safe sessions via periodic checkpoints + orphan reconciliation. |
+| ADR-008 | Workspace/Project Binding Model | Adopted | Multi-project support with persistent metadata. |
+| ADR-009 | Inference Engine Abstraction | Adopted | Multi-backend (MLX, llama.cpp, OpenAI) with hardware detection. |
+| ADR-010 | MCP Adapter Interface | Adopted | Lightweight bridge to MCP-compliant tools/servers. |
+| ADR-011 | Quality Gates (Biome + Vitest) | Adopted | Strict linting, type checking, test coverage enforced in CI. |
+| ADR-012 | Desktop with Tauri | Adopted | Native desktop app with Rust-JS bridge for OS integration. |
+| ADR-013 | Build with Bun/esbuild | Adopted | All-in-one runtime, fast build, simplified toolchain. |
+| ADR-014 | Protocol-First Development | Adopted | Schemas define envelopes, topics, methods; validation at boundaries. |
+| ADR-015 | Streaming Output with Backpressure | Adopted | ReadableStream for PTY output with backlog metrics. |
+| ADR-016 | Provider Adapter Pattern | Adopted | Extensible adapters for inference, MCP, tools. |
+| ADR-017 | Secrets Redaction in Events | Adopted | Sensitive data scrubbed from event bus and logs. |
+| ADR-018 | Event Audit Log with Sequences | Adopted | Queryable audit trail with monotonic sequences per topic. |
+| ADR-019 | Zellij Integration | Adopted | Session multiplexer for multi-pane workloads. |
+| ADR-020 | GitHub Actions CI & Gates | Adopted | Automated lint, test, security, docs checks with blocking gates. |
+
+---
+
+## Cross-References
+
+- **Protocol Specifications**: See `/specs/protocol/v1/` for envelope schemas, topics, and methods.
+- **Kitty Specs**: See `/kitty-specs/` for detailed requirements and traceability matrices.
+- **Code Entity Map**: See `docs/reference/CODE_ENTITY_MAP.md` for mapping decisions to implementation.
+- **Functional Requirements**: See `FUNCTIONAL_REQUIREMENTS.md` for features that depend on these decisions.

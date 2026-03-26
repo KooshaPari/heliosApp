@@ -39,7 +39,7 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
-            const files = data.map(f => `${f.filename}::${f.status}`);
+            const files = data.map(f => f.filename);
             core.setOutput('files', JSON.stringify(files));
             console.log('Changed files:', files);
 
@@ -56,11 +56,7 @@ jobs:
         run: |
           FILES='${{ steps.files.outputs.files }}'
           FILES_ARRAY=$(echo "$FILES" | jq -r '.[]' | tr '\n' ' ')
-          if [ -z "$FILES_ARRAY" ]; then
-            echo '{"passed":true,"findings":[],"timestamp":"'"$(date -Iseconds)"'"}' > compliance-result.json
-          else
-            bun scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>compliance-stderr.log
-          fi
+          bun run scripts/compliance-checker.ts --json $FILES_ARRAY > compliance-result.json 2>compliance-stderr.log
           cat compliance-result.json
           if [ -s compliance-stderr.log ]; then
             echo "::warning::Compliance checker stderr:"
@@ -89,10 +85,10 @@ jobs:
         with:
           script: |
             const findings = JSON.parse('${{ steps.results.outputs.findings }}');
-
+            
             let comment = '## Compliance Check - Violations Found\n\n';
             comment += `Found ${findings.length} constitution violation(s):\n\n`;
-
+            
             findings.forEach((f, i) => {
               comment += `### ${i + 1}. ${f.check}`;
               if (f.line) {
@@ -109,10 +105,10 @@ jobs:
               comment += '\n\n';
               comment += `**Remediation:** ${f.remediationHint}\n\n`;
             });
-
+            
             comment += '---\n';
             comment += '**Note:** To proceed with an exception, create an ADR in `/docs/adrs/` and link it in the PR description.\n';
-
+            
             github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,

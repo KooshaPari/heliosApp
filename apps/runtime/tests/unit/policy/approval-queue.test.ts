@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { test, expect, describe } from "bun:test";
 import { ApprovalQueue, ApprovalStatus } from "../../../src/policy/approval-queue";
 
 describe("ApprovalQueue", () => {

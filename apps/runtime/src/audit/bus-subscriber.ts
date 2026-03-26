@@ -1,5 +1,5 @@
-import { AUDIT_EVENT_TYPES, createAuditEvent } from "./event";
 import type { AuditSink } from "./sink";
+import { createAuditEvent, AUDIT_EVENT_TYPES } from "./event";
 
 /**
  * Bus event topic to audit event type mapping.
@@ -68,7 +68,10 @@ export class BusAuditSubscriber {
     this.unsubscribe = bus.subscribe("*", async (event: BusEvent) => {
       try {
         await this.handleBusEvent(event, sink);
-      } catch (_err) {}
+      } catch (err) {
+        // Log error but do not throw; do not block bus dispatch
+        console.error("[BusAuditSubscriber] Error handling bus event:", err);
+      }
     });
   }
 
@@ -93,6 +96,8 @@ export class BusAuditSubscriber {
     const auditEventType = TOPIC_TO_AUDIT_TYPE[event.topic];
 
     if (!auditEventType) {
+      // Unknown topic: log warning but continue
+      console.warn(`[BusAuditSubscriber] Unknown bus topic: ${event.topic}`);
       // Optionally create a generic audit event for unknown topics
       // For now, skip unknown topics to avoid noise
       return;

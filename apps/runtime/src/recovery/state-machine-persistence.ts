@@ -1,12 +1,14 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
+import { promises as fs } from "fs";
+import path from "path";
 import type { RecoveryState } from "./state-machine-types.js";
 
 export function getRecoveryStatePath(recoveryDataDir: string): string {
   return path.join(recoveryDataDir, "recovery", "recovery-state.json");
 }
 
-export async function loadRecoveryState(recoveryDataDir: string): Promise<RecoveryState | null> {
+export async function loadRecoveryState(
+  recoveryDataDir: string,
+): Promise<RecoveryState | null> {
   try {
     const statePath = getRecoveryStatePath(recoveryDataDir);
     const data = await fs.readFile(statePath, "utf-8");
@@ -18,7 +20,7 @@ export async function loadRecoveryState(recoveryDataDir: string): Promise<Recove
 
 export async function persistRecoveryState(
   recoveryDataDir: string,
-  state: RecoveryState
+  state: RecoveryState,
 ): Promise<void> {
   try {
     const statePath = getRecoveryStatePath(recoveryDataDir);
@@ -28,7 +30,9 @@ export async function persistRecoveryState(
     const tempPath = `${statePath}.tmp`;
     await fs.writeFile(tempPath, JSON.stringify(state, null, 2));
     await fs.rename(tempPath, statePath);
-  } catch (_err) {}
+  } catch (err) {
+    console.error("Failed to persist recovery state:", err);
+  }
 }
 
 export async function deleteRecoveryState(recoveryDataDir: string): Promise<void> {

@@ -1,14 +1,14 @@
 import { describe, expect, it, mock } from "bun:test";
 import {
-  type EventBus,
-  generateCorrelationId,
-  type MuxEvent,
   MuxEventEmitter,
   MuxEventType,
-  type PaneAddedEvent,
-  type PaneDimensionRejectedEvent,
+  generateCorrelationId,
+  type EventBus,
+  type MuxEvent,
   type SessionCreatedEvent,
+  type PaneAddedEvent,
   type TabSwitchedEvent,
+  type PaneDimensionRejectedEvent,
 } from "../events.js";
 
 function makeBus(): EventBus & { events: MuxEvent[] } {
@@ -98,7 +98,7 @@ describe("MuxEventEmitter", () => {
     });
 
     await new Promise(r => setTimeout(r, 10));
-    expect(bus.events[0]?.correlationId).toBe("custom-123");
+    expect(bus.events[0]!.correlationId).toBe("custom-123");
   });
 
   it("emits pane.dimension_rejected events", async () => {
@@ -115,7 +115,7 @@ describe("MuxEventEmitter", () => {
     });
 
     await new Promise(r => setTimeout(r, 10));
-    expect(bus.events[0]?.type).toBe("mux.pane.dimension_rejected");
+    expect(bus.events[0]!.type).toBe("mux.pane.dimension_rejected");
   });
 
   it("swallows bus publish failures without throwing", async () => {
@@ -145,9 +145,7 @@ describe("MuxEventEmitter", () => {
     const bus: EventBus = {
       publish: mock(async () => {
         callCount++;
-        if (callCount === 1) {
-          throw new Error("transient");
-        }
+        if (callCount === 1) throw new Error("transient");
       }),
     };
     const emitter = new MuxEventEmitter(bus);

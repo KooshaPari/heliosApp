@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
-import type { ZellijCli } from "../cli.js";
-import { TabNotFoundError } from "../errors.js";
-import { ZellijPaneManager } from "../panes.js";
+import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { ZellijTabManager } from "../tabs.js";
+import { ZellijPaneManager } from "../panes.js";
 import { TopologyTracker } from "../topology.js";
+import { TabNotFoundError } from "../errors.js";
+import type { ZellijCli } from "../cli.js";
 import type { PtyManagerInterface } from "../types.js";
 
 /**
@@ -72,7 +72,7 @@ describe("ZellijTabManager", () => {
       await tabManager.createTab("test-session", "work");
 
       const runMock = cli.run as ReturnType<typeof mock>;
-      const callArgs = runMock.mock.calls[0]?.[0] as string[];
+      const callArgs = runMock.mock.calls[0]![0] as string[];
       expect(callArgs).toContain("new-tab");
       expect(callArgs).toContain("--name");
       expect(callArgs).toContain("work");

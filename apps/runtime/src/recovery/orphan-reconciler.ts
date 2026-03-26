@@ -1,5 +1,5 @@
-import { randomUUID } from "node:crypto";
 import type { LocalBus } from "../protocol/bus.js";
+import { randomUUID } from "crypto";
 
 export interface OrphanItem {
   type: "pty" | "zellij_session" | "par_lane" | "share_worker" | "temp_file";
@@ -80,14 +80,21 @@ export class OrphanReconciler {
             }
           }
         } else if (item.type === "temp_file" && item.path) {
-          const { promises: fs } = await import("node:fs");
+          const { promises: fs } = await import("fs");
           await fs.unlink(item.path);
           removed++;
         }
-      } catch (_err) {}
+      } catch (err) {
+        console.error(`Failed to cleanup orphan ${item.id}:`, err);
+      }
     }
 
     const reviewPending = report.needsReview.length;
+
+    // Log cleanup result
+    console.log(
+      `Orphan cleanup: ${terminated} terminated, ${removed} removed, ${reviewPending} pending review`
+    );
 
     // Publish cleanup event
     if (this.bus) {
@@ -112,8 +119,8 @@ export class OrphanReconciler {
   }
 
   private async scanOrphanPTYs(
-    _safeToTerminate: OrphanItem[],
-    _needsReview: OrphanItem[]
+    safeToTerminate: OrphanItem[],
+    needsReview: OrphanItem[]
   ): Promise<void> {
     // In a real implementation, this would scan /proc or use Bun/Node APIs
     // to find PTY processes owned by heliosApp but not associated with restored sessions
@@ -121,8 +128,8 @@ export class OrphanReconciler {
   }
 
   private async scanStaleZelijjSessions(
-    _safeToTerminate: OrphanItem[],
-    _needsReview: OrphanItem[]
+    safeToTerminate: OrphanItem[],
+    needsReview: OrphanItem[]
   ): Promise<void> {
     // In a real implementation, this would call zellij list-sessions
     // and compare against restored session IDs
@@ -131,11 +138,11 @@ export class OrphanReconciler {
 
   private async scanStaleTempFiles(
     safeToTerminate: OrphanItem[],
-    _needsReview: OrphanItem[]
+    needsReview: OrphanItem[]
   ): Promise<void> {
     try {
-      const { promises: fs } = await import("node:fs");
-      const path = await import("node:path");
+      const { promises: fs } = await import("fs");
+      const path = await import("path");
 
       // Look for stale temp files in recovery directory
       // This is a simplified version; real implementation would be more thorough
@@ -156,6 +163,8 @@ export class OrphanReconciler {
       } catch {
         // Recovery directory doesn't exist
       }
-    } catch (_err) {}
+    } catch (err) {
+      console.error("Failed to scan for stale temp files:", err);
+    }
   }
 }

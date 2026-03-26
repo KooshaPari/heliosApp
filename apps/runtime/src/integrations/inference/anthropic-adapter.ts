@@ -97,9 +97,7 @@ export class AnthropicInferenceEngine implements InferenceEngine {
   }
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
-    if (!this.apiKey) {
-      return "unavailable";
-    }
+    if (!this.apiKey) return "unavailable";
     try {
       const response = await fetch(`${this.endpoint}/v1/messages`, {
         method: "POST",

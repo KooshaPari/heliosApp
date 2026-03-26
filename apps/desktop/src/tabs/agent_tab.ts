@@ -1,4 +1,4 @@
-import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
+import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
 
 export interface AgentAction {
   timestamp: string;
@@ -26,6 +26,7 @@ export interface AgentTabState extends TabState {
 export class AgentTab extends TabSurface {
   private agentStatus: "idle" | "running" | "error" = "idle";
   private actions: AgentAction[] = [];
+  protected override errorMessage: string | null = null;
   private contentEl: HTMLElement | null = null;
 
   constructor() {
@@ -152,6 +153,7 @@ export class AgentTab extends TabSurface {
     restartBtn.style.fontSize = "12px";
     restartBtn.addEventListener("click", () => {
       this.agentStatus = "running";
+      console.log("Restart agent action triggered");
     });
 
     const logBtn = document.createElement("button");
@@ -164,8 +166,7 @@ export class AgentTab extends TabSurface {
     logBtn.style.cursor = "pointer";
     logBtn.style.fontSize = "12px";
     logBtn.addEventListener("click", () => {
-      // Open log panel
-      console.debug("Log button clicked for agent tab");
+      console.log("View full log action triggered");
     });
 
     const copyBtn = document.createElement("button");
@@ -182,7 +183,7 @@ export class AgentTab extends TabSurface {
       try {
         await navigator.clipboard.writeText(text);
       } catch {
-        // Clipboard access may be denied
+        console.error("Failed to copy to clipboard");
       }
     });
 

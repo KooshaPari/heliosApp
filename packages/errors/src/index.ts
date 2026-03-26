@@ -40,14 +40,10 @@ export class HeliosAppError extends Error {
   readonly details?: Record<string, unknown>;
   readonly fatal: boolean;
 
-  constructor(
-    code: ErrorCode,
-    message: string,
-    options?: {
-      details?: Record<string, unknown>;
-      fatal?: boolean;
-    }
-  ) {
+  constructor(code: ErrorCode, message: string, options?: {
+    details?: Record<string, unknown>;
+    fatal?: boolean;
+  }) {
     super(message);
     this.name = "HeliosAppError";
     this.code = code;

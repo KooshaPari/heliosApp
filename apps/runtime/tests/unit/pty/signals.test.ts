@@ -1,16 +1,16 @@
 import { describe, expect, it } from "bun:test";
-import { InMemoryBusPublisher } from "../../../src/pty/events.js";
-import type { PtyRecord } from "../../../src/pty/registry.js";
-import { PtyRegistry } from "../../../src/pty/registry.js";
-import type { SignalHistoryMap } from "../../../src/pty/signals.js";
 import {
-  InvalidDimensionsError,
   resize,
-  SignalHistory,
-  sendSighup,
   terminate,
+  sendSighup,
+  SignalHistory,
+  InvalidDimensionsError,
 } from "../../../src/pty/signals.js";
+import type { SignalHistoryMap } from "../../../src/pty/signals.js";
+import { PtyRegistry } from "../../../src/pty/registry.js";
+import type { PtyRecord } from "../../../src/pty/registry.js";
 import { PtyLifecycle } from "../../../src/pty/state_machine.js";
+import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
   return {
@@ -61,7 +61,7 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(h.length).toBe(2);
-    expect(h.getAll()[0]?.signal).toBe("SIGTERM");
+    expect(h.getAll()[0]!.signal).toBe("SIGTERM");
   });
 
   it("bounds history to maxRecords", () => {
@@ -88,7 +88,7 @@ describe("SignalHistory", () => {
       pid: 1,
     });
     expect(h.length).toBe(2);
-    expect(h.getAll()[0]?.signal).toBe("SIGTERM");
+    expect(h.getAll()[0]!.signal).toBe("SIGTERM");
   });
 });
 
@@ -172,8 +172,11 @@ describe("resize", () => {
 
 describe("terminate", () => {
   it("terminates with SIGTERM and cleans up", async () => {
+    const pid = spawnShellProcess() as number;
+    pidsToCleanup.push(pid);
+
     const registry = new PtyRegistry();
-    const record = makeRecord({ pid: 99998 });
+    const record = makeRecord({ pid });
     registry.register(record);
     const lifecycle = new PtyLifecycle(record.ptyId, "active");
     const historyMap: SignalHistoryMap = new Map();
@@ -237,8 +240,21 @@ describe("terminate", () => {
 });
 
 describe("sendSighup", () => {
-  it("records signal delivery result", () => {
-    // Use non-existent PID to avoid sending signals to test process
+  it("records successful delivery", () => {
+    // Spawn a real child so SIGHUP has a valid target (not the test runner).
+    const pid = spawnShellProcess();
+    pidsToCleanup.push(pid);
+
+    const record = makeRecord({ pid });
+    const historyMap: SignalHistoryMap = new Map();
+    const bus = new InMemoryBusPublisher();
+    const envelope = sendSighup(record, historyMap, bus);
+    expect(envelope.outcome).toBe("delivered");
+    expect(envelope.signal).toBe("SIGHUP");
+    expect(historyMap.get(record.ptyId)?.length).toBe(1);
+  });
+
+  it("records failed delivery for dead process", () => {
     const record = makeRecord({ pid: 999999 });
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();

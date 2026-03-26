@@ -73,6 +73,7 @@ export async function registerRio(
   if (!isRioEnabled(config)) {
     // Zero-cost path: do nothing.
     if (typeof console !== "undefined") {
+      console.debug("Rio renderer: disabled by feature flag");
     }
     return;
   }
@@ -81,13 +82,15 @@ export async function registerRio(
   let backendModule: typeof import("./backend.js");
   try {
     backendModule = await import("./backend.js");
-  } catch (_err) {
+  } catch (err) {
+    console.error("Rio renderer: failed to load backend module", err);
     return;
   }
 
   // Detect binary availability.
   const available = await detectRioBinary();
   if (!available) {
+    console.warn("Rio renderer: feature flag is enabled but rio binary not found on PATH");
     return;
   }
 
@@ -121,35 +124,7 @@ export async function handleRioToggle(
 ): Promise<ToggleEvent[]> {
   const events: ToggleEvent[] = [];
 
-  if (newEnabled) {
-    // Enabling rio.
-    const existing = registry.get("rio");
-    if (existing) {
-      // Already registered, just re-enable.
-      (existing as RioBackend).setEnabled();
-    } else {
-      // Dynamically import and register.
-      const available = await detectRioBinary();
-      if (!available) {
-        events.push({ type: "renderer.rio.enabled" });
-        return events;
-      }
-
-      let backendModule: typeof import("./backend.js");
-      try {
-        backendModule = await import("./backend.js");
-      } catch {
-        events.push({ type: "renderer.rio.enabled" });
-        return events;
-      }
-
-      const backend = new backendModule.RioBackend();
-      backend.setRegistry(registry);
-      registry.register(backend);
-    }
-    // Do NOT automatically switch to rio.
-    events.push({ type: "renderer.rio.enabled" });
-  } else {
+  if (!newEnabled) {
     // Disabling rio.
     const rioAdapter = registry.get("rio") as RioBackend | undefined;
     if (rioAdapter) {
@@ -185,6 +160,36 @@ export async function handleRioToggle(
       }
     }
     events.push({ type: "renderer.rio.disabled" });
+  } else {
+    // Enabling rio.
+    const existing = registry.get("rio");
+    if (existing) {
+      // Already registered, just re-enable.
+      (existing as RioBackend).setEnabled();
+    } else {
+      // Dynamically import and register.
+      const available = await detectRioBinary();
+      if (!available) {
+        console.warn("Rio renderer: feature flag enabled but rio binary not found");
+        events.push({ type: "renderer.rio.enabled" });
+        return events;
+      }
+
+      let backendModule: typeof import("./backend.js");
+      try {
+        backendModule = await import("./backend.js");
+      } catch {
+        console.error("Rio renderer: failed to load backend module during toggle");
+        events.push({ type: "renderer.rio.enabled" });
+        return events;
+      }
+
+      const backend = new backendModule.RioBackend();
+      backend.setRegistry(registry);
+      registry.register(backend);
+    }
+    // Do NOT automatically switch to rio.
+    events.push({ type: "renderer.rio.enabled" });
   }
 
   return events;
@@ -242,7 +247,7 @@ export class RioToggleQueue {
     // Resolve all but last with queued event.
     const last = this._pending[this._pending.length - 1]!;
     for (let i = 0; i < this._pending.length - 1; i++) {
-      this._pending[i]?.resolve([{ type: "renderer.rio.toggle_queued" }]);
+      this._pending[i]!.resolve([{ type: "renderer.rio.toggle_queued" }]);
     }
     this._pending = [];
     return last;

@@ -117,7 +117,7 @@ const laneLocks = new Map<string, Promise<void>>();
 
 export async function withLaneLock<T>(laneId: string, fn: () => Promise<T>): Promise<T> {
   const prev = laneLocks.get(laneId) ?? Promise.resolve();
-  let resolve!: () => void;
+  let resolve: () => void;
   const next = new Promise<void>(r => {
     resolve = r;
   });
@@ -127,7 +127,7 @@ export async function withLaneLock<T>(laneId: string, fn: () => Promise<T>): Pro
   try {
     return await fn();
   } finally {
-    resolve?.();
+    resolve!();
     // Clean up if this is the last in chain
     if (laneLocks.get(laneId) === next) {
       laneLocks.delete(laneId);

@@ -5,9 +5,9 @@
  * well-formed envelopes with auto-generated IDs and timestamps.
  */
 
+import type { CommandEnvelope, ResponseEnvelope, EventEnvelope, Envelope } from "./types.js";
+import { validationError, backpressureError } from "./errors.js";
 import type { BusError } from "./errors.js";
-import { backpressureError, validationError } from "./errors.js";
-import type { CommandEnvelope, Envelope, EventEnvelope, ResponseEnvelope } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -94,16 +94,7 @@ export function createResponse(
     payload,
   };
   if (error !== undefined) {
-    return {
-      ...base,
-      error: {
-        code: error.code,
-        message: error.message,
-        ...(error.details && typeof error.details === "object"
-          ? { details: error.details as Record<string, unknown> }
-          : {}),
-      },
-    };
+    return { ...base, error };
   }
   return base;
 }
@@ -163,24 +154,24 @@ export function validateEnvelope(input: unknown): ValidationResult {
   const envelope = input as Record<string, unknown>;
 
   // --- Required base fields ---
-  if (typeof envelope.id !== "string" || envelope.id === "") {
+  if (typeof envelope["id"] !== "string" || envelope["id"] === "") {
     return fail('Missing or empty "id" field');
   }
-  if (typeof envelope.correlation_id !== "string" || envelope.correlation_id === "") {
+  if (typeof envelope["correlation_id"] !== "string" || envelope["correlation_id"] === "") {
     return fail('Missing or empty "correlation_id" field');
   }
-  if (typeof envelope.timestamp !== "number" || !(envelope.timestamp > 0)) {
+  if (typeof envelope["timestamp"] !== "number" || !(envelope["timestamp"] > 0)) {
     return fail('Missing or invalid "timestamp" field (must be a positive number)');
   }
 
-  const type = envelope.type;
+  const type = envelope["type"];
   if (type !== "command" && type !== "response" && type !== "event") {
     return fail(`Unknown envelope type: ${String(type)}`, { type });
   }
 
   // --- Type-specific fields ---
   if (type === "command") {
-    if (typeof envelope.method !== "string" || envelope.method === "") {
+    if (typeof envelope["method"] !== "string" || envelope["method"] === "") {
       return fail('Command envelope requires a non-empty "method" field');
     }
     if (!("payload" in envelope)) {
@@ -189,13 +180,13 @@ export function validateEnvelope(input: unknown): ValidationResult {
   }
 
   if (type === "response") {
-    if (typeof envelope.method !== "string" || envelope.method === "") {
+    if (typeof envelope["method"] !== "string" || envelope["method"] === "") {
       return fail('Response envelope requires a non-empty "method" field');
     }
   }
 
   if (type === "event") {
-    if (typeof envelope.topic !== "string" || envelope.topic === "") {
+    if (typeof envelope["topic"] !== "string" || envelope["topic"] === "") {
       return fail('Event envelope requires a non-empty "topic" field');
     }
     if (!("payload" in envelope)) {
@@ -204,13 +195,13 @@ export function validateEnvelope(input: unknown): ValidationResult {
   }
 
   // --- Payload size check ---
-  if ("payload" in envelope && envelope.payload !== undefined && envelope.payload !== null) {
-    const payload = envelope.payload;
+  if ("payload" in envelope && envelope["payload"] !== undefined && envelope["payload"] !== null) {
+    const payload = envelope["payload"];
     const topicOrMethod =
-      typeof envelope.topic === "string"
-        ? envelope.topic
-        : typeof envelope.method === "string"
-          ? envelope.method
+      typeof envelope["topic"] === "string"
+        ? envelope["topic"]
+        : typeof envelope["method"] === "string"
+          ? envelope["method"]
           : "unknown";
 
     // Fast-path: Buffer/ArrayBuffer — check byteLength directly.

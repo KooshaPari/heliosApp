@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import type { BindingTriple } from "../../../src/registry/binding_triple.js";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
+import type { BindingTriple } from "../../../src/registry/binding_triple.js";
 
 describe("Lane/Session Lifecycle Integration", () => {
   let registry: TerminalRegistry;
@@ -83,7 +83,7 @@ describe("Lane/Session Lifecycle Integration", () => {
       const lanes = ["lane-1", "lane-2"];
       const terminals = [];
 
-      for (const lane of lanes) {
+      for (let lane of lanes) {
         for (let i = 0; i < 3; i++) {
           const terminalId = `terminal-${lane}-${i}`;
           terminals.push(terminalId);

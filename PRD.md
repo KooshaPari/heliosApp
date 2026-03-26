@@ -1,445 +1,252 @@
-# heliosApp — Product Requirements Document
+# Product Requirements Document — heliosApp
 
+**Status:** ACTIVE
+**Owner:** Phenotype Engineering
+**Last Updated:** 2026-03-26
 **Version:** 2.0
-**Status:** Active
-**Date:** 2026-03-26
-**Derived from:** Codebase analysis of `apps/runtime`, `apps/desktop`, `apps/renderer`, `packages/`
 
 ---
 
-## Product Vision
+## Overview
 
-heliosApp is an agent-first desktop IDE for developers who run AI coding agents at scale.
-It provides a unified terminal-and-chat workspace where multiple parallel agent sessions
-("lanes") run simultaneously, each with its own PTY, lifecycle state machine, policy gate,
-and runtime bus connection.
+heliosApp is a native desktop application and runtime for agent-driven software engineering. It provides a unified interface for developers and AI agents to collaborate within isolated workspace lanes, each containing PTY terminal sessions, multiplexed shell environments, and a local bus protocol for command/event coordination. The system is built as a Bun monorepo (`apps/runtime`, `apps/desktop`) with TypeScript throughout, targeting macOS (Apple Silicon) and Linux (NVIDIA GPU) as primary platforms.
 
-The application spans three tiers:
-
-1. **`@helios/runtime`** (`apps/runtime`) — TypeScript runtime owning the in-process message
-   bus, session/lane/workspace state machines, terminal buffers, PTY lifecycle, audit ledger,
-   secrets vault, credential redaction, policy engine, and pluggable inference engine registry.
-2. **`@helios/desktop`** (`apps/desktop`) — SolidJS desktop shell owning lane panels,
-   workspace views, approval workflows, renderer-engine settings, and the runtime HTTP client.
-3. **`@helios/renderer`** (`apps/renderer`) — SolidJS chat UI, terminal tabs, sidebar, and
-   keyboard shortcuts rendered inside the Tauri window.
-
-The long-term goal is a Cursor/Windsurf-quality native desktop experience backed by a
-unified inference layer that spans cloud providers (Anthropic), local runtimes (MLX,
-llama.cpp), and server deployments (vLLM), with full security governance (secret redaction,
-policy-gated command execution, and tamper-evident audit).
+The MVP target is a persistent chat-plus-terminal interface where a user can issue natural language prompts, observe real-time streamed responses, watch the agent's tool calls inline, and interact with spawned terminal sessions — all within a single desktop application.
 
 ---
 
-## Target Users
+## E1: Runtime Orchestration
 
-- **Agent-workflow engineers** — developers who run many simultaneous AI coding sessions and
-  need fine-grained control over lane lifecycle, approval gates, and session recovery.
-- **AI-assisted developers** — individual engineers who want a native IDE shell wrapping LLM
-  chat with real terminal access, model selection, and tool-call visibility.
-- **Platform operators** — teams requiring audit trails, secret redaction, and policy gates
-  before deploying agent-generated commands in sensitive environments.
+### E1.1: Local Bus Protocol
+As the runtime, I want a unified message bus so that workspace, lane, session, and terminal entities can communicate via typed commands, events, and responses without tight coupling.
 
----
+**Acceptance Criteria:**
+- `LocalBusEnvelope` protocol with three envelope types: command (method-based), event (topic-based pub/sub), response (success or error).
+- All envelopes carry: `id`, `correlation_id`, `type`, `ts`, and context IDs (`workspace_id`, `lane_id`, `session_id`, `terminal_id`).
+- Correlation tracking via `correlation_id` links commands to their events and responses.
+- Lifecycle ordering enforcement: state machine transitions are validated and invalid ordering is rejected.
+- `InMemoryLocalBus` and `BoundaryDispatcher` implementations both satisfy the bus interface.
 
-## Epic Index
+**Code:** `apps/runtime/src/protocol/bus.ts`, `apps/runtime/src/protocol/types.ts`, `apps/runtime/src/protocol/methods.ts`
 
-| Epic | Title |
-|------|-------|
-| E1 | Lane and Session Orchestration |
-| E2 | Desktop Shell and Terminal UI |
-| E3 | Inference Engine and Provider Routing |
-| E4 | Secrets Vault and Credential Redaction |
-| E5 | Policy Engine and Approval Workflow |
-| E6 | Audit Ledger and Session Recovery |
-| E7 | Terminal Sharing |
-| E8 | Configuration, Feature Flags, and Settings |
-| E9 | Canary Dependency Management |
+### E1.2: Workspace and Lane Management
+As a developer, I want to create workspaces containing named lanes so that I can organize parallel agent sessions with independent state.
 
----
+**Acceptance Criteria:**
+- Workspace CRUD: create, read, list, delete. Each workspace has a unique ID, name, and persistent metadata.
+- Lane CRUD within a workspace. Lanes support PAR (parallel) execution mode.
+- Lane-to-session binding: a lane can hold one or more sessions.
+- Lane state machine: `idle -> active -> paused -> terminated`.
+- Orphan detection: lanes without active sessions after a timeout are flagged for remediation.
+- Workspace and lane metadata persisted to durable storage across restarts.
 
-## E1: Lane and Session Orchestration
+**Code:** `apps/runtime/src/workspace/`, `apps/runtime/src/lanes/`
 
-Core runtime feature enabling multiple parallel agent sessions within a workspace.
+### E1.3: Session and Terminal Lifecycle
+As a developer, I want to attach sessions to lanes and spawn PTY terminals so that agents and users can execute commands in real shell environments.
 
-### Stories
+**Acceptance Criteria:**
+- Session attach/detach with state machine (`created -> attaching -> attached -> detaching -> detached -> terminated`).
+- `PTYLifecycleManager` spawns real PTY processes using the user's default shell.
+- Terminal output streamed with full ANSI color and cursor support.
+- Terminal resize events propagated to the PTY process.
+- Multiple concurrent terminal instances supported.
+- PTY idle monitoring: terminals inactive beyond a threshold trigger a watchdog scan.
+- Zellij mux adapter available for multiplexed multi-pane session management.
 
-- **E1.1: Workspace CRUD** — As a developer, I need to create, open, close, and delete
-  workspaces so I can group related agent lanes by project.
-  _Acceptance criteria:_ `createWorkspace` requires a non-empty name and absolute `rootPath`;
-  `closeWorkspace` requires `active` state; `deleteWorkspace` requires zero active sessions;
-  bus events emitted for each lifecycle transition (`workspace.created`, `workspace.closed`,
-  `workspace.deleted`).
-  _Key code:_ `apps/runtime/src/workspace/workspace.ts`, `workspace/types.ts`
-
-- **E1.2: Lane Lifecycle State Machine** — As the runtime, I need lanes to transition
-  through a formal state machine (`new → provisioning → ready → running → blocked → shared
-  → cleaning → closed`) so invalid transitions are rejected.
-  _Acceptance criteria:_ Invalid transitions throw; closed lanes reject terminal spawns with
-  `LANE_CLOSED`; lane state published to bus on every transition.
-  _Key code:_ `apps/runtime/src/sessions/state_machine.ts`, `lanes/state_machine.ts`
-
-- **E1.3: Session Attach and Detach** — As a lane, I need to attach and detach from a
-  Codex session using transport negotiation (cliproxy harness vs native OpenAI fallback).
-  _Acceptance criteria:_ Session attach probes `harnessProbe` health; resolved transport
-  (`cliproxy_harness` or `native_openai`) returned in session response; harness
-  unavailability emits `harness.status.changed` event with `degrade_reason`.
-  _Key code:_ `apps/runtime/src/index.ts` (session attach route), `sessions/`
-
-- **E1.4: PAR Lane Groups** — As a developer, I need to run parallel groups of lanes where
-  all members execute concurrently within the same workspace.
-  _Acceptance criteria:_ PAR registry tracks member lanes; bus routes commands to all
-  members in parallel; individual member failures do not stop surviving members.
-  _Key code:_ `apps/runtime/src/lanes/par.ts`, `lanes/registry.ts`
-
-- **E1.5: Lane Cleanup** — As the runtime, I need a cleanup route that marks a lane closed
-  and prevents further terminal spawns on it.
-  _Acceptance criteria:_ `POST /v1/workspaces/:wid/lanes/:lid/cleanup` sets lane to
-  `LANE_CLOSED`; subsequent terminal spawn returns 409; bus event emitted.
-  _Key code:_ `apps/runtime/src/index.ts` (cleanup route)
+**Code:** `apps/runtime/src/pty/`, `apps/runtime/src/sessions/`, `apps/runtime/src/integrations/zellij/`
 
 ---
 
-## E2: Desktop Shell and Terminal UI
+## E2: Desktop Application
 
-Native Tauri desktop application providing the primary developer interface.
+### E2.1: Tauri Desktop Shell
+As a user, I want a native desktop application so that I can interact with the runtime visually with OS-level integration.
 
-### Stories
+**Acceptance Criteria:**
+- Tauri-based desktop app (`apps/desktop`) with TypeScript renderer.
+- Desktop app communicates with runtime via local bus client (`runtime_client.ts`).
+- Application launches on macOS and Linux without requiring Node.js in the environment.
+- App settings persisted across restarts (preferred model, theme, keybindings).
 
-- **E2.1: Lane Panel Display** — As a developer, I need a panel for each lane showing its
-  lifecycle state, last action, and quick-action buttons.
-  _Acceptance criteria:_ `lane_panel.ts` renders lane state badge, action buttons, and event
-  handler; empty lane list shows empty state; keyboard navigation works between panels.
-  _Key code:_ `apps/desktop/src/panels/lane_panel.ts`, `panels/lane_list_item.ts`,
-  `panels/status_badge.ts`
+**Code:** `apps/desktop/src/`, `apps/desktop/src/runtime_client.ts`
 
-- **E2.2: Active Context Store** — As the desktop shell, I need a context store tracking
-  the active workspace, lane, session, terminal, and tab so all panels stay in sync.
-  _Acceptance criteria:_ `ActiveContextState` covers workspace/lane/session/terminal IDs,
-  active tab, runtime state, transport diagnostics, operation loading states, and renderer
-  switch status; dispatched actions produce correct state transitions.
-  _Key code:_ `apps/desktop/src/context_store.ts`
+### E2.2: Chat Interface
+As a user, I want a persistent chat interface with real-time streaming so that I can issue natural language prompts and observe agent responses token by token.
 
-- **E2.3: Renderer Engine Hot-Swap** — As a developer, I need to switch the terminal
-  renderer engine between Ghostty and Rio at runtime without restarting the application.
-  _Acceptance criteria:_ `switchRendererWithRollback` switches engine and rolls back on
-  failure; `rendererSwitch` state in context store tracks in-flight/succeeded/failed/
-  rolled_back states; settings UI exposes the toggle.
-  _Key code:_ `apps/desktop/src/settings.ts`, `settings/hotswap_toggle.ts`,
-  `settings/renderer_settings.ts`
+**Acceptance Criteria:**
+- Left sidebar: conversation history and navigation.
+- Center panel: active chat conversation with streaming output.
+- Bottom input area: model selector and send controls.
+- Agent tool calls (file reads, writes, terminal commands) rendered inline in the chat.
+- Multi-turn conversations with full context retention.
+- Interrupt/cancel in-progress agent actions.
+- All conversations persisted across app restarts.
 
-- **E2.4: Terminal Rendering (xterm.js)** — As a developer, I need a terminal component
-  rendering PTY output with ANSI support, URL linking, and auto-fit to window dimensions.
-  _Acceptance criteria:_ xterm.js renders all standard ANSI color codes; `addon-fit` resizes
-  columns/rows on window resize; `addon-web-links` makes URLs in terminal output clickable.
-  _Key code:_ `apps/renderer/` (xterm component), `package.json` (`@xterm/*` deps)
+**Code:** `apps/desktop/src/pages/`, `apps/desktop/src/panels/`
 
-- **E2.5: Conversation History Persistence** — As a developer, I need chat conversation
-  history persisted to disk and restored across application restarts.
-  _Acceptance criteria:_ `loadPersistedConversations` in `stores/persistence.store.ts`
-  restores conversations on `initializeApp()`; writes occur on each exchange completion.
-  _Key code:_ `apps/desktop/src/init.ts`, `stores/persistence.store.ts`
+### E2.3: Terminal Panels
+As a user, I want integrated terminal panels so that I can observe and interact with the shell sessions the agent is using.
 
-- **E2.6: Model Selection UI** — As a developer, I need a model selector component for
-  choosing which inference engine and model to use for a lane session.
-  _Acceptance criteria:_ `ModelSelector.tsx` lists available models from the inference
-  registry; selection stored in session config; displayed in chat panel header.
-  _Key code:_ `apps/desktop/src/components/chat/ModelSelector.tsx`
+**Acceptance Criteria:**
+- Terminal panels displayable in bottom or side layout.
+- ANSI color and cursor rendering.
+- Terminal resize propagated to PTY.
+- Agent can execute commands in any open terminal panel.
+- Keyboard shortcut to toggle terminal visibility.
 
----
+**Code:** `apps/desktop/src/panels/`, `apps/runtime/src/runtime/terminal.ts`
 
-## E3: Inference Engine and Provider Routing
+### E2.4: Tabs and Lane Navigation
+As a user, I want tab-based navigation between workspaces and lanes so that I can switch context without losing state.
 
-Pluggable inference layer supporting cloud and local AI model backends.
+**Acceptance Criteria:**
+- Tab bar showing open workspaces and lanes.
+- Tab creation, closing, and reordering.
+- Active tab state persisted.
+- Lane status visible in tabs (idle, active, error).
 
-### Stories
-
-- **E3.1: InferenceEngine Interface** — As the runtime, I need a uniform adapter interface
-  for all inference backends so providers can be added without touching domain logic.
-  _Acceptance criteria:_ `InferenceEngine` interface exposes `init`, `infer`, `inferStream`,
-  `listModels`, `healthCheck`, `terminate`; adapters implement the interface independently.
-  _Key code:_ `apps/runtime/src/integrations/inference/engine.ts`
-
-- **E3.2: Anthropic Cloud Adapter** — As a developer, I need a Claude adapter that routes
-  prompts to the Anthropic Messages API with configurable API key and model.
-  _Acceptance criteria:_ `AnthropicInferenceEngine` reads key from `HELIOS_ACP_API_KEY` or
-  `ANTHROPIC_API_KEY`; default model is `claude-sonnet-4-20250514`; streaming supported;
-  `init()` throws if key is absent.
-  _Key code:_ `apps/runtime/src/integrations/inference/anthropic-adapter.ts`
-
-- **E3.3: Local MLX Adapter** — As a developer on Apple Silicon, I need an MLX adapter
-  that routes prompts to a locally running MLX inference server.
-  _Acceptance criteria:_ `MlxInferenceEngine` connects to MLX server endpoint; `healthCheck`
-  probes the endpoint; `listModels` returns available local models.
-  _Key code:_ `apps/runtime/src/integrations/inference/mlx-adapter.ts`
-
-- **E3.4: llama.cpp Adapter** — As a developer, I need a llama.cpp adapter for
-  GGUF-quantized model inference on CPU/GPU without cloud dependency.
-  _Acceptance criteria:_ `LlamacppInferenceEngine` manages a llama.cpp server process;
-  `init` starts the server; `terminate` stops it cleanly.
-  _Key code:_ `apps/runtime/src/integrations/inference/llamacpp-adapter.ts`
-
-- **E3.5: vLLM Server Adapter** — As a platform operator, I need a vLLM adapter for
-  high-throughput batch inference on GPU servers.
-  _Acceptance criteria:_ `VllmInferenceEngine` connects to a vLLM OpenAI-compatible
-  endpoint; streaming supported; `listModels` queries `/v1/models`.
-  _Key code:_ `apps/runtime/src/integrations/inference/vllm-adapter.ts`
-
-- **E3.6: MCP Tool Bridge** — As an agent session, I need to call MCP-registered tools via
-  the provider adapter layer so agents can use external tools via the Model Context Protocol.
-  _Acceptance criteria:_ `McpAdapter.callTool(serverId, toolName, args)` dispatches the call
-  and returns the result; unknown server IDs return a typed error.
-  _Key code:_ `apps/runtime/src/integrations/mcp/adapter.ts`
-
-- **E3.7: A2A Task Delegation** — As an agent, I need to delegate subtasks to peer agents
-  via the Agent-to-Agent (A2A) protocol.
-  _Acceptance criteria:_ `A2aAdapter.delegateTask(targetAgentId, payload)` returns a
-  `delegationId`; delegation events published to bus.
-  _Key code:_ `apps/runtime/src/integrations/a2a/adapter.ts`
+**Code:** `apps/desktop/src/tabs.ts`, `apps/desktop/src/tabs/`
 
 ---
 
-## E4: Secrets Vault and Credential Redaction
+## E3: Provider and Extension System
 
-Encrypted credential storage and automatic secret scrubbing from all output.
+### E3.1: Multi-Backend Inference
+As a developer, I want to switch between cloud and local inference providers so that I can use the best available model for my hardware and connectivity.
 
-### Stories
+**Acceptance Criteria:**
+- At least one cloud provider: Anthropic API.
+- Local inference on Apple Silicon via MLX.
+- Local inference on NVIDIA GPU via llama.cpp.
+- Auto-detect available hardware at startup.
+- Switch providers without losing conversation state.
+- Graceful fallback when a selected provider becomes unavailable.
 
-- **E4.1: Encrypted Credential Store** — As an operator, I need provider API keys stored
-  encrypted at rest so credentials are never written to disk in plaintext.
-  _Acceptance criteria:_ `CredentialStore` encrypts via `EncryptionService`; access requires
-  `CredentialAccessContext` with `requestingProviderId` and `workspaceId`; access denied
-  events published to bus; `CredentialAlreadyExistsError` prevents duplicate keys.
-  _Key code:_ `apps/runtime/src/secrets/credential-store.ts`, `secrets/encryption.ts`
+**Code:** `apps/runtime/src/providers/`
 
-- **E4.2: Secret Redaction Engine** — As an operator, I need all PTY output and audit
-  payloads scanned for secrets and replaced with `[REDACTED]` before storage or display.
-  _Acceptance criteria:_ `RedactionEngine` runs regex rules from `redaction-rules.ts`;
-  `RedactionResult` includes position and length of each match; false positive rates tracked
-  per rule; `api_key` fields in audit payloads redacted by `sanitizePayload`.
-  _Key code:_ `apps/runtime/src/secrets/redaction-engine.ts`,
-  `secrets/redaction-rules.ts`, `index.ts` (`sanitizePayload`)
+### E3.2: Provider Adapter Interface
+As a developer, I want a pluggable provider adapter interface so that new AI providers can be added without modifying core runtime.
 
-- **E4.3: Protected Paths Detector** — As the policy engine, I need a module that detects
-  when agent commands affect protected file paths (e.g., `.env`, credential files).
-  _Acceptance criteria:_ `ProtectedPathsDetector` matches command arguments against
-  `protected-paths-config.ts` rules; matches elevate command classification to
-  `NeedsApproval` or `Blocked`.
-  _Key code:_ `apps/runtime/src/secrets/protected-paths-detector.ts`,
-  `secrets/protected-paths-matching.ts`, `secrets/protected-paths-config.ts`
+**Acceptance Criteria:**
+- `ProviderAdapter` interface with lifecycle hooks: `initialize`, `generate`, `stream`, `dispose`.
+- Provider registry for discovery and management.
+- Configuration per-provider stored in app settings.
+- MCP (Model Context Protocol) adapter bridge for MCP-compliant tools and servers.
 
-- **E4.4: Secrets Audit Trail** — As an auditor, I need every credential access attempt
-  logged with outcome, requester, and timestamp.
-  _Acceptance criteria:_ `audit-trail.ts` writes an entry for every access (granted/denied);
-  entries queryable by `workspaceId` and `providerId`.
-  _Key code:_ `apps/runtime/src/secrets/audit-trail.ts`
+**Code:** `apps/runtime/src/providers/`, `apps/runtime/src/integrations/`
 
 ---
 
-## E5: Policy Engine and Approval Workflow
+## E4: Observability and Security
 
-Command classification and human-in-the-loop approval gating.
+### E4.1: Audit Logging and Session Replay
+As an operator, I want audit logging of all bus events so that I can review and replay agent actions post-hoc.
 
-### Stories
+**Acceptance Criteria:**
+- Audit subscriber captures all bus envelopes with monotonic sequence numbers per topic.
+- Audit records include: `id`, `type`, `topic/method`, `correlation_id`, `timestamp`, `payload`, `outcome` (accepted/rejected), `validation_errors`.
+- Queryable by topic, `correlation_id`, or time range.
+- Session replay reconstructs system state from audit trail.
+- Audit log retained with configurable retention policy.
 
-- **E5.1: Policy Rule Storage** — As an operator, I need policy rules stored per workspace
-  in a file-based store with live reload on rule changes.
-  _Acceptance criteria:_ `PolicyStorage` watches rule files; `onRulesChanged` callback fires
-  on modification; `getRuleSet` returns the latest parsed `PolicyRuleSet` for a workspace.
-  _Key code:_ `apps/runtime/src/policy/storage.ts`
+**Code:** `apps/runtime/src/audit/`
 
-- **E5.2: Policy Evaluation Engine** — As the runtime, I need commands classified as
-  `safe`, `needs-approval`, or `blocked` before dispatch.
-  _Acceptance criteria:_ `PolicyEngine.evaluate(command, context)` returns a
-  `PolicyEvaluationResult` with classification, matched rules, and evaluation latency;
-  `canExecuteDirectly` / `needsApproval` / `isBlocked` are derived convenience methods.
-  _Key code:_ `apps/runtime/src/policy/engine.ts`, `policy/rules.ts`, `policy/types.ts`
+### E4.2: Secrets Management and Redaction
+As a developer, I want secure secret handling so that credentials are never exposed in terminal sessions or event logs.
 
-- **E5.3: Approval Queue** — As the runtime, I need blocked/needs-approval commands
-  queued for human review with per-command approve/reject lifecycle.
-  _Acceptance criteria:_ `approval-queue.ts` enqueues classified commands; approve action
-  dispatches the original command; reject action emits a rejection event; queue depth is
-  observable from the bus state.
-  _Key code:_ `apps/runtime/src/policy/approval-queue.ts`
+**Acceptance Criteria:**
+- `RedactionEngine` scrubs sensitive patterns from all bus events before logging.
+- Default redaction rules cover common secret patterns (API keys, tokens, passwords).
+- Secret injection into terminal environments without exposing values in command arguments.
+- Secrets module with encrypted storage.
 
-- **E5.4: Approval UI Panel** — As a developer, I need a panel listing pending approval
-  requests with approve and reject-with-reason actions.
-  _Acceptance criteria:_ `ApprovalPanel.tsx` lists all queued commands; each item shows
-  command text, policy rule that matched, and risk classification; approve/reject updates
-  queue via runtime client.
-  _Key code:_ `apps/desktop/src/components/approval/ApprovalPanel.tsx`,
-  `apps/desktop/src/pages/ApprovalWorkflow.tsx`
+**Code:** `apps/runtime/src/secrets/redaction-engine.ts`, `apps/runtime/src/secrets/redaction-rules.ts`
 
----
+### E4.3: Command Policy Engine
+As an operator, I want a policy engine that can approve or block agent commands so that I can enforce safety constraints without disabling the agent.
 
-## E6: Audit Ledger and Session Recovery
+**Acceptance Criteria:**
+- Policy rules defined per command method.
+- Approval workflow: commands can be held pending explicit user approval.
+- Blocked commands produce a clear rejection event (not a silent drop).
+- Policy state persisted across sessions.
 
-Tamper-evident event log and crash-recovery bootstrap.
-
-### Stories
-
-- **E6.1: In-Memory Audit Sink** — As the runtime, I need every bus envelope recorded to
-  an `InMemoryAuditSink` with sequence number, outcome, and timestamp.
-  _Acceptance criteria:_ `AuditSink.write(event)` appends to ring buffer; `flush()` drains
-  pending entries; `getMetrics()` reports total written, high-water mark, and persistence
-  failures.
-  _Key code:_ `apps/runtime/src/audit/sink.ts`, `audit/ring-buffer.ts`
-
-- **E6.2: Audit Bundle Export** — As an operator, I need to export a filtered audit bundle
-  by correlation ID with redacted payloads.
-  _Acceptance criteria:_ `exportAuditBundle({ correlation_id })` returns count, records with
-  `type`, `topic`, `payload`, and `recorded_at`; API keys in payloads replaced with
-  `[REDACTED]`.
-  _Key code:_ `apps/runtime/src/index.ts` (`exportAuditBundle`)
-
-- **E6.3: Recovery Metadata Export** — As the runtime, I need to export recovery metadata
-  for all active lanes, sessions, and terminals so a crashed process can restore state.
-  _Acceptance criteria:_ `exportRecoveryMetadata()` returns serializable metadata with all
-  lane/session/terminal entries; safe to call at any time without pausing bus dispatch.
-  _Key code:_ `apps/runtime/src/index.ts` (`exportRecoveryMetadata`)
-
-- **E6.4: Bootstrap Recovery Classification** — As the runtime on restart, I need to
-  classify recovered metadata into recoverable (reconcile) and unrecoverable (cleanup)
-  issues so the process can restart cleanly.
-  _Acceptance criteria:_ `classifyBootstrap(metadata)` returns `recovered_session_ids` and
-  `issues` array; detached sessions classified as unrecoverable/cleanup; lanes with missing
-  sessions classified as recoverable/reconcile; terminals with missing sessions classified
-  as unrecoverable/cleanup.
-  _Key code:_ `apps/runtime/src/index.ts` (`classifyBootstrap`)
-
-- **E6.5: Session Checkpoint Store** — As the runtime, I need periodic session checkpoints
-  written to disk so long-running agent sessions survive application restarts.
-  _Acceptance criteria:_ `checkpoint_store.ts` serializes session state to disk on a
-  configurable interval; restore loads the latest checkpoint on startup.
-  _Key code:_ `apps/runtime/src/sessions/checkpoint_store.ts`
+**Code:** `apps/runtime/src/policy/`
 
 ---
 
-## E7: Terminal Sharing
+## E5: Resilience and Recovery
 
-Collaborative terminal access via tmate and upterm backends.
+### E5.1: Crash Recovery
+As a developer, I want session state checkpointed periodically so that a crash does not lose more than one checkpoint interval of work.
 
-### Stories
+**Acceptance Criteria:**
+- `RecoveryRegistry` tracks all active sessions and their last checkpoint.
+- Checkpoint written on session state transitions and on a periodic timer.
+- On restart, `RecoveryBootstrapResult` identifies recoverable vs. unrecoverable sessions.
+- Orphaned lanes (no session reattached within timeout) are remediated.
 
-- **E7.1: Share Session Entity** — As the runtime, I need a share session entity tracking
-  state (`pending → active → expired/revoked/failed`) and share link for a terminal.
-  _Acceptance criteria:_ `ShareSession` includes `id`, `terminalId`, `backend`
-  (`upterm`|`tmate`), `shareLink`, `ttlMs`, `workerPid`, and `correlationId`; state
-  transitions are atomic via state machine.
-  _Key code:_ `apps/runtime/src/integrations/sharing/share-session.ts`
+**Code:** `apps/runtime/src/sessions/registry.ts`, `apps/runtime/src/recovery/`
 
-- **E7.2: tmate Backend** — As a developer, I need to share a terminal session via tmate
-  for read-only or read-write collaborative access.
-  _Acceptance criteria:_ `TmateAdapter` spawns a tmate subprocess; share link extracted
-  from tmate output; worker PID tracked for cleanup on revoke.
-  _Key code:_ `apps/runtime/src/integrations/tmate/adapter.ts`,
-  `integrations/tmate/command.ts`
+### E5.2: Performance Baseline
+As a developer, I want runtime instrumentation so that I can detect regressions and set performance budgets.
 
-- **E7.3: upterm Backend** — As a developer, I need to share a terminal session via upterm
-  as an alternative to tmate.
-  _Acceptance criteria:_ `UptermAdapter` spawns an upterm worker; session URL returned as
-  share link; cleanup terminates the worker process.
-  _Key code:_ `apps/runtime/src/integrations/upterm/adapter.ts`,
-  `integrations/upterm/command.ts`
+**Acceptance Criteria:**
+- Latency instrumentation on bus command dispatch and PTY output streaming.
+- PTY output backpressure metrics: queue depth and backlog size.
+- Performance baseline exported in a structured format for CI comparison.
 
-- **E7.4: Policy Gate for Sharing** — As an operator, I need terminal sharing to require
-  policy approval before a share link is issued.
-  _Acceptance criteria:_ Share action submits to approval queue if sharing policy rule
-  matches; approved shares proceed to backend; rejected shares emit a revocation event.
-  _Key code:_ `apps/runtime/src/integrations/sharing/share-session.ts` (FR-026-003 comment)
+**Code:** `apps/runtime/src/diagnostics/`
 
 ---
 
-## E8: Configuration, Feature Flags, and Settings
+## E6: Collaboration
 
-Application-wide configuration, startup feature flags, and UI settings.
+### E6.1: Session Sharing
+As a developer, I want to share terminal sessions with collaborators or external tools so that pair programming and tool integration are possible.
 
-### Stories
+**Acceptance Criteria:**
+- Share session via tty-share or equivalent external tool.
+- Share URL generated and displayed to the user.
+- Shared session read-only by default; write access requires explicit grant.
+- Session sharing state visible in the lane UI.
 
-- **E8.1: App Config Module** — As the runtime, I need a typed configuration module loading
-  settings from environment and config files at startup.
-  _Acceptance criteria:_ Config module in `apps/runtime/src/config/` validates required
-  fields; missing required config throws with a descriptive message; defaults applied for
-  optional fields.
-  _Key code:_ `apps/runtime/src/config/`
-
-- **E8.2: Retention Policy Config** — As an operator, I need configurable retention
-  settings for audit ring buffers so long-running processes do not consume unbounded memory.
-  _Acceptance criteria:_ `createRetentionPolicyConfig` produces typed config; `maxEvents`
-  and `maxAgeMs` bounds enforced by ring buffer on write.
-  _Key code:_ `apps/runtime/src/config/retention.ts`, `audit/ring-buffer.ts`
-
-- **E8.3: Desktop Renderer Settings** — As a developer, I need settings to control the
-  active renderer engine (Ghostty vs Rio) and hot-swap preference.
-  _Acceptance criteria:_ `DesktopSettings` (`rendererEngine`, `hotSwapPreferred`) persisted
-  via settings store; default is Ghostty with hot-swap enabled; settings UI in
-  `settings/renderer_preferences.ts`.
-  _Key code:_ `apps/desktop/src/settings.ts`, `settings/renderer_preferences.ts`
-
-- **E8.4: Diagnostics Module** — As an operator, I need runtime diagnostics exposed for
-  health checks and debugging.
-  _Acceptance criteria:_ Diagnostics module in `apps/runtime/src/diagnostics/` reports
-  transport state, harness probe results, and bus metrics; accessible via HTTP health
-  endpoint.
-  _Key code:_ `apps/runtime/src/diagnostics/`
+**Code:** `apps/runtime/src/` (share integration)
 
 ---
 
-## E9: Canary Dependency Management
+## E7: Build, CI, and Dependency Management
 
-Structured dependency upgrade workflow with automated rollback capability.
+### E7.1: Monorepo Build System
+As a developer, I want a unified build system so that all packages build, lint, and test with a single command.
 
-### Stories
+**Acceptance Criteria:**
+- Bun workspaces with `apps/runtime` and `apps/desktop` as packages.
+- `bun run build` produces a production-optimized desktop bundle.
+- `bun run typecheck` runs TypeScript strict-mode check across all packages (exit non-zero on error).
+- Biome linting and formatting enforced across all TypeScript source.
+- Taskfile for standard targets: `lint`, `test`, `build`, `typecheck`.
 
-- **E9.1: Canary Upgrade Script** — As a maintainer, I need a script to upgrade a specific
-  dependency to its latest version and log the change for rollback reference.
-  _Acceptance criteria:_ `deps-canary.ts` upgrades the target package, writes the previous
-  and new versions to `deps-changelog.json` and `deps-registry.json`; dry-run mode
-  supported.
-  _Key code:_ `scripts/deps-canary.ts`, `deps-changelog.json`, `deps-registry.json`
+**Code:** `package.json`, `Taskfile.yml`, `biome.json`, `tsconfig.base.json`
 
-- **E9.2: Dependency Status Dashboard** — As a maintainer, I need a status script reporting
-  current vs latest versions across all workspace packages.
-  _Acceptance criteria:_ `deps-status.ts` queries the npm registry for each dependency;
-  outputs a table of current, latest, and upgrade-available status.
-  _Key code:_ `scripts/deps-status.ts`
+### E7.2: Dependency Management
+As a developer, I want automated dependency tracking and rollback so that prerelease dependency upgrades do not silently break the build.
 
-- **E9.3: Rollback Script** — As a maintainer, I need a rollback script to revert a
-  specific dependency to its previously logged version after a canary regression.
-  _Acceptance criteria:_ `deps-rollback.ts` reads `deps-changelog.json` for the target
-  package; restores the previous version; re-runs `bun install`.
-  _Key code:_ `scripts/deps-rollback.ts`
+**Acceptance Criteria:**
+- Dependency registry manifest tracking each prerelease dep: name, current pin, channel, upstream source, known-good history.
+- `bun run deps:status` reports current state and available upgrades.
+- `bun run deps:rollback <package>` atomically reverts to last known-good pin.
+- Every upgrade attempt recorded in structured `deps-changelog.json` with timestamp, versions, gate results, and actor.
+- Canary process: isolated branch, upgrade, full quality gates, auto-merge on pass or issue on failure.
 
----
-
-## Non-Functional Requirements
-
-| Category | Requirement |
-|----------|-------------|
-| Performance | Local bus P99 round-trip < 10 ms for < 100 concurrent messages |
-| Performance | Terminal buffer backpressure prevents unbounded memory growth |
-| Security | Credentials never written to disk in plaintext |
-| Security | Secret patterns redacted from all audit payloads before persistence |
-| Security | Policy engine evaluates every agent command before dispatch |
-| Reliability | Session recovery metadata exportable at any time without pausing the bus |
-| Reliability | Bootstrap recovery classifies orphaned entities on restart |
-| Testability | All domain logic testable with in-memory bus and stub adapters |
-| Compatibility | Bun >= 1.2.20, Node.js >= 20 for ecosystem compat checks |
-| Compatibility | macOS, Linux (PTY) as primary platforms; Windows via ConPTY as future work |
+**Code:** `deps-registry.json`, `deps-changelog.json`
 
 ---
 
-## Key Dependencies (from `package.json`)
+## Future Roadmap
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `solid-js` | ^1.9.11 | UI renderer |
-| `@xterm/xterm` | ^5.5.0 | Terminal widget |
-| `@xterm/addon-fit` | ^0.10.0 | Terminal auto-resize |
-| `@xterm/addon-web-links` | ^0.11.0 | Clickable URLs in terminal |
-| `@biomejs/biome` | 1.9.4 | Linter + formatter |
-| `typescript` | 5.8.2 | Type system |
-| `vitepress` | 1.6.3 | Documentation site |
-| `playwright` | 1.58.2 | E2E tests |
-| `esbuild` | ^0.27.3 | Bundler |
-| `esbuild-plugin-solid` | ^0.6.0 | SolidJS JSX transform |
+- **Phase 2**: Remote workspace sync across machines.
+- **Phase 3**: Multi-user collaborative lanes with CRDT-based state.
+- **Phase 4**: Plugin marketplace for provider adapters and MCP tools.
+- **Phase 5**: Cloud-hosted runtime for fully remote agent execution.

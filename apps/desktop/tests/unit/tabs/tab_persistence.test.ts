@@ -1,9 +1,9 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { promises as fs } from "node:fs";
-import { tmpdir } from "node:os";
-import * as path from "node:path";
-import { type TabPersistedState, TabPersistence } from "../../../src/tabs/tab_persistence";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { promises as fs } from "fs";
+import * as path from "path";
+import { TabPersistence, type TabPersistedState } from "../../../src/tabs/tab_persistence";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
+import { tmpdir } from "os";
 
 describe("TabPersistence", () => {
   let persistence: TabPersistence;
@@ -85,7 +85,7 @@ describe("TabPersistence", () => {
 
       const startTime = Date.now();
       await persistence.load();
-      const _duration = Date.now() - startTime;
+      const duration = Date.now() - startTime;
 
       expect(persistence.getLastLoadTime()).toBeLessThan(100);
     });
@@ -119,15 +119,12 @@ describe("TabPersistence", () => {
 
       // Mock fs.writeFile to count writes
       const originalWriteFile = fs.writeFile;
-      fs.writeFile = async (...args: Parameters<typeof fs.writeFile>) => {
+      const countingWriteFile = async (...args: Parameters<typeof fs.writeFile>) => {
         writeCount++;
         return (originalWriteFile as Function).apply(fs, args);
       };
       // biome-ignore lint/suspicious/noExplicitAny: test mock override
-      (fs as any).writeFile = async (...args: Parameters<typeof fs.writeFile>) => {
-        writeCount++;
-        return originalWriteFile(...args);
-      };
+      (fs as any).writeFile = countingWriteFile;
 
       const testState: TabPersistedState = {
         version: 1,
@@ -348,7 +345,7 @@ describe("TabPersistence", () => {
       };
 
       // Will not throw
-      const loadedState = persistence.validateState(testState);
+      const loadedState = persistence["validateState"](testState);
       expect(loadedState).toBe(true);
     });
 
@@ -362,7 +359,7 @@ describe("TabPersistence", () => {
         savedAt: new Date().toISOString(),
       };
 
-      const isValid = persistence.validateState(testState);
+      const isValid = persistence["validateState"](testState);
       expect(isValid).toBe(true); // null is allowed
     });
   });

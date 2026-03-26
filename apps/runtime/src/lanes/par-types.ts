@@ -1,7 +1,7 @@
 // Par task types, errors, and helpers — extracted from par.ts for static analysis compliance.
 
-import type { LocalBus } from "../protocol/bus.js";
 import type { LaneRegistry } from "./registry.js";
+import type { LocalBus } from "../protocol/bus.js";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -120,17 +120,11 @@ export function defaultSpawn(
     cwd: opts.cwd,
     stdout: "pipe",
     stderr: "pipe",
-  } as Parameters<typeof Bun.spawn>[1]) as unknown as {
-    pid: number;
-    stdout: ReadableStream<Uint8Array> | null;
-    stderr: ReadableStream<Uint8Array> | null;
-    exited: Promise<number>;
-    kill(signal?: number): void;
-  };
+  });
   return {
     pid: proc.pid,
-    stdout: proc.stdout,
-    stderr: proc.stderr,
+    stdout: proc.stdout as ReadableStream<Uint8Array> | null,
+    stderr: proc.stderr as ReadableStream<Uint8Array> | null,
     exited: proc.exited,
     kill(signal?: number) {
       proc.kill(signal);

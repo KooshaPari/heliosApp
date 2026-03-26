@@ -5,12 +5,12 @@
  * SC-025-004: All provider errors map to normalized taxonomy.
  */
 
-import { describe, expect, it } from "bun:test";
+import { describe, it, expect } from "bun:test";
 import {
-  getErrorMessage,
-  isRetryable,
   NormalizedProviderError,
   normalizeError,
+  isRetryable,
+  getErrorMessage,
   PROVIDER_ERROR_CODES,
 } from "../errors.js";
 

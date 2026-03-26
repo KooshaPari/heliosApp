@@ -1,6 +1,6 @@
+import { createCipheriv, createDecipheriv, randomBytes, hkdfSync } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { createCipheriv, createDecipheriv, hkdfSync, randomBytes } from "node:crypto";
-import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -143,9 +143,7 @@ export class EncryptionService {
   }
 
   private readFromKeychain(): Buffer | null {
-    if (process.platform !== "darwin") {
-      return null;
-    }
+    if (process.platform !== "darwin") return null;
     try {
       const hex = execFileSync(
         "security",
@@ -164,9 +162,7 @@ export class EncryptionService {
   }
 
   private writeToKeychain(key: Buffer): boolean {
-    if (process.platform !== "darwin") {
-      return false;
-    }
+    if (process.platform !== "darwin") return false;
     try {
       execFileSync(
         "security",

@@ -53,9 +53,7 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
   const activeModelName = () => {
     for (const group of modelGroups) {
       const found = group.models.find(m => m.id === props.activeModel);
-      if (found) {
-        return found.name;
-      }
+      if (found) return found.name;
     }
     return props.activeModel.split("/").pop() ?? props.activeModel;
   };
@@ -63,7 +61,6 @@ export const ModelSelector: Component<ModelSelectorProps> = props => {
   return (
     <div style={{ position: "relative" }}>
       <button
-        type="button"
         onClick={() => setIsOpen(!isOpen())}
         style={{
           background: "none",

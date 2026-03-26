@@ -1,4 +1,5 @@
-import { type Component, createSignal, Show } from "solid-js";
+import { type Component, createSignal } from "solid-js";
+import { Show } from "solid-js";
 import type { Message } from "../../../../runtime/src/types/conversation";
 
 type ToolCallBlockProps = { message: Message };
@@ -32,8 +33,7 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = props => {
         overflow: "hidden",
       }}
     >
-      <button
-        type="button"
+      <div
         onClick={() => setExpanded(!expanded())}
         style={{
           display: "flex",
@@ -44,15 +44,12 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = props => {
           cursor: "pointer",
           "font-size": "13px",
           color: "#a6adc8",
-          border: "none",
-          width: "100%",
-          "text-align": "left",
         }}
       >
         <span>{statusIcon()}</span>
         <span style={{ flex: "1" }}>{toolName()}</span>
         <span>{expanded() ? "\u25B2" : "\u25BC"}</span>
-      </button>
+      </div>
       <Show when={expanded() && input() !== undefined}>
         <div
           style={{
@@ -66,7 +63,7 @@ export const ToolCallBlock: Component<ToolCallBlockProps> = props => {
             "overflow-y": "auto",
           }}
         >
-          {JSON.stringify(input(), null, 2)}
+          <>{JSON.stringify(input(), null, 2)}</>
         </div>
       </Show>
     </div>

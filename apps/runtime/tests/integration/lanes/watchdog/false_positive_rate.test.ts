@@ -1,23 +1,23 @@
 // Integration test for false positive rate validation
 
-import { beforeEach, describe, expect, it } from "bun:test";
-import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
-import { ResourceClassifier } from "../../../../src/lanes/watchdog/resource_classifier.js";
 import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { ResourceClassifier } from "../../../../src/lanes/watchdog/resource_classifier.js";
+import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
 
 describe("False Positive Rate", () => {
   let engine: RemediationEngine;
   let bus: InMemoryLocalBus;
   let laneRegistry: LaneRegistry;
-  let _classifier: ResourceClassifier;
+  let classifier: ResourceClassifier;
 
   beforeEach(() => {
     bus = new InMemoryLocalBus();
     laneRegistry = new LaneRegistry();
     engine = new RemediationEngine(laneRegistry, bus);
-    _classifier = new ResourceClassifier();
+    classifier = new ResourceClassifier();
   });
 
   it("should have zero false positives with healthy system", async () => {

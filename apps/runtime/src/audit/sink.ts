@@ -1,22 +1,46 @@
-import { createRetentionPolicyConfig, type RetentionPolicyConfig } from "../config/retention.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
 import type { AuditEvent } from "./event";
 import { AuditRingBuffer } from "./ring-buffer";
+import type { AuditFilter } from "./ring-buffer";
+import type { LocalBusEnvelope } from "../protocol/types.js";
+import {
+  type AuditOutcome,
+  type AuditRecord,
+  type AuditExportRecord,
+  type RetentionPolicyConfig,
+  type AuditBundle,
+  type AuditSinkMetrics,
+  toExportRecord,
+  shouldRetainRecord,
+  buildDeletionProofRecord,
+  sanitizeEnvelopeSimple,
+  sanitize,
+  getString,
+  inferType,
+  getRecordPayload,
+  isSensitiveKey,
+} from "./sink-helpers.js";
 
-export interface AuditSinkMetrics {
-  totalEventsWritten: number;
-  bufferHighWaterMark: number;
-  persistenceFailures: number;
-  retryCount: number;
-  eventsOverflowed?: number;
-  sqliteWriteFailures?: number;
-  sqliteRetryCount?: number;
-}
+export type {
+  AuditOutcome,
+  AuditRecord,
+  AuditExportRecord,
+  RetentionPolicyConfig,
+  AuditBundle,
+  AuditSinkMetrics,
+} from "./sink-helpers.js";
 
+/**
+ * Storage backend interface for persisting audit events.
+ * Implemented by WP02 (SQLite storage).
+ */
 export interface AuditStorage {
   persist(events: AuditEvent[]): Promise<void>;
 }
 
+/**
+ * Append-only sink for audit events.
+ * Never blocks, never drops events, guarantees delivery.
+ */
 export interface AuditSink {
   write(event: AuditEvent): Promise<void>;
   flush(): Promise<void>;
@@ -24,46 +48,10 @@ export interface AuditSink {
   getMetrics(): AuditSinkMetrics;
 }
 
-export type AuditOutcome = "accepted" | "rejected";
-
-export type AuditRecord = {
-  recorded_at: string;
-  sequence: number | null;
-  outcome: AuditOutcome;
-  reason: string | null;
-  envelope: LocalBusEnvelope | Record<string, unknown>;
-};
-
-export type AuditFilter = {
-  workspace_id?: string;
-  lane_id?: string;
-  session_id?: string;
-  correlation_id?: string;
-};
-
-export type AuditBundle = {
-  generated_at: string;
-  filters: AuditFilter;
-  count: number;
-  records: AuditRecord[];
-};
-
-export type AuditExportRecord = {
-  recorded_at: string;
-  sequence: number | null;
-  outcome: AuditOutcome;
-  reason: string | null;
-  envelope_id: string;
-  envelope_type: string;
-  correlation_id: string | null;
-  workspace_id: string | null;
-  lane_id: string | null;
-  session_id: string | null;
-  terminal_id: string | null;
-  method_or_topic: string | null;
-  envelope: LocalBusEnvelope | Record<string, unknown>;
-};
-
+/**
+ * Default implementation of AuditSink with ring buffer and SQLite persistence.
+ * Integrates WP01 (sink) with WP02 (ring buffer and storage).
+ */
 export class DefaultAuditSink implements AuditSink {
   private buffer: AuditEvent[] = [];
   private ringBuffer: AuditRingBuffer;
@@ -95,7 +83,7 @@ export class DefaultAuditSink implements AuditSink {
 
   constructor(
     storageOrConfig?: AuditStorage | Record<string, unknown>,
-    ringBufferCapacity = 10_000
+    ringBufferCapacity: number = 10_000
   ) {
     if (storageOrConfig && typeof (storageOrConfig as AuditStorage).persist === "function") {
       this.storage = storageOrConfig as AuditStorage;
@@ -129,18 +117,24 @@ export class DefaultAuditSink implements AuditSink {
     const evicted = this.ringBuffer.push(event);
 
     if (evicted) {
-      this.metrics.eventsOverflowed = (this.metrics.eventsOverflowed ?? 0) + 1;
+      this.metrics.eventsOverflowed!++;
       this.overflowQueue.push(evicted);
-      this.persistOverflow().catch(_err => {});
+
+      this.persistOverflow().catch(err => {
+        console.error("[AuditSink] Overflow persistence failed:", err);
+      });
     }
 
     this.buffer.push(event);
+
     if (this.buffer.length > this.metrics.bufferHighWaterMark) {
       this.metrics.bufferHighWaterMark = this.buffer.length;
     }
 
     if (this.buffer.length >= this.MAX_BUFFER_SIZE) {
-      this.persistWithRetry().catch(_err => {});
+      this.persistWithRetry().catch(err => {
+        console.error("[AuditSink] Persistence failed, events retained in buffer:", err);
+      });
     }
   }
 
@@ -163,7 +157,7 @@ export class DefaultAuditSink implements AuditSink {
         }
         break;
       } catch (err) {
-        retries += 1;
+        retries++;
         if (retries >= this.MAX_RETRIES) {
           throw new Error(`[AuditSink] Failed to flush after ${this.MAX_RETRIES} retries: ${err}`);
         }
@@ -180,16 +174,13 @@ export class DefaultAuditSink implements AuditSink {
     return { ...this.metrics };
   }
 
-  destroy(): void {
-    this.stopPeriodicFlush();
-  }
-
   private async persistWithRetry(): Promise<void> {
     if (this.persistenceInProgress || this.buffer.length === 0) {
       return;
     }
 
     this.persistenceInProgress = true;
+
     try {
       let retries = 0;
       while (retries < this.MAX_RETRIES) {
@@ -198,16 +189,22 @@ export class DefaultAuditSink implements AuditSink {
           await this.storage.persist(eventsToPersist);
           this.buffer = [];
           break;
-        } catch {
-          this.metrics.persistenceFailures += 1;
-          this.metrics.retryCount += 1;
-          retries += 1;
+        } catch (err) {
+          this.metrics.persistenceFailures++;
+          this.metrics.retryCount++;
+          retries++;
           if (retries < this.MAX_RETRIES) {
             await new Promise(resolve =>
-              setTimeout(resolve, this.RETRY_BACKOFF_MS * 2 ** (retries - 1))
+              setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1))
             );
           }
         }
+      }
+
+      if (this.buffer.length > 0) {
+        console.warn(
+          "[AuditSink] Events retained in buffer after retries; will retry on next write"
+        );
       }
     } finally {
       this.persistenceInProgress = false;
@@ -226,13 +223,13 @@ export class DefaultAuditSink implements AuditSink {
         await this.storage.persist(eventsToPersist);
         this.overflowQueue = [];
         break;
-      } catch {
-        this.metrics.sqliteWriteFailures = (this.metrics.sqliteWriteFailures ?? 0) + 1;
-        this.metrics.sqliteRetryCount = (this.metrics.sqliteRetryCount ?? 0) + 1;
-        retries += 1;
+      } catch (err) {
+        this.metrics.sqliteWriteFailures!++;
+        this.metrics.sqliteRetryCount!++;
+        retries++;
         if (retries < this.MAX_RETRIES) {
           await new Promise(resolve =>
-            setTimeout(resolve, this.RETRY_BACKOFF_MS * 2 ** (retries - 1))
+            setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1))
           );
         }
       }
@@ -242,7 +239,9 @@ export class DefaultAuditSink implements AuditSink {
   private startPeriodicFlush(): void {
     this.flushTimer = setInterval(() => {
       if (this.buffer.length > 0 || this.overflowQueue.length > 0) {
-        this.persistWithRetry().catch(_err => {});
+        this.persistWithRetry().catch(err => {
+          console.error("[AuditSink] Periodic flush failed:", err);
+        });
       }
     }, this.FLUSH_INTERVAL_MS) as unknown as number;
   }
@@ -253,66 +252,14 @@ export class DefaultAuditSink implements AuditSink {
       this.flushTimer = null;
     }
   }
-}
 
-export class NoOpAuditStorage implements AuditStorage {
-  async persist(_events: AuditEvent[]): Promise<void> {
-    // Intentionally discarded.
-  }
-}
-
-export class InMemoryAuditSink {
-  private readonly retentionPolicy: RetentionPolicyConfig;
-  private readonly records: AuditRecord[] = [];
-
-  constructor(input: Partial<RetentionPolicyConfig> = {}) {
-    this.retentionPolicy = createRetentionPolicyConfig(input);
-  }
-
-  async append(record: AuditRecord): Promise<void> {
-    this.records.push({
-      ...record,
-      envelope: sanitizeEnvelope(record.envelope, this.retentionPolicy.redacted_fields),
-    });
-  }
-
-  getRecords(): AuditRecord[] {
-    return [...this.records];
-  }
-
-  query(filter: AuditFilter = {}): AuditRecord[] {
-    return this.records.filter(record => {
-      const envelope = record.envelope as Record<string, unknown>;
-      if (filter.workspace_id && getString(envelope.workspace_id) !== filter.workspace_id) {
-        return false;
-      }
-      if (filter.lane_id && getString(envelope.lane_id) !== filter.lane_id) {
-        return false;
-      }
-      if (filter.session_id && getString(envelope.session_id) !== filter.session_id) {
-        return false;
-      }
-      if (filter.correlation_id && getString(envelope.correlation_id) !== filter.correlation_id) {
-        return false;
-      }
-      return true;
-    });
-  }
-
-  exportBundle(filter: AuditFilter = {}): AuditBundle {
-    const records = this.query(filter);
-    return {
-      generated_at: new Date().toISOString(),
-      filters: { ...filter },
-      count: records.length,
-      records,
-    };
+  destroy(): void {
+    this.stopPeriodicFlush();
   }
 
   async enforceRetention(now: Date = new Date()): Promise<{ deleted_count: number }> {
     const keep: AuditRecord[] = [];
     const expired: AuditRecord[] = [];
-
     for (const record of this.records) {
       if (shouldRetainRecord(record, this.retentionPolicy, now)) {
         keep.push(record);
@@ -336,97 +283,81 @@ export class InMemoryAuditSink {
   }
 }
 
-function toExportRecord(record: AuditRecord, policy: RetentionPolicyConfig): AuditExportRecord {
-  const envelope = sanitizeEnvelope(record.envelope, policy.redacted_fields);
-  const envelopeObject = envelope as Record<string, unknown>;
-  const methodOrTopic = getString(envelopeObject.method) ?? getString(envelopeObject.topic) ?? null;
+/**
+ * No-op storage for testing and development.
+ * Events are buffered but never persisted.
+ */
+export class NoOpAuditStorage implements AuditStorage {
+  readonly records: AuditRecord[] = [];
 
-  return {
-    recorded_at: record.recorded_at,
-    sequence: record.sequence,
-    outcome: record.outcome,
-    reason: record.reason,
-    envelope_id: getString(envelopeObject.id) ?? "unknown",
-    envelope_type: getString(envelopeObject.type) ?? "unknown",
-    correlation_id: getString(envelopeObject.correlation_id) ?? null,
-    workspace_id: getString(envelopeObject.workspace_id) ?? null,
-    lane_id: getString(envelopeObject.lane_id) ?? null,
-    session_id: getString(envelopeObject.session_id) ?? null,
-    terminal_id: getString(envelopeObject.terminal_id) ?? null,
-    method_or_topic: methodOrTopic,
-    envelope,
-  };
-}
-
-function shouldRetainRecord(
-  record: AuditRecord,
-  policy: RetentionPolicyConfig,
-  now: Date
-): boolean {
-  const topic = readEnvelopeTopic(record.envelope);
-  if (topic && policy.exempt_topics.includes(topic)) {
-    return true;
+  async persist(_events: AuditEvent[]): Promise<void> {
+    // Do nothing; events are discarded
   }
 
-  const recordedAtMs = Date.parse(record.recorded_at);
-  if (Number.isNaN(recordedAtMs)) {
-    return true;
+  query(filter: AuditFilter = {}): AuditRecord[] {
+    return this.records.filter(record => {
+      if (filter.workspaceId && record.workspace_id !== filter.workspaceId) {
+        return false;
+      }
+      if (filter.laneId && record.lane_id !== filter.laneId) {
+        return false;
+      }
+      if (filter.sessionId && record.session_id !== filter.sessionId) {
+        return false;
+      }
+      if (filter.correlationId && record.correlation_id !== filter.correlationId) {
+        return false;
+      }
+      return true;
+    });
   }
 
-  const ttlMs = policy.retention_days * 24 * 60 * 60 * 1000;
-  return now.getTime() - recordedAtMs <= ttlMs;
-}
-
-function readEnvelopeTopic(envelope: LocalBusEnvelope | Record<string, unknown>): string | null {
-  if (!envelope || typeof envelope !== "object") {
-    return null;
+  exportBundle(filter: AuditFilter = {}): AuditBundle {
+    const records = this.query(filter);
+    return {
+      generated_at: new Date().toISOString(),
+      filters: { ...filter },
+      count: records.length,
+      records,
+    };
   }
-  return getString((envelope as Record<string, unknown>).topic) ?? null;
-}
 
-function buildDeletionProofRecord(expiredCount: number, now: Date): AuditRecord {
-  return {
-    recorded_at: now.toISOString(),
-    sequence: null,
-    outcome: "accepted",
-    reason: "retention_enforced",
-    envelope: {
-      id: `audit.retention.deleted:${now.getTime()}`,
-      type: "event",
-      ts: now.toISOString(),
-      topic: "audit.retention.deleted",
-      payload: {
-        deleted_count: expiredCount,
-      },
-    },
-  };
-}
+  private enrichRecord(record: {
+    recorded_at: string;
+    sequence: number | null;
+    outcome: AuditOutcome;
+    reason: string | null;
+    envelope: LocalBusEnvelope | Record<string, unknown>;
+  }): AuditRecord {
+    const envelope = sanitizeEnvelopeSimple(record.envelope);
+    const payload = sanitize(getRecordPayload(envelope));
 
-function sanitizeEnvelope(
-  envelope: LocalBusEnvelope | Record<string, unknown>,
-  redactedFields: string[]
-): LocalBusEnvelope | Record<string, unknown> {
-  const redactionSet = new Set(redactedFields.map(field => field.toLowerCase()));
-  return deepRedact(envelope, redactionSet) as LocalBusEnvelope | Record<string, unknown>;
-}
-
-function deepRedact(value: unknown, redactionSet: ReadonlySet<string>): unknown {
-  if (Array.isArray(value)) {
-    return value.map(entry => deepRedact(entry, redactionSet));
+    return {
+      id: `${record.recorded_at}:${this.records.length + 1}`,
+      recorded_at: record.recorded_at,
+      sequence: record.sequence,
+      outcome: record.outcome,
+      reason: record.reason,
+      envelope,
+      action: getString(envelope.topic) ?? getString(envelope.method) ?? "audit.recorded",
+      type: inferType(envelope),
+      status: record.outcome === "accepted" ? "ok" : "error",
+      workspace_id: getString(envelope.workspace_id),
+      lane_id:
+        getString(envelope.lane_id) ??
+        getString((envelope.payload as Record<string, unknown>)?.lane_id),
+      session_id:
+        getString(envelope.session_id) ??
+        getString((envelope.payload as Record<string, unknown>)?.session_id),
+      terminal_id:
+        getString(envelope.terminal_id) ??
+        getString((envelope.payload as Record<string, unknown>)?.terminal_id),
+      correlation_id: getString(envelope.correlation_id),
+      error_code: getString((envelope.error as Record<string, unknown>)?.code),
+      payload,
+    };
   }
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => {
-        if (redactionSet.has(key.toLowerCase())) {
-          return [key, "[REDACTED]"];
-        }
-        return [key, deepRedact(item, redactionSet)];
-      })
-    );
-  }
-  return value;
 }
 
-function getString(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
-}
+/** @deprecated Use DefaultAuditSink. Alias retained for backward compatibility. */
+export { DefaultAuditSink as InMemoryAuditSink };

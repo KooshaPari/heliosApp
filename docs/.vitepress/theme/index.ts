@@ -1,2 +1,3 @@
-export { default } from "@phenotype/docs/theme";
-export * from "@phenotype/docs/theme";
+import PhenoDocsTheme from '@phenodocs-theme'
+
+export default PhenoDocsTheme

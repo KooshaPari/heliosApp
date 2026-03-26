@@ -1,7 +1,6 @@
 import { randomBytes } from "node:crypto";
 import type { LocalBus } from "../protocol/bus.js";
-import type { MethodHandler } from "../protocol/methods.js";
-import type { EventEnvelope, LocalBusEnvelope, ResponseEnvelope } from "../protocol/types.js";
+import type { LocalBusEnvelope } from "../protocol/types.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -80,9 +79,7 @@ export class AuditSink {
    */
   async ingest(envelope: LocalBusEnvelope): Promise<AuditRecord | null> {
     const topic = envelope.topic ?? "";
-    if (!this.watchedTopics.has(topic)) {
-      return null;
-    }
+    if (!this.watchedTopics.has(topic)) return null;
 
     const correlationId: string =
       (envelope.payload?.correlationId as string | undefined) ?? randomBytes(8).toString("hex");
@@ -132,13 +129,6 @@ export class AuditSink {
    */
   wrapBus(bus: LocalBus): LocalBus {
     const sink = this;
-    const extBus = bus as unknown as {
-      registerMethod?(method: string, handler: MethodHandler): void;
-      send?(envelope: unknown): Promise<ResponseEnvelope>;
-      subscribe?(topic: string, handler: (evt: EventEnvelope) => void | Promise<void>): () => void;
-      destroy?(): void;
-      getActiveCorrelationId?(): string | undefined;
-    };
     return {
       async publish(event: LocalBusEnvelope): Promise<void> {
         await sink.ingest(event);
@@ -147,13 +137,11 @@ export class AuditSink {
       async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
         return bus.request(command);
       },
-      ...(extBus.registerMethod && { registerMethod: extBus.registerMethod.bind(extBus) }),
-      ...(extBus.send && { send: extBus.send.bind(extBus) }),
-      ...(extBus.subscribe && { subscribe: extBus.subscribe.bind(extBus) }),
-      ...(extBus.destroy && { destroy: extBus.destroy.bind(extBus) }),
-      ...(extBus.getActiveCorrelationId && {
-        getActiveCorrelationId: extBus.getActiveCorrelationId.bind(extBus),
-      }),
+      registerMethod: bus.registerMethod.bind(bus),
+      send: bus.send.bind(bus),
+      subscribe: bus.subscribe.bind(bus),
+      destroy: bus.destroy.bind(bus),
+      getActiveCorrelationId: bus.getActiveCorrelationId.bind(bus),
     };
   }
 

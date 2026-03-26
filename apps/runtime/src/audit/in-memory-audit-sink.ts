@@ -1,5 +1,10 @@
 import type { AuditEvent } from "./event";
-import type { AuditExportRecord, AuditRecord, AuditSink, AuditSinkMetrics } from "./sink-types";
+import type {
+  AuditExportRecord,
+  AuditRecord,
+  AuditSink,
+  AuditSinkMetrics,
+} from "./sink-types";
 
 function createMetrics(): AuditSinkMetrics {
   return {
@@ -33,7 +38,7 @@ export class InMemoryAuditSink implements AuditSink {
       sequence: this.records.length + 1,
       outcome: "accepted",
       reason: null,
-      envelope: event as unknown as Record<string, unknown>,
+      envelope: event,
     });
   }
 
@@ -52,7 +57,7 @@ export class InMemoryAuditSink implements AuditSink {
   }
 
   async exportRecords(): Promise<AuditExportRecord[]> {
-    return this.records.map(record => this.flattenRecord(record, true));
+    return this.records.map((record) => this.flattenRecord(record, true));
   }
 
   clear(): void {
@@ -66,7 +71,7 @@ export class InMemoryAuditSink implements AuditSink {
   async enforceRetention(now: Date = new Date()): Promise<{ deleted_count: number }> {
     const originalCount = this.records.length;
     const cutoffMs = this.retentionDays * 24 * 60 * 60 * 1000;
-    const retained = this.records.filter(record => {
+    const retained = this.records.filter((record) => {
       const topic = record.envelope.topic;
       if (topic === "audit.retention.deleted") {
         return true;
@@ -98,7 +103,10 @@ export class InMemoryAuditSink implements AuditSink {
     return { deleted_count: deletedCount };
   }
 
-  private flattenRecord(record: AuditRecord, redactPayload: boolean): AuditExportRecord {
+  private flattenRecord(
+    record: AuditRecord,
+    redactPayload: boolean,
+  ): AuditExportRecord {
     const envelope = redactPayload ? this.redactEnvelope(record.envelope) : { ...record.envelope };
     const methodOrTopic = (envelope.method ?? envelope.topic) as string | undefined;
 
@@ -122,7 +130,7 @@ export class InMemoryAuditSink implements AuditSink {
 
   private redactValue(value: unknown, key?: string): unknown {
     if (Array.isArray(value)) {
-      return value.map(item => this.redactValue(item));
+      return value.map((item) => this.redactValue(item));
     }
 
     if (!value || typeof value !== "object") {
@@ -138,7 +146,7 @@ export class InMemoryAuditSink implements AuditSink {
           return [entryKey, "[REDACTED]"];
         }
         return [entryKey, this.redactValue(entryValue, entryKey)];
-      }
+      },
     );
 
     return Object.fromEntries(entries);

@@ -17,9 +17,7 @@ export function getConversations(): Conversation[] {
 
 export function getActiveConversation(): Conversation | null {
   const id = activeConversationId();
-  if (!id) {
-    return null;
-  }
+  if (!id) return null;
   return conversations().find(c => c.id === id) ?? null;
 }
 
@@ -73,9 +71,7 @@ export async function sendMessage(text: string): Promise<void> {
 
   setConversations((prev: Conversation[]) =>
     prev.map(c => {
-      if (c.id !== convId) {
-        return c;
-      }
+      if (c.id !== convId) return c;
       return {
         ...c,
         messages: [...c.messages, userMsg, assistantMsg],
@@ -154,15 +150,11 @@ export async function sendMessage(text: string): Promise<void> {
 function appendToAssistantMessage(convId: string, msgId: string, content: string): void {
   setConversations((prev: Conversation[]) =>
     prev.map(c => {
-      if (c.id !== convId) {
-        return c;
-      }
+      if (c.id !== convId) return c;
       return {
         ...c,
         messages: c.messages.map(m => {
-          if (m.id !== msgId) {
-            return m;
-          }
+          if (m.id !== msgId) return m;
           return { ...m, content: m.content + content };
         }),
       };
@@ -177,15 +169,11 @@ function finalizeAssistantMessage(
 ): void {
   setConversations((prev: Conversation[]) =>
     prev.map(c => {
-      if (c.id !== convId) {
-        return c;
-      }
+      if (c.id !== convId) return c;
       return {
         ...c,
         messages: c.messages.map(m => {
-          if (m.id !== msgId) {
-            return m;
-          }
+          if (m.id !== msgId) return m;
           return { ...m, metadata: { ...m.metadata, status } };
         }),
       };
@@ -197,9 +185,7 @@ function finalizeAssistantMessage(
 export function cancelResponse(): void {
   // TODO: AbortController integration for cancelling in-flight requests
   const conv = getActiveConversation();
-  if (!conv) {
-    return;
-  }
+  if (!conv) return;
   const lastMsg = conv.messages[conv.messages.length - 1];
   if (lastMsg?.metadata?.status === "streaming") {
     finalizeAssistantMessage(conv.id, lastMsg.id, "cancelled");

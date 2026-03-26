@@ -11,10 +11,10 @@
  */
 
 import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.js";
-import { executeHotSwap, type TerminalContext } from "./hot_swap.js";
 import type { RendererEventBus } from "./index.js";
-import { executeRestartWithRestore } from "./restart_restore.js";
+import { executeHotSwap, type TerminalContext } from "./hot_swap.js";
 import { executeRollback } from "./rollback.js";
+import { executeRestartWithRestore } from "./restart_restore.js";
 import type { SwitchBuffer } from "./stream_binding.js";
 
 // ---------------------------------------------------------------------------
@@ -219,13 +219,14 @@ export class SwitchTransactionOrchestrator {
         request.onProgress?.("committed");
 
         return transaction;
-      }
-      // Hot-swap failed, rollback was triggered
-      this._transitionState(transaction, "rolled-back");
-      request.onProgress?.("rolled-back");
+      } else {
+        // Hot-swap failed, rollback was triggered
+        this._transitionState(transaction, "rolled-back");
+        request.onProgress?.("rolled-back");
 
-      transaction.error = result.error;
-      return transaction;
+        transaction.error = result.error;
+        return transaction;
+      }
     } catch (error: unknown) {
       // Unexpected error during hot-swap
       this._transitionState(transaction, "failed");
@@ -281,13 +282,14 @@ export class SwitchTransactionOrchestrator {
         request.onProgress?.("committed");
 
         return transaction;
-      }
-      // Restart-with-restore failed, rollback was triggered
-      this._transitionState(transaction, "rolled-back");
-      request.onProgress?.("rolled-back");
+      } else {
+        // Restart-with-restore failed, rollback was triggered
+        this._transitionState(transaction, "rolled-back");
+        request.onProgress?.("rolled-back");
 
-      transaction.error = result.error;
-      return transaction;
+        transaction.error = result.error;
+        return transaction;
+      }
     } catch (error: unknown) {
       // Unexpected error during restart-with-restore
       this._transitionState(transaction, "failed");

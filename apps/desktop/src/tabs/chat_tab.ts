@@ -1,4 +1,4 @@
-import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
+import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
 
 export interface ChatMessage {
   id: string;
@@ -27,7 +27,7 @@ export interface ChatTabState extends TabState {
  */
 export class ChatTab extends TabSurface {
   private messages: ChatMessage[] = [];
-  private draftInput = "";
+  private draftInput: string = "";
   private contentEl: HTMLElement | null = null;
   private scrollContainer: HTMLElement | null = null;
 
@@ -192,7 +192,13 @@ export class ChatTab extends TabSurface {
     if (message.content.length > 500) {
       const lines = message.content.split("\n");
 
-      if (message.collapsed) {
+      if (!message.collapsed) {
+        for (const line of lines) {
+          const lineEl = document.createElement("div");
+          lineEl.textContent = line;
+          contentEl.appendChild(lineEl);
+        }
+      } else {
         const lineEl = document.createElement("div");
         lineEl.textContent = lines[0];
         contentEl.appendChild(lineEl);
@@ -213,12 +219,6 @@ export class ChatTab extends TabSurface {
         });
 
         contentEl.appendChild(expandBtn);
-      } else {
-        for (const line of lines) {
-          const lineEl = document.createElement("div");
-          lineEl.textContent = line;
-          contentEl.appendChild(lineEl);
-        }
       }
     } else {
       const textEl = document.createElement("div");
@@ -231,9 +231,7 @@ export class ChatTab extends TabSurface {
   }
 
   private sendMessage(text: string): void {
-    if (!text.trim()) {
-      return;
-    }
+    if (!text.trim()) return;
 
     // Add user message
     const userMsg: ChatMessage = {
@@ -253,6 +251,9 @@ export class ChatTab extends TabSurface {
         timestamp: new Date().toISOString(),
       };
       this.messages.push(agentMsg);
+
+      // In real implementation, would emit event on bus for agent to handle
+      console.log("Message sent:", text);
     }, 500);
   }
 
@@ -279,7 +280,7 @@ export class ChatTab extends TabSurface {
   /**
    * Generate mock chat history for demonstration.
    */
-  private generateMockChatHistory(_context: ActiveContext): void {
+  private generateMockChatHistory(context: ActiveContext): void {
     const baseTime = Date.now();
     this.messages = [
       {
@@ -305,8 +306,7 @@ export class ChatTab extends TabSurface {
       {
         id: "msg-4",
         role: "agent",
-        content:
-          "Summary of recent changes:\n\n1. Tab UI framework implementation\n2. Context store integration\n3. Terminal rendering updates\n\nAll changes look good and follow the project patterns.",
+        content: `Summary of recent changes:\n\n1. Tab UI framework implementation\n2. Context store integration\n3. Terminal rendering updates\n\nAll changes look good and follow the project patterns.`,
         timestamp: new Date(baseTime - 200000).toISOString(),
       },
     ];

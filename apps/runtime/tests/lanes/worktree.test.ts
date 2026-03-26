@@ -1,21 +1,21 @@
 // Tests for T006-T010: Worktree provisioning, cleanup, PTY termination, orphan reconciliation
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
-import type { PtyManager } from "../../src/lanes/index.js";
-import { _resetIdCounter, LaneManager } from "../../src/lanes/index.js";
+import * as os from "node:os";
 import {
-  computeBranchName,
-  computeWorktreePath,
-  lastMetrics,
   provisionWorktree,
-  reconcileOrphanedWorktrees,
   removeWorktree,
-  resetMetrics,
+  reconcileOrphanedWorktrees,
+  computeWorktreePath,
+  computeBranchName,
   WorktreeProvisionError,
+  resetMetrics,
+  lastMetrics,
 } from "../../src/lanes/worktree.js";
+import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
+import type { PtyManager, PtyHandle } from "../../src/lanes/index.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -88,10 +88,7 @@ describe("T006 - provisionWorktree", () => {
 
     // Verify branch exists
     const branches = Bun.spawnSync(["git", "branch", "--list", result.branchName], { cwd: repo });
-    const branchOutput =
-      typeof branches.stdout === "string"
-        ? branches.stdout
-        : new TextDecoder().decode(branches.stdout ?? new Uint8Array()).trim();
+    const branchOutput = new TextDecoder().decode(branches.stdout).trim();
     expect(branchOutput).toContain("helios/lane/lane_test_1");
   });
 

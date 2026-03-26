@@ -7,14 +7,14 @@
  * Covers: FR-028-011 - CI gate fails on unredacted secrets in test scenarios.
  */
 
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { AuditSink } from "../../audit/audit-sink.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { RedactionAuditTrail } from "../audit-trail.js";
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules } from "../redaction-rules.js";
+import { RedactionAuditTrail } from "../audit-trail.js";
+import { AuditSink } from "../../audit/audit-sink.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -253,13 +253,13 @@ describe("CI Redaction Verification (T014) [FR-028-011]", () => {
   describe("Partial match handling", () => {
     it("redacts secret at beginning of string", () => {
       const key = knownSecrets.aws_access_keys[0];
-      const result = engine.redact(`${key} is the access key`, makeContext("boundary-start"));
+      const result = engine.redact(key + " is the access key", makeContext("boundary-start"));
       expect(result.redacted).not.toContain(key);
     });
 
     it("redacts secret at end of string", () => {
       const key = knownSecrets.aws_access_keys[0];
-      const result = engine.redact(`Access key: ${key}`, makeContext("boundary-end"));
+      const result = engine.redact("Access key: " + key, makeContext("boundary-end"));
       expect(result.redacted).not.toContain(key);
     });
 

@@ -7,14 +7,14 @@
  * Tags: FR-011-001, FR-011-003, FR-011-004
  */
 
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import type { RendererConfig, RenderSurface } from "../../../../src/renderer/adapter.js";
+import { describe, test, expect, beforeEach, afterEach, mock } from "bun:test";
 import {
-  GhosttyAlreadyInitializedError,
   GhosttyBackend,
   GhosttyNotInitializedError,
   GhosttyNotRunningError,
+  GhosttyAlreadyInitializedError,
 } from "../../../../src/renderer/ghostty/backend.js";
+import type { RendererConfig, RenderSurface } from "../../../../src/renderer/adapter.js";
 import type { PtyWriter } from "../../../../src/renderer/ghostty/input.js";
 
 // Mock Bun.spawn to avoid slow system_profiler calls during detectCapabilities

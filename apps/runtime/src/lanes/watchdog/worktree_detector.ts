@@ -1,8 +1,8 @@
 // T002 - Orphaned worktree detector
 
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import type { LaneRecord, LaneRegistry } from "../registry.js";
+import { promises as fs } from "fs";
+import path from "path";
+import { LaneRegistry, type LaneRecord } from "../registry.js";
 import type { OrphanedResource } from "./resource_classifier.js";
 
 export class WorktreeDetector {
@@ -18,9 +18,7 @@ export class WorktreeDetector {
       const entries = await fs.readdir(this.baseDir, { withFileTypes: true });
 
       for (const entry of entries) {
-        if (!entry.isDirectory()) {
-          continue;
-        }
+        if (!entry.isDirectory()) continue;
 
         const worktreePath = path.join(this.baseDir, entry.name);
         const laneId = this.extractLaneId(entry.name);
@@ -33,8 +31,12 @@ export class WorktreeDetector {
         // Check if lane is active in registry
         const lane = this.findActiveLane(laneId);
 
-        // Any lane that still exists in the registry is not orphaned.
+        // Exclude transient states
         if (lane) {
+          if (lane.state === "cleaning" || (lane.state as string) === "recovering") {
+            continue; // Not orphaned, just in transient state
+          }
+          // Lane is active and not in transient state
           continue;
         }
 
@@ -56,8 +58,8 @@ export class WorktreeDetector {
   }
 
   private extractLaneId(dirName: string): string | null {
-    // Accept both legacy `lane-...` and current `lane_...` naming.
-    const match = dirName.match(/^(lane[-_][a-z0-9_]+)$/i);
+    // Lane IDs are typically in directory names like "lane-abc123"
+    const match = dirName.match(/^(lane-[a-z0-9]+)$/i);
     return match ? match[1] : null;
   }
 

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "bun:test";
 import {
-  DuplicateBindingError,
-  SessionAlreadyExistsError,
-  SessionNotFoundError,
-  ZellijCliError,
   ZellijNotFoundError,
-  ZellijTimeoutError,
   ZellijVersionError,
+  ZellijCliError,
+  ZellijTimeoutError,
+  SessionNotFoundError,
+  SessionAlreadyExistsError,
+  DuplicateBindingError,
 } from "../errors.js";
 
 /**

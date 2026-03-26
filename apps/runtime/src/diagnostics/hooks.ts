@@ -105,12 +105,16 @@ export function markEnd(metric: string, handle: number): number {
 
   // Guard: out-of-range handle.
   if (handle < 0 || handle >= s.startTimes.length) {
-    return Number.NaN;
+    console.warn(`[perf] markEnd called with out-of-range handle ${handle}`);
+    return NaN;
   }
 
   // Guard: stale / mismatched handle.
   if (s.metricNames[handle] !== metric) {
-    return Number.NaN;
+    console.warn(
+      `[perf] markEnd handle ${handle} expected metric "${metric}" but found "${s.metricNames[handle]}" (stale?)`
+    );
+    return NaN;
   }
 
   const end = s.clock.now();
@@ -168,10 +172,14 @@ export function createInstrumentationHooks(opts?: {
 
     markEnd(metric: string, handle: number): number {
       if (handle < 0 || handle >= state.startTimes.length) {
-        return Number.NaN;
+        console.warn(`[perf] markEnd called with out-of-range handle ${handle}`);
+        return NaN;
       }
       if (state.metricNames[handle] !== metric) {
-        return Number.NaN;
+        console.warn(
+          `[perf] markEnd handle ${handle} expected metric "${metric}" but found "${state.metricNames[handle]}" (stale?)`
+        );
+        return NaN;
       }
       const end = state.clock.now();
       const duration = end - state.startTimes[handle]!;

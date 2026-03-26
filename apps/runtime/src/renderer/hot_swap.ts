@@ -8,8 +8,8 @@
  */
 
 import type { RendererAdapter, RendererConfig, RenderSurface } from "./adapter.js";
-import type { RendererEventBus } from "./index.js";
 import type { SwitchBuffer } from "./stream_binding.js";
+import type { RendererEventBus } from "./index.js";
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -90,7 +90,7 @@ export async function executeHotSwap(
   config: RendererConfig,
   surface: RenderSurface,
   onRollback: (error: Error) => Promise<void>,
-  _eventBus?: RendererEventBus
+  eventBus?: RendererEventBus
 ): Promise<HotSwapResult> {
   const startTime = Date.now();
   let currentPhase = "pre-validation";

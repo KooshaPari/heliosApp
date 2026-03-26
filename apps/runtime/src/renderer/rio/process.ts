@@ -21,14 +21,8 @@ type ExitHandler = (code: number) => void;
 
 const SIGKILL_TIMEOUT_MS = 3000;
 
-type SpawnedRioProcess = ReturnType<typeof Bun.spawn> & {
-  pid?: number;
-  kill?: (signal: string) => void;
-  stdin?: { write(data: Uint8Array): number } | null;
-};
-
 export class RioProcess {
-  private _proc: SpawnedRioProcess | undefined;
+  private _proc: ReturnType<typeof Bun.spawn> | undefined;
   private _pid: number | undefined;
   private _running = false;
   private _startedAt: number | undefined;
@@ -57,7 +51,7 @@ export class RioProcess {
         stdin: "pipe",
         stdout: "pipe",
         stderr: "pipe",
-      }) as SpawnedRioProcess;
+      });
 
       this._pid = this._proc.pid;
       this._running = true;
@@ -75,7 +69,7 @@ export class RioProcess {
         }
       });
 
-      return { pid: this._pid as number };
+      return { pid: this._pid };
     } catch (err) {
       this._running = false;
       this._startLock = false;
@@ -91,12 +85,12 @@ export class RioProcess {
    * Stop the rio process with SIGTERM -> SIGKILL escalation.
    */
   async stop(): Promise<void> {
-    if (!(this._proc && this._running)) {
+    if (!this._proc || !this._running) {
       return;
     }
 
     // Send SIGTERM first.
-    this._proc.kill?.("SIGTERM");
+    this._proc.kill("SIGTERM");
 
     // Wait up to SIGKILL_TIMEOUT_MS, then escalate.
     const exitPromise = this._proc.exited;
@@ -106,7 +100,7 @@ export class RioProcess {
 
     const result = await Promise.race([exitPromise, timeout]);
     if (result === "timeout") {
-      this._proc.kill?.("SIGKILL");
+      this._proc.kill("SIGKILL");
       await this._proc.exited;
     }
 
@@ -123,9 +117,7 @@ export class RioProcess {
   }
 
   getUptime(): number | undefined {
-    if (this._startedAt === undefined) {
-      return undefined;
-    }
+    if (this._startedAt === undefined) return undefined;
     return Date.now() - this._startedAt;
   }
 
@@ -140,13 +132,11 @@ export class RioProcess {
    * Write data to the rio process stdin.
    */
   writeToStdin(data: Uint8Array): void {
-    if (!(this._proc && this._running)) {
-      return;
-    }
+    if (!this._proc || !this._running) return;
     try {
       const stdin = this._proc.stdin;
       if (stdin && typeof stdin === "object" && "write" in stdin) {
-        stdin.write(data);
+        (stdin as { write(data: Uint8Array): number }).write(data);
       }
     } catch {
       // Process may have died between the check and the write.

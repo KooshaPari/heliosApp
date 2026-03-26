@@ -34,7 +34,6 @@ export const ToastContainer: Component<ToastContainerProps> = props => {
       <For each={props.toasts}>
         {toast => (
           <div
-            role="alert"
             onClick={() => props.onDismiss(toast.id)}
             onKeyDown={e => {
               if (e.key === "Enter" || e.key === " ") {

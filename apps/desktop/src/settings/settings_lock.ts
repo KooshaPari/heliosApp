@@ -9,7 +9,7 @@ export interface SettingsLockOptions {
 }
 
 export class SettingsLock {
-  private isLocked = false;
+  private isLocked: boolean = false;
   private options: SettingsLockOptions;
   private lockTimeoutId?: NodeJS.Timeout;
   private lockedElements: Set<HTMLElement> = new Set();
@@ -22,9 +22,7 @@ export class SettingsLock {
   }
 
   lock(settingsContainer: HTMLElement): void {
-    if (this.isLocked) {
-      return;
-    }
+    if (this.isLocked) return;
 
     this.isLocked = true;
     this.applyLock(settingsContainer);
@@ -32,9 +30,7 @@ export class SettingsLock {
   }
 
   unlock(settingsContainer: HTMLElement): void {
-    if (!this.isLocked) {
-      return;
-    }
+    if (!this.isLocked) return;
 
     this.isLocked = false;
     this.removeLock(settingsContainer);
@@ -50,7 +46,7 @@ export class SettingsLock {
     const interactiveSelectors = 'input, button, [role="button"], [role="switch"]';
     const elements = container.querySelectorAll(interactiveSelectors) as NodeListOf<HTMLElement>;
 
-    for (const element of elements) {
+    elements.forEach(element => {
       if (element instanceof HTMLInputElement || element instanceof HTMLButtonElement) {
         element.disabled = true;
       } else {
@@ -62,7 +58,7 @@ export class SettingsLock {
       }
 
       this.lockedElements.add(element);
-    }
+    });
 
     // Add visual overlay/grayed-out effect
     container.style.opacity = "0.7";
@@ -70,7 +66,7 @@ export class SettingsLock {
   }
 
   private removeLock(container: HTMLElement): void {
-    for (const element of this.lockedElements) {
+    this.lockedElements.forEach(element => {
       if (element instanceof HTMLInputElement || element instanceof HTMLButtonElement) {
         element.disabled = false;
       } else {
@@ -80,7 +76,7 @@ export class SettingsLock {
         element.style.cursor = "";
         element.removeAttribute("title");
       }
-    }
+    });
 
     this.lockedElements.clear();
     container.style.opacity = "";
@@ -89,6 +85,7 @@ export class SettingsLock {
 
   private startAutoUnlockTimer(): void {
     this.lockTimeoutId = setTimeout(() => {
+      console.warn("Settings lock timeout: auto-unlocking settings");
       this.isLocked = false;
       if (this.options.onAutoUnlocked) {
         this.options.onAutoUnlocked();

@@ -1,9 +1,9 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { promises as fs } from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { type Checkpoint, CheckpointWriter } from "../checkpoint.js";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { CheckpointScheduler } from "../checkpoint-scheduler.js";
+import { CheckpointWriter, type Checkpoint, type CheckpointSession } from "../checkpoint.js";
+import { promises as fs } from "fs";
+import path from "path";
+import os from "os";
 
 describe("CheckpointScheduler", () => {
   let scheduler: CheckpointScheduler;
@@ -136,7 +136,7 @@ describe("CheckpointScheduler", () => {
 
       // First checkpoint at 60s
       vi.advanceTimersByTime(60100);
-      const _firstTime = Date.now();
+      const firstTime = Date.now();
 
       // The scheduler should have increased its interval
       vi.advanceTimersByTime(60100); // Only 60s more, but interval was doubled

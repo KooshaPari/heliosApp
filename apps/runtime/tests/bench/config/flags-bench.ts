@@ -10,13 +10,13 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { FlagRegistry, RENDERER_ENGINE_FLAG } from "../../../src/config/flags.js";
+import { JsonSettingsStore } from "../../../src/config/store.js";
 import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
 import { SettingsManager } from "../../../src/config/settings.js";
-import { JsonSettingsStore } from "../../../src/config/store.js";
+import { FlagRegistry, RENDERER_ENGINE_FLAG } from "../../../src/config/flags.js";
 
 // CI slowdown factor — 2x threshold multiplier
-const CI_FACTOR = process.env.CI ? 2 : 1;
+const CI_FACTOR = process.env["CI"] ? 2 : 1;
 
 interface BenchResult {
   name: string;
@@ -225,15 +225,25 @@ async function main() {
   results.push(await benchHotReloadPropagation());
   results.push(await benchFlagReadMemory());
 
+  // Structured JSON output for CI
+  console.log(JSON.stringify({ benchmarks: results }, null, 2));
+
   // Assert thresholds
   const failures = results.filter(r => !r.pass);
   if (failures.length > 0) {
-    for (const _f of failures) {
+    console.error("\nBenchmark threshold breaches:");
+    for (const f of failures) {
+      console.error(
+        `  FAIL: ${f.name} — p95=${f.p95_ms.toFixed(4)} > threshold=${f.threshold_p95_ms}`
+      );
     }
     process.exit(1);
   }
+
+  console.log("\nAll benchmarks passed.");
 }
 
-main().catch(_err => {
+main().catch(err => {
+  console.error(err);
   process.exit(1);
 });

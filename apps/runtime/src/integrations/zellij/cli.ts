@@ -5,8 +5,13 @@
  * using Bun.spawn for process execution.
  */
 
-import { ZellijNotFoundError, ZellijTimeoutError, ZellijVersionError } from "./errors.js";
 import type { AvailabilityResult, CliResult, ZellijSession } from "./types.js";
+import {
+  ZellijNotFoundError,
+  ZellijVersionError,
+  ZellijCliError,
+  ZellijTimeoutError,
+} from "./errors.js";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const MINIMUM_VERSION = "0.40.0";
@@ -21,12 +26,8 @@ function compareSemver(a: string, b: string): number {
   for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
     const va = pa[i] ?? 0;
     const vb = pb[i] ?? 0;
-    if (va < vb) {
-      return -1;
-    }
-    if (va > vb) {
-      return 1;
-    }
+    if (va < vb) return -1;
+    if (va > vb) return 1;
   }
   return 0;
 }
@@ -87,9 +88,14 @@ export class ZellijCli {
       proc.exited,
     ]);
 
-    const _durationMs = performance.now() - startMs;
+    const durationMs = performance.now() - startMs;
     const stdout = new TextDecoder().decode(stdoutBuf);
     const stderr = new TextDecoder().decode(stderrBuf);
+
+    // Debug logging for all CLI calls
+    console.debug(
+      `[zellij-cli] ${command} -> exit=${exitCode} duration=${durationMs.toFixed(1)}ms`
+    );
 
     return { stdout, stderr, exitCode };
   }
@@ -161,16 +167,12 @@ export class ZellijCli {
    */
   private parseSessionLine(line: string): ZellijSession | undefined {
     const trimmed = line.trim();
-    if (trimmed === "") {
-      return undefined;
-    }
+    if (trimmed === "") return undefined;
 
     // The session name is the first whitespace-delimited token
     const parts = trimmed.split(/\s+/);
     const name = parts[0];
-    if (!name) {
-      return undefined;
-    }
+    if (!name) return undefined;
 
     const attached = /\(ATTACHED\)/i.test(trimmed) || trimmed.includes("ATTACHED");
 

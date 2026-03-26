@@ -35,16 +35,14 @@ export class MlxInferenceEngine implements InferenceEngine {
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
     const prompt = request.messages.map(m => `${m.role}: ${m.content}`).join("\n");
     const args = ["python3", "-m", "mlx_lm.generate", "--model", request.model, "--prompt", prompt];
-    if (request.maxTokens) {
-      args.push("--max-tokens", String(request.maxTokens));
-    }
+    if (request.maxTokens) args.push("--max-tokens", String(request.maxTokens));
 
     const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
-    const output = proc.stdout ? await new Response(proc.stdout).text() : "";
+    const output = await new Response(proc.stdout).text();
     const exitCode = await proc.exited;
 
     if (exitCode !== 0) {
-      const stderr = proc.stderr ? await new Response(proc.stderr).text() : "";
+      const stderr = await new Response(proc.stderr).text();
       throw new Error(`MLX inference failed: ${stderr}`);
     }
 
@@ -81,9 +79,7 @@ export class MlxInferenceEngine implements InferenceEngine {
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
     const hw = await detectHardware();
-    if (!hw.hasAppleSilicon) {
-      return "unavailable";
-    }
+    if (!hw.hasAppleSilicon) return "unavailable";
     try {
       const proc = Bun.spawn(["python3", "-c", "import mlx_lm"], {
         stdout: "pipe",

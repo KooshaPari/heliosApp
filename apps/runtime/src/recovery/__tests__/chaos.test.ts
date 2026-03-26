@@ -1,13 +1,13 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
-import { promises as fs } from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { type Checkpoint, CheckpointReader, CheckpointWriter } from "../checkpoint.js";
-import { OrphanReconciler } from "../orphan-reconciler.js";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { RestorationPipeline } from "../restoration.js";
+import { RecoveryStateMachine, RecoveryStage } from "../state-machine.js";
 import { CrashLoopDetector, SafeMode } from "../safe-mode.js";
-import { RecoveryStage, RecoveryStateMachine } from "../state-machine.js";
+import { CheckpointWriter, CheckpointReader, type Checkpoint } from "../checkpoint.js";
+import { OrphanReconciler } from "../orphan-reconciler.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { promises as fs } from "fs";
+import path from "path";
+import os from "os";
 
 describe("Chaos Tests - Crash Recovery Resilience", () => {
   let tempDir: string;

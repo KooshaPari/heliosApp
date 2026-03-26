@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { AuditExporter } from "../../../src/audit/export";
+import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 
 describe("AuditExporter", () => {
   let exporter: AuditExporter;
