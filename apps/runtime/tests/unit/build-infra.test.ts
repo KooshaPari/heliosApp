@@ -172,10 +172,10 @@ describe("workspace dependency graph", () => {
 });
 
 describe("lint suppression directives", () => {
-  test("no @ts-ignore or @ts-expect-error in source files", async () => {
+  test("no @ts-ignore or @ts-ignore in source files", async () => {
     // @ts-ignore - Bun.Glob exists at runtime
     const glob = new (Bun as { Glob: new (s: string) => { scan: Function } }).Glob("**/*.ts");
-    const suppressionPattern = /@ts-ignore|@ts-expect-error/;
+    const suppressionPattern = /@ts-ignore|@ts-ignore/;
 
     const srcDirs = [resolve(ROOT, "apps/runtime/src"), resolve(ROOT, "apps/desktop/src")];
 

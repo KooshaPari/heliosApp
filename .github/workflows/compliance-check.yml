@@ -39,7 +39,7 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
-            const files = data.map(f => f.filename);
+            const files = data.map(f => `${f.filename}::${f.status}`);
             core.setOutput('files', JSON.stringify(files));
             console.log('Changed files:', files);
 

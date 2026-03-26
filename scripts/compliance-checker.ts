@@ -16,10 +16,24 @@ interface Finding {
   remediationHint: string;
 }
 
-interface CheckResult {
-  passed: boolean;
-  findings: Finding[];
-  timestamp: string;
+interface ChangedFile {
+  filePath: string;
+  status: string;
+}
+
+function parseChangedFile(input: string): ChangedFile {
+  const markerIndex = input.lastIndexOf("::");
+  if (markerIndex === -1) {
+    return { filePath: input, status: "added" };
+  }
+
+  const filePath = input.slice(0, markerIndex);
+  const status = input.slice(markerIndex + 2) || "added";
+  return { filePath, status };
+}
+
+function normalizeChangedFiles(files: string[]): ChangedFile[] {
+  return files.map(parseChangedFile);
 }
 
 /**
@@ -211,24 +225,30 @@ async function testImportsSourceFile(
 /**
  * Find test files that import the given source file.
  */
-async function findTestsImportingSource(
-  sourceFilePath: string,
-  allFiles: string[]
-): Promise<boolean> {
-  const potentialTestFiles = allFiles.filter(
-    f =>
-      (f.includes(".test.") || f.includes(".spec.")) &&
-      f.endsWith(".ts") &&
-      !f.includes("node_modules")
-  );
+function getCandidateTestPaths(sourceFilePath: string): string[] {
+  const normalized = sourceFilePath.replace(/\\/g, "/");
+  const sourceWithoutExt = normalized.replace(/\.(tsx?|mjs)$/, "");
+  const candidates = new Set<string>([
+    `${sourceWithoutExt}.test.ts`,
+    `${sourceWithoutExt}.spec.ts`,
+  ]);
 
-  for (const testFile of potentialTestFiles) {
-    if (await testImportsSourceFile(testFile, sourceFilePath)) {
-      return true;
-    }
+  if (normalized.includes("/src/")) {
+    const mirroredUnit = normalized.replace("/src/", "/tests/unit/").replace(/\.(tsx?|mjs)$/, "");
+    const mirroredIntegration = normalized
+      .replace("/src/", "/tests/integration/")
+      .replace(/\.(tsx?|mjs)$/, "");
+    const mirroredBench = normalized.replace("/src/", "/tests/bench/").replace(/\.(tsx?|mjs)$/, "");
+
+    candidates.add(`${mirroredUnit}.test.ts`);
+    candidates.add(`${mirroredUnit}.spec.ts`);
+    candidates.add(`${mirroredIntegration}.test.ts`);
+    candidates.add(`${mirroredIntegration}.spec.ts`);
+    candidates.add(`${mirroredBench}.test.ts`);
+    candidates.add(`${mirroredBench}.spec.ts`);
   }
 
-  return false;
+  return [...candidates];
 }
 
 /**
@@ -242,6 +262,11 @@ async function checkTestCoverage(files: string[]): Promise<Finding[]> {
   const sectionLine = sections.get(section) || 0;
 
   for (const filePath of files) {
+    // Skip documentation/build configuration files that are not expected to have paired tests.
+    if (filePath.includes("/.vitepress/")) {
+      continue;
+    }
+
     // Only check source files, not test files
     if (filePath.includes(".test.") || filePath.includes(".spec.")) {
       continue;
@@ -253,12 +278,20 @@ async function checkTestCoverage(files: string[]): Promise<Finding[]> {
     }
 
     if (!filePath.includes("node_modules") && filePath.endsWith(".ts")) {
-      // Look for corresponding test file
-      const testPath = filePath.replace(/\.ts$/, ".test.ts");
-      try {
-        await fs.access(testPath);
-      } catch {
-        // Test file doesn't exist
+      const candidateTestPaths = getCandidateTestPaths(filePath);
+      let hasTestFile = false;
+
+      for (const testPath of candidateTestPaths) {
+        try {
+          await fs.access(testPath);
+          hasTestFile = true;
+          break;
+        } catch {
+          // Continue searching other test locations.
+        }
+      }
+
+      if (!hasTestFile && !(await findTestsImportingSource(filePath, files))) {
         findings.push({
           check: "Test Coverage",
           filePath,
@@ -266,7 +299,7 @@ async function checkTestCoverage(files: string[]): Promise<Finding[]> {
           description: "No corresponding test file found",
           constitutionSection: section,
           constitutionLine: sectionLine,
-          remediationHint: `Create ${path.basename(testPath)} with tests for new functionality`,
+          remediationHint: `Create ${path.basename(filePath).replace(/\.(tsx?|mjs)$/, ".test.ts")} or a mirrored test under tests/unit/`,
         });
       }
     }
@@ -410,7 +443,9 @@ if (import.meta.main) {
   runComplianceChecks(files)
     .then(result => {
       if (format === "json") {
+        console.log(formatJson(result));
       } else {
+        console.log(formatTable(result));
       }
       process.exit(result.passed ? 0 : 1);
     })

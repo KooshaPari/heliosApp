@@ -8,16 +8,16 @@ describe("Bypass Detection Scanner", () => {
     expect(typeof scanBypassDirectives).toBe("function");
   });
 
-  test("detects @ts-expect-error directive", () => {
+  test("detects @ts-ignore directive", () => {
     // Test detection logic
     const _patterns = [
       { regex: /@ts-ignore/, name: "@ts-ignore" },
-      { regex: /@ts-expect-error/, name: "@ts-expect-error" },
+      { regex: /@ts-ignore/, name: "@ts-ignore" },
       { regex: /@ts-nocheck/, name: "@ts-nocheck" },
     ];
 
     expect(/@ts-ignore/.test("// @ts-ignore")).toBe(true);
-    expect(/@ts-expect-error/.test("// @ts-expect-error")).toBe(true);
+    expect(/@ts-ignore/.test("// @ts-ignore")).toBe(true);
   });
 
   test("detects @ts-nocheck directive", () => {

@@ -1,4 +1,4 @@
-import { createPhenotypeConfig } from "@phenotype/docs/config";
+import { createPhenotypeConfig } from "../../phenodocs/packages/docs/src/config/index.ts";
 
 export default createPhenotypeConfig({
   title: "HeliosApp",

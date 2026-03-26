@@ -3,13 +3,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "postinstall": "cd ../vendor/phenodocs/packages/docs && bun install",
+    "postinstall": "cd ../../phenodocs/packages/docs && bun install",
     "dev": "vitepress dev .",
     "build": "vitepress build .",
     "preview": "vitepress preview ."
   },
   "dependencies": {
-    "@phenotype/docs": "file:../vendor/phenodocs/packages/docs"
+    "@phenotype/docs": "file:../../phenodocs/packages/docs"
   },
   "devDependencies": {
     "vitepress": "^1.6.4",

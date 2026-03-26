@@ -118,6 +118,36 @@ export function calculateSum(values: number[]): number {
     expect(new Date(result.timestamp).getTime()).toBeGreaterThan(0);
   });
 
+  test("recognizes mirrored tests under tests/unit", async () => {
+    const sourceDir = `${FIXTURE_DIR}/apps/desktop/src/tabs`;
+    const testDir = `${FIXTURE_DIR}/apps/desktop/tests/unit/tabs`;
+    await fs.mkdir(sourceDir, { recursive: true });
+    await fs.mkdir(testDir, { recursive: true });
+
+    const sourceFile = `${sourceDir}/project_tab.ts`;
+    const testFile = `${testDir}/project_tab.test.ts`;
+
+    await fs.writeFile(sourceFile, "export const projectName = 'demo';\n");
+    await fs.writeFile(
+      testFile,
+      [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { projectName } from \"../../../../src/tabs/project_tab\";",
+        "",
+        "describe('project tab mirror', () => {",
+        "  it('imports the source file', () => {",
+        "    expect(projectName).toBe('demo');",
+        "  });",
+        "});",
+      ].join("\n")
+    );
+
+    const result = await runComplianceChecks([sourceFile, testFile]);
+
+    expect(result.passed).toBe(true);
+    expect(result.findings.find(f => f.filePath === sourceFile && f.check === "Test Coverage")).toBeUndefined();
+  });
+
   test("handles multiple files", async () => {
     const file1 = `${FIXTURE_DIR}/multi-1.ts`;
     const file2 = `${FIXTURE_DIR}/multi-2.ts`;

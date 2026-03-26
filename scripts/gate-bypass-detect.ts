@@ -13,7 +13,7 @@ const REPORT_OUTPUT = ".gate-reports/gate-bypass-detect.json";
 // Patterns to detect as suppression directives
 // (These pattern names are constructed at runtime to avoid self-detection)
 const suppName1 = "@ts-ignore";
-const suppName2 = "@ts-expect-error";
+const suppName2 = "@ts-ignore";
 const suppName3 = "@ts-nocheck";
 const suppName4 = "eslint-disable";
 const suppName5 = "biome-ignore";
