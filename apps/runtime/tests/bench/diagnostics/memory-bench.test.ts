@@ -3,12 +3,14 @@
 import { describe, expect, it } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 
+declare const Bun: {
+  gc?: (force?: boolean) => void;
+};
+
 describe("Memory Overhead", () => {
   it("20 metrics x 10k samples stays under 10 MB", () => {
     // Force GC before measurement if available.
-    // @ts-expect-error - Bun.gc exists at runtime
-    if (typeof globalThis.Bun !== "undefined" && typeof Bun.gc === "function") {
-      // @ts-expect-error
+    if (typeof Bun.gc === "function") {
       Bun.gc(true);
     }
 
@@ -24,7 +26,7 @@ describe("Memory Overhead", () => {
         type: "latency",
         unit: "ms",
         description: `Memory test metric ${i}`,
-        bufferSize: bufferSize,
+        bufferSize,
       });
     }
 
@@ -35,9 +37,7 @@ describe("Memory Overhead", () => {
       }
     }
 
-    // @ts-expect-error - Bun.gc exists at runtime
-    if (typeof globalThis.Bun !== "undefined" && typeof Bun.gc === "function") {
-      // @ts-expect-error
+    if (typeof Bun.gc === "function") {
       Bun.gc(true);
     }
 
@@ -52,9 +52,7 @@ describe("Memory Overhead", () => {
   });
 
   it("empty buffers have near-zero overhead", () => {
-    // @ts-expect-error - Bun.gc exists at runtime
-    if (typeof globalThis.Bun !== "undefined" && typeof Bun.gc === "function") {
-      // @ts-expect-error
+    if (typeof Bun.gc === "function") {
       Bun.gc(true);
     }
 
@@ -72,9 +70,7 @@ describe("Memory Overhead", () => {
     }
     // No samples recorded — buffers are lazily allocated.
 
-    // @ts-expect-error - Bun.gc exists at runtime
-    if (typeof globalThis.Bun !== "undefined" && typeof Bun.gc === "function") {
-      // @ts-expect-error
+    if (typeof Bun.gc === "function") {
       Bun.gc(true);
     }
 

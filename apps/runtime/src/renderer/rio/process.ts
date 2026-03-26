@@ -21,8 +21,14 @@ type ExitHandler = (code: number) => void;
 
 const SIGKILL_TIMEOUT_MS = 3000;
 
+type SpawnedRioProcess = ReturnType<typeof Bun.spawn> & {
+  pid?: number;
+  kill?: (signal: string) => void;
+  stdin?: { write(data: Uint8Array): number } | null;
+};
+
 export class RioProcess {
-  private _proc: ReturnType<typeof Bun.spawn> | undefined;
+  private _proc: SpawnedRioProcess | undefined;
   private _pid: number | undefined;
   private _running = false;
   private _startedAt: number | undefined;
@@ -48,13 +54,11 @@ export class RioProcess {
       }
 
       this._proc = Bun.spawn(args, {
-        // @ts-expect-error
         stdin: "pipe",
         stdout: "pipe",
         stderr: "pipe",
-      });
+      }) as SpawnedRioProcess;
 
-      // @ts-expect-error - proc.pid exists at runtime
       this._pid = this._proc.pid;
       this._running = true;
       this._startedAt = Date.now();
@@ -92,8 +96,7 @@ export class RioProcess {
     }
 
     // Send SIGTERM first.
-    // @ts-expect-error - proc.kill exists at runtime
-    this._proc.kill("SIGTERM");
+    this._proc.kill?.("SIGTERM");
 
     // Wait up to SIGKILL_TIMEOUT_MS, then escalate.
     const exitPromise = this._proc.exited;
@@ -103,8 +106,7 @@ export class RioProcess {
 
     const result = await Promise.race([exitPromise, timeout]);
     if (result === "timeout") {
-      // @ts-expect-error - proc.kill exists at runtime
-      this._proc.kill("SIGKILL");
+      this._proc.kill?.("SIGKILL");
       await this._proc.exited;
     }
 
@@ -142,10 +144,9 @@ export class RioProcess {
       return;
     }
     try {
-      // @ts-expect-error - stdin exists at runtime
-      const stdin = this._proc.stdin as { write(data: Uint8Array): number } | null | undefined;
+      const stdin = this._proc.stdin;
       if (stdin && typeof stdin === "object" && "write" in stdin) {
-        (stdin as { write(data: Uint8Array): number }).write(data);
+        stdin.write(data);
       }
     } catch {
       // Process may have died between the check and the write.

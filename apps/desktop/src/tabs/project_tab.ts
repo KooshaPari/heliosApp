@@ -119,7 +119,9 @@ export class ProjectTab extends TabSurface {
       retryBtn.style.borderRadius = "3px";
       retryBtn.style.cursor = "pointer";
       retryBtn.style.fontSize = "12px";
-      retryBtn.addEventListener("click", () => {});
+      retryBtn.addEventListener("click", () => {
+        this.onContextChange(null);
+      });
 
       errorEl.appendChild(titleEl);
       errorEl.appendChild(msgEl);

@@ -64,13 +64,10 @@ export { GhosttySurface, SurfaceBindingError } from "./surface.js";
 export async function isGhosttyAvailable(binaryPath = "ghostty"): Promise<boolean> {
   try {
     const proc = Bun.spawn(["which", binaryPath], {
-      // @ts-expect-error
       stdout: "ignore",
-      // @ts-expect-error
       stderr: "ignore",
     });
     const exitCode = await proc.exited;
-    // @ts-expect-error - exitCode exists at runtime
     return exitCode === 0;
   } catch {
     return false;
@@ -86,7 +83,6 @@ export async function detectGhosttyVersion(binaryPath = "ghostty"): Promise<stri
   try {
     const proc = Bun.spawn([binaryPath, "--version"], {
       stdout: "pipe",
-      // @ts-expect-error
       stderr: "ignore",
     });
     const text = await new Response(

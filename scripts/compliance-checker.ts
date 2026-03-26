@@ -223,7 +223,7 @@ async function testImportsSourceFile(
 }
 
 /**
- * Find test files that import the given source file.
+ * Get candidate test paths for a source file.
  */
 function getCandidateTestPaths(sourceFilePath: string): string[] {
   const normalized = sourceFilePath.replace(/\\/g, "/");
@@ -249,6 +249,35 @@ function getCandidateTestPaths(sourceFilePath: string): string[] {
   }
 
   return [...candidates];
+}
+
+/**
+ * Find test files that import the given source file.
+ */
+async function findTestsImportingSource(
+  sourceFilePath: string,
+  files: string[]
+): Promise<boolean> {
+  for (const testPath of files) {
+    if (
+      !testPath.endsWith(".ts") &&
+      !testPath.endsWith(".tsx") &&
+      !testPath.endsWith(".js") &&
+      !testPath.endsWith(".jsx")
+    ) {
+      continue;
+    }
+
+    if (!testPath.includes(".test.") && !testPath.includes(".spec.")) {
+      continue;
+    }
+
+    if (await testImportsSourceFile(testPath, sourceFilePath)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /**

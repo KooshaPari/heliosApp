@@ -68,9 +68,7 @@ export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Pr
 
   try {
     const proc = Bun.spawn([shell], {
-      // @ts-expect-error
       cwd,
-      // @ts-expect-error
       env: {
         ...env,
         TERM: env.TERM ?? "xterm-256color",
@@ -80,9 +78,12 @@ export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Pr
       stdin: "pipe",
       stdout: "pipe",
       stderr: "pipe",
-    });
+    } as Parameters<typeof Bun.spawn>[1]) as unknown as {
+      pid: number;
+      exited: Promise<number>;
+      kill(signal?: number): void;
+    };
 
-    // @ts-expect-error - proc.pid exists at runtime
     const pid = proc.pid;
 
     if (pid <= 0) {

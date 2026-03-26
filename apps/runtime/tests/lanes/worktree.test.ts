@@ -27,16 +27,11 @@ function createTempGitRepo(): string {
   tmpDirs.push(dir);
 
   // Initialize a git repo with an initial commit
-  // @ts-expect-error
   Bun.spawnSync(["git", "init"], { cwd: dir });
-  // @ts-expect-error
   Bun.spawnSync(["git", "config", "user.email", "test@test.com"], { cwd: dir });
-  // @ts-expect-error
   Bun.spawnSync(["git", "config", "user.name", "Test"], { cwd: dir });
   fs.writeFileSync(path.join(dir, "README.md"), "# test repo\n");
-  // @ts-expect-error
   Bun.spawnSync(["git", "add", "."], { cwd: dir });
-  // @ts-expect-error
   Bun.spawnSync(["git", "commit", "-m", "initial"], { cwd: dir });
 
   return dir;
@@ -46,7 +41,6 @@ function cleanup(): void {
   for (const dir of tmpDirs) {
     try {
       // Prune worktrees first to avoid locked file issues
-      // @ts-expect-error
       Bun.spawnSync(["git", "worktree", "prune"], { cwd: dir });
     } catch {
       // ignore
@@ -93,7 +87,6 @@ describe("T006 - provisionWorktree", () => {
     expect(fs.existsSync(result.worktreePath)).toBe(true);
 
     // Verify branch exists
-    // @ts-expect-error - Bun.spawnSync exists at runtime
     const branches = Bun.spawnSync(["git", "branch", "--list", result.branchName], { cwd: repo });
     const branchOutput =
       typeof branches.stdout === "string"

@@ -116,21 +116,23 @@ export function defaultSpawn(
   cmd: string[],
   opts: { cwd?: string; stdout?: "pipe"; stderr?: "pipe" }
 ): SpawnResult {
-  // @ts-expect-error - Bun.spawn cwd option exists at runtime
   const proc = Bun.spawn(cmd, {
-    // @ts-expect-error
     cwd: opts.cwd,
     stdout: "pipe",
     stderr: "pipe",
-  });
+  } as Parameters<typeof Bun.spawn>[1]) as unknown as {
+    pid: number;
+    stdout: ReadableStream<Uint8Array> | null;
+    stderr: ReadableStream<Uint8Array> | null;
+    exited: Promise<number>;
+    kill(signal?: number): void;
+  };
   return {
-    // @ts-expect-error - proc.pid exists at runtime
     pid: proc.pid,
-    stdout: proc.stdout as ReadableStream<Uint8Array> | null,
-    stderr: proc.stderr as ReadableStream<Uint8Array> | null,
+    stdout: proc.stdout,
+    stderr: proc.stderr,
     exited: proc.exited,
     kill(signal?: number) {
-      // @ts-expect-error - proc.kill exists at runtime
       proc.kill(signal);
     },
   };

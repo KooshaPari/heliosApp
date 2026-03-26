@@ -51,8 +51,13 @@ export class GhosttyProcessError extends Error {
 
 const SIGTERM_TIMEOUT_MS = 5_000;
 
+type SpawnedProcess = ReturnType<typeof Bun.spawn> & {
+  pid?: number;
+  kill?: (signal: string) => void;
+};
+
 export class GhosttyProcess {
-  private _proc: Subprocess | undefined;
+  private _proc: SpawnedProcess | undefined;
   private _pid: number | undefined;
   private _running = false;
   private _intentionalStop = false;
@@ -103,11 +108,9 @@ export class GhosttyProcess {
     try {
       const which = Bun.spawn(["which", binaryPath], {
         stdout: "pipe",
-        // @ts-expect-error
         stderr: "ignore",
       });
       const whichExit = await which.exited;
-      // @ts-expect-error - exitCode exists at runtime
       if (whichExit !== 0) {
         throw new GhosttyBinaryNotFoundError(binaryPath);
       }
@@ -127,17 +130,19 @@ export class GhosttyProcess {
       args.push(...options.extraArgs);
     }
 
-    // @ts-expect-error - Bun.spawn env option exists at runtime
+    const env = Object.fromEntries(
+      Object.entries({ ...process.env, ...options.env }).filter(
+        (entry): entry is [string, string] => typeof entry[1] === "string"
+      )
+    ) as Record<string, string>;
+
     const proc = Bun.spawn(args, {
       stdout: "pipe",
       stderr: "pipe",
-      // @ts-expect-error
-      env: { ...process.env, ...options.env },
-    });
+      env,
+    }) as SpawnedProcess;
 
-    // @ts-expect-error - proc type assignment
     this._proc = proc;
-    // @ts-expect-error - proc.pid exists at runtime
     this._pid = proc.pid;
     this._running = true;
     this._startedAt = Date.now();
@@ -155,8 +160,7 @@ export class GhosttyProcess {
       }
     });
 
-    // @ts-expect-error - proc.pid exists at runtime
-    return { pid: proc.pid };
+    return { pid: proc.pid ?? 0 };
   }
 
   /**
@@ -173,7 +177,7 @@ export class GhosttyProcess {
     this._intentionalStop = true;
 
     // SIGTERM
-    this._proc.kill("SIGTERM");
+    this._proc.kill?.("SIGTERM");
 
     // Wait for graceful exit or timeout
     const exitPromise = this._proc.exited;
@@ -185,7 +189,7 @@ export class GhosttyProcess {
 
     if (result === "timeout") {
       // Escalate to SIGKILL
-      this._proc.kill("SIGKILL");
+      this._proc.kill?.("SIGKILL");
       await this._proc.exited;
     }
 

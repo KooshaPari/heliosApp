@@ -15,8 +15,9 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
 
   async init(): Promise<void> {
     try {
-      // @ts-expect-error - Bun.file exists at runtime
-      const file = Bun.file(this.binaryPath);
+      const file = Bun.file(this.binaryPath) as unknown as {
+        exists(): Promise<boolean>;
+      };
       if (!(await file.exists())) {
         throw new Error(`llama.cpp binary not found at ${this.binaryPath}`);
       }
@@ -57,7 +58,6 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
   async listModels(): Promise<ModelInfo[]> {
     // Scan model directory for .gguf files
     try {
-      // @ts-expect-error - Bun.Glob exists at runtime
       const glob = new Bun.Glob("**/*.gguf");
       const models: ModelInfo[] = [];
       for await (const path of glob.scan({ cwd: this.modelDir })) {
@@ -81,7 +81,6 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
     try {
-      // @ts-expect-error - Bun.file exists at runtime
       const file = Bun.file(this.binaryPath);
       return (await file.exists()) ? "healthy" : "unavailable";
     } catch {
