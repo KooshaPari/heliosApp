@@ -5,7 +5,7 @@
  */
 
 import { existsSync, readFileSync } from "node:fs";
-import { type GateFinding, createGateReport, writeGateReport } from "./gate-report";
+import { createGateReport, type GateFinding, writeGateReport } from "./gate-report";
 
 const REPORT_OUTPUT = ".gate-reports/gate-test.json";
 

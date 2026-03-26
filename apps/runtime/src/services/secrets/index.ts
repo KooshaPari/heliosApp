@@ -14,8 +14,8 @@
 
 // Audit Trail
 export type {
-  RedactionAuditRecord,
   AuditFilter,
+  RedactionAuditRecord,
 } from "../../secrets/audit-trail.js";
 export { RedactionAuditTrail } from "../../secrets/audit-trail.js";
 
@@ -34,9 +34,9 @@ export { EncryptionService } from "../../secrets/encryption.js";
 
 // Protected Paths
 export type {
+  ProtectedPathAcknowledgment,
   ProtectedPathMatch,
   ProtectedPathPattern,
-  ProtectedPathAcknowledgment,
 } from "../../secrets/protected-paths.js";
 export {
   ProtectedPathConfig,
@@ -48,8 +48,8 @@ export type {
   RedactionContext,
   RedactionMatch,
   RedactionResult,
-  RedactionStats,
   RedactionRule,
+  RedactionStats,
 } from "../../secrets/redaction-engine.js";
 export { RedactionEngine } from "../../secrets/redaction-engine.js";
 

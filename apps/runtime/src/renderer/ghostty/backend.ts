@@ -5,13 +5,13 @@
  * ghostty terminal emulator backend.
  */
 
-import type { RenderSurface, RendererAdapter, RendererConfig, RendererState } from "../adapter.js";
+import type { RendererAdapter, RendererConfig, RendererState, RenderSurface } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
 import { detectCapabilities, getCachedCapabilities } from "./capabilities.js";
-import { GhosttyInputRelay } from "./input.js";
 import type { PtyWriter } from "./input.js";
-import { GhosttyMetrics } from "./metrics.js";
+import { GhosttyInputRelay } from "./input.js";
 import type { MetricsPublisher, MetricsSnapshot } from "./metrics.js";
+import { GhosttyMetrics } from "./metrics.js";
 import { GhosttyProcess } from "./process.js";
 import { GhosttySurface } from "./surface.js";
 

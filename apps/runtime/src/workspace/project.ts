@@ -1,6 +1,6 @@
 // T006, T007, T008 — Project binding, stale detection, and git clone delegation
 
-import { constants, accessSync, existsSync, realpathSync } from "node:fs";
+import { accessSync, constants, existsSync, realpathSync } from "node:fs";
 import { isAbsolute } from "node:path";
 import type { ProjectBinding, Workspace } from "./types.js";
 
@@ -147,13 +147,13 @@ export async function detectStaleProjects(workspace: Workspace): Promise<Workspa
 export async function gitClone(url: string, targetDir: string, timeoutMs = 120_000): Promise<void> {
   // Check git availability
   try {
-    // @ts-ignore - Bun.spawn exitCode exists at runtime
+    // @ts-expect-error - Bun.spawn exitCode exists at runtime
     const versionProc = Bun.spawn(["git", "--version"], {
       stdout: "pipe",
       stderr: "pipe",
     });
     const versionExit = await versionProc.exited;
-    // @ts-ignore - exitCode exists at runtime
+    // @ts-expect-error - exitCode exists at runtime
     if (versionExit !== 0) {
       throw new Error("git binary not functional");
     }
@@ -161,14 +161,14 @@ export async function gitClone(url: string, targetDir: string, timeoutMs = 120_0
     throw new Error("git is not available on this system. Install git to clone repositories.");
   }
 
-  // @ts-ignore - proc.kill exists at runtime
+  // @ts-expect-error - proc.kill exists at runtime
   const proc = Bun.spawn(["git", "clone", url, targetDir], {
     stdout: "pipe",
     stderr: "pipe",
   });
 
   const timer = setTimeout(() => {
-    // @ts-ignore - proc.kill exists at runtime
+    // @ts-expect-error - proc.kill exists at runtime
     proc.kill();
   }, timeoutMs);
 

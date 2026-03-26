@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { CheckpointScheduler } from "../checkpoint-scheduler.js";
 import { type Checkpoint, CheckpointWriter } from "../checkpoint.js";
+import { CheckpointScheduler } from "../checkpoint-scheduler.js";
 
 describe("CheckpointScheduler", () => {
   let scheduler: CheckpointScheduler;

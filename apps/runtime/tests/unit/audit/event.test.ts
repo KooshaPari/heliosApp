@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test";
+import type { AuditEvent } from "../../../src/audit/event";
 import {
   AUDIT_EVENT_RESULTS,
   AUDIT_EVENT_TYPES,
   createAuditEvent,
   validateAuditEvent,
 } from "../../../src/audit/event";
-import type { AuditEvent } from "../../../src/audit/event";
 
 describe("AuditEvent Schema", () => {
   describe("createAuditEvent", () => {

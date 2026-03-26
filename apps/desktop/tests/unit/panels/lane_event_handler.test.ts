@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import { LaneEventHandler } from "../../../src/panels/lane_event_handler";
 import type { BusEvent, BusSubscriber } from "../../../src/panels/lane_event_handler";
+import { LaneEventHandler } from "../../../src/panels/lane_event_handler";
 
 describe("LaneEventHandler", () => {
   let handler: LaneEventHandler;

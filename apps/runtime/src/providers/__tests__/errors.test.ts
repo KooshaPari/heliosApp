@@ -7,11 +7,11 @@
 
 import { describe, expect, it } from "bun:test";
 import {
-  NormalizedProviderError,
-  PROVIDER_ERROR_CODES,
   getErrorMessage,
   isRetryable,
+  NormalizedProviderError,
   normalizeError,
+  PROVIDER_ERROR_CODES,
 } from "../errors.js";
 
 describe("NormalizedProviderError", () => {

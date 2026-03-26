@@ -16,61 +16,40 @@
 export type {
   RendererAdapter,
   RendererConfig,
-  RenderSurface,
   RendererState,
+  RenderSurface,
 } from "../../renderer/adapter.js";
 
 export type {
-  RendererCapabilities,
   CapabilityDiff,
   CapabilityDiff as CapabilityDiffEntry,
+  RendererCapabilities,
 } from "../../renderer/capabilities.js";
-export { queryCapabilities, compareCapabilities } from "../../renderer/capabilities.js";
-
-export type {
-  RendererEvent,
-  TransitionRecord,
-} from "../../renderer/state_machine.js";
-export {
-  RendererStateMachine,
-  InvalidRendererTransitionError,
-  transition,
-} from "../../renderer/state_machine.js";
-
-export type { RegistrationMeta } from "../../renderer/registry.js";
-export {
-  RendererRegistry,
-  DuplicateRendererError,
-  RendererNotFoundError,
-} from "../../renderer/registry.js";
-
-export type { SwitchContext } from "../../renderer/switch.js";
-export {
-  switchRenderer,
-  SwitchTimeoutError,
-  SwitchSameRendererError,
-} from "../../renderer/switch.js";
-
-export type {
-  StreamBinding,
-  BufferOverflowEvent,
-  StreamBindingEventBus,
-} from "../../renderer/stream_binding.js";
-export {
-  StreamBindingManager,
-  SwitchBuffer,
-} from "../../renderer/stream_binding.js";
-
+export { compareCapabilities, queryCapabilities } from "../../renderer/capabilities.js";
 export type {
   HotSwapResult,
   TerminalContext,
 } from "../../renderer/hot_swap.js";
 export {
   executeHotSwap,
-  HotSwapError,
   HotSwapCapabilityError,
+  HotSwapError,
 } from "../../renderer/hot_swap.js";
 
+export type { RegistrationMeta } from "../../renderer/registry.js";
+export {
+  DuplicateRendererError,
+  RendererNotFoundError,
+  RendererRegistry,
+} from "../../renderer/registry.js";
+export type {
+  RestartRestoreResult,
+  ZmxCheckpoint,
+} from "../../renderer/restart_restore.js";
+export {
+  executeRestartWithRestore,
+  RestartRestoreError,
+} from "../../renderer/restart_restore.js";
 export type {
   RollbackResult,
   RollbackTerminalStatus,
@@ -79,24 +58,38 @@ export {
   executeRollback,
   RollbackError,
 } from "../../renderer/rollback.js";
-
+export type {
+  RendererEvent,
+  TransitionRecord,
+} from "../../renderer/state_machine.js";
+export {
+  InvalidRendererTransitionError,
+  RendererStateMachine,
+  transition,
+} from "../../renderer/state_machine.js";
+export type {
+  BufferOverflowEvent,
+  StreamBinding,
+  StreamBindingEventBus,
+} from "../../renderer/stream_binding.js";
+export {
+  StreamBindingManager,
+  SwitchBuffer,
+} from "../../renderer/stream_binding.js";
+export type { SwitchContext } from "../../renderer/switch.js";
+export {
+  SwitchSameRendererError,
+  SwitchTimeoutError,
+  switchRenderer,
+} from "../../renderer/switch.js";
 export type {
   SwitchTransaction,
   SwitchTransactionRequest,
   SwitchTransactionState,
 } from "../../renderer/switch_transaction.js";
 export {
-  SwitchTransactionOrchestrator,
-  createSwitchOrchestrator,
   ConcurrentSwitchError,
+  createSwitchOrchestrator,
   InvalidTransitionError,
+  SwitchTransactionOrchestrator,
 } from "../../renderer/switch_transaction.js";
-
-export type {
-  ZmxCheckpoint,
-  RestartRestoreResult,
-} from "../../renderer/restart_restore.js";
-export {
-  executeRestartWithRestore,
-  RestartRestoreError,
-} from "../../renderer/restart_restore.js";

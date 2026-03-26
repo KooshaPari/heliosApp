@@ -5,30 +5,27 @@
  * percentile calculations, and Prometheus/JSON export.
  */
 
-// Core classes
-export {
-  MetricsRegistry,
-  registerMetric,
-  recordMetric,
-  getMetric,
-  getAllMetrics,
-  metricsSnapshot,
-  metricsToPrometheus,
-  metricsToJson,
-} from "./index.js";
-
-export { RingBuffer } from "./ring-buffer.js";
+export type { AggregationResult, PercentileOptions } from "./aggregator.js";
 export { Aggregator, aggregate, getPercentiles } from "./aggregator.js";
-
 // Types
 export type {
-  MetricConfig,
-  MetricType,
-  MetricUnit,
   Metric,
+  MetricConfig,
   MetricStats,
   MetricsSnapshot,
+  MetricType,
+  MetricUnit,
   SystemMetrics,
 } from "./index.js";
-
-export type { AggregationResult, PercentileOptions } from "./aggregator.js";
+// Core classes
+export {
+  getAllMetrics,
+  getMetric,
+  MetricsRegistry,
+  metricsSnapshot,
+  metricsToJson,
+  metricsToPrometheus,
+  recordMetric,
+  registerMetric,
+} from "./index.js";
+export { RingBuffer } from "./ring-buffer.js";

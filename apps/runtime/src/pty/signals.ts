@@ -9,8 +9,7 @@
 
 import type { BusPublisher, PtyEventCorrelation } from "./events.js";
 import { emitPtyEvent } from "./events.js";
-import type { PtyRecord } from "./registry.js";
-import type { PtyRegistry } from "./registry.js";
+import type { PtyRecord, PtyRegistry } from "./registry.js";
 import type { PtyLifecycle } from "./state_machine.js";
 
 // ── Signal Envelope ──────────────────────────────────────────────────────────

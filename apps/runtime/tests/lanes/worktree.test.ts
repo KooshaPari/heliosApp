@@ -4,10 +4,9 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
 import type { PtyManager } from "../../src/lanes/index.js";
+import { _resetIdCounter, LaneManager } from "../../src/lanes/index.js";
 import {
-  WorktreeProvisionError,
   computeBranchName,
   computeWorktreePath,
   lastMetrics,
@@ -15,6 +14,7 @@ import {
   reconcileOrphanedWorktrees,
   removeWorktree,
   resetMetrics,
+  WorktreeProvisionError,
 } from "../../src/lanes/worktree.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
 
@@ -27,16 +27,16 @@ function createTempGitRepo(): string {
   tmpDirs.push(dir);
 
   // Initialize a git repo with an initial commit
-  // @ts-ignore
+  // @ts-expect-error
   Bun.spawnSync(["git", "init"], { cwd: dir });
-  // @ts-ignore
+  // @ts-expect-error
   Bun.spawnSync(["git", "config", "user.email", "test@test.com"], { cwd: dir });
-  // @ts-ignore
+  // @ts-expect-error
   Bun.spawnSync(["git", "config", "user.name", "Test"], { cwd: dir });
   fs.writeFileSync(path.join(dir, "README.md"), "# test repo\n");
-  // @ts-ignore
+  // @ts-expect-error
   Bun.spawnSync(["git", "add", "."], { cwd: dir });
-  // @ts-ignore
+  // @ts-expect-error
   Bun.spawnSync(["git", "commit", "-m", "initial"], { cwd: dir });
 
   return dir;
@@ -46,7 +46,7 @@ function cleanup(): void {
   for (const dir of tmpDirs) {
     try {
       // Prune worktrees first to avoid locked file issues
-      // @ts-ignore
+      // @ts-expect-error
       Bun.spawnSync(["git", "worktree", "prune"], { cwd: dir });
     } catch {
       // ignore
@@ -93,7 +93,7 @@ describe("T006 - provisionWorktree", () => {
     expect(fs.existsSync(result.worktreePath)).toBe(true);
 
     // Verify branch exists
-    // @ts-ignore - Bun.spawnSync exists at runtime
+    // @ts-expect-error - Bun.spawnSync exists at runtime
     const branches = Bun.spawnSync(["git", "branch", "--list", result.branchName], { cwd: repo });
     const branchOutput =
       typeof branches.stdout === "string"

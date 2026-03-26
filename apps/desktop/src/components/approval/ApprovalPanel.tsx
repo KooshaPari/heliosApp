@@ -3,7 +3,7 @@
  * Displays pending approval requests and handles approval/rejection.
  */
 
-import { For, createSignal } from "solid-js";
+import { createSignal, For } from "solid-js";
 import type { ApprovalRequest } from "../../types/approval";
 
 interface ApprovalPanelProps {
@@ -67,15 +67,15 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
         <div class="approval-details">
           <h3>Review Request</h3>
           <div class="detail-group">
-            <span aria-label="Command">Command:</span>
+            <span>Command:</span>
             <code>{selectedRequest()?.command}</code>
           </div>
           <div class="detail-group">
-            <span aria-label="Requested by">Requested by:</span>
+            <span>Requested by:</span>
             <span>{selectedRequest()?.requesterName}</span>
           </div>
           <div class="detail-group">
-            <span aria-label="Workspace">Workspace:</span>
+            <span>Workspace:</span>
             <span>{selectedRequest()?.workspaceId}</span>
           </div>
 

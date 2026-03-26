@@ -5,7 +5,7 @@ const COVERAGE_GATE = "tools/gates/runtime-coverage.mjs";
 
 describe("quality gates fail-closed fixtures", () => {
   test("requirement traceability gate passes with complete fixture mapping", () => {
-    // @ts-ignore - Bun.spawnSync exists at runtime
+    // @ts-expect-error - Bun.spawnSync exists at runtime
     const run = Bun.spawnSync(["node", TRACE_GATE], {
       env: {
         ...process.env,
@@ -20,7 +20,7 @@ describe("quality gates fail-closed fixtures", () => {
   });
 
   test("requirement traceability gate fails closed when mappings are missing", () => {
-    // @ts-ignore - Bun.spawnSync exists at runtime
+    // @ts-expect-error - Bun.spawnSync exists at runtime
     const run = Bun.spawnSync(["node", TRACE_GATE], {
       env: {
         ...process.env,
@@ -35,7 +35,7 @@ describe("quality gates fail-closed fixtures", () => {
   });
 
   test("coverage gate passes at and above 85 percent", () => {
-    // @ts-ignore - Bun.spawnSync exists at runtime
+    // @ts-expect-error - Bun.spawnSync exists at runtime
     const run = Bun.spawnSync(["node", COVERAGE_GATE], {
       env: {
         ...process.env,
@@ -50,7 +50,7 @@ describe("quality gates fail-closed fixtures", () => {
   });
 
   test("coverage gate fails closed below 85 percent", () => {
-    // @ts-ignore - Bun.spawnSync exists at runtime
+    // @ts-expect-error - Bun.spawnSync exists at runtime
     const run = Bun.spawnSync(["node", COVERAGE_GATE], {
       env: {
         ...process.env,

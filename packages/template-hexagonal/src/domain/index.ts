@@ -1,5 +1,5 @@
 export { Entity } from "./entities";
-export { ValueObject } from "./value-objects";
-export { DomainEvent, BaseDomainEvent } from "./events";
-export { ProjectDomainService, type ValidationResult } from "./services";
+export { BaseDomainEvent, DomainEvent } from "./events";
 export * from "./ports";
+export { ProjectDomainService, type ValidationResult } from "./services";
+export { ValueObject } from "./value-objects";

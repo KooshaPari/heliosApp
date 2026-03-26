@@ -1,4 +1,4 @@
-import { type Component, For, Show, createEffect } from "solid-js";
+import { type Component, createEffect, For, Show } from "solid-js";
 import type { Message } from "../../../../runtime/src/types/conversation";
 import { MessageBubble } from "./MessageBubble";
 

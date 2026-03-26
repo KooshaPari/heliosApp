@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
-  MCP_BRIDGE_CONFIG,
   createMcpBridgeFixture,
   initMcpBridge,
+  MCP_BRIDGE_CONFIG,
 } from "./mcp-bridge-test-helpers.js";
 
 describe("MCP Bridge Adapter - Init and Health", () => {

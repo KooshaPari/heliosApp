@@ -237,10 +237,7 @@ export async function handleInMemoryRequest(
     }
 
     if (command.method === "terminal.input") {
-      if (
-        command.payload?.data === undefined &&
-        !Object.prototype.hasOwnProperty.call(command, "data")
-      ) {
+      if (command.payload?.data === undefined && !Object.hasOwn(command, "data")) {
         return makeErrorResponse(command, "INVALID_TERMINAL_INPUT", "payload.data is required");
       }
 

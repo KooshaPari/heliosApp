@@ -1,6 +1,7 @@
 // FR-001, FR-008: Unit tests for monotonic clock and markStart/markEnd API.
 
 import { beforeEach, describe, expect, it } from "bun:test";
+import type { MonotonicClock } from "../../../src/diagnostics/hooks.js";
 import {
   _resetGlobalHooks,
   createInstrumentationHooks,
@@ -8,7 +9,6 @@ import {
   markStart,
   monotonicNow,
 } from "../../../src/diagnostics/hooks.js";
-import type { MonotonicClock } from "../../../src/diagnostics/hooks.js";
 
 // ── Helper: deterministic mock clock ───────────────────────────────────
 

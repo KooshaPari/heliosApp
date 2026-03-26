@@ -3,8 +3,8 @@
  * @see FR-010-005, NFR-010-002
  */
 import { afterEach, describe, expect, it } from "bun:test";
-import { StreamBindingManager, SwitchBuffer } from "../../../src/renderer/stream_binding.js";
 import type { BufferOverflowEvent } from "../../../src/renderer/stream_binding.js";
+import { StreamBindingManager, SwitchBuffer } from "../../../src/renderer/stream_binding.js";
 import { MockGhosttyAdapter, MockRioAdapter } from "../../helpers/mock_adapter.js";
 
 // Track all created streams for cleanup to prevent test hanging

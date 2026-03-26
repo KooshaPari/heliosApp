@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
+import type { RendererEvent } from "../state_machine.js";
 import {
   InvalidRendererTransitionError,
   RendererStateMachine,
   transition,
 } from "../state_machine.js";
-import type { RendererEvent } from "../state_machine.js";
 
 describe("RendererStateMachine", () => {
   it("starts in uninitialized state", () => {

@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { Show, createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { getAppState } from "../stores/app.store";
 import { StatusBar } from "./common/StatusBar";
 import { Sidebar } from "./sidebar/Sidebar";
@@ -84,14 +84,17 @@ export const AppShell: Component = () => {
           </div>
 
           <Show when={state().terminalVisible}>
-            <div
+            <hr
               onMouseDown={onDragHandleMouseDown}
+              aria-orientation="horizontal"
               style={{
                 height: "6px",
                 "min-height": "6px",
                 cursor: "ns-resize",
                 "background-color": isDragging() ? "#89b4fa" : "#313244",
                 "border-top": "1px solid #45475a",
+                border: "none",
+                margin: "0",
                 transition: isDragging() ? "none" : "background-color 0.15s ease",
                 "flex-shrink": "0",
               }}

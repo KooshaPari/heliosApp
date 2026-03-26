@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import {
   DEFAULT_COLOR_SCHEME,
-  StatusBadge,
   getStatusBadgeContent,
+  StatusBadge,
 } from "../../../src/panels/status_badge";
 
 describe("StatusBadge", () => {

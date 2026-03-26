@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
 import {
-  SETTINGS_SCHEMA,
   getAllDefaults,
   getDefault,
+  SETTINGS_SCHEMA,
   validateValue,
 } from "../../../src/config/schema.js";
 

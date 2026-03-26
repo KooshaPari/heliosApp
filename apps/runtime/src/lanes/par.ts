@@ -3,8 +3,11 @@
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
 import {
+  defaultSpawn,
   type ExecResult,
   ExecTimeoutError,
+  generateParTaskId,
+  isProcessAlive,
   LaneNotReadyError,
   type ParBinding,
   type ParManagerOptions,
@@ -12,26 +15,23 @@ import {
   ParSpawnError,
   type SpawnFn,
   type SpawnResult,
-  defaultSpawn,
-  generateParTaskId,
-  isProcessAlive,
 } from "./par-types.js";
 import type { LaneRegistry } from "./registry.js";
 import { type LaneState, recordTransition, transition, withLaneLock } from "./state_machine.js";
 
 export type {
-  ParBinding,
   ExecResult,
+  ParBinding,
   ParManagerOptions,
   SpawnFn,
   SpawnResult,
 } from "./par-types.js";
 export {
+  _resetParIdCounter,
+  ExecTimeoutError,
+  LaneNotReadyError,
   ParNotFoundError,
   ParSpawnError,
-  LaneNotReadyError,
-  ExecTimeoutError,
-  _resetParIdCounter,
 } from "./par-types.js";
 
 // ── Par Manager ─────────────────────────────────────────────────────────────

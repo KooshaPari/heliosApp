@@ -1,5 +1,4 @@
-import { type Component, createSignal } from "solid-js";
-import { Show } from "solid-js";
+import { type Component, createSignal, Show } from "solid-js";
 
 type ShareModalProps = {
   isOpen: boolean;
@@ -48,7 +47,7 @@ export const ShareModal: Component<ShareModalProps> = props => {
           }}
           onClick={(e: MouseEvent) => e.stopPropagation()}
           onKeyDown={(e: KeyboardEvent) => e.stopPropagation()}
-          role="presentation"
+          role="dialog"
         >
           <h3
             style={{

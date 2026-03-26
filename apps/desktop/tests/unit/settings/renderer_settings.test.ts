@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import { RendererSettings } from "../../../src/settings/renderer_settings";
 import type { Renderer } from "../../../src/settings/renderer_settings";
+import { RendererSettings } from "../../../src/settings/renderer_settings";
 
 describe("RendererSettings", () => {
   let container: HTMLDivElement;

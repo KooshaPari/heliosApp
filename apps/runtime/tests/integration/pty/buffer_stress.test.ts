@@ -10,8 +10,8 @@
 
 import { describe, expect, it } from "bun:test";
 import { OutputBuffer } from "../../../src/pty/buffers.js";
-import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 import type { PtyEventCorrelation } from "../../../src/pty/events.js";
+import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 
 function makeCorrelation(): PtyEventCorrelation {
   return {

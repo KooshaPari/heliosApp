@@ -6,19 +6,19 @@
 
 import { beforeEach, describe, expect, it } from "bun:test";
 import type {
-  RenderSurface,
   RendererAdapter,
   RendererConfig,
   RendererState,
+  RenderSurface,
 } from "../../../../src/renderer/adapter.js";
 import type { RendererCapabilities } from "../../../../src/renderer/capabilities.js";
 import { RendererRegistry } from "../../../../src/renderer/registry.js";
 import { RioBackend } from "../../../../src/renderer/rio/backend.js";
 import {
-  type RioFeatureFlagConfig,
-  RioToggleQueue,
   handleRioToggle,
   isRioEnabled,
+  type RioFeatureFlagConfig,
+  RioToggleQueue,
 } from "../../../../src/renderer/rio/index.js";
 
 // ---------------------------------------------------------------------------

@@ -1,1 +1,1 @@
-export { DomainEvent, BaseDomainEvent } from "./DomainEvent";
+export { BaseDomainEvent, DomainEvent } from "./DomainEvent";

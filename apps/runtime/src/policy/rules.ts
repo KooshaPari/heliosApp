@@ -3,8 +3,8 @@
  * Evaluates commands against policy rules with denylist-wins conflict resolution.
  */
 
-import { PolicyClassification, PolicyPatternType } from "./types";
 import type { CommandContext, PolicyEvaluationResult, PolicyRule } from "./types";
+import { PolicyClassification, PolicyPatternType } from "./types";
 
 /**
  * Pattern matcher for glob and regex patterns.

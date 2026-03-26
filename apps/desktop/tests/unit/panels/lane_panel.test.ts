@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import { LanePanel } from "../../../src/panels/lane_panel";
 import type { Lane } from "../../../src/panels/lane_panel";
+import { LanePanel } from "../../../src/panels/lane_panel";
 
 describe("LanePanel", () => {
   let container: HTMLDivElement;

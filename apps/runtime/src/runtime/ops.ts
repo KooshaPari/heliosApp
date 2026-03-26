@@ -2,7 +2,7 @@ import { METHODS } from "../protocol/methods.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
 import type { RedactionEngine } from "../secrets/redaction-engine.js";
 import type { RecoveryRegistry } from "../sessions/registry.js";
-import { type RuntimeTerminalContext, handleTerminalCommand } from "./terminal.js";
+import { handleTerminalCommand, type RuntimeTerminalContext } from "./terminal.js";
 
 type RuntimeOpsContext = RuntimeTerminalContext & {
   recovery: RecoveryRegistry;

@@ -1,8 +1,8 @@
 // Unit tests for ZellijDetector
 
 import { beforeEach, describe, expect, it } from "bun:test";
-import { ZellijDetector } from "../../../../src/lanes/watchdog/zellij_detector.js";
 import type { SessionRegistry } from "../../../../src/lanes/watchdog/zellij_detector.js";
+import { ZellijDetector } from "../../../../src/lanes/watchdog/zellij_detector.js";
 
 describe("ZellijDetector", () => {
   let detector: ZellijDetector;

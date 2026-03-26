@@ -3,7 +3,7 @@
  */
 
 import { beforeEach, describe, expect, test } from "bun:test";
-import type { RenderSurface, RendererConfig } from "../../adapter.js";
+import type { RendererConfig, RenderSurface } from "../../adapter.js";
 import {
   GhosttyAlreadyInitializedError,
   GhosttyBackend,

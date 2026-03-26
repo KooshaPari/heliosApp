@@ -1,6 +1,7 @@
 import { describe, expect, it, mock } from "bun:test";
 import {
   type EventBus,
+  generateCorrelationId,
   type MuxEvent,
   MuxEventEmitter,
   MuxEventType,
@@ -8,7 +9,6 @@ import {
   type PaneDimensionRejectedEvent,
   type SessionCreatedEvent,
   type TabSwitchedEvent,
-  generateCorrelationId,
 } from "../events.js";
 
 function makeBus(): EventBus & { events: MuxEvent[] } {

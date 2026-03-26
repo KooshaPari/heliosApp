@@ -1,15 +1,15 @@
 import { describe, expect, it } from "bun:test";
 import { InMemoryBusPublisher } from "../events.js";
-import { PtyRegistry } from "../registry.js";
 import type { PtyRecord } from "../registry.js";
+import { PtyRegistry } from "../registry.js";
+import type { SignalHistoryMap } from "../signals.js";
 import {
   InvalidDimensionsError,
-  SignalHistory,
   resize,
+  SignalHistory,
   sendSighup,
   terminate,
 } from "../signals.js";
-import type { SignalHistoryMap } from "../signals.js";
 import { PtyLifecycle } from "../state_machine.js";
 
 function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {

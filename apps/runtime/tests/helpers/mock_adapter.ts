@@ -6,11 +6,11 @@
  */
 
 import type {
-  RenderSurface,
   RendererAdapter,
   RendererCapabilities,
   RendererConfig,
   RendererState,
+  RenderSurface,
 } from "../../src/renderer/index.js";
 
 export interface MockAdapterOptions {

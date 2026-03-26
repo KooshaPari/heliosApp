@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import type { SpawnFn, SpawnResult } from "../../src/lanes/par.js";
 import {
+  _resetParIdCounter,
   LaneNotReadyError,
   ParManager,
   ParNotFoundError,
   ParSpawnError,
-  _resetParIdCounter,
 } from "../../src/lanes/par.js";
-import type { SpawnFn, SpawnResult } from "../../src/lanes/par.js";
 import { LaneRegistry } from "../../src/lanes/registry.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
 

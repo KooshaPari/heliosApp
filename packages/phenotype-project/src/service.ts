@@ -10,9 +10,16 @@ export class ProjectDomainService {
 }
 
 export class ProjectService {
-  constructor(private repo: IProjectRepository, private domain = new ProjectDomainService()) {}
+  constructor(
+    private repo: IProjectRepository,
+    private domain = new ProjectDomainService()
+  ) {}
 
-  async create(input: { name: string; ownerId: string; description?: string }): Promise<ProjectEntity> {
+  async create(input: {
+    name: string;
+    ownerId: string;
+    description?: string;
+  }): Promise<ProjectEntity> {
     const validation = this.domain.validateProjectName(input.name);
     if (!validation.valid) throw new Error(`invalid-name:${validation.reason}`);
 

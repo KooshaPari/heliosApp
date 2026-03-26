@@ -8,8 +8,8 @@
  */
 
 import { beforeEach, describe, expect, test } from "bun:test";
-import { GhosttyInputRelay } from "../../../../src/renderer/ghostty/input.js";
 import type { GhosttyInputEvent, PtyWriter } from "../../../../src/renderer/ghostty/input.js";
+import { GhosttyInputRelay } from "../../../../src/renderer/ghostty/input.js";
 import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
 import { GhosttyProcess } from "../../../../src/renderer/ghostty/process.js";
 

@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import fs from "node:fs";
 import path from "node:path";
 import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
-import { DefaultAuditSink } from "../../../src/audit/sink";
 import type { AuditStorage } from "../../../src/audit/sink";
+import { DefaultAuditSink } from "../../../src/audit/sink";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
 
 const TMP_DIR = `/tmp/audit-test-${Math.random().toString(36).substring(7)}`;

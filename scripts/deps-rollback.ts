@@ -103,9 +103,9 @@ async function rollback(packageName: string): Promise<void> {
 
   try {
     // Update package.json to pin the known-good version
-    let packageJson;
+    let packageJson: Record<string, unknown>;
     try {
-      packageJson = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf-8"));
+      packageJson = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf-8")) as Record<string, unknown>;
     } catch (e) {
       throw new Error(`Failed to read package.json: ${e}`);
     }

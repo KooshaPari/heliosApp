@@ -1,13 +1,13 @@
 // T017 - Unit tests for lane sharing (FR-008-007)
 
 import { beforeEach, describe, expect, test } from "bun:test";
-import { LaneRegistry } from "../../../src/lanes/registry.js";
 import type { LaneRecord } from "../../../src/lanes/registry.js";
+import { LaneRegistry } from "../../../src/lanes/registry.js";
 import {
-  LaneClosedError,
   attachAgent,
   detachAgent,
   forceDetachAll,
+  LaneClosedError,
   shareLane,
 } from "../../../src/lanes/sharing.js";
 
