@@ -74,7 +74,7 @@ export class SwitchStatus {
     this.container.appendChild(status);
   }
 
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity
   private createStatusElement(): HTMLElement {
     const container = document.createElement("div");
     container.className = "switch-status";

@@ -14,6 +14,7 @@ const createdRenderers: (MockGhosttyAdapter | MockRioAdapter)[] = [];
 afterEach(() => {
   // Cancel all unclosed streams created directly in tests
   for (const stream of createdStreams) {
+    // biome-ignore lint/suspicious/noEmptyBlockStatements: intentional no-op
     stream.cancel().catch(() => {});
   }
   createdStreams.length = 0;
@@ -21,6 +22,7 @@ afterEach(() => {
   // Cancel all streams bound to mock renderers
   for (const renderer of createdRenderers) {
     for (const stream of renderer.boundStreams.values()) {
+      // biome-ignore lint/suspicious/noEmptyBlockStatements: intentional no-op
       stream.cancel().catch(() => {});
     }
   }
@@ -75,8 +77,10 @@ describe("StreamBindingManager", () => {
     mgr.bind("pty-1", stream2, renderer);
 
     expect(mgr.count()).toBe(1);
-    const binding = mgr.getBindings().get("pty-1")!;
-    expect(binding.stream).toBe(stream2);
+    const bindingMap = mgr.getBindings();
+    expect(bindingMap.has("pty-1")).toBe(true);
+    const binding = bindingMap.get("pty-1")!;
+    expect(binding?.stream).toBe(stream2);
   });
 
   it("rebindAll transfers all bindings to new renderer", () => {
@@ -122,6 +126,7 @@ describe("StreamBindingManager", () => {
 
     const latency = mgr.getRelayLatency("pty-1");
     expect(latency).toBeDefined();
+    // biome-ignore lint/style/noNonNullAssertion: latency was just confirmed defined above
     expect(latency!).toBeLessThan(16.7); // < 1 frame
   });
 
