@@ -37,7 +37,7 @@ export interface AuditRecord {
   sequence: number;
   outcome: "accepted" | "rejected";
   reason: string | null;
-  envelope: AuditEvent;
+  envelope: Record<string, unknown>;
 }
 
 export interface AuditExportRecord extends AuditRecord {
