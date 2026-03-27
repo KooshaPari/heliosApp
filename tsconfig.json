@@ -13,6 +13,7 @@
 		"jsxImportSource": "solid-js",
 		"types": ["bun-types", "node", "@playwright/test"],
 		"baseUrl": ".",
+		"ignoreDeprecations": "6.0",
 		"paths": {
 			"@helios/runtime": ["apps/runtime/src/index.ts"],
 			"@helios/runtime/*": ["apps/runtime/src/*"],
