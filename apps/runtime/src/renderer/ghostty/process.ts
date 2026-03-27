@@ -29,7 +29,8 @@ export interface GhosttyOptions {
 export class GhosttyBinaryNotFoundError extends Error {
   constructor(path: string) {
     super(
-      `Ghostty binary not found at "${path}". Ensure ghostty is installed and the path is correct.`
+      `Ghostty binary not found at "${path}". ` +
+        "Ensure ghostty is installed and the path is correct."
     );
     this.name = "GhosttyBinaryNotFoundError";
   }
@@ -51,13 +52,8 @@ export class GhosttyProcessError extends Error {
 
 const SIGTERM_TIMEOUT_MS = 5_000;
 
-type SpawnedProcess = ReturnType<typeof Bun.spawn> & {
-  pid?: number;
-  kill?: (signal: string) => void;
-};
-
 export class GhosttyProcess {
-  private _proc: SpawnedProcess | undefined;
+  private _proc: Subprocess | undefined;
   private _pid: number | undefined;
   private _running = false;
   private _intentionalStop = false;
@@ -78,9 +74,7 @@ export class GhosttyProcess {
 
   /** Uptime in milliseconds, or 0 if not running. */
   getUptime(): number {
-    if (this._startedAt === undefined) {
-      return 0;
-    }
+    if (this._startedAt === undefined) return 0;
     return Date.now() - this._startedAt;
   }
 
@@ -110,14 +104,12 @@ export class GhosttyProcess {
         stdout: "pipe",
         stderr: "ignore",
       });
-      const whichExit = await which.exited;
-      if (whichExit !== 0) {
+      await which.exited;
+      if (which.exitCode !== 0) {
         throw new GhosttyBinaryNotFoundError(binaryPath);
       }
     } catch (e) {
-      if (e instanceof GhosttyBinaryNotFoundError) {
-        throw e;
-      }
+      if (e instanceof GhosttyBinaryNotFoundError) throw e;
       throw new GhosttyBinaryNotFoundError(binaryPath);
     }
 
@@ -130,17 +122,11 @@ export class GhosttyProcess {
       args.push(...options.extraArgs);
     }
 
-    const env = Object.fromEntries(
-      Object.entries({ ...process.env, ...options.env }).filter(
-        (entry): entry is [string, string] => typeof entry[1] === "string"
-      )
-    ) as Record<string, string>;
-
     const proc = Bun.spawn(args, {
       stdout: "pipe",
       stderr: "pipe",
-      env,
-    }) as SpawnedProcess;
+      env: { ...process.env, ...options.env },
+    });
 
     this._proc = proc;
     this._pid = proc.pid;
@@ -160,7 +146,7 @@ export class GhosttyProcess {
       }
     });
 
-    return { pid: proc.pid ?? 0 };
+    return { pid: proc.pid };
   }
 
   /**
@@ -177,7 +163,7 @@ export class GhosttyProcess {
     this._intentionalStop = true;
 
     // SIGTERM
-    this._proc.kill?.("SIGTERM");
+    this._proc.kill("SIGTERM");
 
     // Wait for graceful exit or timeout
     const exitPromise = this._proc.exited;
@@ -189,7 +175,7 @@ export class GhosttyProcess {
 
     if (result === "timeout") {
       // Escalate to SIGKILL
-      this._proc.kill?.("SIGKILL");
+      this._proc.kill("SIGKILL");
       await this._proc.exited;
     }
 

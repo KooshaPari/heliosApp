@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import type { ActiveContext } from "../../../src/tabs/context_switch";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { SessionTab } from "../../../src/tabs/session_tab";
+import type { ActiveContext } from "../../../src/tabs/context_switch";
 
 describe("SessionTab", () => {
   let tab: SessionTab;
@@ -137,10 +137,9 @@ describe("SessionTab", () => {
 
       await tab.onContextChange(context);
       const state = tab.getState();
-      const expandedSections = state.expandedSections ?? [];
 
-      expect(expandedSections).toBeDefined();
-      expect(Array.isArray(expandedSections)).toBe(true);
+      expect(state.expandedSections).toBeDefined();
+      expect(Array.isArray(state.expandedSections)).toBe(true);
     });
   });
 
@@ -154,7 +153,6 @@ describe("SessionTab", () => {
 
       await tab.onContextChange(context);
       const state = tab.getState();
-      const _originalExpandedSections = state.expandedSections ?? [];
 
       expect(state.tabType).toBe("session");
       expect(state.expandedSections).toBeDefined();
@@ -169,12 +167,11 @@ describe("SessionTab", () => {
 
       await tab.onContextChange(context);
       const originalState = tab.getState();
-      const originalExpandedSections = originalState.expandedSections ?? [];
 
       const newTab = new SessionTab();
       newTab.restoreState(originalState);
 
-      expect(newTab.getState().expandedSections ?? []).toEqual(originalExpandedSections);
+      expect(newTab.getState().expandedSections).toEqual(originalState.expandedSections);
     });
   });
 

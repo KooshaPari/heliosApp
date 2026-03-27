@@ -5,24 +5,27 @@
  * the full create -> add panes -> resize -> close -> event pipeline.
  */
 
-import { beforeEach, describe, expect, it, mock } from "bun:test";
-import type { ZellijCli } from "../../../../src/integrations/zellij/cli.js";
+import { describe, expect, it, mock, beforeEach } from "bun:test";
 import {
-  type EventBus,
-  type MuxEvent,
+  ZellijSessionManager,
+  sessionNameForLane,
+} from "../../../../src/integrations/zellij/session.js";
+import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
+import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
+import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
+import { ZellijTabManager } from "../../../../src/integrations/zellij/tabs.js";
+import {
   MuxEventEmitter,
   MuxEventType,
+  type EventBus,
+  type MuxEvent,
 } from "../../../../src/integrations/zellij/events.js";
-import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
 import { reconcile } from "../../../../src/integrations/zellij/reconciliation.js";
-import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
-import { ZellijSessionManager } from "../../../../src/integrations/zellij/session.js";
-import { ZellijTabManager } from "../../../../src/integrations/zellij/tabs.js";
-import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
+import type { ZellijCli } from "../../../../src/integrations/zellij/cli.js";
 import type {
   CliResult,
-  PtyManagerInterface,
   ZellijSession,
+  PtyManagerInterface,
 } from "../../../../src/integrations/zellij/types.js";
 
 // ---------------------------------------------------------------------------
@@ -90,7 +93,7 @@ function makePtyManager(): PtyManagerInterface & { spawned: string[] } {
   let counter = 0;
   return {
     spawned,
-    spawn: mock(async _opts => {
+    spawn: mock(async opts => {
       const id = `pty-${++counter}`;
       spawned.push(id);
       return { ptyId: id, pid: 1000 + counter };

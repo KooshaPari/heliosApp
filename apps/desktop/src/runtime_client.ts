@@ -1,8 +1,8 @@
-import type { LocalBus } from "../../runtime/src/protocol/bus";
 import type { LocalBusEnvelope } from "../../runtime/src/protocol/types";
 import type { RuntimeState } from "../../runtime/src/sessions/state_machine";
-import type { TransportDiagnostics } from "./context_store";
+import type { LocalBus } from "../../runtime/src/protocol/bus";
 import type { RendererEngine } from "./settings";
+import type { TransportDiagnostics } from "./context_store";
 
 type RuntimeResponse<T extends Record<string, unknown>> = {
   ok: boolean;
@@ -198,11 +198,11 @@ export class DesktopRuntimeClient {
     );
     const parsed = toResponse<Record<string, unknown>>(response);
     const activeEngine = parsed.result?.active_engine === "rio" ? "rio" : "ghostty";
-    const available: RendererEngine[] = Array.isArray(parsed.result?.available_engines)
+    const available = Array.isArray(parsed.result?.available_engines)
       ? parsed.result.available_engines.filter(
           (value): value is RendererEngine => value === "ghostty" || value === "rio"
         )
-      : ["ghostty", "rio"];
+      : (["ghostty", "rio"] as RendererEngine[]);
     return {
       activeEngine,
       availableEngines: available,

@@ -1,4 +1,4 @@
-import { describe, expect, it, spyOn } from "bun:test";
+import { describe, it, expect, spyOn } from "bun:test";
 import { ConsoleLogger, LogLevel } from "../src/index";
 
 describe("ConsoleLogger", () => {

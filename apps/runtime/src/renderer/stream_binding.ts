@@ -63,6 +63,7 @@ export class StreamBindingManager {
    */
   bind(ptyId: string, stream: ReadableStream<Uint8Array>, renderer: RendererAdapter): void {
     if (this._bindings.has(ptyId)) {
+      console.warn(`StreamBindingManager: replacing existing binding for PTY "${ptyId}"`);
       this.unbind(ptyId);
     }
 
@@ -238,8 +239,8 @@ export class SwitchBuffer {
     if (buf.totalBytes > this._maxBytesPerPty && buf.chunks.length === 1) {
       const excess = buf.totalBytes - this._maxBytesPerPty;
       buf.droppedBytes += excess;
-      buf.chunks[0] = buf.chunks[0]?.slice(excess);
-      buf.totalBytes = buf.chunks[0]?.byteLength;
+      buf.chunks[0] = buf.chunks[0]!.slice(excess);
+      buf.totalBytes = buf.chunks[0]!.byteLength;
     }
 
     if (buf.droppedBytes > 0) {

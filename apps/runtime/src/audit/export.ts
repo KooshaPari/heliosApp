@@ -95,7 +95,7 @@ export class AuditExporter {
    * @returns Export bundle
    */
   exportSession(
-    _sessionId: string,
+    sessionId: string,
     events: AuditEvent[],
     snapshots?: SessionSnapshot[]
   ): ExportBundle {

@@ -60,13 +60,13 @@ export class UptermAdapter implements ShareBackendAdapter {
   ): Promise<{ link: string; process: any }> {
     try {
       // Validate inputs
-      if (!(terminalId && zellijSessionName)) {
+      if (!terminalId || !zellijSessionName) {
         throw new Error("Missing terminalId or zellijSessionName");
       }
 
       // Generate upterm command
       const attachCommand = `zellij attach ${zellijSessionName}`;
-      const _uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
+      const uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
 
       // Mock implementation: return simulated result
       const link = `https://upterm.io/${terminalId}-${Date.now()}`;
@@ -140,13 +140,13 @@ export class TmateAdapter implements ShareBackendAdapter {
   ): Promise<{ link: string; process: any }> {
     try {
       // Validate inputs
-      if (!(terminalId && zellijSessionName)) {
+      if (!terminalId || !zellijSessionName) {
         throw new Error("Missing terminalId or zellijSessionName");
       }
 
       // Generate tmate command
       const attachCommand = `zellij attach ${zellijSessionName}`;
-      const _tmateCommand = `tmate -F -c "${attachCommand}"`;
+      const tmateCommand = `tmate -F -c "${attachCommand}"`;
 
       // Mock implementation: return simulated result
       // Tmate typically outputs link to stderr

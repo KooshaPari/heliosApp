@@ -10,8 +10,8 @@
  */
 
 import type { LocalBus } from "../protocol/bus.js";
-import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "./adapter.js";
-import { NormalizedProviderError, normalizeError } from "./errors.js";
+import type { ProviderAdapter, ProviderRegistration, ProviderHealthStatus } from "./adapter.js";
+import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
 
 /**
  * Registered provider instance with metadata.
@@ -366,7 +366,7 @@ export class ProviderRegistry {
       );
     }
 
-    if (!(registration.type && ["acp", "mcp", "a2a"].includes(registration.type))) {
+    if (!registration.type || !["acp", "mcp", "a2a"].includes(registration.type)) {
       throw new NormalizedProviderError(
         "PROVIDER_INIT_FAILED",
         "Registration missing or invalid required field: type",
@@ -427,6 +427,9 @@ export class ProviderRegistry {
         topic,
         payload,
       });
-    } catch (_error) {}
+    } catch (error) {
+      // Log error but don't throw (event publishing is best-effort)
+      console.warn(`Failed to publish provider event ${topic}:`, error);
+    }
   }
 }

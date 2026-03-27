@@ -3,9 +3,9 @@
  * Persists renderer settings across sessions
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { dirname, resolve } from "node:path";
+import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { resolve, dirname } from "path";
+import { homedir } from "os";
 
 export interface RendererPreferences {
   activeRenderer: string;
@@ -20,7 +20,7 @@ const DEFAULT_PREFERENCES: RendererPreferences = {
 export class RendererPreferencesManager {
   private preferencesPath: string;
   private preferences: RendererPreferences = { ...DEFAULT_PREFERENCES };
-  private isDirty = false;
+  private isDirty: boolean = false;
 
   constructor(preferencesPath?: string) {
     if (preferencesPath) {
@@ -42,13 +42,16 @@ export class RendererPreferencesManager {
         // Validate loaded preferences
         if (this.isValidPreferences(loaded)) {
           this.preferences = loaded;
-          const _loadTime = performance.now() - startTime;
+          const loadTime = performance.now() - startTime;
+          console.log(`Renderer preferences loaded in ${loadTime.toFixed(2)}ms`);
           return { ...this.preferences };
+        } else {
+          console.warn("Invalid preferences file, using defaults");
+          return { ...DEFAULT_PREFERENCES };
         }
-        return { ...DEFAULT_PREFERENCES };
       }
-    } catch {
-      // Use defaults on parse error
+    } catch (error) {
+      console.warn("Failed to load renderer preferences, using defaults", error);
     }
 
     this.preferences = { ...DEFAULT_PREFERENCES };
@@ -64,8 +67,9 @@ export class RendererPreferencesManager {
       writeFileSync(this.preferencesPath, content, "utf-8");
 
       this.isDirty = false;
-    } catch {
-      // Use defaults on parse error
+      console.log("Renderer preferences saved");
+    } catch (error) {
+      console.error("Failed to save renderer preferences", error);
     }
   }
 
@@ -116,8 +120,8 @@ export class RendererPreferencesManager {
     const dir = dirname(this.preferencesPath);
     try {
       mkdirSync(dir, { recursive: true });
-    } catch {
-      // Use defaults on parse error
+    } catch (error) {
+      console.error("Failed to create preferences directory", error);
     }
   }
 

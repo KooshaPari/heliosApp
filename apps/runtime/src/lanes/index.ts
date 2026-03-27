@@ -5,10 +5,29 @@
 import * as path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
-import { LaneNotFoundError, type LaneRecord, LaneRegistry } from "./registry.js";
-import { attachAgent, detachAgent, SharedLaneCleanupError, shareLane } from "./sharing.js";
-import { type LaneState, recordTransition, transition, withLaneLock } from "./state_machine.js";
-import { provisionWorktree, reconcileOrphanedWorktrees, removeWorktree } from "./worktree.js";
+import { LaneRegistry, type LaneRecord, LaneNotFoundError } from "./registry.js";
+import {
+  transition,
+  withLaneLock,
+  recordTransition,
+  type LaneState,
+  type LaneEvent,
+} from "./state_machine.js";
+import {
+  shareLane,
+  attachAgent,
+  detachAgent,
+  forceDetachAll,
+  LaneClosedError,
+  SharedLaneCleanupError,
+} from "./sharing.js";
+import {
+  provisionWorktree,
+  removeWorktree,
+  reconcileOrphanedWorktrees,
+  WorktreeProvisionError,
+  type ReconciliationResult,
+} from "./worktree.js";
 
 // ── T016: Full Reconciliation Result ─────────────────────────────────────────
 
@@ -139,9 +158,7 @@ export class LaneManager {
   async provision(laneId: string, workspaceRepoPath: string): Promise<LaneRecord> {
     return withLaneLock(laneId, async () => {
       const lane = this.registry.get(laneId);
-      if (!lane) {
-        throw new LaneNotFoundError(laneId);
-      }
+      if (!lane) throw new LaneNotFoundError(laneId);
       if (lane.state !== "provisioning") {
         throw new Error(`Cannot provision lane in state ${lane.state}`);
       }
@@ -234,7 +251,7 @@ export class LaneManager {
 
   // ── T003: cleanup ────────────────────────────────────────────────────────
 
-  async cleanup(laneId: string, force = false): Promise<void> {
+  async cleanup(laneId: string, force: boolean = false): Promise<void> {
     await withLaneLock(laneId, async () => {
       const lane = this.registry.get(laneId);
       if (!lane) {
@@ -325,9 +342,7 @@ export class LaneManager {
   // ── T008: Graceful PTY termination before worktree removal ───────────────
 
   private async terminateLanePtys(laneId: string, workspaceId: string): Promise<void> {
-    if (!this.ptyManager) {
-      return;
-    }
+    if (!this.ptyManager) return;
 
     let ptys: PtyHandle[];
     try {
@@ -337,23 +352,21 @@ export class LaneManager {
       return;
     }
 
-    if (ptys.length === 0) {
-      return;
-    }
+    if (ptys.length === 0) return;
 
-    let _forceKilled = 0;
+    let forceKilled = 0;
     const terminationPromises = ptys.map(async pty => {
       try {
         const timeout = new Promise<"timeout">(resolve =>
           setTimeout(() => resolve("timeout"), this.ptyTerminationTimeoutMs)
         );
-        const termination = this.ptyManager?.terminate(pty.ptyId).then(() => "done" as const);
+        const termination = this.ptyManager!.terminate(pty.ptyId).then(() => "done" as const);
         const result = await Promise.race([termination, timeout]);
         if (result === "timeout") {
-          _forceKilled++;
+          forceKilled++;
         }
       } catch {
-        _forceKilled++;
+        forceKilled++;
       }
     });
 
@@ -412,9 +425,7 @@ export class LaneManager {
       if (!isTimedOut()) {
         const fsModule = await import("node:fs");
         for (const lane of activeLanes) {
-          if (isTimedOut()) {
-            break;
-          }
+          if (isTimedOut()) break;
           if (lane.worktreePath && !fsModule.existsSync(lane.worktreePath)) {
             result.orphanedRecords++;
             result.totalCleaned++;
@@ -430,9 +441,7 @@ export class LaneManager {
       if (!isTimedOut()) {
         const allLanes = this.registry.list();
         for (const lane of allLanes) {
-          if (isTimedOut()) {
-            break;
-          }
+          if (isTimedOut()) break;
           if (lane.parTaskPid !== null && lane.state !== "closed") {
             // Check if the process is still alive
             try {
@@ -451,9 +460,7 @@ export class LaneManager {
       if (!isTimedOut() && this.ptyManager) {
         const closedLanes = this.registry.list().filter(l => l.state === "closed");
         for (const lane of closedLanes) {
-          if (isTimedOut()) {
-            break;
-          }
+          if (isTimedOut()) break;
           try {
             const ptys = this.ptyManager.getByLane(lane.laneId);
             for (const pty of ptys) {
@@ -485,9 +492,7 @@ export class LaneManager {
   }
 
   private async emitReconciliationEvent(result: FullReconciliationResult): Promise<void> {
-    if (!this.bus) {
-      return;
-    }
+    if (!this.bus) return;
 
     const envelope: LocalBusEnvelope = {
       id: `reconciliation:${Date.now()}`,
@@ -520,9 +525,7 @@ export class LaneManager {
     fromState: LaneState,
     toState: LaneState
   ): Promise<void> {
-    if (!this.bus) {
-      return;
-    }
+    if (!this.bus) return;
 
     const envelope: LocalBusEnvelope = {
       id: `${laneId}:${topic}:${Date.now()}`,
@@ -548,42 +551,38 @@ export class LaneManager {
   }
 }
 
-export {
-  _resetParIdCounter,
-  type ExecResult,
-  ExecTimeoutError,
-  LaneNotReadyError,
-  type ParBinding,
-  ParManager,
-  type ParManagerOptions,
-  ParNotFoundError,
-  ParSpawnError,
-  type SpawnFn,
-  type SpawnResult,
-} from "./par.js";
 // Re-export public types
+export { LaneRegistry, type LaneRecord, LaneNotFoundError } from "./registry.js";
+export type { LaneState, LaneEvent } from "./state_machine.js";
 export {
-  LaneNotFoundError,
-  type LaneRecord,
-  LaneRegistry,
-} from "./registry.js";
-export { LaneClosedError, SharedLaneCleanupError } from "./sharing.js";
-export type { LaneEvent, LaneState } from "./state_machine.js";
-export {
-  getTransitionHistory,
   InvalidLaneTransitionError,
   transition,
   withLaneLock,
+  getTransitionHistory,
 } from "./state_machine.js";
+export { LaneClosedError, SharedLaneCleanupError } from "./sharing.js";
 export {
-  computeBranchName,
-  computeWorktreePath,
   provisionWorktree,
-  type ReconciliationResult,
-  reconcileOrphanedWorktrees,
   removeWorktree,
-  WorktreeCleanupError,
-  type WorktreeOptions,
+  reconcileOrphanedWorktrees,
   WorktreeProvisionError,
+  WorktreeCleanupError,
+  computeWorktreePath,
+  computeBranchName,
+  type WorktreeOptions,
   type WorktreeResult,
+  type ReconciliationResult,
 } from "./worktree.js";
+export {
+  ParManager,
+  ParNotFoundError,
+  ParSpawnError,
+  LaneNotReadyError,
+  ExecTimeoutError,
+  _resetParIdCounter,
+  type ParBinding,
+  type ExecResult,
+  type ParManagerOptions,
+  type SpawnFn,
+  type SpawnResult,
+} from "./par.js";

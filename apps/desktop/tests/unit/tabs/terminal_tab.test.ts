@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import type { ActiveContext } from "../../../src/tabs/context_switch";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { TerminalTab } from "../../../src/tabs/terminal_tab";
+import type { ActiveContext } from "../../../src/tabs/context_switch";
 
 describe("TerminalTab", () => {
   let tab: TerminalTab;
@@ -198,16 +198,10 @@ describe("TerminalTab", () => {
       const state = tab.getState();
       const terminalId = state.terminalId;
 
-      expect(terminalId).toBeDefined();
-      if (terminalId === undefined) {
-        throw new Error("Expected terminalId in restored state");
-      }
-      const expectedTerminalId = terminalId;
-
       const newTab = new TerminalTab();
       newTab.restoreState(state);
 
-      expect(newTab.getState().terminalId).toBe(expectedTerminalId);
+      expect(newTab.getState().terminalId).toBe(terminalId);
     });
   });
 

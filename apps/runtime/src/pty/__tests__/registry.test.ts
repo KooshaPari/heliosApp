@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it, beforeEach } from "bun:test";
 import {
-  DuplicatePtyError,
-  type PtyRecord,
   PtyRegistry,
+  DuplicatePtyError,
   RegistryCapacityError,
+  type PtyRecord,
 } from "../registry.js";
 
 function makeRecord(overrides: Partial<PtyRecord> = {}): PtyRecord {

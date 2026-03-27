@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { NormalizedProviderError } from "../errors.js";
+import { describe, expect, it, beforeEach } from "vitest";
 import { createMcpBridgeFixture, initMcpBridge } from "./mcp-bridge-test-helpers.js";
+import { NormalizedProviderError } from "../errors.js";
 
 describe("MCP Bridge Adapter - Error Handling", () => {
   let adapter: ReturnType<typeof createMcpBridgeFixture>["adapter"];
@@ -36,9 +36,9 @@ describe("MCP Bridge Adapter - Error Handling", () => {
         },
         "corr-123"
       )
-      .catch(caught => caught);
+      .catch((caught) => caught);
 
-    expect(error instanceof NormalizedProviderError).toBe(true);
+    expect(error).toBeInstanceOf(NormalizedProviderError);
   });
 
   it("emits error event on execution failure", async () => {
@@ -57,7 +57,7 @@ describe("MCP Bridge Adapter - Error Handling", () => {
     }
 
     const events = bus.getEvents();
-    const errorEvent = events.find(event => event.topic === "provider.mcp.tool.failed");
+    const errorEvent = events.find((event) => event.topic === "provider.mcp.tool.failed");
     expect(errorEvent).toBeDefined();
     expect(errorEvent?.payload?.toolName).toBe("nonexistent_tool");
   });

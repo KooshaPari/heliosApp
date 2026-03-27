@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import { type CommandBus, createBus } from "../../../src/protocol/bus.js";
+import { describe, expect, it, beforeEach } from "bun:test";
+import { createBus } from "../../../src/protocol/bus.js";
+import type { LocalBus } from "../../../src/protocol/bus.js";
 import { createEvent } from "../../../src/protocol/envelope.js";
 import type { LocalBusEnvelope } from "../../../src/protocol/types.js";
 
@@ -8,7 +9,7 @@ import type { LocalBusEnvelope } from "../../../src/protocol/types.js";
 // FR-010: Snapshot-based subscriber iteration
 
 describe("LocalBus — event fan-out", () => {
-  let bus: CommandBus;
+  let bus: LocalBus;
 
   beforeEach(() => {
     bus = createBus();
@@ -143,7 +144,7 @@ describe("LocalBus — event fan-out", () => {
       id: "cmd_123",
       // biome-ignore lint/style/useNamingConvention: Protocol fixture intentionally uses snake_case.
       correlation_id: "cor_123",
-      ts: new Date().toISOString(),
+      timestamp: 1,
       type: "command" as const,
       method: "test",
       payload: {},

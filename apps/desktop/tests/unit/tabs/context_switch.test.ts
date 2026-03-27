@@ -1,9 +1,9 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import {
-  type ActiveContext,
   ActiveContextStore,
-  getActiveContextStore,
+  type ActiveContext,
   resetActiveContextStore,
+  getActiveContextStore,
 } from "../../../src/tabs/context_switch";
 
 describe("ActiveContextStore", () => {
@@ -107,11 +107,11 @@ describe("ActiveContextStore", () => {
 
       const calls: any[] = [];
 
-      store.onContextChange(_event => {
+      store.onContextChange(event => {
         calls.push("listener1");
       });
 
-      store.onContextChange(_event => {
+      store.onContextChange(event => {
         calls.push("listener2");
       });
 
@@ -130,7 +130,7 @@ describe("ActiveContextStore", () => {
 
       let callCount = 0;
 
-      const unsubscribe = store.onContextChange(_event => {
+      const unsubscribe = store.onContextChange(event => {
         callCount++;
       });
 
@@ -164,7 +164,7 @@ describe("ActiveContextStore", () => {
         sessionId: "session3",
       };
 
-      const emittedContexts: ActiveContext[] = [];
+      let emittedContexts: ActiveContext[] = [];
 
       store.onContextChange(event => {
         if (event.current) {
@@ -209,13 +209,7 @@ describe("ActiveContextStore", () => {
       // Wait for debounce
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      expect(finalContext).not.toBeNull();
-      if (finalContext === null) {
-        throw new Error("Expected final context to be emitted");
-      }
-      const emittedContext = finalContext;
-
-      expect<ActiveContext>(emittedContext).toEqual(contexts[2]);
+      expect(finalContext!).toEqual(contexts[2]!);
     });
   });
 
@@ -229,7 +223,7 @@ describe("ActiveContextStore", () => {
 
       let validated = false;
 
-      store.setValidator(async _ctx => {
+      store.setValidator(async ctx => {
         validated = true;
         return true;
       });
@@ -240,7 +234,6 @@ describe("ActiveContextStore", () => {
       await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(validated).toBe(true);
-      expect(store.getContext()).not.toBeNull();
       expect(store.getContext()).toEqual(validContext);
     });
 

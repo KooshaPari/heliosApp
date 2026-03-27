@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { DefaultAuditSink, NoOpAuditStorage } from "../../../src/audit/sink";
+import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 
 describe("AuditSink", () => {
   let sink: DefaultAuditSink;

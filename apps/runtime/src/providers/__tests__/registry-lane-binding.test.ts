@@ -4,16 +4,11 @@
  * FR-025-008: Lane binding and failure isolation.
  */
 
-import { beforeEach, describe, expect, it } from "bun:test";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import type {
-  ACPConfig,
-  ACPExecuteInput,
-  ACPExecuteOutput,
-  ProviderAdapter,
-  ProviderHealthStatus,
-} from "../adapter.js";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { ProviderRegistry } from "../registry.js";
+import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
+import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 
 /**
  * Mock provider for testing registry behavior.
@@ -36,7 +31,7 @@ class TestProvider implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExe
     };
   }
 
-  async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+  async execute(input: ACPExecuteInput, correlationId: string): Promise<ACPExecuteOutput> {
     if (!this.initialized) {
       throw new Error("Not initialized");
     }

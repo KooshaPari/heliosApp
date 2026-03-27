@@ -1,13 +1,13 @@
 // T017 - Unit tests for lane registry (FR-008-001, NFR-008-003)
 
-import { describe, expect, test } from "bun:test";
-import type { LaneRecord } from "../../../src/lanes/registry.js";
+import { describe, test, expect } from "bun:test";
 import {
-  DuplicateLaneError,
-  LaneCapacityExceededError,
-  LaneNotFoundError,
   LaneRegistry,
+  DuplicateLaneError,
+  LaneNotFoundError,
+  LaneCapacityExceededError,
 } from "../../../src/lanes/registry.js";
+import type { LaneRecord } from "../../../src/lanes/registry.js";
 
 function makeRecord(overrides: Partial<LaneRecord> = {}): LaneRecord {
   const now = new Date().toISOString();
@@ -32,10 +32,10 @@ describe("LaneRegistry (FR-008-001)", () => {
     reg.register(rec);
     const got = reg.get("r1");
     expect(got).toBeDefined();
-    expect(got?.laneId).toBe("r1");
+    expect(got!.laneId).toBe("r1");
     // Mutation of returned copy does not affect internal state
     got!.state = "closed";
-    expect(reg.get("r1")?.state).toBe("new");
+    expect(reg.get("r1")!.state).toBe("new");
   });
 
   test("duplicate registration throws DuplicateLaneError", () => {
@@ -63,7 +63,7 @@ describe("LaneRegistry (FR-008-001)", () => {
   test("update modifies record and sets updatedAt", () => {
     const reg = new LaneRegistry();
     reg.register(makeRecord({ laneId: "upd1", state: "new" }));
-    const _before = reg.get("upd1")?.updatedAt;
+    const before = reg.get("upd1")!.updatedAt;
     // Small delay to get different timestamp
     reg.update("upd1", { state: "provisioning" });
     const after = reg.get("upd1")!;

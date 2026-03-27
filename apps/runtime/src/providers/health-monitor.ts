@@ -1,5 +1,5 @@
 /**
- * Health Monitoring Coordinator
+ * Health Monitoring Coordinator — extracted from a2a-router.ts for static analysis compliance.
  *
  * Manages health state for all registered providers across all types (ACP, MCP, A2A).
  * Publishes state transitions on the bus and coordinates failover decisions.
@@ -11,15 +11,6 @@
 import type { LocalBus } from "../protocol/bus.js";
 import type { ProviderHealthStatus } from "./adapter.js";
 
-/**
- * Health Monitoring Coordinator
- *
- * Manages health state for all registered providers across all types (ACP, MCP, A2A).
- * Publishes state transitions on the bus and coordinates failover decisions.
- *
- * FR-025-009: Health monitoring for all providers.
- * FR-025-010: Failover routing based on health state.
- */
 export class HealthMonitoringCoordinator {
   private providerHealthMap = new Map<string, ProviderHealthStatus>();
   private healthCheckIntervals = new Map<string, NodeJS.Timeout>();
@@ -66,7 +57,9 @@ export class HealthMonitoringCoordinator {
             failureCount: status.failureCount,
           });
         }
-      } catch (_error) {}
+      } catch (_error) {
+        // Health polling errors are intentionally isolated per interval tick.
+      }
     }, interval);
 
     this.healthCheckIntervals.set(providerId, intervalId);
@@ -143,6 +136,8 @@ export class HealthMonitoringCoordinator {
         topic,
         payload,
       });
-    } catch (_error) {}
+    } catch (_error) {
+      // Best-effort event publishing should not fail coordinator flow.
+    }
   }
 }

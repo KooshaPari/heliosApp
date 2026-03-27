@@ -15,9 +15,7 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
 
   async init(): Promise<void> {
     try {
-      const file = Bun.file(this.binaryPath) as unknown as {
-        exists(): Promise<boolean>;
-      };
+      const file = Bun.file(this.binaryPath);
       if (!(await file.exists())) {
         throw new Error(`llama.cpp binary not found at ${this.binaryPath}`);
       }
@@ -29,16 +27,14 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
     const prompt = request.messages.map(m => `${m.role}: ${m.content}`).join("\n");
     const args = [this.binaryPath, "-m", request.model, "-p", prompt, "--no-display-prompt"];
-    if (request.maxTokens) {
-      args.push("-n", String(request.maxTokens));
-    }
+    if (request.maxTokens) args.push("-n", String(request.maxTokens));
 
     const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
-    const output = proc.stdout ? await new Response(proc.stdout).text() : "";
+    const output = await new Response(proc.stdout).text();
     const exitCode = await proc.exited;
 
     if (exitCode !== 0) {
-      const stderr = proc.stderr ? await new Response(proc.stderr).text() : "";
+      const stderr = await new Response(proc.stderr).text();
       throw new Error(`llama.cpp inference failed: ${stderr}`);
     }
 
@@ -60,7 +56,7 @@ export class LlamaCppInferenceEngine implements InferenceEngine {
     try {
       const glob = new Bun.Glob("**/*.gguf");
       const models: ModelInfo[] = [];
-      for await (const path of glob.scan({ cwd: this.modelDir })) {
+      for await (const path of glob.scan(this.modelDir)) {
         const name =
           path
             .replace(/\.gguf$/, "")

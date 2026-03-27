@@ -6,10 +6,10 @@
  * On recovery, persisted bindings are re-validated against current state.
  */
 
-import { createHash } from "node:crypto";
-import { promises as fs } from "node:fs";
-import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { promises as fs } from "fs";
+import { createHash } from "crypto";
+import { homedir } from "os";
+import { dirname, join } from "path";
 import type { TerminalBinding } from "./binding_triple.js";
 
 export interface PersistenceStore {
@@ -71,7 +71,9 @@ export class JsonFilePersistence implements PersistenceStore {
         await this.doWrite(bindings);
         this.writeTimeoutId = null;
         this.pendingBindings = null;
-      } catch (_error) {}
+      } catch (error) {
+        console.error("Failed to persist bindings:", error);
+      }
     }, this.writeDebounceMs);
   }
 
@@ -87,13 +89,15 @@ export class JsonFilePersistence implements PersistenceStore {
       const data: PersistenceData = JSON.parse(content);
 
       // Verify structure
-      if (!(data.bindings && Array.isArray(data.bindings))) {
+      if (!data.bindings || !Array.isArray(data.bindings)) {
+        console.warn("Invalid persistence format: missing or invalid bindings array");
         return [];
       }
 
       // Verify checksum
       const expectedChecksum = this.computeChecksum(data.bindings, data.timestamp);
       if (data.checksum !== expectedChecksum) {
+        console.warn("Persistence file is corrupt (checksum mismatch); starting fresh");
         return [];
       }
 
@@ -103,6 +107,7 @@ export class JsonFilePersistence implements PersistenceStore {
         // File doesn't exist; expected on first run
         return [];
       }
+      console.warn("Failed to load persisted bindings:", error);
       return [];
     }
   }
@@ -132,6 +137,7 @@ export class JsonFilePersistence implements PersistenceStore {
       await fs.unlink(this.storePath);
     } catch (error) {
       if ((error as any).code !== "ENOENT") {
+        console.error("Failed to clear persistence:", error);
       }
     }
   }

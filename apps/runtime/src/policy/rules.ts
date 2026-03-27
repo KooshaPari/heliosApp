@@ -3,8 +3,13 @@
  * Evaluates commands against policy rules with denylist-wins conflict resolution.
  */
 
-import type { CommandContext, PolicyEvaluationResult, PolicyRule } from "./types";
-import { PolicyClassification, PolicyPatternType } from "./types";
+import {
+  type PolicyRule,
+  PolicyClassification,
+  PolicyPatternType,
+  type CommandContext,
+  type PolicyEvaluationResult,
+} from "./types";
 
 /**
  * Pattern matcher for glob and regex patterns.
@@ -109,7 +114,7 @@ export class PolicyRuleSet {
         }
 
         const hasMatchingPath = context.affectedPaths.some(path => {
-          return rule.targets?.some(target => {
+          return rule.targets!.some(target => {
             return this.patternMatcher.matches(path, target, PolicyPatternType.Glob);
           });
         });

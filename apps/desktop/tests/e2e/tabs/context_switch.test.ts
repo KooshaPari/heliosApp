@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, it, expect } from "bun:test";
 
 describe("Context Switch E2E", () => {
   it("should update all tabs on lane switch", async () => {

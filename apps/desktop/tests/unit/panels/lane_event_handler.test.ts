@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
-import type { BusEvent, BusSubscriber } from "../../../src/panels/lane_event_handler";
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { LaneEventHandler } from "../../../src/panels/lane_event_handler";
+import type { BusSubscriber, BusEvent } from "../../../src/panels/lane_event_handler";
 
 describe("LaneEventHandler", () => {
   let handler: LaneEventHandler;
@@ -10,10 +10,10 @@ describe("LaneEventHandler", () => {
   beforeEach(() => {
     busHandlers = new Map();
     mockBus = {
-      subscribe: mock((topic: string, handler: (event: BusEvent) => void) => {
+      subscribe: vi.fn((topic, handler) => {
         busHandlers.set(topic, handler);
       }),
-      unsubscribe: mock((topic: string) => {
+      unsubscribe: vi.fn(topic => {
         busHandlers.delete(topic);
       }),
     };
@@ -34,7 +34,7 @@ describe("LaneEventHandler", () => {
   });
 
   it("should handle state changed events", async () => {
-    const onStateChanged = mock();
+    const onStateChanged = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
       onStateChanged,
@@ -57,7 +57,7 @@ describe("LaneEventHandler", () => {
   });
 
   it("should handle lane created events", () => {
-    const onLaneCreated = mock();
+    const onLaneCreated = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
       onLaneCreated,
@@ -77,7 +77,7 @@ describe("LaneEventHandler", () => {
   });
 
   it("should handle lane cleanup events", () => {
-    const onLaneCleaned = mock();
+    const onLaneCleaned = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
       onLaneCleaned,
@@ -97,7 +97,7 @@ describe("LaneEventHandler", () => {
   });
 
   it("should batch rapid state changes with RAF", async () => {
-    const onStateChanged = mock();
+    const onStateChanged = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
       onStateChanged,
@@ -134,7 +134,7 @@ describe("LaneEventHandler", () => {
   });
 
   it("should discard out-of-order events", async () => {
-    const onStateChanged = mock();
+    const onStateChanged = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
       onStateChanged,
@@ -166,7 +166,7 @@ describe("LaneEventHandler", () => {
   });
 
   it("should monitor bus connectivity", async () => {
-    const onBusConnectivityIssue = mock();
+    const onBusConnectivityIssue = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
       onBusConnectivityIssue,
@@ -181,7 +181,7 @@ describe("LaneEventHandler", () => {
   });
 
   it("should recover connectivity after events resume", async () => {
-    const onBusConnectivityIssue = mock();
+    const onBusConnectivityIssue = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
       onBusConnectivityIssue,
@@ -214,7 +214,7 @@ describe("LaneEventHandler", () => {
   });
 
   it("should handle orphan detection cycle events", () => {
-    const onOrphanStatusChanged = mock();
+    const onOrphanStatusChanged = vi.fn();
     handler = new LaneEventHandler({
       bus: mockBus,
       onOrphanStatusChanged,

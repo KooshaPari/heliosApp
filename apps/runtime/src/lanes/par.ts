@@ -2,36 +2,36 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
+import type { LaneRegistry } from "./registry.js";
+import { transition, withLaneLock, recordTransition, type LaneState } from "./state_machine.js";
 import {
-  defaultSpawn,
+  type ParBinding,
   type ExecResult,
+  type ParManagerOptions,
+  type SpawnFn,
+  type SpawnResult,
+  ParNotFoundError,
+  ParSpawnError,
+  LaneNotReadyError,
   ExecTimeoutError,
   generateParTaskId,
   isProcessAlive,
-  LaneNotReadyError,
-  type ParBinding,
-  type ParManagerOptions,
-  ParNotFoundError,
-  ParSpawnError,
-  type SpawnFn,
-  type SpawnResult,
+  defaultSpawn,
 } from "./par-types.js";
-import type { LaneRegistry } from "./registry.js";
-import { type LaneState, recordTransition, transition, withLaneLock } from "./state_machine.js";
 
 export type {
-  ExecResult,
   ParBinding,
+  ExecResult,
   ParManagerOptions,
   SpawnFn,
   SpawnResult,
 } from "./par-types.js";
 export {
-  _resetParIdCounter,
-  ExecTimeoutError,
-  LaneNotReadyError,
   ParNotFoundError,
   ParSpawnError,
+  LaneNotReadyError,
+  ExecTimeoutError,
+  _resetParIdCounter,
 } from "./par-types.js";
 
 // ── Par Manager ─────────────────────────────────────────────────────────────
@@ -248,7 +248,7 @@ export class ParManager {
           }
 
           // Transition back to ready
-          const currentState = this.registry.get(laneId)?.state as LaneState;
+          const currentState = this.registry.get(laneId)!.state as LaneState;
           const readyState = transition(currentState, "command_complete", laneId);
           recordTransition(laneId, currentState, "command_complete", readyState);
           this.registry.update(laneId, { state: readyState });
@@ -269,7 +269,7 @@ export class ParManager {
         const duration = performance.now() - start;
 
         // Transition back to ready
-        const currentState = this.registry.get(laneId)?.state as LaneState;
+        const currentState = this.registry.get(laneId)!.state as LaneState;
         const readyState = transition(currentState, "command_complete", laneId);
         recordTransition(laneId, currentState, "command_complete", readyState);
         this.registry.update(laneId, { state: readyState });
@@ -290,9 +290,7 @@ export class ParManager {
         return execResult;
       } catch (err) {
         // If it's our own timeout error, re-throw
-        if (err instanceof ExecTimeoutError) {
-          throw err;
-        }
+        if (err instanceof ExecTimeoutError) throw err;
 
         // Transition back to ready on unexpected error
         try {
@@ -313,9 +311,7 @@ export class ParManager {
   // ── T014: Stale detection and health check ──────────────────────────────
 
   startHealthCheck(): void {
-    if (this.healthCheckTimer) {
-      return;
-    }
+    if (this.healthCheckTimer) return;
     this.healthCheckTimer = setInterval(() => {
       this.runHealthCheck().catch(() => {
         // Health check error - will retry next cycle
@@ -332,9 +328,7 @@ export class ParManager {
 
   async runHealthCheck(): Promise<void> {
     for (const [laneId, binding] of this.bindings) {
-      if (binding.status !== "active") {
-        continue;
-      }
+      if (binding.status !== "active") continue;
 
       const lane = this.registry.get(laneId);
       const workspaceId = lane?.workspaceId ?? "";
@@ -407,9 +401,7 @@ export class ParManager {
     workspaceId: string,
     extra: Record<string, unknown>
   ): Promise<void> {
-    if (!this.bus) {
-      return;
-    }
+    if (!this.bus) return;
 
     const envelope: LocalBusEnvelope = {
       id: `${laneId}:${topic}:${Date.now()}`,

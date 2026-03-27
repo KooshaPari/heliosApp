@@ -1,6 +1,6 @@
-import { handleInMemoryRequest } from "./bus_in_memory_request.js";
-import type { LocalBusEnvelope } from "./types.js";
 import { ProtocolValidationError } from "./types.js";
+import type { LocalBusEnvelope } from "./types.js";
+import { handleInMemoryRequest } from "./bus_in_memory_request.js";
 import { validateEnvelope } from "./validator.js";
 
 type LocalBusEnvelopeWithSequence = LocalBusEnvelope & { sequence?: number };
@@ -112,10 +112,7 @@ export class InMemoryLocalBus {
   }
 
   private recordMetric(metric: string, value?: number, tags?: Record<string, string>): void {
-    const existing = this.metricsAccumulator.get(metric) ?? {
-      count: 0,
-      values: [],
-    };
+    const existing = this.metricsAccumulator.get(metric) ?? { count: 0, values: [] };
     const latestValue = value !== undefined ? value : existing.latest;
     const updated = {
       count: existing.count + 1,
@@ -127,11 +124,7 @@ export class InMemoryLocalBus {
     }
     this.metricsAccumulator.set(metric, updated);
     if (value !== undefined) {
-      this.metricSamples.push({
-        metric,
-        value,
-        ...(tags !== undefined ? { tags } : {}),
-      });
+      this.metricSamples.push({ metric, value, ...(tags !== undefined ? { tags } : {}) });
     }
   }
 
@@ -184,11 +177,7 @@ export class InMemoryLocalBus {
       validateEnvelope(event);
     } catch (err) {
       const auditErr = err instanceof ProtocolValidationError ? err.message : String(err);
-      this.auditLog.push({
-        envelope: event,
-        outcome: "rejected",
-        error: auditErr,
-      });
+      this.auditLog.push({ envelope: event, outcome: "rejected", error: auditErr });
       throw err;
     }
 
@@ -215,11 +204,7 @@ export class InMemoryLocalBus {
             "ORDERING_VIOLATION",
             `Duplicate start topic "${topic}" for correlation "${correlationId}"`
           );
-          this.auditLog.push({
-            envelope: event,
-            outcome: "rejected",
-            error: err.message,
-          });
+          this.auditLog.push({ envelope: event, outcome: "rejected", error: err.message });
           throw err;
         }
         progress.add(topic);
@@ -250,11 +235,7 @@ export class InMemoryLocalBus {
             "ORDERING_VIOLATION",
             `Topic '${topic}' cannot be published before '${expectedStart}'`
           );
-          this.auditLog.push({
-            envelope: event,
-            outcome: "rejected",
-            error: err.message,
-          });
+          this.auditLog.push({ envelope: event, outcome: "rejected", error: err.message });
           throw err;
         }
       }

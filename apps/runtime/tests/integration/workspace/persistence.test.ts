@@ -3,11 +3,12 @@
 // FR-006: Corruption detection
 // FR-007: Recovery from snapshot
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { mkdtemp, rm, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { createJsonStore } from "../../../src/workspace/store.js";
+import { tmpdir } from "node:os";
+import { createJsonStore, JsonWorkspaceStore } from "../../../src/workspace/store.js";
+import { createSnapshot } from "../../../src/workspace/snapshot.js";
 import type { Workspace } from "../../../src/workspace/types.js";
 
 function makeWorkspace(overrides: Partial<Workspace> = {}): Workspace {
@@ -154,7 +155,7 @@ describe("Corruption recovery", () => {
     // Tamper with the primary file's checksum
     const raw = await readFile(join(dataDir, "workspaces.json"), "utf-8");
     const data = JSON.parse(raw) as Record<string, unknown>;
-    data._checksum = "badhash";
+    data["_checksum"] = "badhash";
     await writeFile(join(dataDir, "workspaces.json"), JSON.stringify(data));
 
     const store2 = await createJsonStore(dataDir);

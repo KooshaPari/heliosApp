@@ -13,7 +13,7 @@ export class MemorySampler {
   private readonly intervalMs: number;
   private timer: ReturnType<typeof setInterval> | null = null;
 
-  constructor(registry: MetricsRegistry, intervalMs = 5000) {
+  constructor(registry: MetricsRegistry, intervalMs: number = 5000) {
     this.registry = registry;
     this.intervalMs = intervalMs;
 
@@ -33,6 +33,9 @@ export class MemorySampler {
     }
 
     if (this.intervalMs < 500) {
+      console.warn(
+        `[samplers] Memory sampler interval ${this.intervalMs}ms is very short; may cause overhead.`
+      );
     }
 
     this.timer = setInterval(() => {
@@ -52,9 +55,11 @@ export class MemorySampler {
   private sample(): void {
     try {
       const heapUsedBytes = process.memoryUsage().heapUsed;
-      const heapUsedMb = heapUsedBytes / (1024 * 1024);
-      this.registry.record("memory", heapUsedMb);
-    } catch {}
+      const heapUsedMB = heapUsedBytes / (1024 * 1024);
+      this.registry.record("memory", heapUsedMB);
+    } catch {
+      console.warn("[samplers] process.memoryUsage() not available; skipping sample.");
+    }
   }
 }
 
@@ -142,6 +147,7 @@ export class FrameTimingSampler {
     this.registry.record("fps", fps);
 
     if (fps < 55) {
+      console.warn(`[samplers] Low FPS detected: ${fps}`);
     }
 
     this.frameCount = 1;

@@ -2,7 +2,7 @@
 // FR-001: Store supports CRUD
 // FR-002: Case-insensitive name lookup
 
-import { describe, expect, test } from "bun:test";
+import { describe, test, expect } from "bun:test";
 import { createInMemoryStore } from "../../../src/workspace/store.js";
 import type { Workspace } from "../../../src/workspace/types.js";
 
@@ -53,8 +53,8 @@ describe("InMemoryWorkspaceStore", () => {
     await store.save(a);
     await store.save(b);
     const all = await store.getAll();
-    expect(all[0]?.name).toBe("B");
-    expect(all[1]?.name).toBe("A");
+    expect(all[0]!.name).toBe("B");
+    expect(all[1]!.name).toBe("A");
   });
 
   test("remove deletes workspace", async () => {
@@ -90,7 +90,7 @@ describe("InMemoryWorkspaceStore", () => {
     await store.save(ws);
     const updated = { ...ws, name: "Updated" };
     await store.save(updated);
-    expect((await store.getById(ws.id))?.name).toBe("Updated");
+    expect((await store.getById(ws.id))!.name).toBe("Updated");
     expect(await store.getAll()).toHaveLength(1);
   });
 });

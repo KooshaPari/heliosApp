@@ -15,55 +15,68 @@ export type EnvelopeType = "command" | "response" | "event";
 export type ErrorPayload = {
   code: string;
   message: string;
-  retryable?: boolean;
+  retryable: boolean;
   details?: Record<string, unknown> | null;
 };
 
-type EnvelopeBase = {
+export interface CommandEnvelope {
   id: string;
-  type: EnvelopeType;
+  type: "command";
+  ts?: string;
+  timestamp?: number;
+  method: string;
   correlation_id: string;
+  payload: Record<string, unknown>;
   workspace_id?: string;
+  lane_id?: string;
   session_id?: string;
   terminal_id?: string;
-  lane_id?: string;
-};
+}
 
-export type CommandEnvelope = EnvelopeBase & {
-  type: "command";
-  timestamp: number;
-  method: string;
-  payload: unknown;
-};
-
-export type ResponseEnvelope = EnvelopeBase & {
-  type: "response";
-  timestamp: number;
-  method: string;
-  payload: unknown;
-  error?: ErrorPayload;
-};
-
-export type EventEnvelope = EnvelopeBase & {
+export interface EventEnvelope {
+  id?: string;
   type: "event";
-  timestamp: number;
   topic: string;
-  payload: unknown;
-  sequence: number;
-};
+  ts?: string;
+  timestamp?: number;
+  correlation_id?: string;
+  sequence?: number;
+  payload?: Record<string, unknown>;
+  workspace_id?: string;
+  lane_id?: string;
+  session_id?: string;
+  terminal_id?: string;
+}
 
-export type Envelope = CommandEnvelope | ResponseEnvelope | EventEnvelope;
+export interface ResponseEnvelope {
+  id: string;
+  type: "response";
+  ts?: string;
+  timestamp?: number;
+  status?: "ok" | "error";
+  method?: string;
+  correlation_id?: string;
+  result?: Record<string, unknown>;
+  error?: {
+    code: string;
+    message: string;
+    retryable?: boolean;
+  };
+  payload?: Record<string, unknown> | null;
+}
+
+export type Envelope = CommandEnvelope | EventEnvelope | ResponseEnvelope;
 
 export type LocalBusEnvelope = {
   id: string;
   type: EnvelopeType;
-  ts: string;
-  timestamp?: string | number;
-  correlation_id?: string;
+  ts?: string;
+  timestamp?: number;
   workspace_id?: string;
   session_id?: string;
   terminal_id?: string;
   lane_id?: string;
+  correlation_id?: string;
   method?: string;
   topic?: string;
   sequence?: number;
@@ -72,37 +85,3 @@ export type LocalBusEnvelope = {
   result?: Record<string, unknown> | null;
   error?: ErrorPayload | null;
 };
-
-export function isCommand(value: unknown): value is CommandEnvelope {
-  return (
-    value !== null &&
-    typeof value === "object" &&
-    (value as Record<string, unknown>).type === "command" &&
-    typeof (value as Record<string, unknown>).method === "string" &&
-    typeof (value as Record<string, unknown>).correlation_id === "string" &&
-    typeof (value as Record<string, unknown>).timestamp === "number"
-  );
-}
-
-export function isResponse(value: unknown): value is ResponseEnvelope {
-  return (
-    value !== null &&
-    typeof value === "object" &&
-    (value as Record<string, unknown>).type === "response" &&
-    typeof (value as Record<string, unknown>).method === "string" &&
-    typeof (value as Record<string, unknown>).correlation_id === "string" &&
-    typeof (value as Record<string, unknown>).timestamp === "number"
-  );
-}
-
-export function isEvent(value: unknown): value is EventEnvelope {
-  return (
-    value !== null &&
-    typeof value === "object" &&
-    (value as Record<string, unknown>).type === "event" &&
-    typeof (value as Record<string, unknown>).topic === "string" &&
-    typeof (value as Record<string, unknown>).correlation_id === "string" &&
-    typeof (value as Record<string, unknown>).timestamp === "number" &&
-    typeof (value as Record<string, unknown>).sequence === "number"
-  );
-}

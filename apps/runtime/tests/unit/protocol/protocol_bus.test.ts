@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { InMemoryLocalBus } from "../../../src/protocol/bus";
-import { type LocalBusEnvelope, ProtocolValidationError } from "../../../src/protocol/types";
+import { ProtocolValidationError, type LocalBusEnvelope } from "../../../src/protocol/types";
 import { validateEnvelope } from "../../../src/protocol/validator";
 
 function createLifecycleCommand(overrides: Partial<LocalBusEnvelope> = {}): LocalBusEnvelope {

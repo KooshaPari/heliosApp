@@ -51,9 +51,7 @@ export class StatusBadge {
   }
 
   private render(): void {
-    if (!this.container) {
-      return;
-    }
+    if (!this.container) return;
 
     // Clear children safely
     while (this.container.firstChild) {

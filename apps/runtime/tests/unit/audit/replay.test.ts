@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it } from "bun:test";
-import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
-import type { ReplayStream } from "../../../src/audit/replay";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { ReplayEngine } from "../../../src/audit/replay";
+import type { ReplayStream } from "../../../src/audit/replay";
+import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 import type { SessionSnapshot } from "../../../src/audit/snapshot";
 
 describe("ReplayEngine", () => {

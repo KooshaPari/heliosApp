@@ -1,8 +1,8 @@
 // FR-007: Metrics query API for retrieving current statistics.
 
+import type { PercentileBucket, Sample } from "./types.js";
 import type { MetricsRegistry } from "./metrics.js";
 import { computePercentiles } from "./percentiles.js";
-import type { PercentileBucket, Sample } from "./types.js";
 
 /**
  * Read API for retrieving computed statistics from the metrics registry.
@@ -24,7 +24,7 @@ export class MetricsQuery {
     if (entry === undefined) {
       return null;
     }
-    return computePercentiles(entry.buffer.getValues());
+    return computePercentiles(entry.buffer.getValues()) ?? null;
   }
 
   /** Compute percentile statistics for all registered metrics with samples. */
@@ -33,7 +33,10 @@ export class MetricsQuery {
     for (const name of this.registry.listMetrics()) {
       const entry = this.registry.getMetric(name);
       if (entry !== undefined) {
-        result[name] = computePercentiles(entry.buffer.getValues());
+        const stats = computePercentiles(entry.buffer.getValues());
+        if (stats !== undefined) {
+          result[name] = stats;
+        }
       }
     }
     return result;

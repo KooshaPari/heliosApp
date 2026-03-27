@@ -163,7 +163,11 @@ export class MuxEventEmitter {
    * Emit an event. Bus failures are caught and logged but never propagated.
    */
   emit(event: MuxEvent): void {
-    this.bus.publish(event).catch(_err => {});
+    this.bus.publish(event).catch(err => {
+      console.warn(
+        `[mux-events] Bus publish failed for ${event.type}: ${err instanceof Error ? err.message : String(err)}`
+      );
+    });
   }
 
   /**

@@ -5,18 +5,12 @@
  * FR-025-008: Lane binding and failure isolation.
  */
 
-import { beforeEach, describe, expect, it } from "bun:test";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
-import type {
-  ACPConfig,
-  ACPExecuteInput,
-  ACPExecuteOutput,
-  ProviderAdapter,
-  ProviderHealthStatus,
-  ProviderRegistration,
-} from "../adapter.js";
-import { NormalizedProviderError } from "../errors.js";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { ProviderRegistry } from "../registry.js";
+import { NormalizedProviderError, PROVIDER_ERROR_CODES } from "../errors.js";
+import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
+import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 
 /**
  * Mock provider for testing registry behavior.
@@ -39,7 +33,7 @@ class TestProvider implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExe
     };
   }
 
-  async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
+  async execute(input: ACPExecuteInput, correlationId: string): Promise<ACPExecuteOutput> {
     if (!this.initialized) {
       throw new Error("Not initialized");
     }
@@ -168,9 +162,11 @@ describe("ProviderRegistry", () => {
     });
 
     it("should emit provider.init.failed event on init failure", async () => {
-      class FailingProvider
-        implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
-      {
+      class FailingProvider implements ProviderAdapter<
+        ACPConfig,
+        ACPExecuteInput,
+        ACPExecuteOutput
+      > {
         async init(_config: ACPConfig): Promise<void> {
           throw new Error("Init failed");
         }

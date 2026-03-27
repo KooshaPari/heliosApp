@@ -45,12 +45,8 @@ export interface ValidationResult {
  * Standard format: lowercase alphanumeric with hyphens, 1-36 characters.
  */
 function isValidIdFormat(id: string): boolean {
-  if (!id || typeof id !== "string") {
-    return false;
-  }
-  if (id.length === 0 || id.length > 36) {
-    return false;
-  }
+  if (!id || typeof id !== "string") return false;
+  if (id.length < 1 || id.length > 36) return false;
   return /^[a-z0-9-]+$/.test(id);
 }
 

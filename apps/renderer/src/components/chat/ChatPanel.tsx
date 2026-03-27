@@ -1,4 +1,4 @@
-import { type Component, createEffect, For, Show } from "solid-js";
+import { type Component, For, Show, createEffect } from "solid-js";
 import type { Message } from "../../../../runtime/src/types/conversation";
 import { MessageBubble } from "./MessageBubble";
 
@@ -15,7 +15,7 @@ export const ChatPanel: Component<ChatPanelProps> = props => {
     const _ = props.messages.length;
     if (containerRef) {
       requestAnimationFrame(() => {
-        containerRef!.scrollTop = containerRef?.scrollHeight ?? 0;
+        containerRef!.scrollTop = containerRef!.scrollHeight;
       });
     }
   });

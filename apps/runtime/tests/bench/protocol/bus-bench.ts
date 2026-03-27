@@ -75,7 +75,7 @@ async function runAsync(
 function summarize(
   name: string,
   sorted: number[],
-  thresholdP95Ms: number,
+  threshold_p95_ms: number,
   warmup: number
 ): BenchResult {
   const p50 = percentile(sorted, 50);
@@ -88,8 +88,8 @@ function summarize(
     p50_ms: p50,
     p95_ms: p95,
     p99_ms: p99,
-    threshold_p95_ms: thresholdP95Ms,
-    passed: p95 <= thresholdP95Ms,
+    threshold_p95_ms,
+    passed: p95 <= threshold_p95_ms,
   };
 }
 
@@ -106,9 +106,7 @@ const VALIDATE_P95_THRESHOLD = 0.2; // SLO: 0.1ms, CI: 0.2ms
 
 async function benchCommandDispatch(): Promise<BenchResult> {
   const bus = createBus();
-  bus.registerMethod("bench.echo", cmd =>
-    createResponse(cmd, cmd.payload as Record<string, unknown>)
-  );
+  bus.registerMethod("bench.echo", cmd => createResponse(cmd, cmd.payload));
 
   const timings = await runAsync(
     async () => {
@@ -187,13 +185,13 @@ async function benchSustainedThroughput(): Promise<
     lastSeq = e.sequence ?? 0;
   });
 
-  const targetRate = 10_000; // msg/s
-  const durationS = 2; // shortened for test practicality (full 10s in real CI)
-  const total = targetRate * durationS;
+  const TARGET_RATE = 10_000; // msg/s
+  const DURATION_S = 2; // shortened for test practicality (full 10s in real CI)
+  const TOTAL = TARGET_RATE * DURATION_S;
 
   const start = performance.now();
   const promises: Promise<void>[] = [];
-  for (let i = 0; i < total; i++) {
+  for (let i = 0; i < TOTAL; i++) {
     promises.push(
       bus.publish(
         createEvent("bench.sustained", {
@@ -207,14 +205,14 @@ async function benchSustainedThroughput(): Promise<
 
   bus.destroy();
 
-  const passed = received === total && violations === 0;
+  const passed = received === TOTAL && violations === 0;
   return {
     name: "sustained_throughput",
-    iterations: total,
+    iterations: TOTAL,
     warmup: 0,
-    p50_ms: elapsed / total,
-    p95_ms: elapsed / total,
-    p99_ms: elapsed / total,
+    p50_ms: elapsed / TOTAL,
+    p95_ms: elapsed / TOTAL,
+    p99_ms: elapsed / TOTAL,
     threshold_p95_ms: DISPATCH_P95_THRESHOLD,
     passed,
     total_messages: received,
@@ -236,15 +234,22 @@ async function main(): Promise<void> {
   results.push(await benchSustainedThroughput());
 
   // Output structured JSON for CI
-  const _output = JSON.stringify({ benchmarks: results }, null, 2);
+  const output = JSON.stringify({ benchmarks: results }, null, 2);
+  console.log(output);
 
   // Assert all passed
   const failures = results.filter(r => !r.passed);
   if (failures.length > 0) {
-    for (const _f of failures) {
+    console.error("\nSLO BREACHES:");
+    for (const f of failures) {
+      console.error(
+        `  ${f.name}: p95=${String(f.p95_ms.toFixed(3))}ms > threshold=${String(f.threshold_p95_ms)}ms`
+      );
     }
     process.exit(1);
   }
+
+  console.log("\nAll benchmarks passed SLO thresholds.");
 }
 
 await main();

@@ -1,7 +1,9 @@
-import { METHODS } from "../protocol/methods.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
-import type { RedactionEngine } from "../secrets/redaction-engine.js";
+import { METHODS } from "../protocol/methods.js";
 import type { RecoveryRegistry } from "../sessions/registry.js";
+import type { RuntimeAuditRecord } from "./types.js";
+import { RedactionEngine } from "../secrets/redaction-engine.js";
+import type { InMemoryLocalBus } from "../protocol/bus.js";
 import { handleTerminalCommand, type RuntimeTerminalContext } from "./terminal.js";
 
 type RuntimeOpsContext = RuntimeTerminalContext & {
@@ -31,7 +33,7 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
   }
 
   if (Array.isArray(value)) {
-    return value.map(item => redactStructuredValue(item));
+    return value.map((item) => redactStructuredValue(item));
   }
 
   if (value && typeof value === "object") {
@@ -39,7 +41,7 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
       Object.entries(value as Record<string, unknown>).map(([entryKey, entryValue]) => [
         entryKey,
         redactStructuredValue(entryValue, entryKey),
-      ])
+      ]),
     );
   }
 
@@ -49,7 +51,7 @@ function redactStructuredValue(value: unknown, key?: string): unknown {
 function redactPayload(
   engine: RedactionEngine,
   payload: Record<string, unknown>,
-  correlationId: string
+  correlationId: string,
 ): Record<string, unknown> {
   const structured = redactStructuredValue(payload) as Record<string, unknown>;
   const serialized = JSON.stringify(structured);
@@ -61,6 +63,7 @@ function redactPayload(
   return JSON.parse(result.redacted) as Record<string, unknown>;
 }
 
+
 function recordCommand(context: RuntimeOpsContext, envelope: LocalBusEnvelope): void {
   context.appendAuditRecord({
     recorded_at: new Date().toISOString(),
@@ -70,7 +73,7 @@ function recordCommand(context: RuntimeOpsContext, envelope: LocalBusEnvelope): 
     payload: redactPayload(
       context.redactionEngine,
       normalizePayload(envelope.payload),
-      envelope.correlation_id ?? envelope.id
+      envelope.correlation_id ?? envelope.id,
     ),
     error: null,
   });
@@ -85,7 +88,7 @@ function recordResponse(context: RuntimeOpsContext, envelope: LocalBusEnvelope):
     payload: redactPayload(
       context.redactionEngine,
       normalizePayload(envelope.result ?? envelope.payload),
-      envelope.correlation_id ?? envelope.id
+      envelope.correlation_id ?? envelope.id,
     ),
     error: envelope.error ?? null,
   });
@@ -108,23 +111,17 @@ function applyRecoveryFromCommand(
     lane_id:
       command.lane_id ??
       (typeof payload.lane_id === "string" ? payload.lane_id : undefined) ??
-      (typeof payload.id === "string" && command.method === "lane.create"
-        ? payload.id
-        : undefined) ??
+      (typeof payload.id === "string" && command.method === "lane.create" ? payload.id : undefined) ??
       (typeof result.lane_id === "string" ? result.lane_id : undefined),
     session_id:
       command.session_id ??
       (typeof payload.session_id === "string" ? payload.session_id : undefined) ??
-      (typeof payload.id === "string" && command.method === "session.attach"
-        ? payload.id
-        : undefined) ??
+      (typeof payload.id === "string" && command.method === "session.attach" ? payload.id : undefined) ??
       (typeof result.session_id === "string" ? result.session_id : undefined),
     terminal_id:
       command.terminal_id ??
       (typeof payload.terminal_id === "string" ? payload.terminal_id : undefined) ??
-      (typeof payload.id === "string" && command.method === "terminal.spawn"
-        ? payload.id
-        : undefined) ??
+      (typeof payload.id === "string" && command.method === "terminal.spawn" ? payload.id : undefined) ??
       (typeof result.terminal_id === "string" ? result.terminal_id : undefined),
     codex_session_id:
       typeof payload.codex_session_id === "string" ? payload.codex_session_id : undefined,
@@ -145,11 +142,7 @@ export async function handleRuntimeRequest(
       correlation_id: command.correlation_id,
       method: command.method,
       status: "error",
-      error: {
-        code: "MISSING_CORRELATION_ID",
-        message: "Correlation ID is required",
-        retryable: false,
-      },
+      error: { code: "MISSING_CORRELATION_ID", message: "Correlation ID is required", retryable: false },
     };
     recordResponse(context, response);
     return response;

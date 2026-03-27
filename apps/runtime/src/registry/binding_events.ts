@@ -5,8 +5,9 @@
  * Events are published via the internal bus for downstream consumers.
  */
 
-import { randomUUID } from "node:crypto";
 import type { LocalBus } from "../protocol/bus.js";
+import { randomUUID } from "node:crypto";
+const uuidv4 = randomUUID;
 import type { BindingTriple, TerminalBinding } from "./binding_triple.js";
 
 // Event topics
@@ -45,7 +46,7 @@ export class BindingEventEmitter {
    */
   private async emitEvent(topic: BindingEventTopic, payload: BindingEventPayload): Promise<void> {
     const event = {
-      id: randomUUID(),
+      id: uuidv4(),
       type: "event" as const,
       ts: new Date().toISOString(),
       topic,
@@ -58,13 +59,15 @@ export class BindingEventEmitter {
 
     try {
       await this.bus.publish(event as any);
-    } catch (_error) {}
+    } catch (error) {
+      console.error(`Failed to emit binding event ${topic}:`, error);
+    }
   }
 
   /**
    * Emit 'bound' event when a terminal is registered.
    */
-  async emitBound(binding: TerminalBinding, correlationId: string = randomUUID()): Promise<void> {
+  async emitBound(binding: TerminalBinding, correlationId: string = uuidv4()): Promise<void> {
     await this.emitEvent(BINDING_TOPICS.BOUND, {
       terminalId: binding.terminalId,
       binding: binding.binding,
@@ -80,7 +83,7 @@ export class BindingEventEmitter {
   async emitRebound(
     binding: TerminalBinding,
     previousBinding: BindingTriple,
-    correlationId: string = randomUUID()
+    correlationId: string = uuidv4()
   ): Promise<void> {
     await this.emitEvent(BINDING_TOPICS.REBOUND, {
       terminalId: binding.terminalId,
@@ -95,7 +98,7 @@ export class BindingEventEmitter {
   /**
    * Emit 'unbound' event when a terminal is unregistered.
    */
-  async emitUnbound(binding: TerminalBinding, correlationId: string = randomUUID()): Promise<void> {
+  async emitUnbound(binding: TerminalBinding, correlationId: string = uuidv4()): Promise<void> {
     await this.emitEvent(BINDING_TOPICS.UNBOUND, {
       terminalId: binding.terminalId,
       binding: binding.binding,
@@ -111,7 +114,7 @@ export class BindingEventEmitter {
   async emitValidationFailed(
     binding: TerminalBinding,
     reason: string,
-    correlationId: string = randomUUID()
+    correlationId: string = uuidv4()
   ): Promise<void> {
     const payloadWithReason = {
       terminalId: binding.terminalId,
@@ -124,7 +127,7 @@ export class BindingEventEmitter {
 
     // Emit with reason in payload
     const event = {
-      id: randomUUID(),
+      id: uuidv4(),
       type: "event" as const,
       ts: new Date().toISOString(),
       topic: BINDING_TOPICS.VALIDATION_FAILED,
@@ -137,6 +140,8 @@ export class BindingEventEmitter {
 
     try {
       await this.bus.publish(event as any);
-    } catch (_error) {}
+    } catch (error) {
+      console.error(`Failed to emit validation_failed event:`, error);
+    }
   }
 }

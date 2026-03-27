@@ -1,4 +1,5 @@
-import { type Component, createSignal, Show } from "solid-js";
+import { type Component, createSignal } from "solid-js";
+import { Show } from "solid-js";
 
 type ShareModalProps = {
   isOpen: boolean;
@@ -21,19 +22,15 @@ export const ShareModal: Component<ShareModalProps> = props => {
 
   return (
     <Show when={props.isOpen}>
-      <button
-        type="button"
+      <div
         style={{
           position: "fixed",
           inset: "0",
-          background: "rgba(0,0,0,0.5)",
+          "background-color": "rgba(0,0,0,0.5)",
           display: "flex",
           "align-items": "center",
           "justify-content": "center",
           "z-index": "1000",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
         }}
         onClick={props.onClose}
       >
@@ -46,8 +43,6 @@ export const ShareModal: Component<ShareModalProps> = props => {
             "max-width": "500px",
           }}
           onClick={(e: MouseEvent) => e.stopPropagation()}
-          onKeyDown={(e: KeyboardEvent) => e.stopPropagation()}
-          role="dialog"
         >
           <h3
             style={{
@@ -79,7 +74,6 @@ export const ShareModal: Component<ShareModalProps> = props => {
               {props.shareUrl || "Generating link..."}
             </code>
             <button
-              type="button"
               onClick={copyToClipboard}
               style={{
                 background: copied() ? "#a6e3a1" : "#89b4fa",
@@ -96,7 +90,6 @@ export const ShareModal: Component<ShareModalProps> = props => {
             </button>
           </div>
           <button
-            type="button"
             onClick={props.onClose}
             style={{
               "margin-top": "16px",
@@ -112,7 +105,7 @@ export const ShareModal: Component<ShareModalProps> = props => {
             Close
           </button>
         </div>
-      </button>
+      </div>
     </Show>
   );
 };

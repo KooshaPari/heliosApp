@@ -10,19 +10,19 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type {
+  ProviderAdapter,
+  ProviderHealthStatus,
   MCPConfig,
   MCPExecuteInput,
   MCPExecuteOutput,
   MCPTool,
-  ProviderAdapter,
-  ProviderHealthStatus,
 } from "./adapter.js";
 import { NormalizedProviderError, normalizeError } from "./errors.js";
 
 /**
  * MCP server connection state.
  */
-interface McpConnection {
+interface MCPConnection {
   connected: boolean;
   lastConnectionAttempt: Date;
   reconnectAttempts: number;
@@ -46,12 +46,14 @@ interface ToolEntry {
  *
  * FR-025-004: MCP tool discovery and sandboxed invocation.
  */
-export class MCPBridgeAdapter
-  implements ProviderAdapter<MCPConfig, MCPExecuteInput, MCPExecuteOutput>
-{
+export class MCPBridgeAdapter implements ProviderAdapter<
+  MCPConfig,
+  MCPExecuteInput,
+  MCPExecuteOutput
+> {
   private config: MCPConfig | null = null;
   private bus: LocalBus | null = null;
-  private connection: McpConnection = {
+  private connection: MCPConnection = {
     connected: false,
     lastConnectionAttempt: new Date(),
     reconnectAttempts: 0,
@@ -176,7 +178,7 @@ export class MCPBridgeAdapter
    * @throws NormalizedProviderError on failure
    */
   async execute(input: MCPExecuteInput, correlationId: string): Promise<MCPExecuteOutput> {
-    if (!(this.config && this.connection.connected)) {
+    if (!this.config || !this.connection.connected) {
       throw new NormalizedProviderError(
         "PROVIDER_UNAVAILABLE",
         "MCP bridge not initialized or disconnected",
@@ -463,7 +465,7 @@ export class MCPBridgeAdapter
    */
   private async invokeTool(
     toolName: string,
-    _toolArguments: Record<string, unknown>,
+    toolArguments: Record<string, unknown>,
     signal: AbortSignal
   ): Promise<unknown> {
     // Check for abort
@@ -500,6 +502,8 @@ export class MCPBridgeAdapter
         topic,
         payload,
       });
-    } catch (_error) {}
+    } catch (error) {
+      console.warn(`Failed to publish MCP event ${topic}:`, error);
+    }
   }
 }

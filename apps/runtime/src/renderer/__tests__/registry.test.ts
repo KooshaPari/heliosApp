@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
+import { RendererRegistry, DuplicateRendererError, RendererNotFoundError } from "../registry.js";
 import type { RendererAdapter, RendererState } from "../adapter.js";
 import type { RendererCapabilities } from "../capabilities.js";
-import { DuplicateRendererError, RendererNotFoundError, RendererRegistry } from "../registry.js";
 
 function mockAdapter(id: string, version = "1.0.0"): RendererAdapter {
   const caps: RendererCapabilities = {

@@ -101,18 +101,12 @@ export function matchesPattern(filePath: string, pattern: string): boolean {
     return base === ".env" || base.startsWith(".env.");
   }
 
-  if (!(pattern.includes("*") || pattern.includes("?"))) {
+  if (!pattern.includes("*") && !pattern.includes("?")) {
     const base = filePath.split("/").pop() ?? filePath;
     const patBase = pattern.split("/").pop() ?? pattern;
-    if (base === patBase) {
-      return true;
-    }
-    if (filePath.endsWith(pattern) || filePath === pattern) {
-      return true;
-    }
-    if (expandedPath.endsWith(expandedPattern) || expandedPath === expandedPattern) {
-      return true;
-    }
+    if (base === patBase) return true;
+    if (filePath.endsWith(pattern) || filePath === pattern) return true;
+    if (expandedPath.endsWith(expandedPattern) || expandedPath === expandedPattern) return true;
     return false;
   }
 
@@ -129,9 +123,7 @@ function globToRegex(glob: string): string {
     if (ch === "*" && glob[i + 1] === "*") {
       result += ".*";
       i += 2;
-      if (glob[i] === "/") {
-        i++;
-      }
+      if (glob[i] === "/") i++;
     } else if (ch === "*") {
       result += "[^/]*";
       i++;
@@ -139,23 +131,21 @@ function globToRegex(glob: string): string {
       result += "[^/]";
       i++;
     } else if (/[.+^${}()|[\]\\]/.test(ch)) {
-      result += `\\${ch}`;
+      result += "\\" + ch;
       i++;
     } else {
       result += ch;
       i++;
     }
   }
-  return `(^|/|^.*[/\\\\])${result}($|[/\\\\])`;
+  return "(^|/|^.*[/\\\\])" + result + "($|[/\\\\])";
 }
 
 export function extractFilePaths(command: string): string[] {
   const paths: string[] = [];
   const tokens = tokenizeCommand(command);
 
-  if (tokens.length === 0) {
-    return paths;
-  }
+  if (tokens.length === 0) return paths;
 
   const cmd = tokens[0];
 
@@ -164,9 +154,7 @@ export function extractFilePaths(command: string): string[] {
       const tok = tokens[i];
       if ((tok === "-d" || tok === "--data" || tok === "--data-binary") && i + 1 < tokens.length) {
         const next = tokens[i + 1];
-        if (next.startsWith("@")) {
-          paths.push(next.slice(1));
-        }
+        if (next.startsWith("@")) paths.push(next.slice(1));
         i++;
       } else if (tok.startsWith("@")) {
         paths.push(tok.slice(1));
@@ -178,12 +166,8 @@ export function extractFilePaths(command: string): string[] {
   if (cmd === "scp") {
     for (let i = 1; i < tokens.length; i++) {
       const tok = tokens[i];
-      if (tok.startsWith("-")) {
-        continue;
-      }
-      if (tok.includes(":")) {
-        continue;
-      }
+      if (tok.startsWith("-")) continue;
+      if (tok.includes(":")) continue;
       paths.push(tok);
     }
     return paths;
@@ -230,9 +214,7 @@ function tokenizeCommand(command: string): string[] {
       current += ch;
     }
   }
-  if (current.length > 0) {
-    tokens.push(current);
-  }
+  if (current.length > 0) tokens.push(current);
   return tokens;
 }
 

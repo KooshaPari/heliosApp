@@ -1,4 +1,4 @@
-import { type ActiveContext, type TabState, TabSurface } from "./tab_surface";
+import { TabSurface, type TabState, type ActiveContext } from "./tab_surface";
 
 export interface TerminalTabState extends TabState {
   terminalId?: string;
@@ -18,7 +18,7 @@ export interface TerminalTabState extends TabState {
  */
 export class TerminalTab extends TabSurface {
   private terminalId: string | null = null;
-  private rendererSwitchInProgress = false;
+  private rendererSwitchInProgress: boolean = false;
   private contentEl: HTMLElement | null = null;
   private outputBuffer: string[] = [];
 
@@ -99,7 +99,10 @@ export class TerminalTab extends TabSurface {
       actionEl.style.cursor = "pointer";
       actionEl.style.fontSize = "13px";
 
-      actionEl.addEventListener("click", () => {});
+      actionEl.addEventListener("click", () => {
+        // Would trigger terminal creation via event bus
+        console.log("Create terminal action triggered");
+      });
 
       emptyEl.appendChild(messageEl);
       emptyEl.appendChild(actionEl);
@@ -203,13 +206,13 @@ export class TerminalTab extends TabSurface {
     return [
       `$ cd /workspace/${context.workspaceId}`,
       `workspace $ cd lanes/${context.laneId}`,
-      "lane $ ls -la",
-      "total 42",
-      "drwxr-xr-x  5 user  staff   160 Mar  1 10:00 .",
-      "drwxr-xr-x  3 user  staff    96 Mar  1 09:00 ..",
-      "-rw-r--r--  1 user  staff  1024 Mar  1 10:00 README.md",
-      "drwxr-xr-x  2 user  staff    64 Mar  1 10:00 src",
-      "$ ",
+      `lane $ ls -la`,
+      `total 42`,
+      `drwxr-xr-x  5 user  staff   160 Mar  1 10:00 .`,
+      `drwxr-xr-x  3 user  staff    96 Mar  1 09:00 ..`,
+      `-rw-r--r--  1 user  staff  1024 Mar  1 10:00 README.md`,
+      `drwxr-xr-x  2 user  staff    64 Mar  1 10:00 src`,
+      `$ `,
     ];
   }
 }

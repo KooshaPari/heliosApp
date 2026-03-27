@@ -1,5 +1,8 @@
+// T005 - Lane sharing (multi-agent concurrent access)
+
+import type { LaneRecord } from "./registry.js";
 import type { LaneRegistry } from "./registry.js";
-import { type LaneState, recordTransition, transition, withLaneLock } from "./state_machine.js";
+import { transition, withLaneLock, recordTransition, type LaneState } from "./state_machine.js";
 
 export class LaneClosedError extends Error {
   constructor(laneId: string) {

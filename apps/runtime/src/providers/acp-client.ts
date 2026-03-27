@@ -11,13 +11,13 @@
 
 import type { LocalBus } from "../protocol/bus.js";
 import type {
+  ProviderAdapter,
+  ProviderHealthStatus,
   ACPConfig,
   ACPExecuteInput,
   ACPExecuteOutput,
-  ProviderAdapter,
-  ProviderHealthStatus,
 } from "./adapter.js";
-import { NormalizedProviderError, normalizeError } from "./errors.js";
+import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
 
 /**
  * Policy gate interface for access control.
@@ -46,7 +46,7 @@ class DefaultPolicyGate implements PolicyGate {
 /**
  * Mock ACP request for testing/prototyping.
  */
-interface AcpRequest {
+interface ACPRequest {
   correlationId: string;
   model: string;
   messages: Array<{ role: string; content: string }>;
@@ -57,7 +57,7 @@ interface AcpRequest {
 /**
  * Mock ACP response.
  */
-interface AcpResponse {
+interface ACPResponse {
   taskId: string;
   content: string;
   stopReason: string;
@@ -79,9 +79,11 @@ interface AcpResponse {
  *
  * FR-025-003: ACP protocol client for Claude.
  */
-export class ACPClientAdapter
-  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
-{
+export class ACPClientAdapter implements ProviderAdapter<
+  ACPConfig,
+  ACPExecuteInput,
+  ACPExecuteOutput
+> {
   private config: ACPConfig | null = null;
   private bus: LocalBus | null = null;
   private policyGate: PolicyGate;
@@ -116,13 +118,9 @@ export class ACPClientAdapter
       if (!config.baseUrl || typeof config.baseUrl !== "string") {
         throw new Error("Missing or invalid endpoint");
       }
-      const endpoint = config.baseUrl.trim();
-      if (!endpoint) {
-        throw new Error("Missing or invalid endpoint");
-      }
 
       if (!config.apiKey || typeof config.apiKey !== "string") {
-        throw new Error("Missing or invalid apiKey");
+        throw new Error("Missing or invalid apiKeyRef");
       }
 
       if (!config.model || typeof config.model !== "string") {
@@ -134,17 +132,12 @@ export class ACPClientAdapter
         throw new Error("timeout must be >= 1000ms");
       }
 
-      // Validate optional health check interval
-      if (config.healthCheckIntervalMs !== undefined && config.healthCheckIntervalMs < 1000) {
-        throw new Error("healthCheckIntervalMs must be >= 1000ms");
-      }
-
       // Simulate endpoint reachability check with timeout
       const probeTimeout = config.timeout || 10000;
       const probeResult = await Promise.race([
-        this.probeEndpoint(endpoint),
+        this.probeEndpoint(config.baseUrl),
         new Promise<boolean>((_, reject) =>
-          setTimeout(() => reject(new Error("Probe timeout")), probeTimeout)
+          setTimeout(() => reject(new Error("Probe timeout")), 2000)
         ),
       ]);
 
@@ -152,12 +145,8 @@ export class ACPClientAdapter
         throw new Error("Endpoint unreachable");
       }
 
-      this.config = {
-        ...config,
-        baseUrl: endpoint,
-      };
-      this.healthCheckInterval = config.healthCheckIntervalMs ?? 30000;
-      this.lastHealthCheckTime = Date.now();
+      this.config = config;
+      this.healthCheckInterval = 30000;
 
       this.healthStatus = {
         state: "healthy",
@@ -171,7 +160,7 @@ export class ACPClientAdapter
       }
 
       await this.publishEvent("provider.acp.initialized", {
-        endpoint,
+        endpoint: config.baseUrl,
         model: config.model,
       });
     } catch (error) {
@@ -203,11 +192,6 @@ export class ACPClientAdapter
       };
     }
 
-    const now = Date.now();
-    if (now - this.lastHealthCheckTime < this.healthCheckInterval) {
-      return { ...this.healthStatus };
-    }
-
     try {
       // Perform lightweight health check
       const probeSuccess = await Promise.race([
@@ -235,7 +219,6 @@ export class ACPClientAdapter
           });
         }
 
-        this.lastHealthCheckTime = now;
         return { ...this.healthStatus };
       }
     } catch (error) {
@@ -269,7 +252,6 @@ export class ACPClientAdapter
       }
     }
 
-    this.lastHealthCheckTime = now;
     return { ...this.healthStatus };
   }
 
@@ -327,7 +309,7 @@ export class ACPClientAdapter
         const startTime = Date.now();
 
         // Construct ACP request
-        const acpRequest: AcpRequest = {
+        const acpRequest: ACPRequest = {
           correlationId,
           model: this.config.model,
           messages: [
@@ -495,25 +477,15 @@ export class ACPClientAdapter
    * @param signal Abort signal
    * @returns ACP response
    */
-  private async sendACPRequest(request: AcpRequest, signal: AbortSignal): Promise<AcpResponse> {
+  private async sendACPRequest(request: ACPRequest, signal: AbortSignal): Promise<ACPResponse> {
     // Check for abort
     if (signal.aborted) {
-      const aborted = new Error("Request aborted");
-      aborted.name = "AbortError";
-      throw aborted;
+      throw new Error("Request aborted");
     }
 
     // Mock implementation: simulate ACP processing
-    return new Promise((resolve, reject) => {
-      const onAbort = () => {
-        clearTimeout(timeout);
-        const aborted = new Error("Request cancelled");
-        aborted.name = "AbortError";
-        reject(aborted);
-      };
-
+    return new Promise(resolve => {
       const timeout = setTimeout(() => {
-        signal.removeEventListener("abort", onAbort);
         resolve({
           taskId: `task-${request.correlationId}`,
           content: "This is a mock ACP response.",
@@ -526,7 +498,10 @@ export class ACPClientAdapter
       }, 10);
 
       // Clean up on abort
-      signal.addEventListener("abort", onAbort, { once: true });
+      signal.addEventListener("abort", () => {
+        clearTimeout(timeout);
+        throw new Error("Request cancelled");
+      });
     });
   }
 
@@ -549,6 +524,9 @@ export class ACPClientAdapter
         topic,
         payload,
       });
-    } catch (_error) {}
+    } catch (error) {
+      // Log but don't throw (event publishing is best-effort)
+      console.warn(`Failed to publish ACP event ${topic}:`, error);
+    }
   }
 }

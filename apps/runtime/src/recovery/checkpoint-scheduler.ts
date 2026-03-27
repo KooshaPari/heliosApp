@@ -1,4 +1,5 @@
-import type { Checkpoint, CheckpointWriter } from "./checkpoint.js";
+import type { Checkpoint } from "./checkpoint.js";
+import type { CheckpointWriter } from "./checkpoint.js";
 
 const DEFAULT_CHECKPOINT_INTERVAL_MS = 60000; // 60 seconds
 const ACTIVITY_THRESHOLD = 50; // Activity events before triggering checkpoint
@@ -18,9 +19,7 @@ export class CheckpointScheduler {
   private lastWriteDurationMs = 0;
 
   start(writer: CheckpointWriter, stateGetter: () => Checkpoint): void {
-    if (this.isRunning) {
-      return;
-    }
+    if (this.isRunning) return;
 
     this.writer = writer;
     this.stateGetter = stateGetter;
@@ -46,9 +45,7 @@ export class CheckpointScheduler {
   }
 
   async triggerNow(): Promise<void> {
-    if (!(this.writer && this.stateGetter)) {
-      return;
-    }
+    if (!this.writer || !this.stateGetter) return;
 
     const checkpoint = this.stateGetter();
     const startTime = Date.now();
@@ -61,7 +58,9 @@ export class CheckpointScheduler {
 
       // Adjust interval based on write time
       this.adjustInterval();
-    } catch (_err) {}
+    } catch (err) {
+      console.error("Failed to write checkpoint:", err);
+    }
   }
 
   recordActivity(): void {
@@ -69,12 +68,16 @@ export class CheckpointScheduler {
 
     // Check if activity threshold exceeded
     if (this.activityCounter >= ACTIVITY_THRESHOLD) {
-      this.triggerNow().catch(_err => {});
+      this.triggerNow().catch(err => {
+        console.error("Activity-triggered checkpoint failed:", err);
+      });
     }
   }
 
   private onTimer(): void {
-    this.triggerNow().catch(_err => {});
+    this.triggerNow().catch(err => {
+      console.error("Periodic checkpoint failed:", err);
+    });
   }
 
   private adjustInterval(): void {
@@ -97,9 +100,7 @@ export class CheckpointScheduler {
 
   private async handleShutdown(): Promise<void> {
     // Take final checkpoint synchronously (with timeout)
-    if (!(this.writer && this.stateGetter)) {
-      return;
-    }
+    if (!this.writer || !this.stateGetter) return;
 
     const checkpoint = this.stateGetter();
     const writePromise = this.writer.write(checkpoint);
@@ -110,7 +111,9 @@ export class CheckpointScheduler {
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Checkpoint timeout")), FINAL_CHECKPOINT_TIMEOUT)
       ),
-    ]).catch(_err => {});
+    ]).catch(err => {
+      console.error("Final checkpoint on shutdown failed:", err);
+    });
 
     this.stop();
   }

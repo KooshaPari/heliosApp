@@ -17,10 +17,10 @@ export function createMcpBridgeFixture() {
 export async function initMcpBridge(adapter: MCPBridgeAdapter): Promise<void> {
   await adapter.init({
     ...MCP_BRIDGE_CONFIG,
-    args: [...MCP_BRIDGE_CONFIG.args] as string[],
+    args: [...MCP_BRIDGE_CONFIG.args],
   });
 }
 
 export function getMcpToolEvents(bus: InMemoryLocalBus) {
-  return bus.getEvents().filter(event => event.topic?.startsWith("provider.mcp.tool"));
+  return bus.getEvents().filter((event) => event.topic?.startsWith("provider.mcp.tool"));
 }

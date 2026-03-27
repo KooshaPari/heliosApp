@@ -66,9 +66,7 @@ describe("boundary adapter mapping", () => {
     expect(response.type).toBe("response");
     expect(response.status).toBe("error");
     expect(response.error?.code).toBe("UNSUPPORTED_BOUNDARY_ADAPTER");
-    expect((response.error?.details as Record<string, unknown> | undefined)?.boundary).toBe(
-      "tool_interop"
-    );
+    expect(response.error?.details?.boundary).toBe("tool_interop");
   });
 
   test("routes a2a methods to provided adapter", async () => {

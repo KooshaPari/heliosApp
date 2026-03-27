@@ -6,15 +6,10 @@
  * SC-025-002: Provider crash in lane A must produce zero effect on lane B.
  */
 
-import { describe, expect, it } from "bun:test";
-import type {
-  ACPConfig,
-  ACPExecuteInput,
-  ACPExecuteOutput,
-  ProviderAdapter,
-  ProviderHealthStatus,
-} from "../adapter.js";
-import { normalizeError } from "../errors.js";
+import { describe, it, expect } from "bun:test";
+import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
+import { NormalizedProviderError, normalizeError } from "../errors.js";
+import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 
 /**
  * Mock isolated provider for testing lane isolation behavior.
@@ -22,9 +17,11 @@ import { normalizeError } from "../errors.js";
  * In a real implementation, this would spawn a child process.
  * For testing, we simulate the behavior with in-process state.
  */
-class MockIsolatedProvider
-  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
-{
+class MockIsolatedProvider implements ProviderAdapter<
+  ACPConfig,
+  ACPExecuteInput,
+  ACPExecuteOutput
+> {
   private laneId: string;
   private initialized = false;
   private shouldCrash = false;
@@ -111,7 +108,7 @@ describe("Process-Level Isolation", () => {
       for (let i = 0; i < 3; i++) {
         try {
           await laneProviderA.execute({ prompt: "test" }, "corr-123");
-        } catch {
+        } catch (_e) {
           // Expected
         }
       }
@@ -137,7 +134,7 @@ describe("Process-Level Isolation", () => {
       for (let i = 0; i < 100; i++) {
         try {
           await provider.execute({ prompt: `test-${i}` }, `corr-${i}`);
-        } catch {
+        } catch (e) {
           // Handle error
         }
       }
@@ -274,7 +271,7 @@ describe("Process-Level Isolation", () => {
       for (let i = 0; i < 5; i++) {
         try {
           await providers[1].execute({ prompt: "test" }, `corr-${i}`);
-        } catch {
+        } catch (e) {
           // Expected
         }
       }
@@ -318,7 +315,7 @@ describe("Process-Level Isolation", () => {
       provider.setCrash(true);
       try {
         await provider.execute({ prompt: "test" }, "corr-123");
-      } catch {
+      } catch (e) {
         // Expected
       }
 

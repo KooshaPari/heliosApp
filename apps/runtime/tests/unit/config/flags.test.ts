@@ -1,11 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { type FeatureFlag, FlagRegistry, RENDERER_ENGINE_FLAG } from "../../../src/config/flags.js";
+import { JsonSettingsStore } from "../../../src/config/store.js";
 import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
 import { SettingsManager } from "../../../src/config/settings.js";
-import { JsonSettingsStore } from "../../../src/config/store.js";
+import { FlagRegistry, RENDERER_ENGINE_FLAG, type FeatureFlag } from "../../../src/config/flags.js";
 
 let tempDir: string;
 let filePath: string;
@@ -121,8 +121,8 @@ describe("FlagRegistry — renderer_engine", () => {
     expect(flags.getRendererEngine()).toBe("ghostty");
     const p = flags.getPending<"ghostty" | "rio">("renderer_engine");
     expect(p).not.toBeNull();
-    expect(p?.current).toBe("ghostty");
-    expect(p?.pending).toBe("rio");
+    expect(p!.current).toBe("ghostty");
+    expect(p!.pending).toBe("rio");
     flags.dispose();
     settings.dispose();
   });
@@ -232,7 +232,7 @@ describe("FlagRegistry — getAll", () => {
     flags.register(RENDERER_ENGINE_FLAG);
     flags.init();
     const all = flags.getAll();
-    expect(all.renderer_engine).toBe("ghostty");
+    expect(all["renderer_engine"]).toBe("ghostty");
     expect(Object.keys(all)).toEqual(["renderer_engine"]);
     flags.dispose();
     settings.dispose();

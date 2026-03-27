@@ -1,4 +1,7 @@
-import type { LocalBus } from "../../../runtime/src/protocol/bus";
+/** Minimal subset of runtime LocalBus used for context events. */
+interface LocalBus {
+  publish(event: Record<string, unknown>): Promise<void>;
+}
 
 export interface ActiveContext {
   workspaceId: string;
@@ -85,7 +88,7 @@ export class ActiveContextStore {
                 type: "event",
                 ts: new Date().toISOString(),
                 topic: "context.validation.failed",
-                payload: { context: contextToSet } as Record<string, unknown>,
+                payload: { context: contextToSet },
               });
             }
             resolve();
@@ -119,10 +122,7 @@ export class ActiveContextStore {
             workspace_id: contextToSet?.workspaceId,
             lane_id: contextToSet?.laneId,
             session_id: contextToSet?.sessionId,
-            payload: {
-              previous: changeEvent.previous,
-              current: changeEvent.current,
-            } as Record<string, unknown>,
+            payload: changeEvent,
           });
         }
 

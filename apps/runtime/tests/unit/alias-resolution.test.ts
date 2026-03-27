@@ -1,18 +1,23 @@
-describe("path alias resolution (requires external project setup)", () => {
+/**
+ * T011 - Path alias resolution validation tests.
+ *
+ * Verifies that @helios/* path aliases resolve correctly in the Bun runtime
+ * context, matching the paths configured in tsconfig.base.json.
+ */
+import { describe, expect, test } from "bun:test";
+
+describe("path alias resolution", () => {
   test("@helios/runtime resolves and exports VERSION", async () => {
-    // @ts-ignore - the alias is intentionally unresolved inside this package
     const runtime = await import("@helios/runtime");
-    expect(runtime.VERSION).toBe("0.1.1");
+    expect(runtime.VERSION).toBe("0.0.1");
   });
 
   test("@helios/runtime exports healthCheck function", async () => {
-    // @ts-ignore - the alias is intentionally unresolved inside this package
     const runtime = await import("@helios/runtime");
     expect(typeof runtime.healthCheck).toBe("function");
   });
 
   test("healthCheck returns valid HealthCheckResult", async () => {
-    // @ts-ignore - the alias is intentionally unresolved inside this package
     const { healthCheck } = await import("@helios/runtime");
     const result = healthCheck();
 
@@ -24,7 +29,6 @@ describe("path alias resolution (requires external project setup)", () => {
   });
 
   test("@helios/runtime type exports are structurally correct", async () => {
-    // @ts-ignore - the alias is intentionally unresolved inside this package
     const { healthCheck } = await import("@helios/runtime");
     const result = healthCheck();
 

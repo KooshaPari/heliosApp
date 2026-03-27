@@ -1,8 +1,8 @@
 // FR-005, FR-006: Unit tests for memory and frame timing samplers.
 
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
-import { FrameTimingSampler, MemorySampler } from "../../../src/diagnostics/samplers.js";
+import { MemorySampler, FrameTimingSampler } from "../../../src/diagnostics/samplers.js";
 
 describe("MemorySampler", () => {
   let registry: MetricsRegistry;
@@ -21,7 +21,7 @@ describe("MemorySampler", () => {
   it("registers memory metric on construction", () => {
     const def = registry.getDefinition("memory");
     expect(def).toBeDefined();
-    expect(def?.unit).toBe("MB");
+    expect(def!.unit).toBe("MB");
   });
 
   // FR-005
@@ -31,7 +31,7 @@ describe("MemorySampler", () => {
     sampler.stop();
     const entry = registry.getMetric("memory");
     expect(entry).toBeDefined();
-    expect(entry?.buffer.getCount()).toBeGreaterThanOrEqual(2);
+    expect(entry!.buffer.getCount()).toBeGreaterThanOrEqual(2);
   });
 
   // FR-005: Values in MB
@@ -41,7 +41,7 @@ describe("MemorySampler", () => {
     sampler.stop();
     const entry = registry.getMetric("memory");
     expect(entry).toBeDefined();
-    const values = entry?.buffer.getValues() ?? new Float64Array();
+    const values = entry!.buffer.getValues();
     // Heap should be at least a few MB but less than 10,000 MB
     expect(values[0]!).toBeGreaterThan(0.1);
     expect(values[0]!).toBeLessThan(10000);
@@ -56,7 +56,7 @@ describe("MemorySampler", () => {
     sampler.stop();
     const entry = registry.getMetric("memory");
     // If duplicated, we'd have 3x the samples. With 100ms interval over 250ms, expect ~2-3.
-    expect(entry?.buffer.getCount()).toBeLessThan(6);
+    expect(entry!.buffer.getCount()).toBeLessThan(6);
   });
 
   // FR-005: stop halts cleanly
@@ -64,9 +64,9 @@ describe("MemorySampler", () => {
     sampler.start();
     await new Promise(r => setTimeout(r, 150));
     sampler.stop();
-    const countAfterStop = registry.getMetric("memory")?.buffer.getCount();
+    const countAfterStop = registry.getMetric("memory")!.buffer.getCount();
     await new Promise(r => setTimeout(r, 200));
-    const countLater = registry.getMetric("memory")?.buffer.getCount();
+    const countLater = registry.getMetric("memory")!.buffer.getCount();
     expect(countLater).toBe(countAfterStop);
   });
 });
@@ -88,7 +88,7 @@ describe("FrameTimingSampler", () => {
   it("registers fps metric on construction", () => {
     const def = registry.getDefinition("fps");
     expect(def).toBeDefined();
-    expect(def?.unit).toBe("fps");
+    expect(def!.unit).toBe("fps");
   });
 
   // FR-006: 60 frames in 1 second = FPS 60
@@ -105,7 +105,7 @@ describe("FrameTimingSampler", () => {
 
     const entry = registry.getMetric("fps");
     expect(entry).toBeDefined();
-    const values = entry?.buffer.getValues() ?? new Float64Array();
+    const values = entry!.buffer.getValues();
     expect(values[0]!).toBe(60);
   });
 
@@ -121,7 +121,7 @@ describe("FrameTimingSampler", () => {
 
     const entry = registry.getMetric("fps");
     expect(entry).toBeDefined();
-    const values = entry?.buffer.getValues() ?? new Float64Array();
+    const values = entry!.buffer.getValues();
     expect(values[0]!).toBe(30);
   });
 
@@ -147,7 +147,7 @@ describe("FrameTimingSampler", () => {
 
     const entry = registry.getMetric("fps");
     expect(entry).toBeDefined();
-    expect(entry?.buffer.getCount()).toBe(2);
+    expect(entry!.buffer.getCount()).toBe(2);
   });
 
   // FR-006: does not record when not running
