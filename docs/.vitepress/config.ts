@@ -1,6 +1,16 @@
 import { defineConfig } from "vitepress";
 
 export default defineConfig({
+  vite: {
+    ssr: {
+      noExternal: [],
+    },
+    build: {
+      rollupOptions: {
+        external: ["vue/server-renderer"],
+      },
+    },
+  },
   title: "Documentation",
   description: "Unified documentation",
   base: process.env.GITHUB_ACTIONS ? "/heliosApp/" : "/",
