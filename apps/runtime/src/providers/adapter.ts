@@ -142,7 +142,7 @@ export type ACPAdapter = ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteO
 /** MCP provider configuration input */
 export interface MCPConfig {
   serverPath: string;
-  args?: string[];
+  args?: string[] | readonly string[];
   env?: Record<string, string>;
   timeout?: number;
 }
