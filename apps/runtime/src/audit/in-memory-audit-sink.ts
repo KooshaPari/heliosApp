@@ -38,7 +38,7 @@ export class InMemoryAuditSink implements AuditSink {
       sequence: this.records.length + 1,
       outcome: "accepted",
       reason: null,
-      envelope: event,
+      envelope: event as unknown as Record<string, unknown>,
     });
   }
 
