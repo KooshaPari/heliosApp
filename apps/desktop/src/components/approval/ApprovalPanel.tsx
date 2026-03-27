@@ -67,15 +67,15 @@ export function ApprovalPanel(props: ApprovalPanelProps) {
         <div class="approval-details">
           <h3>Review Request</h3>
           <div class="detail-group">
-            <span>Command:</span>
+            <span aria-label="Command">Command:</span>
             <code>{selectedRequest()?.command}</code>
           </div>
           <div class="detail-group">
-            <span>Requested by:</span>
+            <span aria-label="Requested by">Requested by:</span>
             <span>{selectedRequest()?.requesterName}</span>
           </div>
           <div class="detail-group">
-            <span>Workspace:</span>
+            <span aria-label="Workspace">Workspace:</span>
             <span>{selectedRequest()?.workspaceId}</span>
           </div>
 
