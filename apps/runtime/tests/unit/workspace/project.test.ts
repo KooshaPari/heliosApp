@@ -4,7 +4,7 @@
 // FR-009: Stale binding detection
 
 import { describe, test, expect, mock, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, mkdirSync, rmdirSync, symlinkSync, realpathSync } from "node:fs";
+import { mkdtempSync, mkdirSync, rmSync, symlinkSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -27,7 +27,7 @@ beforeEach(() => {
 
 afterEach(() => {
   try {
-    rmdirSync(tempDir, { recursive: true } as never);
+    rmSync(tempDir, { recursive: true });
   } catch {
     // cleanup best-effort
   }
