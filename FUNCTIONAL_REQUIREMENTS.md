@@ -498,3 +498,36 @@ Each FR SHALL be implemented by code in the heliosApp repository. FR IDs are ref
 - Implementation code via docstrings: `Traces to: FR-XXX-NNN`
 - Test coverage tracked in `docs/reference/FR_TRACKER.md`
 - Code entity mapping in `docs/reference/CODE_ENTITY_MAP.md`
+
+---
+
+## Diagnostics and SLO Instrumentation
+
+Requirements derived from `apps/runtime/src/diagnostics/`.
+
+- **FR-DIAG-001**: SHALL define `MetricType` as union of `"latency" | "gauge" | "counter"` and `MetricDefinition` with fields `name`, `type`, `unit`, `description`, and optional `bufferSize`.
+  **Code:** `apps/runtime/src/diagnostics/types.ts`
+
+- **FR-DIAG-002**: SHALL define `Sample` with fields `timestamp` (number), `value` (number), and optional `labels` (Record<string,string>); labels MUST be omittable on hot paths to avoid allocation.
+  **Code:** `apps/runtime/src/diagnostics/types.ts`
+
+- **FR-DIAG-003**: SHALL define `PercentileBucket` with fields `p50`, `p95`, `p99`, `min`, `max`, `count`; all fields are readonly numbers.
+  **Code:** `apps/runtime/src/diagnostics/types.ts`
+
+- **FR-DIAG-004**: SHALL define `SLODefinition` with fields `metric` (string), `percentile` ("p50"|"p95"|"p99"), `threshold` (number), `unit` (string); SLO definitions drive automated alerting when thresholds are breached.
+  **Code:** `apps/runtime/src/diagnostics/types.ts`
+
+- **FR-DIAG-005**: SHALL emit `SLOViolationEvent` with fields `metric`, `percentile`, `threshold`, `actual`, `timestamp` whenever a recorded sample causes a registered SLO to be breached.
+  **Code:** `apps/runtime/src/diagnostics/types.ts`
+
+- **FR-DIAG-006**: SHALL implement `samplers.ts` providing per-metric circular sample buffers with configurable `bufferSize`; oldest samples SHALL be overwritten on overflow without blocking.
+  **Code:** `apps/runtime/src/diagnostics/samplers.ts`
+
+- **FR-DIAG-007**: SHALL implement `percentiles.ts` computing `PercentileBucket` from a sample buffer using a sort-and-index algorithm; computation MUST be synchronous and complete in O(n log n) where n is the buffer size.
+  **Code:** `apps/runtime/src/diagnostics/percentiles.ts`
+
+- **FR-DIAG-008**: SHALL implement `query.ts` exposing a `MetricsQuery` interface with `getMetric(name: string): PercentileBucket | undefined` and `listMetrics(): string[]`.
+  **Code:** `apps/runtime/src/diagnostics/query.ts`
+
+- **FR-DIAG-009**: SHALL implement `slo.ts` with an `SLOMonitor` class that accepts `SLODefinition[]`, evaluates each after every sample record, and emits `SLOViolationEvent` to registered listeners.
+  **Code:** `apps/runtime/src/diagnostics/slo.ts`
