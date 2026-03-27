@@ -298,10 +298,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
   }
 
   return {
-    bus: {
-      request,
-      publish: (event: LocalBusEnvelope) => bus.publish(event),
-    },
+    bus: Object.assign(bus, { request }),
     fetch,
     exportRecoveryMetadata(): RecoveryMetadata {
       return recovery.snapshot();
