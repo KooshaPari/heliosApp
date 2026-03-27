@@ -44,7 +44,7 @@
     "bun-types": "1.3.11",
     "esbuild": "^0.27.3",
     "esbuild-plugin-solid": "^0.6.0",
-    "happy-dom": "20.8.7",
+    "happy-dom": "20.8.9",
     "oxlint": "latest",
     "typescript": "5.8.2",
     "vitepress": "1.6.4",
