@@ -113,7 +113,7 @@ describe("detectStaleProjects", () => {
   test("missing path becomes stale", async () => {
     const bound = bindLocalProject(ws, tempDir);
     // Remove the directory
-    rmdirSync(tempDir);
+    rmSync(tempDir, { recursive: true });
     const checked = await detectStaleProjects(bound);
     expect(checked.projects[0]!.status).toBe("stale");
   });
