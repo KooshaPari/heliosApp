@@ -1,7 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.4.9/schema.json",
   "files": {
-    "include": [
+    "includes": [
       "**",
       "!node_modules",
       "!.archive",
@@ -86,7 +86,7 @@
   },
   "overrides": [
     {
-      "include": ["apps/desktop/src/runtime_client.ts"],
+      "includes": ["apps/desktop/src/runtime_client.ts"],
       "linter": {
         "rules": {
           "style": {

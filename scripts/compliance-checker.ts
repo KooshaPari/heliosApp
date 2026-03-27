@@ -483,4 +483,4 @@ if (import.meta.main) {
   }
 }
 
-export { runComplianceChecks, type CheckResult, type Finding };
+export { type CheckResult, type Finding, runComplianceChecks };
