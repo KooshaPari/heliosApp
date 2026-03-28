@@ -6,8 +6,10 @@
  * direct-to-API chat when the full ElectroBun RPC bridge is not yet wired.
  *
  * wraps: Anthropic Messages REST API v2023-06-01
+ * wraps: ky 1.14.3
  */
 
+import ky, { HTTPError } from "ky";
 import { getAnthropicApiKey, getAnthropicBaseUrl } from "./config.js";
 import type { Message } from "./types.js";
 
@@ -79,30 +81,33 @@ export async function sendMessages(
   const apiKey = opts.apiKey ?? getAnthropicApiKey();
   const baseUrl = getAnthropicBaseUrl();
 
-  const response = await fetch(`${baseUrl}/v1/messages`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: opts.model,
-      max_tokens: opts.maxTokens ?? 4096,
-      messages: opts.history,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new AnthropicApiError(
-      response.status,
-      errorText,
-      `Anthropic API returned ${response.status}: ${errorText}`,
-    );
+  try {
+    return await ky
+      .post(`${baseUrl}/v1/messages`, {
+        headers: {
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        json: {
+          model: opts.model,
+          max_tokens: opts.maxTokens ?? 4096,
+          messages: opts.history,
+        },
+        retry: { limit: 3, methods: ["post"], statusCodes: [429, 500, 502, 503, 504] },
+      })
+      .json<AnthropicMessagesResponse>();
+  } catch (err: unknown) {
+    // ky wraps HTTP errors in HTTPError; extract status + body for AnthropicApiError
+    if (err instanceof HTTPError) {
+      const errorText = await err.response.text();
+      throw new AnthropicApiError(
+        err.response.status,
+        errorText,
+        `Anthropic API returned ${err.response.status}: ${errorText}`,
+      );
+    }
+    throw err;
   }
-
-  return response.json() as Promise<AnthropicMessagesResponse>;
 }
 
 /**
