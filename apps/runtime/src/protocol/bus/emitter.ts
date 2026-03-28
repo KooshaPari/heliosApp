@@ -120,6 +120,12 @@ export class InMemoryLocalBus implements LocalBus {
           throw err;
         }
         progress.add(topic);
+
+        const sequencedEvent = event as LocalBusEnvelopeWithSequence;
+        if (sequencedEvent.sequence === undefined) {
+          sequencedEvent.sequence = this.getSequence() + 1;
+        }
+
         this.auditLog.push({ envelope: event, outcome: "accepted" });
         this.eventLog.push(event);
         return;

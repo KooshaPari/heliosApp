@@ -22,9 +22,11 @@ export class SQLiteAuditStore {
     this.dbPath = dbPath;
     this.db = new Database(dbPath);
 
-    // Enable WAL mode for concurrent reads/writes
     this.db.exec("PRAGMA journal_mode = WAL");
     this.db.exec("PRAGMA synchronous = NORMAL");
+    this.db.exec("PRAGMA page_size = 4096");
+    this.db.exec("PRAGMA temp_store = MEMORY");
+    this.db.exec("PRAGMA auto_vacuum = INCREMENTAL");
 
     // Initialize schema
     this.initializeSchema();
@@ -42,7 +44,7 @@ export class SQLiteAuditStore {
     }
 
     const stmt = this.db.prepare(`
-      INSERT INTO audit_events (
+      INSERT OR IGNORE INTO audit_events (
         id, event_type, actor, action, target, result,
         timestamp, workspace_id, lane_id, session_id,
         correlation_id, metadata
@@ -226,6 +228,35 @@ export class SQLiteAuditStore {
    * Initialize the database schema on first run.
    */
   private initializeSchema(): void {
+    const handleSchemaFailure = (err: unknown): void => {
+      console.error("[SQLiteAuditStore] Schema initialization failed:", err);
+
+      if (this.dbPath !== ":memory:" &&
+          (err instanceof Error) &&
+          (err as any).code === "SQLITE_IOERR_SHORT_READ") {
+        // Attempt recovery from potential DB corruption due to partial write.
+        try {
+          this.db.close();
+          if (fs.existsSync(this.dbPath)) {
+            fs.unlinkSync(this.dbPath);
+          }
+        } catch (cleanupErr) {
+          console.error("[SQLiteAuditStore] Recovery cleanup failed:", cleanupErr);
+        }
+
+        // Recreate database and reinitialize PRAGMAs.
+        this.db = new Database(this.dbPath);
+        this.db.exec("PRAGMA journal_mode = WAL");
+        this.db.exec("PRAGMA synchronous = NORMAL");
+
+        // Try one more time.
+        this.initializeSchema();
+        return;
+      }
+
+      throw err;
+    };
+
     try {
       // Check if table exists
       const tableExists = this.db
@@ -249,7 +280,7 @@ export class SQLiteAuditStore {
             correlation_id TEXT NOT NULL,
             metadata TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-          )
+          ) WITHOUT ROWID;
         `);
 
         // Create indexes for efficient querying
@@ -265,10 +296,10 @@ export class SQLiteAuditStore {
         `);
       }
     } catch (err) {
-      console.error("[SQLiteAuditStore] Schema initialization failed:", err);
-      throw err;
+      handleSchemaFailure(err);
     }
   }
+
 
   /**
    * Convert a database row to an AuditEvent.

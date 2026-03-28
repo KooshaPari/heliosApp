@@ -1,3 +1,5 @@
+// wraps: ky 1.14.3
+import ky, { type KyInstance } from "ky";
 import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
 import type { InferenceEngine } from "./engine";
 
@@ -7,10 +9,19 @@ export class AnthropicInferenceEngine implements InferenceEngine {
   readonly type = "cloud" as const;
   private endpoint: string;
   private apiKey: string;
+  private client: KyInstance;
 
   constructor(apiKey?: string, endpoint = "https://api.anthropic.com") {
     this.apiKey = apiKey ?? process.env.HELIOS_ACP_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "";
     this.endpoint = endpoint;
+    this.client = ky.create({
+      prefixUrl: endpoint,
+      retry: { limit: 3, methods: ["post"], statusCodes: [429, 500, 502, 503, 504] },
+      headers: {
+        "anthropic-version": "2023-06-01",
+        ...(this.apiKey ? { "x-api-key": this.apiKey } : {}),
+      },
+    });
   }
 
   async init(): Promise<void> {
@@ -22,34 +33,23 @@ export class AnthropicInferenceEngine implements InferenceEngine {
   }
 
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
-    const response = await fetch(`${this.endpoint}/v1/messages`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": this.apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: request.model || "claude-sonnet-4-20250514",
-        max_tokens: request.maxTokens ?? 4096,
-        messages: request.messages.map(m => ({
-          role: m.role,
-          content: m.content,
-        })),
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Anthropic API error (${response.status}): ${errorText}`);
-    }
-
-    const data = (await response.json()) as {
-      content: Array<{ type: string; text: string }>;
-      model: string;
-      usage: { input_tokens: number; output_tokens: number };
-      stop_reason: string;
-    };
+    const data = await this.client
+      .post("v1/messages", {
+        json: {
+          model: request.model || "claude-sonnet-4-20250514",
+          max_tokens: request.maxTokens ?? 4096,
+          messages: request.messages.map(m => ({
+            role: m.role,
+            content: m.content,
+          })),
+        },
+      })
+      .json<{
+        content: Array<{ type: string; text: string }>;
+        model: string;
+        usage: { input_tokens: number; output_tokens: number };
+        stop_reason: string;
+      }>();
 
     const content = data.content
       .filter((c: { type: string }) => c.type === "text")
@@ -99,20 +99,15 @@ export class AnthropicInferenceEngine implements InferenceEngine {
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
     if (!this.apiKey) return "unavailable";
     try {
-      const response = await fetch(`${this.endpoint}/v1/messages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": this.apiKey,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
+      await this.client.post("v1/messages", {
+        retry: 0,
+        json: {
           model: "claude-haiku-4-20250514",
           max_tokens: 1,
           messages: [{ role: "user", content: "hi" }],
-        }),
+        },
       });
-      return response.ok ? "healthy" : "degraded";
+      return "healthy";
     } catch {
       return "unavailable";
     }

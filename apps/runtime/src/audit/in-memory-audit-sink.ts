@@ -72,7 +72,8 @@ export class InMemoryAuditSink implements AuditSink {
     const originalCount = this.records.length;
     const cutoffMs = this.retentionDays * 24 * 60 * 60 * 1000;
     const retained = this.records.filter((record) => {
-      const topic = record.envelope.topic;
+      const envelope = record.envelope as Record<string, unknown>;
+      const topic = envelope.topic as string | undefined;
       if (topic === "audit.retention.deleted") {
         return true;
       }
@@ -107,7 +108,8 @@ export class InMemoryAuditSink implements AuditSink {
     record: AuditRecord,
     redactPayload: boolean,
   ): AuditExportRecord {
-    const envelope = redactPayload ? this.redactEnvelope(record.envelope) : { ...record.envelope };
+    const envelopeRecord = record.envelope as Record<string, unknown>;
+    const envelope = redactPayload ? this.redactEnvelope(envelopeRecord) : { ...envelopeRecord };
     const methodOrTopic = (envelope.method ?? envelope.topic) as string | undefined;
 
     return {

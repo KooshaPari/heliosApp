@@ -6,7 +6,7 @@ import { RedactionEngine } from "../secrets/redaction-engine.js";
 import type { InMemoryLocalBus } from "../protocol/bus.js";
 import { handleTerminalCommand, type RuntimeTerminalContext } from "./terminal.js";
 
-type RuntimeOpsContext = RuntimeTerminalContext & {
+export type RuntimeOpsContext = RuntimeTerminalContext & {
   recovery: RecoveryRegistry;
   redactionEngine: RedactionEngine;
 };
@@ -70,6 +70,7 @@ function recordCommand(context: RuntimeOpsContext, envelope: LocalBusEnvelope): 
     type: "command",
     method: envelope.method,
     correlation_id: envelope.correlation_id,
+    envelope,
     payload: redactPayload(
       context.redactionEngine,
       normalizePayload(envelope.payload),
@@ -85,6 +86,7 @@ function recordResponse(context: RuntimeOpsContext, envelope: LocalBusEnvelope):
     type: "response",
     method: envelope.method,
     correlation_id: envelope.correlation_id,
+    envelope,
     payload: redactPayload(
       context.redactionEngine,
       normalizePayload(envelope.result ?? envelope.payload),

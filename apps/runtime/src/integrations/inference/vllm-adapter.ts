@@ -1,3 +1,5 @@
+// wraps: ky 1.14.3
+import ky, { type KyInstance } from "ky";
 import type { InferenceRequest, InferenceResponse, ModelInfo } from "../../types/inference";
 import type { InferenceEngine } from "./engine";
 
@@ -6,11 +8,15 @@ export class VllmInferenceEngine implements InferenceEngine {
   readonly name = "vLLM (GPU Server)";
   readonly type = "server" as const;
   private endpoint: string;
-  private apiKey: string;
+  private client: KyInstance;
 
   constructor(endpoint = "http://localhost:8000", apiKey = "") {
     this.endpoint = endpoint;
-    this.apiKey = apiKey;
+    this.client = ky.create({
+      prefixUrl: endpoint,
+      retry: { limit: 3, methods: ["get", "post"], statusCodes: [429, 500, 502, 503, 504] },
+      headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
+    });
   }
 
   async init(): Promise<void> {
@@ -21,31 +27,20 @@ export class VllmInferenceEngine implements InferenceEngine {
   }
 
   async infer(request: InferenceRequest): Promise<InferenceResponse> {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
-
-    const response = await fetch(`${this.endpoint}/v1/chat/completions`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        model: request.model,
-        messages: request.messages,
-        max_tokens: request.maxTokens ?? 4096,
-        stream: false,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`vLLM error (${response.status}): ${await response.text()}`);
-    }
-
-    const data = (await response.json()) as {
-      choices: Array<{ message: { content: string }; finish_reason: string }>;
-      model: string;
-      usage: { prompt_tokens: number; completion_tokens: number };
-    };
+    const data = await this.client
+      .post("v1/chat/completions", {
+        json: {
+          model: request.model,
+          messages: request.messages,
+          max_tokens: request.maxTokens ?? 4096,
+          stream: false,
+        },
+      })
+      .json<{
+        choices: Array<{ message: { content: string }; finish_reason: string }>;
+        model: string;
+        usage: { prompt_tokens: number; completion_tokens: number };
+      }>();
 
     return {
       content: data.choices[0]?.message.content ?? "",
@@ -65,11 +60,7 @@ export class VllmInferenceEngine implements InferenceEngine {
 
   async listModels(): Promise<ModelInfo[]> {
     try {
-      const headers: Record<string, string> = {};
-      if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
-      const response = await fetch(`${this.endpoint}/v1/models`, { headers });
-      if (!response.ok) return [];
-      const data = (await response.json()) as { data: Array<{ id: string }> };
+      const data = await this.client.get("v1/models").json<{ data: Array<{ id: string }> }>();
       return data.data.map(m => ({
         id: m.id,
         name: m.id,
@@ -83,10 +74,8 @@ export class VllmInferenceEngine implements InferenceEngine {
 
   async healthCheck(): Promise<"healthy" | "degraded" | "unavailable"> {
     try {
-      const response = await fetch(`${this.endpoint}/v1/models`, {
-        signal: AbortSignal.timeout(3000),
-      });
-      return response.ok ? "healthy" : "degraded";
+      await this.client.get("v1/models", { retry: 0, timeout: 3000 });
+      return "healthy";
     } catch {
       return "unavailable";
     }

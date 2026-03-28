@@ -3,7 +3,7 @@ import { MCPBridgeAdapter } from "../mcp-bridge.js";
 
 export const MCP_BRIDGE_CONFIG = {
   serverPath: "stdio",
-  args: [],
+  args: [] as string[],
   timeout: 30000,
   healthCheckIntervalMs: 30000,
 } as const;

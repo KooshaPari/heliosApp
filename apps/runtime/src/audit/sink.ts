@@ -77,7 +77,7 @@ export class DefaultAuditSink implements AuditSink {
     sqliteRetryCount: 0,
   };
 
-  private persistenceInProgress = false;
+  private persistenceChain: Promise<void> = Promise.resolve();
   private flushTimer: number | null = null;
   private overflowQueue: AuditEvent[] = [];
 
@@ -117,12 +117,19 @@ export class DefaultAuditSink implements AuditSink {
     const evicted = this.ringBuffer.push(event);
 
     if (evicted) {
-      this.metrics.eventsOverflowed!++;
-      this.overflowQueue.push(evicted);
+      // If the evicted event is still in the worker buffer, remove it and persist via overflow path.
+      const idx = this.buffer.findIndex(e => e.id === evicted.id);
+      if (idx >= 0) {
+        this.buffer.splice(idx, 1);
+        this.metrics.eventsOverflowed!++;
+        this.overflowQueue.push(evicted);
 
-      this.persistOverflow().catch(err => {
-        console.error("[AuditSink] Overflow persistence failed:", err);
-      });
+        this.persistOverflow().catch(err => {
+          console.error("[AuditSink] Overflow persistence failed:", err);
+        });
+      } else {
+        // Event is already persisted; skip duplicate overflow persist.
+      }
     }
 
     this.buffer.push(event);
@@ -174,21 +181,29 @@ export class DefaultAuditSink implements AuditSink {
     return { ...this.metrics };
   }
 
+  private enqueuePersistenceTask(task: () => Promise<void>): Promise<void> {
+    const chained = this.persistenceChain.then(() => task());
+    this.persistenceChain = chained.catch(() => {
+      // swallow to keep chain alive for future tasks, errors are handled separately
+    });
+    return chained;
+  }
+
   private async persistWithRetry(): Promise<void> {
-    if (this.persistenceInProgress || this.buffer.length === 0) {
+    if (this.buffer.length === 0) {
       return;
     }
 
-    this.persistenceInProgress = true;
+    await this.enqueuePersistenceTask(async () => {
+      // Snapshot current buffer for persistence, and allow new writes to accumulate concurrently.
+      const eventsToPersist = [...this.buffer];
+      this.buffer = [];
 
-    try {
       let retries = 0;
       while (retries < this.MAX_RETRIES) {
         try {
-          const eventsToPersist = [...this.buffer];
           await this.storage.persist(eventsToPersist);
-          this.buffer = [];
-          break;
+          return;
         } catch (err) {
           this.metrics.persistenceFailures++;
           this.metrics.retryCount++;
@@ -197,18 +212,14 @@ export class DefaultAuditSink implements AuditSink {
             await new Promise(resolve =>
               setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1))
             );
+          } else {
+            // Put persisted events back into buffer to avoid data loss; preserve new events that may have been added.
+            this.buffer = [...eventsToPersist, ...this.buffer];
+            throw err;
           }
         }
       }
-
-      if (this.buffer.length > 0) {
-        console.warn(
-          "[AuditSink] Events retained in buffer after retries; will retry on next write"
-        );
-      }
-    } finally {
-      this.persistenceInProgress = false;
-    }
+    });
   }
 
   private async persistOverflow(): Promise<void> {
@@ -216,24 +227,32 @@ export class DefaultAuditSink implements AuditSink {
       return;
     }
 
-    let retries = 0;
-    while (retries < this.MAX_RETRIES && this.overflowQueue.length > 0) {
-      try {
-        const eventsToPersist = [...this.overflowQueue];
-        await this.storage.persist(eventsToPersist);
-        this.overflowQueue = [];
-        break;
-      } catch (err) {
-        this.metrics.sqliteWriteFailures!++;
-        this.metrics.sqliteRetryCount!++;
-        retries++;
-        if (retries < this.MAX_RETRIES) {
+    await this.enqueuePersistenceTask(async () => {
+      let retries = 0;
+
+      while (retries < this.MAX_RETRIES && this.overflowQueue.length > 0) {
+        try {
+          const eventsToPersist = [...this.overflowQueue];
+          await this.storage.persist(eventsToPersist);
+
+          this.overflowQueue.splice(0, eventsToPersist.length);
+
+          retries = 0;
+        } catch (err) {
+          this.metrics.sqliteWriteFailures!++;
+          this.metrics.sqliteRetryCount!++;
+          retries++;
+
+          if (retries >= this.MAX_RETRIES) {
+            throw err;
+          }
+
           await new Promise(resolve =>
             setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1))
           );
         }
       }
-    }
+    });
   }
 
   private startPeriodicFlush(): void {

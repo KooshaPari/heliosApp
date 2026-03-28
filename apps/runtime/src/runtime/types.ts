@@ -1,4 +1,9 @@
-import type { RecoveryBootstrapResult, RecoveryMetadata, WatchdogScanResult } from "../sessions/types.js";
+import type { LocalBusEnvelope } from "../protocol/types.js";
+import type {
+  RecoveryBootstrapResult,
+  RecoveryMetadata,
+  WatchdogScanResult,
+} from "../sessions/types.js";
 
 export interface HealthCheckResult {
   readonly ok: boolean;
@@ -14,6 +19,7 @@ export type RuntimeAuditRecord = {
   correlation_id?: string;
   payload: Record<string, unknown>;
   error?: { code: string; message: string; retryable?: boolean } | null;
+  envelope?: LocalBusEnvelope | Record<string, unknown>;
 };
 
 export type RuntimeAuditBundle = {
@@ -24,6 +30,10 @@ export type RuntimeAuditBundle = {
 
 export type RuntimeOptions = {
   recovery_metadata?: RecoveryMetadata;
+  harnessProbe?: {
+    check(): Promise<{ ok: boolean; reason?: string | null }>;
+  };
+  terminalBufferCapBytes?: number;
 };
 
 export interface TerminalBufferEntry {
@@ -38,15 +48,9 @@ export interface TerminalBuffer {
   entries: TerminalBufferEntry[];
 }
 
-export type RuntimeStateSnapshot = {
-  terminal: string;
+export type RuntimeBootstrapSnapshot = {
+  snapshot(): RecoveryMetadata;
+  bootstrap(metadata: RecoveryMetadata): RecoveryBootstrapResult;
+  scanForOrphans(nowIso: string): WatchdogScanResult;
 };
 
-export type RuntimeBootstrapSnapshot = {
-  bootstrapResult: RecoveryBootstrapResult | null;
-  recovery: {
-    exportRecoveryMetadata(): RecoveryMetadata;
-    bootstrapRecovery(metadata: RecoveryMetadata): RecoveryBootstrapResult;
-    getOrphanReport(): WatchdogScanResult;
-  };
-};

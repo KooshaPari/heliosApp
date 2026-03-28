@@ -27,11 +27,11 @@ export type EnsureSessionInput = {
 };
 
 type RecoveryLifecycleInput = {
-  lane_id?: string;
-  session_id?: string;
-  terminal_id?: string;
-  workspace_id?: string;
-  codex_session_id?: string;
+  lane_id?: string | undefined;
+  session_id?: string | undefined;
+  terminal_id?: string | undefined;
+  workspace_id?: string | undefined;
+  codex_session_id?: string | undefined;
 };
 
 export class SessionRegistryError extends Error {
