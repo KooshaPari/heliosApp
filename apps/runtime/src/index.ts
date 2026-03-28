@@ -122,7 +122,19 @@ export function healthCheck(): HealthCheckResult {
 }
 
 export function createRuntime(options: RuntimeOptions = {}) {
-  const bus = new InMemoryLocalBus();
+  const innerBus = new InMemoryLocalBus();
+  const bus = new Proxy(innerBus, {
+    get(target, prop) {
+      if (prop === "request") {
+        return (command: LocalBusEnvelope) => request(command);
+      }
+      const value = (target as any)[prop];
+      if (typeof value === "function") {
+        return value.bind(target);
+      }
+      return value;
+    },
+  }) as InMemoryLocalBus;
   const recovery = new RecoveryRegistry();
   const sessionRegistry = new InMemorySessionRegistry();
   const terminalRegistry = new TerminalRegistry();
@@ -254,6 +266,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
     getRuntimeState,
     recovery,
     redactionEngine,
+    rawBusRequest: innerBus.request.bind(innerBus),
   };
 
   async function request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
@@ -268,9 +281,12 @@ export function createRuntime(options: RuntimeOptions = {}) {
     }
 
     if (command.method === "terminal.spawn" && response.status === "ok") {
+      console.log("createRuntime.request: terminal.spawn detected, clearing buffer", command.terminal_id, response.result?.terminal_id);
       runtimeState.terminal = "active";
       const terminalId = String(response.result?.terminal_id ?? "");
       if (terminalId) {
+        console.log("createRuntime.request: deleting buffer for", terminalId);
+        terminalBuffers.delete(terminalId);
         terminalRegistry.spawn({
           terminal_id: terminalId,
           workspace_id: command.workspace_id ?? "",
@@ -297,7 +313,10 @@ export function createRuntime(options: RuntimeOptions = {}) {
       runtimeState.terminal = getTerminalState();
       const terminalId = command.terminal_id ?? (command.payload as Record<string, unknown>)?.terminal_id;
       if (typeof terminalId === "string") {
-        terminalRegistry.setState(terminalId, runtimeState.terminal === "throttled" ? "throttled" : "active");
+        terminalRegistry.setState(
+          terminalId,
+          runtimeState.terminal === "throttled" ? "throttled" : "active"
+        );
       }
     }
 

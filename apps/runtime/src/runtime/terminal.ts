@@ -44,41 +44,48 @@ function appendTerminalOutput(
   terminalId: string,
   data: string,
   correlationId?: string,
+  workspaceId?: string,
+  laneId?: string,
+  sessionId?: string,
 ): void {
   const buffer = context.getTerminalBuffer(terminalId);
   const dataSize = data.length;
+  const workspace_id =
+    workspaceId ?? context.terminalRegistry.get(terminalId)?.workspace_id ?? "";
+  const lane_id = laneId ?? context.terminalRegistry.get(terminalId)?.lane_id ?? "";
+  const session_id = sessionId ?? context.terminalRegistry.get(terminalId)?.session_id ?? "";
 
   if (buffer.total_bytes + dataSize > context.terminalBufferCap) {
     buffer.dropped_bytes += dataSize;
     context.setTerminalState("throttled");
-    const stateEvt = {
+    const stateEvt: LocalBusEnvelope = {
       id: `evt-throttle-${Date.now()}`,
       type: "event",
       ts: new Date().toISOString(),
       topic: "terminal.state.changed",
       correlation_id: correlationId,
-      workspace_id: context.terminalRegistry.get(terminalId)?.workspace_id,
-      lane_id: context.terminalRegistry.get(terminalId)?.lane_id,
-      session_id: context.terminalRegistry.get(terminalId)?.session_id,
+      workspace_id,
+      lane_id,
+      session_id,
       terminal_id: terminalId,
       payload: { state: "throttled", runtime_state: context.getRuntimeState() },
     };
-    context.bus.publish(stateEvt as LocalBusEnvelope);
+    context.bus.publish(stateEvt);
     context.appendAuditRecord({ ...stateEvt, recorded_at: stateEvt.ts, type: "event" } as any);
 
-    const overflowEvt = {
+    const overflowEvt: LocalBusEnvelope = {
       id: `evt-output-overflow-${Date.now()}`,
       type: "event",
       ts: new Date().toISOString(),
       topic: "terminal.output",
       correlation_id: correlationId,
-      workspace_id: context.terminalRegistry.get(terminalId)?.workspace_id,
-      lane_id: context.terminalRegistry.get(terminalId)?.lane_id,
-      session_id: context.terminalRegistry.get(terminalId)?.session_id,
+      workspace_id,
+      lane_id,
+      session_id,
       terminal_id: terminalId,
       payload: { overflowed: true },
     };
-    context.bus.publish(overflowEvt as LocalBusEnvelope);
+    context.bus.publish(overflowEvt);
     context.appendAuditRecord({ ...overflowEvt, recorded_at: overflowEvt.ts, type: "event" } as any);
     return;
   }
@@ -87,20 +94,20 @@ function appendTerminalOutput(
   buffer.entries.push({ seq, data });
   buffer.total_bytes += dataSize;
 
-  context.bus.publish({
+  const outputEvt: LocalBusEnvelope = {
     id: `evt-output-${Date.now()}`,
     type: "event",
     ts: new Date().toISOString(),
     topic: "terminal.output",
     correlation_id: correlationId,
-    workspace_id: context.terminalRegistry.get(terminalId)?.workspace_id,
-    lane_id: context.terminalRegistry.get(terminalId)?.lane_id,
-    session_id: context.terminalRegistry.get(terminalId)?.session_id,
+    workspace_id,
+    lane_id,
+    session_id,
     terminal_id: terminalId,
     payload: { seq, data_length: dataSize, runtime_state: context.getRuntimeState() },
-  } as LocalBusEnvelope);
+  };
 
-
+  context.bus.publish(outputEvt);
   context.appendAuditRecord({
     recorded_at: new Date().toISOString(),
     type: "event",
@@ -128,7 +135,23 @@ export async function handleTerminalCommand(
           ? `term_${sessionId}_${Date.now()}`
           : `term_${Date.now()}`;
     const finalTerminalId = terminalId;
-    context.terminalBuffers.delete(finalTerminalId);
+
+    // Ensure terminal buffer is cleared when reusing an existing terminal id.
+    const terminalBuffer = context.getTerminalBuffer(finalTerminalId);
+    terminalBuffer.entries = [];
+    terminalBuffer.total_bytes = 0;
+    terminalBuffer.dropped_bytes = 0;
+
+    // Ensure registry reflects the newly spawned terminal context.
+    context.terminalRegistry.spawn({
+      terminal_id: finalTerminalId,
+      workspace_id: command.workspace_id ?? "",
+      lane_id: command.lane_id ?? "",
+      session_id: command.session_id ?? "",
+      title: typeof payload.title === "string" ? String(payload.title) : "Terminal",
+    });
+    context.terminalRegistry.setState(finalTerminalId, "active");
+
     context.setTerminalState("active");
 
     const response: LocalBusEnvelope = {
