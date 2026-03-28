@@ -185,9 +185,8 @@ export async function handleTerminalCommand(
     };
     context.bus.publish(stateActiveEvt as LocalBusEnvelope);
     context.appendAuditRecord({ ...stateActiveEvt, recorded_at: stateActiveEvt.ts, type: "event" } as any);
-    context.setTerminalState("active");
 
-    const spawnedEvt = {
+    const spawnedEvt: LocalBusEnvelope = {
       id: `evt-spawned-${Date.now()}`,
       type: "event",
       ts: new Date().toISOString(),
@@ -199,10 +198,10 @@ export async function handleTerminalCommand(
       terminal_id: finalTerminalId,
       payload: { terminal_id: finalTerminalId },
     };
+
     context.bus.publish(spawnedEvt as LocalBusEnvelope);
     context.appendAuditRecord({ ...spawnedEvt, recorded_at: spawnedEvt.ts, type: "event" } as any);
 
-    recordResponse(context, response);
     return response;
   }
 

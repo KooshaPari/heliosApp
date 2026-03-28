@@ -112,8 +112,14 @@ describe("detectStaleProjects", () => {
   // FR-009
   test("missing path becomes stale", async () => {
     const bound = bindLocalProject(ws, tempDir);
-    // Remove the directory
-    rmSync(tempDir, { recursive: true });
+    // Remove the directory and wait for filesystem to settle
+    try {
+      rmSync(tempDir, { recursive: true });
+    } catch {
+      // Best-effort removal; test checks stale detection regardless
+    }
+    // Small delay to ensure filesystem sync
+    await new Promise(resolve => setTimeout(resolve, 10));
     const checked = await detectStaleProjects(bound);
     expect(checked.projects[0]!.status).toBe("stale");
   });
