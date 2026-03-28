@@ -1,15 +1,19 @@
 import { createSignal } from "solid-js";
-import type { Conversation, Message } from "../../../runtime/src/types/conversation";
+import type { Conversation, Message } from "@helios/runtime-core";
+import {
+  generateMessageId,
+  generateConversationId,
+  sendMessages,
+  extractTextContent,
+  toAnthropicHistory,
+  getAnthropicApiKey,
+  getDefaultModelId,
+  AnthropicApiError,
+} from "@helios/runtime-core";
 
 const [conversations, setConversations] = createSignal<Conversation[]>([]);
 const [activeConversationId, setActiveConversationId] = createSignal<string | null>(null);
 const [isStreaming, setIsStreaming] = createSignal(false);
-
-let messageIdCounter = 0;
-
-function generateId(): string {
-  return `msg-${Date.now()}-${++messageIdCounter}`;
-}
 
 export function getConversations(): Conversation[] {
   return conversations();
@@ -26,13 +30,13 @@ export function getIsStreaming(): boolean {
 }
 
 export function createConversation(): string {
-  const id = `conv-${Date.now()}`;
+  const id = generateConversationId();
   const conv: Conversation = {
     id,
     title: "New Conversation",
     createdAt: Date.now(),
     updatedAt: Date.now(),
-    modelId: "claude-sonnet-4-20250514",
+    modelId: getDefaultModelId(),
     messages: [],
   };
   setConversations((prev: Conversation[]) => [conv, ...prev]);
@@ -50,18 +54,16 @@ export async function sendMessage(text: string): Promise<void> {
     convId = createConversation();
   }
 
-  // Add user message
   const userMsg: Message = {
-    id: generateId(),
+    id: generateMessageId(),
     conversationId: convId,
     role: "user",
     content: text,
     timestamp: Date.now(),
   };
 
-  // Add placeholder assistant message
   const assistantMsg: Message = {
-    id: generateId(),
+    id: generateMessageId(),
     conversationId: convId,
     role: "assistant",
     content: "",
@@ -84,13 +86,7 @@ export async function sendMessage(text: string): Promise<void> {
   setIsStreaming(true);
 
   try {
-    // Call the inference engine via the runtime bridge
-    // For now, use a direct fetch to Anthropic API as a placeholder
-    // This will be replaced with proper RPC wiring when ElectroBun is integrated
-    const apiKey =
-      typeof process !== "undefined"
-        ? (process.env?.ANTHROPIC_API_KEY ?? process.env?.HELIOS_ACP_API_KEY ?? "")
-        : "";
+    const apiKey = getAnthropicApiKey();
 
     if (!apiKey) {
       appendToAssistantMessage(
@@ -102,46 +98,25 @@ export async function sendMessage(text: string): Promise<void> {
       return;
     }
 
-    const history =
-      getActiveConversation()
-        ?.messages.filter(m => m.role === "user" || m.role === "assistant")
-        .filter(m => m.id !== assistantMsg.id)
-        .map(m => ({ role: m.role, content: m.content })) ?? [];
+    const history = toAnthropicHistory(
+      (getActiveConversation()?.messages ?? []).filter(m => m.id !== assistantMsg.id)
+    );
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 4096,
-        messages: history,
-      }),
+    const response = await sendMessages({
+      model: getDefaultModelId(),
+      history,
+      apiKey,
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      appendToAssistantMessage(convId, assistantMsg.id, `Error: ${response.status} - ${errorText}`);
-      finalizeAssistantMessage(convId, assistantMsg.id, "error");
-      return;
-    }
-
-    const data = (await response.json()) as {
-      content: Array<{ type: string; text: string }>;
-      usage: { input_tokens: number; output_tokens: number };
-    };
-    const content = data.content
-      .filter((c: { type: string }) => c.type === "text")
-      .map((c: { text: string }) => c.text)
-      .join("");
-
-    appendToAssistantMessage(convId, assistantMsg.id, content);
+    appendToAssistantMessage(convId, assistantMsg.id, extractTextContent(response));
     finalizeAssistantMessage(convId, assistantMsg.id, "complete");
   } catch (err) {
-    const errMsg = err instanceof Error ? err.message : String(err);
+    let errMsg: string;
+    if (err instanceof AnthropicApiError) {
+      errMsg = `Anthropic API error ${err.status}: ${err.body}`;
+    } else {
+      errMsg = err instanceof Error ? err.message : String(err);
+    }
     appendToAssistantMessage(convId, assistantMsg.id, `Error: ${errMsg}`);
     finalizeAssistantMessage(convId, assistantMsg.id, "error");
   }
@@ -183,7 +158,6 @@ function finalizeAssistantMessage(
 }
 
 export function cancelResponse(): void {
-  // TODO: AbortController integration for cancelling in-flight requests
   const conv = getActiveConversation();
   if (!conv) return;
   const lastMsg = conv.messages[conv.messages.length - 1];
