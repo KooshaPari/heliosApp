@@ -10,7 +10,13 @@
   },
   "workspaces": [
     "apps/runtime",
-    "apps/desktop"
+    "apps/desktop",
+    "apps/colab-renderer",
+    "packages/errors",
+    "packages/ids",
+    "packages/logger",
+    "packages/runtime-core",
+    "packages/types"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",

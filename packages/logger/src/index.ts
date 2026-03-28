@@ -1,3 +1,17 @@
+/**
+ * @helios/logger
+ *
+ * Structured logger wrapping pino. Preserves the original Logger interface
+ * so all existing call sites remain compatible.
+ *
+ * wraps: pino@^9.6.0  (https://github.com/pinojs/pino)
+ */
+import pino, { type Logger as PinoLogger } from 'pino';
+
+// ---------------------------------------------------------------------------
+// Public types — kept identical to the original interface for backward compat
+// ---------------------------------------------------------------------------
+
 export enum LogLevel {
     DEBUG = 0,
     INFO = 1,
@@ -24,77 +38,116 @@ export interface Logger {
     withLevel(level: LogLevel): Logger;
 }
 
-export class ConsoleLogger implements Logger {
-    private readonly minLevel: LogLevel;
-    private readonly baseContext: Record<string, unknown>;
+// ---------------------------------------------------------------------------
+// Level mapping
+// ---------------------------------------------------------------------------
 
-    constructor(minLevel: LogLevel = LogLevel.INFO, baseContext: Record<string, unknown> = {}) {
-        this.minLevel = minLevel;
-        this.baseContext = baseContext;
-    }
+const LEVEL_MAP: Record<LogLevel, pino.Level> = {
+    [LogLevel.DEBUG]: 'debug',
+    [LogLevel.INFO]: 'info',
+    [LogLevel.WARN]: 'warn',
+    [LogLevel.ERROR]: 'error',
+    [LogLevel.FATAL]: 'fatal',
+};
 
-    private shouldLog(level: LogLevel): boolean {
-        return level >= this.minLevel;
-    }
+function pinoLevel(level: LogLevel): pino.Level {
+    return LEVEL_MAP[level] ?? 'info';
+}
 
-    private formatLevel(level: LogLevel): string {
-        return LogLevel[level];
-    }
+// ---------------------------------------------------------------------------
+// PinoLogger adapter — implements the helios Logger interface on top of pino
+// ---------------------------------------------------------------------------
 
-    private log(level: LogLevel, message: string, error?: Error | unknown, context?: Record<string, unknown>): void {
-        if (!this.shouldLog(level)) return;
-        const mergedContext = { ...this.baseContext, ...context };
-        const entry: LogEntry = {
-            level,
-            message,
-            timestamp: new Date().toISOString(),
-            context: mergedContext,
-            error,
-        };
-        const levelStr = this.formatLevel(level);
-        if (error) {
-            console[level === LogLevel.FATAL ? "error" : level === LogLevel.ERROR ? "error" : level === LogLevel.WARN ? "warn" : "info"](
-                `[${entry.timestamp}] [${levelStr}] ${message}`,
-                mergedContext,
-                error
-            );
+class PinoLoggerAdapter implements Logger {
+    constructor(private readonly inner: PinoLogger) {}
+
+    debug(message: string, context?: Record<string, unknown>): void {
+        if (context) {
+            this.inner.debug(context, message);
         } else {
-            console[level === LogLevel.FATAL ? "error" : level === LogLevel.ERROR ? "error" : level === LogLevel.WARN ? "warn" : "info"](
-                `[${entry.timestamp}] [${levelStr}] ${message}`,
-                mergedContext
-            );
+            this.inner.debug(message);
         }
     }
 
-    debug(message: string, context?: Record<string, unknown>): void {
-        this.log(LogLevel.DEBUG, message, undefined, context);
-    }
-
     info(message: string, context?: Record<string, unknown>): void {
-        this.log(LogLevel.INFO, message, undefined, context);
+        if (context) {
+            this.inner.info(context, message);
+        } else {
+            this.inner.info(message);
+        }
     }
 
     warn(message: string, context?: Record<string, unknown>): void {
-        this.log(LogLevel.WARN, message, undefined, context);
+        if (context) {
+            this.inner.warn(context, message);
+        } else {
+            this.inner.warn(message);
+        }
     }
 
     error(message: string, error?: Error | unknown, context?: Record<string, unknown>): void {
-        this.log(LogLevel.ERROR, message, error, context);
+        const merged = error instanceof Error
+            ? { err: error, ...(context ?? {}) }
+            : { ...(context ?? {}), ...(error != null ? { rawError: error } : {}) };
+        this.inner.error(merged, message);
     }
 
     fatal(message: string, error?: Error | unknown, context?: Record<string, unknown>): void {
-        this.log(LogLevel.FATAL, message, error, context);
+        const merged = error instanceof Error
+            ? { err: error, ...(context ?? {}) }
+            : { ...(context ?? {}), ...(error != null ? { rawError: error } : {}) };
+        this.inner.fatal(merged, message);
     }
 
     child(context: Record<string, unknown>): Logger {
-        return new ConsoleLogger(this.minLevel, { ...this.baseContext, ...context });
+        return new PinoLoggerAdapter(this.inner.child(context));
     }
 
     withLevel(level: LogLevel): Logger {
-        return new ConsoleLogger(level, this.baseContext);
+        return new PinoLoggerAdapter(this.inner.child({}, { level: pinoLevel(level) }));
     }
 }
 
+// ---------------------------------------------------------------------------
+// Factory
+// ---------------------------------------------------------------------------
+
+function buildPino(level: pino.Level): PinoLogger {
+    const isDev = process.env.NODE_ENV === 'development';
+    if (isDev) {
+        return pino({
+            level,
+            transport: {
+                target: 'pino-pretty',
+                options: { colorize: true, translateTime: 'SYS:standard' },
+            },
+        });
+    }
+    return pino({ level });
+}
+
 export function createLogger(minLevel: LogLevel = LogLevel.INFO): Logger {
-    return new ConsoleLogger(minLevel);
+    return new PinoLoggerAdapter(buildPino(pinoLevel(minLevel)));
+}
+
+// ---------------------------------------------------------------------------
+// Default singleton (compatible drop-in for existing `new ConsoleLogger()`)
+// ---------------------------------------------------------------------------
+
+/** @deprecated Use createLogger() directly. Kept for backward compatibility. */
+export class ConsoleLogger implements Logger {
+    private readonly _inner: Logger;
+
+    constructor(minLevel: LogLevel = LogLevel.INFO, baseContext: Record<string, unknown> = {}) {
+        const base = createLogger(minLevel);
+        this._inner = Object.keys(baseContext).length > 0 ? base.child(baseContext) : base;
+    }
+
+    debug(message: string, context?: Record<string, unknown>): void { this._inner.debug(message, context); }
+    info(message: string, context?: Record<string, unknown>): void { this._inner.info(message, context); }
+    warn(message: string, context?: Record<string, unknown>): void { this._inner.warn(message, context); }
+    error(message: string, error?: Error | unknown, context?: Record<string, unknown>): void { this._inner.error(message, error, context); }
+    fatal(message: string, error?: Error | unknown, context?: Record<string, unknown>): void { this._inner.fatal(message, error, context); }
+    child(context: Record<string, unknown>): Logger { return this._inner.child(context); }
+    withLevel(level: LogLevel): Logger { return this._inner.withLevel(level); }
 }
