@@ -223,6 +223,12 @@ export function handleTerminalSpawn(
   }
   const forceError = command.payload?.force_error === true;
 
+  const terminalResultId: string =
+    String(command.payload?.id ?? command.payload?.terminal_id ?? "") || `terminal_${Date.now()}`;
+
+  // Ensure all terminal lifecycle events include terminal context.
+  command.terminal_id = terminalResultId;
+
   if (!ctx.lifecycleProgress.has(correlationId)) {
     ctx.lifecycleProgress.set(correlationId, new Set());
   }
@@ -251,8 +257,6 @@ export function handleTerminalSpawn(
   publishLifecycleEvent("terminal.state.changed", command, ctx.eventLog, ctx.auditLog);
   ctx.lifecycleProgress.get(correlationId)?.add("terminal.spawned");
   publishLifecycleEvent("terminal.spawned", command, ctx.eventLog, ctx.auditLog);
-  const terminalResultId =
-    command.payload?.id ?? command.payload?.terminal_id ?? `terminal_${Date.now()}`;
   ctx.metricsRecorder.recordMetric("terminal_spawn_latency_ms", Date.now() - startTime);
   ctx.metricsRecorder.emitMetricEvent(
     "terminal_spawn_latency_ms",

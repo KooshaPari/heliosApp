@@ -9,8 +9,11 @@ import { InMemoryLocalBus } from "./protocol/bus.js";
 import { createBoundaryDispatcher } from "./protocol/boundary_adapter.js";
 import { METHODS } from "./protocol/methods.js";
 import type { LocalBusEnvelope } from "./protocol/types.js";
-import type { LocalBus } from "./protocol/bus.js";
-import { RecoveryRegistry } from "./sessions/registry.js";
+import { RecoveryRegistry, InMemorySessionRegistry } from "./sessions/registry.js";
+import { LaneLifecycleService, type RuntimeState } from "./sessions/state_machine.js";
+import type { TerminalBuffer } from "./runtime/types.js";
+import { TerminalRegistry } from "./sessions/terminal_registry.js";
+import { handleRuntimeRequest, type RuntimeOpsContext } from "./runtime/ops.js";
 import type {
   RecoveryBootstrapResult,
   RecoveryMetadata,
@@ -37,6 +40,7 @@ export type RuntimeAuditRecord = {
   correlation_id?: string;
   payload: Record<string, unknown>;
   error?: { code: string; message: string; retryable?: boolean } | null;
+  envelope?: LocalBusEnvelope | Record<string, unknown>;
 };
 
 export type RuntimeAuditBundle = {
@@ -47,6 +51,10 @@ export type RuntimeAuditBundle = {
 
 export type RuntimeOptions = {
   recovery_metadata?: RecoveryMetadata;
+  harnessProbe?: {
+    check(): Promise<{ ok: boolean; reason?: string | null }>;
+  };
+  terminalBufferCapBytes?: number;
 };
 
 type RuntimeInstance = ReturnType<typeof createRuntime>;
@@ -116,6 +124,9 @@ export function healthCheck(): HealthCheckResult {
 export function createRuntime(options: RuntimeOptions = {}) {
   const bus = new InMemoryLocalBus();
   const recovery = new RecoveryRegistry();
+  const sessionRegistry = new InMemorySessionRegistry();
+  const terminalRegistry = new TerminalRegistry();
+  const laneService = new LaneLifecycleService(bus);
   const redactionEngine = new RedactionEngine();
   redactionEngine.loadRules(getDefaultRules());
 
@@ -136,6 +147,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
       type: "command",
       method: envelope.method,
       correlation_id: envelope.correlation_id,
+      envelope,
       payload: redactPayload(
         redactionEngine,
         normalizePayload(envelope.payload),
@@ -151,6 +163,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
       type: "response",
       method: envelope.method,
       correlation_id: envelope.correlation_id,
+      envelope,
       payload: redactPayload(
         redactionEngine,
         normalizePayload(envelope.result ?? envelope.payload),
@@ -196,55 +209,202 @@ export function createRuntime(options: RuntimeOptions = {}) {
     });
   }
 
+  const terminalBuffers = new Map<string, TerminalBuffer>();
+  const terminalBufferCap = options.terminalBufferCapBytes ?? 1024;
+  let currentTerminalState: "idle" | "active" | "throttled" = "idle";
+  const runtimeState: RuntimeState = { lane: "new", session: "detached", terminal: "idle" };
+
+  let harnessStatus: { status: "available" | "unavailable"; degrade_reason: string | null } = {
+    status: "available",
+    degrade_reason: null,
+  };
+
+  function getTerminalBufferInternal(terminalId: string): TerminalBuffer {
+    let buffer = terminalBuffers.get(terminalId);
+    if (!buffer) {
+      buffer = {
+        terminal_id: terminalId,
+        total_bytes: 0,
+        dropped_bytes: 0,
+        entries: [],
+      };
+      terminalBuffers.set(terminalId, buffer);
+    }
+    return buffer;
+  }
+
+  function getTerminalState(): "idle" | "active" | "throttled" {
+    return currentTerminalState;
+  }
+
+  function setTerminalState(state: "idle" | "active" | "throttled"): void {
+    currentTerminalState = state;
+    runtimeState.terminal = state;
+  }
+
+  const opsContext = {
+    bus,
+    terminalRegistry,
+    terminalBufferCap,
+    terminalBuffers,
+    appendAuditRecord,
+    getTerminalBuffer: getTerminalBufferInternal,
+    getTerminalState,
+    setTerminalState,
+    getRuntimeState,
+    recovery,
+    redactionEngine,
+  };
+
   async function request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
-    recordCommand(command);
+    const response = await handleRuntimeRequest(opsContext as any, command);
 
-    if (command.type === "command" && command.method && !METHOD_SET.has(command.method)) {
-      const response: LocalBusEnvelope = {
-        id: command.id,
-        type: "response",
-        ts: new Date().toISOString(),
-        correlation_id: command.correlation_id,
-        method: command.method,
-        status: "error",
-        error: {
-          code: "METHOD_NOT_SUPPORTED",
-          message: `Unsupported method '${command.method}'`,
-          retryable: false,
-        },
-      };
-      recordResponse(response);
-      return response;
+    if (command.method === "session.attach" && response.status === "ok") {
+      runtimeState.session = "attached";
     }
 
-    if (
-      command.type === "command" &&
-      command.method === "session.attach" &&
-      command.payload?.boundary_failure === "harness"
-    ) {
-      const response: LocalBusEnvelope = {
-        id: command.id,
-        type: "response",
-        ts: new Date().toISOString(),
-        correlation_id: command.correlation_id,
-        method: command.method,
-        status: "error",
-        error: {
-          code: "HARNESS_UNAVAILABLE",
-          message: "Harness boundary unavailable",
-          retryable: false,
-        },
-      };
-      recordResponse(response);
-      return response;
+    if (command.method === "lane.create" && response.status === "ok") {
+      runtimeState.lane = "running";
     }
 
-    const response = await bus.request(command);
-    response.correlation_id ??= command.correlation_id;
-    response.method ??= command.method;
-    applyRecoveryFromCommand(command, response);
-    recordResponse(response);
+    if (command.method === "terminal.spawn" && response.status === "ok") {
+      runtimeState.terminal = "active";
+      const terminalId = String(response.result?.terminal_id ?? "");
+      if (terminalId) {
+        terminalRegistry.spawn({
+          terminal_id: terminalId,
+          workspace_id: command.workspace_id ?? "",
+          lane_id: command.lane_id ?? "",
+          session_id: command.session_id ?? "",
+          title:
+            typeof command.payload?.title === "string"
+              ? String(command.payload.title)
+              : "Terminal",
+        });
+        terminalRegistry.setState(terminalId, "active");
+      }
+    }
+
+    if (command.method === "terminal.resize" && response.status === "ok") {
+      runtimeState.terminal = "active";
+      const terminalId = command.terminal_id ?? (command.payload as Record<string, unknown>)?.terminal_id;
+      if (typeof terminalId === "string") {
+        terminalRegistry.setState(terminalId, "active");
+      }
+    }
+
+    if (command.method === "terminal.input" && response.status === "ok") {
+      runtimeState.terminal = getTerminalState();
+      const terminalId = command.terminal_id ?? (command.payload as Record<string, unknown>)?.terminal_id;
+      if (typeof terminalId === "string") {
+        terminalRegistry.setState(terminalId, runtimeState.terminal === "throttled" ? "throttled" : "active");
+      }
+    }
+
     return response;
+  }
+
+  function getEvents(): LocalBusEnvelope[] {
+    return bus.getEvents();
+  }
+
+  function getState(): RuntimeState {
+    return { ...runtimeState };
+  }
+
+  function getRuntimeState(): RuntimeState {
+    return { ...runtimeState };
+  }
+
+  function getTerminal(terminalId: string) {
+    return terminalRegistry.get(terminalId);
+  }
+
+  function getTerminalBuffer(terminalId: string): TerminalBuffer {
+    return getTerminalBufferInternal(terminalId);
+  }
+
+  async function spawnTerminal(input: {
+    command_id: string;
+    correlation_id: string;
+    workspace_id: string;
+    lane_id: string;
+    session_id: string;
+    title?: string;
+    terminal_id?: string;
+  }): Promise<LocalBusEnvelope> {
+    const command: LocalBusEnvelope = {
+      id: input.command_id,
+      type: "command",
+      ts: new Date().toISOString(),
+      workspace_id: input.workspace_id,
+      lane_id: input.lane_id,
+      session_id: input.session_id,
+      correlation_id: input.correlation_id,
+      method: "terminal.spawn",
+      payload: {
+        ...(input.terminal_id ? { terminal_id: input.terminal_id } : {}),
+        session_id: input.session_id,
+        title: input.title,
+      },
+    };
+    return request(command);
+  }
+
+  async function inputTerminal(input: {
+    command_id: string;
+    correlation_id: string;
+    workspace_id: string;
+    lane_id: string;
+    session_id: string;
+    terminal_id: string;
+    data: string;
+  }): Promise<LocalBusEnvelope> {
+    const command: LocalBusEnvelope = {
+      id: input.command_id,
+      type: "command",
+      ts: new Date().toISOString(),
+      workspace_id: input.workspace_id,
+      lane_id: input.lane_id,
+      session_id: input.session_id,
+      terminal_id: input.terminal_id,
+      correlation_id: input.correlation_id,
+      method: "terminal.input",
+      payload: {
+        terminal_id: input.terminal_id,
+        data: input.data,
+      },
+    };
+    return request(command);
+  }
+
+  async function resizeTerminal(input: {
+    command_id: string;
+    correlation_id: string;
+    workspace_id: string;
+    lane_id: string;
+    session_id: string;
+    terminal_id: string;
+    cols: number;
+    rows: number;
+  }): Promise<LocalBusEnvelope> {
+    const command: LocalBusEnvelope = {
+      id: input.command_id,
+      type: "command",
+      ts: new Date().toISOString(),
+      workspace_id: input.workspace_id,
+      lane_id: input.lane_id,
+      session_id: input.session_id,
+      terminal_id: input.terminal_id,
+      correlation_id: input.correlation_id,
+      method: "terminal.resize",
+      payload: {
+        terminal_id: input.terminal_id,
+        cols: input.cols,
+        rows: input.rows,
+      },
+    };
+    return request(command);
   }
 
   async function fetch(requestInput: Request): Promise<Response> {
@@ -283,10 +443,198 @@ export function createRuntime(options: RuntimeOptions = {}) {
 
       return Response.json(result.result ?? {}, { status: 200 });
     }
+    if (url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes$/) && requestInput.method === "POST") {
+      const body = (await requestInput.json()) as Record<string, any>;
+      const workspaceId = url.pathname.split("/")[3];
+
+      const lane = await laneService.create({
+        workspace_id: workspaceId,
+        project_context_id: String(body.project_context_id ?? "default"),
+        display_name: String(body.display_name ?? "Lane"),
+      });
+
+      runtimeState.lane = lane.status;
+      return Response.json({ lane_id: lane.lane_id }, { status: 201 });
+    }
+
+    if (url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/sessions$/) && requestInput.method === "POST") {
+      const body = (await requestInput.json()) as Record<string, any>;
+      const laneId = url.pathname.split("/")[5];
+      const workspaceId = url.pathname.split("/")[3];
+
+      if (body.preferred_transport && body.preferred_transport !== "native_openai" && body.preferred_transport !== "cliproxy_harness") {
+        return Response.json({ error: "invalid_preferred_transport" }, { status: 400 });
+      }
+
+      const probeResult = options.harnessProbe
+        ? await options.harnessProbe.check()
+        : { ok: true, reason: null };
+
+      let transport: "cliproxy_harness" | "native_openai";
+      let degrade_reason: string | null = null;
+
+      if (body.provider === "codex") {
+        if (probeResult.ok) {
+          transport = "cliproxy_harness";
+          degrade_reason = null;
+        } else {
+          transport = "native_openai";
+          degrade_reason = probeResult.reason || "harness_unavailable";
+          if (harnessStatus.status !== "unavailable" || harnessStatus.degrade_reason !== degrade_reason) {
+            harnessStatus = { status: "unavailable", degrade_reason };
+            const statusEvt = {
+              id: `evt-harness-status-changed-${Date.now()}`,
+              type: "event",
+              ts: new Date().toISOString(),
+              topic: "harness.status.changed",
+              payload: {
+                status: "unavailable",
+                degrade_reason,
+              },
+            };
+            await bus.publish(statusEvt as LocalBusEnvelope);
+            appendAuditRecord({ ...statusEvt, recorded_at: statusEvt.ts, type: "event" } as any);
+          }
+        }
+      } else {
+        transport = "native_openai";
+      }
+
+      if (probeResult.ok && harnessStatus.status !== "available") {
+        harnessStatus = { status: "available", degrade_reason: null };
+        const statusEvt = {
+          id: `evt-harness-status-changed-${Date.now()}`,
+          type: "event",
+          ts: new Date().toISOString(),
+          topic: "harness.status.changed",
+          payload: {
+            status: "available",
+            degrade_reason: null,
+          },
+        };
+        await bus.publish(statusEvt as LocalBusEnvelope);
+        appendAuditRecord({ ...statusEvt, recorded_at: statusEvt.ts, type: "event" } as any);
+      }
+
+      const ensureSession = sessionRegistry.ensure({
+        lane_id: laneId,
+        transport,
+        codex_session_id: typeof body.codex_session_id === "string" ? body.codex_session_id : undefined,
+      });
+
+      runtimeState.session = "attached";
+
+      const startEvt = {
+        id: `evt-session-attach-started-${Date.now()}`,
+        type: "event",
+        ts: new Date().toISOString(),
+        topic: "session.attach.started",
+        session_id: ensureSession.session.session_id,
+        lane_id: laneId,
+        workspace_id: workspaceId,
+        correlation_id: body.correlation_id || `corr-${Date.now()}`,
+        payload: { session_id: ensureSession.session.session_id },
+      };
+      await bus.publish(startEvt as LocalBusEnvelope);
+      appendAuditRecord({ ...startEvt, recorded_at: startEvt.ts, type: "event" } as any);
+
+      const attachedEvt = {
+        id: `evt-session-attached-${Date.now()}`,
+        type: "event",
+        ts: new Date().toISOString(),
+        topic: "session.attached",
+        session_id: ensureSession.session.session_id,
+        lane_id: laneId,
+        workspace_id: workspaceId,
+        correlation_id: startEvt.correlation_id,
+        payload: { session_id: ensureSession.session.session_id },
+      };
+      await bus.publish(attachedEvt as LocalBusEnvelope);
+      appendAuditRecord({ ...attachedEvt, recorded_at: attachedEvt.ts, type: "event" } as any);
+
+      const createdEvt = {
+        id: `evt-session-created-${Date.now()}`,
+        type: "event",
+        ts: new Date().toISOString(),
+        topic: "session.created",
+        session_id: ensureSession.session.session_id,
+        lane_id: laneId,
+        workspace_id: workspaceId,
+        correlation_id: startEvt.correlation_id,
+        payload: { session_id: ensureSession.session.session_id },
+      };
+      await bus.publish(createdEvt as LocalBusEnvelope);
+      appendAuditRecord({ ...createdEvt, recorded_at: createdEvt.ts, type: "event" } as any);
+
+      return Response.json({
+        session_id: ensureSession.session.session_id,
+        transport,
+        status: "attached",
+        diagnostics: { degrade_reason },
+        codex_session_id: ensureSession.session.codex_session_id,
+      }, { status: 200 });
+    }
+
+    if (url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/terminals$/) && requestInput.method === "POST") {
+      const body = (await requestInput.json()) as Record<string, any>;
+      const laneId = url.pathname.split("/")[5];
+      const workspaceId = url.pathname.split("/")[3];
+
+      let lane;
+      try {
+        lane = laneService.getRequired(laneId);
+      } catch (_err) {
+        return Response.json({ error: "lane_not_found" }, { status: 404 });
+      }
+
+      if (lane.workspace_id !== workspaceId) {
+        return Response.json({ error: "does not belong to workspace" }, { status: 409 });
+      }
+
+      if (lane.status === "closed") {
+        return Response.json({ error: "lane_closed" }, { status: 409 });
+      }
+
+      const spawnResult = await spawnTerminal({
+        command_id: `cmd-spawn-${Date.now()}`,
+        correlation_id: body.correlation_id || `corr-${Date.now()}`,
+        workspace_id: workspaceId,
+        lane_id: laneId,
+        session_id: body.session_id,
+        title: typeof body.title === "string" ? body.title : "Terminal",
+      });
+
+      if (spawnResult.status !== "ok") {
+        return Response.json({ error: spawnResult.error?.code ?? "terminal.spawn.failed" }, { status: 500 });
+      }
+
+      return Response.json({
+        terminal_id: String(spawnResult.result?.terminal_id),
+        lane_id: laneId,
+        session_id: body.session_id,
+        state: "active",
+      }, { status: 201 });
+    }
+
+    if (url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/cleanup$/) && requestInput.method === "POST") {
+      const laneId = url.pathname.split("/")[5];
+      await laneService.cleanup(url.pathname.split("/")[3], laneId);
+      runtimeState.lane = "closed";
+      return Response.json({ status: "ok" }, { status: 200 });
+    }
+
+    if (url.pathname === "/v1/harness/cliproxy/status" && requestInput.method === "GET") {
+      return Response.json(
+        {
+          status: harnessStatus.status === "available" ? "available" : "unavailable",
+          degrade_reason: harnessStatus.degrade_reason,
+        },
+        { status: 200 }
+      );
+    }
 
     return new Response("Not found", { status: 404 });
   }
-
   function exportAuditBundle(filter?: { correlation_id?: string }): RuntimeAuditBundle {
     const records = filter?.correlation_id
       ? auditRecords.filter(record => record.correlation_id === filter.correlation_id)
@@ -298,17 +646,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
     };
   }
 
-  // Expose bus with the instrumented request wrapper while preserving all LocalBus methods
-  const instrumentedBus: LocalBus = new Proxy(bus, {
-    get(target, prop) {
-      if (prop === "request") return request;
-      const value = (target as unknown as Record<string | symbol, unknown>)[prop];
-      return typeof value === "function" ? value.bind(target) : value;
-    },
-  });
-
   return {
-    bus: instrumentedBus,
+    bus,
     fetch,
     exportRecoveryMetadata(): RecoveryMetadata {
       return recovery.snapshot();
@@ -327,6 +666,13 @@ export function createRuntime(options: RuntimeOptions = {}) {
     async getAuditRecords(): Promise<RuntimeAuditRecord[]> {
       return [...auditRecords];
     },
+    getEvents,
+    getState,
+    getTerminal,
+    getTerminalBuffer,
+    spawnTerminal,
+    inputTerminal,
+    resizeTerminal,
     shutdown(): void {},
   };
 }

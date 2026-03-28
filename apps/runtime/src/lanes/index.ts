@@ -67,6 +67,7 @@ export interface PtyManager {
 // T015: Comprehensive lane lifecycle event catalog
 export type LaneBusEventTopic =
   // Core lane lifecycle
+  | "lane.create.started"
   | "lane.created"
   | "lane.state.changed"
   | "lane.shared"
@@ -139,6 +140,8 @@ export class LaneManager {
       };
 
       this.registry.register(record);
+
+      await this.emitEvent("lane.create.started", laneId, workspaceId, "new", "new");
 
       // Transition new -> provisioning
       const fromState: LaneState = "new";
@@ -533,6 +536,7 @@ export class LaneManager {
       ts: new Date().toISOString(),
       workspace_id: workspaceId,
       lane_id: laneId,
+      correlation_id: laneId,
       topic,
       payload: {
         laneId,

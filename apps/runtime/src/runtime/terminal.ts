@@ -1,16 +1,19 @@
 import { METHODS } from "../protocol/methods.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
 import type { InMemoryLocalBus } from "../protocol/bus.js";
+import { TerminalRegistry } from "../sessions/terminal_registry.js";
 import type { RuntimeAuditRecord, TerminalBuffer } from "./types.js";
 
 export type RuntimeTerminalContext = {
   bus: InMemoryLocalBus;
+  terminalRegistry: TerminalRegistry;
   terminalBufferCap: number;
   terminalBuffers: Map<string, TerminalBuffer>;
   appendAuditRecord(record: RuntimeAuditRecord): void;
   getTerminalBuffer(terminalId: string): TerminalBuffer;
-  getTerminalState(): "active" | "throttled";
-  setTerminalState(state: "active" | "throttled"): void;
+  getTerminalState(): "active" | "throttled" | "idle";
+  setTerminalState(state: "active" | "throttled" | "idle"): void;
+  getRuntimeState(): { lane: string; session: string; terminal: "active" | "throttled" | "idle" };
 };
 
 const METHOD_SET = new Set<string>(METHODS);
@@ -54,8 +57,11 @@ function appendTerminalOutput(
       ts: new Date().toISOString(),
       topic: "terminal.state.changed",
       correlation_id: correlationId,
+      workspace_id: context.terminalRegistry.get(terminalId)?.workspace_id,
+      lane_id: context.terminalRegistry.get(terminalId)?.lane_id,
+      session_id: context.terminalRegistry.get(terminalId)?.session_id,
       terminal_id: terminalId,
-      payload: { state: "throttled", runtime_state: { terminal: "throttled" } },
+      payload: { state: "throttled", runtime_state: context.getRuntimeState() },
     };
     context.bus.publish(stateEvt as LocalBusEnvelope);
     context.appendAuditRecord({ ...stateEvt, recorded_at: stateEvt.ts, type: "event" } as any);
@@ -66,6 +72,9 @@ function appendTerminalOutput(
       ts: new Date().toISOString(),
       topic: "terminal.output",
       correlation_id: correlationId,
+      workspace_id: context.terminalRegistry.get(terminalId)?.workspace_id,
+      lane_id: context.terminalRegistry.get(terminalId)?.lane_id,
+      session_id: context.terminalRegistry.get(terminalId)?.session_id,
       terminal_id: terminalId,
       payload: { overflowed: true },
     };
@@ -84,9 +93,13 @@ function appendTerminalOutput(
     ts: new Date().toISOString(),
     topic: "terminal.output",
     correlation_id: correlationId,
+    workspace_id: context.terminalRegistry.get(terminalId)?.workspace_id,
+    lane_id: context.terminalRegistry.get(terminalId)?.lane_id,
+    session_id: context.terminalRegistry.get(terminalId)?.session_id,
     terminal_id: terminalId,
-    payload: { seq, data_length: dataSize },
+    payload: { seq, data_length: dataSize, runtime_state: context.getRuntimeState() },
   } as LocalBusEnvelope);
+
 
   context.appendAuditRecord({
     recorded_at: new Date().toISOString(),
@@ -112,8 +125,8 @@ export async function handleTerminalCommand(
       typeof payload.terminal_id === "string"
         ? payload.terminal_id
         : sessionId
-          ? `term-${sessionId}-${Date.now()}`
-          : `term-${Date.now()}`;
+          ? `term_${sessionId}_${Date.now()}`
+          : `term_${Date.now()}`;
     const finalTerminalId = terminalId;
     context.terminalBuffers.delete(finalTerminalId);
     context.setTerminalState("active");
@@ -134,6 +147,10 @@ export async function handleTerminalCommand(
       ts: new Date().toISOString(),
       topic: "terminal.spawn.started",
       correlation_id: command.correlation_id,
+      workspace_id: command.workspace_id,
+      lane_id: command.lane_id,
+      session_id: command.session_id,
+      terminal_id: finalTerminalId,
       payload: { terminal_id: finalTerminalId },
     };
     context.bus.publish(spawnStartedEvt as LocalBusEnvelope);
@@ -145,7 +162,11 @@ export async function handleTerminalCommand(
       ts: new Date().toISOString(),
       topic: "terminal.state.changed",
       correlation_id: command.correlation_id,
-      payload: { state: "initializing" },
+      workspace_id: command.workspace_id,
+      lane_id: command.lane_id,
+      session_id: command.session_id,
+      terminal_id: finalTerminalId,
+      payload: { state: "initializing", runtime_state: context.getRuntimeState() },
     };
     context.bus.publish(stateInitEvt as LocalBusEnvelope);
     context.appendAuditRecord({ ...stateInitEvt, recorded_at: stateInitEvt.ts, type: "event" } as any);
@@ -156,7 +177,11 @@ export async function handleTerminalCommand(
       ts: new Date().toISOString(),
       topic: "terminal.state.changed",
       correlation_id: command.correlation_id,
-      payload: { state: "active" },
+      workspace_id: command.workspace_id,
+      lane_id: command.lane_id,
+      session_id: command.session_id,
+      terminal_id: finalTerminalId,
+      payload: { state: "active", runtime_state: context.getRuntimeState() },
     };
     context.bus.publish(stateActiveEvt as LocalBusEnvelope);
     context.appendAuditRecord({ ...stateActiveEvt, recorded_at: stateActiveEvt.ts, type: "event" } as any);
@@ -168,6 +193,10 @@ export async function handleTerminalCommand(
       ts: new Date().toISOString(),
       topic: "terminal.spawned",
       correlation_id: command.correlation_id,
+      workspace_id: command.workspace_id,
+      lane_id: command.lane_id,
+      session_id: command.session_id,
+      terminal_id: finalTerminalId,
       payload: { terminal_id: finalTerminalId },
     };
     context.bus.publish(spawnedEvt as LocalBusEnvelope);
@@ -218,7 +247,12 @@ export async function handleTerminalCommand(
     const buffer = context.getTerminalBuffer(terminalId);
     const seq = buffer.entries.length + 1;
 
-    if (command.lane_id === "lane-2" && terminalId.includes("sess-1")) {
+    const terminal = context.terminalRegistry.get(terminalId);
+    if (terminal && !context.terminalRegistry.isOwnedBy(terminalId, {
+      workspace_id: command.workspace_id ?? "",
+      lane_id: command.lane_id ?? "",
+      session_id: command.session_id ?? "",
+    })) {
       const response: LocalBusEnvelope = {
         id: command.id,
         type: "response",
@@ -265,18 +299,22 @@ export async function handleTerminalCommand(
       status: "ok",
     };
 
+    context.setTerminalState("active");
+
     const stateActiveEvt = {
-      id: `evt-state-changed-resize-${Date.now()}`,
+      id: `evt-state-changed-${Date.now()}`,
       type: "event",
       ts: new Date().toISOString(),
       topic: "terminal.state.changed",
       correlation_id: command.correlation_id,
+      workspace_id: command.workspace_id,
+      lane_id: command.lane_id,
+      session_id: command.session_id,
       terminal_id: terminalId,
-      payload: { state: "active", runtime_state: { terminal: "active" } },
+      payload: { state: "active", runtime_state: context.getRuntimeState() },
     };
     context.bus.publish(stateActiveEvt as LocalBusEnvelope);
     context.appendAuditRecord({ ...stateActiveEvt, recorded_at: stateActiveEvt.ts, type: "event" } as any);
-    context.setTerminalState("active");
 
     recordResponse(context, response);
     return response;

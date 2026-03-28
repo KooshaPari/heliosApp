@@ -116,17 +116,31 @@ export async function handleRuntimeFetch(
       lane_id: laneId,
       workspace_id: workspaceId,
       correlation_id: startEvt.correlation_id,
-      payload: { session_id: sessionId }
+      payload: { session_id: sessionId },
     };
     await context.bus.publish(attachedEvt as LocalBusEnvelope);
     context.appendAuditRecord({ ...attachedEvt, recorded_at: attachedEvt.ts, type: "event" } as any);
+
+    const createdEvt = {
+      id: `evt-session-created-${Date.now()}`,
+      type: "event",
+      ts: new Date().toISOString(),
+      topic: "session.created",
+      session_id: sessionId,
+      lane_id: laneId,
+      workspace_id: workspaceId,
+      correlation_id: startEvt.correlation_id,
+      payload: { session_id: sessionId },
+    };
+    await context.bus.publish(createdEvt as LocalBusEnvelope);
+    context.appendAuditRecord({ ...createdEvt, recorded_at: createdEvt.ts, type: "event" } as any);
 
     return Response.json({
       session_id: sessionId,
       transport: body.provider === "codex" ? "native_openai" : "cliproxy_harness",
       status: "attached",
       diagnostics: { degrade_reason: null },
-      codex_session_id: body.codex_session_id
+      codex_session_id: body.codex_session_id,
     }, { status: 200 });
   }
 

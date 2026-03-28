@@ -122,6 +122,7 @@ const contract = readJson(
 		"kitty-specs/001-colab-agent-terminal-control-plane/contracts/orchestration-envelope.schema.json",
 	),
 
+
 );
 
 const contractMethods = (contract.properties?.method?.enum ?? []).filter(
