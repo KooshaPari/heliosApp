@@ -90,6 +90,9 @@
     "packages/runtime-core": {
       "name": "@helios/runtime-core",
       "version": "0.1.0",
+      "dependencies": {
+        "ky": "^1.14.3",
+      },
       "devDependencies": {
         "bun-types": "latest",
         "typescript": "6.0.2",
