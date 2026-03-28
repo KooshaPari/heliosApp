@@ -302,7 +302,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
   const instrumentedBus: LocalBus = new Proxy(bus, {
     get(target, prop) {
       if (prop === "request") return request;
-      const value = (target as Record<string | symbol, unknown>)[prop];
+      const value = (target as unknown as Record<string | symbol, unknown>)[prop];
       return typeof value === "function" ? value.bind(target) : value;
     },
   });
