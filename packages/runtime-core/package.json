@@ -17,7 +17,9 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test"
   },
-  "dependencies": {},
+  "dependencies": {
+    "ky": "^1.14.3"
+  },
   "devDependencies": {
     "bun-types": "latest",
     "typescript": "6.0.2"

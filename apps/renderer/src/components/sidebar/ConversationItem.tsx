@@ -1,3 +1,5 @@
+// wraps: date-fns 4.1.0
+import { formatDistanceToNow } from "date-fns";
 import type { Component } from "solid-js";
 
 export type ConversationItemProps = {
@@ -9,16 +11,7 @@ export type ConversationItemProps = {
 };
 
 function relativeTime(date: Date): string {
-  const now = Date.now();
-  const diffMs = now - date.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 60) return `${diffSec}s ago`;
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m ago`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
-  const diffDay = Math.floor(diffHr / 24);
-  return `${diffDay}d ago`;
+  return formatDistanceToNow(date, { addSuffix: true });
 }
 
 export const ConversationItem: Component<ConversationItemProps> = props => {
