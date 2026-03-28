@@ -9,6 +9,7 @@ import { InMemoryLocalBus } from "./protocol/bus.js";
 import { createBoundaryDispatcher } from "./protocol/boundary_adapter.js";
 import { METHODS } from "./protocol/methods.js";
 import type { LocalBusEnvelope } from "./protocol/types.js";
+import type { LocalBus } from "./protocol/bus.js";
 import { RecoveryRegistry } from "./sessions/registry.js";
 import type {
   RecoveryBootstrapResult,
@@ -298,16 +299,13 @@ export function createRuntime(options: RuntimeOptions = {}) {
   }
 
   // Expose bus with the instrumented request wrapper while preserving all LocalBus methods
-  const instrumentedBus = {
-    ...bus,
-    request,
-    publish: (event: LocalBusEnvelope) => bus.publish(event),
-    registerMethod: (method: string, handler: MethodHandler) => bus.registerMethod(method, handler),
-    send: (envelope: unknown) => bus.send(envelope as LocalBusEnvelope),
-    subscribe: (topic: string, handler: (evt: EventEnvelope) => void | Promise<void>) => bus.subscribe(topic, handler),
-    destroy: () => bus.destroy(),
-    getActiveCorrelationId: () => bus.getActiveCorrelationId(),
-  };
+  const instrumentedBus: LocalBus = new Proxy(bus, {
+    get(target, prop) {
+      if (prop === "request") return request;
+      const value = (target as Record<string | symbol, unknown>)[prop];
+      return typeof value === "function" ? value.bind(target) : value;
+    },
+  });
 
   return {
     bus: instrumentedBus,
