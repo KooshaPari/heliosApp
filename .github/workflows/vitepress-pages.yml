@@ -1,4 +1,5 @@
 name: VitePress Pages
+# Pages enabled: KooshaPari/heliosApp - build_type=workflow
 
 on:
   pull_request:
