@@ -297,8 +297,20 @@ export function createRuntime(options: RuntimeOptions = {}) {
     };
   }
 
+  // Expose bus with the instrumented request wrapper while preserving all LocalBus methods
+  const instrumentedBus = {
+    ...bus,
+    request,
+    publish: (event: LocalBusEnvelope) => bus.publish(event),
+    registerMethod: (method: string, handler: MethodHandler) => bus.registerMethod(method, handler),
+    send: (envelope: unknown) => bus.send(envelope as LocalBusEnvelope),
+    subscribe: (topic: string, handler: (evt: EventEnvelope) => void | Promise<void>) => bus.subscribe(topic, handler),
+    destroy: () => bus.destroy(),
+    getActiveCorrelationId: () => bus.getActiveCorrelationId(),
+  };
+
   return {
-    bus: Object.assign(bus, { request }),
+    bus: instrumentedBus,
     fetch,
     exportRecoveryMetadata(): RecoveryMetadata {
       return recovery.snapshot();
