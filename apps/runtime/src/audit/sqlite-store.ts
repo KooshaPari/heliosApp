@@ -139,7 +139,7 @@ export class SQLiteAuditStore {
    */
   getByCorrelationChain(correlationId: string): AuditEvent[] {
     const stmt = this.db.prepare(
-      "SELECT * FROM audit_events WHERE correlation_id = ? ORDER BY timestamp ASC, id DESC"
+      "SELECT * FROM audit_events WHERE correlation_id = ? ORDER BY timestamp ASC, id ASC"
     );
     const rows = stmt.all(correlationId) as any[];
 
