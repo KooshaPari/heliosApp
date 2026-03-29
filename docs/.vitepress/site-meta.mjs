@@ -1,8 +1,8 @@
 export function createSiteMeta({ base = '/' } = {}) {
   return {
     base,
-    title: 'heliosApp',
-    description: 'heliosApp documentation',
+    title: 'apps/heliosApp-colab',
+    description: 'Documentation',
     themeConfig: {
       nav: [
         { text: 'Home', link: base || '/' },

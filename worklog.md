@@ -1,38 +1,37 @@
-# heliosApp Worklog
 
-**Last updated:** 2026-03-29
+# Worklog
 
-## Active Workstreams
+**This project is managed through AgilePlus.**
 
-| Status | Workstream | Description |
-|---|---|---|
-| **Active** | Integration test stabilization | 247/247 tests pass (2026-03-28 evidence session) |
-| Pending | HAPP-003 Reference hardware replay | Requires hardware access |
-| Pending | HAPP-007 Cross-repo contract freeze | Deferred |
-| Pending | HAPP-008 Release packet refresh | Requires return-to-main |
+## AgilePlus Tracking
 
-## Recent Evidence Sessions
+All feature work is tracked in AgilePlus:
+- Reference: /Users/kooshapari/CodeProjects/Phenotype/repos/AgilePlus
+- CLI: agileplus (run from AgilePlus directory)
 
-- `docs/sessions/20260328-heliosapp-evidence`: Full integration suite rerun — **247/247 pass** (74.34s). 29 tests fixed (was 0 pass before fixes). All substantive correctness failures resolved. Remaining: deps:status upgrade notices.
+## Quick Commands
 
-## Completed Work
+```bash
+cd /Users/kooshapari/CodeProjects/Phenotype/repos/AgilePlus
 
-- TDZ fix in `scripts/deps-status.ts` (renamed conflicting variable to `daysSinceUpdate`)
-- Runtime API surface exposed: `spawnTerminal`, `inputTerminal`, `resizeTerminal`, `getTerminalBuffer`, `getEvents`, `getState`
-- Protocol validator fixed: terminal.* methods no longer require workspace_id context
-- Watchdog orphan detection restored: `detect()` and `suggest()` methods implemented
-- SLOMonitor diagnostics rewritten cleanly with correct checkAll() return type
-- Session registry afterEach cleanup added across test files
-- Duplicate workspace IDs fixed in binding lifecycle tests
-- Categorical risk sort fixed in detection accuracy tests
-- `clear()` method added to LaneRegistry for test isolation
+# List all features
+agileplus list
 
-## Known Blockers
+# Show feature details
+agileplus show <feature-id>
 
-- **Reference hardware required** — HAPP-003 (reference hardware replay) cannot run on current hardware
-- **Detached canonical branch** — canonical checkout is `HEAD (no branch)`, needs return-to-main integration before merge
+# Update work package status
+agileplus status <feature-id> --wp <wp-id> --state <state>
+```
 
-## Repository State
+## Current Work
 
-- `main` is clean, ahead of origin/main by 2 commits
-- `chore/sync-v3` has unrelated dirty files not owned by this workstream
+See AgilePlus database for current work status:
+- /Users/kooshapari/CodeProjects/Phenotype/repos/AgilePlus/.agileplus/agileplus.db
+
+## Work History
+
+Historical work is documented in:
+- AgilePlus worklog: /Users/kooshapari/CodeProjects/Phenotype/repos/AgilePlus/.work-audit/worklog.md
+- Git history for merged work
+

@@ -1,3 +1,3 @@
 # Namay-e Koli
 
-`heliosApp` darvaze-ye mostanadat ast.
+`apps/heliosApp-colab` darvaze-ye mostanadat ast.
