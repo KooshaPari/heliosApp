@@ -86,20 +86,15 @@ export class TerminalRegistry implements RegistryQueryInterface {
     this.primaryStore.set(terminalId, binding);
 
     // Update indexes
-    this.addToIndex(this.laneIndex, triple.laneId, terminalId);
-    this.addToIndex(this.sessionIndex, triple.sessionId, terminalId);
-    this.addToIndex(this.workspaceIndex, triple.workspaceId, terminalId);
-    if (!this.sessionPerLaneIndex.has(triple.laneId)) {
-      this.sessionPerLaneIndex.set(triple.laneId, new Map());
-    }
-    this.sessionPerLaneIndex.get(triple.laneId)!.set(triple.sessionId, new Set([terminalId]));
+    this.addToIndex(this.laneIndex, binding.binding.laneId, terminalId);
+    this.addToIndex(this.sessionIndex, binding.binding.sessionId, terminalId);
+    this.addToIndex(this.workspaceIndex, binding.binding.workspaceId, terminalId);
 
     return binding;
   }
 
   /**
    * Rebind an existing terminal to a new triple.
-   *
    * Validates new triple, updates primary + all secondary indexes.
    * Transitions state to 'rebound'.
    */

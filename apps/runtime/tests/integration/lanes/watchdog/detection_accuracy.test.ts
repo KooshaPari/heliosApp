@@ -1,6 +1,6 @@
 // Integration test for detection accuracy
 
-import { describe, it, expect, beforeEach } from "bun:test";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
@@ -15,6 +15,10 @@ describe("Detection Accuracy", () => {
     bus = new InMemoryLocalBus();
     laneRegistry = new LaneRegistry();
     engine = new RemediationEngine(laneRegistry, bus);
+  });
+
+  afterEach(() => {
+    engine.stop();
   });
 
   it("should detect all orphans in mixed environment", async () => {

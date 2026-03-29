@@ -139,7 +139,7 @@ describe("Remediation Workflow", () => {
     ];
 
     const suggestions = await engine.generateSuggestions(orphans);
-    engine.declineCleanup(suggestions[0].id);
+    await engine.declineCleanup(suggestions[0].id);
 
     const events = bus.getEvents();
     const declineEvent = events.find(e => e.topic === "orphan.remediation.declined");

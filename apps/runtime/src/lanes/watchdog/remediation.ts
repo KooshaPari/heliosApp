@@ -434,6 +434,12 @@ export class RemediationEngine {
     }
   }
 
+  /** Clear in-memory state (called between tests). Does NOT persist. */
+  stop(): void {
+    this.cooldownMap.clear();
+    this.suggestions.clear();
+  }
+
   private saveCooldownMap(): void {
     try {
       const dir = path.dirname(this.cooldownPath);
