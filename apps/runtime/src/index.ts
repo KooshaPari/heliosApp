@@ -10,7 +10,7 @@ import { createBoundaryDispatcher } from "./protocol/boundary_adapter.js";
 import { METHODS } from "./protocol/methods.js";
 import type { LocalBusEnvelope } from "./protocol/types.js";
 import { RecoveryRegistry, InMemorySessionRegistry } from "./sessions/registry.js";
-import { LaneLifecycleService, type RuntimeState } from "./sessions/state_machine.js";
+import { LaneLifecycleService, type RuntimeState, type LaneRecord } from "./sessions/state_machine.js";
 import type { TerminalBuffer } from "./runtime/types.js";
 import { TerminalRegistry } from "./sessions/terminal_registry.js";
 import { handleRuntimeRequest, type RuntimeOpsContext } from "./runtime/ops.js";
@@ -307,6 +307,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
       if (typeof terminalId === "string") {
         terminalRegistry.setState(terminalId, "active");
       }
+      // Apply recovery bookkeeping for terminal state changes
+      applyRecoveryFromCommand(command, response);
     }
 
     if (command.method === "terminal.input" && response.status === "ok") {
@@ -318,6 +320,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
           runtimeState.terminal === "throttled" ? "throttled" : "active"
         );
       }
+      // Apply recovery bookkeeping for terminal state changes
+      applyRecoveryFromCommand(command, response);
     }
 
     return response;
@@ -485,9 +489,16 @@ export function createRuntime(options: RuntimeOptions = {}) {
         return Response.json({ error: "invalid_preferred_transport" }, { status: 400 });
       }
 
-      const probeResult = options.harnessProbe
-        ? await options.harnessProbe.check()
-        : { ok: true, reason: null };
+      let probeResult: { ok: boolean; reason: string | null };
+      try {
+        const result = options.harnessProbe
+          ? await options.harnessProbe.check()
+          : { ok: true, reason: null };
+        probeResult = { ok: result.ok, reason: result.reason ?? null };
+      } catch (err) {
+        console.error("[Runtime] Harness probe exception:", err);
+        probeResult = { ok: false, reason: "harness_probe_exception" };
+      }
 
       let transport: "cliproxy_harness" | "native_openai";
       let degrade_reason: string | null = null;
@@ -599,7 +610,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
       const laneId = url.pathname.split("/")[5];
       const workspaceId = url.pathname.split("/")[3];
 
-      let lane;
+      let lane: LaneRecord;
       try {
         lane = laneService.getRequired(laneId);
       } catch (_err) {

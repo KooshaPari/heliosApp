@@ -312,6 +312,36 @@ export async function handleTerminalCommand(
           ? payload.terminal_id
           : undefined;
 
+    // Validate terminal exists in registry before creating buffers or emitting events
+    if (!terminalId) {
+      const response: LocalBusEnvelope = {
+        id: command.id,
+        type: "response",
+        ts: new Date().toISOString(),
+        correlation_id: command.correlation_id,
+        method: command.method,
+        status: "error",
+        error: { code: "MISSING_TERMINAL_ID", message: "Terminal ID is required", retryable: false },
+      };
+      recordResponse(context, response);
+      return response;
+    }
+
+    const terminal = context.terminalRegistry.get(terminalId);
+    if (!terminal) {
+      const response: LocalBusEnvelope = {
+        id: command.id,
+        type: "response",
+        ts: new Date().toISOString(),
+        correlation_id: command.correlation_id,
+        method: command.method,
+        status: "error",
+        error: { code: "TERMINAL_NOT_FOUND", message: "Terminal not found in registry", retryable: false },
+      };
+      recordResponse(context, response);
+      return response;
+    }
+
     const response: LocalBusEnvelope = {
       id: command.id,
       type: "response",

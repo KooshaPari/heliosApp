@@ -71,7 +71,7 @@ function recordCommand(context: RuntimeOpsContext, envelope: LocalBusEnvelope): 
     type: "command",
     method: envelope.method,
     correlation_id: envelope.correlation_id,
-    envelope,
+    // Do not persist raw envelope; sensitive data is stripped below
     payload: redactPayload(
       context.redactionEngine,
       normalizePayload(envelope.payload),
@@ -87,7 +87,7 @@ function recordResponse(context: RuntimeOpsContext, envelope: LocalBusEnvelope):
     type: "response",
     method: envelope.method,
     correlation_id: envelope.correlation_id,
-    envelope,
+    // Do not persist raw envelope; sensitive data is stripped below
     payload: redactPayload(
       context.redactionEngine,
       normalizePayload(envelope.result ?? envelope.payload),
