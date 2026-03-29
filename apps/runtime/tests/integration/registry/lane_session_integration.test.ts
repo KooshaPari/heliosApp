@@ -189,16 +189,16 @@ describe("Lane/Session Lifecycle Integration", () => {
 
   describe("complex invalidation scenarios", () => {
     it("should handle cascade: lane cleanup with multiple sessions", () => {
-      // Register 12 terminals across 3 lanes x 2 sessions x 2 terminals per (lane,session) pair
-      // Use unique lane IDs (lane-X-Y) to avoid duplicate (lane,session) key collisions
+      // Register 12 terminals: 3 lanes x 2 sessions x 2 terminals
+      // Use unique session IDs per (lane,session) pair to avoid DuplicateSessionId
       let terminalCount = 0;
-      for (let laneIdx = 1; laneIdx <= 3; laneIdx++) {
-        for (let sessionIdx = 1; sessionIdx <= 2; sessionIdx++) {
+      for (const laneId of ["lane-1", "lane-2", "lane-3"]) {
+        for (const sessionId of ["session-A", "session-B"]) {
           for (let t = 0; t < 2; t++) {
             registry.register(`terminal-${terminalCount}`, {
               workspaceId: "ws-1",
-              laneId: `lane-${laneIdx}-${t}`,
-              sessionId: `session-${sessionIdx}`,
+              laneId,
+              sessionId: `${sessionId}-${terminalCount}`,  // unique per (lane,session) pair
             });
             terminalCount++;
           }
