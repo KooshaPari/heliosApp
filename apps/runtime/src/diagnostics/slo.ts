@@ -45,7 +45,7 @@ export const SLO_DEFINITIONS: readonly SLODefinition[] = Object.freeze([
 
 /** Return SLO definitions for a given metric name. */
 export function getSLOsForMetric(metric: string): SLODefinition[] {
-  return SLO_DEFINITIONS.filter(d => d.metric === metric);
+  return SLO_DEFINITIONS.filter(s => s.metric === metric);
 }
 
 /** Check result from a single SLO against a percentile bucket. */

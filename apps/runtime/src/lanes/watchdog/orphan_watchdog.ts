@@ -177,27 +177,24 @@ export class OrphanWatchdog {
       }
 
       // Emit watchdog.suggestion events for high-risk orphans
-      const highRisk = this.lastClassifiedOrphans.filter((o) => o.risk_level >= 3);
+      const highRisk = this.lastClassifiedOrphans.filter((o) => o.riskLevel === "high");
       for (const orphan of highRisk) {
         const suggestion: WatchdogSuggestion = {
-          lane_id: orphan.lane_id,
-          session_id: orphan.session_id,
-          resource_id: orphan.resource_id,
-          risk_level: orphan.risk_level,
           action: "decline",
-          reason: `Orphan resource detected: ${orphan.resource_type} (risk ${orphan.risk_level})`,
+          reason: `Orphan resource detected: ${orphan.type} (risk ${orphan.riskLevel})`,
           event: {
             type: "decline",
             timestamp: new Date().toISOString(),
           },
         };
         await this.bus.publish({
-          id: `suggestion-${this.cycleNumber}-${orphan.resource_id}`,
+          id: `suggestion-${this.cycleNumber}-${orphan.path ?? orphan.pid ?? orphan.type}`,
           type: "event",
           ts: new Date().toISOString(),
           topic: "watchdog.suggestion",
           payload: {
             suggestion,
+            orphan,
           },
         });
       }

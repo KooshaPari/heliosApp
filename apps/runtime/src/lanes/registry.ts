@@ -115,7 +115,6 @@ export class LaneRegistry {
   clear(): void {
     this.lanes.clear();
     this.workspaceIndex.clear();
-    this.#events.length = 0;
   }
 
   private addToWorkspaceIndex(workspaceId: string, laneId: string): void {

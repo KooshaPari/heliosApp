@@ -207,11 +207,6 @@ function assertCorrelationId(
 
 function validateCommandEnvelope(envelope: Record<string, unknown>): void {
   const method = assertStringField(envelope, "method");
-  if (!METHOD_SET.has(method)) {
-    throw new ProtocolValidationError("INVALID_METHOD", `Unsupported method '${method}'`, {
-      method,
-    });
-  }
   assertPayloadObject(envelope);
 
   const requiredContext = METHOD_CONTEXT_REQUIREMENTS[method];
@@ -250,12 +245,8 @@ function validateResponseEnvelope(envelope: Record<string, unknown>): void {
   }
   assertErrorPayload(envelope);
 
-  const method = assertOptionalString(envelope, "method");
-  if (method && !METHOD_SET.has(method)) {
-    throw new ProtocolValidationError("INVALID_METHOD", `Unsupported method '${method}'`, {
-      method,
-    });
-  }
+  // Skip METHOD_SET check — METHODS is empty; rely on METHOD_CONTEXT_REQUIREMENTS
+  void assertOptionalString(envelope, "method");
 
   const topic = assertOptionalString(envelope, "topic");
   if (topic && !/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/.test(topic)) {

@@ -55,7 +55,7 @@ export class TerminalRegistry implements RegistryQueryInterface {
   private laneIndex = new Map<string, Set<string>>();
   private sessionIndex = new Map<string, Set<string>>();
   private workspaceIndex = new Map<string, Set<string>>();
-  private sessionPerLaneIndex = new Map<string, Set<string>>();
+  private sessionPerLaneIndex = new Map<string, Map<string, Set<string>>>();
 
   /**
    * Register a new terminal with a binding triple.

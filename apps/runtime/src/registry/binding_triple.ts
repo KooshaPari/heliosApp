@@ -121,3 +121,10 @@ export function createBinding(terminalId: string, triple: BindingTriple): Termin
     updatedAt: now,
   };
 }
+
+export function createTerminalBinding(
+  terminalId: string,
+  triple: BindingTriple,
+): TerminalBinding {
+  return createBinding(terminalId, triple);
+}
