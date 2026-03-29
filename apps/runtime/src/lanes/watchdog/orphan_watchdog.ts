@@ -144,6 +144,9 @@ export class OrphanWatchdog {
         );
       }
 
+      // Increment cycle number before emitting events so first cycle is cycle 1
+      this.cycleNumber++;
+
       // Emit detection cycle event
       await this.bus.publish({
         id: `orphan-cycle-${this.cycleNumber}`,
@@ -213,8 +216,6 @@ export class OrphanWatchdog {
         },
       };
       await this.checkpointManager.save(checkpoint);
-
-      this.cycleNumber++;
 
       console.log(
         `[Watchdog] Cycle ${this.cycleNumber} completed: ${this.lastDetectionDuration}ms, ${this.lastClassifiedOrphans.length} orphans found`
