@@ -1,135 +1,25 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+## [unreleased]
+
+### Documentation
+
+- *(heliosApp)* Update CHANGELOG with 247/247 integration test fix results
+
+### Miscellaneous Tasks
+
+- *(release)* Create VERSION file and release 0.1.0
+- Rescue unpushed docs and deps commits (#349)
+
 ## [0.1.0] - 2026-03-29
 
-### 🚀 Features
+### Auto
 
-- Add platform specs 001-028, constitution v2, ADR-001, WP00
-- Add implementation plans for specs 002-028
-- *(WP01)* Protocol contracts and runtime foundation
-- *(WP02)* Lane and session lifecycle with harness routing
-- *(WP04)* Editorless control plane ui and context cohesion
-- *(WP07)* Protocol boundary delegation and traceability gates
-- *(WP08)* Durability placeholder and retention compliance
-- *(WP09)* Formal protocol surface completion
-- *(WP01)* Envelope schema, types, validation, and error taxonomy
-- *(WP01)* Envelope schema, types, validation, and error taxonomy
-- *(WP02)* Method/topic registries with dispatch and fan-out
-- *(WP01)* Envelope schema, types, validation, and error taxonomy
-- *(WP02)* Method/topic registries with dispatch and fan-out
-- *(WP03)* Event sequencing, correlation propagation, payload enforcement, and tests
-- *(WP01)* Workspace CRUD, store abstraction, and unit tests
-- *(WP02)* Project binding, stale detection, git clone, and bus events
-- *(WP03)* JSON file persistence with atomic writes, corruption recovery, and concurrency control
-- *(WP01)* Settings schema, persistence, hot-reload, and unit tests
-- *(WP02)* Feature flag system with zero-alloc reads, restart-pending semantics, and benchmarks
-- *(WP01)* ULID library, prefix format, and validation
-- *(WP01)* ULID library, prefix format, and validation
-- *(WP02)* Cross-repo compatibility, collision/format tests, and benchmarks
-- *(WP01)* Instrumentation hooks and timer API
-- *(WP02)* Rolling percentiles and SLO definitions
-- *(WP03)* Violation events and bus integration
-- *(WP01)* PTY spawn, state machine, and process registry
-- *(WP02)* Implement PTY input, resize, terminate handlers and signal handling
-- *(WP03)* Bounded output buffering, backpressure, and tests
-- *(WP01)* Par-lane orchestrator integration
-- *(WP01)* Lane state machine and lifecycle commands
-- *(WP02)* Lane orchestrator commands
-- *(WP03)* Par task binding, execution, stale detection, and lifecycle events
-- *(WP04)* Orphan reconciliation and comprehensive lane tests
-- *(WP01)* Zellij mux session adapter
-- *(WP02)* Pane/tab topology, layout snapshots, health monitoring
-- *(WP03)* Mux event relay, reattach, and reconciliation with tests
-- *(WP01)* Renderer adapter interface
-- *(WP02)* Stream binding, switch buffering, and comprehensive tests
-- *(WP02)* Renderer adapter implementation
-- *(WP01)* Ghostty renderer backend
-- *(WP02)* Render loop monitoring, input passthrough, and frame metrics
-- *(WP03)* PTY stream piping, GPU rendering surface, and comprehensive tests
-- *(WP01)* Rio renderer backend adapter with feature flag
-- *(WP02)* Crash fallback to ghostty, feature flag toggle, and comprehensive tests
-- *(030)* Add Helios MVP Agent IDE spec, meta, and checklists
-- *(WP01)* SolidJS foundation, shared types, inference engine, persistence
-- *(WP02)* App shell layout with sidebar, status bar, and keyboard shortcuts
-- *(WP03)* Chat panel with message rendering, input, and tool call display
-- *(WP04)* Agent chat loop with conversation management, multi-turn context, and cancel
-- *(WP05)* Terminal panel with xterm.js, multi-tab support, and terminal store
-- *(WP06)* Conversation persistence with localStorage and session restore
-- *(WP07)* Hardware detection, MLX, Anthropic, and llama.cpp inference adapters
-- *(WP08)* VLLM adapter and model selector component
-- *(WP09)* Muxer dispatch and session sharing modal
-- *(WP10)* File context panel, diff view, setup wizard, toast notifications
-- *(WP01)* Encrypted credential store with AES-256-GCM, provider isolation, and audit events
-- *(WP02)* Redaction engine with pattern matching, rule management, and audit trail
-- *(WP03)* Protected paths, audit integration, CI verification, integration tests
-- *(WP01)* Bun workspace monorepo with TS strict mode
-- *(WP02)* Build, dev, typecheck scripts with path aliases and tests
-- *(WP02)* Hot-swap implementation, rollback, and concurrent switch rejection
-- *(WP03)* Restart-with-restore fallback, degraded mode, terminal queue, and comprehensive tests
-- *(WP01)* Implement terminal registry, binding CRUD, and validation middleware
-- *(WP02)* Implement binding lifecycle events, persistence, and integration tests
-- *(WP01)* Implement watchdog scheduler and three detectors
-- *(WP02)* Implement remediation UI, recovery suppression, and integration tests
-- *(WP01)* Implement active context store, tab surfaces, tab bar, and persistence
-- *(WP02)* Implement five tab surfaces with context binding and error handling
-- *(WP03)* Implement context propagation, keyboard shortcuts, and E2E tests
-- *(WP01)* Implement lane panel with status badges and keyboard navigation
-- *(WP02)* Implement CRUD actions, confirmation dialog, and real-time event handling
-- *(WP01)* Implement renderer settings panel with capabilities and preferences
-- *(WP02)* Implement hot-swap toggle, status indicators, and settings lock
-- *(WP01)* Implement registry manifest, status command, and changelog infrastructure
-- *(WP02)* Implement rollback automation, canary upgrade process, and integration tests
-- *(WP01)* Implement quality gates pipeline infrastructure and first four gates
-- *(WP02)* Implement coverage, security, and static analysis quality gates
-- *(WP03)* Implement bypass detection gate and local gates mirror
-- *(WP01)* GCA/CodeRabbit configuration and review requirements
-- *(WP01)* GCA/CodeRabbit configuration and review requirements
-- *(WP02)* Compliance checker, ADR workflow, and tests
-- *(WP01)* Policy rule model and storage with hot-swap
-- *(WP01)* Policy rule model and storage with hot-swap
-- *(WP02)* Policy evaluation engine and approval request queue
-- *(WP01)* Policy rule model and storage with hot-swap
-- *(WP02)* Policy evaluation engine and approval request queue
-- *(WP03)* Approval lifecycle UI and workflow page
-- *(WP03)* Add approval types and workflow page (continued)
-- *(WP01)* Audit event schema, sink, and bus subscriber
-- *(WP02)* Ring buffer, SQLite storage, and overflow handling
-- *(WP03)* Searchable ledger, filtering API, and correlation chain traversal
-- *(WP04)* Session replay, retention, and export with redaction
-- *(WP01)* Implement provider adapter interface, registry, error taxonomy, and isolation foundation
-- *(WP02)* Implement ACP client adapter with lifecycle, policy gate, and health monitoring
-- *(WP03)* Implement MCP tool bridge with discovery, schema registration, and sandboxing
-- *(WP04)* Implement A2A router, health monitoring coordinator, and failover with comprehensive tests
-- *(WP01)* Implement share session management with upterm and tmate adapters
-- *(WP01)* Implement crash detection and watchdog system
-- *(WP02)* Implement recovery state machine and checkpoint system
-- *(WP03)* Implement restoration pipeline, orphan reconciliation, and recovery UI
-- *(WP07)* Protocol boundary delegation and traceability gates
-- *(WP08)* Durability placeholder and retention compliance
-- *(WP09)* Formal protocol surface completion
-- *(WP03)* Event sequencing, correlation propagation, payload enforcement, and tests
-- *(WP02)* Cross-repo compatibility, collision/format tests, and benchmarks
-- *(WP02)* Rolling percentiles and SLO definitions
-- *(WP03)* Par task binding, execution, stale detection, and lifecycle events
-- *(WP04)* Orphan reconciliation and comprehensive lane tests
-- *(WP01)* SolidJS foundation, shared types, inference engine, persistence
-- *(WP02)* App shell layout with sidebar, status bar, and keyboard shortcuts
-- *(WP05)* Terminal panel with xterm.js, multi-tab support, and terminal store
-- *(WP01)* Encrypted credential store with AES-256-GCM, provider isolation, and audit events
-- *(WP01)* Implement registry manifest, status command, and changelog infrastructure
-- Implement createRuntime and fix DOM test shim
-- Runtime audit logic (#204)
-- *(shared)* Add @helios/logger, @helios/errors, and @helios/types packages
-- *(governance)* Add KILL_SWITCH, SBOM CI, and fix desktop syntax/types
-- Modernize heliosApp 2026 (#266)
-- Code reduction for heliosApp (#286)
-- Complete spec documentation for heliosApp
-- Add ADR framework, xDD methodology catalog, and hexagonal template
-- Add @phenotype/metrics package with TDD/BDD tests
-- Add @phenotype/project package (domain: ProjectService, ports, entities, tests scaffold)
-- Extract @phenotype/project package (#319)
-- *(heliosApp)* Restore OXC migration fixes and runtime improvements
-- Merge colab-renderer + extract @helios/runtime-core (#341)
+- Sync and evaluate codex/launch-20260314 (#281)
+- Codex: oxc-migration-20260305-heliosapp-consolidated (#296)
 
-### 🐛 Bug Fixes
+### Bug Fixes
 
 - Stabilize llama.cpp adapter for tsc and biome
 - Reduce runtime lint warnings in stubs and muxer route
@@ -292,23 +182,7 @@
 - GetByCorrelationChain ordering — UUID v7 tiebreaker
 - *(sqlite-store)* Remove ordering dependency in getByCorrelationChain test
 
-### 💼 Other
-
-- Sync and evaluate codex/launch-20260314 (#281)
-- Codex: oxc-migration-20260305-heliosapp-consolidated (#296)
-- Merge conflicts in docs tests
-
-### 🚜 Refactor
-
-- Decompose runtime into pty/renderer/secrets/lanes services (#40)
-- *(runtime)* Harden bus and event surfaces with typed envelopes
-- Decompose bus.ts into focused modules
-- Migrate from biome to oxlint/oxfmt
-- Separate unit and integration tests in CI
-- Split files exceeding 500-line static analysis limit
-- Phase2 decompose (merged with main) (#305)
-
-### 📚 Documentation
+### Documentation
 
 - *(governance)* Codify review bot retrigger protocol
 - Unify VitePress IA categories and index pipeline (#1)
@@ -337,14 +211,136 @@
 - Add docs-site scaffold and verification harness
 - Add docs-site scaffold and verification harness
 
-### 🧪 Testing
+### Features
 
-- Fix zellij review blockers and runtime edge cases
-- Fix zellij review blockers and runtime edge cases
-- Add session restore reconnect e2e coverage (#56)
-- Fix zellij review blockers and runtime edge cases
+- Add platform specs 001-028, constitution v2, ADR-001, WP00
+- Add implementation plans for specs 002-028
+- *(WP01)* Protocol contracts and runtime foundation
+- *(WP02)* Lane and session lifecycle with harness routing
+- *(WP04)* Editorless control plane ui and context cohesion
+- *(WP07)* Protocol boundary delegation and traceability gates
+- *(WP08)* Durability placeholder and retention compliance
+- *(WP09)* Formal protocol surface completion
+- *(WP01)* Envelope schema, types, validation, and error taxonomy
+- *(WP01)* Envelope schema, types, validation, and error taxonomy
+- *(WP02)* Method/topic registries with dispatch and fan-out
+- *(WP01)* Envelope schema, types, validation, and error taxonomy
+- *(WP02)* Method/topic registries with dispatch and fan-out
+- *(WP03)* Event sequencing, correlation propagation, payload enforcement, and tests
+- *(WP01)* Workspace CRUD, store abstraction, and unit tests
+- *(WP02)* Project binding, stale detection, git clone, and bus events
+- *(WP03)* JSON file persistence with atomic writes, corruption recovery, and concurrency control
+- *(WP01)* Settings schema, persistence, hot-reload, and unit tests
+- *(WP02)* Feature flag system with zero-alloc reads, restart-pending semantics, and benchmarks
+- *(WP01)* ULID library, prefix format, and validation
+- *(WP01)* ULID library, prefix format, and validation
+- *(WP02)* Cross-repo compatibility, collision/format tests, and benchmarks
+- *(WP01)* Instrumentation hooks and timer API
+- *(WP02)* Rolling percentiles and SLO definitions
+- *(WP03)* Violation events and bus integration
+- *(WP01)* PTY spawn, state machine, and process registry
+- *(WP02)* Implement PTY input, resize, terminate handlers and signal handling
+- *(WP03)* Bounded output buffering, backpressure, and tests
+- *(WP01)* Par-lane orchestrator integration
+- *(WP01)* Lane state machine and lifecycle commands
+- *(WP02)* Lane orchestrator commands
+- *(WP03)* Par task binding, execution, stale detection, and lifecycle events
+- *(WP04)* Orphan reconciliation and comprehensive lane tests
+- *(WP01)* Zellij mux session adapter
+- *(WP02)* Pane/tab topology, layout snapshots, health monitoring
+- *(WP03)* Mux event relay, reattach, and reconciliation with tests
+- *(WP01)* Renderer adapter interface
+- *(WP02)* Stream binding, switch buffering, and comprehensive tests
+- *(WP02)* Renderer adapter implementation
+- *(WP01)* Ghostty renderer backend
+- *(WP02)* Render loop monitoring, input passthrough, and frame metrics
+- *(WP03)* PTY stream piping, GPU rendering surface, and comprehensive tests
+- *(WP01)* Rio renderer backend adapter with feature flag
+- *(WP02)* Crash fallback to ghostty, feature flag toggle, and comprehensive tests
+- *(030)* Add Helios MVP Agent IDE spec, meta, and checklists
+- *(WP01)* SolidJS foundation, shared types, inference engine, persistence
+- *(WP02)* App shell layout with sidebar, status bar, and keyboard shortcuts
+- *(WP03)* Chat panel with message rendering, input, and tool call display
+- *(WP04)* Agent chat loop with conversation management, multi-turn context, and cancel
+- *(WP05)* Terminal panel with xterm.js, multi-tab support, and terminal store
+- *(WP06)* Conversation persistence with localStorage and session restore
+- *(WP07)* Hardware detection, MLX, Anthropic, and llama.cpp inference adapters
+- *(WP08)* VLLM adapter and model selector component
+- *(WP09)* Muxer dispatch and session sharing modal
+- *(WP10)* File context panel, diff view, setup wizard, toast notifications
+- *(WP01)* Encrypted credential store with AES-256-GCM, provider isolation, and audit events
+- *(WP02)* Redaction engine with pattern matching, rule management, and audit trail
+- *(WP03)* Protected paths, audit integration, CI verification, integration tests
+- *(WP01)* Bun workspace monorepo with TS strict mode
+- *(WP02)* Build, dev, typecheck scripts with path aliases and tests
+- *(WP02)* Hot-swap implementation, rollback, and concurrent switch rejection
+- *(WP03)* Restart-with-restore fallback, degraded mode, terminal queue, and comprehensive tests
+- *(WP01)* Implement terminal registry, binding CRUD, and validation middleware
+- *(WP02)* Implement binding lifecycle events, persistence, and integration tests
+- *(WP01)* Implement watchdog scheduler and three detectors
+- *(WP02)* Implement remediation UI, recovery suppression, and integration tests
+- *(WP01)* Implement active context store, tab surfaces, tab bar, and persistence
+- *(WP02)* Implement five tab surfaces with context binding and error handling
+- *(WP03)* Implement context propagation, keyboard shortcuts, and E2E tests
+- *(WP01)* Implement lane panel with status badges and keyboard navigation
+- *(WP02)* Implement CRUD actions, confirmation dialog, and real-time event handling
+- *(WP01)* Implement renderer settings panel with capabilities and preferences
+- *(WP02)* Implement hot-swap toggle, status indicators, and settings lock
+- *(WP01)* Implement registry manifest, status command, and changelog infrastructure
+- *(WP02)* Implement rollback automation, canary upgrade process, and integration tests
+- *(WP01)* Implement quality gates pipeline infrastructure and first four gates
+- *(WP02)* Implement coverage, security, and static analysis quality gates
+- *(WP03)* Implement bypass detection gate and local gates mirror
+- *(WP01)* GCA/CodeRabbit configuration and review requirements
+- *(WP01)* GCA/CodeRabbit configuration and review requirements
+- *(WP02)* Compliance checker, ADR workflow, and tests
+- *(WP01)* Policy rule model and storage with hot-swap
+- *(WP01)* Policy rule model and storage with hot-swap
+- *(WP02)* Policy evaluation engine and approval request queue
+- *(WP01)* Policy rule model and storage with hot-swap
+- *(WP02)* Policy evaluation engine and approval request queue
+- *(WP03)* Approval lifecycle UI and workflow page
+- *(WP03)* Add approval types and workflow page (continued)
+- *(WP01)* Audit event schema, sink, and bus subscriber
+- *(WP02)* Ring buffer, SQLite storage, and overflow handling
+- *(WP03)* Searchable ledger, filtering API, and correlation chain traversal
+- *(WP04)* Session replay, retention, and export with redaction
+- *(WP01)* Implement provider adapter interface, registry, error taxonomy, and isolation foundation
+- *(WP02)* Implement ACP client adapter with lifecycle, policy gate, and health monitoring
+- *(WP03)* Implement MCP tool bridge with discovery, schema registration, and sandboxing
+- *(WP04)* Implement A2A router, health monitoring coordinator, and failover with comprehensive tests
+- *(WP01)* Implement share session management with upterm and tmate adapters
+- *(WP01)* Implement crash detection and watchdog system
+- *(WP02)* Implement recovery state machine and checkpoint system
+- *(WP03)* Implement restoration pipeline, orphan reconciliation, and recovery UI
+- *(WP07)* Protocol boundary delegation and traceability gates
+- *(WP08)* Durability placeholder and retention compliance
+- *(WP09)* Formal protocol surface completion
+- *(WP03)* Event sequencing, correlation propagation, payload enforcement, and tests
+- *(WP02)* Cross-repo compatibility, collision/format tests, and benchmarks
+- *(WP02)* Rolling percentiles and SLO definitions
+- *(WP03)* Par task binding, execution, stale detection, and lifecycle events
+- *(WP04)* Orphan reconciliation and comprehensive lane tests
+- *(WP01)* SolidJS foundation, shared types, inference engine, persistence
+- *(WP02)* App shell layout with sidebar, status bar, and keyboard shortcuts
+- *(WP05)* Terminal panel with xterm.js, multi-tab support, and terminal store
+- *(WP01)* Encrypted credential store with AES-256-GCM, provider isolation, and audit events
+- *(WP01)* Implement registry manifest, status command, and changelog infrastructure
+- Implement createRuntime and fix DOM test shim
+- Runtime audit logic (#204)
+- *(shared)* Add @helios/logger, @helios/errors, and @helios/types packages
+- *(governance)* Add KILL_SWITCH, SBOM CI, and fix desktop syntax/types
+- Modernize heliosApp 2026 (#266)
+- Code reduction for heliosApp (#286)
+- Complete spec documentation for heliosApp
+- Add ADR framework, xDD methodology catalog, and hexagonal template
+- Add @phenotype/metrics package with TDD/BDD tests
+- Add @phenotype/project package (domain: ProjectService, ports, entities, tests scaffold)
+- Extract @phenotype/project package (#319)
+- *(heliosApp)* Restore OXC migration fixes and runtime improvements
+- Merge colab-renderer + extract @helios/runtime-core (#341)
 
-### ⚙️ Miscellaneous Tasks
+### Miscellaneous Tasks
 
 - Standardize CodeRabbit and Gemini review policy
 - WP01 claimed for implementation
@@ -568,7 +564,6 @@
 - Add docs session validation and publish readiness gates
 - Finalize heliosApp devops hardening and queue publish docs
 - Finish recovery lint cleanup and tests
-- Align required-check names with workflow job labels
 - Finalize heliosApp stabilization working changes
 - Mark 5 subtasks as done on spec 028
 - Move WP04 to for_review on spec 008 [claude-wp04-008]
@@ -916,6 +911,9 @@
 - Update AGENTS.md
 - Trigger CI re-evaluation
 - Remove stale comment in backend test
+- *(deps)* Bump oven-sh/setup-bun from 1 to 2 (#63)
+- *(deps-dev)* Bump vitepress from 1.6.3 to 1.6.4 (#68)
+- *(deps)* Bump actions/upload-artifact from 4 to 7 (#66)
 - Sync main to gh main (#206)
 - PR50 OXC comments (#208)
 - Add lint-test composite action workflow (#178)
@@ -923,8 +921,6 @@
 - *(ci)* Resolve merge conflicts in bun.lock and package.json (drop @biomejs/biome, normalize devDependencies)
 - *(ci)* Finalize package.json merge resolution (normalize scripts/devDependencies)
 - *(ci)* Auto-resolve workflow and config merge conflicts (workflows prefer HEAD, json prefer incoming)
-- *(governance)* Enforce required-check parity and align manifest
-- Retrigger required checks for PR #48
 - Resolve all merge conflicts (upstream wins)
 - *(ci)* Resolve all merge conflicts by restoring from tech-debt branch
 - Update desktop UI components
@@ -948,8 +944,15 @@
 - *(lint)* Ignore cognitive complexity for createStatusElement in switch_status.ts
 - Final cleanup commit
 - *(lint)* Fix lint violations in switch_status, switch_confirmation, stream_binding tests
+- *(deps-dev)* Bump vitepress from 1.6.3 to 1.6.4 (#327)
+- *(deps-dev)* Bump happy-dom from 20.8.7 to 20.8.9 (#331)
+- *(deps)* Bump @xterm/addon-web-links from 0.11.0 to 0.12.0 (#326)
+- *(deps)* Bump @xterm/addon-fit from 0.10.0 to 0.11.0 (#328)
+- *(deps-dev)* Bump typescript from 5.8.2 to 6.0.2 (#325)
+- *(deps-dev)* Bump vitest from 2.1.9 to 4.1.2 (#330)
+- *(deps-dev)* Bump @biomejs/biome from 1.9.4 to 2.4.9 (#332)
+- *(deps)* Bump @xterm/xterm from 5.5.0 to 6.0.0 (#329)
 - *(governance)* Remove duplicated governance blocks, reference thegent templates (#333)
-- Add release-drafter config
 - Migrate kitty-specs to docs/specs (AgilePlus format) (#338)
 - Archive kitty-specs (#343)
 - Commit working changes from work-audit session 2026-03-28
@@ -957,4 +960,33 @@
 - Commit working changes from work-audit session 2026-03-28
 - Commit working changes from work-audit session 2026-03-28
 - Update registry binding lifecycle and lane session integration tests
-- *(release)* Create VERSION file and release 0.1.0
+
+### Refactor
+
+- Decompose runtime into pty/renderer/secrets/lanes services (#40)
+- *(runtime)* Harden bus and event surfaces with typed envelopes
+- Decompose bus.ts into focused modules
+- Migrate from biome to oxlint/oxfmt
+- Separate unit and integration tests in CI
+- Split files exceeding 500-line static analysis limit
+- Phase2 decompose (merged with main) (#305)
+
+### Testing
+
+- Fix zellij review blockers and runtime edge cases
+- Fix zellij review blockers and runtime edge cases
+- Add session restore reconnect e2e coverage (#56)
+- Fix zellij review blockers and runtime edge cases
+
+### Ci
+
+- Align required-check names with workflow job labels
+- *(governance)* Enforce required-check parity and align manifest
+- Retrigger required checks for PR #48
+- Add release-drafter config
+
+### Resolve
+
+- Merge conflicts in docs tests
+
+

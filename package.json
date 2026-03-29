@@ -1,6 +1,6 @@
 {
   "name": "heliosapp",
-  "version": "0.1.2",
+  "version": "2026.03A.0",
   "private": true,
   "type": "module",
   "packageManager": "bun@1.2.20",
