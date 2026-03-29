@@ -179,7 +179,9 @@ export class OrphanWatchdog {
       // Emit watchdog.suggestion events for high-risk orphans
       const highRisk = this.lastClassifiedOrphans.filter((o) => o.riskLevel === "high");
       for (const orphan of highRisk) {
+        const riskLevelMap = { low: 1, medium: 2, high: 3 };
         const suggestion: WatchdogSuggestion = {
+          risk_level: riskLevelMap[orphan.riskLevel],
           action: "decline",
           reason: `Orphan resource detected: ${orphan.type} (risk ${orphan.riskLevel})`,
           event: {
