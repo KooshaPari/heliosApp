@@ -1,3 +1,3 @@
 # 概覽
 
-`heliosApp` 的文件入口。
+`apps/heliosApp-colab` 的文件入口。

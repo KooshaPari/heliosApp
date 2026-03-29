@@ -1,3 +1,3 @@
 # 概览
 
-`heliosApp` 的文档入口。
+`apps/heliosApp-colab` 的文档入口。
