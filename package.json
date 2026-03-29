@@ -24,7 +24,7 @@
     "format": "biome format --write apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
     "test": "bun test apps/runtime/tests/unit scripts/tests/",
     "test:desktop": "bun test apps/desktop/tests/unit",
-    "test:integration": "bun test apps/runtime/tests/integration",
+    "test:integration": "bun test --timeout 60000 apps/runtime/tests/integration",
     "test:coverage": "bun test --coverage apps/runtime/tests/unit apps/desktop/tests/unit",
     "test:e2e": "playwright test",
     "gates": "bun scripts/gates.ts",

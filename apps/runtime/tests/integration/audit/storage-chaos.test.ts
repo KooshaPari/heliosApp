@@ -63,8 +63,8 @@ describe("Storage Chaos Tests", () => {
     }
   });
 
-  it("should recover all persisted events after restart", async () => {
-    // Phase 1: Write 10,000 events
+  it("should recover all persisted events after restart", { timeout: 60000 }, async () => {
+    // NOTE: timeout increased from default to handle SQLite persistence in CI
     store = new SQLiteAuditStore(dbPath);
     const storageAdapter: AuditStorage = {
       persist: events => {

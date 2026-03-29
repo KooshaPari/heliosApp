@@ -206,7 +206,7 @@ describe("Concurrent operations", () => {
 });
 
 describe("Storage size", () => {
-  test("50 workspaces with 10 projects each under 1 MB", async () => { test.timeout(15000);
+  test("50 workspaces with 10 projects each under 1 MB", { timeout: 30000 }, async () => {
     const store = await createJsonStore(dataDir);
     for (let i = 0; i < 50; i++) {
       const ws = makeWorkspace({

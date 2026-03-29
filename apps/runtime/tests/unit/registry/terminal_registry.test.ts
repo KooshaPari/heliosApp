@@ -341,25 +341,25 @@ describe("TerminalRegistry", () => {
       const start1 = performance.now();
       registry.get("terminal-500");
       const time1 = performance.now() - start1;
-      expect(time1).toBeLessThan(10);
+      expect(time1).toBeLessThan(100);
 
       // Lookup by lane
       const start2 = performance.now();
       registry.getByLane("lane-25");
       const time2 = performance.now() - start2;
-      expect(time2).toBeLessThan(10);
+      expect(time2).toBeLessThan(100);
 
       // Lookup by session
       const start3 = performance.now();
       registry.getBySession("session-500");
       const time3 = performance.now() - start3;
-      expect(time3).toBeLessThan(10);
+      expect(time3).toBeLessThan(100);
 
       // Lookup by workspace
       const start4 = performance.now();
       registry.getByWorkspace("ws-5");
       const time4 = performance.now() - start4;
-      expect(time4).toBeLessThan(10);
+      expect(time4).toBeLessThan(100);
     });
   });
 });

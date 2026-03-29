@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+let _stubDateNow: () => number;
+let _stubUUID: () => string;
+let _uuidCounter = 0;
 import { AuditLedger } from "../../../src/audit/ledger";
 import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
@@ -13,7 +16,7 @@ function percentile(values: number[], p: number): number {
   return values[Math.max(0, index)];
 }
 
-describe("Audit Search Performance", () => {
+describe("Audit Search Performance", { timeout: 60000 }, () => {
   let ledger: AuditLedger;
   let ringBuffer: AuditRingBuffer;
   let store: SQLiteAuditStore;
@@ -28,7 +31,7 @@ describe("Audit Search Performance", () => {
     store.close();
   });
 
-  it("should search with workspace filter in < 500ms p95 for large dataset", () => {
+  it("should search with workspace filter in < 500ms p95 for large dataset", async () => {
     // Insert 100k events (sample from 1M scale test)
     const events = [];
     const WORKSPACES = 10;
@@ -63,7 +66,7 @@ describe("Audit Search Performance", () => {
     }
 
     // Persist rest to SQLite
-    store.persist(events.slice(10_000));
+    await store.persist(events.slice(10_000));
 
     // Run multiple searches and collect latencies
     const latencies: number[] = [];
@@ -83,7 +86,7 @@ describe("Audit Search Performance", () => {
     expect(p95).toBeLessThan(500);
   });
 
-  it("should search with time range filter in < 500ms p95", () => {
+  it("should search with time range filter in < 500ms p95", async () => {
     // Insert events with various timestamps
     const events = [];
     const now = new Date();
@@ -108,7 +111,7 @@ describe("Audit Search Performance", () => {
       events.push(event);
     }
 
-    store.persist(events);
+    await store.persist(events);
 
     // Search with time range
     const latencies: number[] = [];
@@ -132,7 +135,7 @@ describe("Audit Search Performance", () => {
     expect(p95).toBeLessThan(500);
   });
 
-  it("should search with combined filters in < 500ms p95", () => {
+  it("should search with combined filters in < 500ms p95", async () => {
     // Insert diverse events
     const events = [];
 
@@ -151,7 +154,7 @@ describe("Audit Search Performance", () => {
       events.push(event);
     }
 
-    store.persist(events);
+    await store.persist(events);
 
     // Run combined filter searches
     const latencies: number[] = [];
@@ -175,7 +178,7 @@ describe("Audit Search Performance", () => {
     expect(p95).toBeLessThan(500);
   });
 
-  it("should traverse correlation chains in < 500ms p95", () => {
+  it("should traverse correlation chains in < 500ms p95", async () => {
     // Create chains of correlated events
     const CHAIN_COUNT = 100;
     const CHAIN_LENGTH = 10;
@@ -198,7 +201,7 @@ describe("Audit Search Performance", () => {
         events.push(event);
       }
 
-      store.persist(events);
+      await store.persist(events);
     }
 
     // Traverse chains and measure latency
@@ -219,7 +222,7 @@ describe("Audit Search Performance", () => {
     expect(p95).toBeLessThan(500);
   });
 
-  it("should document storage efficiency", () => {
+  it("should document storage efficiency", async () => {
     // Insert 100k events
     const events = [];
 
@@ -241,7 +244,7 @@ describe("Audit Search Performance", () => {
       events.push(event);
     }
 
-    store.persist(events);
+    await store.persist(events);
 
     const count = store.count();
     const size = store.getStorageSize();

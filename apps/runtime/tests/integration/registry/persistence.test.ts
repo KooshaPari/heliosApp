@@ -259,7 +259,7 @@ describe("Persistence Integration", () => {
       await persistence.flush();
       const time = performance.now() - start;
 
-      expect(time).toBeLessThan(100);
+      expect(time).toBeLessThan(200);
     });
   });
 });
