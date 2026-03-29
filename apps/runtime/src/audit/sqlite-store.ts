@@ -258,6 +258,7 @@ export class SQLiteAuditStore {
         this.db = new Database(this.dbPath);
         this.db.exec("PRAGMA journal_mode = WAL");
         this.db.exec("PRAGMA synchronous = NORMAL");
+        this.db.exec("PRAGMA integrity_check");
 
         // Try again with incremented retry count.
         this.initializeSchemaWithRetry(retryCount + 1);
