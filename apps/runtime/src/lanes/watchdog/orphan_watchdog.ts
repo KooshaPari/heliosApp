@@ -18,6 +18,19 @@ export interface WatchdogConfig {
   checkpointBaseDir?: string;
 }
 
+export interface WatchdogSuggestion {
+  lane_id?: string;
+  session_id?: string;
+  resource_id?: string;
+  risk_level: number;
+  action: "decline" | "ignore";
+  reason: string;
+  event: {
+    type: "decline" | "ignore";
+    timestamp: string;
+  };
+}
+
 export class OrphanWatchdog {
   private readonly checkpointManager: CheckpointManager;
   private readonly resourceClassifier = new ResourceClassifier();
@@ -91,57 +104,18 @@ export class OrphanWatchdog {
   }
 
   private scheduleNextCycle(): void {
-  private async processOrphans(): Promise<void> {
-    if (!this.#running) return;
-    try {
-      const classified = await this.#classifier.classify();
-      const orphans = classified.filter((o) => o.risk_level > 0);
-      if (orphans.length > 0) {
-        this.#lastClassified = orphans;
-        this.publish(
-          makeEnvelope("orphan.detection.resource_found", {
-            orphans,
-            summary: {
-              total: orphans.length,
-              high: orphans.filter((o) => o.risk_level >= 3).length,
-              medium: orphans.filter((o) => o.risk_level === 2).length,
-              low: orphans.filter((o) => o.risk_level === 1).length,
-            },
-          }),
-        );
-        const suggestions = orphans.map((orphan): WatchdogSuggestion => ({
-          lane_id: orphan.lane_id,
-          session_id: orphan.session_id,
-          resource_id: orphan.resource_id,
-          risk_level: orphan.risk_level,
-          action: "decline" as const,
-          reason: `Orphan resource detected: ${orphan.resource_type} (risk ${orphan.risk_level})`,
-          event: {
-            type: "decline" as const,
-            timestamp: new Date().toISOString(),
-          },
-        }));
-        suggestions.forEach((s) => {
-          this.publish(
-            makeEnvelope("watchdog.suggestion", {
-              suggestion: s,
-            }),
-          );
-        });
+    this.detectionTimer = setTimeout(async () => {
+      await this.processOrphans();
+      if (this.isRunning) {
+        this.scheduleNextCycle();
       }
-      this.publish(
-        makeEnvelope("orphan.detection.cycle_completed", {
-          scanned: classified.length,
-          orphans: orphans.length,
-          timestamp: new Date().toISOString(),
-        }),
-      );
-    } finally {
-      this.scheduleNext();
-    }
+    }, this.detectionInterval);
   }
+
+  private async processOrphans(): Promise<void> {
+    if (!this.isRunning) return;
+
     const startTime = Date.now();
-    this.cycleNumber++;
 
     try {
       // Run all three detectors in parallel (allSettled tolerates individual failures)
@@ -164,7 +138,6 @@ export class OrphanWatchdog {
 
       // Warn if cycle took too long
       if (this.lastDetectionDuration > 2000) {
-        // High latency warning intentionally logged for triage correlation.
         // biome-ignore lint/suspicious/noConsole: High-latency detection cycles are intentionally surfaced for triage.
         console.warn(
           `[Watchdog] Detection cycle took ${this.lastDetectionDuration}ms (exceeds 2s target)`
@@ -203,6 +176,32 @@ export class OrphanWatchdog {
         });
       }
 
+      // Emit watchdog.suggestion events for high-risk orphans
+      const highRisk = this.lastClassifiedOrphans.filter((o) => o.risk_level >= 3);
+      for (const orphan of highRisk) {
+        const suggestion: WatchdogSuggestion = {
+          lane_id: orphan.lane_id,
+          session_id: orphan.session_id,
+          resource_id: orphan.resource_id,
+          risk_level: orphan.risk_level,
+          action: "decline",
+          reason: `Orphan resource detected: ${orphan.resource_type} (risk ${orphan.risk_level})`,
+          event: {
+            type: "decline",
+            timestamp: new Date().toISOString(),
+          },
+        };
+        await this.bus.publish({
+          id: `suggestion-${this.cycleNumber}-${orphan.resource_id}`,
+          type: "event",
+          ts: new Date().toISOString(),
+          topic: "watchdog.suggestion",
+          payload: {
+            suggestion,
+          },
+        });
+      }
+
       // Save checkpoint
       const checkpoint: WatchdogCheckpoint = {
         cycleNumber: this.cycleNumber,
@@ -215,6 +214,8 @@ export class OrphanWatchdog {
         },
       };
       await this.checkpointManager.save(checkpoint);
+
+      this.cycleNumber++;
 
       console.log(
         `[Watchdog] Cycle ${this.cycleNumber} completed: ${this.lastDetectionDuration}ms, ${this.lastClassifiedOrphans.length} orphans found`

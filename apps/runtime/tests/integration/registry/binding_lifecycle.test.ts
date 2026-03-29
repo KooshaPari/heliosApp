@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import { BindingEventEmitter } from "../../../src/registry/binding_events.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";

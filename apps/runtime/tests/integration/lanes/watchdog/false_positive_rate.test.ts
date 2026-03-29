@@ -13,15 +13,21 @@ describe("False Positive Rate", () => {
   let laneRegistry: LaneRegistry;
   let classifier: ResourceClassifier;
 
+  const TEST_ID = `fp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+
   beforeEach(() => {
     bus = new InMemoryLocalBus();
     laneRegistry = new LaneRegistry();
-    engine = new RemediationEngine(laneRegistry, bus);
+    engine = new RemediationEngine(laneRegistry, bus, {
+      cooldownFile: `/tmp/helios-cooldown-${TEST_ID}.json`,
+    });
     classifier = new ResourceClassifier();
   });
 
   afterEach(() => {
     engine.stop();
+    // Clean up the test-scoped cooldown file so cooldowns don't leak between tests
+    try { require("fs").unlinkSync(`/tmp/helios-cooldown-${TEST_ID}.json`); } catch {}
   });
 
   it("should have zero false positives with healthy system", async () => {

@@ -103,7 +103,10 @@ export class RemediationEngine {
   }
 
   getSuggestions(): RemediationSuggestion[] {
-    return Array.from(this.suggestions.values());
+    const RISK_ORDER: Record<string, number> = { high: 3, medium: 2, low: 1 };
+    return Array.from(this.suggestions.values()).sort(
+      (a, b) => RISK_ORDER[b.orphan.riskLevel] - RISK_ORDER[a.orphan.riskLevel],
+    );
   }
 
   async confirmCleanup(suggestionId: string): Promise<CleanupResult> {

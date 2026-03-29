@@ -89,6 +89,13 @@ export class TerminalRegistry implements RegistryQueryInterface {
     this.addToIndex(this.laneIndex, binding.binding.laneId, terminalId);
     this.addToIndex(this.sessionIndex, binding.binding.sessionId, terminalId);
     this.addToIndex(this.workspaceIndex, binding.binding.workspaceId, terminalId);
+    if (!this.sessionPerLaneIndex.has(binding.binding.laneId)) {
+      this.sessionPerLaneIndex.set(binding.binding.laneId, new Map());
+    }
+    if (!this.sessionPerLaneIndex.get(binding.binding.laneId)!.has(binding.binding.sessionId)) {
+      this.sessionPerLaneIndex.get(binding.binding.laneId)!.set(binding.binding.sessionId, new Set());
+    }
+    this.sessionPerLaneIndex.get(binding.binding.laneId)!.get(binding.binding.sessionId)!.add(terminalId);
 
     return binding;
   }
@@ -116,7 +123,11 @@ export class TerminalRegistry implements RegistryQueryInterface {
     this.removeFromIndex(this.laneIndex, oldTriple.laneId, terminalId);
     this.removeFromIndex(this.sessionIndex, oldTriple.sessionId, terminalId);
     this.removeFromIndex(this.workspaceIndex, oldTriple.workspaceId, terminalId);
-    this.removeFromIndex(this.sessionPerLaneIndex, oldTriple.laneId, oldTriple.sessionId);
+    const oldLaneMap = this.sessionPerLaneIndex.get(oldTriple.laneId);
+    if (oldLaneMap) {
+      const oldSet = oldLaneMap.get(oldTriple.sessionId);
+      if (oldSet) oldSet.delete(terminalId);
+    }
 
     // Update binding
     binding.binding = newTriple;
@@ -127,7 +138,14 @@ export class TerminalRegistry implements RegistryQueryInterface {
     this.addToIndex(this.laneIndex, newTriple.laneId, terminalId);
     this.addToIndex(this.sessionIndex, newTriple.sessionId, terminalId);
     this.addToIndex(this.workspaceIndex, newTriple.workspaceId, terminalId);
-    this.addToIndex(this.sessionPerLaneIndex, newTriple.laneId, newTriple.sessionId);
+    if (!this.sessionPerLaneIndex.has(newTriple.laneId)) {
+      this.sessionPerLaneIndex.set(newTriple.laneId, new Map());
+    }
+    const newLaneMap = this.sessionPerLaneIndex.get(newTriple.laneId)!;
+    if (!newLaneMap.has(newTriple.sessionId)) {
+      newLaneMap.set(newTriple.sessionId, new Set());
+    }
+    newLaneMap.get(newTriple.sessionId)!.add(terminalId);
 
     return binding;
   }
@@ -153,7 +171,14 @@ export class TerminalRegistry implements RegistryQueryInterface {
     this.removeFromIndex(this.laneIndex, triple.laneId, terminalId);
     this.removeFromIndex(this.sessionIndex, triple.sessionId, terminalId);
     this.removeFromIndex(this.workspaceIndex, triple.workspaceId, terminalId);
-    this.removeFromIndex(this.sessionPerLaneIndex, triple.laneId, triple.sessionId);
+    const laneMap = this.sessionPerLaneIndex.get(triple.laneId);
+    if (laneMap) {
+      const sessionSet = laneMap.get(triple.sessionId);
+      if (sessionSet) {
+        sessionSet.delete(terminalId);
+        if (sessionSet.size === 0) laneMap.delete(triple.sessionId);
+      }
+    }
 
     // Remove from primary store
     this.primaryStore.delete(terminalId);
