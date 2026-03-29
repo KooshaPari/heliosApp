@@ -16,6 +16,15 @@ describe("Binding Lifecycle Integration", () => {
     emitter = new BindingEventEmitter(bus);
   });
 
+  afterEach(() => {
+    // Clear shared registry state between tests to prevent cross-test pollution
+    registry.clear();
+    if ("clear" in bus) {
+      (bus as any)["_events"] = [];
+      (bus as any)["_handlers"] = [];
+    }
+  });
+
   describe("full lifecycle", () => {
     it("should emit bound event on register", async () => {
       const triple: BindingTriple = {

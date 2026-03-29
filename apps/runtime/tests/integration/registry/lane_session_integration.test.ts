@@ -193,7 +193,7 @@ describe("Lane/Session Lifecycle Integration", () => {
       // Use unique session IDs per (lane,session) pair to avoid DuplicateSessionId
       let terminalCount = 0;
       for (const laneId of ["lane-1", "lane-2", "lane-3"]) {
-        for (const sessionId of ["session-A", "session-B"]) {
+        for (const sessionId of ["session-a", "session-b"]) {
           for (let t = 0; t < 2; t++) {
             registry.register(`terminal-${terminalCount}`, {
               workspaceId: "ws-1",
