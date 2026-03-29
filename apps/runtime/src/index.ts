@@ -270,7 +270,9 @@ export function createRuntime(options: RuntimeOptions = {}) {
   };
 
   async function request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {
+    recordCommand(command);
     const response = await handleRuntimeRequest(opsContext as any, command);
+    recordResponse(response);
 
     if (command.method === "session.attach" && response.status === "ok") {
       runtimeState.session = "attached";

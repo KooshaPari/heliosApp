@@ -151,7 +151,7 @@ export class RemediationEngine {
     return result;
   }
 
-  declineCleanup(suggestionId: string): void {
+  async declineCleanup(suggestionId: string): Promise<void> {
     const suggestion = this.suggestions.get(suggestionId);
     if (!suggestion) {
       return;
@@ -171,7 +171,7 @@ export class RemediationEngine {
     this.suggestions.delete(suggestionId);
 
     // Emit declined event
-    this.bus.publish({
+    await this.bus.publish({
       id: `remediation-declined-${suggestionId}`,
       type: "event",
       ts: new Date().toISOString(),
