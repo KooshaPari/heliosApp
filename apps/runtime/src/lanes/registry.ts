@@ -112,6 +112,12 @@ export class LaneRegistry {
     return [...this.lanes.values()].filter(r => r.state !== "closed").map(r => ({ ...r }));
   }
 
+  clear(): void {
+    this.lanes.clear();
+    this.workspaceIndex.clear();
+    this.#events.length = 0;
+  }
+
   private addToWorkspaceIndex(workspaceId: string, laneId: string): void {
     let set = this.workspaceIndex.get(workspaceId);
     if (!set) {
