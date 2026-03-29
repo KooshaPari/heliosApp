@@ -91,17 +91,55 @@ export class OrphanWatchdog {
   }
 
   private scheduleNextCycle(): void {
-    if (!this.isRunning) return;
-
-    this.detectionTimer = setTimeout(() => {
-      this.runDetectionCycle();
-      if (this.isRunning) {
-        this.scheduleNextCycle();
+  private async processOrphans(): Promise<void> {
+    if (!this.#running) return;
+    try {
+      const classified = await this.#classifier.classify();
+      const orphans = classified.filter((o) => o.risk_level > 0);
+      if (orphans.length > 0) {
+        this.#lastClassified = orphans;
+        this.publish(
+          makeEnvelope("orphan.detection.resource_found", {
+            orphans,
+            summary: {
+              total: orphans.length,
+              high: orphans.filter((o) => o.risk_level >= 3).length,
+              medium: orphans.filter((o) => o.risk_level === 2).length,
+              low: orphans.filter((o) => o.risk_level === 1).length,
+            },
+          }),
+        );
+        const suggestions = orphans.map((orphan): WatchdogSuggestion => ({
+          lane_id: orphan.lane_id,
+          session_id: orphan.session_id,
+          resource_id: orphan.resource_id,
+          risk_level: orphan.risk_level,
+          action: "decline" as const,
+          reason: `Orphan resource detected: ${orphan.resource_type} (risk ${orphan.risk_level})`,
+          event: {
+            type: "decline" as const,
+            timestamp: new Date().toISOString(),
+          },
+        }));
+        suggestions.forEach((s) => {
+          this.publish(
+            makeEnvelope("watchdog.suggestion", {
+              suggestion: s,
+            }),
+          );
+        });
       }
-    }, this.detectionInterval);
+      this.publish(
+        makeEnvelope("orphan.detection.cycle_completed", {
+          scanned: classified.length,
+          orphans: orphans.length,
+          timestamp: new Date().toISOString(),
+        }),
+      );
+    } finally {
+      this.scheduleNext();
+    }
   }
-
-  private async runDetectionCycle(): Promise<void> {
     const startTime = Date.now();
     this.cycleNumber++;
 

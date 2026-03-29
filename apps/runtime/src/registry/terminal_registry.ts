@@ -75,10 +75,9 @@ export class TerminalRegistry implements RegistryQueryInterface {
       throw new InvalidBinding(validation.errors);
     }
 
-    // Check for duplicate session_id in same lane (optional constraint)
-    const laneSessionsKey = `${triple.laneId}`;
-    const sessionsInLane = this.sessionPerLaneIndex.get(laneSessionsKey) || new Set();
-    if (sessionsInLane.has(triple.sessionId)) {
+    // Check for duplicate (lane, session) pair using composite key
+    const laneMap = this.sessionPerLaneIndex.get(triple.laneId);
+    if (laneMap?.has(triple.sessionId)) {
       throw new DuplicateSessionId(triple.sessionId);
     }
 
@@ -90,7 +89,10 @@ export class TerminalRegistry implements RegistryQueryInterface {
     this.addToIndex(this.laneIndex, triple.laneId, terminalId);
     this.addToIndex(this.sessionIndex, triple.sessionId, terminalId);
     this.addToIndex(this.workspaceIndex, triple.workspaceId, terminalId);
-    this.addToIndex(this.sessionPerLaneIndex, laneSessionsKey, triple.sessionId);
+    if (!this.sessionPerLaneIndex.has(triple.laneId)) {
+      this.sessionPerLaneIndex.set(triple.laneId, new Map());
+    }
+    this.sessionPerLaneIndex.get(triple.laneId)!.set(triple.sessionId, new Set([terminalId]));
 
     return binding;
   }
