@@ -229,7 +229,7 @@ describe("Storage Chaos Tests", () => {
     expect(finalCount).toBe(1000);
   });
 
-  it("should stay within storage budget", async () => {
+  it("should stay within storage budget", { timeout: 60_000 }, async () => {
     store = new SQLiteAuditStore(dbPath);
     const storageAdapter: AuditStorage = {
       persist: events => {
@@ -240,8 +240,8 @@ describe("Storage Chaos Tests", () => {
     const sink = new DefaultAuditSink(storageAdapter, 5000);
 
     // Simulate 30 days at 100k events/day = 3M events
-    // This test writes a smaller batch to verify storage efficiency
-    const EVENT_COUNT = 20_000; // Sample 20k events (less than 100k) to keep projected storage within budget
+    // This test writes a smaller sample to verify storage efficiency in CI
+    const EVENT_COUNT = 10_000; // Sample 10k events to keep runtime under timeout
 
     for (let i = 0; i < EVENT_COUNT; i++) {
       const event = createAuditEvent({

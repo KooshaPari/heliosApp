@@ -44,11 +44,12 @@ export class SQLiteAuditStore {
     }
 
     const stmt = this.db.prepare(`
-      INSERT OR IGNORE INTO audit_events (
+      INSERT INTO audit_events (
         id, event_type, actor, action, target, result,
         timestamp, workspace_id, lane_id, session_id,
         correlation_id, metadata
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO NOTHING
     `);
 
     const transaction = this.db.transaction((eventBatch: AuditEvent[]) => {
@@ -228,8 +229,17 @@ export class SQLiteAuditStore {
    * Initialize the database schema on first run.
    */
   private initializeSchema(): void {
+    this.initializeSchemaWithRetry(0);
+  }
+
+  private initializeSchemaWithRetry(retryCount: number): void {
+    const maxRetries = 3;
     const handleSchemaFailure = (err: unknown): void => {
       console.error("[SQLiteAuditStore] Schema initialization failed:", err);
+
+      if (retryCount >= maxRetries) {
+        throw new Error(`Schema initialization failed after ${maxRetries} attempts: ${err}`);
+      }
 
       if (this.dbPath !== ":memory:" &&
           (err instanceof Error) &&
@@ -248,9 +258,10 @@ export class SQLiteAuditStore {
         this.db = new Database(this.dbPath);
         this.db.exec("PRAGMA journal_mode = WAL");
         this.db.exec("PRAGMA synchronous = NORMAL");
+        this.db.exec("PRAGMA integrity_check");
 
-        // Try one more time.
-        this.initializeSchema();
+        // Try again with incremented retry count.
+        this.initializeSchemaWithRetry(retryCount + 1);
         return;
       }
 

@@ -9,6 +9,7 @@ import { handleTerminalCommand, type RuntimeTerminalContext } from "./terminal.j
 export type RuntimeOpsContext = RuntimeTerminalContext & {
   recovery: RecoveryRegistry;
   redactionEngine: RedactionEngine;
+  rawBusRequest?: (command: LocalBusEnvelope) => Promise<LocalBusEnvelope>;
 };
 
 const METHOD_SET = new Set<string>(METHODS);
@@ -70,7 +71,7 @@ function recordCommand(context: RuntimeOpsContext, envelope: LocalBusEnvelope): 
     type: "command",
     method: envelope.method,
     correlation_id: envelope.correlation_id,
-    envelope,
+    // Do not persist raw envelope; sensitive data is stripped below
     payload: redactPayload(
       context.redactionEngine,
       normalizePayload(envelope.payload),
@@ -86,7 +87,7 @@ function recordResponse(context: RuntimeOpsContext, envelope: LocalBusEnvelope):
     type: "response",
     method: envelope.method,
     correlation_id: envelope.correlation_id,
-    envelope,
+    // Do not persist raw envelope; sensitive data is stripped below
     payload: redactPayload(
       context.redactionEngine,
       normalizePayload(envelope.result ?? envelope.payload),
@@ -195,7 +196,7 @@ export async function handleRuntimeRequest(
     return response;
   }
 
-  const response = await context.bus.request(command);
+  const response = await (context.rawBusRequest ? context.rawBusRequest(command) : context.bus.request(command));
   response.correlation_id ??= command.correlation_id;
   response.method ??= command.method;
   applyRecoveryFromCommand(context, command, response);

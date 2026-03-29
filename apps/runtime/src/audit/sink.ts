@@ -197,12 +197,13 @@ export class DefaultAuditSink implements AuditSink {
     await this.enqueuePersistenceTask(async () => {
       // Snapshot current buffer for persistence, and allow new writes to accumulate concurrently.
       const eventsToPersist = [...this.buffer];
-      this.buffer = [];
 
       let retries = 0;
       while (retries < this.MAX_RETRIES) {
         try {
           await this.storage.persist(eventsToPersist);
+          // Only clear buffer after successful commit
+          this.buffer = this.buffer.slice(eventsToPersist.length);
           return;
         } catch (err) {
           this.metrics.persistenceFailures++;

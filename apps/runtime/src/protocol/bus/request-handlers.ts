@@ -227,7 +227,10 @@ export function handleTerminalSpawn(
     String(command.payload?.id ?? command.payload?.terminal_id ?? "") || `terminal_${Date.now()}`;
 
   // Ensure all terminal lifecycle events include terminal context.
-  command.terminal_id = terminalResultId;
+  // Only assign if not already set to avoid overwriting existing terminal_id
+  if (!command.terminal_id) {
+    command.terminal_id = terminalResultId;
+  }
 
   if (!ctx.lifecycleProgress.has(correlationId)) {
     ctx.lifecycleProgress.set(correlationId, new Set());

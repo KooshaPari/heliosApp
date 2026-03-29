@@ -99,7 +99,10 @@ describe("terminal lifecycle and streaming data plane", () => {
 
     const auditRecords = await runtime.getAuditRecords();
     expect(auditRecords.length).toBeGreaterThanOrEqual(events.length);
-    const firstEnvelope = (auditRecords[0]?.envelope ?? {}) as Record<string, unknown>;
+    const spawnRecord = auditRecords.find(
+      (r) => (r.envelope as Record<string, unknown>)?.correlation_id === "corr-spawn-1"
+    );
+    const firstEnvelope = (spawnRecord?.envelope ?? {}) as Record<string, unknown>;
     expect(firstEnvelope.correlation_id).toBe("corr-spawn-1");
   });
 
