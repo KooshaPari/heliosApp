@@ -1,10 +1,10 @@
 // T020 - Stress test for concurrent lane operations (50 lanes)
 // (NFR-008-003, SC-008-002)
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { LaneManager, _resetIdCounter } from "../../../src/lanes/index.js";
+import { _resetIdCounter, LaneManager } from "../../../src/lanes/index.js";
 import { LaneCapacityExceededError } from "../../../src/lanes/registry.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 
@@ -25,7 +25,7 @@ async function createTempRepo(): Promise<string> {
     `helios-stress-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
   );
   fs.mkdirSync(tmpDir, { recursive: true });
-  await runGit(["init"], tmpDir);
+  await runGit(["init", "-b", "main"], tmpDir);
   await runGit(["config", "user.email", "test@test.com"], tmpDir);
   await runGit(["config", "user.name", "Test"], tmpDir);
   fs.writeFileSync(path.join(tmpDir, "file.txt"), "content\n");
