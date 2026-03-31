@@ -5,22 +5,38 @@
  * the current test suite.
  */
 
-import { InMemoryLocalBus } from "./protocol/bus.js";
 import { createBoundaryDispatcher } from "./protocol/boundary_adapter.js";
+import { InMemoryLocalBus } from "./protocol/bus.js";
 import { METHODS } from "./protocol/methods.js";
 import type { LocalBusEnvelope } from "./protocol/types.js";
-import { RecoveryRegistry, InMemorySessionRegistry } from "./sessions/registry.js";
-import { LaneLifecycleService, type RuntimeState, type LaneRecord } from "./sessions/state_machine.js";
-import type { TerminalBuffer } from "./runtime/types.js";
-import { TerminalRegistry } from "./sessions/terminal_registry.js";
 import { handleRuntimeRequest, type RuntimeOpsContext } from "./runtime/ops.js";
+import type { TerminalBuffer } from "./runtime/types.js";
+import { RedactionEngine } from "./secrets/redaction-engine.js";
+import { getDefaultRules } from "./secrets/redaction-rules.js";
+import {
+  createRateLimiters,
+  createRateLimiters,
+  getClientKey,
+  getClientKey,
+  getSecurityHeaders,
+  getSecurityHeaders,
+  sanitizeRequestBody,
+  sanitizeRequestBody,
+  validateRequestIds,
+  validateRequestIds,
+} from "./security/api-middleware.js";
+import { InMemorySessionRegistry, RecoveryRegistry } from "./sessions/registry.js";
+import {
+  LaneLifecycleService,
+  type LaneRecord,
+  type RuntimeState,
+} from "./sessions/state_machine.js";
+import { TerminalRegistry } from "./sessions/terminal_registry.js";
 import type {
   RecoveryBootstrapResult,
   RecoveryMetadata,
   WatchdogScanResult,
 } from "./sessions/types.js";
-import { RedactionEngine } from "./secrets/redaction-engine.js";
-import { getDefaultRules } from "./secrets/redaction-rules.js";
 
 /** Semantic version of the runtime package. */
 export const VERSION = "0.0.1" as const;
@@ -141,6 +157,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
   const laneService = new LaneLifecycleService(bus);
   const redactionEngine = new RedactionEngine();
   redactionEngine.loadRules(getDefaultRules());
+  const rateLimiters = createRateLimiters();
 
   const auditRecords: RuntimeAuditRecord[] = [];
   let bootstrapResult: RecoveryBootstrapResult | null = null;
@@ -283,7 +300,11 @@ export function createRuntime(options: RuntimeOptions = {}) {
     }
 
     if (command.method === "terminal.spawn" && response.status === "ok") {
-      console.log("createRuntime.request: terminal.spawn detected, clearing buffer", command.terminal_id, response.result?.terminal_id);
+      console.log(
+        "createRuntime.request: terminal.spawn detected, clearing buffer",
+        command.terminal_id,
+        response.result?.terminal_id
+      );
       runtimeState.terminal = "active";
       const terminalId = String(response.result?.terminal_id ?? "");
       if (terminalId) {
@@ -295,9 +316,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
           lane_id: command.lane_id ?? "",
           session_id: command.session_id ?? "",
           title:
-            typeof command.payload?.title === "string"
-              ? String(command.payload.title)
-              : "Terminal",
+            typeof command.payload?.title === "string" ? String(command.payload.title) : "Terminal",
         });
         terminalRegistry.setState(terminalId, "active");
       }
@@ -305,7 +324,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
 
     if (command.method === "terminal.resize" && response.status === "ok") {
       runtimeState.terminal = "active";
-      const terminalId = command.terminal_id ?? (command.payload as Record<string, unknown>)?.terminal_id;
+      const terminalId =
+        command.terminal_id ?? (command.payload as Record<string, unknown>)?.terminal_id;
       if (typeof terminalId === "string") {
         terminalRegistry.setState(terminalId, "active");
       }
@@ -315,7 +335,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
 
     if (command.method === "terminal.input" && response.status === "ok") {
       runtimeState.terminal = getTerminalState();
-      const terminalId = command.terminal_id ?? (command.payload as Record<string, unknown>)?.terminal_id;
+      const terminalId =
+        command.terminal_id ?? (command.payload as Record<string, unknown>)?.terminal_id;
       if (typeof terminalId === "string") {
         terminalRegistry.setState(
           terminalId,
@@ -435,16 +456,45 @@ export function createRuntime(options: RuntimeOptions = {}) {
   async function fetch(requestInput: Request): Promise<Response> {
     const url = new URL(requestInput.url);
 
+    const securityHeaders = getSecurityHeaders();
+
+    function securityResponse(body: Record<string, unknown> | string, status: number): Response {
+      const response =
+        typeof body === "string" ? new Response(body, { status }) : Response.json(body, { status });
+      for (const [key, value] of Object.entries(securityHeaders)) {
+        response.headers.set(key, value);
+      }
+      return response;
+    }
+
     if (url.pathname === "/v1/protocol/dispatch" && requestInput.method === "POST") {
+      const clientKey = getClientKey(requestInput);
+      const rateCheck = rateLimiters.protocol_dispatch.check(clientKey);
+      if (!rateCheck.allowed) {
+        const resp = securityResponse({ error: "rate_limit_exceeded" }, 429);
+        resp.headers.set("X-RateLimit-Reset", String(rateCheck.resetAt));
+        return resp;
+      }
+
       const body = (await requestInput.json()) as Record<string, unknown>;
+      const sanitizedBody = sanitizeRequestBody(body);
+      const idValidation = validateRequestIds(sanitizedBody);
+      if (!idValidation.valid) {
+        return securityResponse({ error: "validation_failed", details: idValidation.errors }, 400);
+      }
+
       const command: LocalBusEnvelope = {
         id: `dispatch-${Date.now()}`,
         type: "command",
         ts: new Date().toISOString(),
-        workspace_id: typeof body.workspace_id === "string" ? body.workspace_id : undefined,
-        correlation_id: typeof body.correlation_id === "string" ? body.correlation_id : undefined,
-        method: String(body.method ?? ""),
-        payload: normalizePayload(body.payload),
+        workspace_id:
+          typeof sanitizedBody.workspace_id === "string" ? sanitizedBody.workspace_id : undefined,
+        correlation_id:
+          typeof sanitizedBody.correlation_id === "string"
+            ? sanitizedBody.correlation_id
+            : undefined,
+        method: String(sanitizedBody.method ?? ""),
+        payload: normalizePayload(sanitizedBody.payload),
       };
 
       const dispatcher = createBoundaryDispatcher({
@@ -452,43 +502,89 @@ export function createRuntime(options: RuntimeOptions = {}) {
       });
       const result = await dispatcher(command);
       if (result.type !== "response") {
-        return Response.json({ error: "invalid_boundary_response" }, { status: 500 });
+        return securityResponse({ error: "invalid_boundary_response" }, 500);
       }
 
       if (result.status === "error") {
         const status = result.error?.code === "UNSUPPORTED_BOUNDARY_ADAPTER" ? 409 : 400;
-        return Response.json(
+        const resp = securityResponse(
           {
             error: result.error?.code ?? "dispatch_error",
             details: result.error?.details ?? null,
           },
-          { status }
+          status
         );
+        resp.headers.set("X-RateLimit-Remaining", String(rateCheck.remaining));
+        return resp;
       }
 
-      return Response.json(result.result ?? {}, { status: 200 });
+      const resp = Response.json(result.result ?? {}, { status: 200 });
+      for (const [key, value] of Object.entries(securityHeaders)) {
+        resp.headers.set(key, value);
+      }
+      resp.headers.set("X-RateLimit-Remaining", String(rateCheck.remaining));
+      return resp;
     }
+
     if (url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes$/) && requestInput.method === "POST") {
+      const clientKey = getClientKey(requestInput);
+      const rateCheck = rateLimiters.lane_create.check(clientKey);
+      if (!rateCheck.allowed) {
+        const resp = securityResponse({ error: "rate_limit_exceeded" }, 429);
+        resp.headers.set("X-RateLimit-Reset", String(rateCheck.resetAt));
+        return resp;
+      }
+
       const body = (await requestInput.json()) as Record<string, any>;
+      const sanitizedBody = sanitizeRequestBody(body);
       const workspaceId = url.pathname.split("/")[3];
+
+      if (!validateWorkspaceId(workspaceId)) {
+        return securityResponse({ error: "invalid_workspace_id" }, 400);
+      }
 
       const lane = await laneService.create({
         workspace_id: workspaceId,
-        project_context_id: String(body.project_context_id ?? "default"),
-        display_name: String(body.display_name ?? "Lane"),
+        project_context_id: String(sanitizedBody.project_context_id ?? "default"),
+        display_name: String(sanitizedBody.display_name ?? "Lane"),
       });
 
       runtimeState.lane = lane.status;
-      return Response.json({ lane_id: lane.lane_id }, { status: 201 });
+      const resp = Response.json({ lane_id: lane.lane_id }, { status: 201 });
+      for (const [key, value] of Object.entries(securityHeaders)) {
+        resp.headers.set(key, value);
+      }
+      resp.headers.set("X-RateLimit-Remaining", String(rateCheck.remaining));
+      return resp;
     }
 
-    if (url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/sessions$/) && requestInput.method === "POST") {
+    if (
+      url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/sessions$/) &&
+      requestInput.method === "POST"
+    ) {
+      const clientKey = getClientKey(requestInput);
+      const rateCheck = rateLimiters.session_attach.check(clientKey);
+      if (!rateCheck.allowed) {
+        const resp = securityResponse({ error: "rate_limit_exceeded" }, 429);
+        resp.headers.set("X-RateLimit-Reset", String(rateCheck.resetAt));
+        return resp;
+      }
+
       const body = (await requestInput.json()) as Record<string, any>;
+      const sanitizedBody = sanitizeRequestBody(body);
       const laneId = url.pathname.split("/")[5];
       const workspaceId = url.pathname.split("/")[3];
 
-      if (body.preferred_transport && body.preferred_transport !== "native_openai" && body.preferred_transport !== "cliproxy_harness") {
-        return Response.json({ error: "invalid_preferred_transport" }, { status: 400 });
+      if (!validateLaneId(laneId) || !validateWorkspaceId(workspaceId)) {
+        return securityResponse({ error: "invalid_path_parameters" }, 400);
+      }
+
+      if (
+        sanitizedBody.preferred_transport &&
+        sanitizedBody.preferred_transport !== "native_openai" &&
+        sanitizedBody.preferred_transport !== "cliproxy_harness"
+      ) {
+        return securityResponse({ error: "invalid_preferred_transport" }, 400);
       }
 
       let probeResult: { ok: boolean; reason: string | null };
@@ -505,14 +601,17 @@ export function createRuntime(options: RuntimeOptions = {}) {
       let transport: "cliproxy_harness" | "native_openai";
       let degrade_reason: string | null = null;
 
-      if (body.provider === "codex") {
+      if (sanitizedBody.provider === "codex") {
         if (probeResult.ok) {
           transport = "cliproxy_harness";
           degrade_reason = null;
         } else {
           transport = "native_openai";
           degrade_reason = probeResult.reason || "harness_unavailable";
-          if (harnessStatus.status !== "unavailable" || harnessStatus.degrade_reason !== degrade_reason) {
+          if (
+            harnessStatus.status !== "unavailable" ||
+            harnessStatus.degrade_reason !== degrade_reason
+          ) {
             harnessStatus = { status: "unavailable", degrade_reason };
             const statusEvt = {
               id: `evt-harness-status-changed-${Date.now()}`,
@@ -551,7 +650,10 @@ export function createRuntime(options: RuntimeOptions = {}) {
       const ensureSession = sessionRegistry.ensure({
         lane_id: laneId,
         transport,
-        codex_session_id: typeof body.codex_session_id === "string" ? body.codex_session_id : undefined,
+        codex_session_id:
+          typeof sanitizedBody.codex_session_id === "string"
+            ? sanitizedBody.codex_session_id
+            : undefined,
       });
 
       runtimeState.session = "attached";
@@ -564,7 +666,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
         session_id: ensureSession.session.session_id,
         lane_id: laneId,
         workspace_id: workspaceId,
-        correlation_id: body.correlation_id || `corr-${Date.now()}`,
+        correlation_id: sanitizedBody.correlation_id || `corr-${Date.now()}`,
         payload: { session_id: ensureSession.session.session_id },
       };
       await bus.publish(startEvt as LocalBusEnvelope);
@@ -598,74 +700,149 @@ export function createRuntime(options: RuntimeOptions = {}) {
       await bus.publish(createdEvt as LocalBusEnvelope);
       appendAuditRecord({ ...createdEvt, recorded_at: createdEvt.ts, type: "event" } as any);
 
-      return Response.json({
-        session_id: ensureSession.session.session_id,
-        transport,
-        status: "attached",
-        diagnostics: { degrade_reason },
-        codex_session_id: ensureSession.session.codex_session_id,
-      }, { status: 200 });
+      const resp = Response.json(
+        {
+          session_id: ensureSession.session.session_id,
+          transport,
+          status: "attached",
+          diagnostics: { degrade_reason },
+          codex_session_id: ensureSession.session.codex_session_id,
+        },
+        { status: 200 }
+      );
+      for (const [key, value] of Object.entries(securityHeaders)) {
+        resp.headers.set(key, value);
+      }
+      resp.headers.set("X-RateLimit-Remaining", String(rateCheck.remaining));
+      return resp;
     }
 
-    if (url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/terminals$/) && requestInput.method === "POST") {
+    if (
+      url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/terminals$/) &&
+      requestInput.method === "POST"
+    ) {
+      const clientKey = getClientKey(requestInput);
+      const rateCheck = rateLimiters.terminal_spawn.check(clientKey);
+      if (!rateCheck.allowed) {
+        const resp = securityResponse({ error: "rate_limit_exceeded" }, 429);
+        resp.headers.set("X-RateLimit-Reset", String(rateCheck.resetAt));
+        return resp;
+      }
+
       const body = (await requestInput.json()) as Record<string, any>;
+      const sanitizedBody = sanitizeRequestBody(body);
       const laneId = url.pathname.split("/")[5];
       const workspaceId = url.pathname.split("/")[3];
+
+      if (!validateLaneId(laneId) || !validateWorkspaceId(workspaceId)) {
+        return securityResponse({ error: "invalid_path_parameters" }, 400);
+      }
 
       let lane: LaneRecord;
       try {
         lane = laneService.getRequired(laneId);
       } catch (_err) {
-        return Response.json({ error: "lane_not_found" }, { status: 404 });
+        return securityResponse({ error: "lane_not_found" }, 404);
       }
 
       if (lane.workspace_id !== workspaceId) {
-        return Response.json({ error: "does not belong to workspace" }, { status: 409 });
+        return securityResponse({ error: "does not belong to workspace" }, 409);
       }
 
       if (lane.status === "closed") {
-        return Response.json({ error: "lane_closed" }, { status: 409 });
+        return securityResponse({ error: "lane_closed" }, 409);
       }
 
       const spawnResult = await spawnTerminal({
         command_id: `cmd-spawn-${Date.now()}`,
-        correlation_id: body.correlation_id || `corr-${Date.now()}`,
+        correlation_id: sanitizedBody.correlation_id || `corr-${Date.now()}`,
         workspace_id: workspaceId,
         lane_id: laneId,
-        session_id: body.session_id,
-        title: typeof body.title === "string" ? body.title : "Terminal",
+        session_id: sanitizedBody.session_id,
+        title:
+          typeof sanitizedBody.title === "string"
+            ? sanitizeString(sanitizedBody.title as string, 100)
+            : "Terminal",
       });
 
       if (spawnResult.status !== "ok") {
-        return Response.json({ error: spawnResult.error?.code ?? "terminal.spawn.failed" }, { status: 500 });
+        const resp = securityResponse(
+          { error: spawnResult.error?.code ?? "terminal.spawn.failed" },
+          500
+        );
+        resp.headers.set("X-RateLimit-Remaining", String(rateCheck.remaining));
+        return resp;
       }
 
-      return Response.json({
-        terminal_id: String(spawnResult.result?.terminal_id),
-        lane_id: laneId,
-        session_id: body.session_id,
-        state: "active",
-      }, { status: 201 });
+      const resp = Response.json(
+        {
+          terminal_id: String(spawnResult.result?.terminal_id),
+          lane_id: laneId,
+          session_id: sanitizedBody.session_id,
+          state: "active",
+        },
+        { status: 201 }
+      );
+      for (const [key, value] of Object.entries(securityHeaders)) {
+        resp.headers.set(key, value);
+      }
+      resp.headers.set("X-RateLimit-Remaining", String(rateCheck.remaining));
+      return resp;
     }
 
-    if (url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/cleanup$/) && requestInput.method === "POST") {
+    if (
+      url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/cleanup$/) &&
+      requestInput.method === "POST"
+    ) {
+      const clientKey = getClientKey(requestInput);
+      const rateCheck = rateLimiters.lane_cleanup.check(clientKey);
+      if (!rateCheck.allowed) {
+        const resp = securityResponse({ error: "rate_limit_exceeded" }, 429);
+        resp.headers.set("X-RateLimit-Reset", String(rateCheck.resetAt));
+        return resp;
+      }
+
       const laneId = url.pathname.split("/")[5];
-      await laneService.cleanup(url.pathname.split("/")[3], laneId);
+      const workspaceId = url.pathname.split("/")[3];
+
+      if (!validateLaneId(laneId) || !validateWorkspaceId(workspaceId)) {
+        return securityResponse({ error: "invalid_path_parameters" }, 400);
+      }
+
+      await laneService.cleanup(workspaceId, laneId);
       runtimeState.lane = "closed";
-      return Response.json({ status: "ok" }, { status: 200 });
+      const resp = Response.json({ status: "ok" }, { status: 200 });
+      for (const [key, value] of Object.entries(securityHeaders)) {
+        resp.headers.set(key, value);
+      }
+      resp.headers.set("X-RateLimit-Remaining", String(rateCheck.remaining));
+      return resp;
     }
 
     if (url.pathname === "/v1/harness/cliproxy/status" && requestInput.method === "GET") {
-      return Response.json(
+      const clientKey = getClientKey(requestInput);
+      const rateCheck = rateLimiters.harness_status.check(clientKey);
+      if (!rateCheck.allowed) {
+        const resp = securityResponse({ error: "rate_limit_exceeded" }, 429);
+        resp.headers.set("X-RateLimit-Reset", String(rateCheck.resetAt));
+        return resp;
+      }
+
+      const resp = Response.json(
         {
           status: harnessStatus.status === "available" ? "available" : "unavailable",
           degrade_reason: harnessStatus.degrade_reason,
         },
         { status: 200 }
       );
+      for (const [key, value] of Object.entries(securityHeaders)) {
+        resp.headers.set(key, value);
+      }
+      resp.headers.set("X-RateLimit-Remaining", String(rateCheck.remaining));
+      return resp;
     }
 
-    return new Response("Not found", { status: 404 });
+    return securityResponse("Not found", 404);
   }
   function exportAuditBundle(filter?: { correlation_id?: string }): RuntimeAuditBundle {
     const records = filter?.correlation_id
