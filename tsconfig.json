@@ -14,7 +14,6 @@
 		"types": ["bun-types", "node", "@playwright/test"],
 		"ignoreDeprecations": "6.0",
 		"baseUrl": ".",
-		"ignoreDeprecations": "6.0",
 		"paths": {
 			"@helios/runtime": ["apps/runtime/src/index.ts"],
 			"@helios/runtime/*": ["apps/runtime/src/*"],
