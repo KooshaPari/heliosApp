@@ -56,13 +56,15 @@ export type SendMessagesOptions = {
   maxTokens?: number;
   /** Anthropic API key — falls back to env lookup when omitted. */
   apiKey?: string;
+  /** AbortSignal for cancelling in-flight requests. */
+  signal?: AbortSignal;
 };
 
 export class AnthropicApiError extends Error {
   constructor(
     public readonly status: number,
     public readonly body: string,
-    message: string,
+    message: string
   ) {
     super(message);
     this.name = "AnthropicApiError";
@@ -75,9 +77,7 @@ export class AnthropicApiError extends Error {
  *
  * Throws `AnthropicApiError` on non-2xx HTTP responses.
  */
-export async function sendMessages(
-  opts: SendMessagesOptions,
-): Promise<AnthropicMessagesResponse> {
+export async function sendMessages(opts: SendMessagesOptions): Promise<AnthropicMessagesResponse> {
   const apiKey = opts.apiKey ?? getAnthropicApiKey();
   const baseUrl = getAnthropicBaseUrl();
 
@@ -94,16 +94,20 @@ export async function sendMessages(
           messages: opts.history,
         },
         retry: { limit: 3, methods: ["post"], statusCodes: [429, 500, 502, 503, 504] },
+        signal: opts.signal,
+        timeout: 30000,
       })
       .json<AnthropicMessagesResponse>();
   } catch (err: unknown) {
-    // ky wraps HTTP errors in HTTPError; extract status + body for AnthropicApiError
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw err;
+    }
     if (err instanceof HTTPError) {
       const errorText = await err.response.text();
       throw new AnthropicApiError(
         err.response.status,
         errorText,
-        `Anthropic API returned ${err.response.status}: ${errorText}`,
+        `Anthropic API returned ${err.response.status}: ${errorText}`
       );
     }
     throw err;
@@ -116,7 +120,7 @@ export async function sendMessages(
 export function extractTextContent(response: AnthropicMessagesResponse): string {
   return response.content
     .filter((block): block is AnthropicTextBlock => block.type === "text")
-    .map((block) => block.text)
+    .map(block => block.text)
     .join("");
 }
 
@@ -129,8 +133,9 @@ export function extractTextContent(response: AnthropicMessagesResponse): string 
  */
 export function toAnthropicHistory(messages: Message[]): AnthropicHistoryEntry[] {
   return messages
-    .filter((m): m is Message & { role: "user" | "assistant" } =>
-      m.role === "user" || m.role === "assistant",
+    .filter(
+      (m): m is Message & { role: "user" | "assistant" } =>
+        m.role === "user" || m.role === "assistant"
     )
-    .map((m) => ({ role: m.role, content: m.content }));
+    .map(m => ({ role: m.role, content: m.content }));
 }

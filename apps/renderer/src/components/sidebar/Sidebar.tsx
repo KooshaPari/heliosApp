@@ -1,7 +1,7 @@
 import type { Component } from "solid-js";
-import { For } from "solid-js";
-import { ConversationItem } from "./ConversationItem";
+import { createMemo, For } from "solid-js";
 import { getAppState, newChat, updateAppState } from "../../stores/app.store";
+import { ConversationItem } from "./ConversationItem";
 
 type MockConversation = {
   id: string;
@@ -28,7 +28,7 @@ const MOCK_CONVERSATIONS: MockConversation[] = [
 ];
 
 export const Sidebar: Component = () => {
-  const state = getAppState;
+  const activeConversationId = createMemo(() => getAppState().activeConversationId);
 
   function handleConversationClick(id: string): void {
     updateAppState({ activeConversationId: id });
@@ -85,7 +85,7 @@ export const Sidebar: Component = () => {
               id={conv.id}
               title={conv.title}
               updatedAt={conv.updatedAt}
-              isActive={state().activeConversationId === conv.id}
+              isActive={activeConversationId() === conv.id}
               onClick={handleConversationClick}
             />
           )}
