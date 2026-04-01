@@ -1,16 +1,24 @@
-import { type Component, For, Show, createEffect } from "solid-js";
+import { type Component, createEffect, createMemo, For, Show } from "solid-js";
 import type { Message } from "../../../../runtime/src/types/conversation";
 import { MessageBubble } from "./MessageBubble";
 
 type ChatPanelProps = {
   messages: Message[];
   isStreaming: boolean;
+  isLoading: boolean;
 };
 
 export const ChatPanel: Component<ChatPanelProps> = props => {
   let containerRef: HTMLDivElement | undefined;
 
-  // Auto-scroll to bottom on new messages
+  const hasMessages = createMemo(() => props.messages.length > 0);
+  const streamingMessage = createMemo(() => {
+    if (!props.isStreaming) return null;
+    return (
+      props.messages.find(m => m.role === "assistant" && m.metadata?.status === "streaming") ?? null
+    );
+  });
+
   createEffect(() => {
     const _ = props.messages.length;
     if (containerRef) {
@@ -34,7 +42,7 @@ export const ChatPanel: Component<ChatPanelProps> = props => {
         gap: "12px",
       }}
     >
-      <Show when={props.messages.length === 0}>
+      <Show when={!hasMessages()}>
         <div
           style={{
             display: "flex",
@@ -62,6 +70,30 @@ export const ChatPanel: Component<ChatPanelProps> = props => {
         </div>
       </Show>
       <For each={props.messages}>{message => <MessageBubble message={message} />}</For>
+      <Show when={props.isLoading && !streamingMessage()}>
+        <div
+          style={{
+            display: "flex",
+            "align-items": "center",
+            gap: "8px",
+            padding: "12px 16px",
+            color: "#6c7086",
+            "font-size": "14px",
+          }}
+        >
+          <div
+            style={{
+              width: "16px",
+              height: "16px",
+              border: "2px solid #313244",
+              "border-top-color": "#89b4fa",
+              "border-radius": "50%",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+          Thinking...
+        </div>
+      </Show>
     </div>
   );
 };
