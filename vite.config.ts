@@ -3,11 +3,13 @@ import react from '@vitejs/plugin-react';
 import { federation } from '@module-federation/vite';
 
 const federationMode = process.env.FEDERATION_MODE === 'remote';
+const parsedPort = Number.parseInt(process.env.VITE_PORT ?? '', 10);
+const port = Number.isFinite(parsedPort) ? parsedPort : 3001;
 
 export default defineConfig({
   plugins: [
     react(),
-    ...federation({
+    federation({
       name: 'heliosApp',
       filename: 'remoteEntry.js',
       // Expose components and pages as remote modules
@@ -32,10 +34,10 @@ export default defineConfig({
     }),
   ],
   server: {
-    port: process.env.VITE_PORT ? parseInt(process.env.VITE_PORT) : 3001,
+    port,
     hmr: {
       host: 'localhost',
-      port: process.env.VITE_PORT ? parseInt(process.env.VITE_PORT) : 3001,
+      port,
     },
   },
   build: {

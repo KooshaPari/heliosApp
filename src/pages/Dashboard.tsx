@@ -1,14 +1,9 @@
 import { useState } from 'react';
+import type { DashboardItem } from '../types';
 import './Dashboard.css';
 
-interface DashboardItem {
-  id: string;
-  title: string;
-  description: string;
-  status: 'active' | 'pending' | 'completed';
-}
-
 export default function Dashboard() {
+  const configuredPort = import.meta.env.VITE_PORT ?? '3001';
   const [items] = useState<DashboardItem[]>([
     {
       id: '1',
@@ -53,7 +48,7 @@ export default function Dashboard() {
         <h3>Federation Configuration</h3>
         <ul>
           <li>Remote name: <code>heliosApp</code></li>
-          <li>Port: <code>3001</code></li>
+          <li>Port: <code>{configuredPort}</code></li>
           <li>Exposed modules: <code>Dashboard</code>, <code>Components</code>, <code>Hooks</code></li>
           <li>Shared dependencies: React 18+, React DOM 18+</li>
         </ul>

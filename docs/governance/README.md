@@ -24,5 +24,5 @@ This directory is the repo-local governance surface for `heliosApp`.
 
 ## Current Billing Policy
 
-Use [billing-exempt-ci.md](/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/docs/governance/billing-exempt-ci.md)
+Use [billing-exempt-ci.md](./billing-exempt-ci.md)
 for the only acceptable CI exception class.

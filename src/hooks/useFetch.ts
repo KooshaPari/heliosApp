@@ -14,33 +14,33 @@ export function useFetch<T>(url: string): UseFetchState<T> {
   });
 
   useEffect(() => {
-    let isMounted = true;
+    const controller = new AbortController();
 
     const fetchData = async () => {
       try {
-        const response = await fetch(url);
+        const response = await fetch(url, { signal: controller.signal });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        if (isMounted) {
-          setState({ data, loading: false, error: null });
-        }
+        setState({ data, loading: false, error: null });
       } catch (error) {
-        if (isMounted) {
-          setState({
-            data: null,
-            loading: false,
-            error: error instanceof Error ? error : new Error('Unknown error'),
-          });
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
         }
+
+        setState({
+          data: null,
+          loading: false,
+          error: error instanceof Error ? error : new Error('Unknown error'),
+        });
       }
     };
 
     fetchData();
 
     return () => {
-      isMounted = false;
+      controller.abort();
     };
   }, [url]);
 
