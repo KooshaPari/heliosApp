@@ -2,7 +2,7 @@ name: Policy Gate
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled, ready_for_review]
 
 permissions:
   contents: read
@@ -18,42 +18,34 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Enforce PR policy
+      - name: Enforce PR branch policy
         shell: bash
         env:
           HEAD_REF: ${{ github.head_ref }}
           BASE_REF: ${{ github.base_ref }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
         run: |
           set -euo pipefail
 
-          # Prevent merge commits in PR branch diff range
-          PR_HEAD="${HEAD_SHA}"
-          if ! git fetch origin "$BASE_REF"; then
-            echo "ERROR: failed to fetch base ref $BASE_REF."
+          if [[ "$HEAD_REF" == "main" || "$HEAD_REF" == "master" ]]; then
+            echo "ERROR: shared branches cannot be used as PR head branches."
             exit 1
           fi
-          if ! MERGES=$(git rev-list --merges "origin/$BASE_REF..$PR_HEAD"); then
-            echo "ERROR: failed to compute merge-commit range for base ref '$BASE_REF'."
-            exit 1
-          fi
-          if [[ -n "$MERGES" ]]; then
-            # Filter out merge commits from GitHub's "Update branch" button
-            # These have committer "GitHub <noreply@github.com>"
-            REAL_MERGES=""
-            while IFS= read -r sha; do
-              committer=$(git log -1 --format='%ce' "$sha" 2>/dev/null || echo "unknown")
-              if [[ "$committer" != "noreply@github.com" ]]; then
-                REAL_MERGES="${REAL_MERGES}${sha}"$'\n'
-              fi
-            done <<< "$MERGES"
-            REAL_MERGES=$(echo "$REAL_MERGES" | sed '/^$/d')
-            if [[ -n "$REAL_MERGES" ]]; then
-              echo "ERROR: merge commits detected in PR diff range:"
-              echo "$REAL_MERGES"
+
+          if [[ "$HEAD_REF" == fix/* && ( "$BASE_REF" == "main" || "$BASE_REF" == "master" ) ]]; then
+            if [[ "$PR_LABELS" != *"layered-pr-exception"* ]]; then
+              echo "ERROR: fix/* PRs must target a layered branch or carry layered-pr-exception."
               exit 1
             fi
           fi
 
-          echo "Policy gate passed."
+          git fetch origin "$BASE_REF" --depth=1
+          MERGES=$(git rev-list --merges "origin/$BASE_REF..$PR_HEAD_SHA")
+          if [[ -n "$MERGES" ]]; then
+            echo "ERROR: merge commits detected in PR diff range:"
+            echo "$MERGES"
+            exit 1
+          fi
+
+          echo "Server-side policy gate passed."

@@ -101,7 +101,7 @@ export class ProtectedPathConfig {
   }
 
   getEnabledPatterns(): ProtectedPathPattern[] {
-    return Array.from(this.patterns.values()).filter((p) => p.enabled);
+    return Array.from(this.patterns.values()).filter(p => p.enabled);
   }
 
   private async _emit(topic: string, payload: Record<string, unknown>): Promise<void> {

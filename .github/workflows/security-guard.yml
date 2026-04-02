@@ -12,10 +12,11 @@ permissions:
 
 jobs:
   guard:
+    name: guard
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -23,3 +24,8 @@ jobs:
         uses: pre-commit/action@v3.0.1
         with:
           extra_args: --hook-stage pre-commit --config .pre-commit-config.yaml --show-diff-on-failure
+
+      - name: Run pre-push guard checks
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --hook-stage pre-push --config .pre-commit-config.yaml --show-diff-on-failure

@@ -1,7 +1,7 @@
-declare module '@phenodocs-theme' {
-  import type { Theme } from 'vitepress'
-  const PhenoDocsTheme: Theme.Theme
-  export default PhenoDocsTheme
+declare module "@phenodocs-theme" {
+  import type { Theme } from "vitepress";
+  const PhenoDocsTheme: Theme.Theme;
+  export default PhenoDocsTheme;
 }
 
 declare module "*.vue" {

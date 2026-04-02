@@ -1,0 +1,10 @@
+{
+  "default_branch_required_checks": [
+    "policy-gate",
+    "pr-governance-gate"
+  ],
+  "notes": [
+    "policy-gate enforces layered branch topology and bans merge commits in PR history.",
+    "pr-governance-gate treats every non-billing PR check as merge-blocking, including lint, build, typecheck, and security guard results."
+  ]
+}

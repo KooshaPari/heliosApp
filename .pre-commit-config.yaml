@@ -1,27 +1,50 @@
 repos:
+  - repo: https://github.com/returntocorp/semgrep
+    rev: "v1.72.0"
+    hooks:
+      - id: semgrep
+        name: Semgrep
+        args: ["--config=.semgrep.yaml", "--error"]
+        language: python
+        files: \.(py|rs|json|jsx?|tsx?|ya?ml|go)$
+        additional_dependencies: ["semgrep"]
+
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: "v3.93.6"
+    hooks:
+      - id: trufflehog
+        name: TruffleHog
+        entry: trufflehog git file://.
+        language: golang
+        types: [text]
+        pass_filenames: false
+        stages: [pre-push]
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
-      - id: check-json
       - id: check-toml
+      - id: check-merge-conflict
       - id: check-added-large-files
         args: ["--maxkb=500"]
-      - id: check-merge-conflict
       - id: detect-private-key
-  - repo: local
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.0.0
     hooks:
-      - id: lint-staged
-        name: lint-staged
-        entry: bun run lint
-        language: system
-        files: \.(ts|tsx|js|jsx|json|md)$
-        pass_filenames: true
-      - id: security-guard-pre-commit-pre-push
-        name: security-guard pre-commit/pre-push
-        entry: .github/scripts/security-guard.sh
-        language: script
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert]
+
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: "v9.0.0"
+    hooks:
+      - id: eslint
+        name: eslint
+        entry: eslint .
+        language: node
+        files: \.[cm]?[jt]sx?$
         pass_filenames: false
-        stages: [pre-commit, pre-push]

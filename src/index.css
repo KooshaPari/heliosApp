@@ -1,0 +1,64 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --color-primary: #0066cc;
+  --color-background: #ffffff;
+  --color-text: #333333;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #1a1a1a;
+    --color-text: #e0e0e0;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  transition: background-color 0.2s ease;
+}
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  background-color: var(--color-primary);
+  color: white;
+  padding: var(--spacing-lg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.app-header h1 {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.app-header p {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.app-main {
+  flex: 1;
+  padding: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
