@@ -214,10 +214,28 @@ Convoy work is linked via branch naming:
 
 | Document | Purpose |
 |---|---|
+| `AGENTS.md` | Agent guidance for this repository (source of truth for Kilo identity and tools) |
 | `AGILEPLUS_SPEC.md` | AgilePlus project tracking methodology |
 | `PRD.md` | Product Requirements Document |
 | `CHANGELOG.md` | Version history |
 | `docs/specs/*/spec.md` | Individual technical specifications |
+
+### Relationship with AGENTS.md
+
+`AGENTS.md` (located at repository root) is the **authoritative source** for agent-facing guidance in this repository. It contains:
+
+- Kilo Gastown identity (Rig ID, Town ID, Convoy)
+- Delegation tool descriptions (`gt_sling`, `gt_sling_batch`, `gt_list_convoys`, `gt_convoy_status`)
+- Development commands (`bun run typecheck`, `bun run lint`, `bun run test`, `bun run gates`)
+- Stack information and project structure
+- Agent behavior rules and Git workflow conventions
+
+This specification (`KILO_GASTOWN_SPEC.md`) provides **supplementary context** on the underlying Kilo Gastown methodology, including:
+
+- Conceptual explanation of convoys and bead lifecycle
+- Delegation mechanics and merge modes
+- Integration with AgilePlus tracking
+- Historical background on the orchestration system
 
 ---
 
