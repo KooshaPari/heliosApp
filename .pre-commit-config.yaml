@@ -6,7 +6,7 @@ repos:
         name: Semgrep
         args: ["--config=.semgrep.yaml", "--error"]
         language: python
-        types: [python, rust, json, javascript, typescript, yaml, go]
+        files: \.(py|rs|json|jsx?|tsx?|ya?ml|go)$
         additional_dependencies: ["semgrep"]
 
   - repo: https://github.com/trufflesecurity/trufflehog
@@ -46,5 +46,5 @@ repos:
         name: eslint
         entry: eslint .
         language: node
-        types: [javascript, typescript]
+        files: \.[cm]?[jt]sx?$
         pass_filenames: false

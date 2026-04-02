@@ -1,37 +1,62 @@
 {
-  "name": "heliosApp",
-  "version": "0.1.0",
-  "description": "heliosApp - Module Federation remote for Phenotype ecosystem",
+  "name": "heliosapp",
+  "version": "2026.03A.0",
+  "private": true,
+  "workspaces": [
+    "apps/runtime",
+    "apps/desktop",
+    "apps/colab-renderer",
+    "packages/errors",
+    "packages/ids",
+    "packages/logger",
+    "packages/runtime-core",
+    "packages/types"
+  ],
   "type": "module",
   "scripts": {
-    "dev": "vite --port ${VITE_PORT:-3001}",
-    "dev:remote": "FEDERATION_MODE=remote vite --port ${VITE_PORT:-3001}",
-    "build": "vite build",
-    "build:remote": "FEDERATION_MODE=remote vite build",
-    "preview": "vite preview --port ${VITE_PREVIEW_PORT:-4173}",
-    "local:start": "sh scripts/dev-local.sh",
-    "lint": "oxlint",
-    "format": "prettier --write \"src/**/*.{ts,tsx,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,json}\""
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint apps/",
+    "format": "biome format --write apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
+    "test": "bun test apps/runtime/tests/unit scripts/tests/",
+    "test:desktop": "bun test apps/desktop/tests/unit",
+    "test:integration": "bun test --timeout 60000 apps/runtime/tests/integration",
+    "test:coverage": "bun test --coverage apps/runtime/tests/unit apps/desktop/tests/unit",
+    "test:e2e": "playwright test",
+    "gates": "bun scripts/gates.ts",
+    "docs:index": "bash docs/scripts/generate-doc-index.sh",
+    "docs:dev": "bunx vitepress dev docs",
+    "docs:build": "bun run docs:index && bunx vitepress build docs",
+    "docs:preview": "bunx vitepress preview docs",
+    "deps:status": "bun scripts/deps-status.ts",
+    "deps:rollback": "bun scripts/deps-rollback.ts",
+    "deps:canary": "bun scripts/deps-canary.ts",
+    "deps:log": "bun scripts/deps-canary.ts log"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/addon-web-links": "^0.12.0",
+    "@xterm/xterm": "^6.0.0",
+    "date-fns": "4.1.0",
+    "ky": "1.14.3",
+    "pino": "10.3.1",
+    "solid-js": "^1.9.12"
   },
   "devDependencies": {
-    "@module-federation/enhanced": "^0.7.0",
-    "@module-federation/vite": "^1.13.5",
-    "@types/node": "^22.0.0",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
-    "oxlint": "^0.6.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.6.2",
-    "vite": "^6.0.0"
+    "@biomejs/biome": "2.4.10",
+    "@playwright/test": "1.58.2",
+    "@types/node": "25.5.0",
+    "bun-types": "1.3.11",
+    "esbuild": "^0.27.4",
+    "esbuild-plugin-solid": "^0.6.0",
+    "happy-dom": "20.8.9",
+    "oxlint": "1.57.0",
+    "typescript": "6.0.2",
+    "vitepress": "1.6.4",
+    "vitest": "4.1.2"
   },
   "engines": {
-    "node": ">=22"
+    "bun": ">=1.2.20",
+    "node": ">=20.0.0"
   },
-  "packageManager": "bun@1.1.42"
+  "packageManager": "bun@1.2.20"
 }

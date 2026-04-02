@@ -122,9 +122,6 @@ export function createBinding(terminalId: string, triple: BindingTriple): Termin
   };
 }
 
-export function createTerminalBinding(
-  terminalId: string,
-  triple: BindingTriple,
-): TerminalBinding {
+export function createTerminalBinding(terminalId: string, triple: BindingTriple): TerminalBinding {
   return createBinding(terminalId, triple);
 }

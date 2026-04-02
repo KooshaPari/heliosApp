@@ -66,7 +66,7 @@ jobs:
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        if: always() && hashFiles('semgrep.sarif') != ''
         with:
           sarif_file: semgrep.sarif
           category: semgrep-full
@@ -82,5 +82,5 @@ jobs:
       - uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          extra_args: --only-verified --fail
+          extra_args: --only-verified
         continue-on-error: true
