@@ -1,8 +1,7 @@
-# Default owner for everything
-* @kooshapari
+* @KooshaPari
 
-# Runtime core
-/apps/runtime/ @kooshapari
-
-# Infrastructure
-/.github/ @kooshapari
+/.github/ @KooshaPari
+/src/ @KooshaPari
+/README.md @KooshaPari
+/package.json @KooshaPari
+/tsconfig.json @KooshaPari

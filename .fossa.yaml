@@ -1,0 +1,16 @@
+# FOSSA Configuration - heliosApp
+# FOSSA free tier: 5 projects max
+# https://app.fossa.com
+
+version: 2
+cli:
+  version: 3.16.6
+
+analyze:
+  wait: true
+  upload: true
+
+projects:
+  - name: heliosApp
+    path: ./
+    type: npm
