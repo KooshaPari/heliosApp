@@ -2,8 +2,8 @@
   "name": "@helios/colab-renderer",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "description": "SolidJS chat+terminal UI renderer — migrated from heliosApp-colab",
+  "type": "module",
   "main": "src/index.tsx",
   "scripts": {
     "dev": "bun run --watch src/index.tsx",

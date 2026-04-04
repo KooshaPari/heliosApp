@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-090: Session Harness Routing Tests
+ * Verifies: FR-PVD-003 (ACP for Claude/agent task execution)
+ */
 import { describe, expect, it } from "bun:test";
 import { createRuntime } from "../../../src/index";
 

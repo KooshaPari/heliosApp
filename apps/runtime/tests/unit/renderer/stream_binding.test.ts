@@ -1,6 +1,6 @@
 /**
- * Unit tests for StreamBindingManager and SwitchBuffer.
- * @see FR-010-005, NFR-010-002
+ * FR-HELIOS-058: Stream Binding Manager Tests
+ * Verifies: FR-RND-005 (PTY stream binding/unbinding), FR-TXN-005 (Preserve PTY streams during switch)
  */
 import { describe, expect, it, afterEach } from "bun:test";
 import { StreamBindingManager, SwitchBuffer } from "../../../src/renderer/stream_binding.js";

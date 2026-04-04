@@ -1,8 +1,7 @@
 /**
- * Unit tests for RioProcess lifecycle, crash detection, and SIGTERM/SIGKILL escalation.
- * Covers: T009 (unit tests).
+ * FR-HELIOS-052: Rio Process Lifecycle Tests
+ * Verifies: FR-RIO-001 (Renderer adapter interface), FR-RIO-007 (Crash handling)
  */
-
 import { describe, it, expect, beforeEach } from "bun:test";
 import { RioProcess } from "../../../../src/renderer/rio/process.js";
 

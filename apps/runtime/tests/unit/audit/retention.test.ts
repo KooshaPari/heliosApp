@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-039: Audit Retention Policy Tests
+ * Verifies: FR-AUD-009 (Retention TTL), FR-AUD-010 (Legal hold exceptions), FR-AUD-011 (Deletion proof)
+ */
 import { describe, it, expect, beforeEach } from "bun:test";
 import { RetentionPolicyStore, RetentionPurger } from "../../../src/audit/retention";
 

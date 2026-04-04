@@ -1,5 +1,7 @@
-// Unit tests for ZellijDetector
-
+/**
+ * FR-HELIOS-077: Zellij Session Detector Tests
+ * Verifies: FR-ORF-002 (Stale zellij session detection)
+ */
 import { describe, it, expect, beforeEach } from "bun:test";
 import { ZellijDetector } from "../../../../src/lanes/watchdog/zellij_detector.js";
 import type { SessionRegistry } from "../../../../src/lanes/watchdog/zellij_detector.js";

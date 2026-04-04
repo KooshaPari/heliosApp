@@ -1,5 +1,9 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { createMcpBridgeFixture, getMcpToolEvents, initMcpBridge } from "./mcp-bridge-test-helpers.js";
+import {
+  createMcpBridgeFixture,
+  getMcpToolEvents,
+  initMcpBridge,
+} from "./mcp-bridge-test-helpers.js";
 
 describe("MCP Bridge Adapter - Correlation IDs", () => {
   let adapter: ReturnType<typeof createMcpBridgeFixture>["adapter"];
@@ -24,7 +28,7 @@ describe("MCP Bridge Adapter - Correlation IDs", () => {
     );
 
     const toolEvents = getMcpToolEvents(bus);
-    toolEvents.forEach((event) => {
+    toolEvents.forEach(event => {
       expect(event.payload?.correlationId).toBe(correlationId);
     });
   });

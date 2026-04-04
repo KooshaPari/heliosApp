@@ -1,11 +1,7 @@
 /**
- * Integration tests for event sequencing and correlation ID propagation.
- *
- * FR-005: Per-topic monotonic sequence numbers.
- * FR-008: Correlation ID propagation from commands through events.
- * FR-009: Subscriber isolation during fan-out.
+ * FR-HELIOS-087: Event Sequencing and Correlation Propagation Tests
+ * Verifies: FR-BUS-005 (Monotonic sequence numbers), FR-BUS-008 (Correlation ID propagation), FR-BUS-009 (Subscriber isolation)
  */
-
 import { describe, expect, it, beforeEach } from "bun:test";
 import { createBus } from "../../../src/protocol/bus.js";
 import type { LocalBus } from "../../../src/protocol/bus.js";
