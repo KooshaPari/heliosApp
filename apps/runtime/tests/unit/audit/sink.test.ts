@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-063: Audit Sink Tests
+ * Verifies: FR-AUD-002 (Append-only log), FR-SEC-005 (Redaction at sink boundary)
+ */
 import { describe, it, expect, beforeEach } from "bun:test";
 import { DefaultAuditSink, NoOpAuditStorage } from "../../../src/audit/sink";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";

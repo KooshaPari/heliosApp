@@ -1,5 +1,7 @@
-// FR-005, FR-006: Unit tests for memory and frame timing samplers.
-
+/**
+ * FR-HELIOS-069: Memory and Frame Timing Sampler Tests
+ * Verifies: FR-PRF-005 (Memory usage sampling), FR-PRF-006 (Frame timing sampling)
+ */
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 import { MemorySampler, FrameTimingSampler } from "../../../src/diagnostics/samplers.js";

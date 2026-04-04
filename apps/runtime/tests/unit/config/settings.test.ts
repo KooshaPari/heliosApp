@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-038: Settings Manager Tests
+ * Verifies: FR-CFG-001 (Typed settings schema), FR-CFG-002 (Validation), FR-CFG-004 (Restore on startup), FR-CFG-007 (settings.changed events)
+ */
 import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";

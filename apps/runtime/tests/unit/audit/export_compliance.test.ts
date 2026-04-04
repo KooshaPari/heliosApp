@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-065: Audit Export Compliance Tests
+ * Verifies: FR-AUD-008 (Export with redaction), FR-SEC-005 (Redaction at sink boundary)
+ */
 import { describe, expect, test } from "bun:test";
 import { InMemoryAuditSink } from "../../../src/audit/sink";
 

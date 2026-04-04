@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-072: Approval Queue Tests
+ * Verifies: FR-APR-004 (Approval request creation), FR-APR-005 (Approve/deny actions), FR-APR-007 (Durable persistence)
+ */
 import { test, expect, describe } from "bun:test";
 import { ApprovalQueue, ApprovalStatus } from "../../../src/policy/approval-queue";
 

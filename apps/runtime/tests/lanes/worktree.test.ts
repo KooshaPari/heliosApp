@@ -1,5 +1,7 @@
-// Tests for T006-T010: Worktree provisioning, cleanup, PTY termination, orphan reconciliation
-
+/**
+ * FR-HELIOS-099: Worktree Provisioning and Orphan Reconciliation
+ * Verifies: FR-LAN-006 (Worktree provisioning), FR-LAN-009 (Orphan detection)
+ */
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";

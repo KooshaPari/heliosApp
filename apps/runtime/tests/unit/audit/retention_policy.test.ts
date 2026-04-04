@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-066: Retention Policy Tests
+ * Verifies: FR-AUD-009 (Retention TTL enforcement), FR-AUD-011 (Deletion proof)
+ */
 import { describe, expect, test } from "bun:test";
 import { createRetentionPolicyConfig } from "../../../src/config/retention";
 import { InMemoryAuditSink } from "../../../src/audit/sink";
