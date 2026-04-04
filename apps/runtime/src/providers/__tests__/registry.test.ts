@@ -162,9 +162,11 @@ describe("ProviderRegistry", () => {
     });
 
     it("should emit provider.init.failed event on init failure", async () => {
-      class FailingProvider
-        implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
-      {
+      class FailingProvider implements ProviderAdapter<
+        ACPConfig,
+        ACPExecuteInput,
+        ACPExecuteOutput
+      > {
         async init(_config: ACPConfig): Promise<void> {
           throw new Error("Init failed");
         }

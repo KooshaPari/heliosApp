@@ -79,9 +79,11 @@ interface ACPResponse {
  *
  * FR-025-003: ACP protocol client for Claude.
  */
-export class ACPClientAdapter
-  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
-{
+export class ACPClientAdapter implements ProviderAdapter<
+  ACPConfig,
+  ACPExecuteInput,
+  ACPExecuteOutput
+> {
   private config: ACPConfig | null = null;
   private bus: LocalBus | null = null;
   private policyGate: PolicyGate;
