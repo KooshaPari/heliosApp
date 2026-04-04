@@ -1,5 +1,7 @@
-// NFR-004: Memory overhead test — 20 metrics x 10k samples must stay under 10 MB.
-
+/**
+ * FR-HELIOS-096: Diagnostics Memory Overhead Benchmarks
+ * Verifies: FR-PRF-002 (Memory overhead constraints)
+ */
 import { describe, it, expect } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 
