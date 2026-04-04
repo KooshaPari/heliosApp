@@ -6,9 +6,7 @@ export function getRecoveryStatePath(recoveryDataDir: string): string {
   return path.join(recoveryDataDir, "recovery", "recovery-state.json");
 }
 
-export async function loadRecoveryState(
-  recoveryDataDir: string,
-): Promise<RecoveryState | null> {
+export async function loadRecoveryState(recoveryDataDir: string): Promise<RecoveryState | null> {
   try {
     const statePath = getRecoveryStatePath(recoveryDataDir);
     const data = await fs.readFile(statePath, "utf-8");
@@ -20,7 +18,7 @@ export async function loadRecoveryState(
 
 export async function persistRecoveryState(
   recoveryDataDir: string,
-  state: RecoveryState,
+  state: RecoveryState
 ): Promise<void> {
   try {
     const statePath = getRecoveryStatePath(recoveryDataDir);

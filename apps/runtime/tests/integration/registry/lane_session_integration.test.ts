@@ -110,7 +110,7 @@ describe("Lane/Session Lifecycle Integration", () => {
       for (let i = 0; i < 5; i++) {
         registry.register(`terminal-${i}`, {
           workspaceId: "ws-1",
-          laneId: `lane-${i % 2}-${i}`,  // lane-0-0, lane-1-1, lane-0-2, lane-1-3, lane-0-4
+          laneId: `lane-${i % 2}-${i}`, // lane-0-0, lane-1-1, lane-0-2, lane-1-3, lane-0-4
           sessionId: i < 2 ? "session-1" : "session-2",
         });
       }
@@ -198,7 +198,7 @@ describe("Lane/Session Lifecycle Integration", () => {
             registry.register(`terminal-${terminalCount}`, {
               workspaceId: "ws-1",
               laneId,
-              sessionId: `${sessionId}-${terminalCount}`,  // unique per (lane,session) pair
+              sessionId: `${sessionId}-${terminalCount}`, // unique per (lane,session) pair
             });
             terminalCount++;
           }
