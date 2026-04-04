@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-079: Protocol Assets Tests
+ * Verifies: FR-BUS-003 (Method registry), FR-BUS-004 (Topic registry)
+ */
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { METHODS } from "../../../src/protocol/methods";

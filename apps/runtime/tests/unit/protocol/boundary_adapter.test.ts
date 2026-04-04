@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-060: Boundary Adapter Dispatch Tests
+ * Verifies: FR-BUS-003 (Method registry dispatch), FR-PVD-004 (MCP integration), FR-PVD-005 (A2A integration)
+ */
 import { describe, expect, test } from "bun:test";
 import {
   createBoundaryDispatcher,

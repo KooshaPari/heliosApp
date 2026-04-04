@@ -1,9 +1,7 @@
 /**
- * Unit tests for rio feature flag toggle handling.
- * Covers: T008 (feature flag toggle), T009 (unit tests).
- * FR-012-008, SC-012-004.
+ * FR-HELIOS-055: Rio Feature Flag Toggle Tests
+ * Verifies: FR-RIO-002 (Feature flag gating), FR-CFG-009 (renderer_engine flag)
  */
-
 import { describe, it, expect, beforeEach } from "bun:test";
 import {
   isRioEnabled,

@@ -1,5 +1,7 @@
-// T017 - Unit tests for lane sharing (FR-008-007)
-
+/**
+ * FR-HELIOS-073: Lane Sharing Tests
+ * Verifies: FR-LAN-007 (Mark lanes as shared for multi-agent concurrent access)
+ */
 import { describe, test, expect, beforeEach } from "bun:test";
 import { LaneRegistry } from "../../../src/lanes/registry.js";
 import type { LaneRecord } from "../../../src/lanes/registry.js";

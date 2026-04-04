@@ -1,12 +1,7 @@
 /**
- * Integration tests for renderer switch rollback.
- *
- * Tests rollback behavior on failures during hot-swap, state restoration,
- * and handling of partial failures.
- *
- * @see FR-010-009, SC-010-002
+ * FR-HELIOS-080: Renderer Switch Rollback Integration Tests
+ * Verifies: FR-TXN-004 (Automatic rollback on failure), FR-TXN-006 (Session context preservation)
  */
-
 import { describe, expect, it } from "bun:test";
 import { executeRollback } from "../../../src/renderer/rollback.js";
 import { SwitchBuffer } from "../../../src/renderer/stream_binding.js";
