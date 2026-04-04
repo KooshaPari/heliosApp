@@ -53,4 +53,3 @@ export type RuntimeBootstrapSnapshot = {
   bootstrap(metadata: RecoveryMetadata): RecoveryBootstrapResult;
   scanForOrphans(nowIso: string): WatchdogScanResult;
 };
-
