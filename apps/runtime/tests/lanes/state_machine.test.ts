@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-097: Lane State Machine Unit Tests
+ * Verifies: FR-LAN-001 (Lane state transitions)
+ */
 import { describe, expect, it } from "bun:test";
 import {
   transition,

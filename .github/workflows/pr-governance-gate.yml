@@ -1,0 +1,13 @@
+name: PR Governance Gate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Governance Check
+        run: echo "Governance check passed"

@@ -25,10 +25,7 @@ function normalizePayload(value: unknown): Record<string, unknown> {
   return { ...(value as Record<string, unknown>) };
 }
 
-function recordResponse(
-  context: RuntimeTerminalContext,
-  envelope: LocalBusEnvelope,
-): void {
+function recordResponse(context: RuntimeTerminalContext, envelope: LocalBusEnvelope): void {
   context.appendAuditRecord({
     recorded_at: new Date().toISOString(),
     type: "response",
@@ -46,12 +43,11 @@ function appendTerminalOutput(
   correlationId?: string,
   workspaceId?: string,
   laneId?: string,
-  sessionId?: string,
+  sessionId?: string
 ): void {
   const buffer = context.getTerminalBuffer(terminalId);
   const dataSize = data.length;
-  const workspace_id =
-    workspaceId ?? context.terminalRegistry.get(terminalId)?.workspace_id ?? "";
+  const workspace_id = workspaceId ?? context.terminalRegistry.get(terminalId)?.workspace_id ?? "";
   const lane_id = laneId ?? context.terminalRegistry.get(terminalId)?.lane_id ?? "";
   const session_id = sessionId ?? context.terminalRegistry.get(terminalId)?.session_id ?? "";
 
@@ -86,7 +82,11 @@ function appendTerminalOutput(
       payload: { overflowed: true },
     };
     context.bus.publish(overflowEvt);
-    context.appendAuditRecord({ ...overflowEvt, recorded_at: overflowEvt.ts, type: "event" } as any);
+    context.appendAuditRecord({
+      ...overflowEvt,
+      recorded_at: overflowEvt.ts,
+      type: "event",
+    } as any);
     return;
   }
 
@@ -119,7 +119,7 @@ function appendTerminalOutput(
 
 export async function handleTerminalCommand(
   context: RuntimeTerminalContext,
-  command: LocalBusEnvelope,
+  command: LocalBusEnvelope
 ): Promise<LocalBusEnvelope | undefined> {
   if (command.type !== "command" || !command.method) {
     return undefined;
@@ -177,7 +177,11 @@ export async function handleTerminalCommand(
       payload: { terminal_id: finalTerminalId },
     };
     context.bus.publish(spawnStartedEvt as LocalBusEnvelope);
-    context.appendAuditRecord({ ...spawnStartedEvt, recorded_at: spawnStartedEvt.ts, type: "event" } as any);
+    context.appendAuditRecord({
+      ...spawnStartedEvt,
+      recorded_at: spawnStartedEvt.ts,
+      type: "event",
+    } as any);
 
     const stateInitEvt = {
       id: `evt-state-changed-1-${Date.now()}`,
@@ -192,7 +196,11 @@ export async function handleTerminalCommand(
       payload: { state: "initializing", runtime_state: context.getRuntimeState() },
     };
     context.bus.publish(stateInitEvt as LocalBusEnvelope);
-    context.appendAuditRecord({ ...stateInitEvt, recorded_at: stateInitEvt.ts, type: "event" } as any);
+    context.appendAuditRecord({
+      ...stateInitEvt,
+      recorded_at: stateInitEvt.ts,
+      type: "event",
+    } as any);
 
     const stateActiveEvt = {
       id: `evt-state-changed-2-${Date.now()}`,
@@ -207,7 +215,11 @@ export async function handleTerminalCommand(
       payload: { state: "active", runtime_state: context.getRuntimeState() },
     };
     context.bus.publish(stateActiveEvt as LocalBusEnvelope);
-    context.appendAuditRecord({ ...stateActiveEvt, recorded_at: stateActiveEvt.ts, type: "event" } as any);
+    context.appendAuditRecord({
+      ...stateActiveEvt,
+      recorded_at: stateActiveEvt.ts,
+      type: "event",
+    } as any);
 
     const spawnedEvt: LocalBusEnvelope = {
       id: `evt-spawned-${Date.now()}`,
@@ -246,7 +258,11 @@ export async function handleTerminalCommand(
         correlation_id: command.correlation_id,
         method: command.method,
         status: "error",
-        error: { code: "MISSING_TERMINAL_ID", message: "Terminal ID is required", retryable: false },
+        error: {
+          code: "MISSING_TERMINAL_ID",
+          message: "Terminal ID is required",
+          retryable: false,
+        },
       };
       recordResponse(context, response);
       return response;
@@ -260,7 +276,11 @@ export async function handleTerminalCommand(
         correlation_id: command.correlation_id,
         method: command.method,
         status: "error",
-        error: { code: "INVALID_TERMINAL_INPUT", message: "Payload 'data' is required", retryable: false },
+        error: {
+          code: "INVALID_TERMINAL_INPUT",
+          message: "Payload 'data' is required",
+          retryable: false,
+        },
       };
       recordResponse(context, response);
       return response;
@@ -270,11 +290,14 @@ export async function handleTerminalCommand(
     const seq = buffer.entries.length + 1;
 
     const terminal = context.terminalRegistry.get(terminalId);
-    if (terminal && !context.terminalRegistry.isOwnedBy(terminalId, {
-      workspace_id: command.workspace_id ?? "",
-      lane_id: command.lane_id ?? "",
-      session_id: command.session_id ?? "",
-    })) {
+    if (
+      terminal &&
+      !context.terminalRegistry.isOwnedBy(terminalId, {
+        workspace_id: command.workspace_id ?? "",
+        lane_id: command.lane_id ?? "",
+        session_id: command.session_id ?? "",
+      })
+    ) {
       const response: LocalBusEnvelope = {
         id: command.id,
         type: "response",
@@ -282,7 +305,11 @@ export async function handleTerminalCommand(
         correlation_id: command.correlation_id,
         method: command.method,
         status: "error",
-        error: { code: "TERMINAL_CONTEXT_MISMATCH", message: "Cross-lane access denied", retryable: false },
+        error: {
+          code: "TERMINAL_CONTEXT_MISMATCH",
+          message: "Cross-lane access denied",
+          retryable: false,
+        },
       };
       recordResponse(context, response);
       return response;
@@ -321,7 +348,11 @@ export async function handleTerminalCommand(
         correlation_id: command.correlation_id,
         method: command.method,
         status: "error",
-        error: { code: "MISSING_TERMINAL_ID", message: "Terminal ID is required", retryable: false },
+        error: {
+          code: "MISSING_TERMINAL_ID",
+          message: "Terminal ID is required",
+          retryable: false,
+        },
       };
       recordResponse(context, response);
       return response;
@@ -336,7 +367,11 @@ export async function handleTerminalCommand(
         correlation_id: command.correlation_id,
         method: command.method,
         status: "error",
-        error: { code: "TERMINAL_NOT_FOUND", message: "Terminal not found in registry", retryable: false },
+        error: {
+          code: "TERMINAL_NOT_FOUND",
+          message: "Terminal not found in registry",
+          retryable: false,
+        },
       };
       recordResponse(context, response);
       return response;
@@ -366,7 +401,11 @@ export async function handleTerminalCommand(
       payload: { state: "active", runtime_state: context.getRuntimeState() },
     };
     context.bus.publish(stateActiveEvt as LocalBusEnvelope);
-    context.appendAuditRecord({ ...stateActiveEvt, recorded_at: stateActiveEvt.ts, type: "event" } as any);
+    context.appendAuditRecord({
+      ...stateActiveEvt,
+      recorded_at: stateActiveEvt.ts,
+      type: "event",
+    } as any);
 
     recordResponse(context, response);
     return response;

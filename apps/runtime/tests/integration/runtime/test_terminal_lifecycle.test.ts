@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-081: Terminal Lifecycle Integration Tests
+ * Verifies: FR-BND-001 (Terminal registry), FR-PTY-001 (PTY lifecycle), FR-BUS-008 (Correlation propagation)
+ */
 import { describe, expect, test } from "bun:test";
 
 import { createRuntime } from "../../../src";
@@ -100,7 +104,7 @@ describe("terminal lifecycle and streaming data plane", () => {
     const auditRecords = await runtime.getAuditRecords();
     expect(auditRecords.length).toBeGreaterThanOrEqual(events.length);
     const spawnRecord = auditRecords.find(
-      (r) => (r.envelope as Record<string, unknown>)?.correlation_id === "corr-spawn-1"
+      r => (r.envelope as Record<string, unknown>)?.correlation_id === "corr-spawn-1"
     );
     const firstEnvelope = (spawnRecord?.envelope ?? {}) as Record<string, unknown>;
     expect(firstEnvelope.correlation_id).toBe("corr-spawn-1");

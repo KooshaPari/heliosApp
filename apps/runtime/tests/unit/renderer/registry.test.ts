@@ -1,6 +1,6 @@
 /**
- * Unit tests for RendererRegistry.
- * @see FR-010-008
+ * FR-HELIOS-059: Renderer Registry Tests
+ * Verifies: FR-RND-003 (Renderer registry with capability metadata), FR-RND-008 (Exactly one active renderer)
  */
 import { describe, expect, it } from "bun:test";
 import {

@@ -17,11 +17,9 @@ import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js
  * In a real implementation, this would spawn a child process.
  * For testing, we simulate the behavior with in-process state.
  */
-class MockIsolatedProvider implements ProviderAdapter<
-  ACPConfig,
-  ACPExecuteInput,
-  ACPExecuteOutput
-> {
+class MockIsolatedProvider
+  implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExecuteOutput>
+{
   private laneId: string;
   private initialized = false;
   private shouldCrash = false;
