@@ -10,4 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Governance Check
-        run: echo "Governance check passed"
+        run: |
+          echo "Governance check passed"
+          exit 0
