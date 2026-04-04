@@ -6,10 +6,7 @@ const ITERATIONS = 25;
 const STARTUP_P95_MS = 2_000;
 
 function percentile(sorted: number[], p: number): number {
-  const index = Math.min(
-    sorted.length - 1,
-    Math.max(0, Math.ceil(p * (sorted.length + 1)) - 1),
-  );
+  const index = Math.min(sorted.length - 1, Math.max(0, Math.ceil(p * (sorted.length + 1)) - 1));
   return sorted[index]!;
 }
 
@@ -37,7 +34,7 @@ test("startup latency stays within the local interactive target", async () => {
       p50_ms: percentile(sorted, 0.5),
       p95_ms: p95,
       max_ms: sorted[sorted.length - 1],
-    }),
+    })
   );
 
   expect(p95).toBeLessThan(STARTUP_P95_MS);

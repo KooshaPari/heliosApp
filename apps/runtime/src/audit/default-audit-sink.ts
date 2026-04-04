@@ -20,7 +20,7 @@ function createDefaultMetrics(): AuditSinkMetrics {
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export class DefaultAuditSink implements AuditSink {
@@ -33,7 +33,7 @@ export class DefaultAuditSink implements AuditSink {
 
   constructor(
     private storage: AuditStorage,
-    ringBufferCapacity: number = MAX_BUFFER_SIZE,
+    ringBufferCapacity: number = MAX_BUFFER_SIZE
   ) {
     this.ringBuffer = new AuditRingBuffer(ringBufferCapacity);
     this.startPeriodicFlush();
@@ -46,7 +46,7 @@ export class DefaultAuditSink implements AuditSink {
     if (evicted) {
       this.metrics.eventsOverflowed!++;
       this.overflowQueue.push(evicted);
-      this.persistOverflow().catch((err) => {
+      this.persistOverflow().catch(err => {
         console.error("[AuditSink] Overflow persistence failed:", err);
       });
     }
@@ -58,7 +58,7 @@ export class DefaultAuditSink implements AuditSink {
     }
 
     if (this.buffer.length >= MAX_BUFFER_SIZE) {
-      this.persistWithRetry().catch((err) => {
+      this.persistWithRetry().catch(err => {
         console.error("[AuditSink] Persistence failed, events retained in buffer:", err);
       });
     }
@@ -130,7 +130,7 @@ export class DefaultAuditSink implements AuditSink {
 
       if (this.buffer.length > 0) {
         console.warn(
-          "[AuditSink] Events retained in buffer after retries; will retry on next write",
+          "[AuditSink] Events retained in buffer after retries; will retry on next write"
         );
       }
     } finally {
@@ -164,7 +164,7 @@ export class DefaultAuditSink implements AuditSink {
   private startPeriodicFlush(): void {
     this.flushTimer = setInterval(() => {
       if (this.buffer.length > 0 || this.overflowQueue.length > 0) {
-        this.persistWithRetry().catch((err) => {
+        this.persistWithRetry().catch(err => {
           console.error("[AuditSink] Periodic flush failed:", err);
         });
       }

@@ -139,7 +139,7 @@ describe("SQLiteAuditStore", () => {
       const chain = store.getByCorrelationChain("chain-1");
       expect(chain.length).toBe(2);
       // Sort by step so order doesn't depend on UUID v7 tiebreaker
-      const steps = chain.map((e) => e.metadata.step).sort();
+      const steps = chain.map(e => e.metadata.step).sort();
       expect(steps).toEqual([1, 2]);
     });
   });
