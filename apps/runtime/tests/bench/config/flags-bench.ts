@@ -1,12 +1,8 @@
 /**
- * Microbenchmarks for feature flag reads and settings writes.
- *
- * Run: bun run tests/bench/config/flags-bench.ts
- *
- * Outputs structured JSON for CI gate consumption.
- * Asserts thresholds — fails on breach.
+ * FR-HELIOS-095: Feature Flag Performance Benchmarks
+ * Verifies: FR-CFG-001 (Feature flag read/write latency)
+ * @Benchmarks
  */
-
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

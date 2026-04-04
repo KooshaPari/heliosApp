@@ -1,10 +1,7 @@
 /**
- * T015 - Integration tests for full mux lifecycle.
- *
- * These tests use in-memory fakes (no real zellij binary) to verify
- * the full create -> add panes -> resize -> close -> event pipeline.
+ * FR-HELIOS-089: Zellij Mux Lifecycle Integration Tests
+ * Verifies: FR-ZMX-001 (Zellij session adapter), FR-ZMX-002 (Session to lane binding), FR-ZMX-008 (Session reconciliation)
  */
-
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import {
   ZellijSessionManager,

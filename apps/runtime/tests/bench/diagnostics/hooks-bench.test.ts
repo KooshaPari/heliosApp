@@ -1,5 +1,7 @@
-// FR-008, NFR-001: Microbenchmarks proving instrumentation overhead < 0.1ms per measurement.
-
+/**
+ * FR-HELIOS-094: Diagnostics Instrumentation Benchmarks
+ * Verifies: FR-PRF-001 (Performance instrumentation overhead)
+ */
 import { describe, it, expect } from "bun:test";
 import { createInstrumentationHooks } from "../../../src/diagnostics/hooks.js";
 import { MetricsRegistry, RingBuffer } from "../../../src/diagnostics/metrics.js";

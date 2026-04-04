@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-070: Runtime Metrics Tests
+ * Verifies: FR-PRF-001 (Instrumentation hooks for lane-create, session-restore)
+ */
 import { expect, test } from "bun:test";
 import { InMemoryLocalBus } from "../../../src/protocol/bus";
 

@@ -1,12 +1,12 @@
+/**
+ * FR-HELIOS-103: Local Bus Event Fan-out and Topic Tests
+ * Verifies: FR-BUS-004 (Event fan-out), FR-BUS-009 (Subscriber isolation)
+ */
 import { describe, expect, it, beforeEach } from "bun:test";
 import { createBus } from "../../../src/protocol/bus.js";
 import type { LocalBus } from "../../../src/protocol/bus.js";
 import { createEvent } from "../../../src/protocol/envelope.js";
 import type { LocalBusEnvelope } from "../../../src/protocol/types.js";
-
-// FR-004: Event fan-out with deterministic delivery
-// FR-009: Subscriber isolation (one throwing does not block others)
-// FR-010: Snapshot-based subscriber iteration
 
 describe("LocalBus — event fan-out", () => {
   let bus: LocalBus;

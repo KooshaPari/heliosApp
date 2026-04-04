@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-046: SQLite Audit Store Tests
+ * Verifies: FR-AUD-004 (SQLite persistence for durable retention)
+ */
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";

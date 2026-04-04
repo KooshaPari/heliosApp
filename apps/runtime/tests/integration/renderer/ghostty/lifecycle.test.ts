@@ -1,12 +1,7 @@
 /**
- * Integration tests for ghostty lifecycle and rendering (T013).
- *
- * These tests require the ghostty binary to be installed.
- * They are skipped gracefully when ghostty is not available.
- *
- * Tags: FR-011-001, FR-011-003, SC-011-003
+ * FR-HELIOS-082: Ghostty Lifecycle Integration Tests
+ * Verifies: FR-GHT-001 (Renderer adapter interface), FR-GHT-002 (Ghostty process management), FR-GHT-007 (Crash handling)
  */
-
 import { describe, test, expect, beforeAll, afterEach } from "bun:test";
 import { GhosttyBackend } from "../../../../src/renderer/ghostty/backend.js";
 import { isGhosttyAvailable } from "../../../../src/renderer/ghostty/index.js";
