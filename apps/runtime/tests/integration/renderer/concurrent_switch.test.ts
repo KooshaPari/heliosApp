@@ -122,7 +122,7 @@ describe("Concurrent switch rejection", () => {
       if (error instanceof ConcurrentSwitchError) {
         const activeTransaction = orchestrator.getActiveTransaction();
         expect(activeTransaction).toBeDefined();
-        expect(activeTransaction?.id).toMatch(/^[\da-f\-]+$/);
+        expect(activeTransaction?.id).toMatch(/^[\da-f-]+$/);
       }
     }
 

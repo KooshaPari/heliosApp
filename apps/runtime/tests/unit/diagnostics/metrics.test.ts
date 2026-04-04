@@ -1,5 +1,7 @@
-// FR-001, FR-009: Unit tests for RingBuffer and MetricsRegistry.
-
+/**
+ * FR-HELIOS-107: Metrics Registry and RingBuffer Unit Tests
+ * Verifies: FR-PRF-001 (Performance metrics collection)
+ */
 import { describe, it, expect, beforeEach } from "bun:test";
 import { RingBuffer, MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 import type { MetricDefinition } from "../../../src/diagnostics/types.js";

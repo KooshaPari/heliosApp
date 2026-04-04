@@ -1,5 +1,7 @@
-// FR-003: Unit tests for SLO definitions and checks.
-
+/**
+ * FR-HELIOS-108: SLO Definition and Check Unit Tests
+ * Verifies: FR-PRF-003 (SLO validation)
+ */
 import { describe, it, expect } from "bun:test";
 import { SLO_DEFINITIONS, getSLOsForMetric, checkSLO } from "../../../src/diagnostics/slo.js";
 import type { PercentileBucket, SLODefinition } from "../../../src/diagnostics/types.js";
