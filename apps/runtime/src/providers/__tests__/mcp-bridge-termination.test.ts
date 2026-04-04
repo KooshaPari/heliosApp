@@ -29,7 +29,7 @@ describe("MCP Bridge Adapter - Termination", () => {
     await adapter.terminate();
 
     const events = bus.getEvents();
-    const terminatedEvent = events.find((event) => event.topic === "provider.mcp.terminated");
+    const terminatedEvent = events.find(event => event.topic === "provider.mcp.terminated");
     expect(terminatedEvent).toBeDefined();
   });
 

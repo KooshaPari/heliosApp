@@ -105,7 +105,7 @@ export class RemediationEngine {
   getSuggestions(): RemediationSuggestion[] {
     const RISK_ORDER: Record<string, number> = { high: 3, medium: 2, low: 1 };
     return Array.from(this.suggestions.values()).sort(
-      (a, b) => RISK_ORDER[b.resource.riskLevel] - RISK_ORDER[a.resource.riskLevel],
+      (a, b) => RISK_ORDER[b.resource.riskLevel] - RISK_ORDER[a.resource.riskLevel]
     );
   }
 
