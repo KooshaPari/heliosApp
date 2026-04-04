@@ -28,7 +28,9 @@ describe("False Positive Rate", () => {
 
   afterEach(() => {
     engine.stop();
-    try { unlinkSync(`/tmp/helios-cooldown-${testId}.json`); } catch {}
+    try {
+      unlinkSync(`/tmp/helios-cooldown-${testId}.json`);
+    } catch {}
   });
 
   it("should have zero false positives with healthy system", async () => {

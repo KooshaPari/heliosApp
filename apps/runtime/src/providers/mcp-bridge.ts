@@ -46,11 +46,9 @@ interface ToolEntry {
  *
  * FR-025-004: MCP tool discovery and sandboxed invocation.
  */
-export class MCPBridgeAdapter implements ProviderAdapter<
-  MCPConfig,
-  MCPExecuteInput,
-  MCPExecuteOutput
-> {
+export class MCPBridgeAdapter
+  implements ProviderAdapter<MCPConfig, MCPExecuteInput, MCPExecuteOutput>
+{
   private config: MCPConfig | null = null;
   private bus: LocalBus | null = null;
   private connection: MCPConnection = {

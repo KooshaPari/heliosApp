@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-032: Audit Export and Redaction Tests
+ * Verifies: FR-AUD-008 (Export with redaction), FR-SEC-004 (Pattern-based redaction)
+ */
 import { describe, it, expect, beforeEach } from "bun:test";
 import { AuditExporter } from "../../../src/audit/export";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";

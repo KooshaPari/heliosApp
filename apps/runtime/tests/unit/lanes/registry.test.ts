@@ -1,5 +1,7 @@
-// T017 - Unit tests for lane registry (FR-008-001, NFR-008-003)
-
+/**
+ * FR-HELIOS-043: Lane Registry Tests
+ * Verifies: FR-LAN-001 (Lane state machine), FR-LAN-007 (Concurrent access marking)
+ */
 import { describe, test, expect } from "bun:test";
 import {
   LaneRegistry,

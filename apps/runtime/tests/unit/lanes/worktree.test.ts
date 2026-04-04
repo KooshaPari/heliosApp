@@ -1,5 +1,7 @@
-// T017 - Unit tests for worktree operations (FR-008-002, FR-008-005)
-
+/**
+ * FR-HELIOS-042: Worktree Operations Tests
+ * Verifies: FR-LAN-002 (Git worktree provisioning)
+ */
 import { describe, test, expect } from "bun:test";
 import { computeWorktreePath, computeBranchName } from "../../../src/lanes/worktree.js";
 

@@ -1,11 +1,7 @@
 /**
- * Unit tests for ghostty capability detection (T012).
- *
- * Tests GPU and no-GPU scenarios, caching, and cache invalidation.
- *
- * Tags: FR-011-004, SC-011-002
+ * FR-HELIOS-049: Ghostty Capability Detection Tests
+ * Verifies: FR-GHT-006 (Capability matrix reporting), FR-MVP-017 (Hardware capability detection)
  */
-
 import { describe, test, expect, afterEach, mock, beforeEach } from "bun:test";
 import {
   detectCapabilities,
