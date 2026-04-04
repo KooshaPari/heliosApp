@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-105: Protocol Envelope Creation and Validation Tests
+ * Verifies: FR-BUS-001 (Envelope schema), FR-BUS-006 (Validation)
+ */
 import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import {
   createCommand,
@@ -8,10 +12,6 @@ import {
   setMaxPayloadSize,
 } from "../../../src/protocol/envelope.js";
 import type { CommandEnvelope } from "../../../src/protocol/types.js";
-
-// FR-001: Canonical envelope schema
-// FR-006: Strict validation rejects malformed envelopes
-// FR-007: Error taxonomy
 
 describe("createCommand", () => {
   it("generates a unique id with cmd_ prefix", () => {

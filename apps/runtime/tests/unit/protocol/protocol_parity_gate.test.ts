@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-061: Protocol Parity Gate Tests
+ * Verifies: FR-CI-008 (Static analysis gate), FR-BUS-003 (Method registry)
+ */
 import { describe, expect, test } from "bun:test";
 import { execFileSync } from "node:child_process";
 

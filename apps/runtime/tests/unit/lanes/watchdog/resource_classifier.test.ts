@@ -1,5 +1,7 @@
-// Unit tests for ResourceClassifier
-
+/**
+ * FR-HELIOS-075: Orphan Resource Classifier Tests
+ * Verifies: FR-ORF-006 (Resource classification by type, age, owner, risk level)
+ */
 import { describe, it, expect } from "bun:test";
 import {
   ResourceClassifier,
