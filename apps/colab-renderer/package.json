@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "bun-types": "latest",
-    "esbuild": "^0.27.3",
+    "esbuild": "^0.28.0",
     "esbuild-plugin-solid": "^0.6.0",
     "typescript": "6.0.2"
   }
