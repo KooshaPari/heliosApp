@@ -2,8 +2,7 @@ import { METHODS } from "./methods";
 import { ProtocolValidationError } from "./types";
 
 const METHOD_SET = new Set<string>(METHODS);
-const RFC3339_PATTERN =
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
+const RFC3339_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 const TOPIC_NAME_PATTERN = /^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/;
 
 const CORRELATION_REQUIRED_METHODS = new Set<string>([
@@ -17,20 +16,17 @@ const CORRELATION_REQUIRED_METHODS = new Set<string>([
   "terminal.resize",
 ]);
 
-const CORRELATION_REQUIRED_TOPICS = new Set<string>([
-]);
+const CORRELATION_REQUIRED_TOPICS = new Set<string>([]);
 
 const METHOD_CONTEXT_REQUIREMENTS: Record<
   string,
   Array<"workspace_id" | "lane_id" | "session_id" | "terminal_id">
-> = {
-};
+> = {};
 
 const TOPIC_CONTEXT_REQUIREMENTS: Record<
   string,
   Array<"workspace_id" | "lane_id" | "session_id" | "terminal_id">
-> = {
-};
+> = {};
 
 export function assertRecord(value: unknown): asserts value is Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -44,7 +40,7 @@ export function assertStringField(envelope: Record<string, unknown>, field: stri
     throw new ProtocolValidationError(
       "MISSING_REQUIRED_FIELD",
       `Envelope field '${field}' is required`,
-      { field },
+      { field }
     );
   }
   return value;
@@ -58,7 +54,7 @@ export function assertIsoTimestamp(value: string, field: string): void {
       {
         field,
         value,
-      },
+      }
     );
   }
 }
@@ -71,14 +67,14 @@ function assertPayloadObject(envelope: Record<string, unknown>): void {
       "Envelope field 'payload' must be an object",
       {
         field: "payload",
-      },
+      }
     );
   }
 }
 
 export function assertOptionalString(
   envelope: Record<string, unknown>,
-  field: string,
+  field: string
 ): string | undefined {
   const value = envelope[field];
   if (value === undefined || value === null) {
@@ -90,7 +86,7 @@ export function assertOptionalString(
       `Envelope field '${field}' must be a non-empty string`,
       {
         field,
-      },
+      }
     );
   }
   return value;
@@ -98,7 +94,7 @@ export function assertOptionalString(
 
 function assertContext(
   envelope: Record<string, unknown>,
-  fields: ReadonlyArray<"workspace_id" | "lane_id" | "session_id" | "terminal_id">,
+  fields: ReadonlyArray<"workspace_id" | "lane_id" | "session_id" | "terminal_id">
 ): void {
   for (const field of fields) {
     assertOptionalString(envelope, field);
@@ -108,7 +104,7 @@ function assertContext(
         `Envelope field '${field}' is required`,
         {
           field,
-        },
+        }
       );
     }
   }
@@ -122,7 +118,7 @@ function assertErrorPayload(envelope: Record<string, unknown>): void {
   if (!error || typeof error !== "object" || Array.isArray(error)) {
     throw new ProtocolValidationError(
       "INVALID_ERROR_PAYLOAD",
-      "Envelope field 'error' must be an object",
+      "Envelope field 'error' must be an object"
     );
   }
 
@@ -130,13 +126,13 @@ function assertErrorPayload(envelope: Record<string, unknown>): void {
   if (typeof typedError.code !== "string" || typeof typedError.message !== "string") {
     throw new ProtocolValidationError(
       "INVALID_ERROR_PAYLOAD",
-      "Envelope error payload must include code and message",
+      "Envelope error payload must include code and message"
     );
   }
   if (typeof typedError.retryable !== "boolean") {
     throw new ProtocolValidationError(
       "INVALID_ERROR_PAYLOAD",
-      "Envelope error payload must include retryable boolean",
+      "Envelope error payload must include retryable boolean"
     );
   }
 }
@@ -144,7 +140,7 @@ function assertErrorPayload(envelope: Record<string, unknown>): void {
 export function assertCorrelationId(
   envelope: Record<string, unknown>,
   requiredBy: "method" | "topic",
-  name: string,
+  name: string
 ): void {
   const correlationId = assertOptionalString(envelope, "correlation_id");
   if (!correlationId) {
@@ -156,7 +152,7 @@ export function assertCorrelationId(
         // External protocol field names use snake_case.
         required_by: requiredBy,
         name,
-      },
+      }
     );
   }
 }
@@ -200,13 +196,9 @@ export function validateEventEnvelope(envelope: Record<string, unknown>): void {
 export function validateResponseEnvelope(envelope: Record<string, unknown>): void {
   const status = assertStringField(envelope, "status");
   if (status !== "ok" && status !== "error") {
-    throw new ProtocolValidationError(
-      "INVALID_STATUS",
-      `Unsupported status '${status}'`,
-      {
-        status,
-      },
-    );
+    throw new ProtocolValidationError("INVALID_STATUS", `Unsupported status '${status}'`, {
+      status,
+    });
   }
   assertErrorPayload(envelope);
 
