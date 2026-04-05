@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-040: Quality Gates Fixtures Tests
+ * Verifies: FR-CI-006 (Coverage threshold), FR-CI-009 (Gate-bypass detection)
+ */
 import { describe, expect, test } from "bun:test";
 
 const TRACE_GATE = "tools/gates/requirement-traceability.mjs";

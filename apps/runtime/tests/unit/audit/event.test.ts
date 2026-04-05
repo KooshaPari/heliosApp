@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-064: Audit Event Schema Tests
+ * Verifies: FR-AUD-001 (Audit event structured schema)
+ */
 import { describe, it, expect } from "bun:test";
 import {
   type AuditEvent,

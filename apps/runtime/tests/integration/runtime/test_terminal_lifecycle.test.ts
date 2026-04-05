@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-081: Terminal Lifecycle Integration Tests
+ * Verifies: FR-BND-001 (Terminal registry), FR-PTY-001 (PTY lifecycle), FR-BUS-008 (Correlation propagation)
+ */
 import { describe, expect, test } from "bun:test";
 
 import { createRuntime } from "../../../src";

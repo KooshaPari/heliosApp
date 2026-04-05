@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-035: Binding Triple Validation Tests
+ * Verifies: FR-BND-001 (Terminal registry mapping), FR-BND-002 (Binding validation), FR-BND-007 (Uniqueness)
+ */
 import { describe, it, expect, beforeEach } from "bun:test";
 import {
   BindingState,

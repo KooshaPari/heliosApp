@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-062: PTY Registry Tests
+ * Verifies: FR-PTY-002 (Process registry mapping), FR-PTY-008 (Orphaned PTY detection)
+ */
 import { describe, expect, it, beforeEach } from "bun:test";
 import {
   PtyRegistry,
