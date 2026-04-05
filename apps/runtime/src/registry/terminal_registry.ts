@@ -93,9 +93,14 @@ export class TerminalRegistry implements RegistryQueryInterface {
       this.sessionPerLaneIndex.set(binding.binding.laneId, new Map());
     }
     if (!this.sessionPerLaneIndex.get(binding.binding.laneId)!.has(binding.binding.sessionId)) {
-      this.sessionPerLaneIndex.get(binding.binding.laneId)!.set(binding.binding.sessionId, new Set());
+      this.sessionPerLaneIndex
+        .get(binding.binding.laneId)!
+        .set(binding.binding.sessionId, new Set());
     }
-    this.sessionPerLaneIndex.get(binding.binding.laneId)!.get(binding.binding.sessionId)!.add(terminalId);
+    this.sessionPerLaneIndex
+      .get(binding.binding.laneId)!
+      .get(binding.binding.sessionId)!
+      .add(terminalId);
 
     return binding;
   }

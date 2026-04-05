@@ -1,5 +1,7 @@
-// Unit tests for OrphanWatchdog
-
+/**
+ * FR-HELIOS-036: Orphan Watchdog Detection Tests
+ * Verifies: FR-ORF-001 (Orphaned worktree detection), FR-ORF-002 (Stale zellij session detection), FR-ORF-003 (Leaked PTY detection)
+ */
 import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
 import os from "os";
 import path from "path";

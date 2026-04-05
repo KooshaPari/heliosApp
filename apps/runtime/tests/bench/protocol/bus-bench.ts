@@ -1,15 +1,8 @@
 /**
- * Latency microbenchmarks for the Helios local bus.
- *
- * NFR-001: Dispatch latency < 1ms (p95).
- * NFR-002: Fan-out to 50 subscribers < 5ms (p95).
- * NFR-003: Envelope validation < 0.1ms (p95).
- * NFR-004: Sustained throughput 10k msg/s for 10s.
- *
- * CI slowdown factor: thresholds are 2x the stated SLOs.
- * Output: JSON for CI gate consumption.
+ * FR-HELIOS-098: Local Bus Performance Benchmarks
+ * Verifies: FR-BUS-001 (Bus dispatch latency), FR-PRF-003 (Throughput)
+ * @Benchmarks
  */
-
 import { createBus } from "../../../src/protocol/bus.js";
 import {
   createCommand,

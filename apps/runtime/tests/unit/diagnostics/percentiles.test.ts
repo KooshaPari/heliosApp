@@ -1,5 +1,7 @@
-// FR-002: Unit tests for rolling percentile computation.
-
+/**
+ * FR-HELIOS-047: Percentile Computation Tests
+ * Verifies: FR-PRF-002 (Rolling percentile statistics), FR-DIAG-007 (O(n log n) computation)
+ */
 import { describe, it, expect } from "bun:test";
 import { RingBuffer } from "../../../src/diagnostics/metrics.js";
 import { computePercentiles } from "../../../src/diagnostics/percentiles.js";

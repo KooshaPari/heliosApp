@@ -1,8 +1,2 @@
-# Default owner for everything
-* @kooshapari
-
-# Runtime core
-/apps/runtime/ @kooshapari
-
-# Infrastructure
-/.github/ @kooshapari
+# CODEOWNERS - Repository Owners
+* @KooshaPari
