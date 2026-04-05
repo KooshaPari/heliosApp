@@ -1,12 +1,7 @@
 /**
- * Unit tests for GhosttyProcess (T012).
- *
- * Tests process start/stop, crash detection, SIGTERM/SIGKILL escalation,
- * and restart mutex using mocked Bun.spawn.
- *
- * Tags: FR-011-001, FR-011-002
+ * FR-HELIOS-050: Ghostty Process Lifecycle Tests
+ * Verifies: FR-GHT-001 (Renderer adapter interface), FR-GHT-007 (Crash handling)
  */
-
 import { describe, test, expect, beforeEach } from "bun:test";
 import { GhosttyProcess, GhosttyProcessError } from "../../../../src/renderer/ghostty/process.js";
 

@@ -1,5 +1,7 @@
-// Unit tests for WorktreeDetector
-
+/**
+ * FR-HELIOS-076: Worktree Detector Tests
+ * Verifies: FR-ORF-001 (Orphaned worktree detection)
+ */
 import { describe, it, expect, beforeEach } from "bun:test";
 import { WorktreeDetector } from "../../../../src/lanes/watchdog/worktree_detector.js";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";

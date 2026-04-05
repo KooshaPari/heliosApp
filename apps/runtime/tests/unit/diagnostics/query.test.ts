@@ -1,5 +1,7 @@
-// FR-007: Unit tests for metrics query API.
-
+/**
+ * FR-HELIOS-033: Metrics Query API Tests
+ * Verifies: FR-PRF-007 (Metrics query API), FR-DIAG-008 (MetricsQuery interface)
+ */
 import { describe, it, expect, beforeEach } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 import { MetricsQuery } from "../../../src/diagnostics/query.js";

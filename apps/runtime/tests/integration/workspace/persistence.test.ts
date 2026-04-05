@@ -1,8 +1,7 @@
-// T015 — Integration tests for persistence and recovery
-// FR-005: Persistence across restart
-// FR-006: Corruption detection
-// FR-007: Recovery from snapshot
-
+/**
+ * FR-HELIOS-093: Workspace Persistence Integration Tests
+ * Verifies: FR-PER-005 (Persist metadata), FR-PER-006 (Restore on restart), FR-PER-007 (Corruption detection)
+ */
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { mkdtemp, rm, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";

@@ -1,12 +1,7 @@
 /**
- * Unit tests for GhosttyInputRelay (T012).
- *
- * Tests byte passthrough, focus handling, binding lifecycle,
- * and metrics recording.
- *
- * Tags: FR-011-003, NFR-011-001
+ * FR-HELIOS-048: Ghostty Input Relay Tests
+ * Verifies: FR-GHT-003 (PTY stream piping), FR-RND-005 (PTY stream binding)
  */
-
 import { describe, test, expect, beforeEach } from "bun:test";
 import { GhosttyInputRelay } from "../../../../src/renderer/ghostty/input.js";
 import type { PtyWriter, GhosttyInputEvent } from "../../../../src/renderer/ghostty/input.js";
