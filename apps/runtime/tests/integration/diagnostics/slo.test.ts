@@ -1,5 +1,7 @@
-// FR-004, FR-010: Integration tests for SLO violation detection, rate limiting, and bus emission.
-
+/**
+ * FR-HELIOS-092: SLO Violation Detection Integration Tests
+ * Verifies: FR-PRF-003 (SLO thresholds), FR-PRF-004 (SLO violation events), FR-PRF-010 (Rate limiting)
+ */
 import { describe, it, expect, beforeEach, afterEach, jest } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";
 import { SLOMonitor } from "../../../src/diagnostics/slo.js";

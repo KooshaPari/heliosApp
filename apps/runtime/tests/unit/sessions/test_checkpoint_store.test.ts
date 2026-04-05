@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-045: Session Checkpoint Store Tests
+ * Verifies: FR-CRH-003 (zmx checkpoints for session restoration)
+ */
 import { describe, expect, test } from "bun:test";
 import { Slice1CheckpointStorePlaceholder } from "../../../src/sessions/checkpoint_store";
 

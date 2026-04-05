@@ -1,7 +1,7 @@
 /**
- * Policy Rule Engine Unit Tests
+ * FR-HELIOS-101: Policy Rules Engine Unit Tests
+ * Verifies: FR-APR-002 (Rule pattern matching), FR-APR-003 (Deny-by-default)
  */
-
 import { test, expect, describe } from "bun:test";
 import { PolicyRuleSet } from "../../../src/policy/rules";
 import { PolicyClassification, PolicyPatternType } from "../../../src/policy/types";

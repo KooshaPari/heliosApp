@@ -1,7 +1,7 @@
-// T010 — Bus event emission tests
-// FR-003: Workspace lifecycle events
-// FR-009: Bus error isolation
-
+/**
+ * FR-HELIOS-037: Workspace Lifecycle Events Tests
+ * Verifies: FR-PER-009 (Workspace lifecycle events: created, opened, closed, deleted)
+ */
 import { describe, test, expect, mock, beforeEach } from "bun:test";
 import { WorkspaceService } from "../../../src/workspace/workspace.js";
 import { createInMemoryStore } from "../../../src/workspace/store.js";

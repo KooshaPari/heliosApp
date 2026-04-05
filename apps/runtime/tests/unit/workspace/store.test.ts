@@ -1,7 +1,7 @@
-// T005 — In-memory store tests
-// FR-001: Store supports CRUD
-// FR-002: Case-insensitive name lookup
-
+/**
+ * FR-HELIOS-044: Workspace Store Tests
+ * Verifies: FR-PER-001 (Workspace CRUD), FR-PER-002 (Unique workspace names), FR-PER-005 (Persistence)
+ */
 import { describe, test, expect } from "bun:test";
 import { createInMemoryStore } from "../../../src/workspace/store.js";
 import type { Workspace } from "../../../src/workspace/types.js";

@@ -1,5 +1,7 @@
-// Integration tests for recovery-aware suppression
-
+/**
+ * FR-HELIOS-086: Recovery Suppression Tests
+ * Verifies: FR-ORF-007 (Suppress cleanup suggestions during recovery)
+ */
 import { describe, it, expect, beforeEach } from "bun:test";
 import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";

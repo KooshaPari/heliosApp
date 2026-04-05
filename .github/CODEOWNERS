@@ -1,7 +1,2 @@
+# CODEOWNERS - Repository Owners
 * @KooshaPari
-
-/.github/ @KooshaPari
-/src/ @KooshaPari
-/README.md @KooshaPari
-/package.json @KooshaPari
-/tsconfig.json @KooshaPari

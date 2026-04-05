@@ -16,6 +16,7 @@
     "apps/**/dist/**",
     "docs/.generated/**",
     ".worktrees/**",
+    "agileplus/**",
     "kitty-specs/**",
     "docs/sessions/**",
     "tsconfig*.json"

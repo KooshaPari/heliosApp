@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-106: Protocol Error Taxonomy Unit Tests
+ * Verifies: FR-BUS-007 (Error taxonomy)
+ */
 import { describe, expect, it } from "bun:test";
 import {
   validationError,
@@ -6,8 +10,6 @@ import {
   timeoutError,
   backpressureError,
 } from "../../../src/protocol/errors.js";
-
-// FR-007: Error taxonomy covers all bus failure modes.
 
 describe("Error taxonomy factories", () => {
   // --- validationError ---

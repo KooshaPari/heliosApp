@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-041: PTY Signal Handling Tests
+ * Verifies: FR-PTY-004 (POSIX signals: SIGTERM, SIGKILL, SIGWINCH, SIGHUP), FR-PTY-007 (Grace periods)
+ */
 import { describe, expect, it } from "bun:test";
 import {
   resize,
