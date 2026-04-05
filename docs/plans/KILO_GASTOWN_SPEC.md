@@ -210,10 +210,32 @@ Convoy work is linked via branch naming:
 
 ---
 
+## Relationship with AGENTS.md
+
+The `AGENTS.md` file at the repository root is the authoritative agent guidance file for heliosApp, while this spec provides the broader Kilo Gastown methodology context.
+
+| Document | Scope | Audience |
+|---|---|---|
+| `KILO_GASTOWN_SPEC.md` | Kilo Gastown methodology (this file) | Cross-project reference |
+| `AGENTS.md` | heliosApp-specific agent guidance | All agents working in this rig |
+
+AGENTS.md includes:
+- Kilo Gastown identity (rig ID, town ID, convoy)
+- Delegation tool usage specific to heliosApp
+- heliosApp development commands (`bun run typecheck`, `bun run gates`, etc.)
+- Stack info and project structure
+- Code conventions specific to heliosApp
+- Agent behavior rules for this rig
+
+This spec provides the methodology foundation; AGENTS.md applies it to heliosApp's specific tooling and conventions.
+
+---
+
 ## Related Documentation
 
 | Document | Purpose |
 |---|---|
+| `AGENTS.md` | heliosApp-specific agent guidance and tooling |
 | `AGILEPLUS_SPEC.md` | AgilePlus project tracking methodology |
 | `PRD.md` | Product Requirements Document |
 | `CHANGELOG.md` | Version history |
