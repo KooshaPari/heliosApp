@@ -1,9 +1,7 @@
 /**
- * Unit tests for crash fallback to ghostty.
- * Covers: T007 (crash fallback), T009 (unit tests).
- * FR-012-007, SC-012-003.
+ * FR-HELIOS-054: Rio Crash Fallback Tests
+ * Verifies: FR-RIO-007 (Crash handling with fallback to ghostty)
  */
-
 import { describe, it, expect, beforeEach } from "bun:test";
 import { RioBackend } from "../../../../src/renderer/rio/backend.js";
 import { RendererRegistry } from "../../../../src/renderer/registry.js";

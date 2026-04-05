@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-071: Binding Middleware Tests
+ * Verifies: FR-BND-003 (Terminal binding consistency validation)
+ */
 import { describe, it, expect, beforeEach } from "bun:test";
 import { BindingMiddleware } from "../../../src/registry/binding_middleware.js";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";

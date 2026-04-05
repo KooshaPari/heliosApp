@@ -1,10 +1,7 @@
 /**
- * Schema parity tests — validate runtime-generated envelopes against
- * the canonical JSON schema to prevent silent divergence.
- *
- * Uses a lightweight JSON Schema draft-07 validator (inline, no deps).
+ * FR-HELIOS-034: Protocol Schema Parity Tests
+ * Verifies: FR-BUS-001 (Envelope schema), FR-BUS-006 (Envelope validation)
  */
-
 import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";

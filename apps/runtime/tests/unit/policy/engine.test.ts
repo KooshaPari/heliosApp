@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-100: Policy Engine Unit Tests
+ * Verifies: FR-APR-001 (Command classification)
+ */
 import { test, expect, describe } from "bun:test";
 import { PolicyEngine } from "../../../src/policy/engine";
 import { PolicyClassification } from "../../../src/policy/types";

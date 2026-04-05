@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-102: Protocol Bus and Validator Unit Tests
+ * Verifies: FR-BUS-002 (Envelope validation), FR-BUS-003 (Lifecycle sequencing)
+ */
 import { describe, expect, test } from "bun:test";
 import { InMemoryLocalBus } from "../../../src/protocol/bus";
 import { ProtocolValidationError, type LocalBusEnvelope } from "../../../src/protocol/types";
