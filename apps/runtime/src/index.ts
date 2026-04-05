@@ -10,7 +10,11 @@ import { createBoundaryDispatcher } from "./protocol/boundary_adapter.js";
 import { METHODS } from "./protocol/methods.js";
 import type { LocalBusEnvelope } from "./protocol/types.js";
 import { RecoveryRegistry, InMemorySessionRegistry } from "./sessions/registry.js";
-import { LaneLifecycleService, type RuntimeState, type LaneRecord } from "./sessions/state_machine.js";
+import {
+  LaneLifecycleService,
+  type RuntimeState,
+  type LaneRecord,
+} from "./sessions/state_machine.js";
 import type { TerminalBuffer } from "./runtime/types.js";
 import { TerminalRegistry } from "./sessions/terminal_registry.js";
 import { handleRuntimeRequest, type RuntimeOpsContext } from "./runtime/ops.js";
@@ -283,7 +287,11 @@ export function createRuntime(options: RuntimeOptions = {}) {
     }
 
     if (command.method === "terminal.spawn" && response.status === "ok") {
-      console.log("createRuntime.request: terminal.spawn detected, clearing buffer", command.terminal_id, response.result?.terminal_id);
+      console.log(
+        "createRuntime.request: terminal.spawn detected, clearing buffer",
+        command.terminal_id,
+        response.result?.terminal_id
+      );
       runtimeState.terminal = "active";
       const terminalId = String(response.result?.terminal_id ?? "");
       if (terminalId) {
@@ -295,9 +303,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
           lane_id: command.lane_id ?? "",
           session_id: command.session_id ?? "",
           title:
-            typeof command.payload?.title === "string"
-              ? String(command.payload.title)
-              : "Terminal",
+            typeof command.payload?.title === "string" ? String(command.payload.title) : "Terminal",
         });
         terminalRegistry.setState(terminalId, "active");
       }
@@ -305,7 +311,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
 
     if (command.method === "terminal.resize" && response.status === "ok") {
       runtimeState.terminal = "active";
-      const terminalId = command.terminal_id ?? (command.payload as Record<string, unknown>)?.terminal_id;
+      const terminalId =
+        command.terminal_id ?? (command.payload as Record<string, unknown>)?.terminal_id;
       if (typeof terminalId === "string") {
         terminalRegistry.setState(terminalId, "active");
       }
@@ -315,7 +322,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
 
     if (command.method === "terminal.input" && response.status === "ok") {
       runtimeState.terminal = getTerminalState();
-      const terminalId = command.terminal_id ?? (command.payload as Record<string, unknown>)?.terminal_id;
+      const terminalId =
+        command.terminal_id ?? (command.payload as Record<string, unknown>)?.terminal_id;
       if (typeof terminalId === "string") {
         terminalRegistry.setState(
           terminalId,
@@ -482,12 +490,19 @@ export function createRuntime(options: RuntimeOptions = {}) {
       return Response.json({ lane_id: lane.lane_id }, { status: 201 });
     }
 
-    if (url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/sessions$/) && requestInput.method === "POST") {
+    if (
+      url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/sessions$/) &&
+      requestInput.method === "POST"
+    ) {
       const body = (await requestInput.json()) as Record<string, any>;
       const laneId = url.pathname.split("/")[5];
       const workspaceId = url.pathname.split("/")[3];
 
-      if (body.preferred_transport && body.preferred_transport !== "native_openai" && body.preferred_transport !== "cliproxy_harness") {
+      if (
+        body.preferred_transport &&
+        body.preferred_transport !== "native_openai" &&
+        body.preferred_transport !== "cliproxy_harness"
+      ) {
         return Response.json({ error: "invalid_preferred_transport" }, { status: 400 });
       }
 
@@ -512,7 +527,10 @@ export function createRuntime(options: RuntimeOptions = {}) {
         } else {
           transport = "native_openai";
           degrade_reason = probeResult.reason || "harness_unavailable";
-          if (harnessStatus.status !== "unavailable" || harnessStatus.degrade_reason !== degrade_reason) {
+          if (
+            harnessStatus.status !== "unavailable" ||
+            harnessStatus.degrade_reason !== degrade_reason
+          ) {
             harnessStatus = { status: "unavailable", degrade_reason };
             const statusEvt = {
               id: `evt-harness-status-changed-${Date.now()}`,
@@ -551,7 +569,8 @@ export function createRuntime(options: RuntimeOptions = {}) {
       const ensureSession = sessionRegistry.ensure({
         lane_id: laneId,
         transport,
-        codex_session_id: typeof body.codex_session_id === "string" ? body.codex_session_id : undefined,
+        codex_session_id:
+          typeof body.codex_session_id === "string" ? body.codex_session_id : undefined,
       });
 
       runtimeState.session = "attached";
@@ -598,16 +617,22 @@ export function createRuntime(options: RuntimeOptions = {}) {
       await bus.publish(createdEvt as LocalBusEnvelope);
       appendAuditRecord({ ...createdEvt, recorded_at: createdEvt.ts, type: "event" } as any);
 
-      return Response.json({
-        session_id: ensureSession.session.session_id,
-        transport,
-        status: "attached",
-        diagnostics: { degrade_reason },
-        codex_session_id: ensureSession.session.codex_session_id,
-      }, { status: 200 });
+      return Response.json(
+        {
+          session_id: ensureSession.session.session_id,
+          transport,
+          status: "attached",
+          diagnostics: { degrade_reason },
+          codex_session_id: ensureSession.session.codex_session_id,
+        },
+        { status: 200 }
+      );
     }
 
-    if (url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/terminals$/) && requestInput.method === "POST") {
+    if (
+      url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/terminals$/) &&
+      requestInput.method === "POST"
+    ) {
       const body = (await requestInput.json()) as Record<string, any>;
       const laneId = url.pathname.split("/")[5];
       const workspaceId = url.pathname.split("/")[3];
@@ -637,18 +662,27 @@ export function createRuntime(options: RuntimeOptions = {}) {
       });
 
       if (spawnResult.status !== "ok") {
-        return Response.json({ error: spawnResult.error?.code ?? "terminal.spawn.failed" }, { status: 500 });
+        return Response.json(
+          { error: spawnResult.error?.code ?? "terminal.spawn.failed" },
+          { status: 500 }
+        );
       }
 
-      return Response.json({
-        terminal_id: String(spawnResult.result?.terminal_id),
-        lane_id: laneId,
-        session_id: body.session_id,
-        state: "active",
-      }, { status: 201 });
+      return Response.json(
+        {
+          terminal_id: String(spawnResult.result?.terminal_id),
+          lane_id: laneId,
+          session_id: body.session_id,
+          state: "active",
+        },
+        { status: 201 }
+      );
     }
 
-    if (url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/cleanup$/) && requestInput.method === "POST") {
+    if (
+      url.pathname.match(/\/v1\/workspaces\/[^^/]+\/lanes\/[^^/]+\/cleanup$/) &&
+      requestInput.method === "POST"
+    ) {
       const laneId = url.pathname.split("/")[5];
       await laneService.cleanup(url.pathname.split("/")[3], laneId);
       runtimeState.lane = "closed";

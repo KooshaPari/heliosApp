@@ -241,9 +241,11 @@ export class SQLiteAuditStore {
         throw new Error(`Schema initialization failed after ${maxRetries} attempts: ${err}`);
       }
 
-      if (this.dbPath !== ":memory:" &&
-          (err instanceof Error) &&
-          (err as any).code === "SQLITE_IOERR_SHORT_READ") {
+      if (
+        this.dbPath !== ":memory:" &&
+        err instanceof Error &&
+        (err as any).code === "SQLITE_IOERR_SHORT_READ"
+      ) {
         // Attempt recovery from potential DB corruption due to partial write.
         try {
           this.db.close();
@@ -310,7 +312,6 @@ export class SQLiteAuditStore {
       handleSchemaFailure(err);
     }
   }
-
 
   /**
    * Convert a database row to an AuditEvent.

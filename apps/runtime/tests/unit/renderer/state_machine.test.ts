@@ -149,18 +149,6 @@ describe("RendererStateMachine", () => {
   });
 
   it("limits history to 10 entries", () => {
-    const sm = new RendererStateMachine();
-    // Create many transitions by cycling through states
-    for (let i = 0; i < 6; i++) {
-      sm.transition("init");
-      sm.transition("init_failure");
-      sm.transition("recovery_attempt");
-      sm.transition("init_failure");
-      sm.transition("give_up");
-      // Reset: stopped has no transitions, so create new SM
-      break;
-    }
-    // Do enough transitions to exceed 10
     const sm2 = new RendererStateMachine();
     sm2.transition("init");
     sm2.transition("init_failure");

@@ -21,7 +21,7 @@ export interface RecoveryState {
 export type StageChangeListener = (
   previous: RecoveryStage,
   current: RecoveryStage,
-  attemptCount: number,
+  attemptCount: number
 ) => void;
 
 export const MAX_RETRIES_PER_STAGE = 3;

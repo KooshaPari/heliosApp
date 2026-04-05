@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-088: Protocol Boundary Dispatch Integration Tests
+ * Verifies: FR-PVD-004 (MCP integration), FR-PVD-005 (A2A integration)
+ */
 import { describe, expect, it } from "bun:test";
 import { createRuntime } from "../../../src/index";
 

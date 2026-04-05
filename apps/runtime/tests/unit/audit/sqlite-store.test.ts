@@ -1,3 +1,7 @@
+/**
+ * FR-HELIOS-046: SQLite Audit Store Tests
+ * Verifies: FR-AUD-004 (SQLite persistence for durable retention)
+ */
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
@@ -139,7 +143,7 @@ describe("SQLiteAuditStore", () => {
       const chain = store.getByCorrelationChain("chain-1");
       expect(chain.length).toBe(2);
       // Sort by step so order doesn't depend on UUID v7 tiebreaker
-      const steps = chain.map((e) => e.metadata.step).sort();
+      const steps = chain.map(e => e.metadata.step).sort();
       expect(steps).toEqual([1, 2]);
     });
   });
