@@ -1,138 +1,298 @@
-# CLAUDE.md — HeliosApp
+# heliosApp - Claude Code Instructions
 
 ## Project Overview
 
-**HeliosApp** is a developer-focused AI runtime environment with a desktop shell, terminal multiplexing, session management, and multi-provider AI inference.
+**heliosApp** is a Module Federation remote module for the Phenotype ecosystem. It exposes reusable React components, pages, and hooks that can be dynamically loaded by host applications.
 
-- **Version:** 2026.03A.0
-- **Package Manager:** Bun 1.2.20+
-- **Runtime:** TypeScript 7.x (strict mode)
-- **Architecture:** Event-driven monorepo with LocalBus V1 message bus
+## Current Checkout State
 
-## Stack Information
+- **Branch**: `feat/fix-typescript-vite-federation`
+- **Worktree**: `/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp`
+- **Primary focus**: keep the federation remote stable while the host integration lane is validated
+- **Next step**: verify the remote build path and host-facing expose map before adding new surface area
 
-| Layer | Technology |
-|-------|------------|
-| Runtime | Bun 1.2.20+ (ESM, native test runner) |
-| Language | TypeScript 7.x (strict mode, verbatimModuleSyntax) |
-| UI Framework | SolidJS 1.9.x (JSX, signals-based reactivity) |
-| Terminal | xterm.js 6.x |
-| HTTP Client | ky 1.14.3 |
-| Logging | pino 10.x |
-| Build | esbuild 0.27.x + esbuild-plugin-solid |
-| Testing | Bun test runner (unit), Playwright 1.58 (e2e), happy-dom 20.x (DOM shim) |
-| Linting | Biome 2.4.9, oxlint |
-| Docs | VitePress 1.6.4 |
-| Task Orchestration | Turborepo, go-task, just |
+## Architecture
 
-## Repository Structure
+### Hexagonal Architecture Pattern
+
+```
+Domain (React Components, Hooks)
+  ↓
+Ports (Module Federation Exposes)
+  ↓
+Adapters (Vite, Deployment)
+```
+
+### Layers
+
+- **Domain**: Dashboard page, Card/Button/Header components, custom hooks
+- **Ports**: Module Federation exposes (Dashboard, Components, Hooks)
+- **Adapters**: Vite bundler, React DOM renderer, federation config
+
+## Key Technologies
+
+| Category | Technology | Version |
+|----------|-----------|---------|
+| **Runtime** | TypeScript | 5.6+ |
+| **Framework** | React | 18.3+ |
+| **Bundler** | Vite | 6.0+ |
+| **Federation** | @module-federation/enhanced | 0.7+ |
+| **Package Manager** | Bun | 1.1.42+ |
+| **Linter** | oxlint | 0.6+ |
+| **Formatter** | Prettier | 3.5+ |
+
+## Project Structure
 
 ```
 heliosApp/
-├── apps/
-│   ├── runtime/           # Core runtime engine (bus, PTY, sessions, providers, audit, recovery)
-│   ├── desktop/          # Desktop shell (tabs, panels, settings, context store)
-│   ├── renderer/         # Standalone SolidJS web renderer (terminal + chat UI)
-│   └── colab-renderer/   # Collaborative SolidJS renderer (multi-user)
-├── packages/
-│   ├── runtime-core/     # Shared types, API client, config helpers, ID utilities
-│   ├── ids/              # ULID-based ID generation (ws_, ln_, ss_, tm_, cor_ prefixes)
-│   ├── errors/           # Error type definitions
-│   ├── logger/           # Pino-based structured logging
-│   └── types/            # Base TypeScript type definitions
-├── docs/                  # VitePress documentation site (multi-language)
-├── specs/                 # Protocol specifications (envelope schema, methods, topics)
-├── scripts/               # Build scripts, dependency management, governance tools
-└── tools/                 # Gate testing fixtures and tools
+├── src/
+│   ├── components/
+│   │   ├── Card.tsx          # Reusable card component
+│   │   ├── Button.tsx        # Reusable button component
+│   │   ├── Header.tsx        # Reusable header component
+│   │   └── index.tsx         # Component exports
+│   ├── pages/
+│   │   └── Dashboard.tsx     # Dashboard page (EXPOSED)
+│   ├── hooks/
+│   │   ├── useLocalStorage.ts  # Storage hook
+│   │   ├── useFetch.ts        # Fetch hook
+│   │   └── index.ts          # Hook exports (EXPOSED)
+│   ├── types/
+│   │   └── index.ts          # TypeScript types
+│   ├── App.tsx               # Root component
+│   ├── main.tsx              # Entry point
+│   └── index.css             # Global styles
+├── vite.config.ts            # Vite + Module Federation config
+├── tsconfig.json             # TypeScript strict configuration
+├── package.json              # Dependencies and scripts
+├── README.md                 # Project documentation
+└── index.html                # HTML entry point
 ```
 
-## Build Commands
+## Module Federation Configuration
+
+### Exposed Modules
+
+From `vite.config.ts`:
+
+```typescript
+exposes: {
+  './Dashboard': './src/pages/Dashboard.tsx',
+  './Components': './src/components/index.tsx',
+  './Hooks': './src/hooks/index.ts',
+}
+```
+
+### Shared Dependencies
+
+```typescript
+shared: {
+  react: {
+    singleton: true,
+    requiredVersion: '^18.0.0',
+    strictVersion: false,
+  },
+  'react-dom': {
+    singleton: true,
+    requiredVersion: '^18.0.0',
+    strictVersion: false,
+  },
+}
+```
+
+## Development Workflow
+
+### Installation
 
 ```bash
-# Type check
-bun run typecheck
-
-# Lint
-bun run lint
-
-# Format
-bun run format
-
-# Run unit tests
-bun run test
-
-# Run integration tests
-bun run test:integration
-
-# Run E2E tests
-bun run test:e2e
-
-# Run full test suite with coverage
-bun run test:coverage
-
-# Run quality gates (typecheck + lint + tests + coverage + security)
-bun run gates
-
-# Start documentation dev server
-bun run docs:dev
+bun install
 ```
 
-## Key Architectural Patterns
+### Development Modes
 
-- **Event-Driven LocalBus** — Central in-process message bus with 26 registered methods and 40 topics
-- **State Machines** — Every lifecycle-critical entity uses explicit state machines (Lane: 8 states, Session: 6 states, PTY: 6 states)
-- **Adapter/Plugin Pattern** — Pluggable providers for AI inference, terminal multiplexers, session sharing
-- **Red-Black Transactions** — Atomic renderer switching with automatic rollback on failure
-- **Append-Only Audit Log** — SQLite-backed durable event storage
+**Standalone (default)**:
+```bash
+bun run dev
+```
+- Port: 3001
+- Full development experience
+- Use for isolated feature work
 
-## Code Conventions
+**Federated (for host integration)**:
+```bash
+bun run dev:remote
+```
+- Serves remote entry
+- Output: `dist-remote/`
+- Use when testing with host app
 
-### TypeScript Style
-- TypeScript 7.x strict mode with `verbatimModuleSyntax`
-- Explicit return types on public APIs
-- No `any` types — use `unknown` and type guards
-- Interface-first for data shapes
+### Building
 
-### File Organization
-- One major concept per file
-- Barrel exports (`index.ts`) for packages
-- Co-locate tests with source (`*.test.ts`)
+**Standalone build**:
+```bash
+bun run build
+```
+Output: `dist/`
 
-### Error Handling
-- Use typed errors from `@helios/errors`
-- Never swallow errors — always propagate or handle explicitly
-- Log errors with context before throwing
+**Federated build**:
+```bash
+bun run build:remote
+```
+Output: `dist-remote/`
 
-### State Machines
-- All lifecycle-critical entities MUST have explicit state machines
-- States must be exhaustive enums, not string literals
-- Transitions must be validated before mutation
+### Code Quality
 
-## Agent Behavior Rules
+**Lint**:
+```bash
+bun run lint
+```
 
-### Agents MUST
-- Run `bun run typecheck` and `bun run lint` before committing
-- Run `bun run test` for any changes to runtime logic
-- Add tests for new public API surfaces
-- Update docs in `docs/` for user-facing changes
-- Use typed IDs from `@helios/ids` (ws_, ln_, ss_, tm_, cor_ prefixes)
-- Follow existing patterns — check `specs/` before adding new protocol methods/topics
+**Format check**:
+```bash
+bun run format:check
+```
 
-### Agents MUST NOT
-- Handroll what a library already solves — use pino for logging, ky for HTTP, etc.
-- Bypass the LocalBus for inter-component communication
-- Add stateful global variables — use the config/registry pattern
-- Skip gates — `bun run gates` must pass before merge
-- Modify `specs/` protocol definitions without consensus
+**Format fix**:
+```bash
+bun run format
+```
 
-### LocalBus Protocol
-- 26 methods registered in `protocol/methods.ts`
-- 40 topics registered in `protocol/topics.ts`
-- All envelopes are typed (Command, Event, Response)
-- Correlation tracking via sequence numbers
+## Design Principles
 
-### Testing Requirements
-- Unit tests for all runtime-core public APIs
-- Integration tests for LocalBus method invocations
-- E2E tests for user workflows (Playwright)
-- 85% coverage threshold enforced in gates
+| Principle | Application |
+|-----------|-------------|
+| **SOLID** | Small, focused components with single responsibility |
+| **DRY** | Hooks abstract common patterns (storage, fetching) |
+| **KISS** | Minimal, understandable API surface |
+| **YAGNI** | Only export what's needed by hosts |
+| **Law of Demeter** | Components don't reach into sibling state |
+
+## Integration Guidelines
+
+### For Host Applications
+
+1. **Configure Remote in Host**:
+   ```typescript
+   remotes: {
+     heliosApp: 'heliosApp@http://localhost:3001/remoteEntry.js'
+   }
+   ```
+
+2. **Import and Use**:
+   ```typescript
+   import Dashboard from 'heliosApp/Dashboard';
+   import { Card, Button } from 'heliosApp/Components';
+   import { useLocalStorage } from 'heliosApp/Hooks';
+   ```
+
+3. **Ensure Shared React**:
+   - Host must have React 18.0.0+
+   - React configured as singleton in host federation config
+
+## Adding New Components
+
+### Component Template
+
+```typescript
+// src/components/NewComponent.tsx
+import React from 'react';
+
+interface NewComponentProps {
+  // Props...
+}
+
+export default function NewComponent({ ...props }: NewComponentProps) {
+  return <div>...</div>;
+}
+```
+
+### Export from Library
+
+```typescript
+// src/components/index.tsx
+export { default as NewComponent } from './NewComponent';
+```
+
+## Adding New Hooks
+
+### Hook Template
+
+```typescript
+// src/hooks/useNewHook.ts
+import { useState } from 'react';
+
+export function useNewHook(): ReturnType {
+  // Implementation...
+}
+```
+
+### Export from Library
+
+```typescript
+// src/hooks/index.ts
+export { useNewHook } from './useNewHook';
+```
+
+## Testing Strategy
+
+- **Unit Tests**: Test individual components and hooks
+- **Integration Tests**: Test component composition
+- **Manual Tests**: Test federation loading from host
+- **Performance**: Monitor bundle size, HMR performance
+
+## CI/CD
+
+GitHub Actions workflow (`.github/workflows/ci.yml`):
+- Lint check
+- Build (both modes)
+- Type check
+
+## Troubleshooting
+
+### Port 3001 Already in Use
+
+Edit `vite.config.ts`:
+```typescript
+server: {
+  port: 3002, // Change port
+  hmr: { port: 3002 }
+}
+```
+
+### React Version Conflicts
+
+Ensure host has React 18.0.0+. Check `package.json` and federation config.
+
+### Remote Not Loading
+
+1. Verify heliosApp is running
+2. Check remoteEntry.js exists
+3. Verify URL in host federation config
+
+## Dependency Preferences (Enforced)
+
+- **Bleeding-edge**: Always use latest stable versions
+- **Wrap over handroll**: Prefer existing libraries
+- **Rich UI**: Use Radix/shadcn when needed (future)
+- **No manual utilities**: Use established packages
+
+## Related Projects
+
+- **AgilePlus**: Main host application (planned integration)
+- **heliosCLI**: Command-line interface sibling
+- **phenotype-infrakit**: Ecosystem infrastructure
+- **Phenotype**: Organization project portfolio
+
+## Governance
+
+- **Branch discipline**: Feature branches, PR review required
+- **Commit discipline**: Small, focused commits
+- **Documentation**: Keep README and CLAUDE.md synchronized
+- **Quality**: No merge without passing CI
+
+## References
+
+- Module Federation: https://module-federation.io/
+- Vite Config: vite.config.ts
+- TypeScript Config: tsconfig.json
+- GitHub Actions: .github/workflows/
