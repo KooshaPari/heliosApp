@@ -1,6 +1,6 @@
 /**
- * Unit tests for switchRenderer.
- * @see FR-010-004, SC-010-001
+ * FR-HELIOS-056: Renderer Switch Transaction Tests
+ * Verifies: FR-TXN-001 (Atomic transactions), FR-TXN-002 (Hot-swap), FR-TXN-004 (Automatic rollback), FR-TXN-008 (Lifecycle events)
  */
 import { describe, expect, it } from "bun:test";
 import {

@@ -1,8 +1,7 @@
 /**
- * Unit tests for RioMetrics — verifies schema matches ghostty.
- * Covers: T009 (unit tests).
+ * FR-HELIOS-053: Rio Metrics Collection Tests
+ * Verifies: FR-RIO-005 (Frame metrics using same schema as ghostty), FR-PRF-005 (Memory sampling)
  */
-
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import {
   RioMetrics,

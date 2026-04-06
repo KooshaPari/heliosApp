@@ -1,33 +1,39 @@
-# Added by Spec Kitty CLI (auto-managed)
-.opencode/
-.windsurf/
-.qwen/
-.augment/
-.roo/
-.amazonq/
-.github/copilot/
-.kittify/.dashboard
-!.gemini/
-!.gemini/config.yaml
-*.tsbuildinfo
-node_modules/
-dist/
-# tsc --build emit artifacts in test dirs
-apps/*/tests/**/*.js
-apps/*/tests/**/*.js.map
-apps/*/tests/**/*.d.ts
-apps/*/tests/**/*.d.ts.map
-# Excluded via sparse-checkout
-agileplus/
+# Build outputs
+/dist
+/dist-remote
+/build
 
-# AI tool artifacts
-.claude/
-.codex/
-.cursor/
-.gemini/
-.kittify/
-.kilocode/
-.github/prompts/
-.github/copilot-instructions.md
-.claudeignore
-.llmignore
+# Dependencies
+node_modules
+/.bun
+pnpm-lock.yaml
+bun.lockb
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime
+.turbo
+.eslintcache
+.prettier-ignore
+.__mf__temp
+
+# Testing
+coverage
+.nyc_output
+*.lcov

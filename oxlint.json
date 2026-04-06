@@ -1,0 +1,15 @@
+{
+  "settings": {
+    "react": {
+      "version": "18"
+    }
+  },
+  "rules": {
+    "correctness": "warn",
+    "suspicious": "warn",
+    "complexity": "warn",
+    "perf": "warn",
+    "style": "warn",
+    "jest": "off"
+  }
+}

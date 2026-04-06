@@ -1,12 +1,7 @@
 /**
- * Unit tests for GhosttyMetrics (T012).
- *
- * Tests metrics calculation with synthetic frame data, percentile
- * accuracy, rolling window, and zero-overhead when disabled.
- *
- * Tags: NFR-011-001, SC-011-004
+ * FR-HELIOS-051: Ghostty Metrics Collection Tests
+ * Verifies: FR-GHT-005 (Frame metrics publishing), FR-PRF-005 (Memory sampling)
  */
-
 import { describe, test, expect, beforeEach } from "bun:test";
 import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
 import type { MetricsSnapshot } from "../../../../src/renderer/ghostty/metrics.js";
