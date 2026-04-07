@@ -6,7 +6,7 @@ AgilePlus is the project management methodology and tooling system used to track
 
 **Version:** 1.0  
 **Status:** Active  
-**Reference Implementation:** `/Users/kooshapari/CodeProjects/Phenotype/repos/AgilePlus`
+**Reference Implementation:** `$AGILEPLUS_PATH`
 
 ---
 
@@ -47,7 +47,7 @@ The heliosApp project is configured to use AgilePlus for all work tracking:
 
 | Configuration | Value |
 |---|---|
-| **Reference Path** | `/Users/kooshapari/CodeProjects/Phenotype/repos/AgilePlus` |
+| **Reference Path** | `$AGILEPLUS_PATH` |
 | **Database** | `.agileplus/agileplus.db` |
 | **Work Audit** | `.work-audit/worklog.md` |
 | **CLI Entry Point** | `agileplus` (run from AgilePlus directory) |
@@ -57,7 +57,7 @@ The heliosApp project is configured to use AgilePlus for all work tracking:
 All feature development for heliosApp is tracked in AgilePlus:
 
 ```
-cd /Users/kooshapari/CodeProjects/Phenotype/repos/AgilePlus
+cd $AGILEPLUS_PATH
 
 # List all features
 agileplus list
@@ -144,7 +144,7 @@ Commits maintain a link to work items:
 ### Quick Commands
 
 ```bash
-cd /Users/kooshapari/CodeProjects/Phenotype/repos/AgilePlus
+cd $AGILEPLUS_PATH
 
 # List all features
 agileplus list
