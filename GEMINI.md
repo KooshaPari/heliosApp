@@ -10,6 +10,21 @@ HeliosApp is a developer-focused AI runtime environment with a desktop shell, te
 **Package Manager:** Bun 1.2.20+  
 **Runtime:** TypeScript 7.x (strict mode)
 
+## Kilo Gastown Identity
+
+- **Rig ID:** `35903ad7-65d2-489a-bf30-ff95018fd80f`
+- **Town ID:** `78a8d430-a206-4a25-96c0-5cd9f5caf984`
+- **Convoy:** `convoy/methodology-heliosapp/8fb6d6ea`
+
+## Kilo Delegation Tools
+
+Agents in this rig can delegate work using:
+
+- **`gt_sling`** - Delegate a single bead/task to another agent
+- **`gt_sling_batch`** - Delegate multiple beads/tasks in a single operation
+- **`gt_list_convoys`** - List active convoys and their status
+- **`gt_convoy_status`** - Get detailed status of a specific convoy
+
 ### Architecture
 
 HeliosApp follows an **event-driven monorepo architecture** built around a central message bus (LocalBus V1) that coordinates all subsystems through typed command/event/response envelopes.
