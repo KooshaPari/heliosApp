@@ -18,7 +18,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "ky": "^1.14.3"
+    "ky": "^2.0.0"
   },
   "devDependencies": {
     "bun-types": "latest",
