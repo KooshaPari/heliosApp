@@ -1,6 +1,7 @@
-// T019 - Integration test for orphan reconciliation scenario
-// (FR-008-008, SC-008-002, SC-008-004)
-
+/**
+ * FR-HELIOS-084: Orphan Reconciliation Integration Tests
+ * Verifies: FR-LAN-008 (Orphan lane reconciliation on startup), FR-ORF-001 (Orphan detection)
+ */
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";

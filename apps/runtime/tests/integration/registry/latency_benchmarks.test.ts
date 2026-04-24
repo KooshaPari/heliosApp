@@ -1,15 +1,11 @@
+/**
+ * FR-HELIOS-111: Registry Latency Benchmarks
+ * Verifies: FR-PRF-004 (Registry operation latency SLO)
+ */
 import { describe, it, expect, beforeEach } from "bun:test";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import { BindingMiddleware } from "../../../src/registry/binding_middleware.js";
 import type { BindingTriple } from "../../../src/registry/binding_triple.js";
-
-/**
- * Latency Benchmarks for Registry Operations
- *
- * Validates that registry operations meet SLO targets:
- * - Lookups by any key: < 2ms at p95 with 500+ bindings
- * - Validation middleware: < 5ms at p95
- */
 
 describe("Latency Benchmarks", () => {
   let registry: TerminalRegistry;

@@ -1,5 +1,7 @@
-// FR-001, FR-008: Unit tests for monotonic clock and markStart/markEnd API.
-
+/**
+ * FR-HELIOS-068: Instrumentation Hooks and Monotonic Clock Tests
+ * Verifies: FR-PRF-001 (Instrumentation hooks), FR-PRF-008 (Monotonic clock sources)
+ */
 import { describe, it, expect, beforeEach } from "bun:test";
 import {
   monotonicNow,

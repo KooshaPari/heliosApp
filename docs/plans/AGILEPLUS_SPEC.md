@@ -2,12 +2,11 @@
 
 ## Overview
 
-AgilePlus is the lightweight agile methodology implemented in the heliosApp ecosystem. It emphasizes feature-centric work organization, structured tracking through convoys and beads, and systematic quality enforcement through pre-submission gates.
+AgilePlus is the project management methodology and tooling system used to track, coordinate, and govern all feature development in the heliosApp ecosystem. It provides structured work tracking, historical audit trails, and systematic methodology enforcement across the monorepo.
 
 **Version:** 1.0  
 **Status:** Active  
-**Rig ID:** `35903ad7-65d2-489a-bf30-ff95018fd80f`  
-**Town ID:** `78a8d430-a206-4a25-96c0-5cd9f5caf984`
+**Reference Implementation:** `$AGILEPLUS_PATH`
 
 ---
 
@@ -15,43 +14,78 @@ AgilePlus is the lightweight agile methodology implemented in the heliosApp ecos
 
 ### 1. Feature-Centric Work Organization
 
-All development work is organized around **features** — discrete, deliverable units of functionality that map to product requirements. Features are decomposed into **work packages** (beads) that represent implementation tasks.
+All development work is organized around **features** — discrete, deliverable units of functionality that map to product requirements. Features are the primary tracking entity in AgilePlus, containing one or more **work packages** that represent implementation tasks.
 
-### 2. Convoy-Based Work Batching
-
-Related work items are batched into **convoys** for coordinated parallel execution. Convoys enable multiple agents to work simultaneously on different aspects of the same feature while maintaining traceability.
-
-| Property | Description |
-|---|---|
-| **Convoy ID** | Unique identifier (e.g., `6d75756c-5831-406f-9d7c-bcd49be2a22a`) |
-| **Feature Branch** | Git branch pattern: `convoy/<name>/<convoy-id>/head` |
-| **Beads** | Contains one or more work items |
-
-### 3. Structured Tracking Over Ad Hoc Communication
+### 2. Structured Tracking vs. Ad Hoc Communication
 
 AgilePlus enforces structured tracking over informal communication:
-- All feature work must be tracked via beads in the Gastown system
-- Status updates occur through the bead state machine
-- Historical decisions are preserved in git history and governance logs
+- All feature work must be logged in AgilePlus
+- Status updates occur through the CLI, not informal channels
+- Historical decisions are preserved in worklogs and git history
 
-### 4. Quality Gates Before Submission
+### 3. Methodology Enforcement Through Conventions
 
-Every work submission passes through quality gates before being merged:
-- Type checking (`bun run typecheck`)
-- Linting (`bun run lint`)
-- Unit tests (`bun run test`)
-- E2E tests (`bun run test:e2e`)
-- Coverage validation (85% threshold)
-- Security scanning
-- Bypass detection
+The methodology is enforced through consistent conventions rather than rigid process:
+- Every spec document references its AgilePlus tracking
+- All commits follow structured patterns linked to work packages
+- Work history is preserved across repository migrations
+
+### 4. Separation of Concerns
+
+AgilePlus maintains strict separation between:
+- **Planning layer** — Feature definitions, work packages, priorities
+- **Execution layer** — Git branches, commits, pull requests
+- **Audit layer** — Worklogs, history, retrospectives
+
+---
+
+## AgilePlus in heliosApp
+
+### Project Configuration
+
+The heliosApp project is configured to use AgilePlus for all work tracking:
+
+| Configuration | Value |
+|---|---|
+| **Reference Path** | `$AGILEPLUS_PATH` |
+| **Database** | `.agileplus/agileplus.db` |
+| **Work Audit** | `.work-audit/worklog.md` |
+| **CLI Entry Point** | `agileplus` (run from AgilePlus directory) |
+
+### Feature Tracking
+
+All feature development for heliosApp is tracked in AgilePlus:
+
+```
+cd $AGILEPLUS_PATH
+
+# List all features
+agileplus list
+
+# Show feature details
+agileplus show <feature-id>
+
+# Update work package status
+agileplus status <feature-id> --wp <wp-id> --state <state>
+```
+
+### Spec Migration Convention
+
+When specs are created or migrated for heliosApp, they follow this convention:
+
+```
+Migrated from kitty-specs. Tracked in AgilePlus.
+```
+
+This line appears in all spec documents under `docs/specs/*/spec.md` to ensure traceability between documentation and work tracking.
 
 ---
 
 ## Work Package Workflow
 
-### Bead States
+### States
 
-Work packages (beads) in AgilePlus follow a defined state machine:
+Work packages in AgilePlus follow a defined state machine:
 
 | State | Description |
 |---|---|
@@ -64,148 +98,82 @@ Work packages (beads) in AgilePlus follow a defined state machine:
 
 ### Lifecycle
 
-```
-open → in_progress → in_review → closed
-  ↓         ↓            ↓
-blocked   blocked    (rework)
-```
-
-1. **Feature Creation** — A feature is created and decomposed into beads
-2. **Convoy Formation** — Related beads are batched into a convoy
-3. **Agent Assignment** — Beads are assigned to polecat agents via `gt_sling`
-4. **Execution** — Agent works on the feature branch
-5. **Quality Gates** — Agent runs `task quality` to validate
-6. **Submission** — Agent calls `gt_done` to push and transition to `in_review`
-7. **Review** — Refinery reviews and either merges or requests changes
-8. **Rework** (if requested) — Agent receives feedback, fixes issues
-9. **Closure** — Bead marked as `done`
+1. **Feature Creation** — A feature is created in AgilePlus with associated work packages
+2. **Work Assignment** — Work packages are assigned priority and state
+3. **Execution** — Agent or developer works on the feature branch
+4. **Status Updates** — Work package state is updated via AgilePlus CLI
+5. **Review** — Changes are reviewed and merged
+6. **Closure** — Work package marked as `done`
 
 ---
 
 ## Integration with heliosApp Architecture
 
-### Spec-to-Implementation Mapping
+### Spec-to-Work Mapping
 
-Each technical specification in `docs/plans/` corresponds to implementation work tracked via beads:
+Each technical specification in `docs/specs/` corresponds to one or more AgilePlus features:
 
-| Spec Document | Purpose | Tracking |
+| Spec Directory | Purpose | AgilePlus Tracking |
 |---|---|---|
-| `AGILEPLUS_SPEC.md` | Methodology specification | This document |
-| `KILO_GASTOWN_SPEC.md` | Agent orchestration | Bead lifecycle |
-| `PLAN.md` | 8-phase implementation plan | Phase-based |
-| `FUNCTIONAL_REQUIREMENTS.md` | Technical requirements | FR codes |
+| `docs/specs/001-colab-agent-terminal-control-plane/` | Core terminal control | Tracked in AgilePlus |
+| `docs/specs/002-local-bus-v1-protocol-and-envelope/` | LocalBus protocol | Tracked in AgilePlus |
+| `docs/specs/003-workspace-and-project-metadata-persistence/` | Persistence layer | Tracked in AgilePlus |
+| ... | ... | ... |
 
 ### Branch Naming Convention
 
-Feature branches follow the convoy pattern, linking git work to bead tracking:
+Feature branches follow the convoy pattern, linking git work to AgilePlus work:
 
 ```
-convoy/<project>-kilo-specs-<repo>/<convoy-id>/gt/<agent-name>/<bead-id>
+convoy/agileplus-kilo-specs-heliosapp/<convoy-id>/head
 ```
 
-Example:
-```
-convoy/agileplus-kilo-specs-heliosapp/6d75756c/gt/polecat-33/c5141b38
-```
+This allows traceability from branch → convoy → AgilePlus feature.
 
 ### Commit Hygiene
 
-Commits maintain traceability:
-- Descriptive commit messages reference bead context
+Commits maintain a link to work items:
+- Descriptive commit messages reference feature context
 - Frequent commits on feature branches
 - Push after every commit (ephemeral container)
 
 ---
 
-## heliosApp-Specific Implementation
+## AgilePlus CLI Reference
 
-### Build and Test Commands
-
-| Command | Purpose |
-|---|---|
-| `bun run typecheck` | TypeScript type checking |
-| `bun run lint` | Code linting |
-| `bun run test` | Unit tests |
-| `bun run test:e2e` | End-to-end tests |
-| `bun run test:coverage` | Coverage report |
-| `bun run gates` | Full quality gate suite |
-| `task quality` | Quick quality validation |
-
-### Quality Gate Pipeline
-
-The 8-stage gate pipeline (`.github/workflows/quality-gates.yml`):
-
-1. Type check
-2. Lint
-3. Unit tests
-4. E2E tests
-5. Coverage (85% threshold)
-6. Security scan
-7. Static analysis
-8. Bypass detection
-
-### Monorepo Structure
-
-heliosApp uses a Bun monorepo with structured apps and packages:
-
-```
-heliosApp/
-├── apps/
-│   ├── runtime/           # Core runtime engine
-│   ├── desktop/           # Desktop shell
-│   ├── renderer/          # SolidJS web renderer
-│   └── colab-renderer/    # Collaborative renderer
-├── packages/              # Shared packages
-├── docs/                   # VitePress documentation
-├── specs/                  # Protocol specifications
-├── scripts/               # Build and governance scripts
-└── tools/                  # Gate testing fixtures
-```
-
----
-
-## CLI Reference
-
-### Gastown Delegation Commands
-
-| Command | Purpose |
-|---|---|
-| `gt_prime` | Get context: agent identity, hooked bead, mail |
-| `gt_sling <bead_id>` | Delegate single bead to agent |
-| `gt_sling_batch <convoy_id>` | Delegate all beads in convoy |
-| `gt_done --branch <name>` | Complete work, push, transition to `in_review` |
-| `gt_bead_status <bead_id>` | Check bead status |
-| `gt_checkpoint --data <json>` | Save crash-recovery state |
-| `gt_list_convoys` | List all convoys in rig |
-| `gt_mail_send` | Send message to another agent |
-| `gt_escalate` | Report issue requiring human intervention |
-
-### Local Development Commands
+### Quick Commands
 
 ```bash
-# Quick quality checks
-task quality:quick    # or: just quality-quick
+cd $AGILEPLUS_PATH
 
-# Strict quality checks
-task quality:strict   # or: just quality-strict
+# List all features
+agileplus list
 
-# Full preflight (deps + typecheck + lint + test)
-task preflight        # or: just preflight
+# Show feature details and work packages
+agileplus show <feature-id>
+
+# Update work package status
+agileplus status <feature-id> --wp <wp-id> --state <state>
+
+# List work packages for a feature
+agileplus wp list <feature-id>
+
+# Create a new work package
+agileplus wp create <feature-id> --title "<title>" --priority <priority>
 ```
 
----
+### Status States
 
-## Relationship with Kilo Gastown
+When updating work package state:
 
-AgilePlus and Kilo Gastown work together:
-
-| Layer | System | Tracks |
-|---|---|---|
-| **Orchestration** | Kilo Gastown | Agent work, parallelization, delegation |
-| **Execution** | Git branches, commits | Code changes |
-| **Methodology** | AgilePlus | Features, quality gates, workflow |
-
-Kilo Gastown provides the agent orchestration infrastructure (convoys, beads, polecats), while AgilePlus defines the methodology and quality standards applied to all work.
+| State Flag | Meaning |
+|---|---|
+| `--state open` | Not started |
+| `--state in_progress` | In active development |
+| `--state in_review` | Submitted for review |
+| `--state blocked` | Blocked by dependency |
+| `--state done` | Completed and merged |
+| `--state cancelled` | Cancelled |
 
 ---
 
@@ -213,11 +181,22 @@ Kilo Gastown provides the agent orchestration infrastructure (convoys, beads, po
 
 | Document | Purpose |
 |---|---|
-| `KILO_GASTOWN_SPEC.md` | Agent orchestration system |
-| `AGILEPLUS_KILO_SPEC.md` | Combined methodology overview |
+| `worklog.md` | Project-level worklog referencing AgilePlus |
 | `PLAN.md` | 8-phase implementation plan |
-| `FUNCTIONAL_REQUIREMENTS.md` | Feature requirements |
-| `AGENTS.md` | Agent behavior rules |
+| `PRD.md` | Product Requirements Document |
+| `docs/specs/*/spec.md` | Individual technical specifications |
+
+---
+
+## Migration History
+
+The heliosApp specs were migrated from `kitty-specs` to AgilePlus tracking. All spec documents maintain the notation:
+
+```
+Migrated from kitty-specs. Tracked in AgilePlus.
+```
+
+This ensures backward traceability for historical decision context while maintaining current methodology compliance.
 
 ---
 
@@ -225,8 +204,8 @@ Kilo Gastown provides the agent orchestration infrastructure (convoys, beads, po
 
 AgilePlus provides heliosApp with:
 
-- **Feature-centric organization** — All work decomposed into trackable beads
-- **Convoy parallelization** — Multiple agents work simultaneously on related tasks
-- **Quality gates** — Pre-submission validation ensures code quality
-- **Traceability** — Branch naming links to convoy ID to bead
+- **Centralized work tracking** — All features and work packages in one system
+- **CLI-driven workflow** — Structured commands over informal communication
+- **Audit trail** — Work history preserved in `.work-audit/worklog.md`
+- **Traceability** — Specs link to features, branches link to convoys
 - **Methodology consistency** — Enforced through conventions across the monorepo
