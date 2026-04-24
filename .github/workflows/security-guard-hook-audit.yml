@@ -12,21 +12,4 @@ permissions:
 
 jobs:
   guard:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Wire Git hook path and verify guard hook
-        run: |
-          git config core.hooksPath .github/hooks
-          test -f .github/hooks/pre-commit
-          test -x .github/hooks/pre-commit
-          test -f .github/hooks/security-guard.sh
-          test -x .github/hooks/security-guard.sh
-
-      - name: Run security guard hook
-        run: |
-          .github/hooks/pre-commit
+    uses: KooshaPari/phenoShared/.github/workflows/reusable/security-guard-hook-audit.yml@9bc51f34248d0bc4db5bc1dd7724a8398465eb47
