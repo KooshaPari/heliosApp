@@ -94,7 +94,7 @@ jobs:
 
       - name: Upsert rate-limit comment
         if: failure() && steps.gca.outputs.rate-limited == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const marker = "<!-- gca-rate-limit -->";
