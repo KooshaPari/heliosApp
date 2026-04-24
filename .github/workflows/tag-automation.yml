@@ -1,12 +1,15 @@
 name: Tag Automation
+
+# Delegates to phenoShared reusable workflow.
+# See: https://github.com/KooshaPari/phenoShared/blob/main/.github/workflows/reusable/tag-automation.yml
+
 on:
   push:
     tags:
       - 'v*'
+
 jobs:
   tag:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Create release tag
-        run: echo "Creating release for ${{ github.ref_name }}"
+    uses: KooshaPari/phenoShared/.github/workflows/reusable/tag-automation.yml@main
+    permissions:
+      contents: write
