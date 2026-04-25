@@ -9,6 +9,7 @@ import {
 } from "../gate-report";
 
 describe("Gate Report Generator", () => {
+	// Traces to: FR-GOVERNANCE-GATES
 	test("create pass report with no findings", () => {
 		const report = createGateReport("typecheck", [], 100);
 
@@ -19,6 +20,7 @@ describe("Gate Report Generator", () => {
 		expect(report.summary?.errors).toBe(0);
 	});
 
+	// Traces to: FR-GOVERNANCE-GATES
 	test("create fail report with error findings", () => {
 		const findings: GateFinding[] = [
 			{
@@ -39,6 +41,7 @@ describe("Gate Report Generator", () => {
 		expect(report.summary?.errors).toBe(1);
 	});
 
+	// Traces to: FR-GOVERNANCE-GATES
 	test("count findings by severity", () => {
 		const findings: GateFinding[] = [
 			{
@@ -74,6 +77,7 @@ describe("Gate Report Generator", () => {
 		expect(report.summary?.infos).toBe(1);
 	});
 
+	// Traces to: FR-GOVERNANCE-GATES
 	test("aggregate gate reports into pipeline summary", () => {
 		const report1 = createGateReport("typecheck", [], 100);
 		const report2 = createGateReport("lint", [], 150);
@@ -100,6 +104,7 @@ describe("Gate Report Generator", () => {
 		expect(summary.totalDuration).toBe(450);
 	});
 
+	// Traces to: FR-GOVERNANCE-GATES
 	test("pipeline summary passes when all gates pass", () => {
 		const report1 = createGateReport("typecheck", [], 100);
 		const report2 = createGateReport("lint", [], 150);
@@ -110,6 +115,7 @@ describe("Gate Report Generator", () => {
 		expect(summary.failedGates.length).toBe(0);
 	});
 
+	// Traces to: FR-GOVERNANCE-AUDIT
 	test("gate report includes timestamp", () => {
 		const report = createGateReport("typecheck", [], 100);
 		expect(report.timestamp).toBeDefined();
