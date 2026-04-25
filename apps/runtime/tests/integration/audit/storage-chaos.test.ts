@@ -57,6 +57,7 @@ describe("Storage Chaos Tests", () => {
       if (fs.existsSync(TMP_DIR)) {
         fs.rmdirSync(TMP_DIR);
       }
+    // eslint-disable-next-line no-unused-vars
     } catch (_err) {
       // Ignore cleanup errors
     }

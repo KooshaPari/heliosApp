@@ -22,6 +22,7 @@ describe("Persistence Integration", () => {
   afterEach(async () => {
     try {
       await fs.rm(tempDir, { recursive: true, force: true });
+    // eslint-disable-next-line no-unused-vars
     } catch (_err) {}
   });
 

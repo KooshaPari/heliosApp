@@ -65,6 +65,7 @@ describe("Concurrent switch rejection", () => {
         surface: TEST_SURFACE,
       });
       expect.unreachable("Should have thrown ConcurrentSwitchError");
+    // eslint-disable-next-line no-unused-vars
     } catch (_err) {
       expect(error).toBeInstanceOf(ConcurrentSwitchError);
       if (error instanceof ConcurrentSwitchError) {
@@ -118,6 +119,7 @@ describe("Concurrent switch rejection", () => {
         surface: TEST_SURFACE,
       });
       expect.unreachable("Should have thrown ConcurrentSwitchError");
+    // eslint-disable-next-line no-unused-vars
     } catch (_err) {
       if (error instanceof ConcurrentSwitchError) {
         const activeTransaction = orchestrator.getActiveTransaction();
@@ -264,6 +266,7 @@ describe("Concurrent switch rejection", () => {
         config: TEST_CONFIG,
         surface: TEST_SURFACE,
       });
+    // eslint-disable-next-line no-unused-vars
     } catch (_err) {
       const activeTransaction2 = orchestrator.getActiveTransaction();
       expect(activeTransaction2?.id).toBe(activeTransaction1?.id);

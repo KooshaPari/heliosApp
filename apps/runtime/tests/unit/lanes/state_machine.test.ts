@@ -119,6 +119,7 @@ describe("Lane State Machine (FR-008-001)", () => {
         await withLaneLock("lane-err", async () => {
           throw new Error("boom");
         });
+    // eslint-disable-next-line no-unused-vars
       } catch (_err) {
         // expected
       }

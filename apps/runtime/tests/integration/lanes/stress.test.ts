@@ -121,6 +121,7 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
     try {
       await mgr.create("ws-cap", "main");
       expect(true).toBe(false); // should not reach
+     // eslint-disable-next-line no-unused-vars
     } catch (_err) {
       expect(e).toBeInstanceOf(LaneCapacityExceededError);
     }

@@ -43,11 +43,13 @@ function cleanup(): void {
     try {
       // Prune worktrees first to avoid locked file issues
       Bun.spawnSync(["git", "worktree", "prune"], { cwd: dir });
+    // eslint-disable-next-line no-unused-vars
     } catch (_err) {
       // ignore
     }
     try {
       fs.rmSync(dir, { recursive: true, force: true });
+    // eslint-disable-next-line no-unused-vars
     } catch (_err) {
       // ignore
     }

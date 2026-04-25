@@ -42,6 +42,7 @@ describe("Ghostty integration - lifecycle (T013)", () => {
     if (backend !== undefined) {
       try {
         await backend.stop();
+    // eslint-disable-next-line no-unused-vars
       } catch (_err) {
         // Ignore cleanup errors
       }

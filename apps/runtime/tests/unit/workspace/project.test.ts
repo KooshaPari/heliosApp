@@ -27,6 +27,7 @@ beforeEach(() => {
 afterEach(() => {
   try {
     rmSync(tempDir, { recursive: true });
+    // eslint-disable-next-line no-unused-vars
   } catch (_err) {
     // cleanup best-effort
   }
@@ -114,6 +115,7 @@ describe("detectStaleProjects", () => {
     // Remove the directory and wait for filesystem to settle
     try {
       rmSync(tempDir, { recursive: true });
+    // eslint-disable-next-line no-unused-vars
     } catch (_err) {
       // Best-effort removal; test checks stale detection regardless
     }

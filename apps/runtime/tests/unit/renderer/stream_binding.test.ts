@@ -80,7 +80,7 @@ describe("StreamBindingManager", () => {
     const bindingMap = mgr.getBindings();
     expect(bindingMap.has("pty-1")).toBe(true);
     const _binding = bindingMap.get("pty-1")!;
-    expect(binding?.stream).toBe(stream2);
+    expect(_binding?.stream).toBe(stream2);
   });
 
   it("rebindAll transfers all bindings to new renderer", () => {
@@ -170,7 +170,7 @@ describe("SwitchBuffer", () => {
 
   it("flushes buffered data to new renderer on stopBuffering", () => {
     const buf = new SwitchBuffer();
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
     createdRenderers.push(_renderer);
 
     buf.startBuffering();
@@ -186,7 +186,7 @@ describe("SwitchBuffer", () => {
 
   it("stopBuffering is no-op when not buffering", () => {
     const buf = new SwitchBuffer();
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
     createdRenderers.push(_renderer);
     buf.stopBuffering(renderer); // should not throw
     expect(renderer.boundStreams.size).toBe(0);
@@ -194,7 +194,7 @@ describe("SwitchBuffer", () => {
 
   it("instant switch with no buffered data: flush is no-op", () => {
     const buf = new SwitchBuffer();
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
     createdRenderers.push(_renderer);
     buf.startBuffering();
     buf.stopBuffering(renderer);

@@ -29,6 +29,7 @@ describe("False Positive Rate", () => {
     engine.stop();
     try {
       unlinkSync(`/tmp/helios-cooldown-${testId}.json`);
+    // eslint-disable-next-line no-unused-vars
     } catch (_err) {}
   });
 
