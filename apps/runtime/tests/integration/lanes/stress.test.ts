@@ -60,7 +60,7 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
     const _startTime = Date.now();
 
     // Step 1: Create 50 lanes concurrently
-    const createPromises = Array.from({ length: LANE_COUNT }, (_, i) =>
+    const createPromises = Array.from({ length: LANE_COUNT }, (_,_i) =>
       mgr.create(`ws-stress`, "main")
     );
     const lanes = await Promise.all(createPromises);

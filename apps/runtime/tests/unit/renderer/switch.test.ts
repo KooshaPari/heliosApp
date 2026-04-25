@@ -7,7 +7,7 @@ import { describe, expect, it } from "bun:test";
 import {
   switchRenderer,
   SwitchSameRendererError,
-  SwitchTimeoutError,
+  
 } from "../../../src/renderer/switch.js";
 import { RendererRegistry } from "../../../src/renderer/registry.js";
 import { RendererStateMachine } from "../../../src/renderer/state_machine.js";

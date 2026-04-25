@@ -59,7 +59,7 @@ describe("ActiveContextStore", () => {
 
       let emittedEvent: any = null;
 
-      store.onContextChange(event => {
+      store.onContextChange(_event => {
         emittedEvent = event;
       });
 
@@ -87,7 +87,7 @@ describe("ActiveContextStore", () => {
 
       await store.setContext(context1);
 
-      store.onContextChange(event => {
+      store.onContextChange(_event => {
         emittedEvent = event;
       });
 
@@ -106,11 +106,11 @@ describe("ActiveContextStore", () => {
 
       const calls: any[] = [];
 
-      store.onContextChange(event => {
+      store.onContextChange(_event => {
         calls.push("listener1");
       });
 
-      store.onContextChange(event => {
+      store.onContextChange(_event => {
         calls.push("listener2");
       });
 
@@ -129,7 +129,7 @@ describe("ActiveContextStore", () => {
 
       let callCount = 0;
 
-      const unsubscribe = store.onContextChange(event => {
+      const unsubscribe = store.onContextChange(_event => {
         callCount++;
       });
 
@@ -165,7 +165,7 @@ describe("ActiveContextStore", () => {
 
       let emittedContexts: ActiveContext[] = [];
 
-      store.onContextChange(event => {
+      store.onContextChange(_event => {
         if (event.current) {
           emittedContexts.push(event.current);
         }
@@ -193,7 +193,7 @@ describe("ActiveContextStore", () => {
 
       let finalContext: ActiveContext | null = null;
 
-      store.onContextChange(event => {
+      store.onContextChange(_event => {
         finalContext = event.current;
       });
 

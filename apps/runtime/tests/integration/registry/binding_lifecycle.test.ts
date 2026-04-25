@@ -166,7 +166,7 @@ describe("Binding Lifecycle Integration", () => {
   describe("binding consistency after rapid lane switches", () => {
     it("should maintain accurate binding state after lane switches", async () => {
       const terminal = "terminal-1";
-      let binding = registry.register(terminal, {
+      let _binding = registry.register(terminal, {
         workspaceId: "ws-1",
         laneId: "lane-1",
         sessionId: "session-1",

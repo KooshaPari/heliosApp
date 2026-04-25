@@ -356,7 +356,7 @@ export class LaneManager {
 
     if (ptys.length === 0) return;
 
-    let forceKilled = 0;
+    let _forceKilled = 0;
     const terminationPromises = ptys.map(async pty => {
       try {
         const timeout = new Promise<"timeout">(resolve =>
