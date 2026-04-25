@@ -33,7 +33,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 
@@ -58,7 +58,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 
@@ -79,7 +79,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 
@@ -115,7 +115,7 @@ describe("IdleMonitor", () => {
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 

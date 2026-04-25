@@ -295,7 +295,7 @@ describe("Process-Level Isolation", () => {
       await provider.init({ apiKey: "test", model: "claude-3-sonnet" });
 
       // Execute some operations
-      const result = await provider.execute({ prompt: "test" }, "corr-123");
+      const _result = await provider.execute({ prompt: "test" }, "corr-123");
       expect(result).toBeDefined();
 
       // Terminate should cleanup
