@@ -28,7 +28,7 @@ export class CheckpointManager {
       const dir = path.dirname(this.checkpointPath);
       await fs.mkdir(dir, { recursive: true });
       await fs.writeFile(this.checkpointPath, JSON.stringify(checkpoint, null, 2));
-    } catch (error) {
+    } catch {
       console.error("Failed to save checkpoint:", error);
       throw error;
     }
@@ -39,7 +39,7 @@ export class CheckpointManager {
       const content = await fs.readFile(this.checkpointPath, "utf-8");
       const checkpoint = JSON.parse(content) as WatchdogCheckpoint;
       return checkpoint;
-    } catch (error) {
+    } catch {
       // File doesn't exist or is corrupt - return null for fresh start
       return null;
     }

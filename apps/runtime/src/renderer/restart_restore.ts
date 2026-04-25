@@ -205,7 +205,7 @@ export async function executeRestartWithRestore(
       durationMs: Date.now() - startTime,
       checkpoints,
     };
-  } catch (error: unknown) {
+  } catch {
     const restartError =
       error instanceof RestartRestoreError
         ? error

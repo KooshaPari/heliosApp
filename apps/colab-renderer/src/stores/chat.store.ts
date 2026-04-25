@@ -110,7 +110,7 @@ export async function sendMessage(text: string): Promise<void> {
 
     appendToAssistantMessage(convId, assistantMsg.id, extractTextContent(response));
     finalizeAssistantMessage(convId, assistantMsg.id, "complete");
-  } catch (err) {
+  } catch {
     let errMsg: string;
     if (err instanceof AnthropicApiError) {
       errMsg = `Anthropic API error ${err.status}: ${err.body}`;

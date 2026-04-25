@@ -64,7 +64,7 @@ export class PolicyStorage {
       this.validateRules(rules);
 
       return rules;
-    } catch (error) {
+    } catch {
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         // File doesn't exist: return empty (deny-by-default)
         return [];
@@ -104,7 +104,7 @@ export class PolicyStorage {
 
       // Notify callbacks (debounced)
       this.notifyChangedDebounced(workspaceId, rules);
-    } catch (error) {
+    } catch {
       // Clean up temp file
       try {
         await fs.unlink(tempPath);
@@ -143,7 +143,7 @@ export class PolicyStorage {
             }
             this.cache.set(workspaceId, ruleSet);
             this.notifyChangedDebounced(workspaceId, rules);
-          } catch (error) {
+          } catch {
             console.error(`Failed to reload policy rules for ${workspaceId}:`, error);
             // Keep previous rules on error
           }

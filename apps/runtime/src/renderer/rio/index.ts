@@ -82,7 +82,7 @@ export async function registerRio(
   let backendModule: typeof import("./backend.js");
   try {
     backendModule = await import("./backend.js");
-  } catch (err) {
+  } catch {
     console.error("Rio renderer: failed to load backend module", err);
     return;
   }
@@ -232,7 +232,7 @@ export class RioToggleQueue {
       try {
         const events = await handleRioToggle(this._registry, item.enabled, this._config);
         item.resolve(events);
-      } catch (err) {
+      } catch {
         item.reject(err instanceof Error ? err : new Error(String(err)));
       }
     }

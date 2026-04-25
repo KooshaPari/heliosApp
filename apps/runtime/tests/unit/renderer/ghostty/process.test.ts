@@ -39,7 +39,7 @@ describe("GhosttyProcess", () => {
       // If it somehow succeeds (ghostty is installed), that's fine too
       expect(proc.isRunning()).toBe(true);
       await proc.stop();
-    } catch (e) {
+    } catch {
       expect(e).toBeDefined();
     }
   });

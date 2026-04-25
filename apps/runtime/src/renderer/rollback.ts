@@ -106,7 +106,7 @@ export async function executeRollback(
           restored: true,
           degraded: false,
         });
-      } catch (error: unknown) {
+      } catch {
         terminalStatuses.push({
           ptyId,
           restored: false,
@@ -147,7 +147,7 @@ export async function executeRollback(
       terminalStatuses,
       failureReason,
     };
-  } catch (error: unknown) {
+  } catch {
     const rollbackError = error instanceof RollbackError ? error : new RollbackError(String(error));
 
     return {

@@ -387,7 +387,7 @@ describe("MCP Bridge Adapter", () => {
           },
           "corr-123"
         );
-      } catch (_e) {
+      } catch {
         // Expected
       }
 
@@ -470,7 +470,7 @@ describe("MCP Bridge Adapter", () => {
       // Execute failing tool
       try {
         await adapter.execute({ toolName: "unknown_tool", arguments: {} }, "corr-2");
-      } catch (e) {
+      } catch {
         // Expected
       }
 

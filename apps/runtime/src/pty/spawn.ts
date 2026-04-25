@@ -111,7 +111,7 @@ export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Pr
 
     const spawnLatencyMs = performance.now() - startTime;
     return { record, spawnLatencyMs };
-  } catch (error) {
+  } catch {
     // If still in spawning state, transition to errored
     if (lifecycle.state === "spawning") {
       lifecycle.apply("spawn_failed");

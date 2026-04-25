@@ -68,7 +68,7 @@ export class BusAuditSubscriber {
     this.unsubscribe = bus.subscribe("*", async (event: BusEvent) => {
       try {
         await this.handleBusEvent(event, sink);
-      } catch (err) {
+      } catch {
         // Log error but do not throw; do not block bus dispatch
         console.error("[BusAuditSubscriber] Error handling bus event:", err);
       }

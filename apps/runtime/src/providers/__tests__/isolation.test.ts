@@ -108,7 +108,7 @@ describe("Process-Level Isolation", () => {
       for (let i = 0; i < 3; i++) {
         try {
           await laneProviderA.execute({ prompt: "test" }, "corr-123");
-        } catch (_e) {
+        } catch {
           // Expected
         }
       }
@@ -134,7 +134,7 @@ describe("Process-Level Isolation", () => {
       for (let i = 0; i < 100; i++) {
         try {
           await provider.execute({ prompt: `test-${i}` }, `corr-${i}`);
-        } catch (_e) {
+        } catch {
           // Handle error
         }
       }
@@ -271,7 +271,7 @@ describe("Process-Level Isolation", () => {
       for (let i = 0; i < 5; i++) {
         try {
           await providers[1].execute({ prompt: "test" }, `corr-${i}`);
-        } catch (_e) {
+        } catch {
           // Expected
         }
       }
@@ -315,7 +315,7 @@ describe("Process-Level Isolation", () => {
       provider.setCrash(true);
       try {
         await provider.execute({ prompt: "test" }, "corr-123");
-      } catch (e) {
+      } catch {
         // Expected
       }
 

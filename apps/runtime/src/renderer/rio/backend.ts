@@ -111,7 +111,7 @@ export class RioBackend implements RendererAdapter {
       this._process = new RioProcess();
       this._capabilities.detect(config);
       this._state = "running";
-    } catch (err) {
+    } catch {
       this._state = "errored";
       throw err;
     }

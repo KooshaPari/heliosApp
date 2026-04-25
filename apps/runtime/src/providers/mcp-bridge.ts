@@ -104,7 +104,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
         serverPath: config.serverPath,
         toolCount: this.toolCatalog.size,
       });
-    } catch (error) {
+    } catch {
       const normalized = normalizeError(error, "mcp");
 
       throw new NormalizedProviderError(
@@ -154,7 +154,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
           message: "MCP server disconnected",
         };
       }
-    } catch (error) {
+    } catch {
       this.healthStatus.failureCount++;
       this.healthStatus = {
         state: "unavailable",
@@ -226,7 +226,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
         clearTimeout(timeoutHandle);
         this.inFlightTools.delete(correlationId);
       }
-    } catch (error) {
+    } catch {
       // Handle timeout
       if (error instanceof Error && error.name === "AbortError") {
         const normalized = new NormalizedProviderError(
@@ -310,7 +310,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
       };
 
       await this.publishEvent("provider.mcp.terminated", {});
-    } catch (error) {
+    } catch {
       const normalized = normalizeError(error, "mcp");
 
       throw new NormalizedProviderError(
@@ -361,7 +361,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
       }
 
       this.connection.connected = true;
-    } catch (error) {
+    } catch {
       this.connection.lastConnectionAttempt = new Date();
       this.connection.reconnectAttempts++;
       throw error;
@@ -385,7 +385,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
 
     try {
       await this.connectToServer();
-    } catch (error) {
+    } catch {
       // Exponential backoff: 1s, 2s, 4s, 8s, etc. (max 30s)
       this.connection.reconnectBackoffMs = Math.min(this.connection.reconnectBackoffMs * 2, 30000);
       throw error;
@@ -502,7 +502,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
         topic,
         payload,
       });
-    } catch (error) {
+    } catch {
       console.warn(`Failed to publish MCP event ${topic}:`, error);
     }
   }

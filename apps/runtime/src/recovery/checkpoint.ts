@@ -77,7 +77,7 @@ export class CheckpointWriter {
 
       // Atomic rename
       await fs.rename(tempPath, checkpointPath);
-    } catch (err) {
+    } catch {
       console.error("Failed to write checkpoint:", err);
       throw err;
     }

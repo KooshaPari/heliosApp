@@ -75,7 +75,7 @@ export class UptermAdapter implements ShareBackendAdapter {
         link,
         process: { pid: Math.floor(Math.random() * 100000) + 1000 },
       };
-    } catch (error) {
+    } catch {
       if (String(error).includes("not found")) {
         throw new Error(
           "upterm binary not found. Install with: curl https://upterm.dev/install.sh | bash"
@@ -156,7 +156,7 @@ export class TmateAdapter implements ShareBackendAdapter {
         link,
         process: { pid: Math.floor(Math.random() * 100000) + 1000 },
       };
-    } catch (error) {
+    } catch {
       if (String(error).includes("not found")) {
         throw new Error(
           "tmate binary not found. Install with: brew install tmate (macOS) or apt install tmate (Linux)"

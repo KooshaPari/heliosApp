@@ -172,7 +172,7 @@ describe("ParManager - T011: Par task binding", () => {
     try {
       await mgr.bindParTask("test-lane-1", "/tmp/worktree");
       expect(true).toBe(false);
-    } catch (err) {
+    } catch {
       expect(err).toBeInstanceOf(ParSpawnError);
     }
   });
@@ -184,7 +184,7 @@ describe("ParManager - T011: Par task binding", () => {
     try {
       await mgr.bindParTask("nonexistent", "/tmp/worktree");
       expect(true).toBe(false);
-    } catch (err) {
+    } catch {
       expect(err).toBeInstanceOf(ParSpawnError);
     }
   });
@@ -353,7 +353,7 @@ describe("ParManager - T013: Command execution", () => {
     try {
       await mgr.executeInLane("test-lane-1", ["ls"]);
       expect(true).toBe(false);
-    } catch (err) {
+    } catch {
       expect(err).toBeInstanceOf(LaneNotReadyError);
     }
   });
@@ -366,7 +366,7 @@ describe("ParManager - T013: Command execution", () => {
     try {
       await mgr.executeInLane("test-lane-1", ["ls"]);
       expect(true).toBe(false);
-    } catch (err) {
+    } catch {
       expect(err).toBeInstanceOf(LaneNotReadyError);
     }
   });
@@ -379,7 +379,7 @@ describe("ParManager - T013: Command execution", () => {
     try {
       await mgr.executeInLane("test-lane-1", ["ls"]);
       expect(true).toBe(false);
-    } catch (err) {
+    } catch {
       expect(err).toBeInstanceOf(ParNotFoundError);
     }
   });

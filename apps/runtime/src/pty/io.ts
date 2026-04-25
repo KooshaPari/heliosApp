@@ -81,7 +81,7 @@ export function writeInput(
     const written = proc.stdin.write(data);
     const latencyMs = performance.now() - start;
     return { bytesWritten: written, latencyMs };
-  } catch (error) {
+  } catch {
     // Broken pipe or fd closed — publish diagnostic and trigger error transition.
     const correlation: PtyEventCorrelation = {
       ptyId: record.ptyId,

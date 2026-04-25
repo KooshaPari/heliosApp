@@ -70,7 +70,7 @@ describe("Lane State Machine (FR-008-001)", () => {
       try {
         transition("closed", "create", "lane-42");
         expect(true).toBe(false);
-      } catch (e) {
+      } catch {
         const err = e as InvalidLaneTransitionError;
         expect(err).toBeInstanceOf(InvalidLaneTransitionError);
         expect(err.laneId).toBe("lane-42");

@@ -76,7 +76,7 @@ export class ParManager {
         stdout: "pipe",
         stderr: "pipe",
       });
-    } catch (err) {
+    } catch {
       throw new ParSpawnError(laneId, err instanceof Error ? err.message : String(err));
     }
 
@@ -288,7 +288,7 @@ export class ParManager {
         });
 
         return execResult;
-      } catch (err) {
+      } catch {
         // If it's our own timeout error, re-throw
         if (err instanceof ExecTimeoutError) throw err;
 

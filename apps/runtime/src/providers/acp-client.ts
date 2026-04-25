@@ -163,7 +163,7 @@ export class ACPClientAdapter implements ProviderAdapter<
         endpoint: config.baseUrl,
         model: config.model,
       });
-    } catch (error) {
+    } catch {
       const normalized = normalizeError(error, "acp");
 
       throw new NormalizedProviderError(
@@ -221,7 +221,7 @@ export class ACPClientAdapter implements ProviderAdapter<
 
         return { ...this.healthStatus };
       }
-    } catch (error) {
+    } catch {
       // Increment failure count
       this.healthStatus.failureCount++;
 
@@ -344,7 +344,7 @@ export class ACPClientAdapter implements ProviderAdapter<
         clearTimeout(timeoutHandle);
         this.inFlightTasks.delete(correlationId);
       }
-    } catch (error) {
+    } catch {
       // Handle timeout
       if (error instanceof Error && error.name === "AbortError") {
         const normalized = new NormalizedProviderError(
@@ -407,7 +407,7 @@ export class ACPClientAdapter implements ProviderAdapter<
       await this.publishEvent("provider.acp.execute.cancelled", {
         taskId,
       });
-    } catch (error) {
+    } catch {
       const normalized = normalizeError(error, "acp");
 
       throw new NormalizedProviderError(
@@ -442,7 +442,7 @@ export class ACPClientAdapter implements ProviderAdapter<
       };
 
       await this.publishEvent("provider.acp.terminated", {});
-    } catch (error) {
+    } catch {
       const normalized = normalizeError(error, "acp");
 
       throw new NormalizedProviderError(
@@ -524,7 +524,7 @@ export class ACPClientAdapter implements ProviderAdapter<
         topic,
         payload,
       });
-    } catch (error) {
+    } catch {
       // Log but don't throw (event publishing is best-effort)
       console.warn(`Failed to publish ACP event ${topic}:`, error);
     }

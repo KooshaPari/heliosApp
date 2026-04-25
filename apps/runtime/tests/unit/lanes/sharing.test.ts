@@ -57,7 +57,7 @@ describe("Lane Sharing (FR-008-007)", () => {
     try {
       await shareLane(registry, "sh3");
       expect(true).toBe(false);
-    } catch (e) {
+    } catch {
       expect(e).toBeInstanceOf(LaneClosedError);
     }
   });
@@ -87,7 +87,7 @@ describe("Lane Sharing (FR-008-007)", () => {
     try {
       await attachAgent(registry, "at4", "agent-a");
       expect(true).toBe(false);
-    } catch (e) {
+    } catch {
       expect(e).toBeInstanceOf(LaneClosedError);
     }
   });

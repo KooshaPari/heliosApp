@@ -118,7 +118,7 @@ export class ZellijPaneManager {
         const ptyResult = await this.ptyManager.spawn(spawnOpts);
         ptyId = ptyResult.ptyId;
         this.topology.bindPty(sessionName, paneId, ptyId);
-      } catch (err) {
+      } catch {
         // PTY spawn failed after pane create; close the pane and report
         console.error(`[zellij-panes] PTY spawn failed for pane ${paneId}, closing pane`, err);
         await this.closePaneRaw(sessionName, paneId).catch(() => {});
@@ -153,7 +153,7 @@ export class ZellijPaneManager {
       if (paneTopology?.ptyId) {
         try {
           await this.ptyManager.terminate(paneTopology.ptyId);
-        } catch (err) {
+        } catch {
           // PTY may already be stopped; log and continue
           console.warn(
             `[zellij-panes] PTY terminate for pane ${paneId} failed (may already be stopped):`,

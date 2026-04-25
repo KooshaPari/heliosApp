@@ -68,7 +68,7 @@ export class CrashLoopDetector {
           // Silently fail - don't let history persistence block operations
           console.error("Failed to persist crash history:", err);
         });
-    } catch (err) {
+    } catch {
       console.error("Failed to persist crash history:", err);
     }
   }

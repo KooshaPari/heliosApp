@@ -61,7 +61,7 @@ export class RestorationPipeline {
             };
             restored.push(restored_session);
             await this.publishSessionRestored(restored_session);
-          } catch (err) {
+          } catch {
             // Fall through to respawn attempt
             await this.attemptRespawn(session, restored, failed);
           }
@@ -77,7 +77,7 @@ export class RestorationPipeline {
 
       const duration = Date.now() - startTime;
       return { restored, failed, duration };
-    } catch (err) {
+    } catch {
       const duration = Date.now() - startTime;
       console.error("Restoration pipeline failed:", err);
       return {
@@ -157,7 +157,7 @@ export class RestorationPipeline {
 
       restored.push(restored_session);
       await this.publishSessionRestored(restored_session);
-    } catch (err) {
+    } catch {
       const reason = err instanceof Error ? err.message : String(err);
       const failedSession: FailedSession = {
         sessionId: session.sessionId,

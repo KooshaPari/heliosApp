@@ -61,7 +61,7 @@ export class TabPersistence {
       }
 
       return state;
-    } catch (error) {
+    } catch {
       if (error instanceof Error && "code" in error) {
         const nodeError = error as NodeJS.ErrnoException;
         if (nodeError.code === "ENOENT") {
@@ -105,7 +105,7 @@ export class TabPersistence {
           // Write state to file
           const data = JSON.stringify(stateToWrite, null, 2);
           await fs.writeFile(this.storagePath, data, "utf-8");
-        } catch (error) {
+        } catch {
           console.error("Failed to save tab state:", error);
         }
 
@@ -135,7 +135,7 @@ export class TabPersistence {
       await fs.mkdir(this.storageDir, { recursive: true });
       const data = JSON.stringify(stateToWrite, null, 2);
       await fs.writeFile(this.storagePath, data, "utf-8");
-    } catch (error) {
+    } catch {
       console.error("Failed to flush tab state:", error);
     }
   }
@@ -215,7 +215,7 @@ export class TabPersistence {
   async delete(): Promise<void> {
     try {
       await fs.unlink(this.storagePath);
-    } catch (error) {
+    } catch {
       if (error instanceof Error && "code" in error) {
         const nodeError = error as NodeJS.ErrnoException;
         if (nodeError.code !== "ENOENT") {

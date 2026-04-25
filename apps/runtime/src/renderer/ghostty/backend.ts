@@ -190,7 +190,7 @@ export class GhosttyBackend implements RendererAdapter {
 
       // Start render loop monitoring (T006)
       this._startRenderLoopMonitoring();
-    } catch (error) {
+    } catch {
       this._state = "errored";
       throw error;
     }

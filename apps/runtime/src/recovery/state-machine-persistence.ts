@@ -28,7 +28,7 @@ export async function persistRecoveryState(
     const tempPath = `${statePath}.tmp`;
     await fs.writeFile(tempPath, JSON.stringify(state, null, 2));
     await fs.rename(tempPath, statePath);
-  } catch (err) {
+  } catch {
     console.error("Failed to persist recovery state:", err);
   }
 }

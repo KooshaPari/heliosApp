@@ -220,7 +220,7 @@ export class OrphanWatchdog {
       console.log(
         `[Watchdog] Cycle ${this.cycleNumber} completed: ${this.lastDetectionDuration}ms, ${this.lastClassifiedOrphans.length} orphans found`
       );
-    } catch (error) {
+    } catch {
       // biome-ignore lint/suspicious/noConsole: Checkpoint save failures are intentionally emitted for operational visibility.
       console.error("Orphan watchdog detection cycle failed", error);
     }

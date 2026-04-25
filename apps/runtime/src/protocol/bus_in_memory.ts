@@ -175,7 +175,7 @@ export class InMemoryLocalBus {
     await Promise.resolve();
     try {
       validateEnvelope(event);
-    } catch (err) {
+    } catch {
       const auditErr = err instanceof ProtocolValidationError ? err.message : String(err);
       this.auditLog.push({ envelope: event, outcome: "rejected", error: auditErr });
       throw err;

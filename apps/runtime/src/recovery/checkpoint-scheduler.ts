@@ -58,7 +58,7 @@ export class CheckpointScheduler {
 
       // Adjust interval based on write time
       this.adjustInterval();
-    } catch (err) {
+    } catch {
       console.error("Failed to write checkpoint:", err);
     }
   }

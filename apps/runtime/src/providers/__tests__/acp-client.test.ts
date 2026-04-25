@@ -262,7 +262,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch (_e) {
+      } catch {
         // Expected
       }
 
@@ -278,7 +278,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch (e) {
+      } catch {
         // Expected - should be NormalizedProviderError with PROVIDER_POLICY_DENIED
         expect(e instanceof NormalizedProviderError).toBe(true);
         if (e instanceof NormalizedProviderError) {
@@ -427,7 +427,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, correlationId);
-      } catch (e) {
+      } catch {
         if (e instanceof NormalizedProviderError) {
           expect(e.correlationId).toBe(correlationId);
         }
@@ -467,7 +467,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch (_e) {
+      } catch {
         // Expected
       }
 

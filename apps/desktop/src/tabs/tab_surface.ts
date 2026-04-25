@@ -50,7 +50,7 @@ export abstract class TabSurface {
         this.errorMessage = null;
         await this.onContextChange(event.current);
         this.lastContext = event.current;
-      } catch (error) {
+      } catch {
         this.staleContext = true;
         const errorMsg = error instanceof Error ? error.message : String(error);
         this.errorMessage = errorMsg;
@@ -170,7 +170,7 @@ export abstract class TabSurface {
   renderWithErrorBoundary(): HTMLElement {
     try {
       return this.render();
-    } catch (error) {
+    } catch {
       const errorMsg = error instanceof Error ? error.message : String(error);
       this.errorMessage = errorMsg;
       console.error(`[${this.tabType}] Render error:`, errorMsg);

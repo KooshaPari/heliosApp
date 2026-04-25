@@ -171,7 +171,7 @@ export async function executeHotSwap(
       durationMs: Date.now() - startTime,
       preservedContexts: Array.from(terminals.values()),
     };
-  } catch (error: unknown) {
+  } catch {
     const hotSwapError =
       error instanceof HotSwapError ? error : new HotSwapError(currentPhase, String(error));
 

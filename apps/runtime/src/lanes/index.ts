@@ -191,7 +191,7 @@ export class LaneManager {
         );
         await this.emitEvent("lane.state.changed", laneId, lane.workspaceId, fromState, toState);
         return this.registry.get(laneId)!;
-      } catch (err) {
+      } catch {
         // T010: Partial provisioning failure - clean up and close lane
         const fromState = lane.state;
         const toState = transition(fromState, "provision_failed", laneId);

@@ -512,7 +512,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
           ? await options.harnessProbe.check()
           : { ok: true, reason: null };
         probeResult = { ok: result.ok, reason: result.reason ?? null };
-      } catch (err) {
+      } catch {
         console.error("[Runtime] Harness probe exception:", err);
         probeResult = { ok: false, reason: "harness_probe_exception" };
       }
@@ -640,7 +640,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
       let lane: LaneRecord;
       try {
         lane = laneService.getRequired(laneId);
-      } catch (_err) {
+      } catch {
         return Response.json({ error: "lane_not_found" }, { status: 404 });
       }
 
