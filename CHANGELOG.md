@@ -997,3 +997,25 @@ All notable changes to this project will be documented in this file.
 - Merge conflicts in docs tests
 
 
+
+## [v2026.05A.0] - 2026-04-25
+
+### Added
+- FR traceability annotations on 12 compliance and gate-report tests
+- Comprehensive FR coverage dashboard (174/283 FRs traced, 61.5%)
+- Strict CI gate enforcement with lint baseline
+
+### Fixed
+- Reduced lint warnings from 161 to 0 (100% resolution)
+- Test infrastructure isolation (separate temp dirs, fixed spy mocks, unified bun runner)
+- Path resolution and mock signature alignment
+- Applied phenotype-tooling governance workflows (wave-3)
+
+### Changed
+- Adopted monthly SBOM refresh cycle (CycloneDX)
+- Updated CI max-warnings gate to enforce zero-baseline
+
+### Compliance
+- All 12 MVP-001..027 FRs fully traced in tests
+- FR coverage now auditable and enforced by CI
+
