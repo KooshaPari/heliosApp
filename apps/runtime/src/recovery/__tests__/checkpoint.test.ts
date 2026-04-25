@@ -4,7 +4,6 @@ import {
   type Checkpoint,
   type CheckpointSession,
   estimateCheckpointSize,
-  MAX_SCROLLBACK_SIZE,
 } from "../checkpoint.js";
 import { promises as fs } from "fs";
 import path from "path";
