@@ -9,3 +9,4 @@ jobs:
     uses: KooshaPari/phenoShared/.github/workflows/reusable/alert-sync-issues.yml@6a6e1b06026e9443449e419a2892cd0e47c19442
     with:
       auto-label: auto-alert-sync
+      min_severity: medium
