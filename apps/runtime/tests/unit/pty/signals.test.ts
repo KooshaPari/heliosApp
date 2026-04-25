@@ -103,8 +103,8 @@ describe("resize", () => {
     const pid = spawnShellProcess();
     pidsToCleanup.push(pid);
 
-    const registry = new PtyRegistry();
-    const record = makeRecord({ pid });
+    const _registry = new PtyRegistry();
+    const _record = makeRecord({ pid });
     registry.register(record);
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
@@ -121,8 +121,8 @@ describe("resize", () => {
   });
 
   it("rejects zero cols", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord();
+    const _registry = new PtyRegistry();
+    const _record = makeRecord();
     registry.register(record);
     expect(() => resize(record, 0, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
       InvalidDimensionsError
@@ -130,8 +130,8 @@ describe("resize", () => {
   });
 
   it("rejects zero rows", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord();
+    const _registry = new PtyRegistry();
+    const _record = makeRecord();
     registry.register(record);
     expect(() => resize(record, 80, 0, registry, new Map(), new InMemoryBusPublisher())).toThrow(
       InvalidDimensionsError
@@ -139,8 +139,8 @@ describe("resize", () => {
   });
 
   it("rejects cols > 10000", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord();
+    const _registry = new PtyRegistry();
+    const _record = makeRecord();
     registry.register(record);
     expect(() =>
       resize(record, 10001, 24, registry, new Map(), new InMemoryBusPublisher())
@@ -148,8 +148,8 @@ describe("resize", () => {
   });
 
   it("rejects non-integer dimensions", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord();
+    const _registry = new PtyRegistry();
+    const _record = makeRecord();
     registry.register(record);
     expect(() => resize(record, 80.5, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
       InvalidDimensionsError
@@ -157,8 +157,8 @@ describe("resize", () => {
   });
 
   it("rejects resize on errored PTY", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord({ state: "errored" });
+    const _registry = new PtyRegistry();
+    const _record = makeRecord({ state: "errored" });
     registry.register(record);
     expect(() => resize(record, 80, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
       "Cannot resize"
@@ -166,8 +166,8 @@ describe("resize", () => {
   });
 
   it("rejects resize on stopped PTY", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord({ state: "stopped" });
+    const _registry = new PtyRegistry();
+    const _record = makeRecord({ state: "stopped" });
     registry.register(record);
     expect(() => resize(record, 80, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
       "Cannot resize"
@@ -180,8 +180,8 @@ describe("terminate", () => {
     const pid = spawnShellProcess() as number;
     pidsToCleanup.push(pid);
 
-    const registry = new PtyRegistry();
-    const record = makeRecord({ pid });
+    const _registry = new PtyRegistry();
+    const _record = makeRecord({ pid });
     registry.register(record);
     const lifecycle = new PtyLifecycle(record.ptyId, "active");
     const historyMap: SignalHistoryMap = new Map();
@@ -207,7 +207,7 @@ describe("terminate", () => {
   });
 
   it("is idempotent on stopped PTY", async () => {
-    const record = makeRecord({ state: "stopped" });
+    const _record = makeRecord({ state: "stopped" });
     const lifecycle = new PtyLifecycle(record.ptyId, "stopped");
     const bus = new InMemoryBusPublisher();
     await terminate(record, lifecycle, new PtyRegistry(), new Map(), bus);
@@ -215,8 +215,8 @@ describe("terminate", () => {
   });
 
   it("escalates to SIGKILL after grace period", async () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord({ pid: 99999 });
+    const _registry = new PtyRegistry();
+    const _record = makeRecord({ pid: 99999 });
     registry.register(record);
     const lifecycle = new PtyLifecycle(record.ptyId, "active");
     const bus = new InMemoryBusPublisher();
@@ -250,7 +250,7 @@ describe("sendSighup", () => {
     const pid = spawnShellProcess();
     pidsToCleanup.push(pid);
 
-    const record = makeRecord({ pid });
+    const _record = makeRecord({ pid });
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
     const envelope = sendSighup(record, historyMap, bus);
@@ -260,7 +260,7 @@ describe("sendSighup", () => {
   });
 
   it("records failed delivery for dead process", () => {
-    const record = makeRecord({ pid: 999999 });
+    const _record = makeRecord({ pid: 999999 });
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
     const envelope = sendSighup(record, historyMap, bus);

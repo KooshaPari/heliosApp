@@ -96,7 +96,7 @@ describe("computePercentiles", () => {
     buf.push(30, 1);
     buf.push(10, 2);
     buf.push(20, 3);
-    const before = Array.from(buf.getValues());
+    const _before = Array.from(buf.getValues());
     computePercentiles(buf.getValues());
     const after = Array.from(buf.getValues());
     expect(after).toEqual(before);

@@ -181,7 +181,7 @@ export class InMemoryLocalBus {
       throw err;
     }
 
-    const topic = event.topic;
+    const _topic = event.topic;
     const correlationId = event.correlation_id ?? "";
 
     if (topic) {

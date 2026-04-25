@@ -66,7 +66,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
     it("should clean up stale temp files on next write", async () => {
       const writer = new CheckpointWriter(tempDir);
 
-      const checkpoint = createMockCheckpoint(2);
+      const _checkpoint = createMockCheckpoint(2);
       await writer.write(checkpoint);
 
       const tempPath = `${writer.getCheckpointPath()}.tmp`;
@@ -154,12 +154,12 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
   describe("Full recovery cycle resilience", () => {
     it("should complete full recovery cycle within SLO", async () => {
-      const checkpoint = createMockCheckpoint(5);
+      const _checkpoint = createMockCheckpoint(5);
       const pipeline = new RestorationPipeline(bus);
       const stateMachine = new RecoveryStateMachine(tempDir, bus);
       await stateMachine.initialize();
 
-      const startTime = Date.now();
+      const _startTime = Date.now();
 
       // Full cycle
       await stateMachine.transition(RecoveryStage.DETECTING);
@@ -187,7 +187,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
   describe("Concurrent operations during recovery", () => {
     it("should handle concurrent activity during recovery", async () => {
-      const checkpoint = createMockCheckpoint(3);
+      const _checkpoint = createMockCheckpoint(3);
       const pipeline = new RestorationPipeline(bus);
       const stateMachine = new RecoveryStateMachine(tempDir, bus);
       await stateMachine.initialize();
@@ -216,10 +216,10 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
   describe("Repeated chaos scenarios", () => {
     it("should maintain consistency across 5 recovery cycles", async () => {
-      const results = [];
+      const _results = [];
 
       for (let i = 0; i < 5; i++) {
-        const checkpoint = createMockCheckpoint(3);
+        const _checkpoint = createMockCheckpoint(3);
         const pipeline = new RestorationPipeline(bus);
 
         const result = await pipeline.restore(checkpoint);

@@ -57,7 +57,7 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
 
   test("50 concurrent lanes: create, provision, verify, cleanup", async () => {
     const LANE_COUNT = 50;
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     // Step 1: Create 50 lanes concurrently
     const createPromises = Array.from({ length: LANE_COUNT }, (_, i) =>

@@ -5,7 +5,6 @@
 import { describe, it, expect, beforeEach } from "bun:test";
 import {
   isRioEnabled,
-  registerRio,
   handleRioToggle,
   RioToggleQueue,
   type RioFeatureFlagConfig,
@@ -133,7 +132,7 @@ describe("handleRioToggle — disable", () => {
 
 describe("handleRioToggle — enable", () => {
   it("re-enables existing disabled rio adapter", async () => {
-    const registry = new RendererRegistry();
+    const _registry = new RendererRegistry();
     const backend = new RioBackend();
     backend.setDisabled();
     registry.register(backend);
@@ -146,8 +145,8 @@ describe("handleRioToggle — enable", () => {
   });
 
   it("does not auto-switch to rio when enabling", async () => {
-    const registry = new RendererRegistry();
-    const ghostty = createMockGhostty();
+    const _registry = new RendererRegistry();
+    const _ghostty = createMockGhostty();
     registry.register(ghostty);
     registry.setActive("ghostty");
 
@@ -168,8 +167,8 @@ describe("handleRioToggle — enable", () => {
 
 describe("RioToggleQueue", () => {
   it("processes toggles serially", async () => {
-    const registry = new RendererRegistry();
-    const ghostty = createMockGhostty();
+    const _registry = new RendererRegistry();
+    const _ghostty = createMockGhostty();
     registry.register(ghostty);
     const backend = new RioBackend();
     backend.setRegistry(registry);
@@ -179,13 +178,13 @@ describe("RioToggleQueue", () => {
       featureFlags: { rioRenderer: true },
     });
 
-    const results = await queue.enqueue(false);
+    const _results = await queue.enqueue(false);
     expect(results).toEqual([{ type: "renderer.rio.disabled" }]);
   });
 
   it("rapid toggles drain to final state", async () => {
-    const registry = new RendererRegistry();
-    const ghostty = createMockGhostty();
+    const _registry = new RendererRegistry();
+    const _ghostty = createMockGhostty();
     registry.register(ghostty);
     const backend = new RioBackend();
     backend.setRegistry(registry);

@@ -228,7 +228,7 @@ export class GhosttyBackend implements RendererAdapter {
     this._inputRelay = undefined;
 
     // Unbind all streams
-    for (const ptyId of [...this._streams.keys()]) {
+    for (const ptyId of this._streams.keys()) {
       this.unbindStream(ptyId);
     }
 

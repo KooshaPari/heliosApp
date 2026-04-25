@@ -39,7 +39,7 @@ describe("reconcile", () => {
       makeSession("helios-lane-bound"),
       makeSession("other-session"), // not helios-prefixed, should be ignored
     ]);
-    const registry = new MuxRegistry();
+    const _registry = new MuxRegistry();
     registry.bind("helios-lane-bound", "bound", makeMuxSession("helios-lane-bound", "bound"));
 
     const result = await reconcile(cli, registry);
@@ -52,7 +52,7 @@ describe("reconcile", () => {
 
   it("cleans up stale registry entries for dead sessions", async () => {
     const cli = makeCli([]); // no live sessions
-    const registry = new MuxRegistry();
+    const _registry = new MuxRegistry();
     registry.bind("helios-lane-dead", "dead", makeMuxSession("helios-lane-dead", "dead"));
 
     const result = await reconcile(cli, registry);
@@ -63,7 +63,7 @@ describe("reconcile", () => {
 
   it("handles mixed orphans and stale bindings", async () => {
     const cli = makeCli([makeSession("helios-lane-orphan"), makeSession("helios-lane-alive")]);
-    const registry = new MuxRegistry();
+    const _registry = new MuxRegistry();
     registry.bind("helios-lane-alive", "alive", makeMuxSession("helios-lane-alive", "alive"));
     registry.bind("helios-lane-gone", "gone", makeMuxSession("helios-lane-gone", "gone"));
 
@@ -75,7 +75,7 @@ describe("reconcile", () => {
 
   it("is idempotent - running twice with same state yields same results", async () => {
     const cli = makeCli([makeSession("helios-lane-bound")]);
-    const registry = new MuxRegistry();
+    const _registry = new MuxRegistry();
     registry.bind("helios-lane-bound", "bound", makeMuxSession("helios-lane-bound", "bound"));
 
     const r1 = await reconcile(cli, registry);
@@ -89,7 +89,7 @@ describe("reconcile", () => {
 
   it("returns zero counts when everything is clean", async () => {
     const cli = makeCli([]);
-    const registry = new MuxRegistry();
+    const _registry = new MuxRegistry();
 
     const result = await reconcile(cli, registry);
 
@@ -108,7 +108,7 @@ describe("reconcile", () => {
     });
 
     const cli = makeCli([makeSession("helios-lane-stubborn")], killResults);
-    const registry = new MuxRegistry();
+    const _registry = new MuxRegistry();
 
     const result = await reconcile(cli, registry);
 

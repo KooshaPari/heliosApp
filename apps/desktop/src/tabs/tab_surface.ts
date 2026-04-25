@@ -211,7 +211,7 @@ export function createMockTabSurface(tabId: string, tabType: TabType, label: str
     }
 
     render(): HTMLElement {
-      const el = document.createElement("div");
+      const _el = document.createElement("div");
       el.textContent = `${this.label} (${this.tabType})`;
       return el;
     }

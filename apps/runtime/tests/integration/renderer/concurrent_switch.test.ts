@@ -122,7 +122,7 @@ describe("Concurrent switch rejection", () => {
       if (error instanceof ConcurrentSwitchError) {
         const activeTransaction = orchestrator.getActiveTransaction();
         expect(activeTransaction).toBeDefined();
-        expect(activeTransaction?.id).toMatch(/^[\da-f\-]+$/);
+        expect(activeTransaction?.id).toMatch(/^[\da-f-]+$/);
       }
     }
 
@@ -131,7 +131,7 @@ describe("Concurrent switch rejection", () => {
 
   it("allows sequential switches after completion", async () => {
     const orchestrator = createSwitchOrchestrator();
-    const ghostty = new MockGhosttyAdapter();
+    const _ghostty = new MockGhosttyAdapter();
     const rio = new MockRioAdapter();
     const buffer = new SwitchBuffer();
 

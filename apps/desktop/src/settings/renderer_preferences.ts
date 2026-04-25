@@ -32,7 +32,7 @@ export class RendererPreferencesManager {
   }
 
   load(): RendererPreferences {
-    const startTime = performance.now();
+    const _startTime = performance.now();
 
     try {
       if (this.doesFileExist()) {

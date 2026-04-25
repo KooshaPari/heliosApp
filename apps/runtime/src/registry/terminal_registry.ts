@@ -82,7 +82,7 @@ export class TerminalRegistry implements RegistryQueryInterface {
     }
 
     // Create and store binding
-    const binding = createBinding(terminalId, triple);
+    const _binding = createBinding(terminalId, triple);
     this.primaryStore.set(terminalId, binding);
 
     // Update indexes
@@ -111,7 +111,7 @@ export class TerminalRegistry implements RegistryQueryInterface {
    * Transitions state to 'rebound'.
    */
   rebind(terminalId: string, newTriple: BindingTriple): TerminalBinding {
-    const binding = this.primaryStore.get(terminalId);
+    const _binding = this.primaryStore.get(terminalId);
     if (!binding) {
       throw new TerminalNotFound(terminalId);
     }
@@ -161,7 +161,7 @@ export class TerminalRegistry implements RegistryQueryInterface {
    * Transitions state to 'unbound' before removal.
    */
   unregister(terminalId: string): void {
-    const binding = this.primaryStore.get(terminalId);
+    const _binding = this.primaryStore.get(terminalId);
     if (!binding) {
       throw new TerminalNotFound(terminalId);
     }

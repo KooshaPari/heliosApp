@@ -1,7 +1,7 @@
 import { METHODS } from "./methods";
 import { ProtocolValidationError } from "./types";
 
-const METHOD_SET = new Set<string>(METHODS);
+const _METHOD_SET = new Set<string>(METHODS);
 const RFC3339_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 const TOPIC_NAME_PATTERN = /^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/;
 
@@ -176,7 +176,7 @@ export function validateCommandEnvelope(envelope: Record<string, unknown>): void
 }
 
 export function validateEventEnvelope(envelope: Record<string, unknown>): void {
-  const topic = assertStringField(envelope, "topic");
+  const _topic = assertStringField(envelope, "topic");
   if (!TOPIC_NAME_PATTERN.test(topic)) {
     throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${topic}'`, {
       topic,
@@ -209,7 +209,7 @@ export function validateResponseEnvelope(envelope: Record<string, unknown>): voi
     });
   }
 
-  const topic = assertOptionalString(envelope, "topic");
+  const _topic = assertOptionalString(envelope, "topic");
   if (topic && !TOPIC_NAME_PATTERN.test(topic)) {
     throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${topic}'`, {
       topic,

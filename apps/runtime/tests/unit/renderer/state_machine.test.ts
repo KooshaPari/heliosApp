@@ -169,7 +169,7 @@ describe("RendererStateMachine", () => {
 
   it("history entries have timestamps", () => {
     const sm = new RendererStateMachine();
-    const before = Date.now();
+    const _before = Date.now();
     sm.transition("init");
     const after = Date.now();
 

@@ -180,7 +180,7 @@ describe("Integration: full lifecycle", () => {
 describe("Integration: reattach", () => {
   it("creates session, simulates restart, reattaches, verifies topology", async () => {
     const cli = new FakeCli();
-    const registry = new MuxRegistry(cli as unknown as ZellijCli);
+    const _registry = new MuxRegistry(cli as unknown as ZellijCli);
     const topology = new TopologyTracker(cli as unknown as ZellijCli);
     const bus = makeEventBus();
     const emitter = new MuxEventEmitter(bus);
@@ -219,7 +219,7 @@ describe("Integration: reattach", () => {
 describe("Integration: reconciliation", () => {
   it("creates orphans, runs reconciliation, verifies cleanup", async () => {
     const cli = new FakeCli();
-    const registry = new MuxRegistry(cli as unknown as ZellijCli);
+    const _registry = new MuxRegistry(cli as unknown as ZellijCli);
 
     // Create an orphan session (live but not in registry)
     cli.sessions.set("helios-lane-orphan", {

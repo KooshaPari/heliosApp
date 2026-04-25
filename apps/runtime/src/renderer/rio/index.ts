@@ -131,7 +131,7 @@ export async function handleRioToggle(
       // If rio is active, switch to ghostty first.
       const active = registry.getActive();
       if (active && active.id === "rio") {
-        const ghostty = registry.get("ghostty");
+        const _ghostty = registry.get("ghostty");
         if (ghostty) {
           // Init ghostty if needed.
           const ghosttyState = ghostty.getState();

@@ -75,8 +75,8 @@ describe("Audit Search Performance", { timeout: 60000 }, () => {
     const latencies: number[] = [];
 
     for (let i = 0; i < 20; i++) {
-      const startTime = Date.now();
-      const results = ledger.search({ workspaceId: "ws-0", limit: 100 });
+      const _startTime = Date.now();
+      const _results = ledger.search({ workspaceId: "ws-0", limit: 100 });
       const endTime = Date.now();
 
       latencies.push(endTime - startTime);
@@ -122,8 +122,8 @@ describe("Audit Search Performance", { timeout: 60000 }, () => {
     const now2 = now;
 
     for (let i = 0; i < 20; i++) {
-      const startTime = Date.now();
-      const results = ledger.search({
+      const _startTime = Date.now();
+      const _results = ledger.search({
         timeRange: { from: oneHourAgo, to: now2 },
         limit: 100,
       });
@@ -163,8 +163,8 @@ describe("Audit Search Performance", { timeout: 60000 }, () => {
     const latencies: number[] = [];
 
     for (let i = 0; i < 20; i++) {
-      const startTime = Date.now();
-      const results = ledger.search({
+      const _startTime = Date.now();
+      const _results = ledger.search({
         workspaceId: "ws-0",
         actor: "actor-0",
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
@@ -211,7 +211,7 @@ describe("Audit Search Performance", { timeout: 60000 }, () => {
     const latencies: number[] = [];
 
     for (let i = 0; i < CHAIN_COUNT; i++) {
-      const startTime = Date.now();
+      const _startTime = Date.now();
       const chain = ledger.getCorrelationChain(`chain-${i}`);
       const endTime = Date.now();
 

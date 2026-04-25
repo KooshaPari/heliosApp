@@ -17,7 +17,6 @@ import {
   shareLane,
   attachAgent,
   detachAgent,
-  forceDetachAll,
   LaneClosedError,
   SharedLaneCleanupError,
 } from "./sharing.js";
@@ -385,7 +384,7 @@ export class LaneManager {
     options?: { timeoutMs?: number }
   ): Promise<FullReconciliationResult> {
     const timeoutMs = options?.timeoutMs ?? 30_000;
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     const result: FullReconciliationResult = {
       orphanedWorktrees: 0,

@@ -48,7 +48,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
       },
     });
 
-    const checkpoint = runtimeA.exportRecoveryMetadata();
+    const _checkpoint = runtimeA.exportRecoveryMetadata();
     const runtimeB = createRuntime({ recovery_metadata: checkpoint });
     const bootstrap = runtimeB.getBootstrapResult();
 

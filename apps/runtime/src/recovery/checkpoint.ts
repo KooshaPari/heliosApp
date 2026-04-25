@@ -122,7 +122,7 @@ export class CheckpointReader {
 
     try {
       const data = await fs.readFile(checkpointPath, "utf-8");
-      const checkpoint = JSON.parse(data) as Checkpoint;
+      const _checkpoint = JSON.parse(data) as Checkpoint;
 
       // Validate checksum
       if (!this.verifyChecksum(checkpoint)) {
@@ -141,7 +141,7 @@ export class CheckpointReader {
     const backupPath = `${this.getCheckpointPath()}.backup`;
     try {
       const data = await fs.readFile(backupPath, "utf-8");
-      const checkpoint = JSON.parse(data) as Checkpoint;
+      const _checkpoint = JSON.parse(data) as Checkpoint;
 
       if (!this.verifyChecksum(checkpoint)) {
         console.warn("Backup checkpoint checksum mismatch - total loss");

@@ -54,8 +54,8 @@ function generatePtyId(): string {
  * @throws If the shell binary is not found or spawn fails.
  */
 export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Promise<SpawnResult> {
-  const startTime = performance.now();
-  const ptyId = generatePtyId();
+  const _startTime = performance.now();
+  const _ptyId = generatePtyId();
   const lifecycle = new PtyLifecycle(ptyId);
 
   const shell = options.shell ?? "/bin/bash";

@@ -149,7 +149,7 @@ export class PtyRegistry {
    * @param ptyId - The PTY ID.
    */
   remove(ptyId: string): void {
-    const record = this.primary.get(ptyId);
+    const _record = this.primary.get(ptyId);
     if (!record) {
       return;
     }

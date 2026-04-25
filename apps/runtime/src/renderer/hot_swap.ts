@@ -92,7 +92,7 @@ export async function executeHotSwap(
   onRollback: (error: Error) => Promise<void>,
   eventBus?: RendererEventBus
 ): Promise<HotSwapResult> {
-  const startTime = Date.now();
+  const _startTime = Date.now();
   let currentPhase = "pre-validation";
 
   try {

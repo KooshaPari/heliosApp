@@ -49,7 +49,7 @@ export class WorktreeDetector {
           estimatedOwnerId: laneId,
         });
       }
-    } catch {
+    } catch (error) {
       // biome-ignore lint/suspicious/noConsole: Read failures are expected in some environments and should be surfaced for operator visibility.
       console.warn(`Failed to read worktree directory ${this.baseDir}: ${String(error)}`);
     }

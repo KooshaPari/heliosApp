@@ -9,7 +9,6 @@ import type { AvailabilityResult, CliResult, ZellijSession } from "./types.js";
 import {
   ZellijNotFoundError,
   ZellijVersionError,
-  ZellijCliError,
   ZellijTimeoutError,
 } from "./errors.js";
 

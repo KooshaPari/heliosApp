@@ -135,7 +135,7 @@ export async function executeRestartWithRestore(
   onRollback: (error: Error) => Promise<void>,
   eventBus?: RendererEventBus
 ): Promise<RestartRestoreResult> {
-  const startTime = Date.now();
+  const _startTime = Date.now();
   let currentPhase = "checkpoint";
   let checkpoints: ZmxCheckpoint[] = [];
 

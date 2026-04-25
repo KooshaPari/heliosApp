@@ -53,7 +53,7 @@ export class AuditLedgerAPI {
 
     try {
       const filter = this.parseAuditFilter(queryParams);
-      const results = this.ledger.search(filter);
+      const _results = this.ledger.search(filter);
 
       const total = this.ledger.count(filter);
 

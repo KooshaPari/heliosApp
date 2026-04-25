@@ -42,7 +42,7 @@ export class TabPersistence {
    * Must complete within 100ms.
    */
   async load(): Promise<TabPersistedState | null> {
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     try {
       const data = await fs.readFile(this.storagePath, "utf-8");

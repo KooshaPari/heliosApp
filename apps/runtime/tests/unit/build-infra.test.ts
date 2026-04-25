@@ -13,7 +13,7 @@ import { resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dir, "../../../..");
 
-function readJson(relativePath: string): unknown {
+function _readJson(relativePath: string): unknown {
   const fullPath = resolve(ROOT, relativePath);
   return JSON.parse(Bun.file(fullPath).text() as unknown as string);
 }

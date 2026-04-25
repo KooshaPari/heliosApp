@@ -264,7 +264,7 @@ export async function terminate(
   });
 
   // Step 1: Send SIGTERM.
-  const termEnvelope = deliverSignal(
+  const _termEnvelope = deliverSignal(
     record.pid,
     "SIGTERM",
     record.ptyId,

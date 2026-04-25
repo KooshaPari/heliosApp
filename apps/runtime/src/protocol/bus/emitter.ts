@@ -87,7 +87,7 @@ export class InMemoryLocalBus implements LocalBus {
     }
 
     // Check ordering: start topics must appear before terminal topics for same correlation
-    const topic = event.topic;
+    const _topic = event.topic;
     const correlationId = event.correlation_id ?? "";
 
     if (topic) {
@@ -231,7 +231,7 @@ export class InMemoryLocalBus implements LocalBus {
         };
       }
 
-      const startTime = Date.now();
+      const _startTime = Date.now();
       const ctx = this.getHandlerContext();
 
       if (command.method === "lane.create") return handleLaneCreate(command, startTime, ctx);

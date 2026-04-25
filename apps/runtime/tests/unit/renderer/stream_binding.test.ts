@@ -32,7 +32,7 @@ afterEach(() => {
 describe("StreamBindingManager", () => {
   it("binds a stream to a renderer", () => {
     const mgr = new StreamBindingManager();
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
     createdRenderers.push(renderer);
     const stream = new ReadableStream<Uint8Array>();
     createdStreams.push(stream);
@@ -46,7 +46,7 @@ describe("StreamBindingManager", () => {
 
   it("unbinds a stream without closing it", () => {
     const mgr = new StreamBindingManager();
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
     createdRenderers.push(renderer);
     const stream = new ReadableStream<Uint8Array>();
     createdStreams.push(stream);
@@ -67,7 +67,7 @@ describe("StreamBindingManager", () => {
 
   it("replaces existing binding on duplicate bind", () => {
     const mgr = new StreamBindingManager();
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
     createdRenderers.push(renderer);
     const stream1 = new ReadableStream<Uint8Array>();
     const stream2 = new ReadableStream<Uint8Array>();
@@ -79,7 +79,7 @@ describe("StreamBindingManager", () => {
     expect(mgr.count()).toBe(1);
     const bindingMap = mgr.getBindings();
     expect(bindingMap.has("pty-1")).toBe(true);
-    const binding = bindingMap.get("pty-1")!;
+    const _binding = bindingMap.get("pty-1")!;
     expect(binding?.stream).toBe(stream2);
   });
 
@@ -118,7 +118,7 @@ describe("StreamBindingManager", () => {
 
   it("measures relay latency (NFR-010-002)", () => {
     const mgr = new StreamBindingManager();
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
     createdRenderers.push(renderer);
     const stream = new ReadableStream();
     createdStreams.push(stream);
@@ -132,7 +132,7 @@ describe("StreamBindingManager", () => {
 
   it("getBindings returns a copy", () => {
     const mgr = new StreamBindingManager();
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
     createdRenderers.push(renderer);
     const stream = new ReadableStream();
     createdStreams.push(stream);
@@ -170,7 +170,7 @@ describe("SwitchBuffer", () => {
 
   it("flushes buffered data to new renderer on stopBuffering", () => {
     const buf = new SwitchBuffer();
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
     createdRenderers.push(renderer);
 
     buf.startBuffering();
@@ -186,7 +186,7 @@ describe("SwitchBuffer", () => {
 
   it("stopBuffering is no-op when not buffering", () => {
     const buf = new SwitchBuffer();
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
     createdRenderers.push(renderer);
     buf.stopBuffering(renderer); // should not throw
     expect(renderer.boundStreams.size).toBe(0);
@@ -194,7 +194,7 @@ describe("SwitchBuffer", () => {
 
   it("instant switch with no buffered data: flush is no-op", () => {
     const buf = new SwitchBuffer();
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
     createdRenderers.push(renderer);
     buf.startBuffering();
     buf.stopBuffering(renderer);

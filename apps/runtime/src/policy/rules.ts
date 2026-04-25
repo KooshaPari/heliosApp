@@ -93,7 +93,7 @@ export class PolicyRuleSet {
    * 3. If no rules match, returns "blocked" (deny-by-default).
    */
   evaluate(command: string, context: CommandContext): PolicyEvaluationResult {
-    const startTime = performance.now();
+    const _startTime = performance.now();
     const matchedRules: PolicyRule[] = [];
     let hasBlockedRule = false;
     let hasApprovalRule = false;

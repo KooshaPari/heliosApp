@@ -201,7 +201,7 @@ export class RioBackend implements RendererAdapter {
     }
 
     const reader = stream.getReader();
-    const binding = { reader, aborted: false };
+    const _binding = { reader, aborted: false };
     this._streamBindings.set(ptyId, binding);
 
     // Pump loop — read from PTY stream, forward to rio process.
@@ -224,7 +224,7 @@ export class RioBackend implements RendererAdapter {
   }
 
   unbindStream(ptyId: string): void {
-    const binding = this._streamBindings.get(ptyId);
+    const _binding = this._streamBindings.get(ptyId);
     if (!binding) return;
     binding.aborted = true;
     binding.reader.cancel().catch(() => {});
@@ -283,7 +283,7 @@ export class RioBackend implements RendererAdapter {
         return;
       }
 
-      const ghostty = this._registry.get("ghostty");
+      const _ghostty = this._registry.get("ghostty");
       if (!ghostty) {
         // Ghostty not available — escalate to errored.
         this._state = "errored";

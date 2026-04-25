@@ -45,7 +45,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
 
   describe("Full recovery (SC-027-001)", () => {
     it("should restore all sessions with valid checkpoint", async () => {
-      const checkpoint = createMockCheckpoint(5);
+      const _checkpoint = createMockCheckpoint(5);
 
       // Simulate crash detection and state progression
       await stateMachine.transition(RecoveryStage.DETECTING);
@@ -69,7 +69,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
       await stateMachine.transition(RecoveryStage.DETECTING);
       await stateMachine.transition(RecoveryStage.INVENTORYING);
       await stateMachine.transition(RecoveryStage.RESTORING);
-      const checkpoint = createMockCheckpoint(5);
+      const _checkpoint = createMockCheckpoint(5);
       await pipeline.restore(checkpoint);
       await stateMachine.transition(RecoveryStage.RECONCILING);
       await stateMachine.transition(RecoveryStage.LIVE);
@@ -84,7 +84,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
 
   describe("Partial recovery (SC-027-003)", () => {
     it("should report failed sessions with reasons", async () => {
-      const checkpoint = createMockCheckpoint(5);
+      const _checkpoint = createMockCheckpoint(5);
       // Simulate corrupted checkpoint for session 2
       checkpoint.sessions[2].workingDirectory = "/nonexistent/path";
 
@@ -97,7 +97,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
     });
 
     it("should include suggestions for failed sessions", async () => {
-      const checkpoint = createMockCheckpoint(3);
+      const _checkpoint = createMockCheckpoint(3);
       checkpoint.sessions[1].workingDirectory = "/nonexistent";
 
       const result = await pipeline.restore(checkpoint);
@@ -116,7 +116,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
       await stateMachine.transition(RecoveryStage.RESTORING);
 
       // Get current stage
-      const checkpoint = createMockCheckpoint(5);
+      const _checkpoint = createMockCheckpoint(5);
       const beforeCrash = stateMachine.getCurrentStage();
 
       // Simulate second recovery after crash - should resume from RESTORING
@@ -128,7 +128,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
     });
 
     it("should not re-restore previously restored sessions", async () => {
-      const checkpoint = createMockCheckpoint(3);
+      const _checkpoint = createMockCheckpoint(3);
 
       // First restoration
       await stateMachine.transition(RecoveryStage.DETECTING);
@@ -151,7 +151,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
 
   describe("Zellij reattach vs respawn", () => {
     it("should attempt zellij reattach for surviving sessions", async () => {
-      const checkpoint = createMockCheckpoint(2);
+      const _checkpoint = createMockCheckpoint(2);
 
       const result = await pipeline.restore(checkpoint);
 
@@ -161,7 +161,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
     });
 
     it("should fall back to respawn if reattach fails", async () => {
-      const checkpoint = createMockCheckpoint(1);
+      const _checkpoint = createMockCheckpoint(1);
 
       const result = await pipeline.restore(checkpoint);
 
@@ -172,7 +172,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
 
   describe("Missing working directory handling", () => {
     it("should mark session as failed when working directory missing", async () => {
-      const checkpoint = createMockCheckpoint(1);
+      const _checkpoint = createMockCheckpoint(1);
       checkpoint.sessions[0].workingDirectory = "/nonexistent/directory/path";
 
       const result = await pipeline.restore(checkpoint);
@@ -185,7 +185,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
 
   describe("Bus event publishing", () => {
     it("should publish session restored events", async () => {
-      const checkpoint = createMockCheckpoint(1);
+      const _checkpoint = createMockCheckpoint(1);
 
       await pipeline.restore(checkpoint);
 
@@ -195,7 +195,7 @@ describe("Integration Tests - Crash to Live Recovery", () => {
     });
 
     it("should publish session failed events", async () => {
-      const checkpoint = createMockCheckpoint(1);
+      const _checkpoint = createMockCheckpoint(1);
       checkpoint.sessions[0].workingDirectory = "/nonexistent";
 
       await pipeline.restore(checkpoint);
@@ -217,11 +217,11 @@ describe("Integration Tests - Crash to Live Recovery", () => {
 
   describe("Performance (SC-027-002)", () => {
     it("should restore 25 sessions within 10 seconds", async () => {
-      const checkpoint = createMockCheckpoint(25);
+      const _checkpoint = createMockCheckpoint(25);
 
-      const startTime = Date.now();
+      const _startTime = Date.now();
       const result = await pipeline.restore(checkpoint);
-      const duration = Date.now() - startTime;
+      const _duration = Date.now() - startTime;
 
       expect(duration).toBeLessThan(10000);
       expect(result.restored.length).toBe(25);

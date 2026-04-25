@@ -6,7 +6,6 @@ import { EncryptionService } from "../encryption.js";
 import {
   CredentialStore,
   CredentialNotFoundError,
-  CredentialAlreadyExistsError,
 } from "../credential-store.js";
 
 function makeStore(dataDir: string): CredentialStore {

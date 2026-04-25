@@ -65,7 +65,7 @@ export class UptermAdapter implements ShareBackendAdapter {
       }
 
       // Generate upterm command
-      const attachCommand = `zellij attach ${zellijSessionName}`;
+      const _attachCommand = `zellij attach ${zellijSessionName}`;
       const uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
 
       // Mock implementation: return simulated result
@@ -145,7 +145,7 @@ export class TmateAdapter implements ShareBackendAdapter {
       }
 
       // Generate tmate command
-      const attachCommand = `zellij attach ${zellijSessionName}`;
+      const _attachCommand = `zellij attach ${zellijSessionName}`;
       const tmateCommand = `tmate -F -c "${attachCommand}"`;
 
       // Mock implementation: return simulated result

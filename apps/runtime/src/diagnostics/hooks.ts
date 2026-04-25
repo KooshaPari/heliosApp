@@ -132,7 +132,7 @@ export function markEnd(metric: string, handle: number): number {
 }
 
 /** Number of mark-start slots that were overwritten before being consumed. */
-export function getMarkOverflowCount(): number {
+export function _getMarkOverflowCount(): number {
   return globalState.overflowCount;
 }
 

@@ -134,7 +134,7 @@ export class ParManager {
   // ── T012: Terminate par task ────────────────────────────────────────────
 
   async terminateParTask(laneId: string): Promise<void> {
-    const binding = this.bindings.get(laneId);
+    const _binding = this.bindings.get(laneId);
     if (!binding) {
       // Already terminated or never bound - idempotent no-op
       return;
@@ -204,7 +204,7 @@ export class ParManager {
         throw new LaneNotReadyError(laneId, lane.state);
       }
 
-      const binding = this.bindings.get(laneId);
+      const _binding = this.bindings.get(laneId);
       if (!binding || binding.status !== "active") {
         throw new ParNotFoundError(laneId);
       }
@@ -266,7 +266,7 @@ export class ParManager {
           proc.stderr ? new Response(proc.stderr).text() : Promise.resolve(""),
         ]);
 
-        const duration = performance.now() - start;
+        const _duration = performance.now() - start;
 
         // Transition back to ready
         const currentState = this.registry.get(laneId)!.state as LaneState;
@@ -376,7 +376,7 @@ export class ParManager {
 
   /** Update heartbeat for a par binding (e.g. from par's heartbeat signal). */
   updateHeartbeat(laneId: string): void {
-    const binding = this.bindings.get(laneId);
+    const _binding = this.bindings.get(laneId);
     if (binding && binding.status === "active") {
       binding.lastHeartbeat = new Date();
     }

@@ -52,14 +52,14 @@ describe("Capability detection", () => {
   });
 
   test("detectCapabilities caches result", async () => {
-    const caps1 = await detectCapabilities();
+    const _caps1 = await detectCapabilities();
     const caps2 = await detectCapabilities();
     // Same reference from cache
     expect(caps1).toBe(caps2);
   });
 
   test("detectCapabilities forceRefresh re-detects", async () => {
-    const caps1 = await detectCapabilities();
+    const _caps1 = await detectCapabilities();
     const caps2 = await detectCapabilities(true);
     // Both valid but may be different objects
     expect(caps2).toBeDefined();

@@ -58,7 +58,7 @@ export class LaneRegistry {
   }
 
   get(laneId: string): LaneRecord | undefined {
-    const record = this.lanes.get(laneId);
+    const _record = this.lanes.get(laneId);
     return record ? { ...record } : undefined;
   }
 

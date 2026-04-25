@@ -200,7 +200,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
       this.inFlightTools.set(correlationId, abortController);
 
       try {
-        const startTime = Date.now();
+        const _startTime = Date.now();
 
         // Execute tool (mock implementation)
         const result = await this.invokeTool(
@@ -209,7 +209,7 @@ export class MCPBridgeAdapter implements ProviderAdapter<
           abortController.signal
         );
 
-        const duration = Date.now() - startTime;
+        const _duration = Date.now() - startTime;
 
         // Publish success event
         await this.publishEvent("provider.mcp.tool.executed", {

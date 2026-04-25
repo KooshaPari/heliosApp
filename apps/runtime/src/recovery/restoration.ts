@@ -34,7 +34,7 @@ export class RestorationPipeline {
   }
 
   async restore(checkpoint: Checkpoint): Promise<RestorationResult> {
-    const startTime = Date.now();
+    const _startTime = Date.now();
     const restored: RestoredSession[] = [];
     const failed: FailedSession[] = [];
 
@@ -75,10 +75,10 @@ export class RestorationPipeline {
 
       // Stage 3: PTY re-spawn is handled in attemptRespawn
 
-      const duration = Date.now() - startTime;
+      const _duration = Date.now() - startTime;
       return { restored, failed, duration };
     } catch {
-      const duration = Date.now() - startTime;
+      const _duration = Date.now() - startTime;
       console.error("Restoration pipeline failed:", err);
       return {
         restored,

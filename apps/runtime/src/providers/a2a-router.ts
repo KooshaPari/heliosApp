@@ -252,7 +252,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
       this.inFlightDelegations.set(correlationId, abortController);
 
       try {
-        const startTime = Date.now();
+        const _startTime = Date.now();
 
         // Send delegation request
         const result = await this.sendDelegation(
@@ -262,7 +262,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
           abortController.signal
         );
 
-        const duration = Date.now() - startTime;
+        const _duration = Date.now() - startTime;
 
         // Publish success event
         await this.publishEvent("provider.a2a.delegation.completed", {

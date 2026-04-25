@@ -111,7 +111,7 @@ export class ACPClientAdapter implements ProviderAdapter<
    * @throws NormalizedProviderError if init fails
    */
   async init(config: ACPConfig): Promise<void> {
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     try {
       // Validate config
@@ -133,7 +133,7 @@ export class ACPClientAdapter implements ProviderAdapter<
       }
 
       // Simulate endpoint reachability check with timeout
-      const probeTimeout = config.timeout || 10000;
+      const _probeTimeout = config.timeout || 10000;
       const probeResult = await Promise.race([
         this.probeEndpoint(config.baseUrl),
         new Promise<boolean>((_, reject) =>
@@ -306,7 +306,7 @@ export class ACPClientAdapter implements ProviderAdapter<
       this.inFlightTasks.set(correlationId, abortController);
 
       try {
-        const startTime = Date.now();
+        const _startTime = Date.now();
 
         // Construct ACP request
         const acpRequest: ACPRequest = {
@@ -325,7 +325,7 @@ export class ACPClientAdapter implements ProviderAdapter<
         // Execute task (mock implementation)
         const result = await this.sendACPRequest(acpRequest, abortController.signal);
 
-        const duration = Date.now() - startTime;
+        const _duration = Date.now() - startTime;
 
         // Publish success event
         await this.publishEvent("provider.acp.execute.completed", {

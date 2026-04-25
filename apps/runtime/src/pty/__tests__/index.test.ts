@@ -18,7 +18,7 @@ describe("PtyManager", () => {
   it("spawn and get", async () => {
     const bus = new InMemoryBusPublisher();
     const mgr = new PtyManager(300, bus);
-    const record = await mgr.spawn({
+    const _record = await mgr.spawn({
       shell: "/bin/sh",
       laneId: "lane-1",
       sessionId: "session-1",
@@ -60,7 +60,7 @@ describe("PtyManager", () => {
   it("resize updates dimensions and emits events", async () => {
     const bus = new InMemoryBusPublisher();
     const mgr = new PtyManager(300, bus);
-    const record = await mgr.spawn({
+    const _record = await mgr.spawn({
       shell: "/bin/sh",
       laneId: "lane-1",
       sessionId: "s1",
@@ -82,7 +82,7 @@ describe("PtyManager", () => {
 
   it("resize rejects invalid dimensions", async () => {
     const mgr = new PtyManager();
-    const record = await mgr.spawn({
+    const _record = await mgr.spawn({
       shell: "/bin/sh",
       laneId: "lane-1",
       sessionId: "s1",
@@ -99,7 +99,7 @@ describe("PtyManager", () => {
   it("resize rejects on stopped PTY", async () => {
     const bus = new InMemoryBusPublisher();
     const mgr = new PtyManager(300, bus);
-    const record = await mgr.spawn({
+    const _record = await mgr.spawn({
       shell: "/bin/sh",
       laneId: "lane-1",
       sessionId: "s1",
@@ -115,7 +115,7 @@ describe("PtyManager", () => {
   it("terminate cleans up PTY", async () => {
     const bus = new InMemoryBusPublisher();
     const mgr = new PtyManager(300, bus);
-    const record = await mgr.spawn({
+    const _record = await mgr.spawn({
       shell: "/bin/sh",
       laneId: "lane-1",
       sessionId: "s1",

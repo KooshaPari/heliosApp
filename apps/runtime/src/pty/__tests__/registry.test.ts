@@ -75,7 +75,7 @@ describe("PtyRegistry", () => {
   it("update bumps updatedAt", () => {
     const rec = makeRecord();
     registry.register(rec);
-    const before = rec.updatedAt;
+    const _before = rec.updatedAt;
 
     // Small delay to ensure timestamp changes
     registry.update("pty-1", { state: "throttled" });

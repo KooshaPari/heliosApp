@@ -88,7 +88,7 @@ function createLaneInRegistry(
   }>
 ) {
   const laneId = overrides?.laneId ?? "test-lane-1";
-  const record = {
+  const _record = {
     laneId,
     workspaceId: overrides?.workspaceId ?? "ws-1",
     state: (overrides?.state ?? "ready") as any,
@@ -120,7 +120,7 @@ describe("ParManager - T011: Par task binding", () => {
     const { spawnFn } = createMockSpawn({ pid: 42, exitDelay: 60000 });
     const mgr = new ParManager({ registry, bus, spawnFn });
 
-    const binding = await mgr.bindParTask("test-lane-1", "/tmp/worktree");
+    const _binding = await mgr.bindParTask("test-lane-1", "/tmp/worktree");
 
     expect(binding.laneId).toBe("test-lane-1");
     expect(binding.pid).toBe(42);
@@ -486,7 +486,7 @@ describe("ParManager - T014: Stale detection", () => {
     await mgr.runHealthCheck();
 
     // Binding should still be active
-    const binding = mgr.getBinding("test-lane-1");
+    const _binding = mgr.getBinding("test-lane-1");
     expect(binding).toBeDefined();
     expect(binding!.status).toBe("active");
   });
@@ -555,7 +555,7 @@ describe("ParManager - T015: Event completeness", () => {
     const mgr = new ParManager({ registry, bus: failBus as any, spawnFn });
 
     // Should not throw
-    const binding = await mgr.bindParTask("test-lane-1", "/tmp/worktree");
+    const _binding = await mgr.bindParTask("test-lane-1", "/tmp/worktree");
     expect(binding.pid).toBe(42);
   });
 });

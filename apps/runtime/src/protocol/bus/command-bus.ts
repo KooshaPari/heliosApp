@@ -196,7 +196,7 @@ export class CommandBusImpl implements LocalBus {
       (event as unknown as Record<string, unknown>)["correlation_id"] = this.activeCorrelationId;
     }
 
-    const topic = event.topic;
+    const _topic = event.topic;
 
     // Assign per-topic sequence number
     const currentSeq = this.topicSequenceCounters.get(topic) ?? 0;

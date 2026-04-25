@@ -17,9 +17,9 @@ import {
 } from "../../helpers/mock_adapter.js";
 
 function freshSetup() {
-  const registry = new RendererRegistry();
+  const _registry = new RendererRegistry();
   const sm = new RendererStateMachine();
-  const ghostty = new MockGhosttyAdapter();
+  const _ghostty = new MockGhosttyAdapter();
   const rio = new MockRioAdapter();
   registry.register(ghostty);
   registry.register(rio);
@@ -87,7 +87,7 @@ describe("Switch stress tests", () => {
 
     expect(buf.getBufferedBytes()).toBe(100 * 10 * 1024);
 
-    const renderer = new MockGhosttyAdapter();
+    const _renderer = new MockGhosttyAdapter();
     buf.stopBuffering(renderer);
     expect(renderer.boundStreams.has("pty-1")).toBe(true);
     expect(buf.getBufferedBytes()).toBe(0);
@@ -158,7 +158,7 @@ describe("Switch stress tests", () => {
 
   it("(e) double failure: new renderer fails, rollback fails -> errored state", async () => {
     const { registry, sm, events, bus } = freshSetup();
-    const ghostty = registry.get("ghostty") as MockGhosttyAdapter;
+    const _ghostty = registry.get("ghostty") as MockGhosttyAdapter;
     const rio = registry.get("rio") as MockRioAdapter;
 
     rio.setOptions({ startFail: true }); // switch fails

@@ -3,8 +3,8 @@ import { TOPICS } from "./topics";
 import type { LocalBusEnvelope } from "./types";
 import { ProtocolValidationError } from "./types";
 
-const METHOD_SET = new Set<string>(METHODS);
-const TOPIC_SET = new Set<string>(TOPICS);
+const _METHOD_SET = new Set<string>(METHODS);
+const _TOPIC_SET = new Set<string>(TOPICS);
 const RFC3339_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 
 const CORRELATION_REQUIRED_METHODS = new Set<string>([
@@ -219,7 +219,7 @@ function validateCommandEnvelope(envelope: Record<string, unknown>): void {
 }
 
 function validateEventEnvelope(envelope: Record<string, unknown>): void {
-  const topic = assertStringField(envelope, "topic");
+  const _topic = assertStringField(envelope, "topic");
   if (!/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/.test(topic)) {
     throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${topic}'`, {
       topic,
@@ -248,7 +248,7 @@ function validateResponseEnvelope(envelope: Record<string, unknown>): void {
   // Skip METHOD_SET check — METHODS is empty; rely on METHOD_CONTEXT_REQUIREMENTS
   void assertOptionalString(envelope, "method");
 
-  const topic = assertOptionalString(envelope, "topic");
+  const _topic = assertOptionalString(envelope, "topic");
   if (topic && !/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/.test(topic)) {
     throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${topic}'`, {
       topic,

@@ -36,7 +36,7 @@ describe("Binding Lifecycle Integration", () => {
         sessionId: "session-1",
       };
 
-      const binding = registry.register("terminal-1", triple);
+      const _binding = registry.register("terminal-1", triple);
       await emitter.emitBound(binding);
 
       const events = bus.getEvents();
@@ -57,7 +57,7 @@ describe("Binding Lifecycle Integration", () => {
         sessionId: "session-2",
       };
 
-      const binding = registry.register("terminal-1", oldTriple);
+      const _binding = registry.register("terminal-1", oldTriple);
       await emitter.emitBound(binding);
 
       const rebound = registry.rebind("terminal-1", newTriple);
@@ -78,7 +78,7 @@ describe("Binding Lifecycle Integration", () => {
         sessionId: "session-1",
       };
 
-      const binding = registry.register("terminal-1", triple);
+      const _binding = registry.register("terminal-1", triple);
       await emitter.emitBound(binding);
 
       // Get binding before unregister
@@ -99,7 +99,7 @@ describe("Binding Lifecycle Integration", () => {
         sessionId: "session-1",
       };
 
-      const binding = registry.register("terminal-1", triple);
+      const _binding = registry.register("terminal-1", triple);
       expect(binding.state).toBe(BindingState.bound);
 
       const rebound = registry.rebind("terminal-1", {
@@ -138,7 +138,7 @@ describe("Binding Lifecycle Integration", () => {
         sessionId: "session-1",
       };
 
-      const binding = registry.register(terminal, triple);
+      const _binding = registry.register(terminal, triple);
       await emitter.emitBound(binding);
 
       // Rapid rebinds
@@ -213,7 +213,7 @@ describe("Binding Lifecycle Integration", () => {
         sessionId: "session-1",
       };
 
-      const binding = registry.register("terminal-1", triple);
+      const _binding = registry.register("terminal-1", triple);
       const correlationId = "corr-123";
       await emitter.emitBound(binding, correlationId);
 

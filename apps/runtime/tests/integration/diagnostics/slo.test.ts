@@ -13,7 +13,7 @@ const sloDefinitions: SLODefinition[] = [
 ];
 
 function createSetup(busFn?: (topic: string, payload: unknown) => void) {
-  const registry = new MetricsRegistry();
+  const _registry = new MetricsRegistry();
   registry.register({
     name: METRIC_NAME,
     type: "latency",
@@ -112,7 +112,7 @@ describe("Rate Limiting", () => {
 
   // FR-010: independent rate limiting per metric
   it("rate limits each metric independently", () => {
-    const registry = new MetricsRegistry();
+    const _registry = new MetricsRegistry();
     registry.register({
       name: "metric-a",
       type: "latency",
@@ -218,7 +218,7 @@ describe("Periodic Check Loop", () => {
     };
     const setup = createSetup(busFn);
     monitor = setup.monitor;
-    const registry = setup.registry;
+    const _registry = setup.registry;
 
     for (let i = 0; i < 100; i++) {
       registry.record(METRIC_NAME, 100, i);
@@ -239,7 +239,7 @@ describe("Periodic Check Loop", () => {
     };
     const setup = createSetup(busFn);
     monitor = setup.monitor;
-    const registry = setup.registry;
+    const _registry = setup.registry;
 
     for (let i = 0; i < 100; i++) {
       registry.record(METRIC_NAME, 100, i);
@@ -262,7 +262,7 @@ describe("Periodic Check Loop", () => {
     };
     const setup = createSetup(busFn);
     monitor = setup.monitor;
-    const registry = setup.registry;
+    const _registry = setup.registry;
 
     for (let i = 0; i < 100; i++) {
       registry.record(METRIC_NAME, 100, i);
@@ -280,7 +280,7 @@ describe("Periodic Check Loop", () => {
 
   // FR-010: multiple metrics violating simultaneously
   it("handles multiple simultaneous violations", () => {
-    const registry = new MetricsRegistry();
+    const _registry = new MetricsRegistry();
     registry.register({
       name: "m1",
       type: "latency",

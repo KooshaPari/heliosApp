@@ -49,7 +49,7 @@ export class BindingMiddleware {
    */
   validateBeforeOperation(terminalId: string, _operation?: string): MiddlewareValidationResult {
     // Check terminal exists
-    const binding = this.registry.get(terminalId);
+    const _binding = this.registry.get(terminalId);
     if (!binding) {
       return {
         valid: false,

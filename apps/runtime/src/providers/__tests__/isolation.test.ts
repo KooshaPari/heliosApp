@@ -204,7 +204,7 @@ describe("Process-Level Isolation", () => {
       }
 
       // Execute in all lanes
-      const results = await Promise.all(
+      const _results = await Promise.all(
         providers.map(p => p.execute({ prompt: "test" }, "corr-123"))
       );
 
@@ -230,7 +230,7 @@ describe("Process-Level Isolation", () => {
       providers[3].setCrash(true);
 
       // Execute in all lanes and track results
-      const results = await Promise.allSettled(
+      const _results = await Promise.allSettled(
         providers.map((p, i) => p.execute({ prompt: `test-${i}` }, `corr-${i}`))
       );
 

@@ -38,7 +38,7 @@ describe("CheckpointManager", () => {
   });
 
   it("should return null for non-existent checkpoint", async () => {
-    const checkpoint = await manager.load();
+    const _checkpoint = await manager.load();
     expect(checkpoint).toBeNull();
   });
 

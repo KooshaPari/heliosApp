@@ -165,7 +165,7 @@ export async function removeWorktree(
   const branchName = computeBranchName(laneId);
 
   // Try git worktree remove --force
-  const removeResult = await runGit(
+  const _removeResult = await runGit(
     ["worktree", "remove", worktreePath, "--force"],
     workspaceRepoPath
   );

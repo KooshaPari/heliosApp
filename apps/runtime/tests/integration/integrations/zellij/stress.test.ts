@@ -52,7 +52,7 @@ class FakeCli {
 describe("Stress: rapid pane create/close cycles", () => {
   it("handles 50 rapid create-close cycles without state corruption", async () => {
     const cli = new FakeCli();
-    const registry = new MuxRegistry(cli as unknown as ZellijCli);
+    const _registry = new MuxRegistry(cli as unknown as ZellijCli);
     const topology = new TopologyTracker(cli as unknown as ZellijCli);
     const sessionMgr = new ZellijSessionManager(cli as unknown as ZellijCli, registry);
 
@@ -88,7 +88,7 @@ describe("Stress: rapid pane create/close cycles", () => {
 describe("Stress: multiple sessions with shared lane IDs", () => {
   it("prevents duplicate lane bindings", async () => {
     const cli = new FakeCli();
-    const registry = new MuxRegistry(cli as unknown as ZellijCli);
+    const _registry = new MuxRegistry(cli as unknown as ZellijCli);
     const sessionMgr = new ZellijSessionManager(cli as unknown as ZellijCli, registry);
 
     await sessionMgr.createSession("shared-lane");
@@ -100,7 +100,7 @@ describe("Stress: multiple sessions with shared lane IDs", () => {
 
   it("allows reuse of lane ID after session termination", async () => {
     const cli = new FakeCli();
-    const registry = new MuxRegistry(cli as unknown as ZellijCli);
+    const _registry = new MuxRegistry(cli as unknown as ZellijCli);
     const sessionMgr = new ZellijSessionManager(cli as unknown as ZellijCli, registry);
 
     const s1 = await sessionMgr.createSession("reuse-lane");
@@ -115,7 +115,7 @@ describe("Stress: multiple sessions with shared lane IDs", () => {
 describe("Stress: reattach with modified topology", () => {
   it("reattaches after topology has changed", async () => {
     const cli = new FakeCli();
-    const registry = new MuxRegistry(cli as unknown as ZellijCli);
+    const _registry = new MuxRegistry(cli as unknown as ZellijCli);
     const topology = new TopologyTracker(cli as unknown as ZellijCli);
     const bus: EventBus & { events: MuxEvent[] } = {
       events: [],
@@ -155,7 +155,7 @@ describe("Stress: reattach with modified topology", () => {
 describe("Stress: reconciliation with many sessions", () => {
   it("handles 100 orphaned sessions", async () => {
     const cli = new FakeCli();
-    const registry = new MuxRegistry(cli as unknown as ZellijCli);
+    const _registry = new MuxRegistry(cli as unknown as ZellijCli);
 
     // Create 100 orphaned sessions
     for (let i = 0; i < 100; i++) {

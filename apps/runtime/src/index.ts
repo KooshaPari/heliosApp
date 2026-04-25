@@ -63,8 +63,8 @@ export type RuntimeOptions = {
 
 type RuntimeInstance = ReturnType<typeof createRuntime>;
 
-const startTime = performance.now();
-const METHOD_SET = new Set<string>(METHODS);
+const _startTime = performance.now();
+const _METHOD_SET = new Set<string>(METHODS);
 
 function normalizePayload(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
