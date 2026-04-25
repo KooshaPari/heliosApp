@@ -27,7 +27,7 @@ beforeEach(() => {
 afterEach(() => {
   try {
     rmSync(tempDir, { recursive: true });
-  } catch {
+  } catch (_err) {
     // cleanup best-effort
   }
 });
@@ -114,7 +114,7 @@ describe("detectStaleProjects", () => {
     // Remove the directory and wait for filesystem to settle
     try {
       rmSync(tempDir, { recursive: true });
-    } catch {
+    } catch (_err) {
       // Best-effort removal; test checks stale detection regardless
     }
     // Small delay to ensure filesystem sync

@@ -90,9 +90,9 @@ export class InMemoryLocalBus implements LocalBus {
     const _topic = event.topic;
     const correlationId = event.correlation_id ?? "";
 
-    if (topic) {
-      const isTerminal = isTerminalTopic(topic);
-      const isStart = isStartTopic(topic);
+    if (_topic) {
+      const isTerminal = isTerminalTopic(_topic);
+      const isStart = isStartTopic(_topic);
 
       if (isStart) {
         if (!this.lifecycleProgress.has(correlationId)) {
@@ -105,10 +105,10 @@ export class InMemoryLocalBus implements LocalBus {
             `Missing lifecycle progress for correlation "${correlationId}"`
           );
         }
-        if (progress.has(topic)) {
+        if (progress.has(_topic)) {
           const err = new ProtocolValidationError(
             "ORDERING_VIOLATION",
-            `Duplicate start topic "${topic}" for correlation "${correlationId}"`
+            `Duplicate start topic "${_topic}" for correlation "${correlationId}"`
           );
           this.auditLog.push({
             envelope: event,
@@ -117,7 +117,7 @@ export class InMemoryLocalBus implements LocalBus {
           });
           throw err;
         }
-        progress.add(topic);
+        progress.add(_topic);
 
         const sequencedEvent = event as LocalBusEnvelopeWithSequence;
         if (sequencedEvent.sequence === undefined) {
@@ -131,12 +131,12 @@ export class InMemoryLocalBus implements LocalBus {
 
       if (isTerminal) {
         const seen = this.lifecycleProgress.get(correlationId);
-        const expectedStart = resolveExpectedStartTopic(topic);
+        const expectedStart = resolveExpectedStartTopic(_topic);
 
-        if (!seen?.has(expectedStart) && expectedStart !== topic) {
+        if (!seen?.has(expectedStart) && expectedStart !== _topic) {
           const err = new ProtocolValidationError(
             "ORDERING_VIOLATION",
-            `Topic '${topic}' cannot be published before '${expectedStart}'`
+            `Topic '${_topic}' cannot be published before '${expectedStart}'`
           );
           this.auditLog.push({
             envelope: event,
@@ -150,7 +150,7 @@ export class InMemoryLocalBus implements LocalBus {
       }
 
       // Handle terminal.output metrics
-      if (topic === "terminal.output") {
+      if (_topic === "terminal.output") {
         const backlogDepth =
           typeof event.payload?.backlog_depth === "number"
             ? event.payload.backlog_depth

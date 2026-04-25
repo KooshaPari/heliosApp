@@ -68,7 +68,7 @@ function createMockGhostty(): RendererAdapter & { _state: RendererState } {
   return adapter;
 }
 
-const DEFAULT_CONFIG: RendererConfig = {
+const _DEFAULT_CONFIG: RendererConfig = {
   gpuAcceleration: false,
   colorDepth: 24,
   maxDimensions: { cols: 200, rows: 50 },

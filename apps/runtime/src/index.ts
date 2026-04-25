@@ -17,6 +17,7 @@ import {
 } from "./sessions/state_machine.js";
 import type { TerminalBuffer } from "./runtime/types.js";
 import { TerminalRegistry } from "./sessions/terminal_registry.js";
+import { handleRuntimeRequest } from "./runtime/ops.js";
 
 import type {
   RecoveryBootstrapResult,
@@ -121,7 +122,7 @@ export function healthCheck(): HealthCheckResult {
   return {
     ok: true,
     timestamp: Date.now(),
-    uptimeMs: performance.now() - startTime,
+    uptimeMs: performance.now() - _startTime,
   };
 }
 
@@ -512,7 +513,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
           ? await options.harnessProbe.check()
           : { ok: true, reason: null };
         probeResult = { ok: result.ok, reason: result.reason ?? null };
-      } catch {
+      } catch (err) {
         console.error("[Runtime] Harness probe exception:", err);
         probeResult = { ok: false, reason: "harness_probe_exception" };
       }

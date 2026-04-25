@@ -7,7 +7,6 @@ import {
   monotonicNow,
   markStart,
   markEnd,
-  getMarkOverflowCount,
   createInstrumentationHooks,
   _resetGlobalHooks,
 } from "../../../src/diagnostics/hooks.js";

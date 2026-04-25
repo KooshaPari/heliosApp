@@ -121,10 +121,10 @@ describe("ContextPropagator", () => {
   describe("Propagation Cancellation", () => {
     it("should cancel previous propagation on new context", async () => {
       const slowTab = mockTabs[0];
-      let callCount = 0;
+      let _callCount = 0;
 
       slowTab.onContextChange = async () => {
-        callCount++;
+        _callCount++;
         await new Promise(resolve => setTimeout(resolve, 200));
       };
 

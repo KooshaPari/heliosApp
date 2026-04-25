@@ -14,7 +14,7 @@ afterEach(() => {
   for (const pid of pidsToCleanup) {
     try {
       process.kill(pid, "SIGKILL");
-    } catch {
+    } catch (_err) {
       /* already exited */
     }
   }
@@ -143,7 +143,7 @@ describe("PTY lifecycle integration", () => {
     // Kill the process externally.
     try {
       process.kill(record.pid, "SIGKILL");
-    } catch {
+    } catch (_err) {
       // may already be dead
     }
 

@@ -4,7 +4,6 @@ import {
   ParSpawnError,
   ParNotFoundError,
   LaneNotReadyError,
-  ExecTimeoutError,
 } from "../../src/lanes/par.js";
 import type { SpawnFn, SpawnResult } from "../../src/lanes/par.js";
 import { LaneRegistry } from "../../src/lanes/registry.js";
@@ -99,8 +98,8 @@ function createLaneInRegistry(
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  registry.register(record);
-  return record;
+  registry.register(_record);
+  return _record;
 }
 
 // ── Tests ───────────────────────────────────────────────────────────────────
@@ -172,7 +171,7 @@ describe("ParManager - T011: Par task binding", () => {
     try {
       await mgr.bindParTask("test-lane-1", "/tmp/worktree");
       expect(true).toBe(false);
-    } catch {
+    } catch (err) {
       expect(err).toBeInstanceOf(ParSpawnError);
     }
   });
@@ -184,7 +183,7 @@ describe("ParManager - T011: Par task binding", () => {
     try {
       await mgr.bindParTask("nonexistent", "/tmp/worktree");
       expect(true).toBe(false);
-    } catch {
+    } catch (err) {
       expect(err).toBeInstanceOf(ParSpawnError);
     }
   });
@@ -353,7 +352,7 @@ describe("ParManager - T013: Command execution", () => {
     try {
       await mgr.executeInLane("test-lane-1", ["ls"]);
       expect(true).toBe(false);
-    } catch {
+    } catch (err) {
       expect(err).toBeInstanceOf(LaneNotReadyError);
     }
   });
@@ -366,7 +365,7 @@ describe("ParManager - T013: Command execution", () => {
     try {
       await mgr.executeInLane("test-lane-1", ["ls"]);
       expect(true).toBe(false);
-    } catch {
+    } catch (err) {
       expect(err).toBeInstanceOf(LaneNotReadyError);
     }
   });
@@ -379,7 +378,7 @@ describe("ParManager - T013: Command execution", () => {
     try {
       await mgr.executeInLane("test-lane-1", ["ls"]);
       expect(true).toBe(false);
-    } catch {
+    } catch (err) {
       expect(err).toBeInstanceOf(ParNotFoundError);
     }
   });

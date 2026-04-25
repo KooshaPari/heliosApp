@@ -18,7 +18,7 @@ import type { RendererConfig, RenderSurface } from "../adapter.js";
 // Helpers
 // ---------------------------------------------------------------------------
 
-const DEFAULT_CONFIG: RendererConfig = {
+const _DEFAULT_CONFIG: RendererConfig = {
   gpuAcceleration: false,
   colorDepth: 24,
   maxDimensions: { cols: 200, rows: 50 },

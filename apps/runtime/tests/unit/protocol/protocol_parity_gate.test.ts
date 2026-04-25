@@ -13,7 +13,7 @@ function runGate(fixtureRoot: string): { ok: boolean; output: string } {
       encoding: "utf8",
     });
     return { ok: true, output: stdout };
-  } catch {
+  } catch (error) {
     const err = error as { stdout?: string; stderr?: string };
     return { ok: false, output: `${err.stdout ?? ""}${err.stderr ?? ""}` };
   }

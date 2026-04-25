@@ -58,7 +58,7 @@ export abstract class TabSurface {
 
         // Emit error event
         try {
-          const store = getActiveContextStore();
+          const _store = getActiveContextStore();
           // Note: would publish to bus if it was available
         } catch {
           // Silently ignore if store not available

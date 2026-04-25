@@ -105,13 +105,13 @@ describe("resize", () => {
 
     const _registry = new PtyRegistry();
     const _record = makeRecord({ pid });
-    registry.register(record);
+    _registry.register(_record);
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
 
-    resize(record, 120, 40, registry, historyMap, bus);
+    resize(_record, 120, 40, _registry, historyMap, bus);
 
-    expect(registry.get(record.ptyId)?.dimensions).toEqual({
+    expect(_registry.get(_record.ptyId)?.dimensions).toEqual({
       cols: 120,
       rows: 40,
     });
@@ -124,7 +124,7 @@ describe("resize", () => {
     const _registry = new PtyRegistry();
     const _record = makeRecord();
     registry.register(record);
-    expect(() => resize(record, 0, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
+    expect(() => resize(_record, 0, 24, _registry, new Map(), new InMemoryBusPublisher())).toThrow(
       InvalidDimensionsError
     );
   });
@@ -133,7 +133,7 @@ describe("resize", () => {
     const _registry = new PtyRegistry();
     const _record = makeRecord();
     registry.register(record);
-    expect(() => resize(record, 80, 0, registry, new Map(), new InMemoryBusPublisher())).toThrow(
+    expect(() => resize(_record, 80, 0, _registry, new Map(), new InMemoryBusPublisher())).toThrow(
       InvalidDimensionsError
     );
   });
@@ -143,7 +143,7 @@ describe("resize", () => {
     const _record = makeRecord();
     registry.register(record);
     expect(() =>
-      resize(record, 10001, 24, registry, new Map(), new InMemoryBusPublisher())
+      resize(_record, 10001, 24, _registry, new Map(), new InMemoryBusPublisher())
     ).toThrow(InvalidDimensionsError);
   });
 
@@ -182,7 +182,7 @@ describe("terminate", () => {
 
     const _registry = new PtyRegistry();
     const _record = makeRecord({ pid });
-    registry.register(record);
+    _registry.register(_record);
     const lifecycle = new PtyLifecycle(record.ptyId, "active");
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();

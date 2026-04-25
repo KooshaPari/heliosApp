@@ -11,8 +11,6 @@ import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/rend
 import {
   MockGhosttyAdapter,
   MockRioAdapter,
-  MockRendererAdapter,
-  TEST_SURFACE,
   TEST_CONFIG,
 } from "../../helpers/mock_adapter.js";
 
@@ -67,7 +65,7 @@ describe("Switch stress tests", () => {
           eventBus: bus,
         });
         successCount++;
-      } catch {
+      } catch (_err) {
         failCount++;
       }
     }
@@ -94,7 +92,7 @@ describe("Switch stress tests", () => {
   });
 
   it("(c) switch with multiple PTYs bound (10 PTYs): all streams rebound", async () => {
-    const { registry, sm, bus, ghostty, rio } = freshSetup();
+    const { registry, sm, bus, _ghostty, rio } = freshSetup();
     const boundStreams = new Map<string, ReadableStream<Uint8Array>>();
 
     for (let i = 0; i < 10; i++) {

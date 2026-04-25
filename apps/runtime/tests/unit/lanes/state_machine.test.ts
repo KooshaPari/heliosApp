@@ -70,7 +70,7 @@ describe("Lane State Machine (FR-008-001)", () => {
       try {
         transition("closed", "create", "lane-42");
         expect(true).toBe(false);
-      } catch {
+      } catch (e) {
         const err = e as InvalidLaneTransitionError;
         expect(err).toBeInstanceOf(InvalidLaneTransitionError);
         expect(err.laneId).toBe("lane-42");
@@ -119,7 +119,7 @@ describe("Lane State Machine (FR-008-001)", () => {
         await withLaneLock("lane-err", async () => {
           throw new Error("boom");
         });
-      } catch {
+      } catch (_err) {
         // expected
       }
       await withLaneLock("lane-err", async () => {

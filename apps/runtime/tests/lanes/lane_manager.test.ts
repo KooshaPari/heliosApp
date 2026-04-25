@@ -52,7 +52,7 @@ describe("LaneManager", () => {
     try {
       await mgr.attach(lane.laneId, "agent-1");
       expect(true).toBe(false); // should not reach
-    } catch {
+    } catch (err) {
       expect(err).toBeInstanceOf(LaneClosedError);
     }
   });
@@ -95,7 +95,7 @@ describe("LaneManager", () => {
     try {
       await small.create("ws-1", "main");
       expect(true).toBe(false);
-    } catch {
+    } catch (err) {
       expect((err as Error).message).toContain("capacity");
     }
   });
@@ -186,7 +186,7 @@ describe("LaneManager sharing", () => {
     try {
       await mgr.cleanup(lane.laneId);
       expect(true).toBe(false);
-    } catch {
+    } catch (err) {
       expect(err).toBeInstanceOf(SharedLaneCleanupError);
     }
   });

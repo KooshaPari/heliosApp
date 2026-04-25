@@ -12,7 +12,7 @@ import {
 // Mock Bun.spawn to avoid slow system_profiler calls in tests
 const originalSpawn = Bun.spawn;
 beforeEach(() => {
-  (Bun as any).spawn = mock((...args: any[]) => {
+  (Bun as any).spawn = mock((..._args: any[]) => {
     // Return a fake process with stdout that has Metal info
     const encoder = new TextEncoder();
     const data = encoder.encode("Metal: Supported");

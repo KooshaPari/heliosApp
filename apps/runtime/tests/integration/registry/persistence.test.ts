@@ -22,7 +22,7 @@ describe("Persistence Integration", () => {
   afterEach(async () => {
     try {
       await fs.rm(tempDir, { recursive: true, force: true });
-    } catch {}
+    } catch (_err) {}
   });
 
   describe("JsonFilePersistence", () => {

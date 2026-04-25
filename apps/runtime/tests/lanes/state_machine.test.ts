@@ -56,7 +56,7 @@ describe("Lane State Machine", () => {
       try {
         transition("closed", "create", "lane-42");
         expect(true).toBe(false); // should not reach
-      } catch {
+      } catch (e) {
         expect(e).toBeInstanceOf(InvalidLaneTransitionError);
         const err = e as InvalidLaneTransitionError;
         expect(err.laneId).toBe("lane-42");

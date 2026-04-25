@@ -220,19 +220,19 @@ function validateCommandEnvelope(envelope: Record<string, unknown>): void {
 
 function validateEventEnvelope(envelope: Record<string, unknown>): void {
   const _topic = assertStringField(envelope, "topic");
-  if (!/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/.test(topic)) {
-    throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${topic}'`, {
-      topic,
+  if (!/^[a-z][a-z0-9]*(\.[a-z][a-z0-9_]*)*$/.test(_topic)) {
+    throw new ProtocolValidationError("INVALID_TOPIC", `Malformed topic '${_topic}'`, {
+      topic: _topic,
     });
   }
   assertPayloadObject(envelope);
 
-  const requiredContext = TOPIC_CONTEXT_REQUIREMENTS[topic];
+  const requiredContext = TOPIC_CONTEXT_REQUIREMENTS[_topic];
   if (requiredContext) {
     assertContext(envelope, requiredContext);
   }
-  if (CORRELATION_REQUIRED_TOPICS.has(topic)) {
-    assertCorrelationId(envelope, "topic", topic);
+  if (CORRELATION_REQUIRED_TOPICS.has(_topic)) {
+    assertCorrelationId(envelope, "topic", _topic);
   }
 }
 

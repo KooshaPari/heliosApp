@@ -222,7 +222,7 @@ describe("ActiveContextStore", () => {
 
       let validated = false;
 
-      store.setValidator(async ctx => {
+      store.setValidator(async _ctx => {
         validated = true;
         return true;
       });

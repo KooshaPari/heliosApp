@@ -34,7 +34,7 @@ describe("TabBar", () => {
       const tab1 = mockTabs[0];
       const tab2 = mockTabs[1];
 
-      let tab1Active = false;
+      let _tab1Active = false;
       let tab1Deactivated = false;
       let tab2Active = false;
 

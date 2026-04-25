@@ -19,7 +19,7 @@ describe("CheckpointManager", () => {
     // Clean up any existing test files
     try {
       await fs.rm(testDir, { recursive: true, force: true });
-    } catch {
+    } catch (_err) {
       // Ignore cleanup errors
     }
   });
@@ -28,7 +28,7 @@ describe("CheckpointManager", () => {
     // Clean up test files
     try {
       await fs.rm(testDir, { recursive: true, force: true });
-    } catch {
+    } catch (_err) {
       // Ignore cleanup errors
     }
   });
@@ -103,7 +103,7 @@ describe("CheckpointManager", () => {
 
       const loaded = await manager.load();
       expect(loaded).toBeNull();
-    } catch {
+    } catch (_err) {
       // Expected for test isolation
     }
   });

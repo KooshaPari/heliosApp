@@ -115,7 +115,7 @@ describe("LocalBus — command dispatch", () => {
   it("returns error when re-entrant depth limit exceeded", async () => {
     const depthBus = createBus({ maxDepth: 3 });
 
-    depthBus.registerMethod("recurse", async cmd => {
+    depthBus.registerMethod("recurse", async _cmd => {
       const nested = createCommand("recurse", {});
       return await depthBus.send(nested);
     });

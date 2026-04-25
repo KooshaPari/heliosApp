@@ -65,7 +65,7 @@ describe("Concurrent switch rejection", () => {
         surface: TEST_SURFACE,
       });
       expect.unreachable("Should have thrown ConcurrentSwitchError");
-    } catch {
+    } catch (_err) {
       expect(error).toBeInstanceOf(ConcurrentSwitchError);
       if (error instanceof ConcurrentSwitchError) {
         expect(error.message).toContain("already active");
@@ -118,7 +118,7 @@ describe("Concurrent switch rejection", () => {
         surface: TEST_SURFACE,
       });
       expect.unreachable("Should have thrown ConcurrentSwitchError");
-    } catch {
+    } catch (_err) {
       if (error instanceof ConcurrentSwitchError) {
         const activeTransaction = orchestrator.getActiveTransaction();
         expect(activeTransaction).toBeDefined();
@@ -264,7 +264,7 @@ describe("Concurrent switch rejection", () => {
         config: TEST_CONFIG,
         surface: TEST_SURFACE,
       });
-    } catch {
+    } catch (_err) {
       const activeTransaction2 = orchestrator.getActiveTransaction();
       expect(activeTransaction2?.id).toBe(activeTransaction1?.id);
     }

@@ -92,7 +92,7 @@ export class StreamBindingManager {
    * @param ptyId - PTY identifier to unbind.
    */
   unbind(ptyId: string): void {
-    const _binding = this._bindings.get(ptyId);
+    const binding = this._bindings.get(ptyId);
     if (binding === undefined) {
       return; // no-op
     }

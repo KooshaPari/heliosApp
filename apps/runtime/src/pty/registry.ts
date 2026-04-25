@@ -150,12 +150,12 @@ export class PtyRegistry {
    */
   remove(ptyId: string): void {
     const _record = this.primary.get(ptyId);
-    if (!record) {
+    if (!_record) {
       return;
     }
 
-    this.removeFromIndex(this.byLane, record.laneId, ptyId);
-    this.removeFromIndex(this.bySession, record.sessionId, ptyId);
+    this.removeFromIndex(this.byLane, _record.laneId, ptyId);
+    this.removeFromIndex(this.bySession, _record.sessionId, ptyId);
     this.primary.delete(ptyId);
   }
 

@@ -57,7 +57,7 @@ describe("Storage Chaos Tests", () => {
       if (fs.existsSync(TMP_DIR)) {
         fs.rmdirSync(TMP_DIR);
       }
-    } catch {
+    } catch (_err) {
       // Ignore cleanup errors
     }
   });

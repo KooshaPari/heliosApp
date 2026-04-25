@@ -173,7 +173,7 @@ describe("RendererStateMachine", () => {
     sm.transition("init");
     const after = Date.now();
 
-    expect(sm.history[0]!.timestamp).toBeGreaterThanOrEqual(before);
+    expect(sm.history[0]!.timestamp).toBeGreaterThanOrEqual(_before);
     expect(sm.history[0]!.timestamp).toBeLessThanOrEqual(after);
   });
 });

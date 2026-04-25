@@ -14,7 +14,7 @@ const TEST_CONFIG: RendererConfig = {
   maxDimensions: { cols: 200, rows: 50 },
 };
 
-const TEST_SURFACE: RenderSurface = {
+const _TEST_SURFACE: RenderSurface = {
   windowId: "integration-test-window",
   bounds: { x: 0, y: 0, width: 800, height: 600 },
 };
@@ -42,7 +42,7 @@ describe("Ghostty integration - lifecycle (T013)", () => {
     if (backend !== undefined) {
       try {
         await backend.stop();
-      } catch {
+      } catch (_err) {
         // Ignore cleanup errors
       }
       backend = undefined;

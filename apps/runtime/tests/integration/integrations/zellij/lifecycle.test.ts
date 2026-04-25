@@ -7,7 +7,6 @@
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import {
   ZellijSessionManager,
-  sessionNameForLane,
 } from "../../../../src/integrations/zellij/session.js";
 import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
 import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
@@ -92,7 +91,7 @@ function makePtyManager(): PtyManagerInterface & { spawned: string[] } {
   let counter = 0;
   return {
     spawned,
-    spawn: mock(async opts => {
+    spawn: mock(async _opts => {
       const id = `pty-${++counter}`;
       spawned.push(id);
       return { ptyId: id, pid: 1000 + counter };

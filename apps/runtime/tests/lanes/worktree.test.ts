@@ -43,12 +43,12 @@ function cleanup(): void {
     try {
       // Prune worktrees first to avoid locked file issues
       Bun.spawnSync(["git", "worktree", "prune"], { cwd: dir });
-    } catch {
+    } catch (_err) {
       // ignore
     }
     try {
       fs.rmSync(dir, { recursive: true, force: true });
-    } catch {
+    } catch (_err) {
       // ignore
     }
   }

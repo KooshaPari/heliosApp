@@ -242,7 +242,7 @@ export interface ReconciliationResult {
 export async function reconcileOrphanedWorktrees(
   workspaceRepoPath: string,
   knownLaneIds: Set<string>,
-  closeLaneRecord: (laneId: string) => void
+  _closeLaneRecord: (laneId: string) => void
 ): Promise<ReconciliationResult> {
   const worktreeRoot = path.join(workspaceRepoPath, WORKTREE_DIR);
   const result: ReconciliationResult = {

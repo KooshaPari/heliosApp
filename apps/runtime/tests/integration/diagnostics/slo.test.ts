@@ -53,7 +53,7 @@ describe("SLO Violation Detection", () => {
 
   // FR-004: no violation when metric has no samples
   it("does not emit violation when metric has no samples", () => {
-    const { registry, monitor } = createSetup();
+    const { _registry, monitor } = createSetup();
     const violations = monitor.checkAll();
     expect(violations.length).toBe(0);
   });

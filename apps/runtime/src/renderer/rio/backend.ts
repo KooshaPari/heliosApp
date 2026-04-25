@@ -166,7 +166,7 @@ export class RioBackend implements RendererAdapter {
     this._metrics.stop();
 
     // Abort all stream bindings.
-    for (const [ptyId, binding] of this._streamBindings) {
+    for (const [_ptyId, binding] of this._streamBindings) {
       binding.aborted = true;
       try {
         binding.reader.cancel().catch(() => {});
@@ -272,7 +272,7 @@ export class RioBackend implements RendererAdapter {
    * Uses the renderer registry to find ghostty and switch to it.
    * If ghostty is unavailable or the switch fails, transitions to errored.
    */
-  async _attemptFallback(crashError: Error): Promise<void> {
+  async _attemptFallback(_crashError: Error): Promise<void> {
     if (this._fallbackInProgress) return;
     this._fallbackInProgress = true;
 

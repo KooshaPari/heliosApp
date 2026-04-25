@@ -13,8 +13,6 @@ import type {
   ProviderAdapter,
   ProviderHealthStatus,
   A2AConfig,
-  A2AExecuteInput,
-  A2AExecuteOutput,
 } from "./adapter.js";
 import { NormalizedProviderError, normalizeError } from "./errors.js";
 

@@ -17,7 +17,6 @@ import {
   getString,
   inferType,
   getRecordPayload,
-  isSensitiveKey,
 } from "./sink-helpers.js";
 
 export type {

@@ -11,7 +11,7 @@ describe("False Positive Rate", () => {
   let engine: RemediationEngine;
   let bus: InMemoryLocalBus;
   let laneRegistry: LaneRegistry;
-  let classifier: ResourceClassifier;
+  let _classifier: ResourceClassifier;
 
   let testId: string;
 
@@ -22,14 +22,14 @@ describe("False Positive Rate", () => {
     engine = new RemediationEngine(laneRegistry, bus, {
       cooldownFile: `/tmp/helios-cooldown-${testId}.json`,
     });
-    classifier = new ResourceClassifier();
+    _classifier = new ResourceClassifier();
   });
 
   afterEach(() => {
     engine.stop();
     try {
       unlinkSync(`/tmp/helios-cooldown-${testId}.json`);
-    } catch {}
+    } catch (_err) {}
   });
 
   it("should have zero false positives with healthy system", async () => {

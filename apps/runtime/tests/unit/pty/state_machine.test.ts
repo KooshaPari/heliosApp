@@ -66,7 +66,7 @@ describe("transition() — error diagnostics", () => {
     try {
       transition("stopped", "spawn_requested", "pty-42");
       throw new Error("expected throw");
-    } catch {
+    } catch (e) {
       expect(e).toBeInstanceOf(InvalidTransitionError);
       const err = e as InvalidTransitionError;
       expect(err.ptyId).toBe("pty-42");
