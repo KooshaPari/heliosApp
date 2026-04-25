@@ -1,6 +1,13 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [2026.04A.4] - 2026-04-25
+
+### Bug Fixes
+
+- *(W-55)* Fix 32 production bugs: catch scoping, variable shadowing, missing imports
+
 ## [unreleased]
 
 ### Documentation
