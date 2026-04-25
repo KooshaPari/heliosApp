@@ -5,7 +5,6 @@
  * surface binding, capabilities, metrics, and input relay.
  */
 
-import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
 import { RioBackend, FeatureFlagDisabledError } from "../rio/backend.js";
 import { isRioEnabled, type RioFeatureFlagConfig } from "../rio/index.js";
 import { RioProcess } from "../rio/process.js";

@@ -1,6 +1,5 @@
 // Integration test for false positive rate validation
 
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { unlinkSync } from "fs";
 import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";

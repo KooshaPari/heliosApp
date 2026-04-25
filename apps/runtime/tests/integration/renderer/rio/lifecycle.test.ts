@@ -5,7 +5,6 @@
  * Prerequisites: skips if rio binary not available or feature flag not enabled.
  */
 
-import { describe, it, expect, beforeAll, beforeEach, afterEach } from "bun:test";
 import { RioBackend } from "../../../../src/renderer/rio/backend.js";
 import { RendererRegistry } from "../../../../src/renderer/registry.js";
 import { detectRioBinary, isRioEnabled, registerRio } from "../../../../src/renderer/rio/index.js";

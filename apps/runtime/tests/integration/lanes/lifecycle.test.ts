@@ -4,7 +4,6 @@
 // FR-LAN-004 (publish lane lifecycle events), FR-LAN-005 (cleanup on closed),
 // FR-LAN-006 (gracefully terminate PTYs)
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { _resetIdCounter, LaneManager } from "../../../src/lanes/index.js";

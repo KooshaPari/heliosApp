@@ -2,7 +2,6 @@
  * FR-HELIOS-091: Audit Search Performance Tests
  * Verifies: FR-AUD-005 (Search/filter performance)
  */
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 let _stubDateNow: () => number;
 let _stubUUID: () => string;
 let _uuidCounter = 0;

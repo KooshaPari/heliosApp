@@ -9,7 +9,6 @@
  *   SC-028-005: Redaction audit trail present for every persisted artifact
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { mkdtempSync, rmSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

@@ -2,7 +2,6 @@
  * FR-HELIOS-085: Orphan Detection Accuracy Integration Tests
  * Verifies: FR-ORF-001 (Orphan detection), FR-ORF-006 (Resource classification)
  */
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";

@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { CapabilityDisplay } from "../../../src/settings/capability_display";
 import type { Capability } from "../../../src/settings/capability_display";
 

@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { promises as fs } from "fs";
 import * as path from "path";
 import { TabPersistence, type TabPersistedState } from "../../../src/tabs/tab_persistence";

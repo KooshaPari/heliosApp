@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { DefaultAuditSink } from "../../../src/audit/sink";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";

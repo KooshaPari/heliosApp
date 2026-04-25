@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { ConfirmationDialog } from "../../../src/panels/confirmation_dialog";
 
 describe("ConfirmationDialog", () => {

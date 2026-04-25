@@ -1,7 +1,6 @@
 // T020 - Stress test for concurrent lane operations (50 lanes)
 // (NFR-008-003, SC-008-002)
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { _resetIdCounter, LaneManager } from "../../../src/lanes/index.js";

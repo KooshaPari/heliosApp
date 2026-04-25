@@ -3,8 +3,6 @@ import type {
   LocalBus,
   AuditRecord,
   BusState,
-  CommandBusOptions,
-  CommandEnvelope,
   EventEnvelope,
   ResponseEnvelope,
   LocalBusEnvelopeWithSequence,
@@ -256,11 +254,11 @@ export class InMemoryLocalBus implements LocalBus {
   }
 
   // Implement LocalBus interface (stub methods)
-  registerMethod(method: string, handler: MethodHandler): void {
+  registerMethod(_method: string, _handler: MethodHandler): void {
     // Stub for interface compliance
   }
 
-  async send(envelope: unknown): Promise<ResponseEnvelope> {
+  async send(_envelope: unknown): Promise<ResponseEnvelope> {
     return {
       id: "stub",
       type: "response",
@@ -269,7 +267,7 @@ export class InMemoryLocalBus implements LocalBus {
     };
   }
 
-  subscribe(topic: string, handler: (evt: EventEnvelope) => void | Promise<void>): () => void {
+  subscribe(_topic: string, _handler: (evt: EventEnvelope) => void | Promise<void>): () => void {
     return () => {};
   }
 
