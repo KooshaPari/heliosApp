@@ -1,11 +1,13 @@
 // T018 - Integration tests for full lane lifecycle with real git repos
 // (FR-008-001, FR-008-002, FR-008-004, FR-008-005, FR-008-007)
+// Traces to: FR-LAN-002 (provision git worktree), FR-LAN-003 (bind to par task),
+// FR-LAN-004 (publish lane lifecycle events), FR-LAN-005 (cleanup on closed),
+// FR-LAN-006 (gracefully terminate PTYs)
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { _resetIdCounter, LaneManager } from "../../../src/lanes/index.js";
-import { computeBranchName, computeWorktreePath } from "../../../src/lanes/worktree.js";
+
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 
 async function runGit(args: string[], cwd: string): Promise<string> {

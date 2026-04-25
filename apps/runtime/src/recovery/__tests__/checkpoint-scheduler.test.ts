@@ -1,6 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { CheckpointScheduler } from "../checkpoint-scheduler.js";
-import { CheckpointWriter, type Checkpoint, type CheckpointSession } from "../checkpoint.js";
+
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
@@ -33,6 +32,8 @@ describe("CheckpointScheduler", () => {
     vi.useFakeTimers();
     tempDir = path.join(os.tmpdir(), `scheduler-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
+    // Pre-create recovery subdirectory to avoid race conditions
+    await fs.mkdir(path.join(tempDir, "recovery"), { recursive: true });
     scheduler = new CheckpointScheduler();
     writer = new CheckpointWriter(tempDir);
     writeCount = 0;
@@ -136,7 +137,7 @@ describe("CheckpointScheduler", () => {
 
       // First checkpoint at 60s
       vi.advanceTimersByTime(60100);
-      const firstTime = Date.now();
+      const _firstTime = Date.now();
 
       // The scheduler should have increased its interval
       vi.advanceTimersByTime(60100); // Only 60s more, but interval was doubled

@@ -35,10 +35,10 @@ export class ReplayEngine {
    * @param store - Audit store for queries
    * @returns ReplayStream with snapshots and events
    */
-  async loadSession(sessionId: string, store: any): Promise<ReplayStream> {
+  async loadSession(sessionId: string, _store: any): Promise<ReplayStream> {
     // TODO: Integrate with actual store queries
     // For now, return empty replay stream
-    const startTime = new Date();
+    const _startTime = new Date();
     const endTime = new Date();
 
     return {

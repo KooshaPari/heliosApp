@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-103: Local Bus Event Fan-out and Topic Tests
  * Verifies: FR-BUS-004 (Event fan-out), FR-BUS-009 (Subscriber isolation)
+ * Traces to: FR-BUS-005 (monotonic sequence numbers), FR-BUS-009 (deterministic delivery order)
  */
 import { describe, expect, it, beforeEach } from "bun:test";
 import { createBus } from "../../../src/protocol/bus.js";

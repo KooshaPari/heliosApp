@@ -3,7 +3,7 @@
  * Verifies: FR-GHT-001 (Renderer adapter interface), FR-GHT-007 (Crash handling)
  */
 import { describe, test, expect, beforeEach } from "bun:test";
-import { GhosttyProcess, GhosttyProcessError } from "../../../../src/renderer/ghostty/process.js";
+
 
 describe("GhosttyProcess", () => {
   let proc: GhosttyProcess;
@@ -39,7 +39,8 @@ describe("GhosttyProcess", () => {
       // If it somehow succeeds (ghostty is installed), that's fine too
       expect(proc.isRunning()).toBe(true);
       await proc.stop();
-    } catch (e) {
+    // eslint-disable-next-line no-unused-vars
+    } catch (_err) {
       expect(e).toBeDefined();
     }
   });

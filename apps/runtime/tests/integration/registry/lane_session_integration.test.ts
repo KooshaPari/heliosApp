@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-083: Lane/Session Lifecycle Integration Tests
  * Verifies: FR-BND-004 (Binding invalidation on lifecycle state changes), FR-LAN-006 (Graceful PTY termination)
+ * Traces to: FR-MVP-013 (persist lane/session), FR-MVP-020 (isolated workspace lanes)
  */
 import { describe, it, expect, beforeEach } from "bun:test";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";

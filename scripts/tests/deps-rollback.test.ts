@@ -7,6 +7,7 @@ const REPO_ROOT = process.cwd();
 const REGISTRY_PATH = join(REPO_ROOT, "deps-registry.json");
 const CHANGELOG_PATH = join(REPO_ROOT, "deps-changelog.json");
 
+// Traces to: FR-DEP-004 (rollback command), FR-DEP-005 (atomic rollback)
 describe("Dependency Rollback Integration", () => {
 	beforeEach(() => {
 		// Ensure changelog exists (create if missing)

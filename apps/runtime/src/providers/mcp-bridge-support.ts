@@ -49,7 +49,7 @@ export async function connectToServer(
     }
 
     connection.connected = true;
-  } catch (error) {
+  } catch {
     connection.lastConnectionAttempt = new Date();
     connection.reconnectAttempts++;
     throw error;
@@ -71,7 +71,7 @@ export async function reconnectToServer(
 
   try {
     await connectToServer(config, connection);
-  } catch (error) {
+  } catch {
     connection.reconnectBackoffMs = Math.min(
       connection.reconnectBackoffMs * 2,
       MAX_RECONNECT_BACKOFF_MS
@@ -215,7 +215,7 @@ export async function publishEvent(
       topic,
       payload,
     });
-  } catch (error) {
+  } catch {
     console.warn(`Failed to publish MCP event ${topic}:`, error);
   }
 }

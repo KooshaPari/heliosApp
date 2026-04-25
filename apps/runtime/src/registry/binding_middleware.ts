@@ -6,8 +6,8 @@
  */
 
 import type { RegistryQueryInterface, TerminalBinding } from "./binding_triple.js";
-import { BindingState, validateBindingTriple } from "./binding_triple.js";
-import { TerminalNotFound, InvalidBinding } from "./terminal_registry.js";
+
+
 import type { TerminalRegistry } from "./terminal_registry.js";
 
 export interface ValidationError {
@@ -49,7 +49,7 @@ export class BindingMiddleware {
    */
   validateBeforeOperation(terminalId: string, _operation?: string): MiddlewareValidationResult {
     // Check terminal exists
-    const binding = this.registry.get(terminalId);
+    const _binding = this.registry.get(terminalId);
     if (!binding) {
       return {
         valid: false,

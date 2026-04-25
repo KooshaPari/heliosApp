@@ -8,6 +8,9 @@ import {
 } from "../../../src/registry/terminal_registry.js";
 import { BindingState, type BindingTriple } from "../../../src/registry/binding_triple.js";
 
+// Traces to: FR-BND-001 (terminal registry), FR-BND-002 (reject invalid),
+// FR-BND-003 (validate consistency), FR-BND-004 (lifecycle updates), FR-BND-008 (persist)
+
 describe("TerminalRegistry", () => {
   let registry: TerminalRegistry;
 
@@ -23,7 +26,7 @@ describe("TerminalRegistry", () => {
         sessionId: "session-1",
       };
 
-      const binding = registry.register("terminal-1", triple);
+      const _binding = registry.register("terminal-1", triple);
 
       expect(binding.terminalId).toBe("terminal-1");
       expect(binding.binding).toEqual(triple);
@@ -105,14 +108,14 @@ describe("TerminalRegistry", () => {
       };
 
       registry.register("terminal-1", triple);
-      const binding = registry.get("terminal-1");
+      const _binding = registry.get("terminal-1");
 
       expect(binding).toBeDefined();
       expect(binding?.terminalId).toBe("terminal-1");
     });
 
     it("should return undefined for unregistered terminal", () => {
-      const binding = registry.get("terminal-nonexistent");
+      const _binding = registry.get("terminal-nonexistent");
       expect(binding).toBeUndefined();
     });
   });
@@ -203,7 +206,7 @@ describe("TerminalRegistry", () => {
       registry.register("terminal-1", triple);
       registry.unregister("terminal-1");
 
-      const binding = registry.get("terminal-1");
+      const _binding = registry.get("terminal-1");
       expect(binding).toBeUndefined();
     });
 
@@ -249,7 +252,7 @@ describe("TerminalRegistry", () => {
     });
 
     it("should query by lane", () => {
-      const results = registry.getByLane("lane-1");
+      const _results = registry.getByLane("lane-1");
 
       expect(results).toHaveLength(2);
       expect(results.map(b => b.terminalId)).toContain("terminal-1");
@@ -257,14 +260,14 @@ describe("TerminalRegistry", () => {
     });
 
     it("should query by session", () => {
-      const results = registry.getBySession("session-2");
+      const _results = registry.getBySession("session-2");
 
       expect(results).toHaveLength(1);
       expect(results[0].terminalId).toBe("terminal-2");
     });
 
     it("should query by workspace", () => {
-      const results = registry.getByWorkspace("ws-1");
+      const _results = registry.getByWorkspace("ws-1");
 
       expect(results).toHaveLength(3);
     });

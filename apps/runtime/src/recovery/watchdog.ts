@@ -176,7 +176,7 @@ export class Watchdog {
       // Atomic write: write to temp file then rename
       await fs.writeFile(tempPath, JSON.stringify(event, null, 2));
       await fs.rename(tempPath, recordPath);
-    } catch (err) {
+    } catch {
       // Silently fail - watchdog should not crash due to I/O errors
       console.error("Failed to write crash record:", err);
     }

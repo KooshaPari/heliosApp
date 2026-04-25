@@ -14,7 +14,8 @@ afterEach(() => {
   for (const pid of pidsToCleanup) {
     try {
       process.kill(pid, "SIGKILL");
-    } catch {
+    // eslint-disable-next-line no-unused-vars
+    } catch (_err) {
       /* already exited */
     }
   }
@@ -28,7 +29,7 @@ describe("PTY lifecycle integration", () => {
     const bus = new InMemoryBusPublisher();
     const mgr = new PtyManager(10, bus);
 
-    const record = await mgr.spawn({
+    const _record = await mgr.spawn({
       shell: "/bin/sh",
       laneId: "lane-1",
       sessionId: "sess-1",
@@ -69,7 +70,7 @@ describe("PTY lifecycle integration", () => {
     });
     pidsToCleanup.push(proc.pid);
 
-    const record = await mgr.spawn({
+    const _record = await mgr.spawn({
       shell: "/bin/sh",
       laneId: "lane-1",
       sessionId: "sess-1",
@@ -101,7 +102,7 @@ describe("PTY lifecycle integration", () => {
     const bus = new InMemoryBusPublisher();
     const mgr = new PtyManager(10, bus);
 
-    const record = await mgr.spawn({
+    const _record = await mgr.spawn({
       shell: "/bin/sh",
       laneId: "lane-1",
       sessionId: "sess-1",
@@ -132,7 +133,7 @@ describe("PTY lifecycle integration", () => {
     const bus = new InMemoryBusPublisher();
     const mgr = new PtyManager(10, bus);
 
-    const record = await mgr.spawn({
+    const _record = await mgr.spawn({
       shell: "/bin/sh",
       laneId: "lane-1",
       sessionId: "sess-1",
@@ -143,7 +144,8 @@ describe("PTY lifecycle integration", () => {
     // Kill the process externally.
     try {
       process.kill(record.pid, "SIGKILL");
-    } catch {
+    // eslint-disable-next-line no-unused-vars
+    } catch (_err) {
       // may already be dead
     }
 

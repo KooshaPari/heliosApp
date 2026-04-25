@@ -12,7 +12,7 @@ import {
 // Mock Bun.spawn to avoid slow system_profiler calls in tests
 const originalSpawn = Bun.spawn;
 beforeEach(() => {
-  (Bun as any).spawn = mock((...args: any[]) => {
+  (Bun as any).spawn = mock((..._args: any[]) => {
     // Return a fake process with stdout that has Metal info
     const encoder = new TextEncoder();
     const data = encoder.encode("Metal: Supported");
@@ -52,14 +52,14 @@ describe("Capability detection", () => {
   });
 
   test("detectCapabilities caches result", async () => {
-    const caps1 = await detectCapabilities();
+    const _caps1 = await detectCapabilities();
     const caps2 = await detectCapabilities();
     // Same reference from cache
     expect(caps1).toBe(caps2);
   });
 
   test("detectCapabilities forceRefresh re-detects", async () => {
-    const caps1 = await detectCapabilities();
+    const _caps1 = await detectCapabilities();
     const caps2 = await detectCapabilities(true);
     // Both valid but may be different objects
     expect(caps2).toBeDefined();

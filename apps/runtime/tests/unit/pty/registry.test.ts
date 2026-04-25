@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-062: PTY Registry Tests
  * Verifies: FR-PTY-002 (Process registry mapping), FR-PTY-008 (Orphaned PTY detection)
+ * Traces to: FR-MVP-008 (multiple terminals), FR-MVP-006 (spawn PTY)
  */
 import { describe, expect, it, beforeEach } from "bun:test";
 import {

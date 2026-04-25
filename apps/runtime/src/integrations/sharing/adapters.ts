@@ -65,8 +65,8 @@ export class UptermAdapter implements ShareBackendAdapter {
       }
 
       // Generate upterm command
-      const attachCommand = `zellij attach ${zellijSessionName}`;
-      const uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
+      const _attachCommand = `zellij attach ${zellijSessionName}`;
+      const _uptermCommand = `upterm host --server ${this.config.server || "upterm.io"} -- ${attachCommand}`;
 
       // Mock implementation: return simulated result
       const link = `https://upterm.io/${terminalId}-${Date.now()}`;
@@ -75,7 +75,7 @@ export class UptermAdapter implements ShareBackendAdapter {
         link,
         process: { pid: Math.floor(Math.random() * 100000) + 1000 },
       };
-    } catch (error) {
+    } catch {
       if (String(error).includes("not found")) {
         throw new Error(
           "upterm binary not found. Install with: curl https://upterm.dev/install.sh | bash"
@@ -145,8 +145,8 @@ export class TmateAdapter implements ShareBackendAdapter {
       }
 
       // Generate tmate command
-      const attachCommand = `zellij attach ${zellijSessionName}`;
-      const tmateCommand = `tmate -F -c "${attachCommand}"`;
+      const _attachCommand = `zellij attach ${zellijSessionName}`;
+      const _tmateCommand = `tmate -F -c "${attachCommand}"`;
 
       // Mock implementation: return simulated result
       // Tmate typically outputs link to stderr
@@ -156,7 +156,7 @@ export class TmateAdapter implements ShareBackendAdapter {
         link,
         process: { pid: Math.floor(Math.random() * 100000) + 1000 },
       };
-    } catch (error) {
+    } catch {
       if (String(error).includes("not found")) {
         throw new Error(
           "tmate binary not found. Install with: brew install tmate (macOS) or apt install tmate (Linux)"

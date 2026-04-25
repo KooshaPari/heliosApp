@@ -5,10 +5,9 @@
  * Prerequisites: skips if rio binary not available or feature flag not enabled.
  */
 
-import { describe, it, expect, beforeAll, beforeEach, afterEach } from "bun:test";
 import { RioBackend } from "../../../../src/renderer/rio/backend.js";
 import { RendererRegistry } from "../../../../src/renderer/registry.js";
-import { detectRioBinary, isRioEnabled, registerRio } from "../../../../src/renderer/rio/index.js";
+
 import type {
   RendererAdapter,
   RendererConfig,
@@ -69,7 +68,7 @@ function createMockGhostty(): RendererAdapter & { _state: RendererState } {
   return adapter;
 }
 
-const DEFAULT_CONFIG: RendererConfig = {
+const _DEFAULT_CONFIG: RendererConfig = {
   gpuAcceleration: false,
   colorDepth: 24,
   maxDimensions: { cols: 200, rows: 50 },
@@ -81,13 +80,13 @@ const DEFAULT_CONFIG: RendererConfig = {
 
 describe("Rio registration — feature flag off", () => {
   it("does not register when flag disabled", async () => {
-    const registry = new RendererRegistry();
+    const _registry = new RendererRegistry();
     await registerRio(registry, { featureFlags: { rioRenderer: false } });
     expect(registry.get("rio")).toBeUndefined();
   });
 
   it("does not register when flag missing", async () => {
-    const registry = new RendererRegistry();
+    const _registry = new RendererRegistry();
     await registerRio(registry, {});
     expect(registry.get("rio")).toBeUndefined();
   });
@@ -99,7 +98,7 @@ describe("Rio registration — feature flag on", () => {
       console.log("SKIP: rio binary not available");
       return;
     }
-    const registry = new RendererRegistry();
+    const _registry = new RendererRegistry();
     await registerRio(registry, { featureFlags: { rioRenderer: true } });
     expect(registry.get("rio")).toBeDefined();
     expect(registry.get("rio")?.id).toBe("rio");

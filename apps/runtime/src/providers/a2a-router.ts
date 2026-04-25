@@ -13,8 +13,6 @@ import type {
   ProviderAdapter,
   ProviderHealthStatus,
   A2AConfig,
-  A2AExecuteInput,
-  A2AExecuteOutput,
 } from "./adapter.js";
 import { NormalizedProviderError, normalizeError } from "./errors.js";
 
@@ -133,7 +131,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
       for (const endpoint of this.endpoints) {
         try {
           await this.probeEndpoint(endpoint);
-        } catch (error) {
+        } catch {
           endpoint.healthStatus = {
             state: "unavailable",
             lastCheck: new Date(),
@@ -152,7 +150,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
       await this.publishEvent("provider.a2a.initialized", {
         endpointCount: this.endpoints.length,
       });
-    } catch (error) {
+    } catch {
       const normalized = normalizeError(error, "a2a");
 
       throw new NormalizedProviderError(
@@ -199,7 +197,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
           message: "No healthy endpoints available",
         };
       }
-    } catch (error) {
+    } catch {
       this.healthStatus.failureCount++;
       this.healthStatus = {
         state: "unavailable",
@@ -252,7 +250,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
       this.inFlightDelegations.set(correlationId, abortController);
 
       try {
-        const startTime = Date.now();
+        const _startTime = Date.now();
 
         // Send delegation request
         const result = await this.sendDelegation(
@@ -262,7 +260,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
           abortController.signal
         );
 
-        const duration = Date.now() - startTime;
+        const _duration = Date.now() - startTime;
 
         // Publish success event
         await this.publishEvent("provider.a2a.delegation.completed", {
@@ -281,7 +279,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
         clearTimeout(timeoutHandle);
         this.inFlightDelegations.delete(correlationId);
       }
-    } catch (error) {
+    } catch {
       // Handle timeout
       if (error instanceof Error && error.name === "AbortError") {
         const normalized = new NormalizedProviderError(
@@ -337,7 +335,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
       };
 
       await this.publishEvent("provider.a2a.terminated", {});
-    } catch (error) {
+    } catch {
       const normalized = normalizeError(error, "a2a");
 
       throw new NormalizedProviderError(
@@ -485,7 +483,7 @@ export class A2ARouterAdapter implements ProviderAdapter<
         topic,
         payload,
       });
-    } catch (_error) {
+    } catch {
       // Best-effort event publishing should not fail delegation flow.
     }
   }

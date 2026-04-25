@@ -39,7 +39,7 @@ function makeMockProcess(): {
 
 describe("writeInput", () => {
   it("writes data to the process stdin", () => {
-    const record = makeRecord();
+    const _record = makeRecord();
     const { proc, written } = makeMockProcess();
     const processMap: ProcessMap = new Map();
     processMap.set(record.ptyId, proc);
@@ -54,7 +54,7 @@ describe("writeInput", () => {
   });
 
   it("zero-length write is a no-op", () => {
-    const record = makeRecord();
+    const _record = makeRecord();
     const processMap: ProcessMap = new Map();
     const bus = new InMemoryBusPublisher();
 
@@ -63,7 +63,7 @@ describe("writeInput", () => {
   });
 
   it("rejects writes to non-active PTY", () => {
-    const record = makeRecord({ state: "stopped" });
+    const _record = makeRecord({ state: "stopped" });
     const processMap: ProcessMap = new Map();
     const bus = new InMemoryBusPublisher();
 
@@ -73,7 +73,7 @@ describe("writeInput", () => {
   });
 
   it("rejects writes to spawning PTY", () => {
-    const record = makeRecord({ state: "spawning" });
+    const _record = makeRecord({ state: "spawning" });
     const processMap: ProcessMap = new Map();
     const bus = new InMemoryBusPublisher();
 
@@ -83,7 +83,7 @@ describe("writeInput", () => {
   });
 
   it("allows writes to throttled PTY", () => {
-    const record = makeRecord({ state: "throttled" });
+    const _record = makeRecord({ state: "throttled" });
     const { proc, written } = makeMockProcess();
     const processMap: ProcessMap = new Map();
     processMap.set(record.ptyId, proc);
@@ -95,7 +95,7 @@ describe("writeInput", () => {
   });
 
   it("calls onError and emits event on write failure", () => {
-    const record = makeRecord();
+    const _record = makeRecord();
     const processMap: ProcessMap = new Map();
     const errorProc = {
       stdin: {

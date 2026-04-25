@@ -6,7 +6,7 @@
 
 import { describe, it, expect, beforeEach } from "bun:test";
 import { ProviderRegistry } from "../registry.js";
-import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
+
 import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 
@@ -31,7 +31,7 @@ class TestProvider implements ProviderAdapter<ACPConfig, ACPExecuteInput, ACPExe
     };
   }
 
-  async execute(input: ACPExecuteInput, correlationId: string): Promise<ACPExecuteOutput> {
+  async execute(_input: ACPExecuteInput, _correlationId: string): Promise<ACPExecuteOutput> {
     if (!this.initialized) {
       throw new Error("Not initialized");
     }

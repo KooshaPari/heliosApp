@@ -2,6 +2,8 @@ import { describe, it, expect } from "bun:test";
 import { parseId } from "../src/parse.js";
 import { generateId, type EntityType } from "../src/index.js";
 
+// Traces to: FR-ID-007 (ID parsing: extract entity type and timestamp)
+
 // FR-007: parseId round-trip
 describe("parseId", () => {
 	const entities: EntityType[] = [

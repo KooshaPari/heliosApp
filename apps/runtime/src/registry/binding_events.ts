@@ -59,7 +59,7 @@ export class BindingEventEmitter {
 
     try {
       await this.bus.publish(event as any);
-    } catch (error) {
+    } catch {
       console.error(`Failed to emit binding event ${topic}:`, error);
     }
   }
@@ -140,7 +140,7 @@ export class BindingEventEmitter {
 
     try {
       await this.bus.publish(event as any);
-    } catch (error) {
+    } catch {
       console.error(`Failed to emit validation_failed event:`, error);
     }
   }

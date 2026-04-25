@@ -204,7 +204,7 @@ export class RemediationEngine {
             resourceType: orphan.type,
           };
       }
-    } catch (error) {
+    } catch {
       return {
         resourceId: orphan.path || String(orphan.pid),
         success: false,
@@ -246,7 +246,7 @@ export class RemediationEngine {
           resourceType: "worktree",
         };
       }
-    } catch (error) {
+    } catch {
       return {
         resourceId: orphan.path,
         success: false,
@@ -304,7 +304,7 @@ export class RemediationEngine {
           resourceType: "zellij_session",
         };
       }
-    } catch (error) {
+    } catch {
       return {
         resourceId: orphan.path,
         success: false,
@@ -371,7 +371,7 @@ export class RemediationEngine {
           resourceType: "pty_process",
         };
       }
-    } catch (error) {
+    } catch {
       return {
         resourceId: String(orphan.pid),
         success: false,
@@ -450,7 +450,7 @@ export class RemediationEngine {
         const entries = Array.from(this.cooldownMap.values());
         fs.writeFile(this.cooldownPath, JSON.stringify(entries, null, 2));
       });
-    } catch (error) {
+    } catch {
       console.error("Failed to save cooldown map:", error);
     }
   }

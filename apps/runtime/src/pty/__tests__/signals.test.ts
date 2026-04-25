@@ -98,8 +98,8 @@ describe("resize", () => {
     const pid = spawnShellProcess();
     pidsToCleanup.push(pid);
 
-    const registry = new PtyRegistry();
-    const record = makeRecord({ pid });
+    const _registry = new PtyRegistry();
+    const _record = makeRecord({ pid });
     registry.register(record);
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
@@ -126,8 +126,8 @@ describe("resize", () => {
   });
 
   it("rejects invalid dimensions", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord();
+    const _registry = new PtyRegistry();
+    const _record = makeRecord();
     registry.register(record);
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
@@ -140,8 +140,8 @@ describe("resize", () => {
   });
 
   it("rejects resize on errored PTY", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord({ state: "errored" });
+    const _registry = new PtyRegistry();
+    const _record = makeRecord({ state: "errored" });
     registry.register(record);
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
@@ -150,8 +150,8 @@ describe("resize", () => {
   });
 
   it("rejects resize on stopped PTY", () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord({ state: "stopped" });
+    const _registry = new PtyRegistry();
+    const _record = makeRecord({ state: "stopped" });
     registry.register(record);
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
@@ -162,8 +162,8 @@ describe("resize", () => {
 
 describe("terminate", () => {
   it("terminates with SIGTERM and cleans up", async () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord({ pid: 99998 });
+    const _registry = new PtyRegistry();
+    const _record = makeRecord({ pid: 99998 });
     registry.register(record);
     const lifecycle = new PtyLifecycle(record.ptyId, "active");
     const historyMap: SignalHistoryMap = new Map();
@@ -192,8 +192,8 @@ describe("terminate", () => {
   });
 
   it("is idempotent on stopped PTY", async () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord({ state: "stopped" });
+    const _registry = new PtyRegistry();
+    const _record = makeRecord({ state: "stopped" });
     // Don't register — already cleaned up.
     const lifecycle = new PtyLifecycle(record.ptyId, "stopped");
     const historyMap: SignalHistoryMap = new Map();
@@ -205,8 +205,8 @@ describe("terminate", () => {
   });
 
   it("escalates to SIGKILL after grace period", async () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord({ pid: 99999 });
+    const _registry = new PtyRegistry();
+    const _record = makeRecord({ pid: 99999 });
     registry.register(record);
     const lifecycle = new PtyLifecycle(record.ptyId, "active");
     const historyMap: SignalHistoryMap = new Map();
@@ -246,8 +246,8 @@ describe("terminate", () => {
   });
 
   it("handles terminate on throttled PTY", async () => {
-    const registry = new PtyRegistry();
-    const record = makeRecord({ pid: 99998, state: "throttled" });
+    const _registry = new PtyRegistry();
+    const _record = makeRecord({ pid: 99998, state: "throttled" });
     registry.register(record);
     const lifecycle = new PtyLifecycle(record.ptyId, "throttled");
     const historyMap: SignalHistoryMap = new Map();
@@ -278,7 +278,7 @@ describe("sendSighup", () => {
     const pid = spawnShellProcess();
     pidsToCleanup.push(pid);
 
-    const record = makeRecord({ pid });
+    const _record = makeRecord({ pid });
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
     const envelope = sendSighup(record, historyMap, bus);
@@ -289,7 +289,7 @@ describe("sendSighup", () => {
 
   it("records failed delivery for dead process", () => {
     // Use a non-existent PID to avoid sending signals to the test process
-    const record = makeRecord({ pid: 999999 });
+    const _record = makeRecord({ pid: 999999 });
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
 

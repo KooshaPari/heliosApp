@@ -29,11 +29,11 @@ function makeRecord(
 
 describe("IdleMonitor", () => {
   it("transitions idle PTY to throttled", () => {
-    const registry = new PtyRegistry();
+    const _registry = new PtyRegistry();
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 
@@ -54,11 +54,11 @@ describe("IdleMonitor", () => {
   });
 
   it("does not throttle PTY with recent output", () => {
-    const registry = new PtyRegistry();
+    const _registry = new PtyRegistry();
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 
@@ -75,11 +75,11 @@ describe("IdleMonitor", () => {
   });
 
   it("does not throttle disabled PTYs", () => {
-    const registry = new PtyRegistry();
+    const _registry = new PtyRegistry();
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 
@@ -94,11 +94,11 @@ describe("IdleMonitor", () => {
   });
 
   it("transitions throttled PTY back to active on output", () => {
-    const registry = new PtyRegistry();
+    const _registry = new PtyRegistry();
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1", { state: "throttled" });
+    const _record = makeRecord(registry, "pty-1", { state: "throttled" });
     const lifecycle = new PtyLifecycle("pty-1", "throttled");
     lifecycles.set("pty-1", lifecycle);
 
@@ -111,11 +111,11 @@ describe("IdleMonitor", () => {
   });
 
   it("supports per-PTY timeout override", () => {
-    const registry = new PtyRegistry();
+    const _registry = new PtyRegistry();
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 
-    const record = makeRecord(registry, "pty-1");
+    const _record = makeRecord(registry, "pty-1");
     const lifecycle = new PtyLifecycle("pty-1", "active");
     lifecycles.set("pty-1", lifecycle);
 
@@ -131,7 +131,7 @@ describe("IdleMonitor", () => {
   });
 
   it("remove cleans up tracking", () => {
-    const registry = new PtyRegistry();
+    const _registry = new PtyRegistry();
     const bus = new InMemoryBusPublisher();
     const lifecycles = new Map<string, PtyLifecycle>();
 

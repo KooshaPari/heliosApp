@@ -148,7 +148,7 @@ export class GhosttyInputRelay {
    * Tear down the input relay for the given PTY.
    */
   teardownInputRelay(ptyId: string): void {
-    const binding = this._bindings.get(ptyId);
+    const _binding = this._bindings.get(ptyId);
     if (binding === undefined) return;
 
     binding.teardown?.();
@@ -175,7 +175,7 @@ export class GhosttyInputRelay {
       return;
     }
 
-    const binding = this._bindings.get(this._focusedPtyId);
+    const _binding = this._bindings.get(this._focusedPtyId);
     if (binding === undefined) {
       console.warn(
         `[ghostty/input] Focused PTY "${this._focusedPtyId}" has no input relay binding; discarding.`
@@ -208,7 +208,7 @@ export class GhosttyInputRelay {
    * Tear down all input relay bindings.
    */
   teardownAll(): void {
-    for (const ptyId of [...this._bindings.keys()]) {
+    for (const ptyId of this._bindings.keys()) {
       this.teardownInputRelay(ptyId);
     }
   }

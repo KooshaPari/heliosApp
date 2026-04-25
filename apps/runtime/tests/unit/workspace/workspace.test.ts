@@ -2,6 +2,10 @@
 // FR-001: Workspace CRUD lifecycle
 // FR-002: Unique workspace names
 // FR-008: Deletion guard with active sessions
+// Traces to: FR-PER-001 (workspace CRUD), FR-PER-002 (unique names), FR-PER-003 (project binding),
+// FR-PER-004 (validate paths), FR-PER-005 (persist metadata), FR-PER-006 (restore on startup),
+// FR-PER-009 (workspace lifecycle events), FR-PER-010 (assign workspace_id),
+// FR-MVP-011 (persist conversations/state), FR-MVP-013 (persist lane/session)
 
 import { describe, test, expect } from "bun:test";
 import {

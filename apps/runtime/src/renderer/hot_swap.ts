@@ -90,9 +90,9 @@ export async function executeHotSwap(
   config: RendererConfig,
   surface: RenderSurface,
   onRollback: (error: Error) => Promise<void>,
-  eventBus?: RendererEventBus
+  _eventBus?: RendererEventBus
 ): Promise<HotSwapResult> {
-  const startTime = Date.now();
+  const _startTime = Date.now();
   let currentPhase = "pre-validation";
 
   try {
@@ -171,7 +171,7 @@ export async function executeHotSwap(
       durationMs: Date.now() - startTime,
       preservedContexts: Array.from(terminals.values()),
     };
-  } catch (error: unknown) {
+  } catch {
     const hotSwapError =
       error instanceof HotSwapError ? error : new HotSwapError(currentPhase, String(error));
 

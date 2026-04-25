@@ -4,6 +4,9 @@ import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 
+// Traces to: FR-AUD-001 (structured schema), FR-AUD-002 (append-only),
+// FR-AUD-005 (search/filter), FR-MVP-003 (display tool calls), FR-MVP-011 (persist conversations)
+
 describe("AuditLedger", () => {
   let ledger: AuditLedger;
   let ringBuffer: AuditRingBuffer;
@@ -54,30 +57,30 @@ describe("AuditLedger", () => {
     });
 
     it("should filter by workspace ID", () => {
-      const results = ledger.search({ workspaceId: "ws-1" });
+      const _results = ledger.search({ workspaceId: "ws-1" });
       expect(results.every(e => e.workspaceId === "ws-1")).toBe(true);
     });
 
     it("should filter by actor", () => {
-      const results = ledger.search({ actor: "agent-0" });
+      const _results = ledger.search({ actor: "agent-0" });
       expect(results.every(e => e.actor === "agent-0")).toBe(true);
     });
 
     it("should filter by event type", () => {
-      const results = ledger.search({
+      const _results = ledger.search({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
       });
       expect(results.every(e => e.eventType === AUDIT_EVENT_TYPES.COMMAND_EXECUTED)).toBe(true);
     });
 
     it("should merge results from ring buffer and store", () => {
-      const results = ledger.search({ workspaceId: "ws-1", limit: 100 });
+      const _results = ledger.search({ workspaceId: "ws-1", limit: 100 });
       expect(results.length).toBeGreaterThan(0);
       expect(results.length).toBeLessThanOrEqual(100);
     });
 
     it("should maintain chronological order", () => {
-      const results = ledger.search({ workspaceId: "ws-1", limit: 100 });
+      const _results = ledger.search({ workspaceId: "ws-1", limit: 100 });
 
       for (let i = 1; i < results.length; i++) {
         const prevTime = new Date(results[i - 1].timestamp).getTime();

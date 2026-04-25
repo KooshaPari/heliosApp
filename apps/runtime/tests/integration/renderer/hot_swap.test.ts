@@ -5,6 +5,8 @@
  * hot-swap transitions with multiple active terminals.
  *
  * @see FR-010-009, SC-010-002
+ * Traces to: FR-TXN-002 (attempt hot-swap when both renderers support it),
+ * FR-TXN-003 (fall back to restart-with-restore when unavailable)
  */
 
 import { describe, expect, it } from "bun:test";
@@ -144,7 +146,7 @@ describe("Hot-swap integration", () => {
     );
 
     expect(result.success).toBe(true);
-    const context = result.preservedContexts[0]!;
+    const _context = result.preservedContexts[0]!;
     expect(context.scrollback.length).toBe(3);
   });
 
@@ -178,7 +180,7 @@ describe("Hot-swap integration", () => {
     );
 
     expect(result.success).toBe(true);
-    const context = result.preservedContexts[0]!;
+    const _context = result.preservedContexts[0]!;
     expect(context.cursorX).toBe(42);
     expect(context.cursorY).toBe(17);
   });
@@ -222,7 +224,7 @@ describe("Hot-swap integration", () => {
     );
 
     expect(result.success).toBe(true);
-    const context = result.preservedContexts[0]!;
+    const _context = result.preservedContexts[0]!;
     expect(context.env).toEqual(env);
     expect(context.cwd).toBe(cwd);
   });
@@ -244,7 +246,7 @@ describe("Hot-swap integration", () => {
       });
     }
 
-    const startTime = Date.now();
+    const _startTime = Date.now();
     const result = await executeHotSwap(
       source,
       target,

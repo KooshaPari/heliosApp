@@ -1,11 +1,12 @@
 /**
  * FR-HELIOS-089: Zellij Mux Lifecycle Integration Tests
  * Verifies: FR-ZMX-001 (Zellij session adapter), FR-ZMX-002 (Session to lane binding), FR-ZMX-008 (Session reconciliation)
+ * Traces to: FR-ZMX-001 (create/reattach/terminate sessions), FR-ZMX-002 (bind session to lane),
+ * FR-ZMX-005 (relay mux events), FR-ZMX-006 (session reattach after restart), FR-ZMX-008 (reconcile bindings)
  */
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import {
   ZellijSessionManager,
-  sessionNameForLane,
 } from "../../../../src/integrations/zellij/session.js";
 import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
 import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
@@ -90,7 +91,7 @@ function makePtyManager(): PtyManagerInterface & { spawned: string[] } {
   let counter = 0;
   return {
     spawned,
-    spawn: mock(async opts => {
+    spawn: mock(async _opts => {
       const id = `pty-${++counter}`;
       spawned.push(id);
       return { ptyId: id, pid: 1000 + counter };
@@ -178,7 +179,7 @@ describe("Integration: full lifecycle", () => {
 describe("Integration: reattach", () => {
   it("creates session, simulates restart, reattaches, verifies topology", async () => {
     const cli = new FakeCli();
-    const registry = new MuxRegistry(cli as unknown as ZellijCli);
+    const _registry = new MuxRegistry(cli as unknown as ZellijCli);
     const topology = new TopologyTracker(cli as unknown as ZellijCli);
     const bus = makeEventBus();
     const emitter = new MuxEventEmitter(bus);
@@ -217,7 +218,7 @@ describe("Integration: reattach", () => {
 describe("Integration: reconciliation", () => {
   it("creates orphans, runs reconciliation, verifies cleanup", async () => {
     const cli = new FakeCli();
-    const registry = new MuxRegistry(cli as unknown as ZellijCli);
+    const _registry = new MuxRegistry(cli as unknown as ZellijCli);
 
     // Create an orphan session (live but not in registry)
     cli.sessions.set("helios-lane-orphan", {

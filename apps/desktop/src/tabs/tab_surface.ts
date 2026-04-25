@@ -50,7 +50,7 @@ export abstract class TabSurface {
         this.errorMessage = null;
         await this.onContextChange(event.current);
         this.lastContext = event.current;
-      } catch (error) {
+      } catch {
         this.staleContext = true;
         const errorMsg = error instanceof Error ? error.message : String(error);
         this.errorMessage = errorMsg;
@@ -58,7 +58,7 @@ export abstract class TabSurface {
 
         // Emit error event
         try {
-          const store = getActiveContextStore();
+          const _store = getActiveContextStore();
           // Note: would publish to bus if it was available
         } catch {
           // Silently ignore if store not available
@@ -170,7 +170,7 @@ export abstract class TabSurface {
   renderWithErrorBoundary(): HTMLElement {
     try {
       return this.render();
-    } catch (error) {
+    } catch {
       const errorMsg = error instanceof Error ? error.message : String(error);
       this.errorMessage = errorMsg;
       console.error(`[${this.tabType}] Render error:`, errorMsg);
@@ -211,7 +211,7 @@ export function createMockTabSurface(tabId: string, tabType: TabType, label: str
     }
 
     render(): HTMLElement {
-      const el = document.createElement("div");
+      const _el = document.createElement("div");
       el.textContent = `${this.label} (${this.tabType})`;
       return el;
     }

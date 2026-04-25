@@ -28,7 +28,7 @@ describe("AuditSink", () => {
         metadata: {},
       });
 
-      const startTime = Date.now();
+      const _startTime = Date.now();
       await sink.write(event);
       const endTime = Date.now();
 

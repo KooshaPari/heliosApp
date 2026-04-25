@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { createRuntime } from "../../../src/index";
 
+// Traces to: FR-CRH-001 (detect abnormal termination), FR-CRH-002 (recovery state machine),
+// FR-CRH-006 (run orphan reconciliation), FR-CRH-007 (display recovery banner)
+
 describe("WP05 recovery watchdog and audit fidelity", () => {
   test("reattaches recoverable sessions on restart and flags unrecoverable artifacts", async () => {
     const runtimeA = createRuntime();
@@ -45,7 +48,7 @@ describe("WP05 recovery watchdog and audit fidelity", () => {
       },
     });
 
-    const checkpoint = runtimeA.exportRecoveryMetadata();
+    const _checkpoint = runtimeA.exportRecoveryMetadata();
     const runtimeB = createRuntime({ recovery_metadata: checkpoint });
     const bootstrap = runtimeB.getBootstrapResult();
 

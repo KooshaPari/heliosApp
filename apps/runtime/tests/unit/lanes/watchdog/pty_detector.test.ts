@@ -3,7 +3,7 @@
  * Verifies: FR-ORF-003 (Leaked PTY process detection)
  */
 import { describe, it, expect, beforeEach, mock } from "bun:test";
-import * as execModule from "../../../../src/integrations/exec.js";
+
 import { PtyDetector } from "../../../../src/lanes/watchdog/pty_detector.js";
 import type { TerminalRegistry } from "../../../../src/lanes/watchdog/pty_detector.js";
 

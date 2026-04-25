@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+
 import { RedactionAuditTrail } from "../audit-trail.js";
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules } from "../redaction-rules.js";
@@ -34,7 +34,7 @@ describe("RedactionAuditTrail: record creation", () => {
     const trail = new RedactionAuditTrail();
     const engine = makeEngine();
     const result = engine.redact("AKIAIOSFODNN7EXAMPLE", ctx);
-    const record = trail.record("art-1", result, ctx);
+    const _record = trail.record("art-1", result, ctx);
     expect(record.artifactId).toBe("art-1");
     expect(record.artifactType).toBe("log");
     expect(record.correlationId).toBe("corr-1");
@@ -51,7 +51,7 @@ describe("RedactionAuditTrail: no secrets in records", () => {
     const engine = makeEngine();
     const secret = "AKIAIOSFODNN7EXAMPLE";
     const result = engine.redact(secret, ctx);
-    const record = trail.record("art-1", result, ctx);
+    const _record = trail.record("art-1", result, ctx);
     // Stringify the record and ensure the secret doesn't appear
     const recordStr = JSON.stringify(record);
     expect(recordStr).not.toContain(secret);
@@ -93,14 +93,14 @@ describe("RedactionAuditTrail: listRecords filtering", () => {
     const trail = new RedactionAuditTrail();
     const engine = makeEngine();
 
-    const before = new Date();
+    const _before = new Date();
     await new Promise(r => setTimeout(r, 5));
 
     const r = engine.redact("text", ctx);
     trail.record("art-1", r, ctx);
 
     const afterTime = new Date(before.getTime() - 1);
-    const results = trail.listRecords({ since: afterTime });
+    const _results = trail.listRecords({ since: afterTime });
     expect(results.length).toBe(1);
 
     const futureTime = new Date(Date.now() + 100000);

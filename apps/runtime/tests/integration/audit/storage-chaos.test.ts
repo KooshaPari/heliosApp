@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { DefaultAuditSink } from "../../../src/audit/sink";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
@@ -58,7 +57,8 @@ describe("Storage Chaos Tests", () => {
       if (fs.existsSync(TMP_DIR)) {
         fs.rmdirSync(TMP_DIR);
       }
-    } catch (err) {
+    // eslint-disable-next-line no-unused-vars
+    } catch (_err) {
       // Ignore cleanup errors
     }
   });

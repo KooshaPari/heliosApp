@@ -3,6 +3,9 @@
  *
  * Validates the monorepo build configuration: workspace resolution,
  * tsconfig strict mode, config inheritance, and lint suppression checks.
+ *
+ * Traces to: FR-RUN-001 (Bun workspaces), FR-RUN-002 (package.json setup),
+ * FR-RUN-005 (typecheck command), FR-RUN-006 (build command)
  */
 import { describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
@@ -10,7 +13,7 @@ import { resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dir, "../../../..");
 
-function readJson(relativePath: string): unknown {
+function _readJson(relativePath: string): unknown {
   const fullPath = resolve(ROOT, relativePath);
   return JSON.parse(Bun.file(fullPath).text() as unknown as string);
 }

@@ -7,6 +7,8 @@ import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
 import { SettingsManager } from "../../../src/config/settings.js";
 import { FlagRegistry, RENDERER_ENGINE_FLAG, type FeatureFlag } from "../../../src/config/flags.js";
 
+// Traces to: FR-MVP-012 (persist settings)
+
 let tempDir: string;
 let filePath: string;
 
@@ -247,7 +249,7 @@ describe("FlagRegistry — concurrency", () => {
     await settings.init();
     flags.register(RENDERER_ENGINE_FLAG);
     flags.init();
-    const results = await Promise.all(
+    const _results = await Promise.all(
       Array.from({ length: 1000 }, () => Promise.resolve(flags.get("renderer_engine")))
     );
     expect(new Set(results).size).toBe(1);

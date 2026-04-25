@@ -3,6 +3,7 @@ import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
 import { LaneClosedError, SharedLaneCleanupError } from "../../src/lanes/sharing.js";
 
+// Traces to: FR-MVP-020 (isolated workspace lanes), FR-LAN-001, FR-LAN-002, FR-LAN-008
 describe("LaneManager", () => {
   let bus: InMemoryLocalBus;
   let mgr: LaneManager;

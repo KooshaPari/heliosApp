@@ -1,6 +1,7 @@
 /**
  * Unit tests for RendererStateMachine.
  * @see FR-010-003
+ * Traces to: FR-RND-002 (renderer state machine: uninitialized -> initializing -> running -> switching -> stopping -> stopped -> errored)
  */
 import { describe, expect, it } from "bun:test";
 import {
@@ -8,7 +9,7 @@ import {
   InvalidRendererTransitionError,
   transition,
 } from "../../../src/renderer/state_machine.js";
-import type { RendererEvent, RendererState } from "../../../src/renderer/state_machine.js";
+
 
 describe("RendererStateMachine", () => {
   it("starts in uninitialized state", () => {
@@ -168,11 +169,11 @@ describe("RendererStateMachine", () => {
 
   it("history entries have timestamps", () => {
     const sm = new RendererStateMachine();
-    const before = Date.now();
+    const _before = Date.now();
     sm.transition("init");
     const after = Date.now();
 
-    expect(sm.history[0]!.timestamp).toBeGreaterThanOrEqual(before);
+    expect(sm.history[0]!.timestamp).toBeGreaterThanOrEqual(_before);
     expect(sm.history[0]!.timestamp).toBeLessThanOrEqual(after);
   });
 });

@@ -14,7 +14,7 @@ const TEST_CONFIG: RendererConfig = {
   maxDimensions: { cols: 200, rows: 50 },
 };
 
-const TEST_SURFACE: RenderSurface = {
+const _TEST_SURFACE: RenderSurface = {
   windowId: "integration-test-window",
   bounds: { x: 0, y: 0, width: 800, height: 600 },
 };
@@ -42,7 +42,8 @@ describe("Ghostty integration - lifecycle (T013)", () => {
     if (backend !== undefined) {
       try {
         await backend.stop();
-      } catch {
+    // eslint-disable-next-line no-unused-vars
+      } catch (_err) {
         // Ignore cleanup errors
       }
       backend = undefined;
@@ -92,7 +93,7 @@ describe("Ghostty integration - lifecycle (T013)", () => {
   });
 
   test("register ghostty with renderer registry", () => {
-    const registry = new RendererRegistry();
+    const _registry = new RendererRegistry();
     backend = new GhosttyBackend("0.0.0-test");
     registry.register(backend);
     expect(registry.get("ghostty")).toBe(backend);

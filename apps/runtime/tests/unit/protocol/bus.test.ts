@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-104: Local Bus Command Dispatch Tests
  * Verifies: FR-BUS-003 (Command dispatch), FR-BUS-004 (Event fan-out)
+ * Traces to: FR-MVP-002 (stream responses), FR-MVP-004 (multi-turn context)
  */
 import { describe, expect, it, beforeEach } from "bun:test";
 import { createBus } from "../../../src/protocol/bus.js";
@@ -114,7 +115,7 @@ describe("LocalBus — command dispatch", () => {
   it("returns error when re-entrant depth limit exceeded", async () => {
     const depthBus = createBus({ maxDepth: 3 });
 
-    depthBus.registerMethod("recurse", async cmd => {
+    depthBus.registerMethod("recurse", async _cmd => {
       const nested = createCommand("recurse", {});
       return await depthBus.send(nested);
     });

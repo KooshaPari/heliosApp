@@ -166,7 +166,7 @@ export class SwitchTransactionOrchestrator {
       }
 
       return result;
-    } catch (error: unknown) {
+    } catch {
       transaction.state = "failed";
       transaction.error = error instanceof Error ? error : new Error(String(error));
       this._drainTerminalCreationQueue();
@@ -227,7 +227,7 @@ export class SwitchTransactionOrchestrator {
         transaction.error = result.error;
         return transaction;
       }
-    } catch (error: unknown) {
+    } catch {
       // Unexpected error during hot-swap
       this._transitionState(transaction, "failed");
       request.onProgress?.("failed");
@@ -290,7 +290,7 @@ export class SwitchTransactionOrchestrator {
         transaction.error = result.error;
         return transaction;
       }
-    } catch (error: unknown) {
+    } catch {
       // Unexpected error during restart-with-restore
       this._transitionState(transaction, "failed");
       request.onProgress?.("failed");

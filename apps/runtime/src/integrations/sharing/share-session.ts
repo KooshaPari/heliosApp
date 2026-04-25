@@ -82,7 +82,7 @@ export class ShareWorker {
       }, 5000);
 
       return { pid, link };
-    } catch (error) {
+    } catch {
       throw new Error(`Failed to spawn share worker: ${String(error)}`);
     }
   }
@@ -245,7 +245,7 @@ export class ShareSessionManager {
       });
 
       return session;
-    } catch (error) {
+    } catch {
       session.state = "failed";
       session.message = String(error);
 
@@ -291,7 +291,7 @@ export class ShareSessionManager {
       if (terminalSessions) {
         terminalSessions.delete(sessionId);
       }
-    } catch (error) {
+    } catch {
       throw new Error(`Failed to terminate session: ${String(error)}`);
     }
   }
@@ -338,7 +338,7 @@ export class ShareSessionManager {
         topic,
         payload,
       });
-    } catch (error) {
+    } catch {
       console.warn(`Failed to publish share event ${topic}:`, error);
     }
   }

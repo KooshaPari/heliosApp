@@ -5,6 +5,7 @@ import type { DepsRegistry } from "../deps-types";
 
 const REGISTRY_PATH = join(process.cwd(), "deps-registry.json");
 
+// Traces to: FR-DEP-001 (registry manifest), FR-DEP-003 (deterministic lockfile pins)
 describe("Dependency Manifest", () => {
 	test("valid manifest parses without errors", () => {
 		const content = readFileSync(REGISTRY_PATH, "utf-8");

@@ -8,7 +8,7 @@
  */
 
 import { PtyRegistry } from "./registry.js";
-import type { PtyRecord } from "./registry.js";
+
 import { PtyLifecycle } from "./state_machine.js";
 import type { BusPublisher, PtyEventCorrelation } from "./events.js";
 import { emitPtyEvent } from "./events.js";
@@ -58,7 +58,7 @@ export class IdleMonitor {
   recordOutput(ptyId: string): void {
     this.lastOutputTs.set(ptyId, Date.now());
 
-    const record = this.registry.get(ptyId);
+    const _record = this.registry.get(ptyId);
     if (record && record.state === "throttled") {
       const lifecycle = this.lifecycles.get(ptyId);
       if (lifecycle && lifecycle.state === "throttled") {

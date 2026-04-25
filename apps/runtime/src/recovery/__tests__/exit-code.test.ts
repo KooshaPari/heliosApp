@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { Watchdog, CrashReason, type CrashEvent } from "../watchdog.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { promises as fs } from "fs";
@@ -113,7 +112,7 @@ describe("Exit Code Monitoring", () => {
       expect(exists).toBe(true);
 
       const content = await fs.readFile(recordPath, "utf-8");
-      const record = JSON.parse(content);
+      const _record = JSON.parse(content);
       expect(record.name).toBe("test-proc");
       expect(record.pid).toBe(1234);
       expect(record.exitCode).toBe(1);
@@ -132,7 +131,7 @@ describe("Exit Code Monitoring", () => {
 
       const recordPath = path.join(tempDir, "recovery", "last-crash.json");
       const content = await fs.readFile(recordPath, "utf-8");
-      const record = JSON.parse(content);
+      const _record = JSON.parse(content);
 
       // Should have the most recent crash
       expect(record.pid).toBe(1002);

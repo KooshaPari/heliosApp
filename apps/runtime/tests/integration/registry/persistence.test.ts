@@ -2,7 +2,6 @@
  * FR-HELIOS-110: Terminal Registry Persistence Integration Tests
  * Verifies: FR-PER-001 (Workspace persistence)
  */
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import { JsonFilePersistence, InMemoryPersistence } from "../../../src/registry/persistence.js";
 import { promises as fs } from "fs";
@@ -23,7 +22,8 @@ describe("Persistence Integration", () => {
   afterEach(async () => {
     try {
       await fs.rm(tempDir, { recursive: true, force: true });
-    } catch {}
+    // eslint-disable-next-line no-unused-vars
+    } catch (_err) {}
   });
 
   describe("JsonFilePersistence", () => {

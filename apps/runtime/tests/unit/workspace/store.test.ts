@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-044: Workspace Store Tests
  * Verifies: FR-PER-001 (Workspace CRUD), FR-PER-002 (Unique workspace names), FR-PER-005 (Persistence)
+ * Traces to: FR-MVP-011 (persist conversations), FR-MVP-013 (persist lane/session)
  */
 import { describe, test, expect } from "bun:test";
 import { createInMemoryStore } from "../../../src/workspace/store.js";

@@ -1,9 +1,9 @@
 import type { LocalBusEnvelope } from "../protocol/types.js";
 import { METHODS } from "../protocol/methods.js";
 import type { RecoveryRegistry } from "../sessions/registry.js";
-import type { RuntimeAuditRecord } from "./types.js";
+
 import { RedactionEngine } from "../secrets/redaction-engine.js";
-import type { InMemoryLocalBus } from "../protocol/bus.js";
+
 import { handleTerminalCommand, type RuntimeTerminalContext } from "./terminal.js";
 
 export type RuntimeOpsContext = RuntimeTerminalContext & {
@@ -12,7 +12,7 @@ export type RuntimeOpsContext = RuntimeTerminalContext & {
   rawBusRequest?: (command: LocalBusEnvelope) => Promise<LocalBusEnvelope>;
 };
 
-const METHOD_SET = new Set<string>(METHODS);
+const _METHOD_SET = new Set<string>(METHODS);
 
 function normalizePayload(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {

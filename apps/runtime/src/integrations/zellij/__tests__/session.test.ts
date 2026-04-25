@@ -1,4 +1,3 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import { ZellijCli } from "../cli.js";
 import { MuxRegistry } from "../registry.js";
 import { ZellijSessionManager, sessionNameForLane } from "../session.js";
@@ -63,7 +62,7 @@ describe("ZellijSessionManager", () => {
       });
 
       const cli = new ZellijCli();
-      const registry = new MuxRegistry();
+      const _registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
       const session = await manager.createSession("test-1");
@@ -80,7 +79,7 @@ describe("ZellijSessionManager", () => {
       Bun.spawn = mock(() => makeMockProc("helios-lane-dup  2026-02-27 10:00:00", "", 0));
 
       const cli = new ZellijCli();
-      const registry = new MuxRegistry();
+      const _registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
       await expect(manager.createSession("dup")).rejects.toThrow(SessionAlreadyExistsError);
@@ -93,7 +92,7 @@ describe("ZellijSessionManager", () => {
       Bun.spawn = mock(() => makeMockProc("helios-lane-reattach  2026-02-27 10:00:00", "", 0));
 
       const cli = new ZellijCli();
-      const registry = new MuxRegistry();
+      const _registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
       const session = await manager.reattachSession("helios-lane-reattach");
@@ -110,7 +109,7 @@ describe("ZellijSessionManager", () => {
       Bun.spawn = mock(() => makeMockProc("", "", 0));
 
       const cli = new ZellijCli();
-      const registry = new MuxRegistry();
+      const _registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
       await expect(manager.reattachSession("helios-lane-missing")).rejects.toThrow(
@@ -137,7 +136,7 @@ describe("ZellijSessionManager", () => {
       });
 
       const cli = new ZellijCli();
-      const registry = new MuxRegistry();
+      const _registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
       // First reattach to bind it
@@ -156,7 +155,7 @@ describe("ZellijSessionManager", () => {
       Bun.spawn = mock(() => makeMockProc("", "No session named 'foo' found.", 1));
 
       const cli = new ZellijCli();
-      const registry = new MuxRegistry();
+      const _registry = new MuxRegistry();
       const manager = new ZellijSessionManager(cli, registry);
 
       // Should not throw

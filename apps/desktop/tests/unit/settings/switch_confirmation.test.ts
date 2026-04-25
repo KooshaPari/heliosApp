@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { SwitchConfirmation } from "../../../src/settings/switch_confirmation";
 
 describe("SwitchConfirmation", () => {

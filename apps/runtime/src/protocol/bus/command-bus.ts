@@ -140,7 +140,7 @@ export class CommandBusImpl implements LocalBus {
         );
       }
       return result as ResponseEnvelope;
-    } catch (err) {
+    } catch {
       const msg =
         err instanceof Error ? err.message.replace(/\/[\w/.:-]+/g, "<path>") : String(err);
       return makeErrorResponse(
@@ -196,14 +196,14 @@ export class CommandBusImpl implements LocalBus {
       (event as unknown as Record<string, unknown>)["correlation_id"] = this.activeCorrelationId;
     }
 
-    const topic = event.topic;
+    const _topic = event.topic;
 
     // Assign per-topic sequence number
-    const currentSeq = this.topicSequenceCounters.get(topic) ?? 0;
+    const currentSeq = this.topicSequenceCounters.get(_topic) ?? 0;
     const nextSeq = currentSeq + 1;
-    this.topicSequenceCounters.set(topic, nextSeq);
+    this.topicSequenceCounters.set(_topic, nextSeq);
     (event as unknown as Record<string, unknown>)["sequence"] = nextSeq;
-    const list = this.subscribers.get(topic);
+    const list = this.subscribers.get(_topic);
     if (!list) {
       return;
     }

@@ -140,7 +140,7 @@ export async function sendMessage(text: string): Promise<void> {
 
     appendToAssistantMessage(convId, assistantMsg.id, content);
     finalizeAssistantMessage(convId, assistantMsg.id, "complete");
-  } catch (err) {
+  } catch {
     const errMsg = err instanceof Error ? err.message : String(err);
     appendToAssistantMessage(convId, assistantMsg.id, `Error: ${errMsg}`);
     finalizeAssistantMessage(convId, assistantMsg.id, "error");

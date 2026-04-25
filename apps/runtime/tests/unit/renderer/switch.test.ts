@@ -1,12 +1,13 @@
 /**
  * FR-HELIOS-056: Renderer Switch Transaction Tests
  * Verifies: FR-TXN-001 (Atomic transactions), FR-TXN-002 (Hot-swap), FR-TXN-004 (Automatic rollback), FR-TXN-008 (Lifecycle events)
+ * Traces to: FR-RND-004 (renderer switch as transaction), FR-TXN-007 (reject concurrent switches)
  */
 import { describe, expect, it } from "bun:test";
 import {
   switchRenderer,
   SwitchSameRendererError,
-  SwitchTimeoutError,
+  
 } from "../../../src/renderer/switch.js";
 import { RendererRegistry } from "../../../src/renderer/registry.js";
 import { RendererStateMachine } from "../../../src/renderer/state_machine.js";

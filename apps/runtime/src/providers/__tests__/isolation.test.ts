@@ -7,8 +7,8 @@
  */
 
 import { describe, it, expect } from "bun:test";
-import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
-import { NormalizedProviderError, normalizeError } from "../errors.js";
+
+
 import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 
 /**
@@ -108,7 +108,7 @@ describe("Process-Level Isolation", () => {
       for (let i = 0; i < 3; i++) {
         try {
           await laneProviderA.execute({ prompt: "test" }, "corr-123");
-        } catch (_e) {
+        } catch {
           // Expected
         }
       }
@@ -134,7 +134,7 @@ describe("Process-Level Isolation", () => {
       for (let i = 0; i < 100; i++) {
         try {
           await provider.execute({ prompt: `test-${i}` }, `corr-${i}`);
-        } catch (e) {
+        } catch {
           // Handle error
         }
       }
@@ -204,7 +204,7 @@ describe("Process-Level Isolation", () => {
       }
 
       // Execute in all lanes
-      const results = await Promise.all(
+      const _results = await Promise.all(
         providers.map(p => p.execute({ prompt: "test" }, "corr-123"))
       );
 
@@ -230,7 +230,7 @@ describe("Process-Level Isolation", () => {
       providers[3].setCrash(true);
 
       // Execute in all lanes and track results
-      const results = await Promise.allSettled(
+      const _results = await Promise.allSettled(
         providers.map((p, i) => p.execute({ prompt: `test-${i}` }, `corr-${i}`))
       );
 
@@ -271,7 +271,7 @@ describe("Process-Level Isolation", () => {
       for (let i = 0; i < 5; i++) {
         try {
           await providers[1].execute({ prompt: "test" }, `corr-${i}`);
-        } catch (e) {
+        } catch {
           // Expected
         }
       }
@@ -295,7 +295,7 @@ describe("Process-Level Isolation", () => {
       await provider.init({ apiKey: "test", model: "claude-3-sonnet" });
 
       // Execute some operations
-      const result = await provider.execute({ prompt: "test" }, "corr-123");
+      const _result = await provider.execute({ prompt: "test" }, "corr-123");
       expect(result).toBeDefined();
 
       // Terminate should cleanup
@@ -315,7 +315,7 @@ describe("Process-Level Isolation", () => {
       provider.setCrash(true);
       try {
         await provider.execute({ prompt: "test" }, "corr-123");
-      } catch (e) {
+      } catch {
         // Expected
       }
 

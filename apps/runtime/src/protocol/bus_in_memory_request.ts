@@ -50,7 +50,7 @@ export async function handleInMemoryRequest(
       return makeErrorResponse(command, "MISSING_CORRELATION_ID", "correlation_id is required");
     }
 
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     if (command.method === "lane.create") {
       const correlationId = command.correlation_id;

@@ -4,7 +4,7 @@
  */
 import { test, expect, describe } from "bun:test";
 import { PolicyEngine } from "../../../src/policy/engine";
-import { PolicyClassification } from "../../../src/policy/types";
+
 
 describe("PolicyEngine", () => {
   test("evaluates command classification correctly", async () => {

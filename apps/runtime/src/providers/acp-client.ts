@@ -17,7 +17,7 @@ import type {
   ACPExecuteInput,
   ACPExecuteOutput,
 } from "./adapter.js";
-import { NormalizedProviderError, normalizeError, PROVIDER_ERROR_CODES } from "./errors.js";
+
 
 /**
  * Policy gate interface for access control.
@@ -111,7 +111,7 @@ export class ACPClientAdapter implements ProviderAdapter<
    * @throws NormalizedProviderError if init fails
    */
   async init(config: ACPConfig): Promise<void> {
-    const startTime = Date.now();
+    const _startTime = Date.now();
 
     try {
       // Validate config
@@ -133,7 +133,7 @@ export class ACPClientAdapter implements ProviderAdapter<
       }
 
       // Simulate endpoint reachability check with timeout
-      const probeTimeout = config.timeout || 10000;
+      const _probeTimeout = config.timeout || 10000;
       const probeResult = await Promise.race([
         this.probeEndpoint(config.baseUrl),
         new Promise<boolean>((_, reject) =>
@@ -163,7 +163,7 @@ export class ACPClientAdapter implements ProviderAdapter<
         endpoint: config.baseUrl,
         model: config.model,
       });
-    } catch (error) {
+    } catch {
       const normalized = normalizeError(error, "acp");
 
       throw new NormalizedProviderError(
@@ -221,7 +221,7 @@ export class ACPClientAdapter implements ProviderAdapter<
 
         return { ...this.healthStatus };
       }
-    } catch (error) {
+    } catch {
       // Increment failure count
       this.healthStatus.failureCount++;
 
@@ -306,7 +306,7 @@ export class ACPClientAdapter implements ProviderAdapter<
       this.inFlightTasks.set(correlationId, abortController);
 
       try {
-        const startTime = Date.now();
+        const _startTime = Date.now();
 
         // Construct ACP request
         const acpRequest: ACPRequest = {
@@ -325,7 +325,7 @@ export class ACPClientAdapter implements ProviderAdapter<
         // Execute task (mock implementation)
         const result = await this.sendACPRequest(acpRequest, abortController.signal);
 
-        const duration = Date.now() - startTime;
+        const _duration = Date.now() - startTime;
 
         // Publish success event
         await this.publishEvent("provider.acp.execute.completed", {
@@ -344,7 +344,7 @@ export class ACPClientAdapter implements ProviderAdapter<
         clearTimeout(timeoutHandle);
         this.inFlightTasks.delete(correlationId);
       }
-    } catch (error) {
+    } catch {
       // Handle timeout
       if (error instanceof Error && error.name === "AbortError") {
         const normalized = new NormalizedProviderError(
@@ -407,7 +407,7 @@ export class ACPClientAdapter implements ProviderAdapter<
       await this.publishEvent("provider.acp.execute.cancelled", {
         taskId,
       });
-    } catch (error) {
+    } catch {
       const normalized = normalizeError(error, "acp");
 
       throw new NormalizedProviderError(
@@ -442,7 +442,7 @@ export class ACPClientAdapter implements ProviderAdapter<
       };
 
       await this.publishEvent("provider.acp.terminated", {});
-    } catch (error) {
+    } catch {
       const normalized = normalizeError(error, "acp");
 
       throw new NormalizedProviderError(
@@ -524,7 +524,7 @@ export class ACPClientAdapter implements ProviderAdapter<
         topic,
         payload,
       });
-    } catch (error) {
+    } catch {
       // Log but don't throw (event publishing is best-effort)
       console.warn(`Failed to publish ACP event ${topic}:`, error);
     }

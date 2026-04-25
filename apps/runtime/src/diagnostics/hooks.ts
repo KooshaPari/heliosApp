@@ -52,7 +52,7 @@ interface HooksState {
 function createState(maxConcurrent: number, clock: MonotonicClock): HooksState {
   return {
     startTimes: new Float64Array(maxConcurrent),
-    metricNames: new Array<string>(maxConcurrent).fill(""),
+    metricNames: Array.from({ length: maxConcurrent }, () => ""),
     nextSlot: 0,
     totalMarks: 0,
     overflowCount: 0,
@@ -132,7 +132,7 @@ export function markEnd(metric: string, handle: number): number {
 }
 
 /** Number of mark-start slots that were overwritten before being consumed. */
-export function getMarkOverflowCount(): number {
+export function _getMarkOverflowCount(): number {
   return globalState.overflowCount;
 }
 

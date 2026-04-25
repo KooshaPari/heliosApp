@@ -5,7 +5,6 @@
 
 import { PolicyStorage } from "./storage";
 import { PolicyRuleSet } from "./rules";
-import { type CommandContext, type PolicyEvaluationResult, PolicyClassification } from "./types";
 
 /**
  * Policy evaluation engine for commands.
@@ -16,7 +15,7 @@ export class PolicyEngine {
 
   constructor(policyDir?: string) {
     this.storage = new PolicyStorage(policyDir);
-    this.storage.onRulesChanged((workspaceId, rules) => {
+    this.storage.onRulesChanged((workspaceId, _rules) => {
       this.ruleCache.delete(workspaceId);
     });
   }

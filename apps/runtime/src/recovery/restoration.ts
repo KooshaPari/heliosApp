@@ -34,7 +34,7 @@ export class RestorationPipeline {
   }
 
   async restore(checkpoint: Checkpoint): Promise<RestorationResult> {
-    const startTime = Date.now();
+    const _startTime = Date.now();
     const restored: RestoredSession[] = [];
     const failed: FailedSession[] = [];
 
@@ -61,7 +61,7 @@ export class RestorationPipeline {
             };
             restored.push(restored_session);
             await this.publishSessionRestored(restored_session);
-          } catch (err) {
+          } catch {
             // Fall through to respawn attempt
             await this.attemptRespawn(session, restored, failed);
           }
@@ -75,10 +75,10 @@ export class RestorationPipeline {
 
       // Stage 3: PTY re-spawn is handled in attemptRespawn
 
-      const duration = Date.now() - startTime;
+      const _duration = Date.now() - startTime;
       return { restored, failed, duration };
-    } catch (err) {
-      const duration = Date.now() - startTime;
+    } catch {
+      const _duration = Date.now() - startTime;
       console.error("Restoration pipeline failed:", err);
       return {
         restored,
@@ -157,7 +157,7 @@ export class RestorationPipeline {
 
       restored.push(restored_session);
       await this.publishSessionRestored(restored_session);
-    } catch (err) {
+    } catch {
       const reason = err instanceof Error ? err.message : String(err);
       const failedSession: FailedSession = {
         sessionId: session.sessionId,

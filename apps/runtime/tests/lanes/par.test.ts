@@ -1,15 +1,15 @@
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import {
   ParManager,
   _resetParIdCounter,
   ParSpawnError,
   ParNotFoundError,
   LaneNotReadyError,
-  ExecTimeoutError,
 } from "../../src/lanes/par.js";
 import type { SpawnFn, SpawnResult } from "../../src/lanes/par.js";
 import { LaneRegistry } from "../../src/lanes/registry.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
+
+// Traces to: FR-MVP-005 (interrupt/cancel), FR-MVP-009 (execute in terminal), FR-MVP-022 (muxer dispatch)
 
 // ── Mock spawn factory ──────────────────────────────────────────────────────
 
@@ -87,7 +87,7 @@ function createLaneInRegistry(
   }>
 ) {
   const laneId = overrides?.laneId ?? "test-lane-1";
-  const record = {
+  const _record = {
     laneId,
     workspaceId: overrides?.workspaceId ?? "ws-1",
     state: (overrides?.state ?? "ready") as any,
@@ -98,8 +98,8 @@ function createLaneInRegistry(
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  registry.register(record);
-  return record;
+  registry.register(_record);
+  return _record;
 }
 
 // ── Tests ───────────────────────────────────────────────────────────────────
@@ -119,7 +119,7 @@ describe("ParManager - T011: Par task binding", () => {
     const { spawnFn } = createMockSpawn({ pid: 42, exitDelay: 60000 });
     const mgr = new ParManager({ registry, bus, spawnFn });
 
-    const binding = await mgr.bindParTask("test-lane-1", "/tmp/worktree");
+    const _binding = await mgr.bindParTask("test-lane-1", "/tmp/worktree");
 
     expect(binding.laneId).toBe("test-lane-1");
     expect(binding.pid).toBe(42);
@@ -485,7 +485,7 @@ describe("ParManager - T014: Stale detection", () => {
     await mgr.runHealthCheck();
 
     // Binding should still be active
-    const binding = mgr.getBinding("test-lane-1");
+    const _binding = mgr.getBinding("test-lane-1");
     expect(binding).toBeDefined();
     expect(binding!.status).toBe("active");
   });
@@ -554,7 +554,7 @@ describe("ParManager - T015: Event completeness", () => {
     const mgr = new ParManager({ registry, bus: failBus as any, spawnFn });
 
     // Should not throw
-    const binding = await mgr.bindParTask("test-lane-1", "/tmp/worktree");
+    const _binding = await mgr.bindParTask("test-lane-1", "/tmp/worktree");
     expect(binding.pid).toBe(42);
   });
 });

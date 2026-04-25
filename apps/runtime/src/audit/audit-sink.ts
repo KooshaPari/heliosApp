@@ -78,7 +78,7 @@ export class AuditSink {
    * re-parsed before storage to ensure no secrets persist in memory.
    */
   async ingest(envelope: LocalBusEnvelope): Promise<AuditRecord | null> {
-    const topic = envelope.topic ?? "";
+    const _topic = envelope.topic ?? "";
     if (!this.watchedTopics.has(topic)) return null;
 
     const correlationId: string =
@@ -128,10 +128,9 @@ export class AuditSink {
    * them into this audit sink before forwarding to the underlying bus.
    */
   wrapBus(bus: LocalBus): LocalBus {
-    const sink = this;
     return {
       async publish(event: LocalBusEnvelope): Promise<void> {
-        await sink.ingest(event);
+        await this.ingest(event);
         await bus.publish(event);
       },
       async request(command: LocalBusEnvelope): Promise<LocalBusEnvelope> {

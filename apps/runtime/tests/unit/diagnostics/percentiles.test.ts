@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-047: Percentile Computation Tests
  * Verifies: FR-PRF-002 (Rolling percentile statistics), FR-DIAG-007 (O(n log n) computation)
+ * Traces to: FR-DIAG-007 (percentile bucket computation)
  */
 import { describe, it, expect } from "bun:test";
 import { RingBuffer } from "../../../src/diagnostics/metrics.js";
@@ -95,7 +96,7 @@ describe("computePercentiles", () => {
     buf.push(30, 1);
     buf.push(10, 2);
     buf.push(20, 3);
-    const before = Array.from(buf.getValues());
+    const _before = Array.from(buf.getValues());
     computePercentiles(buf.getValues());
     const after = Array.from(buf.getValues());
     expect(after).toEqual(before);

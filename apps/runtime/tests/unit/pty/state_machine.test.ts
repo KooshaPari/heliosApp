@@ -7,6 +7,8 @@ import {
   type PtyEvent,
 } from "../../../src/pty/state_machine.js";
 
+// Traces to: FR-MVP-006 (spawn PTY), FR-MVP-008 (multiple terminals), FR-MVP-010 (terminal resize)
+
 // ── All valid transitions ────────────────────────────────────────────────────
 
 const VALID_TRANSITIONS: [PtyState, PtyEvent, PtyState][] = [

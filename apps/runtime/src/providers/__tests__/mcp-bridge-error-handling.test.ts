@@ -2,6 +2,8 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { createMcpBridgeFixture, initMcpBridge } from "./mcp-bridge-test-helpers.js";
 import { NormalizedProviderError } from "../errors.js";
 
+// Traces to: FR-MVP-019 (graceful fallback), FR-MVP-018 (switch providers)
+
 describe("MCP Bridge Adapter - Error Handling", () => {
   let adapter: ReturnType<typeof createMcpBridgeFixture>["adapter"];
   let bus: ReturnType<typeof createMcpBridgeFixture>["bus"];

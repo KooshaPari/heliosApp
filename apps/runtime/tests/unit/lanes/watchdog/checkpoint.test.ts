@@ -19,7 +19,8 @@ describe("CheckpointManager", () => {
     // Clean up any existing test files
     try {
       await fs.rm(testDir, { recursive: true, force: true });
-    } catch {
+    // eslint-disable-next-line no-unused-vars
+    } catch (_err) {
       // Ignore cleanup errors
     }
   });
@@ -28,7 +29,8 @@ describe("CheckpointManager", () => {
     // Clean up test files
     try {
       await fs.rm(testDir, { recursive: true, force: true });
-    } catch {
+    // eslint-disable-next-line no-unused-vars
+    } catch (_err) {
       // Ignore cleanup errors
     }
   });
@@ -38,7 +40,7 @@ describe("CheckpointManager", () => {
   });
 
   it("should return null for non-existent checkpoint", async () => {
-    const checkpoint = await manager.load();
+    const _checkpoint = await manager.load();
     expect(checkpoint).toBeNull();
   });
 
@@ -103,7 +105,8 @@ describe("CheckpointManager", () => {
 
       const loaded = await manager.load();
       expect(loaded).toBeNull();
-    } catch {
+    // eslint-disable-next-line no-unused-vars
+    } catch (_err) {
       // Expected for test isolation
     }
   });

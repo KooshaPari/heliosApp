@@ -3,8 +3,6 @@ import type {
   LocalBus,
   AuditRecord,
   BusState,
-  CommandBusOptions,
-  CommandEnvelope,
   EventEnvelope,
   ResponseEnvelope,
   LocalBusEnvelopeWithSequence,
@@ -89,12 +87,12 @@ export class InMemoryLocalBus implements LocalBus {
     }
 
     // Check ordering: start topics must appear before terminal topics for same correlation
-    const topic = event.topic;
+    const _topic = event.topic;
     const correlationId = event.correlation_id ?? "";
 
-    if (topic) {
-      const isTerminal = isTerminalTopic(topic);
-      const isStart = isStartTopic(topic);
+    if (_topic) {
+      const isTerminal = isTerminalTopic(_topic);
+      const isStart = isStartTopic(_topic);
 
       if (isStart) {
         if (!this.lifecycleProgress.has(correlationId)) {
@@ -107,10 +105,10 @@ export class InMemoryLocalBus implements LocalBus {
             `Missing lifecycle progress for correlation "${correlationId}"`
           );
         }
-        if (progress.has(topic)) {
+        if (progress.has(_topic)) {
           const err = new ProtocolValidationError(
             "ORDERING_VIOLATION",
-            `Duplicate start topic "${topic}" for correlation "${correlationId}"`
+            `Duplicate start topic "${_topic}" for correlation "${correlationId}"`
           );
           this.auditLog.push({
             envelope: event,
@@ -119,7 +117,7 @@ export class InMemoryLocalBus implements LocalBus {
           });
           throw err;
         }
-        progress.add(topic);
+        progress.add(_topic);
 
         const sequencedEvent = event as LocalBusEnvelopeWithSequence;
         if (sequencedEvent.sequence === undefined) {
@@ -133,12 +131,12 @@ export class InMemoryLocalBus implements LocalBus {
 
       if (isTerminal) {
         const seen = this.lifecycleProgress.get(correlationId);
-        const expectedStart = resolveExpectedStartTopic(topic);
+        const expectedStart = resolveExpectedStartTopic(_topic);
 
-        if (!seen?.has(expectedStart) && expectedStart !== topic) {
+        if (!seen?.has(expectedStart) && expectedStart !== _topic) {
           const err = new ProtocolValidationError(
             "ORDERING_VIOLATION",
-            `Topic '${topic}' cannot be published before '${expectedStart}'`
+            `Topic '${_topic}' cannot be published before '${expectedStart}'`
           );
           this.auditLog.push({
             envelope: event,
@@ -152,7 +150,7 @@ export class InMemoryLocalBus implements LocalBus {
       }
 
       // Handle terminal.output metrics
-      if (topic === "terminal.output") {
+      if (_topic === "terminal.output") {
         const backlogDepth =
           typeof event.payload?.backlog_depth === "number"
             ? event.payload.backlog_depth
@@ -233,7 +231,7 @@ export class InMemoryLocalBus implements LocalBus {
         };
       }
 
-      const startTime = Date.now();
+      const _startTime = Date.now();
       const ctx = this.getHandlerContext();
 
       if (command.method === "lane.create") return handleLaneCreate(command, startTime, ctx);
@@ -256,11 +254,11 @@ export class InMemoryLocalBus implements LocalBus {
   }
 
   // Implement LocalBus interface (stub methods)
-  registerMethod(method: string, handler: MethodHandler): void {
+  registerMethod(_method: string, _handler: MethodHandler): void {
     // Stub for interface compliance
   }
 
-  async send(envelope: unknown): Promise<ResponseEnvelope> {
+  async send(_envelope: unknown): Promise<ResponseEnvelope> {
     return {
       id: "stub",
       type: "response",
@@ -269,7 +267,7 @@ export class InMemoryLocalBus implements LocalBus {
     };
   }
 
-  subscribe(topic: string, handler: (evt: EventEnvelope) => void | Promise<void>): () => void {
+  subscribe(_topic: string, _handler: (evt: EventEnvelope) => void | Promise<void>): () => void {
     return () => {};
   }
 

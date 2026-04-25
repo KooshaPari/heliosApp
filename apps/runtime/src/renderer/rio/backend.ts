@@ -111,7 +111,7 @@ export class RioBackend implements RendererAdapter {
       this._process = new RioProcess();
       this._capabilities.detect(config);
       this._state = "running";
-    } catch (err) {
+    } catch {
       this._state = "errored";
       throw err;
     }
@@ -166,7 +166,7 @@ export class RioBackend implements RendererAdapter {
     this._metrics.stop();
 
     // Abort all stream bindings.
-    for (const [ptyId, binding] of this._streamBindings) {
+    for (const [_ptyId, binding] of this._streamBindings) {
       binding.aborted = true;
       try {
         binding.reader.cancel().catch(() => {});
@@ -201,7 +201,7 @@ export class RioBackend implements RendererAdapter {
     }
 
     const reader = stream.getReader();
-    const binding = { reader, aborted: false };
+    const _binding = { reader, aborted: false };
     this._streamBindings.set(ptyId, binding);
 
     // Pump loop — read from PTY stream, forward to rio process.
@@ -224,7 +224,7 @@ export class RioBackend implements RendererAdapter {
   }
 
   unbindStream(ptyId: string): void {
-    const binding = this._streamBindings.get(ptyId);
+    const _binding = this._streamBindings.get(ptyId);
     if (!binding) return;
     binding.aborted = true;
     binding.reader.cancel().catch(() => {});
@@ -272,7 +272,7 @@ export class RioBackend implements RendererAdapter {
    * Uses the renderer registry to find ghostty and switch to it.
    * If ghostty is unavailable or the switch fails, transitions to errored.
    */
-  async _attemptFallback(crashError: Error): Promise<void> {
+  async _attemptFallback(_crashError: Error): Promise<void> {
     if (this._fallbackInProgress) return;
     this._fallbackInProgress = true;
 
@@ -283,7 +283,7 @@ export class RioBackend implements RendererAdapter {
         return;
       }
 
-      const ghostty = this._registry.get("ghostty");
+      const _ghostty = this._registry.get("ghostty");
       if (!ghostty) {
         // Ghostty not available — escalate to errored.
         this._state = "errored";

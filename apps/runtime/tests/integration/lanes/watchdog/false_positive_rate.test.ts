@@ -1,6 +1,5 @@
 // Integration test for false positive rate validation
 
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { unlinkSync } from "fs";
 import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
@@ -12,7 +11,7 @@ describe("False Positive Rate", () => {
   let engine: RemediationEngine;
   let bus: InMemoryLocalBus;
   let laneRegistry: LaneRegistry;
-  let classifier: ResourceClassifier;
+  let _classifier: ResourceClassifier;
 
   let testId: string;
 
@@ -23,14 +22,15 @@ describe("False Positive Rate", () => {
     engine = new RemediationEngine(laneRegistry, bus, {
       cooldownFile: `/tmp/helios-cooldown-${testId}.json`,
     });
-    classifier = new ResourceClassifier();
+    _classifier = new ResourceClassifier();
   });
 
   afterEach(() => {
     engine.stop();
     try {
       unlinkSync(`/tmp/helios-cooldown-${testId}.json`);
-    } catch {}
+    // eslint-disable-next-line no-unused-vars
+    } catch (_err) {}
   });
 
   it("should have zero false positives with healthy system", async () => {
