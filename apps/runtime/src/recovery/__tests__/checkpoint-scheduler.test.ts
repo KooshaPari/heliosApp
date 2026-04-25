@@ -32,6 +32,8 @@ describe("CheckpointScheduler", () => {
     vi.useFakeTimers();
     tempDir = path.join(os.tmpdir(), `scheduler-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
+    // Pre-create recovery subdirectory to avoid race conditions
+    await fs.mkdir(path.join(tempDir, "recovery"), { recursive: true });
     scheduler = new CheckpointScheduler();
     writer = new CheckpointWriter(tempDir);
     writeCount = 0;

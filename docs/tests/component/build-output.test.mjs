@@ -1,3 +1,9 @@
-import assert from 'node:assert/strict'
+import { describe, it, expect } from 'bun:test'
 import { existsSync } from 'node:fs'
-Deno.test('vitepress config exists', () => { assert.ok(existsSync('.vitepress/config.mts') || existsSync('.vitepress/config.ts')) })
+
+describe('VitePress build output', () => {
+  it('vitepress config exists', () => {
+    const configExists = existsSync('.vitepress/config.mts') || existsSync('.vitepress/config.ts')
+    expect(configExists).toBe(true)
+  })
+})

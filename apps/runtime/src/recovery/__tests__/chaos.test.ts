@@ -31,6 +31,8 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
   beforeEach(async () => {
     tempDir = path.join(os.tmpdir(), `chaos-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
+    // Pre-create recovery subdirectory to avoid race conditions
+    await fs.mkdir(path.join(tempDir, "recovery"), { recursive: true });
     bus = new InMemoryLocalBus();
   });
 
@@ -250,16 +252,14 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const stateMachine = new RecoveryStateMachine(tempDir, bus);
       await stateMachine.initialize();
 
-      await stateMachine.transition(RecoveryStage.DETECTING);
-
-      // Try 3 times
+      // Attempt DETECTING -> DETECTION_FAILED cycle multiple times (MAX_RETRIES_PER_STAGE = 3)
+      // Each cycle increments attemptCount for the source stage (DETECTING)
       for (let i = 0; i < 3; i++) {
-        await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
         await stateMachine.transition(RecoveryStage.DETECTING);
+        await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
       }
 
-      // Fourth attempt should fail
-      await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
+      // Fourth attempt to DETECTING from DETECTION_FAILED should fail due to max retries
       await expect(stateMachine.transition(RecoveryStage.DETECTING)).rejects.toThrow("Max retries");
     });
   });

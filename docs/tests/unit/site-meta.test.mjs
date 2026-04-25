@@ -1,4 +1,13 @@
-import assert from 'node:assert/strict'
+import { describe, it, expect } from 'bun:test'
 import { createSiteMeta } from '../../.vitepress/site-meta.mjs'
-Deno.test('createSiteMeta is a function', () => { assert.strictEqual(typeof createSiteMeta, 'function') })
-Deno.test('createSiteMeta returns an object', () => { const m = createSiteMeta({ base:'/' }); assert.strictEqual(typeof m,'object') })
+
+describe('createSiteMeta', () => {
+  it('createSiteMeta is a function', () => {
+    expect(typeof createSiteMeta).toBe('function')
+  })
+
+  it('createSiteMeta returns an object', () => {
+    const m = createSiteMeta({ base: '/' })
+    expect(typeof m).toBe('object')
+  })
+})
