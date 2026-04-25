@@ -4,6 +4,8 @@ import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 
+// Traces to: FR-MVP-003 (display tool calls), FR-MVP-011 (persist conversations)
+
 describe("AuditLedger", () => {
   let ledger: AuditLedger;
   let ringBuffer: AuditRingBuffer;

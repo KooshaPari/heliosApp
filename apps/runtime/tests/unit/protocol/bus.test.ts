@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-104: Local Bus Command Dispatch Tests
  * Verifies: FR-BUS-003 (Command dispatch), FR-BUS-004 (Event fan-out)
+ * Traces to: FR-MVP-002 (stream responses), FR-MVP-004 (multi-turn context)
  */
 import { describe, expect, it, beforeEach } from "bun:test";
 import { createBus } from "../../../src/protocol/bus.js";

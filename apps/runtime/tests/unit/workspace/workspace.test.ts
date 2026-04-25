@@ -2,6 +2,7 @@
 // FR-001: Workspace CRUD lifecycle
 // FR-002: Unique workspace names
 // FR-008: Deletion guard with active sessions
+// Traces to: FR-MVP-011 (persist conversations/state), FR-MVP-013 (persist lane/session)
 
 import { describe, test, expect } from "bun:test";
 import {

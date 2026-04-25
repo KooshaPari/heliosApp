@@ -2,6 +2,8 @@ import { describe, expect, test } from "bun:test";
 
 import { TerminalRegistry } from "../../../src/sessions/terminal_registry";
 
+// Traces to: FR-MVP-001 (chat interface), FR-MVP-008 (multiple terminals), FR-MVP-009 (execute in terminal)
+
 describe("TerminalRegistry", () => {
   test("stores and queries terminal context", () => {
     const registry = new TerminalRegistry();

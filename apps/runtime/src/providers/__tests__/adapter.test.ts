@@ -2,6 +2,7 @@
  * Tests for ProviderAdapter interface and base class
  *
  * FR-025-001: Typed adapter interface with lifecycle methods.
+ * Traces to: FR-MVP-014 (Anthropic API), FR-MVP-015 (local Apple), FR-MVP-016 (local NVIDIA), FR-MVP-018 (switch providers)
  */
 
 import { describe, it, expect } from "bun:test";

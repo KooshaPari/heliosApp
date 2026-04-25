@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-057: Renderer Capability Query Tests
  * Verifies: FR-RND-007 (Capability matrix), FR-GHT-006 (Ghostty capabilities), FR-RIO-006 (Rio capabilities)
+ * Traces to: FR-MVP-015 (local Apple), FR-MVP-016 (local NVIDIA), FR-MVP-017 (detect hardware)
  */
 import { describe, expect, it } from "bun:test";
 import { queryCapabilities, compareCapabilities } from "../../../src/renderer/capabilities.js";

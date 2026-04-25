@@ -7,6 +7,8 @@ import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
 import { SettingsManager } from "../../../src/config/settings.js";
 import { FlagRegistry, RENDERER_ENGINE_FLAG, type FeatureFlag } from "../../../src/config/flags.js";
 
+// Traces to: FR-MVP-012 (persist settings)
+
 let tempDir: string;
 let filePath: string;
 

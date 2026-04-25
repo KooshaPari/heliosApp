@@ -11,6 +11,8 @@ import type { SpawnFn, SpawnResult } from "../../src/lanes/par.js";
 import { LaneRegistry } from "../../src/lanes/registry.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
 
+// Traces to: FR-MVP-005 (interrupt/cancel), FR-MVP-009 (execute in terminal), FR-MVP-022 (muxer dispatch)
+
 // ── Mock spawn factory ──────────────────────────────────────────────────────
 
 function createMockSpawn(opts?: {

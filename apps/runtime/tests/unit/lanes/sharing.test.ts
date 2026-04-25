@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-073: Lane Sharing Tests
  * Verifies: FR-LAN-007 (Mark lanes as shared for multi-agent concurrent access)
+ * Traces to: FR-MVP-021 (terminal sharing)
  */
 import { describe, test, expect, beforeEach } from "bun:test";
 import { LaneRegistry } from "../../../src/lanes/registry.js";

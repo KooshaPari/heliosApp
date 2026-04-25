@@ -7,6 +7,8 @@ import {
 } from "../../src/lanes/registry.js";
 import type { LaneRecord } from "../../src/lanes/registry.js";
 
+// Traces to: FR-MVP-013 (persist lane/session), FR-MVP-020 (isolated workspace lanes)
+
 function makeRecord(overrides: Partial<LaneRecord> = {}): LaneRecord {
   const now = new Date().toISOString();
   return {

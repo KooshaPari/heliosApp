@@ -6,6 +6,8 @@ import { writeFile } from "node:fs/promises";
 import { JsonSettingsStore } from "../../../src/config/store.js";
 import { SETTINGS_SCHEMA } from "../../../src/config/schema.js";
 
+// Traces to: FR-MVP-012 (persist settings)
+
 let tempDir: string;
 let filePath: string;
 

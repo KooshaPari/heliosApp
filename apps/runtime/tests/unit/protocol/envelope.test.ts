@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-105: Protocol Envelope Creation and Validation Tests
  * Verifies: FR-BUS-001 (Envelope schema), FR-BUS-006 (Validation)
+ * Traces to: FR-MVP-002 (stream responses), FR-MVP-003 (display tool calls), FR-MVP-004 (multi-turn)
  */
 import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import {

@@ -3,6 +3,7 @@
  *
  * FR-025-002: Configuration validation, credential binding, concurrency limits.
  * FR-025-008: Lane binding and failure isolation.
+ * Traces to: FR-MVP-014 (Anthropic API), FR-MVP-018 (switch providers), FR-MVP-019 (graceful fallback)
  */
 
 import { describe, it, expect, beforeEach } from "bun:test";

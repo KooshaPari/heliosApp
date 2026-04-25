@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-059: Renderer Registry Tests
  * Verifies: FR-RND-003 (Renderer registry with capability metadata), FR-RND-008 (Exactly one active renderer)
+ * Traces to: FR-MVP-007 (ANSI color/cursor), FR-MVP-017 (detect hardware)
  */
 import { describe, expect, it } from "bun:test";
 import {
