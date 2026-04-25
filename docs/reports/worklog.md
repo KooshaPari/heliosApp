@@ -1,5 +1,7 @@
 # heliosApp Phase2-Decompose Worklog
 
+
+**Category: ARCHITECTURE**
 ## Client Goals (Semantic)
 
 | ID | Goal | Status | Notes |

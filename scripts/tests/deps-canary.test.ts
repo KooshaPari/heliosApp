@@ -11,6 +11,7 @@ const REPO_ROOT = process.cwd();
 const REGISTRY_PATH = join(REPO_ROOT, "deps-registry.json");
 const CHANGELOG_PATH = join(REPO_ROOT, "deps-changelog.json");
 
+// Traces to: FR-DEP-006 (canary process with quality gates), FR-DEP-007 (auto-merge passing)
 describe("Dependency Canary Upgrade Process", () => {
 	beforeEach(() => {
 		// Ensure clean changelog for testing

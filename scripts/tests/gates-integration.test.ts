@@ -2,8 +2,10 @@ import { expect, test, describe } from "bun:test";
 import { createGateReport, type GateFinding } from "../gate-report";
 
 describe("Gate Integration Tests", () => {
+	// Traces to: FR-CI-001, FR-CI-006
 	// Coverage Gate Tests
 	describe("Coverage Gate", () => {
+		// Traces to: FR-CI-006
 		test("coverage below threshold fails gate", () => {
 			const findings: GateFinding[] = [
 				{
@@ -68,8 +70,10 @@ describe("Gate Integration Tests", () => {
 		});
 	});
 
+	// Traces to: FR-CI-002, FR-CI-003, FR-CI-007 (type check, lint, security)
 	// Security Gate Tests
 	describe("Security Gate", () => {
+		// Traces to: FR-CI-007 (security scanning)
 		test("high severity vulnerability fails gate", () => {
 			const findings: GateFinding[] = [
 				{
@@ -128,8 +132,10 @@ describe("Gate Integration Tests", () => {
 		});
 	});
 
+	// Traces to: FR-CI-008 (static analysis)
 	// Static Analysis Gate Tests
 	describe("Static Analysis Gate", () => {
+		// Traces to: FR-CI-008
 		test("file exceeding length limit fails gate", () => {
 			const findings: GateFinding[] = [
 				{

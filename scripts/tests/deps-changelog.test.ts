@@ -11,6 +11,7 @@ import type { ChangelogEntry, DepsChangelog } from "../deps-types";
 const REPO_ROOT = process.cwd();
 const CHANGELOG_PATH = join(REPO_ROOT, "deps-changelog.json");
 
+// Traces to: FR-DEP-008 (dependency changelog recording)
 describe("Dependency Changelog Utility", () => {
 	beforeEach(() => {
 		// Reset changelog to empty state

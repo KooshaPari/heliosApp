@@ -3,6 +3,8 @@
  *
  * Verifies that @helios/* path aliases resolve correctly in the Bun runtime
  * context, matching the paths configured in tsconfig.base.json.
+ *
+ * Traces to: FR-RUN-007 (tsconfig strict mode), FR-RUN-008 (path alias resolution)
  */
 import { describe, expect, test } from "bun:test";
 

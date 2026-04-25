@@ -6,6 +6,7 @@ const REPO_ROOT = process.cwd();
 const CACHE_DIR = join(REPO_ROOT, ".cache");
 const CACHE_FILE = join(CACHE_DIR, "deps-status-cache.json");
 
+// Traces to: FR-DEP-002 (bun run deps:status command)
 describe("Dependency Status Command", () => {
 	beforeEach(() => {
 		// Clean up cache before each test
