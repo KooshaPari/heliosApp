@@ -221,9 +221,11 @@ describe("Gate Integration Tests", () => {
 		});
 	});
 
+	// Traces to: FR-REV-005, FR-REV-008 (compliance checking and governance logging)
 	// General Gate Report Tests
 	describe("Gate Report Schema Validation", () => {
 		test("all gate reports have required fields", () => {
+			// Traces to: FR-REV-008 (record merge with gate results)
 			const findings: GateFinding[] = [];
 			const report = createGateReport("coverage", findings, 100);
 

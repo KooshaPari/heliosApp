@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { RendererSettings } from "../../../src/settings/renderer_settings";
 import type { Renderer } from "../../../src/settings/renderer_settings";
 
+// Traces to: FR-ENG-001, FR-ENG-002
 describe("RendererSettings", () => {
   let container: HTMLDivElement;
   let settings: RendererSettings;
@@ -24,6 +25,7 @@ describe("RendererSettings", () => {
   });
 
   it("should render settings section with header", () => {
+    // Traces to: FR-ENG-001 (settings panel section)
     const onRendererSelect = vi.fn();
     settings = new RendererSettings({
       renderers: mockRenderers,
@@ -50,6 +52,7 @@ describe("RendererSettings", () => {
   });
 
   it("should render all available renderers", () => {
+    // Traces to: FR-ENG-002 (display both ghostty and rio with availability)
     const onRendererSelect = vi.fn();
     settings = new RendererSettings({
       renderers: mockRenderers,

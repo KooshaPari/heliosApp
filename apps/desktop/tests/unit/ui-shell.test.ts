@@ -8,11 +8,15 @@
  * - FR-MVP-025 (bottom input area with model selector)
  * - FR-MVP-026 (integrated terminal panels)
  * - FR-MVP-027 (keyboard shortcuts for common actions)
+ * - FR-SHL-003 (terminal-first default layout)
+ * - FR-SHL-004 (command palette with fuzzy search)
+ * - FR-SHL-007 (tab management for terminal/agent/session views)
  */
 
 import { describe, test } from "bun:test";
 
-describe("Desktop UI - MVP Shell Layout (FR-MVP-023..027)", () => {
+// Traces to: FR-SHL-003, FR-SHL-004, FR-SHL-007
+describe("Desktop UI - MVP Shell Layout (FR-MVP-023..027, FR-SHL-003..007)", () => {
   // FR-MVP-023: Left sidebar for conversation history and navigation
   test.todo("displays left sidebar with conversation history", () => {});
   test.todo("allows navigation between historical conversations", () => {});

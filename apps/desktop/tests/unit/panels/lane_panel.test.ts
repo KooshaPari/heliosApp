@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { LanePanel } from "../../../src/panels/lane_panel";
 import type { Lane } from "../../../src/panels/lane_panel";
 
+// Traces to: FR-LST-001, FR-LST-002, FR-LST-003
 describe("LanePanel", () => {
   let container: HTMLDivElement;
   let panel: LanePanel;
@@ -45,6 +46,7 @@ describe("LanePanel", () => {
   });
 
   it("should render all lanes in filtered workspace", () => {
+    // Traces to: FR-LST-001 (display all lanes in active workspace)
     const lanes: Lane[] = [
       { id: "lane-1", name: "Lane 1", state: "idle", workspaceId: "ws-1" },
       { id: "lane-2", name: "Lane 2", state: "running", workspaceId: "ws-1" },
