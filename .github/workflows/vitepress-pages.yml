@@ -69,7 +69,7 @@ jobs:
 
       - name: Upload pages artifact
         if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: heliosApp/docs/.vitepress/dist
 
