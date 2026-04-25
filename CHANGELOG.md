@@ -1,6 +1,13 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [2026.04A.2] - 2026-04-25
+
+### Quality
+- Lint warnings eliminated: 78→38 (-51% reduction)
+- Unused imports, variables, and parameters systematically removed
+- Strict-quality CI gate updated to --max-warnings 38
+
 ## [2026.04A.0] - 2026-04-25
 
 ### Added
