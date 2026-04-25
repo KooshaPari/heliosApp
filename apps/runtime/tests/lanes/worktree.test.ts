@@ -16,7 +16,7 @@ import {
   lastMetrics,
 } from "../../src/lanes/worktree.js";
 import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
-import type { PtyManager, PtyHandle } from "../../src/lanes/index.js";
+
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

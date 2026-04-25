@@ -1,5 +1,5 @@
 import { CheckpointScheduler } from "../checkpoint-scheduler.js";
-import { CheckpointWriter, type Checkpoint, type CheckpointSession } from "../checkpoint.js";
+
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";

@@ -7,7 +7,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { _resetIdCounter, LaneManager } from "../../../src/lanes/index.js";
-import { computeBranchName, computeWorktreePath } from "../../../src/lanes/worktree.js";
+
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
 
 async function runGit(args: string[], cwd: string): Promise<string> {

@@ -387,7 +387,7 @@ describe("MCP Bridge Adapter", () => {
           },
           "corr-123"
         );
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 

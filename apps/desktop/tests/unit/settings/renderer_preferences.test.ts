@@ -1,5 +1,5 @@
 import { RendererPreferencesManager } from "../../../src/settings/renderer_preferences";
-import { writeFileSync, unlinkSync, mkdirSync } from "fs";
+
 import { resolve } from "path";
 
 describe("RendererPreferencesManager", () => {

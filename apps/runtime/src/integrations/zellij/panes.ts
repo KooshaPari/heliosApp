@@ -16,7 +16,7 @@ import type {
   MinPaneDimensions,
   PtyManagerInterface,
 } from "./types.js";
-import { PaneTooSmallError, PaneNotFoundError, PtyBindingError, ZellijCliError } from "./errors.js";
+
 
 /** Default minimum pane dimensions. */
 const DEFAULT_MIN_DIMENSIONS: MinPaneDimensions = {

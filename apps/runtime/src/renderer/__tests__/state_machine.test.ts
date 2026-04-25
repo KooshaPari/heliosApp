@@ -4,7 +4,7 @@ import {
   InvalidRendererTransitionError,
   transition,
 } from "../state_machine.js";
-import type { RendererEvent, RendererState } from "../state_machine.js";
+
 
 describe("RendererStateMachine", () => {
   it("starts in uninitialized state", () => {

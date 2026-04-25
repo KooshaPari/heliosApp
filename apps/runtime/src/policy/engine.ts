@@ -15,7 +15,7 @@ export class PolicyEngine {
 
   constructor(policyDir?: string) {
     this.storage = new PolicyStorage(policyDir);
-    this.storage.onRulesChanged((workspaceId, rules) => {
+    this.storage.onRulesChanged((workspaceId, _rules) => {
       this.ruleCache.delete(workspaceId);
     });
   }

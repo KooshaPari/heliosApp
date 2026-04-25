@@ -3,7 +3,7 @@
  * Verifies: FR-GHT-001 (Renderer adapter interface), FR-GHT-007 (Crash handling)
  */
 import { describe, test, expect, beforeEach } from "bun:test";
-import { GhosttyProcess, GhosttyProcessError } from "../../../../src/renderer/ghostty/process.js";
+
 
 describe("GhosttyProcess", () => {
   let proc: GhosttyProcess;

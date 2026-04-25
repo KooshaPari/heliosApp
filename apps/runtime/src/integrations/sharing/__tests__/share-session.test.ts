@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach } from "bun:test";
-import { ShareSessionManager, type PolicyGate, type ShareSession } from "../share-session.js";
+
 import { UptermAdapter, TmateAdapter, getBackendAdapter } from "../adapters.js";
 import { InMemoryLocalBus } from "../../../protocol/bus.js";
 
@@ -134,7 +134,7 @@ describe("Share Session Management", () => {
 
       try {
         await manager.create("terminal-123", "upterm", 60000, "corr-001");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
@@ -149,7 +149,7 @@ describe("Share Session Management", () => {
 
       try {
         await manager.create("terminal-123", "upterm", 60000, "corr-001");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 

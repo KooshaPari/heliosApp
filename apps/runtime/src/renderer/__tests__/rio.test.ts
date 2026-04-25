@@ -6,7 +6,7 @@
  */
 
 import { RioBackend, FeatureFlagDisabledError } from "../rio/backend.js";
-import { isRioEnabled, type RioFeatureFlagConfig } from "../rio/index.js";
+
 import { RioProcess } from "../rio/process.js";
 import { RioSurface } from "../rio/surface.js";
 import { RioCapabilities } from "../rio/capabilities.js";

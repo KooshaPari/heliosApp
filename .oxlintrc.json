@@ -11,8 +11,5 @@
     "kitty-specs/**",
     "docs/sessions/**",
     "tsconfig*.json"
-  ],
-  "rules": {
-    "no-complexity": "off"
-  }
+  ]
 }

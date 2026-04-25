@@ -14,7 +14,7 @@
  */
 
 import { describe, it, expect, beforeAll } from "bun:test";
-import { RioMetrics, type MetricsSummary } from "../../../../src/renderer/rio/metrics.js";
+
 import { detectRioBinary } from "../../../../src/renderer/rio/index.js";
 
 // ---------------------------------------------------------------------------

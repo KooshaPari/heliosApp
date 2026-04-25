@@ -2,7 +2,7 @@
  * T016 - Stress and edge case tests.
  */
 
-import { describe, expect, it, mock, beforeEach } from "bun:test";
+
 import { ZellijSessionManager } from "../../../../src/integrations/zellij/session.js";
 import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
 import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";

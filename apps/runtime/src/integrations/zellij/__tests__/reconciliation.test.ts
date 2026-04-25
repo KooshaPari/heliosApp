@@ -1,4 +1,4 @@
-import { describe, expect, it, mock, beforeEach } from "bun:test";
+
 import { reconcile } from "../reconciliation.js";
 import { MuxRegistry } from "../registry.js";
 import type { ZellijCli } from "../cli.js";

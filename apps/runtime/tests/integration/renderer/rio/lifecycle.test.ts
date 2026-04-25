@@ -7,7 +7,7 @@
 
 import { RioBackend } from "../../../../src/renderer/rio/backend.js";
 import { RendererRegistry } from "../../../../src/renderer/registry.js";
-import { detectRioBinary, isRioEnabled, registerRio } from "../../../../src/renderer/rio/index.js";
+
 import type {
   RendererAdapter,
   RendererConfig,

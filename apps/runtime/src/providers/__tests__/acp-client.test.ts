@@ -262,7 +262,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 
@@ -467,7 +467,7 @@ describe("ACP Client Adapter", () => {
 
       try {
         await adapter.execute({ prompt: "Test" }, "corr-123");
-      } catch (e) {
+      } catch (_e) {
         // Expected
       }
 

@@ -17,7 +17,7 @@ import {
 } from "./sessions/state_machine.js";
 import type { TerminalBuffer } from "./runtime/types.js";
 import { TerminalRegistry } from "./sessions/terminal_registry.js";
-import { handleRuntimeRequest, type RuntimeOpsContext } from "./runtime/ops.js";
+
 import type {
   RecoveryBootstrapResult,
   RecoveryMetadata,

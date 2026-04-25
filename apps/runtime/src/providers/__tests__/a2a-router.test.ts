@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, beforeEach } from "bun:test";
-import { A2ARouterAdapter, HealthMonitoringCoordinator, type A2AEndpoint } from "../a2a-router.js";
+
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { NormalizedProviderError } from "../errors.js";
 import type { ProviderHealthStatus } from "../adapter.js";

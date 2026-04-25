@@ -2,7 +2,7 @@
  * FR-HELIOS-074: Project Binding Tests
  * Verifies: FR-PER-003 (Project binding), FR-PER-004 (Root path validation), FR-PER-005 (Persistence)
  */
-import { describe, test, expect, mock, beforeEach, afterEach } from "bun:test";
+
 import { mkdtempSync, mkdirSync, rmSync, symlinkSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

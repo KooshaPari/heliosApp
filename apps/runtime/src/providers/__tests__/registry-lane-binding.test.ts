@@ -6,7 +6,7 @@
 
 import { describe, it, expect, beforeEach } from "bun:test";
 import { ProviderRegistry } from "../registry.js";
-import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
+
 import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 

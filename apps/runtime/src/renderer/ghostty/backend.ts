@@ -13,7 +13,7 @@ import { detectCapabilities, getCachedCapabilities } from "./capabilities.js";
 import { GhosttyMetrics } from "./metrics.js";
 import type { MetricsSnapshot, MetricsPublisher } from "./metrics.js";
 import { GhosttyInputRelay } from "./input.js";
-import type { PtyWriter, GhosttyInputEvent } from "./input.js";
+
 
 // ---------------------------------------------------------------------------
 // Errors
