@@ -3,6 +3,8 @@ import { RingBuffer, OutputBuffer } from "../../../src/pty/buffers.js";
 import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 import type { PtyEventCorrelation } from "../../../src/pty/events.js";
 
+// Traces to: FR-PTY-005 (bounded output buffers with backpressure), FR-PTY-006 (publish PTY lifecycle events)
+
 function makeCorrelation(): PtyEventCorrelation {
   return {
     ptyId: "pty-buf-1",

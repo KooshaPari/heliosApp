@@ -5,6 +5,8 @@
  * hot-swap transitions with multiple active terminals.
  *
  * @see FR-010-009, SC-010-002
+ * Traces to: FR-TXN-002 (attempt hot-swap when both renderers support it),
+ * FR-TXN-003 (fall back to restart-with-restore when unavailable)
  */
 
 import { describe, expect, it } from "bun:test";

@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-080: Renderer Switch Rollback Integration Tests
  * Verifies: FR-TXN-004 (Automatic rollback on failure), FR-TXN-006 (Session context preservation)
+ * Traces to: FR-TXN-004 (automatic rollback), FR-TXN-005 (preserve PTY streams), FR-TXN-006 (preserve context)
  */
 import { describe, expect, it } from "bun:test";
 import { executeRollback } from "../../../src/renderer/rollback.js";

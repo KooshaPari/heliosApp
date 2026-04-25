@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-047: Percentile Computation Tests
  * Verifies: FR-PRF-002 (Rolling percentile statistics), FR-DIAG-007 (O(n log n) computation)
+ * Traces to: FR-DIAG-007 (percentile bucket computation)
  */
 import { describe, it, expect } from "bun:test";
 import { RingBuffer } from "../../../src/diagnostics/metrics.js";

@@ -1,4 +1,5 @@
 // T017 - Unit tests for lane state machine (FR-008-001, NFR-008-004)
+// Traces to: FR-LAN-001 (lane state machine: new -> provisioning -> ready -> running -> blocked -> shared -> cleaning -> closed)
 
 import { describe, expect, it, beforeEach } from "bun:test";
 import {

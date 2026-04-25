@@ -1,6 +1,7 @@
 /**
  * Unit tests for RendererStateMachine.
  * @see FR-010-003
+ * Traces to: FR-RND-002 (renderer state machine: uninitialized -> initializing -> running -> switching -> stopping -> stopped -> errored)
  */
 import { describe, expect, it } from "bun:test";
 import {

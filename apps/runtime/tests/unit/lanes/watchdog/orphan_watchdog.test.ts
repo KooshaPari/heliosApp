@@ -1,6 +1,8 @@
 /**
  * FR-HELIOS-036: Orphan Watchdog Detection Tests
  * Verifies: FR-ORF-001 (Orphaned worktree detection), FR-ORF-002 (Stale zellij session detection), FR-ORF-003 (Leaked PTY detection)
+ * Traces to: FR-ORF-001 (periodic watchdog), FR-ORF-003 (detect leaked PTYs), FR-ORF-006 (classify by type/age),
+ * FR-ORF-008 (emit detection events), FR-ORF-009 (configurable interval)
  */
 import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
 import os from "os";

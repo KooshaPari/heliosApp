@@ -1,4 +1,5 @@
 // FR-003: Unit tests for SLO definitions and checks.
+// Traces to: FR-DIAG-005 (SLO violation events), FR-DIAG-009 (SLOMonitor class)
 
 import { describe, it, expect } from "bun:test";
 import { SLO_DEFINITIONS, getSLOsForMetric, checkSLO } from "../../../src/diagnostics/slo.js";

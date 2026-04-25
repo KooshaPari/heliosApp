@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from "bun:test";
 import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 
+// Traces to: FR-AUD-003 (in-memory ring buffer for hot queries)
+
 describe("AuditRingBuffer", () => {
   let buffer: AuditRingBuffer;
 

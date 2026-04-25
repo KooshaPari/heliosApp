@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [2026.04A.0] - 2026-04-25
+
+### Added
+- Helios Family Sync: Coordinated CalVer release across 6 repos (waves 29-33)
+- Unified governance and release automation across family
+
 ## [unreleased]
 
 ### Documentation

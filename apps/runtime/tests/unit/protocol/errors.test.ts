@@ -1,6 +1,6 @@
 /**
  * FR-HELIOS-106: Protocol Error Taxonomy Unit Tests
- * Verifies: FR-BUS-007 (Error taxonomy)
+ * Verifies: FR-BUS-007 (Error taxonomy), FR-BUS-008 (propagate correlation_id)
  */
 import { describe, expect, it } from "bun:test";
 import {

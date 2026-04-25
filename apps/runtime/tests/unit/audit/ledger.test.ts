@@ -4,7 +4,8 @@ import { AuditRingBuffer } from "../../../src/audit/ring-buffer";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 
-// Traces to: FR-MVP-003 (display tool calls), FR-MVP-011 (persist conversations)
+// Traces to: FR-AUD-001 (structured schema), FR-AUD-002 (append-only),
+// FR-AUD-005 (search/filter), FR-MVP-003 (display tool calls), FR-MVP-011 (persist conversations)
 
 describe("AuditLedger", () => {
   let ledger: AuditLedger;

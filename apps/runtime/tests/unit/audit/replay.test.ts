@@ -4,6 +4,8 @@ import type { ReplayStream } from "../../../src/audit/replay";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 import type { SessionSnapshot } from "../../../src/audit/snapshot";
 
+// Traces to: FR-AUD-006 (terminal session snapshots), FR-AUD-007 (session replay UI with time-scrubbing)
+
 describe("ReplayEngine", () => {
   let engine: ReplayEngine;
   let mockStream: ReplayStream;

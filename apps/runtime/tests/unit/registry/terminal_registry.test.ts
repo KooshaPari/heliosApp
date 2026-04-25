@@ -8,6 +8,9 @@ import {
 } from "../../../src/registry/terminal_registry.js";
 import { BindingState, type BindingTriple } from "../../../src/registry/binding_triple.js";
 
+// Traces to: FR-BND-001 (terminal registry), FR-BND-002 (reject invalid),
+// FR-BND-003 (validate consistency), FR-BND-004 (lifecycle updates), FR-BND-008 (persist)
+
 describe("TerminalRegistry", () => {
   let registry: TerminalRegistry;
 

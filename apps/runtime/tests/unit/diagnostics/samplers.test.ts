@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-069: Memory and Frame Timing Sampler Tests
  * Verifies: FR-PRF-005 (Memory usage sampling), FR-PRF-006 (Frame timing sampling)
+ * Traces to: FR-DIAG-006 (circular sample buffers with overflow handling)
  */
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";

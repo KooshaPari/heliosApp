@@ -6,7 +6,7 @@ import {
   validateValue,
 } from "../../../src/config/schema.js";
 
-// FR-001: Settings schema with typed defaults
+// Traces to: FR-CFG-001 (typed settings schema), FR-CFG-002 (validate settings)
 describe("getDefault", () => {
   it("returns correct default for renderer_engine", () => {
     expect(getDefault("renderer_engine")).toBe("ghostty");

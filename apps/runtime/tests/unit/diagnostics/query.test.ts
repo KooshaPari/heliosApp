@@ -1,6 +1,7 @@
 /**
  * FR-HELIOS-033: Metrics Query API Tests
  * Verifies: FR-PRF-007 (Metrics query API), FR-DIAG-008 (MetricsQuery interface)
+ * Traces to: FR-DIAG-008 (MetricsQuery interface with getMetric and listMetrics)
  */
 import { describe, it, expect, beforeEach } from "bun:test";
 import { MetricsRegistry } from "../../../src/diagnostics/metrics.js";

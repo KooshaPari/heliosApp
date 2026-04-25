@@ -1,6 +1,8 @@
 /**
  * FR-HELIOS-089: Zellij Mux Lifecycle Integration Tests
  * Verifies: FR-ZMX-001 (Zellij session adapter), FR-ZMX-002 (Session to lane binding), FR-ZMX-008 (Session reconciliation)
+ * Traces to: FR-ZMX-001 (create/reattach/terminate sessions), FR-ZMX-002 (bind session to lane),
+ * FR-ZMX-005 (relay mux events), FR-ZMX-006 (session reattach after restart), FR-ZMX-008 (reconcile bindings)
  */
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import {

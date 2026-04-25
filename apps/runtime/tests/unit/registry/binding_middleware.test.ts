@@ -1,6 +1,6 @@
 /**
  * FR-HELIOS-071: Binding Middleware Tests
- * Verifies: FR-BND-003 (Terminal binding consistency validation)
+ * Verifies: FR-BND-003 (Terminal binding consistency validation), FR-BND-005 (binding lifecycle events)
  */
 import { describe, it, expect, beforeEach } from "bun:test";
 import { BindingMiddleware } from "../../../src/registry/binding_middleware.js";
