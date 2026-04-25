@@ -15,6 +15,7 @@ function baseCaps(): RendererCapabilities {
   };
 }
 
+// Traces to: FR-RND-007 (capability matrix reporting)
 describe("compareCapabilities", () => {
   it("reports equal for identical capabilities", () => {
     const diff = compareCapabilities(baseCaps(), baseCaps());

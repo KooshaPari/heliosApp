@@ -7,6 +7,7 @@ import {
   type PtyEvent,
 } from "../state_machine.js";
 
+// Traces to: FR-PTY-001 (state machine with states)
 describe("transition()", () => {
   const validTransitions: [PtyState, PtyEvent, PtyState][] = [
     ["idle", "spawn_requested", "spawning"],

@@ -6,6 +6,7 @@ import {
 } from "../state_machine.js";
 
 
+// Traces to: FR-RND-002 (renderer state machine)
 describe("RendererStateMachine", () => {
   it("starts in uninitialized state", () => {
     const sm = new RendererStateMachine();

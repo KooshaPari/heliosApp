@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { createRuntime } from "../../../runtime/src";
 import { bootDesktop } from "../../src";
 
+// Traces to: FR-TXN-001 (atomic transactions), FR-TXN-004 (rollback on failure), FR-TXN-006 (context preservation)
 describe("renderer switch transaction", () => {
   test("rolls back to previous renderer on switch failure and keeps active context", async () => {
     const runtime = createRuntime();

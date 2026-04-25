@@ -14,6 +14,7 @@ const ctx = {
   correlationId: "corr-1",
 };
 
+// Traces to: FR-SEC-004 (pattern-based redaction engine)
 describe("RedactionEngine: known patterns redacted", () => {
   let engine: RedactionEngine;
   beforeEach(() => {

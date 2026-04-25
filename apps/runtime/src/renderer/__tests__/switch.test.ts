@@ -75,6 +75,7 @@ function setupRegistry(from: RendererAdapter, to: RendererAdapter) {
   return { reg, sm };
 }
 
+// Traces to: FR-TXN-001 (atomic transactions), FR-TXN-004 (rollback on failure), FR-RND-004 (renderer switches)
 describe("switchRenderer", () => {
   it("successfully switches renderers", async () => {
     const from = createMockAdapter("ghostty");

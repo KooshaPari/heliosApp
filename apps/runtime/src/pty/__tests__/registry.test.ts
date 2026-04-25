@@ -22,6 +22,7 @@ function makeRecord(overrides: Partial<PtyRecord> = {}): PtyRecord {
   };
 }
 
+// Traces to: FR-PTY-002 (process registry)
 describe("PtyRegistry", () => {
   let registry: PtyRegistry;
 

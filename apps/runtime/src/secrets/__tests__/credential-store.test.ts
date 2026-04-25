@@ -16,6 +16,7 @@ function makeStore(dataDir: string): CredentialStore {
   return new CredentialStore({ dataDir, encryption });
 }
 
+// Traces to: FR-SEC-001 (secure credential store with encryption), FR-SEC-002 (provider+workspace scoping)
 describe("CredentialStore: store and retrieve", () => {
   let tmpDir: string;
   let store: CredentialStore;

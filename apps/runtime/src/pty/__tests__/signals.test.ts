@@ -43,6 +43,7 @@ function spawnShellProcess(): number {
 
 const pidsToCleanup: number[] = [];
 
+// Traces to: FR-PTY-004 (POSIX signals delivery)
 describe("SignalHistory", () => {
   it("stores and retrieves envelopes", () => {
     const history = new SignalHistory(3);

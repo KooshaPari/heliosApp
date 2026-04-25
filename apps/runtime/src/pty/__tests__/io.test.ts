@@ -37,6 +37,7 @@ function makeMockProcess(): {
   return { proc, written };
 }
 
+// Traces to: FR-PTY-003 (write-input, read-output operations)
 describe("writeInput", () => {
   it("writes data to the process stdin", () => {
     const _record = makeRecord();

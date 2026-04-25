@@ -4,6 +4,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 
+// Traces to: FR-ORF-001 (orphan detection watchdog)
 describe("Watchdog", () => {
   let watchdog: Watchdog;
   let tempDir: string;

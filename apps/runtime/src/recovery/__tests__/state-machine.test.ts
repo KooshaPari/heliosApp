@@ -4,6 +4,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 
+// Traces to: FR-CRH-002 (recovery state machine)
 describe("RecoveryStateMachine", () => {
   let stateMachine: RecoveryStateMachine;
   let tempDir: string;

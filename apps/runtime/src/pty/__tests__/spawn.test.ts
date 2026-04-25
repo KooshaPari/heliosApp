@@ -2,6 +2,7 @@ import { describe, expect, it, afterEach } from "bun:test";
 import { spawnPty } from "../spawn.js";
 import { PtyRegistry } from "../registry.js";
 
+// Traces to: FR-PTY-001 (state machine), FR-PTY-002 (process registry), FR-PTY-003 (spawn operation)
 describe("spawnPty()", () => {
   const pidsToCleanup: number[] = [];
   let registry: PtyRegistry;

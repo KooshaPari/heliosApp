@@ -10,6 +10,7 @@ import type {
     EventEnvelope,
 } from "../src/index";
 
+// Traces to: FR-BUS-001 (envelope schema), FR-ID-001 (ID format types)
 describe("Workspace types", () => {
     it("should define Workspace interface correctly", () => {
         const workspace: Workspace = {

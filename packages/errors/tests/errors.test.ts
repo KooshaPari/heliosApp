@@ -1,6 +1,7 @@
 import { describe, it, expect } from "bun:test";
 import { HeliosAppError, ErrorCode } from "../src/index";
 
+// Traces to: FR-BUS-007 (error taxonomy)
 describe("HeliosAppError", () => {
   it("should create an error with code and message", () => {
     const error = new HeliosAppError(ErrorCode.INTERNAL_ERROR, "test message");
