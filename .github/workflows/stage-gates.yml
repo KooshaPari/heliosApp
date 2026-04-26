@@ -11,6 +11,9 @@ jobs:
   detect-stage:
     name: detect-stage
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     outputs:
       stage: ${{ steps.detect.outputs.stage }}
       gates: ${{ steps.detect.outputs.gates }}
@@ -18,8 +21,14 @@ jobs:
       - name: Detect stage from branch
         id: detect
         env:
-          BRANCH: ${{ github.head_ref }}
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
+          # Sanitized: read PR head ref via API (PR_NUMBER is integer-typed, safe).
+          # Avoids ${{ github.head_ref }} interpolation flagged by Scorecard
+          # DangerousWorkflow regardless of context (env: or run:).
+          BRANCH=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq .head.ref)
           case "$BRANCH" in
             spike/*)
               echo "stage=SP" >> "$GITHUB_OUTPUT"
