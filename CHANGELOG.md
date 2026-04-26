@@ -8,6 +8,17 @@ All notable changes to this project will be documented in this file.
 
 - *(W-55)* Fix 32 production bugs: catch scoping, variable shadowing, missing imports
 
+## [2026.05B.0] — 2026-04-25
+
+### Documentation
+
+- *(traceability)* FR coverage 96.9%: 19 test files annotated with FR IDs (commit ab51eea)
+- *(e2e-traceability)* Phase-2 e2e annotations: 8 orphaned tests traced to FRs, 10 deferred (commit 2fd5a40)
+
+### Miscellaneous Tasks
+
+- *(chore)* Set alert-sync min_severity to medium (#411)
+
 ## [unreleased]
 
 ### Documentation

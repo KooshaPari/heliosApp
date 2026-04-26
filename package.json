@@ -1,6 +1,6 @@
 {
   "name": "heliosapp",
-  "version": "2026.04A.4",
+  "version": "2026.05B.0",
   "private": true,
   "workspaces": [
     "apps/runtime",
