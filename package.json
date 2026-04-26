@@ -14,6 +14,13 @@
   ],
   "type": "module",
   "scripts": {
+    "dev": "bun run --cwd apps/desktop dev",
+    "dev:desktop": "bun run --cwd apps/desktop dev",
+    "dev:runtime": "bun run --cwd apps/runtime dev",
+    "dev:colab": "bun run --cwd apps/colab-renderer dev",
+    "start": "bun run --cwd apps/desktop dev",
+    "app": "bun run --cwd apps/desktop dev",
+    "build": "bun run --cwd apps/desktop build && bun run --cwd apps/runtime build",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint apps/",
     "format": "biome format --write apps docs/.vitepress playwright.config.ts tsconfig.json package.json",

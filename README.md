@@ -6,6 +6,16 @@
 
 HeliosApp is a developer-focused AI runtime environment with a desktop shell, terminal multiplexing, session management, and multi-provider AI inference. It is structured as a Bun monorepo containing four applications and five shared packages.
 
+## Quick Start
+
+```bash
+bun install && bun run dev
+```
+
+This boots the desktop shell (`apps/desktop`) in watch mode. Use `bun run dev:runtime` or `bun run dev:colab` to launch the runtime engine or colab renderer instead.
+
+> TODO: add desktop shell screenshot to README (`screenshot.png`).
+
 ---
 
 ## Architecture Overview
