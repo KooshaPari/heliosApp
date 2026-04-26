@@ -12,4 +12,4 @@ permissions:
 
 jobs:
   guard:
-    uses: KooshaPari/phenoShared/.github/workflows/reusable/security-guard-hook-audit.yml@9bc51f34248d0bc4db5bc1dd7724a8398465eb47
+    uses: KooshaPari/phenoShared/.github/workflows/security-guard-hook-audit.yml@main
