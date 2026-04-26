@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test";
 import { createRuntime } from "../../../runtime/src";
 import { bootDesktop, renderControlPlaneSnapshot } from "../../src";
 
+// Traces to: FR-SHL-003 (provide terminal-first default layout with split panes, tab bar, and sidebar)
+// Traces to: FR-TAB-002 (All tabs MUST be bound to the currently active workspace, lane, and session context)
 test("lane/session context remains cohesive across all tabs", async ({ page }) => {
   const runtime = createRuntime();
   const controlPlane = bootDesktop({ bus: runtime.bus });
@@ -42,6 +44,8 @@ test("lane/session context remains cohesive across all tabs", async ({ page }) =
   await expect(page.getByTestId("tab-chat-degrade")).toHaveText("none");
 });
 
+// Traces to: FR-SHL-003 (terminal-first default layout with renderer switching)
+// Traces to: FR-TXN-004 (automatically roll back to the previous renderer on any failure)
 test("renderer switch failure rolls back and reports safe status", async ({ page }) => {
   const runtime = createRuntime();
   const controlPlane = bootDesktop({ bus: runtime.bus });
@@ -59,6 +63,8 @@ test("renderer switch failure rolls back and reports safe status", async ({ page
   await expect(page.getByTestId("renderer-switch-status")).toHaveText("rolled_back");
 });
 
+// Traces to: FR-SHL-009 (implement graceful shutdown that signals all subsystems)
+// Traces to: FR-ZMX-006 (support session reattach after runtime restart)
 test("lane lifecycle supports session restore after reconnect", async ({ page }) => {
   const runtime = createRuntime();
   const controlPlane = bootDesktop({ bus: runtime.bus });

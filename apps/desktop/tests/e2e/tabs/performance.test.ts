@@ -1,5 +1,7 @@
 import { describe, it, expect } from "bun:test";
 
+// Traces to: FR-TAB-003 (update all visible tabs when the active lane or session changes)
+// Traces to: FR-PRF-001 (provide instrumentation hooks for input-to-render)
 describe("Tab Performance Benchmarks", () => {
   it("should maintain tab switch latency under 200ms p95", async () => {
     // Benchmark: switch between all 5 tabs 50 times

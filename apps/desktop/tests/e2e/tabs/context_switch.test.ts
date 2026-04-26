@@ -1,5 +1,7 @@
 import { describe, it, expect } from "bun:test";
 
+// Traces to: FR-TAB-003 (update all visible tabs when the active lane or session changes)
+// Traces to: FR-TAB-005 (display a stale-context indicator on any tab that fails to update)
 describe("Context Switch E2E", () => {
   it("should update all tabs on lane switch", async () => {
     // Verify: all visible tabs reflect new lane context within 500ms

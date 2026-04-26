@@ -1,5 +1,7 @@
 import { describe, it, expect } from "bun:test";
 
+// Traces to: FR-TAB-004 (provide configurable keyboard shortcuts for switching between tabs)
+// Traces to: FR-SHL-004 (provide a command palette accessible via global keyboard shortcut)
 describe("Keyboard-Only Workflow E2E", () => {
   it("should complete full workflow with only keyboard", async () => {
     // Workflow:
