@@ -1,5 +1,7 @@
 # HeliosApp
 
+**Status:** stable
+
 **Version:** 2026.03A.0  
 **Package Manager:** Bun 1.2.20+  
 **Runtime:** TypeScript 7.x (strict mode)
