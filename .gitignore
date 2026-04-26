@@ -31,3 +31,7 @@ agileplus/
 .github/copilot-instructions.md
 .claudeignore
 .llmignore
+
+# Worktree directories (org policy)
+.worktrees/
+.claude/worktrees/
