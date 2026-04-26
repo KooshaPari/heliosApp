@@ -8,6 +8,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: read
+
 jobs:
   tag:
     uses: KooshaPari/phenoShared/.github/workflows/reusable/tag-automation.yml@main

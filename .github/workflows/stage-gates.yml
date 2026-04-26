@@ -17,8 +17,9 @@ jobs:
     steps:
       - name: Detect stage from branch
         id: detect
+        env:
+          BRANCH: ${{ github.head_ref }}
         run: |
-          BRANCH="${{ github.head_ref }}"
           case "$BRANCH" in
             spike/*)
               echo "stage=SP" >> "$GITHUB_OUTPUT"

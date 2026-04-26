@@ -5,6 +5,9 @@ on:
     types: [synchronize, opened, reopened]
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   check-merge-readiness:
     runs-on: ubuntu-latest
