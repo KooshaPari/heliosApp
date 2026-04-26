@@ -55,7 +55,7 @@ jobs:
             const approvals = {};
             reviews.data.forEach(review => {
               if (review.state === 'APPROVED') {
-                latestReviewByUser[review.user.login] = true;
+                approvals[review.user.login] = true;
               }
             });
 
@@ -137,7 +137,7 @@ jobs:
             core.setOutput('missing-requirements', missing.join('; '));
       
       - name: Comment on missing requirements
-        if: steps.check.outputs.can-self-merge == 'false' && (context.issue?.number || context.payload?.pull_request?.number)
+        if: steps.check.outputs.can-self-merge == 'false'
         uses: actions/github-script@v9
         with:
           script: |
@@ -165,7 +165,7 @@ jobs:
             });
 
       - name: Allow self-merge
-        if: steps.check.outputs.can-self-merge == 'true' && (context.issue?.number || context.payload?.pull_request?.number)
+        if: steps.check.outputs.can-self-merge == 'true'
         uses: actions/github-script@v9
         with:
           script: |
