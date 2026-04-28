@@ -37,7 +37,7 @@ vars:
       fi
   BUILD_COMMAND:
     sh: |
-      if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts?.build ? 0 : 1)"; then
+      if [ -f package.json ] && bun -e "const pkg = await import('./package.json', { with: { type: 'json' } }); process.exit(pkg.default.scripts?.build ? 0 : 1)"; then
         case "{{.PROJECT_TOOLCHAIN}}" in
           bun) echo "bun run build" ;;
           pnpm) echo "pnpm run build" ;;
@@ -50,7 +50,7 @@ vars:
       fi
   TEST_COMMAND:
     sh: |
-      if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts?.test ? 0 : 1)"; then
+      if [ -f package.json ] && bun -e "const pkg = await import('./package.json', { with: { type: 'json' } }); process.exit(pkg.default.scripts?.test ? 0 : 1)"; then
         case "{{.PROJECT_TOOLCHAIN}}" in
           bun) echo "bun run test" ;;
           pnpm) echo "pnpm run test" ;;
@@ -63,7 +63,7 @@ vars:
       fi
   LINT_COMMAND:
     sh: |
-      if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts?.lint ? 0 : 1)"; then
+      if [ -f package.json ] && bun -e "const pkg = await import('./package.json', { with: { type: 'json' } }); process.exit(pkg.default.scripts?.lint ? 0 : 1)"; then
         case "{{.PROJECT_TOOLCHAIN}}" in
           bun) echo "bun run lint" ;;
           pnpm) echo "pnpm run lint" ;;
@@ -87,7 +87,7 @@ tasks:
       - echo "{{.PROJECT_LANGUAGE}}/{{.PROJECT_TOOLCHAIN}}"
 
   build:
-    desc: Build the detected project
+    desc: Build the detected Bun/TypeScript project
     cmds:
       - |
         set -euo pipefail
@@ -115,7 +115,7 @@ tasks:
         esac
 
   test:
-    desc: Run the primary test suite for the detected project
+    desc: Run the primary Bun test suite
     cmds:
       - |
         set -euo pipefail
@@ -147,7 +147,7 @@ tasks:
         esac
 
   lint:
-    desc: Run static checks for the detected project
+    desc: Run the configured Bun lint checks
     cmds:
       - |
         set -euo pipefail
