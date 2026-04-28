@@ -23,6 +23,11 @@ tasks:
       - task --list
     silent: true
 
+  language:
+    desc: Print the detected project language/toolchain
+    cmds:
+      - echo "{{.PROJECT_KIND}}"
+
   build:
     desc: Build the project using detected language tooling
     cmds:
