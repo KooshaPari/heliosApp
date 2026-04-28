@@ -1,7 +1,22 @@
 version: "3"
 
 vars:
-  PROJECT_KIND:
+  PROJECT_LANGUAGE:
+    sh: |
+      if [ -f tsconfig.json ] || [ -f tsconfig.base.json ]; then
+        echo typescript
+      elif [ -f package.json ]; then
+        echo javascript
+      elif [ -f go.mod ]; then
+        echo go
+      elif [ -f pyproject.toml ] || [ -f requirements.txt ]; then
+        echo python
+      elif [ -f Cargo.toml ]; then
+        echo rust
+      else
+        echo unknown
+      fi
+  PROJECT_TOOLCHAIN:
     sh: |
       if [ -f bun.lock ] || [ -f bun.lockb ] || { [ -f package.json ] && grep -q '"packageManager"[[:space:]]*:[[:space:]]*"bun@' package.json; }; then
         echo bun
@@ -26,14 +41,14 @@ tasks:
   language:
     desc: Print the detected project language/toolchain
     cmds:
-      - echo "{{.PROJECT_KIND}}"
+      - echo "{{.PROJECT_LANGUAGE}}/{{.PROJECT_TOOLCHAIN}}"
 
   build:
     desc: Build the project using detected language tooling
     cmds:
       - |
         set -euo pipefail
-        case "{{.PROJECT_KIND}}" in
+        case "{{.PROJECT_TOOLCHAIN}}" in
           bun)
             bun run build
             ;;
@@ -60,7 +75,7 @@ tasks:
     cmds:
       - |
         set -euo pipefail
-        case "{{.PROJECT_KIND}}" in
+        case "{{.PROJECT_TOOLCHAIN}}" in
           bun)
             bun run test
             ;;
@@ -91,7 +106,7 @@ tasks:
     cmds:
       - |
         set -euo pipefail
-        case "{{.PROJECT_KIND}}" in
+        case "{{.PROJECT_TOOLCHAIN}}" in
           bun)
             bun run lint
             ;;
