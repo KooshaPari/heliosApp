@@ -191,6 +191,7 @@ tasks:
           apps/desktop/dist \
           apps/runtime/dist \
           apps/colab-renderer/dist \
+          apps/renderer/dist \
           docs/.vitepress/dist \
           coverage \
           .turbo \
