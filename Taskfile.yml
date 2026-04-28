@@ -1,5 +1,20 @@
 version: '3'
 
+vars:
+  PROJECT_KIND:
+    sh: |
+      if [ -f bun.lock ] || [ -f bun.lockb ] || [ -f package.json ]; then
+        echo bun
+      elif [ -f go.mod ]; then
+        echo go
+      elif [ -f pyproject.toml ] || [ -f requirements.txt ]; then
+        echo python
+      elif [ -f Cargo.toml ]; then
+        echo rust
+      else
+        echo unknown
+      fi
+
 tasks:
   default:
     cmds:
@@ -11,17 +26,86 @@ tasks:
     cmds:
       - |
         set -euo pipefail
-        command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
         command -v task >/dev/null 2>&1 || { echo "[FAIL] task is required"; exit 1; }
         command -v git >/dev/null 2>&1 || { echo "[FAIL] git is required"; exit 1; }
-        test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
+        case "{{.PROJECT_KIND}}" in
+          bun)
+            command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
+            test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
+            ;;
+          go)
+            command -v go >/dev/null 2>&1 || { echo "[FAIL] go is required"; exit 1; }
+            test -f go.mod || { echo "[FAIL] go.mod missing"; exit 1; }
+            ;;
+          python)
+            command -v python >/dev/null 2>&1 || { echo "[FAIL] python is required"; exit 1; }
+            ;;
+          rust)
+            command -v cargo >/dev/null 2>&1 || { echo "[FAIL] cargo is required"; exit 1; }
+            ;;
+          *)
+            echo "[FAIL] unable to detect project language from repository manifests"
+            exit 1
+            ;;
+        esac
         echo "[OK] preflight checks passed"
 
   deps:
     desc: Install dependencies with lockfile guarantees
     deps: [preflight]
     cmds:
-      - bun install --frozen-lockfile
+      - |
+        set -euo pipefail
+        case "{{.PROJECT_KIND}}" in
+          bun)
+            bun install --frozen-lockfile
+            ;;
+          go)
+            go mod download
+            ;;
+          python)
+            if command -v uv >/dev/null 2>&1; then
+              uv sync
+            elif command -v pip >/dev/null 2>&1; then
+              pip install -r requirements.txt
+            else
+              echo "[FAIL] no supported Python dependency manager found"
+              exit 1
+            fi
+            ;;
+          rust)
+            cargo fetch
+            ;;
+          *)
+            echo "[FAIL] unsupported project kind: {{.PROJECT_KIND}}"
+            exit 1
+            ;;
+        esac
+
+  build:
+    desc: Build the project using detected language tooling
+    deps: [preflight]
+    cmds:
+      - |
+        set -euo pipefail
+        case "{{.PROJECT_KIND}}" in
+          bun)
+            bun run build
+            ;;
+          go)
+            go build ./...
+            ;;
+          python)
+            python -m compileall .
+            ;;
+          rust)
+            cargo build
+            ;;
+          *)
+            echo "[FAIL] unsupported project kind: {{.PROJECT_KIND}}"
+            exit 1
+            ;;
+        esac
 
   typecheck:
     desc: Run TypeScript type checks
@@ -30,18 +114,77 @@ tasks:
 
   lint:
     desc: Run static lint checks
+    deps: [preflight]
     cmds:
-      - bun run lint
+      - |
+        set -euo pipefail
+        case "{{.PROJECT_KIND}}" in
+          bun)
+            bun run lint
+            ;;
+          go)
+            if command -v golangci-lint >/dev/null 2>&1; then
+              golangci-lint run
+            else
+              go vet ./...
+            fi
+            ;;
+          python)
+            if command -v ruff >/dev/null 2>&1; then
+              ruff check .
+            else
+              python -m compileall .
+            fi
+            ;;
+          rust)
+            cargo clippy --all-targets --all-features
+            ;;
+          *)
+            echo "[FAIL] unsupported project kind: {{.PROJECT_KIND}}"
+            exit 1
+            ;;
+        esac
 
   test:
     desc: Run unit test suites
+    deps: [preflight]
     cmds:
-      - bun run test
+      - |
+        set -euo pipefail
+        case "{{.PROJECT_KIND}}" in
+          bun)
+            bun run test
+            ;;
+          go)
+            go test ./...
+            ;;
+          python)
+            if command -v pytest >/dev/null 2>&1; then
+              pytest
+            else
+              python -m unittest discover
+            fi
+            ;;
+          rust)
+            cargo test
+            ;;
+          *)
+            echo "[FAIL] unsupported project kind: {{.PROJECT_KIND}}"
+            exit 1
+            ;;
+        esac
 
   coverage:
     desc: Run unit tests with coverage
     cmds:
       - bun run test:coverage
+
+  clean:
+    desc: Remove generated artifacts from the working tree
+    cmds:
+      - |
+        set -euo pipefail
+        git clean -fdX -- .
 
   docs:index:
     desc: Generate markdown document index pages
