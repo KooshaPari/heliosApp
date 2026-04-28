@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   PROJECT_KIND:
@@ -21,70 +21,8 @@ tasks:
       - task --list
     silent: true
 
-  preflight:
-    desc: Fail fast if required tooling is missing
-    cmds:
-      - |
-        set -euo pipefail
-        command -v task >/dev/null 2>&1 || { echo "[FAIL] task is required"; exit 1; }
-        command -v git >/dev/null 2>&1 || { echo "[FAIL] git is required"; exit 1; }
-        case "{{.PROJECT_KIND}}" in
-          bun)
-            command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
-            test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
-            ;;
-          go)
-            command -v go >/dev/null 2>&1 || { echo "[FAIL] go is required"; exit 1; }
-            test -f go.mod || { echo "[FAIL] go.mod missing"; exit 1; }
-            ;;
-          python)
-            command -v python >/dev/null 2>&1 || { echo "[FAIL] python is required"; exit 1; }
-            ;;
-          rust)
-            command -v cargo >/dev/null 2>&1 || { echo "[FAIL] cargo is required"; exit 1; }
-            ;;
-          *)
-            echo "[FAIL] unable to detect project language from repository manifests"
-            exit 1
-            ;;
-        esac
-        echo "[OK] preflight checks passed"
-
-  deps:
-    desc: Install dependencies with lockfile guarantees
-    deps: [preflight]
-    cmds:
-      - |
-        set -euo pipefail
-        case "{{.PROJECT_KIND}}" in
-          bun)
-            bun install --frozen-lockfile
-            ;;
-          go)
-            go mod download
-            ;;
-          python)
-            if command -v uv >/dev/null 2>&1; then
-              uv sync
-            elif command -v pip >/dev/null 2>&1; then
-              pip install -r requirements.txt
-            else
-              echo "[FAIL] no supported Python dependency manager found"
-              exit 1
-            fi
-            ;;
-          rust)
-            cargo fetch
-            ;;
-          *)
-            echo "[FAIL] unsupported project kind: {{.PROJECT_KIND}}"
-            exit 1
-            ;;
-        esac
-
   build:
     desc: Build the project using detected language tooling
-    deps: [preflight]
     cmds:
       - |
         set -euo pipefail
@@ -99,22 +37,44 @@ tasks:
             python -m compileall .
             ;;
           rust)
-            cargo build
+            cargo build --all-targets
             ;;
           *)
-            echo "[FAIL] unsupported project kind: {{.PROJECT_KIND}}"
+            echo "[FAIL] unable to detect project language from repository manifests"
             exit 1
             ;;
         esac
 
-  typecheck:
-    desc: Run TypeScript type checks
+  test:
+    desc: Run the primary test suite for the detected language
     cmds:
-      - bun run typecheck
+      - |
+        set -euo pipefail
+        case "{{.PROJECT_KIND}}" in
+          bun)
+            bun run test
+            ;;
+          go)
+            go test ./...
+            ;;
+          python)
+            if command -v pytest >/dev/null 2>&1; then
+              pytest
+            else
+              python -m unittest discover
+            fi
+            ;;
+          rust)
+            cargo test --all-targets
+            ;;
+          *)
+            echo "[FAIL] unable to detect project language from repository manifests"
+            exit 1
+            ;;
+        esac
 
   lint:
-    desc: Run static lint checks
-    deps: [preflight]
+    desc: Run static checks for the detected language
     cmds:
       - |
         set -euo pipefail
@@ -140,115 +100,12 @@ tasks:
             cargo clippy --all-targets --all-features
             ;;
           *)
-            echo "[FAIL] unsupported project kind: {{.PROJECT_KIND}}"
+            echo "[FAIL] unable to detect project language from repository manifests"
             exit 1
             ;;
         esac
-
-  test:
-    desc: Run unit test suites
-    deps: [preflight]
-    cmds:
-      - |
-        set -euo pipefail
-        case "{{.PROJECT_KIND}}" in
-          bun)
-            bun run test
-            ;;
-          go)
-            go test ./...
-            ;;
-          python)
-            if command -v pytest >/dev/null 2>&1; then
-              pytest
-            else
-              python -m unittest discover
-            fi
-            ;;
-          rust)
-            cargo test
-            ;;
-          *)
-            echo "[FAIL] unsupported project kind: {{.PROJECT_KIND}}"
-            exit 1
-            ;;
-        esac
-
-  coverage:
-    desc: Run unit tests with coverage
-    cmds:
-      - bun run test:coverage
 
   clean:
     desc: Remove generated artifacts from the working tree
     cmds:
-      - |
-        set -euo pipefail
-        git clean -fdX -- .
-
-  docs:index:
-    desc: Generate markdown document index pages
-    cmds:
-      - bun run docs:index
-
-  docs:build:
-    desc: Build VitePress docs
-    cmds:
-      - bun run docs:build
-
-  quality:quick:
-    desc: Fast quality lane for inner-loop development
-    deps: [preflight, deps]
-    cmds:
-      - task typecheck
-      - task lint
-      - task test
-
-  quality:strict:
-    desc: Strict quality lane including coverage and docs build
-    deps: [quality:quick]
-    cmds:
-      - task coverage
-      - task docs:build
-
-  check:
-    desc: Canonical full-project check
-    deps: [quality:strict]
-
-  ci:
-    desc: CI lane (strict quality + docs index refresh)
-    deps: [check]
-    cmds:
-      - task docs:index
-
-  devops:status:
-    desc: Show Git status, remotes, and branch state
-    cmds:
-      - git status --short --branch
-      - git remote -v
-      - git log --oneline -n 5
-
-  devops:check:
-    desc: Run shared DevOps checks for this repo (no CI pipeline)
-    cmds:
-      - bash scripts/devops-checker.sh
-
-  devops:check:ci:
-    desc: Run shared DevOps checks including CI lane
-    cmds:
-      - bash scripts/devops-checker.sh --check-ci
-
-  devops:check:ci-summary:
-    desc: Run shared DevOps checks including CI lane and emit JSON summary
-    cmds:
-      - bash scripts/devops-checker.sh --check-ci --emit-summary
-
-  devops:push:
-    desc: Push branch with shared helper and fallback remote behavior
-    cmds:
-      - bash scripts/push-heliosapp-with-fallback.sh {{.CLI_ARGS}}
-
-  devops:push:origin:
-    desc: Push using fallback remote only (skip primary)
-    cmds:
-      - bash scripts/push-heliosapp-with-fallback.sh --skip-primary {{.CLI_ARGS}}
+      - git clean -fdX -- .
