@@ -20,8 +20,12 @@ vars:
     sh: |
       if [ -f bun.lock ] || [ -f bun.lockb ] || { [ -f package.json ] && grep -q '"packageManager"[[:space:]]*:[[:space:]]*"bun@' package.json; }; then
         echo bun
-      elif [ -f package.json ]; then
-        echo node
+      elif [ -f pnpm-lock.yaml ] || { [ -f package.json ] && grep -q '"packageManager"[[:space:]]*:[[:space:]]*"pnpm@' package.json; }; then
+        echo pnpm
+      elif [ -f yarn.lock ] || { [ -f package.json ] && grep -q '"packageManager"[[:space:]]*:[[:space:]]*"yarn@' package.json; }; then
+        echo yarn
+      elif [ -f package-lock.json ] || [ -f package.json ]; then
+        echo npm
       elif [ -f go.mod ]; then
         echo go
       elif [ -f pyproject.toml ] || [ -f requirements.txt ]; then
@@ -34,21 +38,39 @@ vars:
   BUILD_COMMAND:
     sh: |
       if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts?.build ? 0 : 1)"; then
-        echo "bun run build"
+        case "{{.PROJECT_TOOLCHAIN}}" in
+          bun) echo "bun run build" ;;
+          pnpm) echo "pnpm run build" ;;
+          yarn) echo "yarn build" ;;
+          npm|node) echo "npm run build" ;;
+          *) echo "" ;;
+        esac
       else
         echo ""
       fi
   TEST_COMMAND:
     sh: |
       if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts?.test ? 0 : 1)"; then
-        echo "bun run test"
+        case "{{.PROJECT_TOOLCHAIN}}" in
+          bun) echo "bun run test" ;;
+          pnpm) echo "pnpm run test" ;;
+          yarn) echo "yarn test" ;;
+          npm|node) echo "npm run test" ;;
+          *) echo "" ;;
+        esac
       else
         echo ""
       fi
   LINT_COMMAND:
     sh: |
       if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts?.lint ? 0 : 1)"; then
-        echo "bun run lint"
+        case "{{.PROJECT_TOOLCHAIN}}" in
+          bun) echo "bun run lint" ;;
+          pnpm) echo "pnpm run lint" ;;
+          yarn) echo "yarn lint" ;;
+          npm|node) echo "npm run lint" ;;
+          *) echo "" ;;
+        esac
       else
         echo ""
       fi
@@ -70,15 +92,12 @@ tasks:
       - |
         set -euo pipefail
         case "{{.PROJECT_TOOLCHAIN}}" in
-          bun)
+          bun|pnpm|yarn|npm|node)
             if [ -z "{{.BUILD_COMMAND}}" ]; then
               echo "[FAIL] package.json does not define a build script"
               exit 1
             fi
             {{.BUILD_COMMAND}}
-            ;;
-          node)
-            npm run build
             ;;
           go)
             go build ./...
@@ -101,15 +120,12 @@ tasks:
       - |
         set -euo pipefail
         case "{{.PROJECT_TOOLCHAIN}}" in
-          bun)
+          bun|pnpm|yarn|npm|node)
             if [ -z "{{.TEST_COMMAND}}" ]; then
               echo "[FAIL] package.json does not define a test script"
               exit 1
             fi
             {{.TEST_COMMAND}}
-            ;;
-          node)
-            npm test
             ;;
           go)
             go test ./...
@@ -136,15 +152,12 @@ tasks:
       - |
         set -euo pipefail
         case "{{.PROJECT_TOOLCHAIN}}" in
-          bun)
+          bun|pnpm|yarn|npm|node)
             if [ -z "{{.LINT_COMMAND}}" ]; then
               echo "[FAIL] package.json does not define a lint script"
               exit 1
             fi
             {{.LINT_COMMAND}}
-            ;;
-          node)
-            npm run lint
             ;;
           go)
             if command -v golangci-lint >/dev/null 2>&1; then
