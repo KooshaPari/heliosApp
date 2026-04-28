@@ -87,7 +87,7 @@ tasks:
       - echo "{{.PROJECT_LANGUAGE}}/{{.PROJECT_TOOLCHAIN}}"
 
   build:
-    desc: Build the detected Bun/TypeScript project
+    desc: Build the detected project
     cmds:
       - |
         set -euo pipefail
@@ -115,7 +115,7 @@ tasks:
         esac
 
   test:
-    desc: Run the primary Bun test suite
+    desc: Run the detected project's primary test suite
     cmds:
       - |
         set -euo pipefail
@@ -147,7 +147,7 @@ tasks:
         esac
 
   lint:
-    desc: Run the configured Bun lint checks
+    desc: Run the detected project's configured lint checks
     cmds:
       - |
         set -euo pipefail
