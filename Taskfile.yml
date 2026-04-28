@@ -31,6 +31,27 @@ vars:
       else
         echo unknown
       fi
+  BUILD_COMMAND:
+    sh: |
+      if [ -f package.json ] && grep -q '"build"' package.json; then
+        echo "bun run build"
+      else
+        echo ""
+      fi
+  TEST_COMMAND:
+    sh: |
+      if [ -f package.json ] && grep -q '"test"' package.json; then
+        echo "bun run test"
+      else
+        echo ""
+      fi
+  LINT_COMMAND:
+    sh: |
+      if [ -f package.json ] && grep -q '"lint"' package.json; then
+        echo "bun run lint"
+      else
+        echo ""
+      fi
 
 tasks:
   default:
@@ -44,13 +65,17 @@ tasks:
       - echo "{{.PROJECT_LANGUAGE}}/{{.PROJECT_TOOLCHAIN}}"
 
   build:
-    desc: Build the project using detected language tooling
+    desc: Build the Bun/TypeScript workspace
     cmds:
       - |
         set -euo pipefail
         case "{{.PROJECT_TOOLCHAIN}}" in
           bun)
-            bun run build
+            if [ -z "{{.BUILD_COMMAND}}" ]; then
+              echo "[FAIL] package.json does not define a build script"
+              exit 1
+            fi
+            {{.BUILD_COMMAND}}
             ;;
           node)
             npm run build
@@ -71,13 +96,17 @@ tasks:
         esac
 
   test:
-    desc: Run the primary test suite for the detected language
+    desc: Run the primary Bun test suite
     cmds:
       - |
         set -euo pipefail
         case "{{.PROJECT_TOOLCHAIN}}" in
           bun)
-            bun run test
+            if [ -z "{{.TEST_COMMAND}}" ]; then
+              echo "[FAIL] package.json does not define a test script"
+              exit 1
+            fi
+            {{.TEST_COMMAND}}
             ;;
           node)
             npm test
@@ -102,13 +131,17 @@ tasks:
         esac
 
   lint:
-    desc: Run static checks for the detected language
+    desc: Run Bun/TypeScript static checks
     cmds:
       - |
         set -euo pipefail
         case "{{.PROJECT_TOOLCHAIN}}" in
           bun)
-            bun run lint
+            if [ -z "{{.LINT_COMMAND}}" ]; then
+              echo "[FAIL] package.json does not define a lint script"
+              exit 1
+            fi
+            {{.LINT_COMMAND}}
             ;;
           node)
             npm run lint
@@ -139,4 +172,14 @@ tasks:
   clean:
     desc: Remove generated artifacts from the working tree
     cmds:
-      - git clean -fdX -- .
+      - |
+        set -euo pipefail
+        rm -rf \
+          apps/desktop/dist \
+          apps/runtime/dist \
+          apps/colab-renderer/dist \
+          docs/.vitepress/dist \
+          coverage \
+          .turbo \
+          .vite \
+          .vitest
