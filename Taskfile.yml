@@ -3,8 +3,10 @@ version: "3"
 vars:
   PROJECT_KIND:
     sh: |
-      if [ -f bun.lock ] || [ -f bun.lockb ] || [ -f package.json ]; then
+      if [ -f bun.lock ] || [ -f bun.lockb ] || { [ -f package.json ] && grep -q '"packageManager"[[:space:]]*:[[:space:]]*"bun@' package.json; }; then
         echo bun
+      elif [ -f package.json ]; then
+        echo node
       elif [ -f go.mod ]; then
         echo go
       elif [ -f pyproject.toml ] || [ -f requirements.txt ]; then
@@ -30,6 +32,9 @@ tasks:
           bun)
             bun run build
             ;;
+          node)
+            npm run build
+            ;;
           go)
             go build ./...
             ;;
@@ -53,6 +58,9 @@ tasks:
         case "{{.PROJECT_KIND}}" in
           bun)
             bun run test
+            ;;
+          node)
+            npm test
             ;;
           go)
             go test ./...
@@ -81,6 +89,9 @@ tasks:
         case "{{.PROJECT_KIND}}" in
           bun)
             bun run lint
+            ;;
+          node)
+            npm run lint
             ;;
           go)
             if command -v golangci-lint >/dev/null 2>&1; then
