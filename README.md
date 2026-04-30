@@ -4,6 +4,7 @@
 [![Release](https://img.shields.io/github/v/release/KooshaPari/heliosApp?include_prereleases&sort=semver)](https://github.com/KooshaPari/heliosApp/releases)
 [![License](https://img.shields.io/github/license/KooshaPari/heliosApp)](LICENSE)
 [![Phenotype](https://img.shields.io/badge/Phenotype-org-blueviolet)](https://github.com/KooshaPari)
+[![AI Slop Inside](https://sladge.net/badge.svg)](https://sladge.net)
 
 **Status:** stable
 
