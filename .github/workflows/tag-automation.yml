@@ -13,6 +13,6 @@ permissions:
 
 jobs:
   tag:
-    uses: KooshaPari/phenoShared/.github/workflows/tag-automation.yml@main
+    uses: KooshaPari/phenoShared/.github/workflows/tag-automation.yml@bf2c65ac776d0c759406dfdb8551e6b344914ea0
     permissions:
       contents: write
