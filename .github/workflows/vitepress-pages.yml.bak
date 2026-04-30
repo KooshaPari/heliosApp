@@ -1,4 +1,5 @@
 name: VitePress Pages
+# Pages enabled: KooshaPari/heliosApp - build_type=workflow
 
 on:
   pull_request:
@@ -32,12 +33,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout heliosApp
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           path: heliosApp
 
       - name: Checkout phenodocs
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           repository: KooshaPari/phenodocs
           path: phenodocs
@@ -48,14 +49,11 @@ jobs:
           bun-version: 1.2.20
 
       - name: Install dependencies
-<<<<<<< HEAD
         working-directory: heliosApp
         run: bun install
 
       - name: Install phenodocs dependencies
         working-directory: phenodocs
-=======
->>>>>>> origin/main
         run: bun install
 
       - name: Generate docs index
@@ -71,7 +69,7 @@ jobs:
 
       - name: Upload pages artifact
         if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: heliosApp/docs/.vitepress/dist
 
@@ -85,7 +83,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Configure Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Deploy to GitHub Pages
         id: deployment

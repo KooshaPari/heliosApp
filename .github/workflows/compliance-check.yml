@@ -35,7 +35,7 @@ jobs:
 
       - name: Get changed files
         id: files
-        uses: actions/github-script@v9
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553
         with:
           script: |
             const { data } = await github.rest.pulls.listFiles({
@@ -69,7 +69,7 @@ jobs:
 
       - name: Parse compliance results
         id: results
-        uses: actions/github-script@v9
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553
         with:
           script: |
             const fs = require('fs');
@@ -85,7 +85,7 @@ jobs:
 
       - name: Post compliance failure comment
         if: steps.results.outputs.passed == 'false'
-        uses: actions/github-script@v9
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553
         with:
           script: |
             const findings = JSON.parse('${{ steps.results.outputs.findings }}');
@@ -122,7 +122,7 @@ jobs:
 
       - name: Post compliance success comment
         if: steps.results.outputs.passed == 'true'
-        uses: actions/github-script@v9
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553
         with:
           script: |
             github.rest.issues.createComment({
