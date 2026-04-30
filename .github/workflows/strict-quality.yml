@@ -14,7 +14,7 @@ jobs:
     name: Type Check + Lint + Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: oven-sh/setup-bun@v1
 
       - name: Install dependencies
