@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   sync:
-    uses: KooshaPari/phenoShared/.github/workflows/alert-sync-issues.yml@bf2c65ac776d0c759406dfdb8551e6b344914ea0
+    uses: KooshaPari/phenoShared/.github/workflows/alert-sync-issues.yml@{"message":"Not Found","documentation_url":"https://docs.github.com/rest/commits/commits#get-a-commit","status":"404"}
     with:
       auto-label: auto-alert-sync
       min_severity: medium

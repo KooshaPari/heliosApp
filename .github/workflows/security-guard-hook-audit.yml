@@ -12,4 +12,4 @@ permissions:
 
 jobs:
   guard:
-    uses: KooshaPari/phenoShared/.github/workflows/security-guard-hook-audit.yml@main
+    uses: KooshaPari/phenoShared/.github/workflows/security-guard-hook-audit.yml@{"message":"Not Found","documentation_url":"https://docs.github.com/rest/commits/commits#get-a-commit","status":"404"}

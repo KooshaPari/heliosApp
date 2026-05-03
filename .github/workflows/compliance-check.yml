@@ -20,13 +20,13 @@ jobs:
 
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11@{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/repos#get-a-repository","status":"404"}
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@{"message":"Not Found","documentation_url":"https://docs.github.com/rest/commits/commits#get-a-commit","status":"404"}
         with:
           bun-version: "1.2.20"
 
@@ -35,7 +35,7 @@ jobs:
 
       - name: Get changed files
         id: files
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        uses: actions/github-script@{"message":"Not Found","documentation_url":"https://docs.github.com/rest/commits/commits#get-a-commit","status":"404"}
         with:
           script: |
             const { data } = await github.rest.pulls.listFiles({
@@ -48,7 +48,7 @@ jobs:
             console.log('Changed files:', files);
 
       - name: Generate SBOM (syft)
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@{"message":"Not Found","documentation_url":"https://docs.github.com/rest/commits/commits#get-a-commit","status":"404"}
         with:
           file: ./package.json
           format: 'spdx-json'
@@ -69,7 +69,7 @@ jobs:
 
       - name: Parse compliance results
         id: results
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        uses: actions/github-script@{"message":"Not Found","documentation_url":"https://docs.github.com/rest/commits/commits#get-a-commit","status":"404"}
         with:
           script: |
             const fs = require('fs');
@@ -85,7 +85,7 @@ jobs:
 
       - name: Post compliance failure comment
         if: steps.results.outputs.passed == 'false'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        uses: actions/github-script@{"message":"Not Found","documentation_url":"https://docs.github.com/rest/commits/commits#get-a-commit","status":"404"}
         with:
           script: |
             const findings = JSON.parse('${{ steps.results.outputs.findings }}');
@@ -122,7 +122,7 @@ jobs:
 
       - name: Post compliance success comment
         if: steps.results.outputs.passed == 'true'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        uses: actions/github-script@{"message":"Not Found","documentation_url":"https://docs.github.com/rest/commits/commits#get-a-commit","status":"404"}
         with:
           script: |
             github.rest.issues.createComment({

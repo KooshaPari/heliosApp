@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   call-sbom-refresh:
-    uses: KooshaPari/phenotype-tooling/.github/workflows/sbom-monthly.yml@79dff2b798fb8a3bc64237e4b2d054a08d3a4601
+    uses: KooshaPari/phenotype-tooling/.github/workflows/sbom-monthly.yml@{"message":"Not Found","documentation_url":"https://docs.github.com/rest/commits/commits#get-a-commit","status":"404"}
     with:
       repo_path: '.'
       build_system: 'node'

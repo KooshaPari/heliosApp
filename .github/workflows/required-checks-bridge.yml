@@ -18,7 +18,7 @@ jobs:
         run: sleep 30
 
       - name: Bridge missing required checks
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        uses: actions/github-script@{"message":"Not Found","documentation_url":"https://docs.github.com/rest/commits/commits#get-a-commit","status":"404"}
         with:
           script: |
             const requiredChecks = [
