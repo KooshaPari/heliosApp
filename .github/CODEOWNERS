@@ -1,10 +1,5 @@
-# Global code owners for KooshaPari org
+# Default owner for all files
 * @KooshaPari
 
-# Infrastructure as code
-/iac/ @KooshaPari
+# Specific paths
 /.github/ @KooshaPari
-
-# Security-sensitive
-/SECURITY.md @KooshaPari
-/.github/dependabot.yml @KooshaPari
