@@ -22,7 +22,7 @@ bun install && bun run dev
 
 This boots the desktop shell (`apps/desktop`) in watch mode. Use `bun run dev:runtime` or `bun run dev:colab` to launch the runtime engine or colab renderer instead.
 
-> TODO: add desktop shell screenshot to README (`screenshot.png`).
+> Desktop shell screenshot pending.
 
 ---
 

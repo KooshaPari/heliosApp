@@ -10,11 +10,11 @@
 
 | Metric | Value |
 |--------|-------|
-| Functional Requirements | TBD |
-| Test Files | TBD |
-| Test Functions | TBD |
+| Functional Requirements | 283 |
+| Test Files | 253 |
+| Test Functions | 2451 |
 | Coverage Target | 80% |
-| Current Coverage | TBD |
+| Current Coverage | 61.5% traced (174 / 283 FRs; see `docs/reference/FR_COVERAGE_DASHBOARD.md`) |
 
 ---
 
@@ -34,19 +34,13 @@
 
 ## FR to Test Coverage Mapping
 
-| FR ID | Description | Test Files | Coverage Status |
-|-------|-------------|------------|-----------------|
-| TBD | TBD | TBD | TBD |
+Detailed FR-to-test traceability is maintained in `docs/reference/fr_coverage_matrix.md`.
 
 ---
 
 ## Coverage Gaps
 
-### Critical Gaps
-1. TBD
-
-### Partial Coverage
-1. TBD
+See `docs/reference/FR_COVERAGE_DASHBOARD.md` for category-level gaps and status.
 
 ---
 
@@ -57,7 +51,7 @@
 2. Add integration tests for adapters
 
 ### Short-term Actions
-1. Increase coverage to 80%
+1. Increase traced FR coverage toward 80%+
 
 ---
 
