@@ -13,6 +13,6 @@ permissions:
 
 jobs:
   tag:
-    uses: KooshaPari/phenoShared/.github/workflows/tag-automation.yml@bf2c65ac776d0c759406dfdb8551e6b344914ea0
+    uses: KooshaPari/phenoShared/.github/workflows/tag-automation.yml@72b9c6cbdb24c49189b0e7c7395d874830d1ed87 # pinned from @ref; org SHA may shift on new commits
     permissions:
       contents: write
