@@ -4,7 +4,7 @@
 
 **HeliosApp** is a developer-focused AI runtime environment with a desktop shell, terminal multiplexing, session management, and multi-provider AI inference.
 
-- **Version:** 2026.03A.0
+- **Version:** 2026.05B.0
 - **Package Manager:** Bun 1.2.20+
 - **Runtime:** TypeScript 7.x (strict mode)
 - **Architecture:** Event-driven monorepo with LocalBus V1 message bus
