@@ -26,7 +26,6 @@ describe("Compliance Checker", () => {
 		}
 	});
 
-	// Traces to: FR-GOVERNANCE-COMPLIANCE
 	test("detects file size violation (>500 lines)", async () => {
 		// Create a large file
 		const lines = Array(501)
@@ -44,7 +43,6 @@ describe("Compliance Checker", () => {
 		expect(result.findings[0].constitutionSection).toBeTruthy();
 	});
 
-	// Traces to: FR-GOVERNANCE-COMPLIANCE
 	test("passes clean file under 500 lines", async () => {
 		const lines = Array(100).fill("// line");
 		const filePath = `${FIXTURE_DIR}/small-file.ts`;
@@ -56,7 +54,6 @@ describe("Compliance Checker", () => {
 		expect(result.findings.length).toBe(0);
 	});
 
-	// Traces to: FR-GOVERNANCE-TYPE-SAFETY
 	test('detects "any" type usage', async () => {
 		const content = `
 export function test(value: any): void {
@@ -76,7 +73,6 @@ export function test(value: any): void {
 		expect(anyTypeFinding?.constitutionSection).toBeTruthy();
 	});
 
-	// Traces to: FR-GOVERNANCE-SECURITY
 	test("detects hardcoded secrets", async () => {
 		const content = `
 const API_KEY = "sk-1234567890abcdef";
@@ -92,7 +88,6 @@ export const token = API_KEY;`;
 		expect(securityFinding?.description).toContain("secret");
 	});
 
-	// Traces to: FR-GOVERNANCE-COMPLIANCE
 	test("passes safe code without violations", async () => {
 		const content = `
 export function calculateSum(values: number[]): number {

@@ -133,9 +133,9 @@ export async function executeRestartWithRestore(
   config: RendererConfig,
   surface: RenderSurface,
   onRollback: (error: Error) => Promise<void>,
-  _eventBus?: RendererEventBus
+  eventBus?: RendererEventBus
 ): Promise<RestartRestoreResult> {
-  const _startTime = Date.now();
+  const startTime = Date.now();
   let currentPhase = "checkpoint";
   let checkpoints: ZmxCheckpoint[] = [];
 
@@ -205,7 +205,7 @@ export async function executeRestartWithRestore(
       durationMs: Date.now() - startTime,
       checkpoints,
     };
-  } catch {
+  } catch (error: unknown) {
     const restartError =
       error instanceof RestartRestoreError
         ? error

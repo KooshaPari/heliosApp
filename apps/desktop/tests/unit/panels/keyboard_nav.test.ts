@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { KeyboardNav } from "../../../src/panels/keyboard_nav";
 import type { KeyboardNavCallbacks } from "../../../src/panels/keyboard_nav";
 

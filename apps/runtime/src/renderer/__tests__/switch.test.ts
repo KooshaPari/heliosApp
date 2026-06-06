@@ -1,4 +1,4 @@
-
+import { describe, expect, it, mock } from "bun:test";
 import { switchRenderer, SwitchSameRendererError } from "../switch.js";
 import { RendererRegistry } from "../registry.js";
 import { RendererStateMachine } from "../state_machine.js";
@@ -75,7 +75,6 @@ function setupRegistry(from: RendererAdapter, to: RendererAdapter) {
   return { reg, sm };
 }
 
-// Traces to: FR-TXN-001 (atomic transactions), FR-TXN-004 (rollback on failure), FR-RND-004 (renderer switches)
 describe("switchRenderer", () => {
   it("successfully switches renderers", async () => {
     const from = createMockAdapter("ghostty");

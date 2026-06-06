@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import {
   ActiveContextStore,
   type ActiveContext,
@@ -59,7 +60,7 @@ describe("ActiveContextStore", () => {
 
       let emittedEvent: any = null;
 
-      store.onContextChange(_event => {
+      store.onContextChange(event => {
         emittedEvent = event;
       });
 
@@ -87,7 +88,7 @@ describe("ActiveContextStore", () => {
 
       await store.setContext(context1);
 
-      store.onContextChange(_event => {
+      store.onContextChange(event => {
         emittedEvent = event;
       });
 
@@ -106,11 +107,11 @@ describe("ActiveContextStore", () => {
 
       const calls: any[] = [];
 
-      store.onContextChange(_event => {
+      store.onContextChange(event => {
         calls.push("listener1");
       });
 
-      store.onContextChange(_event => {
+      store.onContextChange(event => {
         calls.push("listener2");
       });
 
@@ -129,7 +130,7 @@ describe("ActiveContextStore", () => {
 
       let callCount = 0;
 
-      const unsubscribe = store.onContextChange(_event => {
+      const unsubscribe = store.onContextChange(event => {
         callCount++;
       });
 
@@ -165,7 +166,7 @@ describe("ActiveContextStore", () => {
 
       let emittedContexts: ActiveContext[] = [];
 
-      store.onContextChange(_event => {
+      store.onContextChange(event => {
         if (event.current) {
           emittedContexts.push(event.current);
         }
@@ -193,7 +194,7 @@ describe("ActiveContextStore", () => {
 
       let finalContext: ActiveContext | null = null;
 
-      store.onContextChange(_event => {
+      store.onContextChange(event => {
         finalContext = event.current;
       });
 
@@ -222,7 +223,7 @@ describe("ActiveContextStore", () => {
 
       let validated = false;
 
-      store.setValidator(async _ctx => {
+      store.setValidator(async ctx => {
         validated = true;
         return true;
       });

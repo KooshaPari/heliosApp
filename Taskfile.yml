@@ -1,79 +1,4 @@
-version: "3"
-
-vars:
-  PROJECT_LANGUAGE:
-    sh: |
-      if [ -f tsconfig.json ] || [ -f tsconfig.base.json ]; then
-        echo typescript
-      elif [ -f package.json ]; then
-        echo javascript
-      elif [ -f go.mod ]; then
-        echo go
-      elif [ -f pyproject.toml ] || [ -f requirements.txt ]; then
-        echo python
-      elif [ -f Cargo.toml ]; then
-        echo rust
-      else
-        echo unknown
-      fi
-  PROJECT_TOOLCHAIN:
-    sh: |
-      if [ -f bun.lock ] || [ -f bun.lockb ] || { [ -f package.json ] && grep -q '"packageManager"[[:space:]]*:[[:space:]]*"bun@' package.json; }; then
-        echo bun
-      elif [ -f pnpm-lock.yaml ] || { [ -f package.json ] && grep -q '"packageManager"[[:space:]]*:[[:space:]]*"pnpm@' package.json; }; then
-        echo pnpm
-      elif [ -f yarn.lock ] || { [ -f package.json ] && grep -q '"packageManager"[[:space:]]*:[[:space:]]*"yarn@' package.json; }; then
-        echo yarn
-      elif [ -f package-lock.json ] || [ -f package.json ]; then
-        echo npm
-      elif [ -f go.mod ]; then
-        echo go
-      elif [ -f pyproject.toml ] || [ -f requirements.txt ]; then
-        echo python
-      elif [ -f Cargo.toml ]; then
-        echo rust
-      else
-        echo unknown
-      fi
-  BUILD_COMMAND:
-    sh: |
-      if [ -f package.json ] && bun -e "const pkg = await import('./package.json', { with: { type: 'json' } }); process.exit(pkg.default.scripts?.build ? 0 : 1)"; then
-        case "{{.PROJECT_TOOLCHAIN}}" in
-          bun) echo "bun run build" ;;
-          pnpm) echo "pnpm run build" ;;
-          yarn) echo "yarn build" ;;
-          npm|node) echo "npm run build" ;;
-          *) echo "" ;;
-        esac
-      else
-        echo ""
-      fi
-  TEST_COMMAND:
-    sh: |
-      if [ -f package.json ] && bun -e "const pkg = await import('./package.json', { with: { type: 'json' } }); process.exit(pkg.default.scripts?.test ? 0 : 1)"; then
-        case "{{.PROJECT_TOOLCHAIN}}" in
-          bun) echo "bun run test" ;;
-          pnpm) echo "pnpm run test" ;;
-          yarn) echo "yarn test" ;;
-          npm|node) echo "npm run test" ;;
-          *) echo "" ;;
-        esac
-      else
-        echo ""
-      fi
-  LINT_COMMAND:
-    sh: |
-      if [ -f package.json ] && bun -e "const pkg = await import('./package.json', { with: { type: 'json' } }); process.exit(pkg.default.scripts?.lint ? 0 : 1)"; then
-        case "{{.PROJECT_TOOLCHAIN}}" in
-          bun) echo "bun run lint" ;;
-          pnpm) echo "pnpm run lint" ;;
-          yarn) echo "yarn lint" ;;
-          npm|node) echo "npm run lint" ;;
-          *) echo "" ;;
-        esac
-      else
-        echo ""
-      fi
+version: '3'
 
 tasks:
   default:
@@ -81,119 +6,106 @@ tasks:
       - task --list
     silent: true
 
-  language:
-    desc: Print the detected project language/toolchain
-    cmds:
-      - echo "{{.PROJECT_LANGUAGE}}/{{.PROJECT_TOOLCHAIN}}"
-
-  build:
-    desc: Build the detected project
+  preflight:
+    desc: Fail fast if required tooling is missing
     cmds:
       - |
         set -euo pipefail
-        case "{{.PROJECT_TOOLCHAIN}}" in
-          bun|pnpm|yarn|npm|node)
-            if [ -z "{{.BUILD_COMMAND}}" ]; then
-              echo "[FAIL] package.json does not define a build script"
-              exit 1
-            fi
-            {{.BUILD_COMMAND}}
-            ;;
-          go)
-            go build ./...
-            ;;
-          python)
-            python -m compileall .
-            ;;
-          rust)
-            cargo build --all-targets
-            ;;
-          *)
-            echo "[FAIL] unable to detect project language from repository manifests"
-            exit 1
-            ;;
-        esac
+        command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
+        command -v task >/dev/null 2>&1 || { echo "[FAIL] task is required"; exit 1; }
+        command -v git >/dev/null 2>&1 || { echo "[FAIL] git is required"; exit 1; }
+        test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
+        echo "[OK] preflight checks passed"
 
-  test:
-    desc: Run the detected project's primary test suite
+  deps:
+    desc: Install dependencies with lockfile guarantees
+    deps: [preflight]
     cmds:
-      - |
-        set -euo pipefail
-        case "{{.PROJECT_TOOLCHAIN}}" in
-          bun|pnpm|yarn|npm|node)
-            if [ -z "{{.TEST_COMMAND}}" ]; then
-              echo "[FAIL] package.json does not define a test script"
-              exit 1
-            fi
-            {{.TEST_COMMAND}}
-            ;;
-          go)
-            go test ./...
-            ;;
-          python)
-            if command -v pytest >/dev/null 2>&1; then
-              pytest
-            else
-              python -m unittest discover
-            fi
-            ;;
-          rust)
-            cargo test --all-targets
-            ;;
-          *)
-            echo "[FAIL] unable to detect project language from repository manifests"
-            exit 1
-            ;;
-        esac
+      - bun install --frozen-lockfile
+
+  typecheck:
+    desc: Run TypeScript type checks
+    cmds:
+      - bun run typecheck
 
   lint:
-    desc: Run the detected project's configured lint checks
+    desc: Run static lint checks
     cmds:
-      - |
-        set -euo pipefail
-        case "{{.PROJECT_TOOLCHAIN}}" in
-          bun|pnpm|yarn|npm|node)
-            if [ -z "{{.LINT_COMMAND}}" ]; then
-              echo "[FAIL] package.json does not define a lint script"
-              exit 1
-            fi
-            {{.LINT_COMMAND}}
-            ;;
-          go)
-            if command -v golangci-lint >/dev/null 2>&1; then
-              golangci-lint run
-            else
-              go vet ./...
-            fi
-            ;;
-          python)
-            if command -v ruff >/dev/null 2>&1; then
-              ruff check .
-            else
-              python -m compileall .
-            fi
-            ;;
-          rust)
-            cargo clippy --all-targets --all-features
-            ;;
-          *)
-            echo "[FAIL] unable to detect project language from repository manifests"
-            exit 1
-            ;;
-        esac
+      - bun run lint
 
-  clean:
-    desc: Remove generated artifacts from the working tree
+  test:
+    desc: Run unit test suites
     cmds:
-      - |
-        set -euo pipefail
-        rm -rf \
-          apps/desktop/dist \
-          apps/runtime/dist \
-          apps/colab-renderer/dist \
-          apps/renderer/dist \
-          docs/.vitepress/dist \
-          coverage \
-          .turbo \
-          .vite \
-          .vitest
+      - bun run test
+
+  coverage:
+    desc: Run unit tests with coverage
+    cmds:
+      - bun run test:coverage
+
+  docs:index:
+    desc: Generate markdown document index pages
+    cmds:
+      - bun run docs:index
+
+  docs:build:
+    desc: Build VitePress docs
+    cmds:
+      - bun run docs:build
+
+  quality:quick:
+    desc: Fast quality lane for inner-loop development
+    deps: [preflight, deps]
+    cmds:
+      - task typecheck
+      - task lint
+      - task test
+
+  quality:strict:
+    desc: Strict quality lane including coverage and docs build
+    deps: [quality:quick]
+    cmds:
+      - task coverage
+      - task docs:build
+
+  check:
+    desc: Canonical full-project check
+    deps: [quality:strict]
+
+  ci:
+    desc: CI lane (strict quality + docs index refresh)
+    deps: [check]
+    cmds:
+      - task docs:index
+
+  devops:status:
+    desc: Show Git status, remotes, and branch state
+    cmds:
+      - git status --short --branch
+      - git remote -v
+      - git log --oneline -n 5
+
+  devops:check:
+    desc: Run shared DevOps checks for this repo (no CI pipeline)
+    cmds:
+      - bash scripts/devops-checker.sh
+
+  devops:check:ci:
+    desc: Run shared DevOps checks including CI lane
+    cmds:
+      - bash scripts/devops-checker.sh --check-ci
+
+  devops:check:ci-summary:
+    desc: Run shared DevOps checks including CI lane and emit JSON summary
+    cmds:
+      - bash scripts/devops-checker.sh --check-ci --emit-summary
+
+  devops:push:
+    desc: Push branch with shared helper and fallback remote behavior
+    cmds:
+      - bash scripts/push-heliosapp-with-fallback.sh {{.CLI_ARGS}}
+
+  devops:push:origin:
+    desc: Push using fallback remote only (skip primary)
+    cmds:
+      - bash scripts/push-heliosapp-with-fallback.sh --skip-primary {{.CLI_ARGS}}

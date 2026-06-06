@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { SwitchStatus } from "../../../src/settings/switch_status";
 
 describe("SwitchStatus", () => {

@@ -280,7 +280,7 @@ export class ChatTab extends TabSurface {
   /**
    * Generate mock chat history for demonstration.
    */
-  private generateMockChatHistory(_context: ActiveContext): void {
+  private generateMockChatHistory(context: ActiveContext): void {
     const baseTime = Date.now();
     this.messages = [
       {

@@ -58,8 +58,10 @@ describe("audit export compliance", () => {
     });
 
     const rows = await sink.exportRecords();
-    const envelope = rows[0]?.envelope as Record<string, unknown>;
-    const payload = envelope.payload as Record<string, unknown>;
+    const payload = (rows[0]?.envelope as Record<string, unknown>).payload as Record<
+      string,
+      unknown
+    >;
     expect(payload.authorization).toBe("[REDACTED]");
     expect((payload.nested as Record<string, unknown>).token).toBe("[REDACTED]");
     expect((payload.nested as Record<string, unknown>).safe).toBe("value");

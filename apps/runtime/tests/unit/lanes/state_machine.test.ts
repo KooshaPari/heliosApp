@@ -1,5 +1,4 @@
 // T017 - Unit tests for lane state machine (FR-008-001, NFR-008-004)
-// Traces to: FR-LAN-001 (lane state machine: new -> provisioning -> ready -> running -> blocked -> shared -> cleaning -> closed)
 
 import { describe, expect, it, beforeEach } from "bun:test";
 import {
@@ -119,8 +118,7 @@ describe("Lane State Machine (FR-008-001)", () => {
         await withLaneLock("lane-err", async () => {
           throw new Error("boom");
         });
-    // eslint-disable-next-line no-unused-vars
-      } catch (_err) {
+      } catch {
         // expected
       }
       await withLaneLock("lane-err", async () => {

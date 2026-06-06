@@ -57,7 +57,7 @@ export class HealthMonitoringCoordinator {
             failureCount: status.failureCount,
           });
         }
-      } catch {
+      } catch (_error) {
         // Health polling errors are intentionally isolated per interval tick.
       }
     }, interval);
@@ -136,7 +136,7 @@ export class HealthMonitoringCoordinator {
         topic,
         payload,
       });
-    } catch {
+    } catch (_error) {
       // Best-effort event publishing should not fail coordinator flow.
     }
   }

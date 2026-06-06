@@ -22,7 +22,6 @@ function makeRecord(overrides: Partial<PtyRecord> = {}): PtyRecord {
   };
 }
 
-// Traces to: FR-PTY-002 (process registry)
 describe("PtyRegistry", () => {
   let registry: PtyRegistry;
 
@@ -76,7 +75,7 @@ describe("PtyRegistry", () => {
   it("update bumps updatedAt", () => {
     const rec = makeRecord();
     registry.register(rec);
-    const _before = rec.updatedAt;
+    const before = rec.updatedAt;
 
     // Small delay to ensure timestamp changes
     registry.update("pty-1", { state: "throttled" });

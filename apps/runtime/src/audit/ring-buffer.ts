@@ -43,7 +43,7 @@ export class AuditRingBuffer {
    * @param capacity - Maximum number of events to hold (default 10,000)
    */
   constructor(private capacity: number = 10_000) {
-    this.buffer = Array.from({ length: capacity });
+    this.buffer = new Array(capacity);
   }
 
   /**

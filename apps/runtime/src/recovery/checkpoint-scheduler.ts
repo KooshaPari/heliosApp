@@ -47,8 +47,8 @@ export class CheckpointScheduler {
   async triggerNow(): Promise<void> {
     if (!this.writer || !this.stateGetter) return;
 
-    const _checkpoint = this.stateGetter();
-    const _startTime = Date.now();
+    const checkpoint = this.stateGetter();
+    const startTime = Date.now();
 
     try {
       await this.writer.write(checkpoint);
@@ -58,7 +58,7 @@ export class CheckpointScheduler {
 
       // Adjust interval based on write time
       this.adjustInterval();
-    } catch {
+    } catch (err) {
       console.error("Failed to write checkpoint:", err);
     }
   }
@@ -102,7 +102,7 @@ export class CheckpointScheduler {
     // Take final checkpoint synchronously (with timeout)
     if (!this.writer || !this.stateGetter) return;
 
-    const _checkpoint = this.stateGetter();
+    const checkpoint = this.stateGetter();
     const writePromise = this.writer.write(checkpoint);
 
     // Race: wait for write or timeout

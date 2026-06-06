@@ -2,7 +2,7 @@
 
 ## Reporting
 
-Report security vulnerabilities responsibly to: **security@kooshapari.com**
+Report security vulnerabilities responsibly to: **security@phenotype.dev**
 
 Please do not open public issues for security vulnerabilities. Include:
 - Description of the vulnerability

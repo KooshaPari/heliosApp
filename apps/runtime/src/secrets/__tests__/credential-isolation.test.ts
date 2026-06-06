@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { tmpdir } from "node:os";
@@ -178,7 +179,7 @@ describe("CredentialStore: cross-provider isolation", () => {
         "myKey"
       );
       expect(true).toBe(false); // should not reach here
-    } catch {
+    } catch (err) {
       expect(err).toBeInstanceOf(CredentialAccessDeniedError);
       expect((err as CredentialAccessDeniedError).code).toBe("CREDENTIAL_ACCESS_DENIED");
     }

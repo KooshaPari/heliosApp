@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach } from "bun:test";
 import { TabBar } from "../../../src/tabs/tab_bar";
 import { createMockTabSurface } from "../../../src/tabs/tab_surface";
 
-// Traces to: FR-TAB-001, FR-TAB-002, FR-TAB-004
 describe("TabBar", () => {
   let tabBar: TabBar;
   let mockTabs: ReturnType<typeof createMockTabSurface>[] = [];
@@ -21,7 +20,6 @@ describe("TabBar", () => {
 
   describe("Tab Selection", () => {
     it("should initialize with first tab selected", () => {
-      // Traces to: FR-TAB-006 (preserve tab selection state across restarts)
       expect(tabBar.getSelectedTabId()).toBe("tab1");
     });
 
@@ -34,7 +32,7 @@ describe("TabBar", () => {
       const tab1 = mockTabs[0];
       const tab2 = mockTabs[1];
 
-      let _tab1Active = false;
+      let tab1Active = false;
       let tab1Deactivated = false;
       let tab2Active = false;
 

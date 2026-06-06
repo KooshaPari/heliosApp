@@ -9,7 +9,6 @@ function makeFixedKeyService(): EncryptionService {
   });
 }
 
-// Traces to: FR-SEC-001 (encryption at rest)
 describe("EncryptionService", () => {
   let svc: EncryptionService;
 

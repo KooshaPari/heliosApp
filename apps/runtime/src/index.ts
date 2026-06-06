@@ -17,8 +17,7 @@ import {
 } from "./sessions/state_machine.js";
 import type { TerminalBuffer } from "./runtime/types.js";
 import { TerminalRegistry } from "./sessions/terminal_registry.js";
-import { handleRuntimeRequest } from "./runtime/ops.js";
-
+import { handleRuntimeRequest, type RuntimeOpsContext } from "./runtime/ops.js";
 import type {
   RecoveryBootstrapResult,
   RecoveryMetadata,
@@ -64,8 +63,8 @@ export type RuntimeOptions = {
 
 type RuntimeInstance = ReturnType<typeof createRuntime>;
 
-const _startTime = performance.now();
-const _METHOD_SET = new Set<string>(METHODS);
+const startTime = performance.now();
+const METHOD_SET = new Set<string>(METHODS);
 
 function normalizePayload(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -122,7 +121,7 @@ export function healthCheck(): HealthCheckResult {
   return {
     ok: true,
     timestamp: Date.now(),
-    uptimeMs: performance.now() - _startTime,
+    uptimeMs: performance.now() - startTime,
   };
 }
 
@@ -641,7 +640,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
       let lane: LaneRecord;
       try {
         lane = laneService.getRequired(laneId);
-      } catch {
+      } catch (_err) {
         return Response.json({ error: "lane_not_found" }, { status: 404 });
       }
 

@@ -224,7 +224,7 @@ describe("MCP Bridge Adapter", () => {
         );
       }
 
-      const _results = await Promise.all(promises);
+      const results = await Promise.all(promises);
 
       expect(results).toHaveLength(5);
       results.forEach(result => {
@@ -387,7 +387,7 @@ describe("MCP Bridge Adapter", () => {
           },
           "corr-123"
         );
-      } catch {
+      } catch (e) {
         // Expected
       }
 
@@ -441,7 +441,7 @@ describe("MCP Bridge Adapter", () => {
     });
 
     it("should support concurrent tool executions without interference", async () => {
-      const _results = await Promise.all([
+      const results = await Promise.all([
         adapter.execute({ toolName: "read_file", arguments: { path: "/file1.txt" } }, "corr-1"),
         adapter.execute(
           {
@@ -470,7 +470,7 @@ describe("MCP Bridge Adapter", () => {
       // Execute failing tool
       try {
         await adapter.execute({ toolName: "unknown_tool", arguments: {} }, "corr-2");
-      } catch {
+      } catch (e) {
         // Expected
       }
 

@@ -1,7 +1,6 @@
 /**
  * FR-HELIOS-073: Lane Sharing Tests
  * Verifies: FR-LAN-007 (Mark lanes as shared for multi-agent concurrent access)
- * Traces to: FR-MVP-021 (terminal sharing)
  */
 import { describe, test, expect, beforeEach } from "bun:test";
 import { LaneRegistry } from "../../../src/lanes/registry.js";
@@ -57,8 +56,7 @@ describe("Lane Sharing (FR-008-007)", () => {
     try {
       await shareLane(registry, "sh3");
       expect(true).toBe(false);
-    // eslint-disable-next-line no-unused-vars
-    } catch (_err) {
+    } catch (e) {
       expect(e).toBeInstanceOf(LaneClosedError);
     }
   });
@@ -88,8 +86,7 @@ describe("Lane Sharing (FR-008-007)", () => {
     try {
       await attachAgent(registry, "at4", "agent-a");
       expect(true).toBe(false);
-    // eslint-disable-next-line no-unused-vars
-    } catch (_err) {
+    } catch (e) {
       expect(e).toBeInstanceOf(LaneClosedError);
     }
   });

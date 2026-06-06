@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { mkdtempSync, rmSync, existsSync, statSync, readFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { tmpdir } from "node:os";
@@ -6,6 +7,7 @@ import { EncryptionService } from "../encryption.js";
 import {
   CredentialStore,
   CredentialNotFoundError,
+  CredentialAlreadyExistsError,
 } from "../credential-store.js";
 
 function makeStore(dataDir: string): CredentialStore {
@@ -16,7 +18,6 @@ function makeStore(dataDir: string): CredentialStore {
   return new CredentialStore({ dataDir, encryption });
 }
 
-// Traces to: FR-SEC-001 (secure credential store with encryption), FR-SEC-002 (provider+workspace scoping)
 describe("CredentialStore: store and retrieve", () => {
   let tmpDir: string;
   let store: CredentialStore;

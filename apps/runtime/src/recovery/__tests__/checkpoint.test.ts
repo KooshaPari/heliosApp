@@ -1,15 +1,16 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import {
   CheckpointWriter,
   CheckpointReader,
   type Checkpoint,
   type CheckpointSession,
   estimateCheckpointSize,
+  MAX_SCROLLBACK_SIZE,
 } from "../checkpoint.js";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 
-// Traces to: FR-CRH-003 (zmx checkpoint for restoration), FR-CRH-004 (checkpoint integrity validation)
 describe("CheckpointWriter and CheckpointReader", () => {
   let writer: CheckpointWriter;
   let reader: CheckpointReader;

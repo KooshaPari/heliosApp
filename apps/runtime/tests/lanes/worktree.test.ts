@@ -2,6 +2,7 @@
  * FR-HELIOS-099: Worktree Provisioning and Orphan Reconciliation
  * Verifies: FR-LAN-006 (Worktree provisioning), FR-LAN-009 (Orphan detection)
  */
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -16,7 +17,7 @@ import {
   lastMetrics,
 } from "../../src/lanes/worktree.js";
 import { LaneManager, _resetIdCounter } from "../../src/lanes/index.js";
-
+import type { PtyManager, PtyHandle } from "../../src/lanes/index.js";
 import { InMemoryLocalBus } from "../../src/protocol/bus.js";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -43,14 +44,12 @@ function cleanup(): void {
     try {
       // Prune worktrees first to avoid locked file issues
       Bun.spawnSync(["git", "worktree", "prune"], { cwd: dir });
-    // eslint-disable-next-line no-unused-vars
-    } catch (_err) {
+    } catch {
       // ignore
     }
     try {
       fs.rmSync(dir, { recursive: true, force: true });
-    // eslint-disable-next-line no-unused-vars
-    } catch (_err) {
+    } catch {
       // ignore
     }
   }

@@ -31,7 +31,6 @@ function mockAdapter(id: string, version = "1.0.0"): RendererAdapter {
   };
 }
 
-// Traces to: FR-RND-003 (renderer registry)
 describe("RendererRegistry", () => {
   it("registers and retrieves adapters", () => {
     const reg = new RendererRegistry();

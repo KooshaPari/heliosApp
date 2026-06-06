@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { RestorationPipeline } from "../restoration.js";
 import { RecoveryStateMachine, RecoveryStage } from "../state-machine.js";
 import { CrashLoopDetector, SafeMode } from "../safe-mode.js";
@@ -31,8 +32,6 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
   beforeEach(async () => {
     tempDir = path.join(os.tmpdir(), `chaos-test-${Date.now()}`);
     await fs.mkdir(tempDir, { recursive: true });
-    // Pre-create recovery subdirectory to avoid race conditions
-    await fs.mkdir(path.join(tempDir, "recovery"), { recursive: true });
     bus = new InMemoryLocalBus();
   });
 
@@ -66,7 +65,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
     it("should clean up stale temp files on next write", async () => {
       const writer = new CheckpointWriter(tempDir);
 
-      const _checkpoint = createMockCheckpoint(2);
+      const checkpoint = createMockCheckpoint(2);
       await writer.write(checkpoint);
 
       const tempPath = `${writer.getCheckpointPath()}.tmp`;
@@ -154,12 +153,12 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
   describe("Full recovery cycle resilience", () => {
     it("should complete full recovery cycle within SLO", async () => {
-      const _checkpoint = createMockCheckpoint(5);
+      const checkpoint = createMockCheckpoint(5);
       const pipeline = new RestorationPipeline(bus);
       const stateMachine = new RecoveryStateMachine(tempDir, bus);
       await stateMachine.initialize();
 
-      const _startTime = Date.now();
+      const startTime = Date.now();
 
       // Full cycle
       await stateMachine.transition(RecoveryStage.DETECTING);
@@ -187,7 +186,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
   describe("Concurrent operations during recovery", () => {
     it("should handle concurrent activity during recovery", async () => {
-      const _checkpoint = createMockCheckpoint(3);
+      const checkpoint = createMockCheckpoint(3);
       const pipeline = new RestorationPipeline(bus);
       const stateMachine = new RecoveryStateMachine(tempDir, bus);
       await stateMachine.initialize();
@@ -216,10 +215,10 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
 
   describe("Repeated chaos scenarios", () => {
     it("should maintain consistency across 5 recovery cycles", async () => {
-      const _results = [];
+      const results = [];
 
       for (let i = 0; i < 5; i++) {
-        const _checkpoint = createMockCheckpoint(3);
+        const checkpoint = createMockCheckpoint(3);
         const pipeline = new RestorationPipeline(bus);
 
         const result = await pipeline.restore(checkpoint);
@@ -252,14 +251,16 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const stateMachine = new RecoveryStateMachine(tempDir, bus);
       await stateMachine.initialize();
 
-      // Attempt DETECTING -> DETECTION_FAILED cycle multiple times (MAX_RETRIES_PER_STAGE = 3)
-      // Each cycle increments attemptCount for the source stage (DETECTING)
+      await stateMachine.transition(RecoveryStage.DETECTING);
+
+      // Try 3 times
       for (let i = 0; i < 3; i++) {
-        await stateMachine.transition(RecoveryStage.DETECTING);
         await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
+        await stateMachine.transition(RecoveryStage.DETECTING);
       }
 
-      // Fourth attempt to DETECTING from DETECTION_FAILED should fail due to max retries
+      // Fourth attempt should fail
+      await stateMachine.transition(RecoveryStage.DETECTION_FAILED);
       await expect(stateMachine.transition(RecoveryStage.DETECTING)).rejects.toThrow("Max retries");
     });
   });

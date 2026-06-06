@@ -1,10 +1,10 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from "bun:test";
 import { SafeMode, CrashLoopDetector, type SafeModeConfig } from "../safe-mode.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { promises as fs } from "fs";
 import path from "path";
 import os from "os";
 
-// Traces to: FR-CRH-009 (crash loop detection and safe mode)
 describe("CrashLoopDetector", () => {
   let detector: CrashLoopDetector;
   let tempDir: string;

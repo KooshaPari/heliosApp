@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import {
   KeyboardShortcuts,
   type ShortcutAction,

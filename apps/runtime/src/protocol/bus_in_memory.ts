@@ -175,18 +175,18 @@ export class InMemoryLocalBus {
     await Promise.resolve();
     try {
       validateEnvelope(event);
-    } catch {
+    } catch (err) {
       const auditErr = err instanceof ProtocolValidationError ? err.message : String(err);
       this.auditLog.push({ envelope: event, outcome: "rejected", error: auditErr });
       throw err;
     }
 
-    const _topic = event.topic;
+    const topic = event.topic;
     const correlationId = event.correlation_id ?? "";
 
-    if (_topic) {
-      const isTerminalTopic = TERMINAL_TOPICS.has(_topic);
-      const isStartTopic = START_TOPICS.has(_topic);
+    if (topic) {
+      const isTerminalTopic = TERMINAL_TOPICS.has(topic);
+      const isStartTopic = START_TOPICS.has(topic);
 
       if (isStartTopic) {
         if (!this.lifecycleProgress.has(correlationId)) {
@@ -199,15 +199,15 @@ export class InMemoryLocalBus {
             `Missing lifecycle progress for correlation "${correlationId}"`
           );
         }
-        if (progress.has(_topic)) {
+        if (progress.has(topic)) {
           const err = new ProtocolValidationError(
             "ORDERING_VIOLATION",
-            `Duplicate start topic "${_topic}" for correlation "${correlationId}"`
+            `Duplicate start topic "${topic}" for correlation "${correlationId}"`
           );
           this.auditLog.push({ envelope: event, outcome: "rejected", error: err.message });
           throw err;
         }
-        progress.add(_topic);
+        progress.add(topic);
         this.auditLog.push({ envelope: event, outcome: "accepted" });
         this.eventLog.push(event);
         return;
@@ -215,32 +215,32 @@ export class InMemoryLocalBus {
 
       if (isTerminalTopic) {
         const seen = this.lifecycleProgress.get(correlationId);
-        const expectedStart = _topic
+        const expectedStart = topic
           .replace(".attached", ".attach.started")
           .replace(
             ".failed",
-            _topic.includes("attach")
+            topic.includes("attach")
               ? ".attach.started"
-              : _topic.includes("create")
+              : topic.includes("create")
                 ? ".create.started"
-                : _topic.includes("spawn")
+                : topic.includes("spawn")
                   ? ".spawn.started"
                   : ""
           )
           .replace(".created", ".create.started")
           .replace(".spawned", ".spawn.started");
 
-        if (!seen?.has(expectedStart) && expectedStart !== _topic) {
+        if (!seen?.has(expectedStart) && expectedStart !== topic) {
           const err = new ProtocolValidationError(
             "ORDERING_VIOLATION",
-            `Topic '${_topic}' cannot be published before '${expectedStart}'`
+            `Topic '${topic}' cannot be published before '${expectedStart}'`
           );
           this.auditLog.push({ envelope: event, outcome: "rejected", error: err.message });
           throw err;
         }
       }
 
-      if (_topic === "terminal.output") {
+      if (topic === "terminal.output") {
         const backlogDepth =
           typeof event.payload?.backlog_depth === "number"
             ? event.payload.backlog_depth

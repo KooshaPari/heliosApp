@@ -1,28 +1,10 @@
 # HeliosApp
 
-[![Build](https://img.shields.io/github/actions/workflow/status/KooshaPari/heliosApp/ci.yml?branch=main&label=build)](https://github.com/KooshaPari/heliosApp/actions)
-[![Release](https://img.shields.io/github/v/release/KooshaPari/heliosApp?include_prereleases&sort=semver)](https://github.com/KooshaPari/heliosApp/releases)
-[![License](https://img.shields.io/github/license/KooshaPari/heliosApp)](LICENSE)
-[![Phenotype](https://img.shields.io/badge/Phenotype-org-blueviolet)](https://github.com/KooshaPari)
-[![AI Slop Inside](https://sladge.net/badge.svg)](https://sladge.net)
-
-**Status:** stable
-
 **Version:** 2026.03A.0  
 **Package Manager:** Bun 1.2.20+  
 **Runtime:** TypeScript 7.x (strict mode)
 
 HeliosApp is a developer-focused AI runtime environment with a desktop shell, terminal multiplexing, session management, and multi-provider AI inference. It is structured as a Bun monorepo containing four applications and five shared packages.
-
-## Quick Start
-
-```bash
-bun install && bun run dev
-```
-
-This boots the desktop shell (`apps/desktop`) in watch mode. Use `bun run dev:runtime` or `bun run dev:colab` to launch the runtime engine or colab renderer instead.
-
-> TODO: add desktop shell screenshot to README (`screenshot.png`).
 
 ---
 

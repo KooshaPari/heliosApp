@@ -2,6 +2,7 @@
  * FR-HELIOS-109: Terminal Binding Lifecycle Integration Tests
  * Verifies: FR-BND-001 (Terminal-to-lane-session binding)
  */
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import { BindingEventEmitter } from "../../../src/registry/binding_events.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
@@ -36,7 +37,7 @@ describe("Binding Lifecycle Integration", () => {
         sessionId: "session-1",
       };
 
-      const _binding = registry.register("terminal-1", triple);
+      const binding = registry.register("terminal-1", triple);
       await emitter.emitBound(binding);
 
       const events = bus.getEvents();
@@ -57,7 +58,7 @@ describe("Binding Lifecycle Integration", () => {
         sessionId: "session-2",
       };
 
-      const _binding = registry.register("terminal-1", oldTriple);
+      const binding = registry.register("terminal-1", oldTriple);
       await emitter.emitBound(binding);
 
       const rebound = registry.rebind("terminal-1", newTriple);
@@ -78,7 +79,7 @@ describe("Binding Lifecycle Integration", () => {
         sessionId: "session-1",
       };
 
-      const _binding = registry.register("terminal-1", triple);
+      const binding = registry.register("terminal-1", triple);
       await emitter.emitBound(binding);
 
       // Get binding before unregister
@@ -99,7 +100,7 @@ describe("Binding Lifecycle Integration", () => {
         sessionId: "session-1",
       };
 
-      const _binding = registry.register("terminal-1", triple);
+      const binding = registry.register("terminal-1", triple);
       expect(binding.state).toBe(BindingState.bound);
 
       const rebound = registry.rebind("terminal-1", {
@@ -138,7 +139,7 @@ describe("Binding Lifecycle Integration", () => {
         sessionId: "session-1",
       };
 
-      const _binding = registry.register(terminal, triple);
+      const binding = registry.register(terminal, triple);
       await emitter.emitBound(binding);
 
       // Rapid rebinds
@@ -166,7 +167,7 @@ describe("Binding Lifecycle Integration", () => {
   describe("binding consistency after rapid lane switches", () => {
     it("should maintain accurate binding state after lane switches", async () => {
       const terminal = "terminal-1";
-      let _binding = registry.register(terminal, {
+      let binding = registry.register(terminal, {
         workspaceId: "ws-1",
         laneId: "lane-1",
         sessionId: "session-1",
@@ -213,7 +214,7 @@ describe("Binding Lifecycle Integration", () => {
         sessionId: "session-1",
       };
 
-      const _binding = registry.register("terminal-1", triple);
+      const binding = registry.register("terminal-1", triple);
       const correlationId = "corr-123";
       await emitter.emitBound(binding, correlationId);
 

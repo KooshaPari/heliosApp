@@ -165,7 +165,7 @@ export async function removeWorktree(
   const branchName = computeBranchName(laneId);
 
   // Try git worktree remove --force
-  const _removeResult = await runGit(
+  const removeResult = await runGit(
     ["worktree", "remove", worktreePath, "--force"],
     workspaceRepoPath
   );
@@ -242,7 +242,7 @@ export interface ReconciliationResult {
 export async function reconcileOrphanedWorktrees(
   workspaceRepoPath: string,
   knownLaneIds: Set<string>,
-  _closeLaneRecord: (laneId: string) => void
+  closeLaneRecord: (laneId: string) => void
 ): Promise<ReconciliationResult> {
   const worktreeRoot = path.join(workspaceRepoPath, WORKTREE_DIR);
   const result: ReconciliationResult = {

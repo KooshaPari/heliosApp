@@ -119,8 +119,8 @@ export class OrphanReconciler {
   }
 
   private async scanOrphanPTYs(
-    _safeToTerminate: OrphanItem[],
-    _needsReview: OrphanItem[]
+    safeToTerminate: OrphanItem[],
+    needsReview: OrphanItem[]
   ): Promise<void> {
     // In a real implementation, this would scan /proc or use Bun/Node APIs
     // to find PTY processes owned by heliosApp but not associated with restored sessions
@@ -128,8 +128,8 @@ export class OrphanReconciler {
   }
 
   private async scanStaleZelijjSessions(
-    _safeToTerminate: OrphanItem[],
-    _needsReview: OrphanItem[]
+    safeToTerminate: OrphanItem[],
+    needsReview: OrphanItem[]
   ): Promise<void> {
     // In a real implementation, this would call zellij list-sessions
     // and compare against restored session IDs
@@ -138,7 +138,7 @@ export class OrphanReconciler {
 
   private async scanStaleTempFiles(
     safeToTerminate: OrphanItem[],
-    _needsReview: OrphanItem[]
+    needsReview: OrphanItem[]
   ): Promise<void> {
     try {
       const { promises: fs } = await import("fs");

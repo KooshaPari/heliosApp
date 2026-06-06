@@ -113,7 +113,7 @@ export class KeyboardNav {
     event.preventDefault();
   }
 
-  private handleNavigateUp(_event: KeyboardEvent): void {
+  private handleNavigateUp(event: KeyboardEvent): void {
     if (this.currentIndex > 0) {
       this.currentIndex--;
       this.callbacks.onNavigateUp();
@@ -123,7 +123,7 @@ export class KeyboardNav {
     }
   }
 
-  private handleNavigateDown(_event: KeyboardEvent): void {
+  private handleNavigateDown(event: KeyboardEvent): void {
     if (this.currentIndex < this.itemCount - 1) {
       this.currentIndex++;
       this.callbacks.onNavigateDown();
@@ -133,21 +133,21 @@ export class KeyboardNav {
     }
   }
 
-  private handleNavigateHome(_event: KeyboardEvent): void {
+  private handleNavigateHome(event: KeyboardEvent): void {
     this.currentIndex = 0;
     this.callbacks.onNavigateHome();
   }
 
-  private handleNavigateEnd(_event: KeyboardEvent): void {
+  private handleNavigateEnd(event: KeyboardEvent): void {
     this.currentIndex = Math.max(0, this.itemCount - 1);
     this.callbacks.onNavigateEnd();
   }
 
-  private handleSelect(_event: KeyboardEvent): void {
+  private handleSelect(event: KeyboardEvent): void {
     this.callbacks.onSelect();
   }
 
-  private async handleDelete(_event: KeyboardEvent): Promise<void> {
+  private async handleDelete(event: KeyboardEvent): Promise<void> {
     if (!this.options.confirmBeforeDelete) {
       this.callbacks.onDelete();
       return;

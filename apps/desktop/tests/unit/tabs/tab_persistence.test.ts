@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { promises as fs } from "fs";
 import * as path from "path";
 import { TabPersistence, type TabPersistedState } from "../../../src/tabs/tab_persistence";
@@ -82,9 +83,9 @@ describe("TabPersistence", () => {
       const filePath = path.join(tempDir, "tab_state.json");
       await fs.writeFile(filePath, JSON.stringify(testState), "utf-8");
 
-      const _startTime = Date.now();
+      const startTime = Date.now();
       await persistence.load();
-      const _duration = Date.now() - startTime;
+      const duration = Date.now() - startTime;
 
       expect(persistence.getLastLoadTime()).toBeLessThan(100);
     });

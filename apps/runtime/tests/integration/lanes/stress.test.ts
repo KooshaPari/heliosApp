@@ -1,6 +1,7 @@
 // T020 - Stress test for concurrent lane operations (50 lanes)
 // (NFR-008-003, SC-008-002)
 
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { _resetIdCounter, LaneManager } from "../../../src/lanes/index.js";
@@ -57,10 +58,10 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
 
   test("50 concurrent lanes: create, provision, verify, cleanup", async () => {
     const LANE_COUNT = 50;
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     // Step 1: Create 50 lanes concurrently
-    const createPromises = Array.from({ length: LANE_COUNT }, (_,_i) =>
+    const createPromises = Array.from({ length: LANE_COUNT }, (_, i) =>
       mgr.create(`ws-stress`, "main")
     );
     const lanes = await Promise.all(createPromises);
@@ -121,8 +122,7 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
     try {
       await mgr.create("ws-cap", "main");
       expect(true).toBe(false); // should not reach
-     // eslint-disable-next-line no-unused-vars
-    } catch (_err) {
+    } catch (e) {
       expect(e).toBeInstanceOf(LaneCapacityExceededError);
     }
   });

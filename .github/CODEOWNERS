@@ -1,10 +1,2 @@
-# Global code owners for KooshaPari org
+# CODEOWNERS - Repository Owners
 * @KooshaPari
-
-# Infrastructure as code
-/iac/ @KooshaPari
-/.github/ @KooshaPari
-
-# Security-sensitive
-/SECURITY.md @KooshaPari
-/.github/dependabot.yml @KooshaPari
