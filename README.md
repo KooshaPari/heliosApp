@@ -8,7 +8,7 @@
 
 **Status:** stable
 
-**Version:** 2026.03A.0  
+**Version:** 2026.05B.0  
 **Package Manager:** Bun 1.2.20+  
 **Runtime:** TypeScript 7.x (strict mode)
 
@@ -33,7 +33,7 @@ HeliosApp follows an **event-driven monorepo architecture** built around a centr
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Desktop Shell                            │
-│  (ElectroBun-based UI: tabs, panels, settings, context store)   │
+│  (Bun + SolidJS desktop UI: tabs, panels, settings, context store)   │
 └──────────────────────────┬──────────────────────────────────────┘
                            │ LocalBus (in-process message bus)
 ┌──────────────────────────▼──────────────────────────────────────┐
@@ -122,7 +122,7 @@ The core of HeliosApp. Handles all business logic, process management, and inter
 | **panels/** | Lane list, status badges, lane actions, confirmation dialogs, keyboard navigation |
 | **settings/** | Renderer preferences, hotswap toggle, capability display, settings lock |
 
-### Web Renderer (`apps/renderer`)
+### Web Renderer (`apps/colab-renderer`)
 
 SolidJS-based standalone web UI.
 
@@ -161,7 +161,7 @@ SolidJS-based standalone web UI.
 curl -fsSL https://bun.sh/install | bash
 
 # Clone and install dependencies
-git clone <repository-url>
+git clone https://github.com/KooshaPari/heliosApp.git
 cd heliosApp
 bun install --frozen-lockfile
 ```
