@@ -1,30 +1,26 @@
 # Security Policy
 
-## Reporting
+## Reporting a Vulnerability
 
-Report security vulnerabilities responsibly to: **security@kooshapari.com**
+If you discover security vulnerability, please follow the responsible disclosure process:
 
-Please do not open public issues for security vulnerabilities. Include:
-- Description of the vulnerability
-- Steps to reproduce
-- Potential impact
-- Suggested fix (if available)
+1. **Do NOT** open public GitHub issue security vulnerabilities.
+2. Email maintainers directly [maintainer email] GitHub Security Advisories feature.
+3. Provide detailed information, including:
+   - Description issue
+   - Steps reproduce
+   - Potential impact
+   - Any suggested fixes (if applicable)
 
 ## Supported Versions
 
-Only the latest release is supported with security updates.
+| Version | Supported |
+|---------|-----------|
+| 2026.05B.0   | :white_check_mark: |
+| <2026.05B.0  | :x: |
 
-## Disclosure
+## Response Timeline
 
-We follow responsible disclosure practices:
-- Acknowledgment of vulnerability report within 48 hours
-- Good-faith effort to resolve within 90 days
-- Public disclosure after patch release or 90 days, whichever comes first
-- Security advisories published alongside patch releases
-
-## Security Best Practices
-
-- Keep dependencies up to date
-- Enable security alerts for this repository
-- Review dependencies regularly with `bun audit`
-- Use strong authentication for repository access
+**Acknowledgment**: Within 48 hours
+**Initial Assessment**: Within 7 days
+**Fix Timeline**: Varies based on severity
