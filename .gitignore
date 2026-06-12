@@ -1,3 +1,6 @@
+# Phenotype-org standard .gitignore — Node
+# Source: https://github.com/KooshaPari/phenotype-tooling/blob/main/templates/gitignore-node
+
 # Added by Spec Kitty CLI (auto-managed)
 .opencode/
 .windsurf/
@@ -35,3 +38,26 @@ agileplus/
 # Worktree directories (org policy)
 .worktrees/
 .claude/worktrees/
+
+# --- adopted from phenotype-tooling/templates/gitignore-node ---
+.cache/
+.DS_Store
+.eslintcache
+.idea/
+.npm/
+.parcel-cache/
+.pnp
+.pnp.js
+.vscode/
+*.log
+*.swp
+/build/
+/coverage/
+/dist/
+/out/
+lerna-debug.log*
+npm-debug.log*
+pnpm-debug.log*
+Thumbs.db
+yarn-debug.log*
+yarn-error.log*
