@@ -7,11 +7,14 @@
 
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 const COMPONENT_DIRS = [
-  "/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/apps/desktop/src/components",
-  "/Users/kooshapari/CodeProjects/Phenotype/repos/heliosApp/apps/colab-renderer/src/components",
+  join(ROOT, "apps/desktop/src/components"),
+  join(ROOT, "apps/colab-renderer/src/components"),
 ];
 
 function walk(dir: string): string[] {

@@ -16,6 +16,7 @@ import {
   applyLocale,
   readLocaleFromCookie,
 } from "../../../../packages/runtime-core/src/a11y/dir.js";
+import { setLocale as setI18nLocale } from "../../../../packages/runtime-core/src/i18n/index.js";
 
 interface DirContextValue {
   locale: () => LocaleCode;
@@ -24,25 +25,21 @@ interface DirContextValue {
 
 const DirContext = createContext<DirContextValue>();
 
-export const DirProvider: Component<{ children: JSX.Element }> = (props) => {
-  const [locale, setLocaleSignal] = createSignal<LocaleCode>(
-    readLocaleFromCookie(),
-  );
+export const DirProvider: Component<{ children: JSX.Element }> = props => {
+  const [locale, setLocaleSignal] = createSignal<LocaleCode>(readLocaleFromCookie());
 
   onMount(() => {
+    setI18nLocale(locale());
     applyLocale(locale());
   });
 
   const setLocale = (l: LocaleCode) => {
     setLocaleSignal(l);
+    setI18nLocale(l);
     applyLocale(l);
   };
 
-  return (
-    <DirContext.Provider value={{ locale, setLocale }}>
-      {props.children}
-    </DirContext.Provider>
-  );
+  return <DirContext.Provider value={{ locale, setLocale }}>{props.children}</DirContext.Provider>;
 };
 
 export function useDir(): DirContextValue {

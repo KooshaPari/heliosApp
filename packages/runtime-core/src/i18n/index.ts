@@ -1,6 +1,6 @@
 // packages/runtime-core/src/i18n/index.ts
-// Shared t() function for heliosApp. Wraps @solid-primitives/i18n so
-// both apps/desktop and apps/runtime use the same key path semantics.
+// Shared t() function for heliosApp. Both apps/desktop and apps/runtime use
+// the same key path semantics.
 //
 // Usage:
 //   import { t, setLocale } from "@helios/runtime-core/i18n";

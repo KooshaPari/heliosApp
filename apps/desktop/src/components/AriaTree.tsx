@@ -19,23 +19,37 @@ interface AriaTreeProps {
   onActivate?: (id: string) => void;
 }
 
-export const AriaTree: Component<AriaTreeProps> = (props) => {
+export const AriaTree: Component<AriaTreeProps> = props => {
   const [selectedId, setSelectedId] = createSignal<string | null>(null);
   const [focusedId, setFocusedId] = createSignal<string | null>(null);
+  const [expanded, setExpanded] = createSignal<Record<string, boolean>>({});
 
-  const flatten = (nodes: TreeNode[]): TreeNode[] => {
+  const isOpen = (id: string): boolean => expanded()[id] ?? false;
+
+  const toggleOpen = (id: string): void => {
+    setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const flattenVisible = (nodes: TreeNode[]): TreeNode[] => {
     const out: TreeNode[] = [];
-    for (const n of nodes) {
-      out.push(n);
-      if (n.children) out.push(...flatten(n.children));
+    for (const node of nodes) {
+      out.push(node);
+      if (node.children && isOpen(node.id)) {
+        out.push(...flattenVisible(node.children));
+      }
     }
     return out;
   };
 
-  const allNodes = (): TreeNode[] => flatten(props.nodes);
+  const focusNode = (id: string): void => {
+    setFocusedId(id);
+    queueMicrotask(() => {
+      document.querySelector(`[data-treeitem-id="${id}"]`)?.focus();
+    });
+  };
 
   const onKey = (e: KeyboardEvent) => {
-    const ids = allNodes().map((n) => n.id);
+    const ids = flattenVisible(props.nodes).map(n => n.id);
     const current = focusedId();
     if (!current) return;
     const idx = ids.indexOf(current);
@@ -44,19 +58,19 @@ export const AriaTree: Component<AriaTreeProps> = (props) => {
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
-        if (idx < ids.length - 1) setFocusedId(ids[idx + 1]);
+        if (idx < ids.length - 1) focusNode(ids[idx + 1]!);
         break;
       case "ArrowUp":
         e.preventDefault();
-        if (idx > 0) setFocusedId(ids[idx - 1]);
+        if (idx > 0) focusNode(ids[idx - 1]!);
         break;
       case "Home":
         e.preventDefault();
-        setFocusedId(ids[0]);
+        if (ids[0]) focusNode(ids[0]);
         break;
       case "End":
         e.preventDefault();
-        setFocusedId(ids[ids.length - 1]);
+        if (ids[ids.length - 1]) focusNode(ids[ids.length - 1]!);
         break;
       case "Enter":
       case " ":
@@ -68,22 +82,18 @@ export const AriaTree: Component<AriaTreeProps> = (props) => {
   };
 
   return (
-    <ul
-      role="tree"
-      aria-label={props["aria-label"]}
-      onKeyDown={onKey}
-      class="aria-tree"
-    >
+    <ul role="tree" aria-label={props["aria-label"]} onKeyDown={onKey} class="aria-tree">
       <For each={props.nodes}>
-        {(node) => (
+        {node => (
           <AriaTreeItem
             node={node}
             level={1}
-            expanded={createSignal(false)}
+            isOpen={isOpen}
+            toggleOpen={toggleOpen}
             selectedId={selectedId}
             setSelectedId={setSelectedId}
             focusedId={focusedId}
-            setFocusedId={setFocusedId}
+            focusNode={focusNode}
             onActivate={props.onActivate}
           />
         )}
@@ -95,46 +105,47 @@ export const AriaTree: Component<AriaTreeProps> = (props) => {
 interface AriaTreeItemProps {
   node: TreeNode;
   level: number;
-  expanded: ReturnType<typeof createSignal<boolean>>;
+  isOpen: (id: string) => boolean;
+  toggleOpen: (id: string) => void;
   selectedId: () => string | null;
   setSelectedId: (id: string | null) => void;
   focusedId: () => string | null;
-  setFocusedId: (id: string | null) => void;
+  focusNode: (id: string) => void;
   onActivate?: (id: string) => void;
 }
 
-const AriaTreeItem: Component<AriaTreeItemProps> = (props) => {
-  const [isOpen, setIsOpen] = props.expanded;
-  const hasChildren = () =>
-    Array.isArray(props.node.children) && props.node.children.length > 0;
+const AriaTreeItem: Component<AriaTreeItemProps> = props => {
+  const hasChildren = () => Array.isArray(props.node.children) && props.node.children.length > 0;
 
   return (
     <li
       role="treeitem"
-      aria-expanded={hasChildren() ? isOpen() : undefined}
+      data-treeitem-id={props.node.id}
+      aria-expanded={hasChildren() ? props.isOpen(props.node.id) : undefined}
       aria-selected={props.selectedId() === props.node.id}
       aria-level={props.level}
       tabindex={props.focusedId() === props.node.id ? 0 : -1}
       onClick={() => {
-        if (hasChildren()) setIsOpen(!isOpen());
+        if (hasChildren()) props.toggleOpen(props.node.id);
         props.setSelectedId(props.node.id);
-        props.setFocusedId(props.node.id);
+        props.focusNode(props.node.id);
         props.onActivate?.(props.node.id);
       }}
     >
       {props.node.label}
-      {hasChildren() && isOpen() && (
+      {hasChildren() && props.isOpen(props.node.id) && (
         <ul role="group">
           <For each={props.node.children}>
-            {(child) => (
+            {child => (
               <AriaTreeItem
                 node={child}
                 level={props.level + 1}
-                expanded={createSignal(false)}
+                isOpen={props.isOpen}
+                toggleOpen={props.toggleOpen}
                 selectedId={props.selectedId}
                 setSelectedId={props.setSelectedId}
                 focusedId={props.focusedId}
-                setFocusedId={props.setFocusedId}
+                focusNode={props.focusNode}
                 onActivate={props.onActivate}
               />
             )}

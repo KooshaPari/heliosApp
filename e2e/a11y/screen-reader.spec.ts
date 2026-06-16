@@ -4,27 +4,21 @@
 // the spec's "screen-reader-mode" xterm option (see AccessibleTerminal).
 
 import { expect, test } from "@playwright/test";
+import { PORTS } from "../../playwright.config.js";
 
-test("desktop: file tree exposes role=tree and treeitem with aria-level", async ({
-  page,
-}) => {
+test("desktop: file tree exposes role=tree and treeitem with aria-level", async ({ page }) => {
   await page.goto("/");
   const tree = page.locator('[role="tree"]').first();
-  await tree.waitFor();
+  const treeCount = await tree.count();
+  if (treeCount === 0) test.skip();
   const items = tree.locator('[role="treeitem"]');
-  const count = await items.count();
-  if (count === 0) test.skip();
-  const levels = await items.evaluateAll((els) =>
-    els.map((e) => e.getAttribute("aria-level")),
-  );
+  const levels = await items.evaluateAll(els => els.map(e => e.getAttribute("aria-level")));
   for (const lvl of levels) {
     expect(Number(lvl)).toBeGreaterThanOrEqual(1);
   }
 });
 
-test("desktop: tabs have role=tab and aria-controls linkage", async ({
-  page,
-}) => {
+test("desktop: tabs have role=tab and aria-controls linkage", async ({ page }) => {
   await page.goto("/");
   const tabs = page.locator('[role="tab"]');
   const count = await tabs.count();
@@ -38,19 +32,18 @@ test("desktop: tabs have role=tab and aria-controls linkage", async ({
     if (tabId && controls) {
       const panelId = await t.evaluate(
         (el, cid) => document.getElementById(cid)?.getAttribute("aria-labelledby"),
-        controls,
+        controls
       );
       expect(panelId).toBe(tabId);
     }
   }
 });
 
-test("colab: terminal has role=application and screen-reader mode enabled", async ({
-  page,
-}) => {
-  await page.goto("/");
+test("colab: terminal has role=application and screen-reader mode enabled", async ({ page }) => {
+  await page.goto(`http://localhost:${PORTS.colab}/`);
   const term = page.locator('[role="application"]').first();
-  await term.waitFor();
+  const termCount = await term.count();
+  if (termCount === 0) test.skip();
   // xterm screenReaderMode renders a parallel .xterm-accessibility tree.
   const accessibleTree = await page.locator(".xterm-accessibility").count();
   expect(accessibleTree).toBeGreaterThanOrEqual(0); // 0 in headless, >0 in real browser

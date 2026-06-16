@@ -5,14 +5,15 @@
 
 import { defineConfig, devices } from "@playwright/test";
 
-const PORTS = {
+export const PORTS = {
   desktop: 5173,
   runtime: 5174,
   colab: 5175,
 } as const;
 
 export default defineConfig({
-  testDir: "./e2e/a11y",
+  testDir: ".",
+  testMatch: ["e2e/a11y/**/*.spec.ts", "apps/desktop/tests/e2e/**/*.spec.ts"],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

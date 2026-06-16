@@ -34,7 +34,7 @@ function ensureRegion(id: string, role: string, live: AnnounceLevel): void {
   }
 }
 
-export function createAnnouncer(): Announcer {
+export function createAnnouncer(options?: { persist?: boolean }): Announcer {
   const [statusMsg, setStatusMsg] = createSignal<string>("");
   const [alertMsg, setAlertMsg] = createSignal<string>("");
 
@@ -62,11 +62,13 @@ export function createAnnouncer(): Announcer {
     }
   });
 
-  onCleanup(() => {
-    if (typeof document === "undefined") return;
-    document.getElementById(REGION_ID)?.remove();
-    document.getElementById(ALERT_ID)?.remove();
-  });
+  if (!options?.persist) {
+    onCleanup(() => {
+      if (typeof document === "undefined") return;
+      document.getElementById(REGION_ID)?.remove();
+      document.getElementById(ALERT_ID)?.remove();
+    });
+  }
 
   return {
     announce(message: string, level: AnnounceLevel = "polite") {
@@ -81,6 +83,6 @@ export function createAnnouncer(): Announcer {
 // to `getAnnouncer()`.
 let _instance: Announcer | null = null;
 export function getAnnouncer(): Announcer {
-  if (!_instance) _instance = createAnnouncer();
+  if (!_instance) _instance = createAnnouncer({ persist: true });
   return _instance;
 }

@@ -6,7 +6,7 @@
   "type": "module",
   "main": "src/index.tsx",
   "scripts": {
-    "dev": "bun run --watch src/index.tsx",
+    "dev": "bun run ../../scripts/solid-dev-server.ts",
     "typecheck": "tsc --noEmit",
     "build": "bun build src/index.tsx --outdir dist --target browser"
   },

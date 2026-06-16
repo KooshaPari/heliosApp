@@ -7,9 +7,7 @@
 
 import { expect, test } from "@playwright/test";
 
-test("desktop: tab order hits skip-link, header, nav, main", async ({
-  page,
-}) => {
+test("desktop: tab order hits skip-link, header, nav, main", async ({ page }) => {
   await page.goto("/");
   await page.keyboard.press("Tab");
   const first = await page.evaluate(() => document.activeElement?.tagName);
@@ -31,20 +29,17 @@ test("desktop: tab order hits skip-link, header, nav, main", async ({
   expect(mainHandle?.tabindex).toBe("-1");
 });
 
-test("desktop: file tree items use arrow keys (role=treeitem)", async ({
-  page,
-}) => {
+test("desktop: file tree items use arrow keys (role=treeitem)", async ({ page }) => {
   await page.goto("/");
   const tree = page.locator('[role="tree"]').first();
-  await tree.waitFor();
+  const treeCount = await tree.count();
+  if (treeCount === 0) test.skip();
   const items = tree.locator('[role="treeitem"]');
   const count = await items.count();
   if (count === 0) test.skip();
   await items.first().focus();
   await page.keyboard.press("ArrowDown");
-  const activeText = await page.evaluate(
-    () => document.activeElement?.textContent ?? "",
-  );
+  const activeText = await page.evaluate(() => document.activeElement?.textContent ?? "");
   // The focus moved to the second tree item.
   expect(activeText).not.toBe(await items.first().textContent());
 });

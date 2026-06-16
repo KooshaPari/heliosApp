@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   axe:
-    uses: KooshaPari/heliosApp/.github/workflows/reusable-a11y.yml@main
+    uses: ./.github/workflows/reusable-a11y.yml
     with:
       app_name: heliosapp
       app_dir: .

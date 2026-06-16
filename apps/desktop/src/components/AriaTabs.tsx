@@ -20,12 +20,17 @@ interface AriaTabsProps {
   ariaLabel: string;
 }
 
-export const AriaTabs: Component<AriaTabsProps> = (props) => {
-  const [activeId, setActiveId] = createSignal<string>(
-    props.initialTab ?? props.tabs[0]?.id ?? "",
-  );
+export const AriaTabs: Component<AriaTabsProps> = props => {
+  const [activeId, setActiveId] = createSignal<string>(props.initialTab ?? props.tabs[0]?.id ?? "");
 
-  const tabIds = (): string[] => props.tabs.map((t) => t.id);
+  const tabIds = (): string[] => props.tabs.map(t => t.id);
+
+  const focusTab = (id: string): void => {
+    setActiveId(id);
+    queueMicrotask(() => {
+      document.getElementById(`tab-${id}`)?.focus();
+    });
+  };
 
   const onKey = (e: KeyboardEvent) => {
     const ids = tabIds();
@@ -35,19 +40,19 @@ export const AriaTabs: Component<AriaTabsProps> = (props) => {
     switch (e.key) {
       case "ArrowRight":
         e.preventDefault();
-        setActiveId(ids[(idx + 1) % ids.length]);
+        focusTab(ids[(idx + 1) % ids.length]!);
         break;
       case "ArrowLeft":
         e.preventDefault();
-        setActiveId(ids[(idx - 1 + ids.length) % ids.length]);
+        focusTab(ids[(idx - 1 + ids.length) % ids.length]!);
         break;
       case "Home":
         e.preventDefault();
-        setActiveId(ids[0]);
+        if (ids[0]) focusTab(ids[0]);
         break;
       case "End":
         e.preventDefault();
-        setActiveId(ids[ids.length - 1]);
+        if (ids[ids.length - 1]) focusTab(ids[ids.length - 1]!);
         break;
     }
   };
@@ -56,7 +61,7 @@ export const AriaTabs: Component<AriaTabsProps> = (props) => {
     <div class="aria-tabs">
       <div role="tablist" aria-label={props.ariaLabel} onKeyDown={onKey}>
         <For each={props.tabs}>
-          {(t) => (
+          {t => (
             <button
               type="button"
               role="tab"
@@ -65,7 +70,7 @@ export const AriaTabs: Component<AriaTabsProps> = (props) => {
               aria-selected={activeId() === t.id}
               tabindex={activeId() === t.id ? 0 : -1}
               aria-keyshortcuts={t.ariaKeyshortcuts}
-              onClick={() => setActiveId(t.id)}
+              onClick={() => focusTab(t.id)}
             >
               {t.label}
             </button>
@@ -73,14 +78,9 @@ export const AriaTabs: Component<AriaTabsProps> = (props) => {
         </For>
       </div>
       <For each={props.tabs}>
-        {(t) => (
+        {t => (
           <Show when={activeId() === t.id}>
-            <div
-              role="tabpanel"
-              id={`panel-${t.id}`}
-              aria-labelledby={`tab-${t.id}`}
-              tabindex={0}
-            >
+            <div role="tabpanel" id={`panel-${t.id}`} aria-labelledby={`tab-${t.id}`} tabindex={0}>
               {t.panel()}
             </div>
           </Show>
