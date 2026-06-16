@@ -1,3 +1,6 @@
+// FR-001: Local Bus Decoupled Dispatch (context store consumes bus events via ILocalBusPort)
+// FR-003: Workspace Isolation (active context is scoped to workspace/lane/session)
+// Traces to: ILocalBusPort (event subscription), IWorkspacePort (workspace context)
 import { describe, expect, test } from "bun:test";
 import {
   ActiveContextStore,

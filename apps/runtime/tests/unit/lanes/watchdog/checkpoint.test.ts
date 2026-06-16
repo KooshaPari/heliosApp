@@ -1,3 +1,6 @@
+// FR-003: Workspace Isolation (session checkpoint ties to workspace/lane lifecycle)
+// FR-004: Append-Only Audit Trail (checkpoint events are audit-logged)
+// Traces to: IWorkspacePort (workspace context), ISessionPort (checkpoint/restore)
 // Unit tests for CheckpointManager
 
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";

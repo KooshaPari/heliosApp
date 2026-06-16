@@ -1,3 +1,6 @@
+// FR-001: Local Bus Decoupled Dispatch (control plane boots with ILocalBusPort adapter)
+// FR-002: Command Correlation Guarantee (control plane commands must receive correlated responses)
+// Traces to: ILocalBusPort (primary port), IWorkspacePort (workspace boot)
 import { describe, expect, test } from "bun:test";
 import { createRuntime } from "../../../runtime/src";
 import { bootDesktop } from "../../src";

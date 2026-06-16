@@ -1,3 +1,6 @@
+// FR-001: Local Bus Decoupled Dispatch (lane actions dispatch commands via ILocalBusPort)
+// FR-002: Command Correlation Guarantee (create/close lane commands are correlated)
+// Traces to: ILocalBusPort (command dispatch), IWorkspacePort (lane belongs to workspace)
 import { LaneActions } from "../../../src/panels/lane_actions";
 import type { RuntimeAPI } from "../../../src/panels/lane_actions";
 
