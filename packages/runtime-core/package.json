@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Shared runtime protocol, lanes, sessions, and integration layer — extracted from heliosApp and heliosApp-colab",
+  "description": "Shared runtime protocol, lanes, sessions, integration, a11y primitives, and i18n for heliosApp",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -11,7 +11,9 @@
     "./protocol": "./src/protocol/index.ts",
     "./lanes": "./src/lanes/index.ts",
     "./sessions": "./src/sessions/index.ts",
-    "./runtime": "./src/runtime/index.ts"
+    "./runtime": "./src/runtime/index.ts",
+    "./a11y": "./src/a11y/index.ts",
+    "./i18n": "./src/i18n/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
