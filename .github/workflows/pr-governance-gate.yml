@@ -9,8 +9,8 @@ permissions:
 
 jobs:
   pr-governance-gate:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.1
+      - uses: actions/checkout11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.1
       - name: Governance Check
         run: echo "Governance check passed"
