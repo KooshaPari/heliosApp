@@ -36,11 +36,6 @@ on:
         description: 'Glob pattern for manifests (default: "**/manifest.verified.json")'
         required: false
         default: '**/manifest.verified.json'
-      strict_mode:
-        description: 'Run assertions in --strict mode (fail on violations)'
-        required: false
-        default: 'true'
-        type: boolean
       live_verification:
         description: 'Use --live mode (requires ANTHROPIC_API_KEY secret)'
         required: false
@@ -48,13 +43,18 @@ on:
         type: boolean
 
 env:
-  PHENOTYPE_JOURNEY_STRICT: ${{ inputs.strict_mode || 'true' }}
+  PHENOTYPE_JOURNEY_STRICT: 'true'
+  PHENOTYPE_JOURNEY_REPOSITORY: https://github.com/KooshaPari/phenotype-journeys
+  # Last buildable revision before the partial OpenTelemetry 0.32 upgrade.
+  PHENOTYPE_JOURNEY_REVISION: c90480645acd860a6fdbeb3404014c17f988bb72
 
 jobs:
   journey-gate:
     name: Journey Verification
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    outputs:
+      MANIFEST_COUNT: ${{ steps.discover.outputs.MANIFEST_COUNT }}
 
     steps:
       - name: Checkout
@@ -86,17 +86,12 @@ jobs:
             echo "phenotype-journey: $(phenotype-journey --version 2>/dev/null || phenotype-journey --help 2>&1 | head -1)"
           else
             echo "Installing phenotype-journey..."
-            # Install via cargo if available, else download binary
-            if command -v cargo &>/dev/null; then
-              cargo install phenotype-journey --locked \
-                || { echo "ERROR: phenotype-journey install failed"; exit 1; }
-            else
-              # Download latest release binary (adjust URL as needed)
-              curl -fsSL https://github.com/KooshaPari/phenotype-journeys/releases/latest/download/phenotype-journey-x86_64-unknown-linux-gnu \
-                -o /usr/local/bin/phenotype-journey \
-                && chmod +x /usr/local/bin/phenotype-journey \
-                || { echo "ERROR: phenotype-journey download failed"; exit 1; }
-            fi
+            cargo install \
+              --git "$PHENOTYPE_JOURNEY_REPOSITORY" \
+              --rev "$PHENOTYPE_JOURNEY_REVISION" \
+              --locked \
+              phenotype-journey \
+              || { echo "ERROR: phenotype-journey install failed"; exit 1; }
           fi
 
       # ---------------------------------------------------------------------
@@ -162,26 +157,18 @@ jobs:
       - name: Run assertions
         env:
           MANIFEST_LIST: ${{ steps.discover.outputs.MANIFEST_LIST }}
-          PHENOTYPE_JOURNEY_STRICT: ${{ inputs.strict_mode && 'true' || 'false' }}
         run: |
-          # Require strict mode for gated specs
-          STRICT="${PHENOTYPE_JOURNEY_STRICT:-true}"
           MANIFESTS="$MANIFEST_LIST"
 
           for manifest in $MANIFESTS; do
             echo ""
             echo "━━━ Asserting $manifest ━━━"
 
-            if [ "$STRICT" = "true" ]; then
-              if phenotype-journey assert "$manifest" --strict; then
-                echo "✓ $manifest: all assertions passed"
-              else
-                echo "✗ $manifest: assertion violated"
-                exit 1
-              fi
+            if phenotype-journey assert "$manifest" --strict; then
+              echo "✓ $manifest: all assertions passed"
             else
-              phenotype-journey assert "$manifest" || true
-              echo "(non-strict run — violations do not fail the build)"
+              echo "✗ $manifest: assertion violated"
+              exit 1
             fi
           done
 
@@ -224,7 +211,7 @@ jobs:
           echo " Journey Gate — Summary"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo " Manifests checked: $COUNT"
-          echo " Strict mode:        ${{ inputs.strict_mode || 'true' }}"
+          echo " Strict mode:        true"
           echo " Live mode:         ${{ inputs.live_verification && 'enabled' || 'disabled' }}"
           echo ""
           echo "All manifests passed validation and assertions."
@@ -251,8 +238,7 @@ jobs:
           echo "To add journey traceability:"
           echo ""
           echo "  1. Install the CLI:"
-          echo "     brew install phenotype-journey"
-          echo "     # or: cargo install phenotype-journey"
+          echo "     cargo install --git $PHENOTYPE_JOURNEY_REPOSITORY --rev $PHENOTYPE_JOURNEY_REVISION --locked phenotype-journey"
           echo ""
           echo "  2. Initialise a journey manifest:"
           echo "     phenotype-journey init docs/journeys/manifests/<spec-id>"
