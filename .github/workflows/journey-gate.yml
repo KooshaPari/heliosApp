@@ -47,6 +47,8 @@ env:
   PHENOTYPE_JOURNEY_REPOSITORY: https://github.com/KooshaPari/phenotype-journeys
   # Last buildable revision before the partial OpenTelemetry 0.32 upgrade.
   PHENOTYPE_JOURNEY_REVISION: c90480645acd860a6fdbeb3404014c17f988bb72
+  # The pinned CLI's documented CI fallback; avoids starting an OTLP Tokio exporter.
+  OTEL_EXPORTER_OTLP_ENDPOINT: stdout
 
 jobs:
   journey-gate:
