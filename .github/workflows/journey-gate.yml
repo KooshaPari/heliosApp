@@ -145,6 +145,10 @@ jobs:
           for manifest in $MANIFESTS; do
             echo ""
             echo "━━━ Validating $manifest ━━━"
+            if ! jq -e '.passed == true' "$manifest" >/dev/null; then
+              echo "✗ $manifest: verified journey must record passed=true"
+              exit 1
+            fi
             if phenotype-journey validate "$manifest"; then
               echo "✓ $manifest: valid"
             else
