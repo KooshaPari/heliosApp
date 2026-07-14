@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Prepared the history-preserving migration to HeliosLab, which becomes canonical after
+  its consolidation PR is accepted. The standalone heliosApp repository will then receive
+  a final migration release before archival.
+
 ### Added
 
 ### Changed
@@ -1043,4 +1049,3 @@ All notable changes to this project will be documented in this file.
 ### Compliance
 - All 12 MVP-001..027 FRs fully traced in tests
 - FR coverage now auditable and enforced by CI
-
