@@ -6,7 +6,7 @@ import { mkdtemp, rm, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
-
+import { createJsonStore } from "../../../src/workspace/store.js";
 import type { Workspace } from "../../../src/workspace/types.js";
 
 function makeWorkspace(overrides: Partial<Workspace> = {}): Workspace {
@@ -204,7 +204,7 @@ describe("Concurrent operations", () => {
 });
 
 describe("Storage size", () => {
-  test("50 workspaces with 10 projects each under 1 MB", { timeout: 30000 }, async () => {
+  test("50 workspaces with 10 projects each under 1 MB", async () => {
     const store = await createJsonStore(dataDir);
     for (let i = 0; i < 50; i++) {
       const ws = makeWorkspace({
@@ -224,5 +224,5 @@ describe("Storage size", () => {
 
     const raw = await readFile(join(dataDir, "workspaces.json"), "utf-8");
     expect(raw.length).toBeLessThan(1_000_000); // < 1 MB
-  });
+  }, { timeout: 30000 });
 });
