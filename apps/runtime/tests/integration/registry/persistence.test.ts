@@ -5,6 +5,7 @@
 import { TerminalRegistry } from "../../../src/registry/terminal_registry.js";
 import { JsonFilePersistence, InMemoryPersistence } from "../../../src/registry/persistence.js";
 import { promises as fs } from "fs";
+import { createHash } from "crypto";
 import { tmpdir } from "os";
 import { join } from "path";
 import type { BindingTriple } from "../../../src/registry/binding_triple.js";
@@ -104,6 +105,24 @@ describe("Persistence Integration", () => {
       // Load should return empty (corrupted)
       const loaded = await persistence.load();
       expect(loaded).toHaveLength(0);
+    });
+
+    it("should reject checksum-valid malformed bindings", async () => {
+      const filePath = join(tempDir, "malformed-binding.json");
+      const persistence = new JsonFilePersistence(filePath);
+      const timestamp = new Date().toISOString();
+      const bindings = [{ terminalId: "terminal-1" }];
+      const checksum = createHash("sha256")
+        .update(JSON.stringify({ bindings, timestamp }))
+        .digest("hex");
+
+      await fs.writeFile(
+        filePath,
+        JSON.stringify({ version: 1, timestamp, bindings, checksum }),
+        "utf-8"
+      );
+
+      expect(await persistence.load()).toHaveLength(0);
     });
 
     it("should debounce writes", async () => {
