@@ -12,6 +12,7 @@ import { ProviderRegistry } from "../registry.js";
 import type { ProviderAdapter, ProviderHealthStatus, ProviderRegistration } from "../adapter.js";
 import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { NormalizedProviderError } from "../errors.js";
 
 /**
  * Mock provider for testing registry behavior.
