@@ -6,6 +6,7 @@
  */
 
 import type { RegistryQueryInterface, TerminalBinding } from "./binding_triple.js";
+import { BindingState } from "./binding_triple.js";
 
 
 import type { TerminalRegistry } from "./terminal_registry.js";
@@ -49,7 +50,7 @@ export class BindingMiddleware {
    */
   validateBeforeOperation(terminalId: string, _operation?: string): MiddlewareValidationResult {
     // Check terminal exists
-    const _binding = this.registry.get(terminalId);
+    const binding = this.registry.get(terminalId);
     if (!binding) {
       return {
         valid: false,
