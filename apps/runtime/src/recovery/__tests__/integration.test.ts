@@ -1,4 +1,3 @@
-
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { RecoveryStateMachine, RecoveryStage } from "../state-machine.js";
 import { RestorationPipeline } from "../restoration.js";
@@ -127,6 +126,23 @@ describe("Integration Tests - Crash to Live Recovery", () => {
 
       expect(resumedStage).toBe(beforeCrash);
       expect(resumedStage).toBe(RecoveryStage.RESTORING);
+    });
+
+    it("should discard structurally invalid persisted state", async () => {
+      const recoveryDir = path.join(tempDir, "recovery");
+      await fs.mkdir(recoveryDir, { recursive: true });
+      await fs.writeFile(
+        path.join(recoveryDir, "recovery-state.json"),
+        JSON.stringify({
+          stage: "UNKNOWN_STAGE",
+          timestamp: Date.now(),
+          attemptCount: 0,
+        })
+      );
+
+      const resumed = new RecoveryStateMachine(tempDir, bus);
+      expect(await resumed.resume()).toBe(RecoveryStage.CRASHED);
+      await expect(resumed.transition(RecoveryStage.DETECTING)).resolves.toBeUndefined();
     });
 
     it("should not re-restore previously restored sessions", async () => {

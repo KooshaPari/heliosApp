@@ -1,6 +1,24 @@
 import { promises as fs } from "fs";
 import path from "path";
-import type { RecoveryState } from "./state-machine-types.js";
+import { RecoveryStage, type RecoveryState } from "./state-machine-types.js";
+
+const RECOVERY_STAGES = new Set<string>(Object.values(RecoveryStage));
+
+export function isRecoveryState(value: unknown): value is RecoveryState {
+  if (typeof value !== "object" || value === null) return false;
+
+  const state = value as Partial<RecoveryState>;
+  return (
+    typeof state.stage === "string" &&
+    RECOVERY_STAGES.has(state.stage) &&
+    typeof state.timestamp === "number" &&
+    Number.isFinite(state.timestamp) &&
+    typeof state.attemptCount === "number" &&
+    Number.isInteger(state.attemptCount) &&
+    state.attemptCount >= 0 &&
+    (state.lastError === undefined || typeof state.lastError === "string")
+  );
+}
 
 export function getRecoveryStatePath(recoveryDataDir: string): string {
   return path.join(recoveryDataDir, "recovery", "recovery-state.json");
@@ -10,7 +28,8 @@ export async function loadRecoveryState(recoveryDataDir: string): Promise<Recove
   try {
     const statePath = getRecoveryStatePath(recoveryDataDir);
     const data = await fs.readFile(statePath, "utf-8");
-    return JSON.parse(data) as RecoveryState;
+    const parsed: unknown = JSON.parse(data);
+    return isRecoveryState(parsed) ? parsed : null;
   } catch {
     return null;
   }
