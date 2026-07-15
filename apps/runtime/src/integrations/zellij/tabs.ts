@@ -91,7 +91,7 @@ export class ZellijTabManager {
         if (pane.ptyId) {
           try {
             await this.ptyManager.terminate(pane.ptyId);
-          } catch {
+          } catch (err) {
             console.warn(
               `[zellij-tabs] PTY terminate for pane ${pane.paneId} in tab ${tabId} failed:`,
               err
