@@ -309,7 +309,6 @@ describe("Fault injection - buffer overflow handling", () => {
 
   it("buffer still captures data after overflow", async () => {
     const buffer = new SwitchBuffer(10);
-    const _renderer = new MockGhosttyAdapter();
 
     buffer.startBuffering();
     buffer.write("pty-1", new Uint8Array(6));
