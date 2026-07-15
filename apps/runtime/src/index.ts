@@ -458,6 +458,7 @@ export function createRuntime(options: RuntimeOptions = {}) {
 
       const dispatcher = createBoundaryDispatcher({
         dispatchLocal: request,
+        publishBoundaryEvent: event => bus.publish(event),
       });
       const result = await dispatcher(command);
       if (result.type !== "response") {

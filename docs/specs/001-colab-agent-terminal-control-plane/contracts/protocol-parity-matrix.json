@@ -590,6 +590,55 @@
 			"task_ids": ["T008", "T045"]
 		},
 		{
+			"name": "boundary.local.dispatched",
+			"status": "implemented",
+			"contract_refs": [
+				"orchestration-envelope.schema.json#/properties/topic/enum"
+			],
+			"runtime_refs": [
+				"apps/runtime/src/protocol/boundary_adapter.ts",
+				"apps/runtime/tests/unit/protocol/boundary_adapter.test.ts"
+			],
+			"task_ids": ["T031", "T032", "T033"]
+		},
+		{
+			"name": "boundary.tool.dispatched",
+			"status": "implemented",
+			"contract_refs": [
+				"orchestration-envelope.schema.json#/properties/topic/enum"
+			],
+			"runtime_refs": [
+				"apps/runtime/src/protocol/boundary_adapter.ts",
+				"apps/runtime/tests/unit/protocol/boundary_adapter.test.ts"
+			],
+			"task_ids": ["T031", "T032", "T033"]
+		},
+		{
+			"name": "boundary.a2a.delegated",
+			"status": "implemented",
+			"contract_refs": [
+				"orchestration-envelope.schema.json#/properties/topic/enum"
+			],
+			"runtime_refs": [
+				"apps/runtime/src/protocol/boundary_adapter.ts",
+				"apps/runtime/tests/unit/protocol/boundary_adapter.test.ts"
+			],
+			"task_ids": ["T031", "T032", "T033"]
+		},
+		{
+			"name": "boundary.dispatch.failed",
+			"status": "implemented",
+			"contract_refs": [
+				"orchestration-envelope.schema.json#/properties/topic/enum"
+			],
+			"runtime_refs": [
+				"apps/runtime/src/protocol/boundary_adapter.ts",
+				"apps/runtime/tests/unit/protocol/boundary_adapter.test.ts",
+				"apps/runtime/tests/integration/protocol/boundary_dispatch.test.ts"
+			],
+			"task_ids": ["T031", "T032", "T033"]
+		},
+		{
 			"name": "audit.recorded",
 			"status": "implemented",
 			"contract_refs": [

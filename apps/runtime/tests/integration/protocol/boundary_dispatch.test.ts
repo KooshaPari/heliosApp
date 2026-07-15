@@ -3,7 +3,7 @@
  * Verifies: FR-PVD-004 (MCP integration), FR-PVD-005 (A2A integration)
  */
 import { describe, expect, it } from "bun:test";
-import { createRuntime } from "../../../src/index";
+import { createRuntime } from "../../../src/index.js";
 
 function jsonRequest(url: string, body: Record<string, unknown>): Request {
   return new Request(url, {
@@ -32,6 +32,11 @@ describe("protocol boundary dispatch", () => {
     };
     expect(body.active_engine).toBe("ghostty");
     expect(body.hot_swap_supported).toBeTrue();
+    expect(
+      runtime
+        .getEvents()
+        .map(event => ({ topic: event.topic, correlation_id: event.correlation_id }))
+    ).toContainEqual({ topic: "boundary.local.dispatched", correlation_id: "corr-1" });
   });
 
   it("fails closed for unsupported tool boundary adapters", async () => {
@@ -53,6 +58,11 @@ describe("protocol boundary dispatch", () => {
     expect(body.error).toBe("UNSUPPORTED_BOUNDARY_ADAPTER");
     expect(body.details.boundary).toBe("tool_interop");
     expect(body.details.adapter).toBe("tool_bridge");
+    expect(
+      runtime
+        .getEvents()
+        .map(event => ({ topic: event.topic, correlation_id: event.correlation_id }))
+    ).toContainEqual({ topic: "boundary.dispatch.failed", correlation_id: "corr-tool" });
   });
 
   it("fails closed for unsupported a2a boundary adapters", async () => {

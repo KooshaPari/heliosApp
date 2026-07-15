@@ -98,4 +98,70 @@ describe("boundary adapter mapping", () => {
     expect(response.status).toBe("ok");
     expect(response.result?.delegated).toBe(true);
   });
+
+  test("emits the authoritative success topic for every boundary", async () => {
+    const events: LocalBusEnvelope[] = [];
+    const success = async (input: LocalBusEnvelope): Promise<LocalBusEnvelope> => ({
+      id: input.id,
+      type: "response",
+      ts: "2026-02-27T00:00:00.000Z",
+      status: "ok",
+      result: {},
+    });
+    const dispatcher = createBoundaryDispatcher({
+      dispatchLocal: success,
+      dispatchTool: success,
+      dispatchA2A: success,
+      publishBoundaryEvent: event => {
+        events.push(event);
+      },
+    });
+
+    await dispatcher(command("boundary.local.dispatch"));
+    await dispatcher(command("boundary.tool.dispatch"));
+    await dispatcher(command("boundary.a2a.dispatch"));
+
+    expect(events.map(event => event.topic)).toEqual([
+      "boundary.local.dispatched",
+      "boundary.tool.dispatched",
+      "boundary.a2a.delegated",
+    ]);
+    expect(events.map(event => event.payload?.boundary)).toEqual([
+      "local_control",
+      "tool_interop",
+      "agent_delegation",
+    ]);
+  });
+
+  test("emits correlated failure before returning a normalized adapter error", async () => {
+    const order: string[] = [];
+    let failureEvent: LocalBusEnvelope | undefined;
+    const dispatcher = createBoundaryDispatcher({
+      dispatchLocal: async () => {
+        throw new Error("adapter exploded");
+      },
+      publishBoundaryEvent: async event => {
+        await Promise.resolve();
+        failureEvent = event;
+        order.push("event");
+      },
+    });
+
+    const response = await dispatcher(command("boundary.local.dispatch"));
+    order.push("return");
+
+    expect(response.status).toBe("error");
+    expect(response.error?.code).toBe("BOUNDARY_DISPATCH_FAILED");
+    expect(failureEvent?.topic).toBe("boundary.dispatch.failed");
+    expect(failureEvent?.correlation_id).toBe("corr-1");
+    expect(failureEvent?.workspace_id).toBe("ws-1");
+    expect(failureEvent?.payload).toEqual({
+      method: "boundary.local.dispatch",
+      boundary: "local_control",
+      adapter: "local_bus",
+      outcome: "error",
+      error_code: "BOUNDARY_DISPATCH_FAILED",
+    });
+    expect(order).toEqual(["event", "return"]);
+  });
 });
