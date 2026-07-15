@@ -34,6 +34,7 @@ export class Watchdog {
   private crashHandlers: CrashHandler[] = [];
   private crashDataDir: string;
   private bus?: LocalBus;
+  private pendingCrashes = new Set<Promise<void>>();
 
   constructor(crashDataDir: string, bus?: LocalBus) {
     this.crashDataDir = crashDataDir;
@@ -80,8 +81,19 @@ export class Watchdog {
   private startHeartbeatTimer(monitor: ProcessMonitor): void {
     const timeoutMs = monitor.heartbeatIntervalMs * 2; // 2 missed heartbeats
     monitor.timeoutId = setTimeout(() => {
-      this.handleHeartbeatTimeout(monitor);
+      const pending = this.handleHeartbeatTimeout(monitor);
+      this.pendingCrashes.add(pending);
+      void pending.finally(() => this.pendingCrashes.delete(pending));
     }, timeoutMs);
+  }
+
+  async waitForIdle(): Promise<void> {
+    await Promise.all(this.pendingCrashes);
+  }
+
+  dispose(): void {
+    for (const name of this.monitors.keys()) this.unregister(name);
+    this.crashHandlers = [];
   }
 
   private async handleHeartbeatTimeout(monitor: ProcessMonitor): Promise<void> {

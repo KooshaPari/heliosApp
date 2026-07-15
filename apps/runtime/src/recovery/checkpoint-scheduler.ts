@@ -17,6 +17,7 @@ export class CheckpointScheduler {
   private activityCounter = 0;
   private lastCheckpointTime = 0;
   private lastWriteDurationMs = 0;
+  private pendingTrigger?: Promise<void>;
 
   start(writer: CheckpointWriter, stateGetter: () => Checkpoint): void {
     if (this.isRunning) return;
@@ -44,11 +45,30 @@ export class CheckpointScheduler {
     this.isRunning = false;
   }
 
-  async triggerNow(): Promise<void> {
+  triggerNow(): Promise<void> {
+    if (this.pendingTrigger) return this.pendingTrigger;
+
+    const trigger = this.performTrigger();
+    const ownedTrigger = trigger.finally(() => {
+      if (this.pendingTrigger === ownedTrigger) this.pendingTrigger = undefined;
+    });
+    this.pendingTrigger = ownedTrigger;
+    return ownedTrigger;
+  }
+
+  async waitForIdle(): Promise<void> {
+    await this.pendingTrigger;
+  }
+
+  getCurrentIntervalMs(): number {
+    return this.currentInterval;
+  }
+
+  private async performTrigger(): Promise<void> {
     if (!this.writer || !this.stateGetter) return;
 
-    const _checkpoint = this.stateGetter();
-    const _startTime = Date.now();
+    const checkpoint = this.stateGetter();
+    const startTime = Date.now();
 
     try {
       await this.writer.write(checkpoint);
@@ -58,7 +78,7 @@ export class CheckpointScheduler {
 
       // Adjust interval based on write time
       this.adjustInterval();
-    } catch {
+    } catch (err) {
       console.error("Failed to write checkpoint:", err);
     }
   }
@@ -84,7 +104,7 @@ export class CheckpointScheduler {
     if (this.lastWriteDurationMs > MIN_WRITE_TIME_FOR_BACKOFF) {
       // Backoff: increase interval
       this.currentInterval = Math.min(this.currentInterval * 2, MAX_INTERVAL_MS);
-    } else if (this.lastWriteDurationMs < MAX_WRITE_TIME_FOR_RESTORE) {
+    } else if (this.lastWriteDurationMs <= MAX_WRITE_TIME_FOR_RESTORE) {
       // Restore: decrease interval back to default
       this.currentInterval = DEFAULT_CHECKPOINT_INTERVAL_MS;
     }
@@ -102,7 +122,7 @@ export class CheckpointScheduler {
     // Take final checkpoint synchronously (with timeout)
     if (!this.writer || !this.stateGetter) return;
 
-    const _checkpoint = this.stateGetter();
+    const checkpoint = this.stateGetter();
     const writePromise = this.writer.write(checkpoint);
 
     // Race: wait for write or timeout

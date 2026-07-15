@@ -1,4 +1,5 @@
 import { CheckpointScheduler } from "../checkpoint-scheduler.js";
+import { CheckpointWriter, type Checkpoint } from "../checkpoint.js";
 
 import { promises as fs } from "fs";
 import path from "path";
@@ -48,6 +49,7 @@ describe("CheckpointScheduler", () => {
 
   afterEach(async () => {
     scheduler.stop();
+    await scheduler.waitForIdle();
     vi.restoreAllMocks();
     vi.useRealTimers();
     await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
@@ -66,9 +68,11 @@ describe("CheckpointScheduler", () => {
       scheduler.start(writer, createMockCheckpoint);
 
       vi.advanceTimersByTime(60100);
+      await scheduler.waitForIdle();
       const count1 = writeCount;
 
       vi.advanceTimersByTime(60000);
+      await scheduler.waitForIdle();
       const count2 = writeCount;
 
       expect(count2).toBeGreaterThan(count1);
@@ -109,8 +113,7 @@ describe("CheckpointScheduler", () => {
         scheduler.recordActivity();
       }
 
-      // Wait for the async triggerNow to complete (longer timeout for coverage instrumentation)
-      await new Promise(r => setTimeout(r, 200));
+      await scheduler.waitForIdle();
       const count1 = writeCount;
 
       // Record 25 more (not enough to trigger again)
@@ -118,7 +121,7 @@ describe("CheckpointScheduler", () => {
         scheduler.recordActivity();
       }
 
-      await new Promise(r => setTimeout(r, 200));
+      await scheduler.waitForIdle();
       expect(writeCount).toBe(count1); // No additional checkpoint
     });
   });
@@ -137,7 +140,8 @@ describe("CheckpointScheduler", () => {
 
       // First checkpoint at 60s
       vi.advanceTimersByTime(60100);
-      const _firstTime = Date.now();
+      vi.advanceTimersByTime(600);
+      await scheduler.waitForIdle();
 
       // The scheduler should have increased its interval
       vi.advanceTimersByTime(60100); // Only 60s more, but interval was doubled
@@ -165,6 +169,8 @@ describe("CheckpointScheduler", () => {
 
       // First slow write
       vi.advanceTimersByTime(60100);
+      vi.advanceTimersByTime(600);
+      await scheduler.waitForIdle();
       expect(writeCount).toBe(1);
 
       // Interval should be doubled now
@@ -172,12 +178,11 @@ describe("CheckpointScheduler", () => {
 
       // Wait for fast write to occur and interval to restore
       vi.advanceTimersByTime(120100);
+      await scheduler.waitForIdle();
       expect(writeCount).toBeGreaterThan(1);
 
       // Interval should be back to normal now
-      // Next checkpoint should be at original interval (60s)
-      vi.advanceTimersByTime(60100);
-      expect(writeCount).toBeGreaterThan(2);
+      expect(scheduler.getCurrentIntervalMs()).toBe(60000);
     });
   });
 
