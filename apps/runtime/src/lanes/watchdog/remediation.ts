@@ -31,6 +31,7 @@ interface CooldownEntry {
 
 export interface RemediationEngineOptions {
   cooldownFile?: string;
+  snapshotDirectory?: string;
 }
 
 function isCooldownEntry(value: unknown): value is CooldownEntry {
@@ -53,12 +54,22 @@ function parseCooldownEntries(value: unknown): CooldownEntry[] | null {
   return resourceKeys.size === value.length ? value : null;
 }
 
+function sanitizeSnapshotOwner(owner: string): string {
+  const sanitized = owner
+    .normalize("NFKC")
+    .replace(/[^A-Za-z0-9._-]/g, "_")
+    .replace(/^\.+/, "_")
+    .slice(0, 80);
+  return sanitized || "unknown";
+}
+
 export class RemediationEngine {
   private suggestions = new Map<string, RemediationSuggestion>();
   private cooldownMap = new Map<string, CooldownEntry>();
   private readonly cooldownDurationMs = 24 * 60 * 60 * 1000; // 24 hours
   private readonly cooldownPath: string;
   private readonly cooldownReady: Promise<void>;
+  private readonly snapshotDirectory: string;
 
   constructor(
     private readonly laneRegistry: LaneRegistry,
@@ -68,6 +79,8 @@ export class RemediationEngine {
     this.cooldownPath =
       options.cooldownFile ??
       path.join(os.homedir(), ".helios", "data", "remediation_cooldown.json");
+    this.snapshotDirectory =
+      options.snapshotDirectory ?? path.join(os.homedir(), ".helios", "data", "worktree_snapshots");
     this.cooldownReady = this.loadCooldownMap();
   }
 
@@ -286,11 +299,11 @@ export class RemediationEngine {
   private async snapshotWorktree(orphan: ClassifiedOrphan): Promise<void> {
     if (!orphan.path) return;
 
-    const snapshotDir = path.join(os.homedir(), ".helios", "data", "worktree_snapshots");
-    await fs.mkdir(snapshotDir, { recursive: true });
+    await fs.mkdir(this.snapshotDirectory, { recursive: true });
 
-    const snapshotName = `${Date.now()}-${orphan.estimatedOwner}.json`;
-    const snapshotPath = path.join(snapshotDir, snapshotName);
+    const snapshotName = `${Date.now()}-${randomUUID()}-${sanitizeSnapshotOwner(orphan.estimatedOwner)}.json`;
+    const snapshotPath = path.join(this.snapshotDirectory, snapshotName);
+    const tempPath = path.join(this.snapshotDirectory, `.${snapshotName}.tmp`);
 
     const snapshot = {
       timestamp: new Date().toISOString(),
@@ -300,7 +313,14 @@ export class RemediationEngine {
       age: orphan.age,
     };
 
-    await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2));
+    try {
+      await fs.writeFile(tempPath, JSON.stringify(snapshot, null, 2));
+      await fs.rename(tempPath, snapshotPath);
+    } finally {
+      await fs.unlink(tempPath).catch(() => {
+        // The rename consumed the temp file, or cleanup is best-effort after failure.
+      });
+    }
   }
 
   private async cleanupZellijSession(orphan: ClassifiedOrphan): Promise<CleanupResult> {
