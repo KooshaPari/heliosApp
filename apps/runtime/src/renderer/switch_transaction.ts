@@ -77,8 +77,8 @@ export interface SwitchTransactionRequest {
 
 const VALID_TRANSITIONS: Record<SwitchTransactionState, SwitchTransactionState[]> = {
   pending: ["hot-swapping", "restarting"],
-  "hot-swapping": ["committing", "rolled-back", "degraded"],
-  restarting: ["committing", "rolled-back", "degraded"],
+  "hot-swapping": ["committing", "rolled-back", "degraded", "failed"],
+  restarting: ["committing", "rolled-back", "degraded", "failed"],
   committing: ["committed", "degraded"],
   committed: [],
   "rolled-back": [],
@@ -166,7 +166,7 @@ export class SwitchTransactionOrchestrator {
       }
 
       return result;
-    } catch {
+    } catch (error) {
       transaction.state = "failed";
       transaction.error = error instanceof Error ? error : new Error(String(error));
       this._drainTerminalCreationQueue();
@@ -227,7 +227,7 @@ export class SwitchTransactionOrchestrator {
         transaction.error = result.error;
         return transaction;
       }
-    } catch {
+    } catch (error) {
       // Unexpected error during hot-swap
       this._transitionState(transaction, "failed");
       request.onProgress?.("failed");
@@ -290,7 +290,7 @@ export class SwitchTransactionOrchestrator {
         transaction.error = result.error;
         return transaction;
       }
-    } catch {
+    } catch (error) {
       // Unexpected error during restart-with-restore
       this._transitionState(transaction, "failed");
       request.onProgress?.("failed");

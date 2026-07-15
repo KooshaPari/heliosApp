@@ -9,6 +9,7 @@ import {
   InvalidRendererTransitionError,
   transition,
 } from "../../../src/renderer/state_machine.js";
+import type { RendererEvent } from "../../../src/renderer/state_machine.js";
 
 
 describe("RendererStateMachine", () => {
