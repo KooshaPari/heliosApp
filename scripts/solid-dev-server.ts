@@ -36,25 +36,32 @@ if (!port) {
 </body>
 </html>`;
 
+  // Playwright runs route checks in parallel. Share one build per app process so
+  // concurrent /client.js requests cannot launch overlapping esbuild pipelines.
+  const clientBundle = Bun.build({
+    entrypoints: [clientEntry],
+    target: "browser",
+    format: "esm",
+    plugins: [solidPlugin()],
+    define: { "process.env.NODE_ENV": JSON.stringify("development") },
+  }).then(async result => ({
+    success: result.success,
+    body: result.success
+      ? await result.outputs[0]!.text()
+      : result.logs.map(log => String(log.message)).join("\n"),
+  }));
+
   Bun.serve({
     port,
     async fetch(req) {
       const { pathname } = new URL(req.url);
 
       if (pathname === "/client.js") {
-        const result = await Bun.build({
-          entrypoints: [clientEntry],
-          target: "browser",
-          format: "esm",
-          plugins: [solidPlugin()],
-          define: { "process.env.NODE_ENV": JSON.stringify("development") },
-        });
-        if (!result.success) {
-          return new Response(result.logs.map(log => String(log.message)).join("\n"), {
-            status: 500,
-          });
+        const bundle = await clientBundle;
+        if (!bundle.success) {
+          return new Response(bundle.body, { status: 500 });
         }
-        return new Response(await result.outputs[0]?.text(), {
+        return new Response(bundle.body, {
           headers: { "Content-Type": "application/javascript" },
         });
       }
