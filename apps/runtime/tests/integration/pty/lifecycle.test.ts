@@ -9,6 +9,7 @@ import { PtyManager } from "../../../src/pty/index.js";
 import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 
 const pidsToCleanup: number[] = [];
+const shell = process.platform === "win32" ? process.env["ComSpec"] ?? "cmd.exe" : "/bin/sh";
 
 afterEach(() => {
   for (const pid of pidsToCleanup) {
@@ -29,8 +30,8 @@ describe("PTY lifecycle integration", () => {
     const bus = new InMemoryBusPublisher();
     const mgr = new PtyManager(10, bus);
 
-    const _record = await mgr.spawn({
-      shell: "/bin/sh",
+    const record = await mgr.spawn({
+      shell,
       laneId: "lane-1",
       sessionId: "sess-1",
       terminalId: "term-1",
@@ -63,15 +64,15 @@ describe("PTY lifecycle integration", () => {
     const mgr = new PtyManager(10, bus);
 
     // Spawn a shell.
-    const proc = Bun.spawn(["/bin/sh"], {
+    const proc = Bun.spawn([shell], {
       stdin: "pipe",
       stdout: "pipe",
       stderr: "pipe",
     });
     pidsToCleanup.push(proc.pid);
 
-    const _record = await mgr.spawn({
-      shell: "/bin/sh",
+    const record = await mgr.spawn({
+      shell,
       laneId: "lane-1",
       sessionId: "sess-1",
       terminalId: "term-1",
@@ -102,8 +103,8 @@ describe("PTY lifecycle integration", () => {
     const bus = new InMemoryBusPublisher();
     const mgr = new PtyManager(10, bus);
 
-    const _record = await mgr.spawn({
-      shell: "/bin/sh",
+    const record = await mgr.spawn({
+      shell,
       laneId: "lane-1",
       sessionId: "sess-1",
       terminalId: "term-1",
@@ -133,8 +134,8 @@ describe("PTY lifecycle integration", () => {
     const bus = new InMemoryBusPublisher();
     const mgr = new PtyManager(10, bus);
 
-    const _record = await mgr.spawn({
-      shell: "/bin/sh",
+    const record = await mgr.spawn({
+      shell,
       laneId: "lane-1",
       sessionId: "sess-1",
       terminalId: "term-1",
@@ -165,19 +166,19 @@ describe("PTY lifecycle integration", () => {
 
     const records = await Promise.all([
       mgr.spawn({
-        shell: "/bin/sh",
+        shell,
         laneId: "lane-1",
         sessionId: "sess-1",
         terminalId: "term-1",
       }),
       mgr.spawn({
-        shell: "/bin/sh",
+        shell,
         laneId: "lane-1",
         sessionId: "sess-1",
         terminalId: "term-2",
       }),
       mgr.spawn({
-        shell: "/bin/sh",
+        shell,
         laneId: "lane-2",
         sessionId: "sess-2",
         terminalId: "term-3",

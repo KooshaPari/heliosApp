@@ -4,7 +4,7 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { createRuntime } from "../../../src";
+import { createRuntime } from "../../../src/index.js";
 
 
 describe("terminal lifecycle and streaming data plane", () => {
