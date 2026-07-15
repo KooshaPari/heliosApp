@@ -11,9 +11,19 @@ export const PORTS = {
   colab: 5175,
 } as const;
 
+const launchOptions = process.env.PLAYWRIGHT_EXECUTABLE_PATH
+  ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH }
+  : {};
+
 export default defineConfig({
   testDir: ".",
   testMatch: ["e2e/a11y/**/*.spec.ts", "apps/desktop/tests/e2e/**/*.spec.ts"],
+  // Root-level discovery must not recurse into nested clones or worktree collections.
+  testIgnore: [
+    "**/.scoped-migration-notice-pr/**",
+    "**/*-wtrees/**",
+    "**/*-worktrees/**",
+  ],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -23,6 +33,7 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORTS.desktop}`,
     headless: true,
+    launchOptions,
     trace: "retain-on-failure",
   },
   projects: [
