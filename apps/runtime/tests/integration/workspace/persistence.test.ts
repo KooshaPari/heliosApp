@@ -5,6 +5,7 @@
 import { mkdtemp, rm, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { createHash } from "node:crypto";
 
 import { createJsonStore } from "../../../src/workspace/store.js";
 import type { Workspace } from "../../../src/workspace/types.js";
@@ -159,6 +160,25 @@ describe("Corruption recovery", () => {
     const store2 = await createJsonStore(dataDir);
     const loaded = await store2.getById(ws.id);
     expect(loaded?.name).toBe("Checksum");
+  });
+
+  test("checksum-valid malformed primary recovers from snapshot", async () => {
+    const store = await createJsonStore(dataDir);
+    const ws = makeWorkspace({ name: "Schema Recovery" });
+    await store.save(ws);
+
+    const workspaces = [{ id: "malformed" }];
+    const checksum = createHash("sha256")
+      .update(JSON.stringify({ version: 1, workspaces }))
+      .digest("hex");
+    await writeFile(
+      join(dataDir, "workspaces.json"),
+      JSON.stringify({ version: 1, workspaces, _checksum: checksum })
+    );
+
+    const recovered = await createJsonStore(dataDir);
+    expect(await recovered.getById(ws.id)).toEqual(ws);
+    expect(await recovered.getById("malformed")).toBeUndefined();
   });
 
   test("both files missing (fresh install after wipe) starts empty", async () => {

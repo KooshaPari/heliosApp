@@ -76,7 +76,26 @@ export async function detectCorruption(
   return { corrupted: false };
 }
 
-function isValidEnvelope(data: unknown): data is SnapshotEnvelope {
+const WORKSPACE_STATES = new Set(["active", "closed", "deleted"]);
+const PROJECT_STATUSES = new Set(["active", "stale"]);
+
+function isValidProjectBinding(data: unknown): boolean {
+  if (typeof data !== "object" || data === null) return false;
+  const project = data as Record<string, unknown>;
+  return (
+    typeof project["id"] === "string" &&
+    typeof project["workspaceId"] === "string" &&
+    typeof project["rootPath"] === "string" &&
+    (project["gitUrl"] === undefined || typeof project["gitUrl"] === "string") &&
+    typeof project["status"] === "string" &&
+    PROJECT_STATUSES.has(project["status"]) &&
+    typeof project["boundAt"] === "number" &&
+    Number.isFinite(project["boundAt"]) &&
+    project["boundAt"] >= 0
+  );
+}
+
+export function isValidEnvelope(data: unknown): data is SnapshotEnvelope {
   if (typeof data !== "object" || data === null) return false;
   const obj = data as Record<string, unknown>;
   if (obj["version"] !== 1) return false;
@@ -89,10 +108,12 @@ function isValidEnvelope(data: unknown): data is SnapshotEnvelope {
     if (typeof w["id"] !== "string") return false;
     if (typeof w["name"] !== "string") return false;
     if (typeof w["rootPath"] !== "string") return false;
-    if (typeof w["state"] !== "string") return false;
-    if (typeof w["createdAt"] !== "number") return false;
-    if (typeof w["updatedAt"] !== "number") return false;
+    if (typeof w["state"] !== "string" || !WORKSPACE_STATES.has(w["state"])) return false;
+    if (typeof w["createdAt"] !== "number" || !Number.isFinite(w["createdAt"])) return false;
+    if (typeof w["updatedAt"] !== "number" || !Number.isFinite(w["updatedAt"])) return false;
+    if (w["createdAt"] < 0 || w["updatedAt"] < w["createdAt"]) return false;
     if (!Array.isArray(w["projects"])) return false;
+    if (!w["projects"].every(isValidProjectBinding)) return false;
   }
   return true;
 }

@@ -10,6 +10,7 @@ import {
   computeChecksum,
   createSnapshot,
   detectCorruption,
+  isValidEnvelope,
   recoverFromSnapshot,
   PRIMARY_FILE,
 } from "./snapshot.js";
@@ -133,25 +134,18 @@ export class JsonWorkspaceStore implements WorkspaceStore {
     }
 
     // Validate envelope
-    if (
-      typeof parsed !== "object" ||
-      parsed === null ||
-      !Array.isArray((parsed as Record<string, unknown>)["workspaces"])
-    ) {
+    if (!isValidEnvelope(parsed)) {
       await this.attemptRecovery();
       return;
     }
 
-    const envelope = parsed as { workspaces: Workspace[]; _checksum?: string };
+    const envelope = parsed;
 
-    // Verify checksum if present
-    if (typeof envelope._checksum === "string") {
-      const expected = computeChecksum(envelope.workspaces);
-      if (envelope._checksum !== expected) {
-        console.warn("[workspace-store] Checksum mismatch in primary file, attempting recovery");
-        await this.attemptRecovery();
-        return;
-      }
+    const expected = computeChecksum(envelope.workspaces);
+    if (envelope._checksum !== expected) {
+      console.warn("[workspace-store] Checksum mismatch in primary file, attempting recovery");
+      await this.attemptRecovery();
+      return;
     }
 
     for (const ws of envelope.workspaces) {
