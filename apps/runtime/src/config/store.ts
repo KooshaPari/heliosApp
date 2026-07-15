@@ -2,6 +2,7 @@ import { watch as fsWatch, type FSWatcher } from "node:fs";
 import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { SettingsStore, SettingsSchema } from "./types.js";
+import { validateSettingDefinition } from "./schema.js";
 
 /**
  * JSON-file-backed settings store with in-memory unknown-key preservation
@@ -30,11 +31,16 @@ export class JsonSettingsStore implements SettingsStore {
       return {};
     }
 
-    let parsed: Record<string, unknown>;
+    let parsed: unknown;
     try {
-      parsed = JSON.parse(raw) as Record<string, unknown>;
+      parsed = JSON.parse(raw);
     } catch {
       console.warn(`[settings] Corrupted JSON in ${this.filePath}, returning empty.`);
+      return {};
+    }
+
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      console.warn(`[settings] Invalid settings object in ${this.filePath}, returning empty.`);
       return {};
     }
 
@@ -43,8 +49,13 @@ export class JsonSettingsStore implements SettingsStore {
     this.unknownKeys = {};
 
     for (const [k, v] of Object.entries(parsed)) {
-      if (k in this.schema) {
-        known[k] = v;
+      if (Object.hasOwn(this.schema, k)) {
+        const definition = this.schema[k];
+        if (definition && validateSettingDefinition(k, definition, v).valid) {
+          known[k] = v;
+        } else {
+          console.warn(`[settings] Invalid persisted value for ${k}, using default.`);
+        }
       } else {
         this.unknownKeys[k] = v;
       }

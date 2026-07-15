@@ -4,7 +4,7 @@
  * Traces to: FR-MVP-012 (persist settings)
  */
 import { describe, expect, it, beforeEach, afterEach } from "bun:test";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { JsonSettingsStore } from "../../../src/config/store.js";
@@ -104,6 +104,20 @@ describe("SettingsManager — persistence", () => {
     await mgr2.init();
     expect(mgr2.get("theme")).toBe("dark");
     mgr2.dispose();
+  });
+
+  it("falls back to defaults for invalid persisted known values", async () => {
+    await writeFile(
+      filePath,
+      JSON.stringify({ theme: "purple", "terminal.scrollback_lines": 10 }),
+      "utf-8"
+    );
+
+    const mgr = createManager();
+    await mgr.init();
+    expect(mgr.get("theme")).toBe("system");
+    expect(mgr.get("terminal.scrollback_lines")).toBe(10000);
+    mgr.dispose();
   });
 });
 

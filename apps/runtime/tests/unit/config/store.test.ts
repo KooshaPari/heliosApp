@@ -46,6 +46,12 @@ describe("JsonSettingsStore", () => {
     expect(data).toEqual({});
   });
 
+  it("returns empty when valid JSON is not a settings object", async () => {
+    await writeFile(filePath, "null", "utf-8");
+    const store = new JsonSettingsStore(filePath, SETTINGS_SCHEMA);
+    expect(await store.load()).toEqual({});
+  });
+
   // FR-005: Unknown key preservation
   it("preserves unknown keys through save/load", async () => {
     await writeFile(filePath, JSON.stringify({ theme: "dark", "future.setting": 42 }), "utf-8");

@@ -60,6 +60,14 @@ export function validateValue(key: string, value: unknown): { valid: boolean; re
     return { valid: true };
   }
 
+  return validateSettingDefinition(key, def, value);
+}
+
+export function validateSettingDefinition(
+  key: string,
+  def: SettingDefinition,
+  value: unknown
+): { valid: boolean; reason?: string } {
   // Reject null and undefined for defined settings.
   if (value === null || value === undefined) {
     return {
