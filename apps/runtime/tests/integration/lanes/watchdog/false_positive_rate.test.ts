@@ -1,36 +1,30 @@
 // Integration test for false positive rate validation
 
-import { unlinkSync } from "fs";
-import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
-import { ResourceClassifier } from "../../../../src/lanes/watchdog/resource_classifier.js";
+import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
+import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { createTestCooldownFile, removeTestCooldownFile } from "./cooldown_test_utils.js";
 
 describe("False Positive Rate", () => {
   let engine: RemediationEngine;
   let bus: InMemoryLocalBus;
   let laneRegistry: LaneRegistry;
-  let _classifier: ResourceClassifier;
-
-  let testId: string;
+  let cooldownFile: string;
 
   beforeEach(() => {
-    testId = `fp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     bus = new InMemoryLocalBus();
     laneRegistry = new LaneRegistry();
+    cooldownFile = createTestCooldownFile();
     engine = new RemediationEngine(laneRegistry, bus, {
-      cooldownFile: `/tmp/helios-cooldown-${testId}.json`,
+      cooldownFile,
     });
-    _classifier = new ResourceClassifier();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     engine.stop();
-    try {
-      unlinkSync(`/tmp/helios-cooldown-${testId}.json`);
-    // eslint-disable-next-line no-unused-vars
-    } catch (_err) {}
+    await removeTestCooldownFile(cooldownFile);
   });
 
   it("should have zero false positives with healthy system", async () => {

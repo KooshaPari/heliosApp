@@ -1,20 +1,41 @@
 // Performance test for detection and remediation
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
+import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { createTestCooldownFile, removeTestCooldownFile } from "./cooldown_test_utils.js";
+
+function createPerformanceOrphan(index: number): ClassifiedOrphan {
+  const resourceType = index % 3;
+  return {
+    type: resourceType === 0 ? "worktree" : resourceType === 1 ? "zellij_session" : "pty_process",
+    path: resourceType !== 2 ? `/tmp/orphan-${index}` : undefined,
+    pid: resourceType === 2 ? 10000 + index : undefined,
+    age: 5000,
+    estimatedOwner: `lane-dead-${index}`,
+    riskLevel: index % 2 === 0 ? "high" : "medium",
+    createdAt: new Date().toISOString(),
+  };
+}
 
 describe("Performance", () => {
   let engine: RemediationEngine;
   let bus: InMemoryLocalBus;
   let laneRegistry: LaneRegistry;
+  let cooldownFile: string;
 
   beforeEach(() => {
     bus = new InMemoryLocalBus();
     laneRegistry = new LaneRegistry(200);
-    engine = new RemediationEngine(laneRegistry, bus);
+    cooldownFile = createTestCooldownFile();
+    engine = new RemediationEngine(laneRegistry, bus, { cooldownFile });
+  });
+
+  afterEach(async () => {
+    engine.stop();
+    await removeTestCooldownFile(cooldownFile);
   });
 
   it("should handle 100 lanes with 20 orphans efficiently", async () => {
@@ -59,18 +80,7 @@ describe("Performance", () => {
 
   it("should handle large suggestion lists efficiently", async () => {
     // Create 50 orphaned resources
-    const orphans: ClassifiedOrphan[] = [];
-    for (let i = 0; i < 50; i++) {
-      orphans.push({
-        type: i % 3 === 0 ? "worktree" : i % 3 === 1 ? "zellij_session" : "pty_process",
-        path: i % 3 !== 2 ? `/tmp/orphan-${i}` : undefined,
-        pid: i % 3 === 2 ? 10000 + i : undefined,
-        age: 5000,
-        estimatedOwner: `lane-dead-${i}`,
-        riskLevel: i % 2 === 0 ? "high" : "medium",
-        createdAt: new Date().toISOString(),
-      });
-    }
+    const orphans = Array.from({ length: 50 }, (_, index) => createPerformanceOrphan(index));
 
     const startTime = Date.now();
     const suggestions = await engine.generateSuggestions(orphans);
@@ -167,7 +177,7 @@ describe("Performance", () => {
 
     // Decline it (triggers cooldown save)
     const startTime = Date.now();
-    engine.declineCleanup(suggestions[0].id);
+    await engine.declineCleanup(suggestions[0].id);
     const declineTime = Date.now() - startTime;
 
     // Decline should be fast (< 100ms)

@@ -1,20 +1,28 @@
 // Integration tests for remediation workflow
 
-import { describe, it, expect, beforeEach } from "bun:test";
-import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
+import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { createTestCooldownFile, removeTestCooldownFile } from "./cooldown_test_utils.js";
 
 describe("Remediation Workflow", () => {
   let engine: RemediationEngine;
   let bus: InMemoryLocalBus;
   let laneRegistry: LaneRegistry;
+  let cooldownFile: string;
 
   beforeEach(() => {
     bus = new InMemoryLocalBus();
     laneRegistry = new LaneRegistry();
-    engine = new RemediationEngine(laneRegistry, bus);
+    cooldownFile = createTestCooldownFile();
+    engine = new RemediationEngine(laneRegistry, bus, { cooldownFile });
+  });
+
+  afterEach(async () => {
+    engine.stop();
+    await removeTestCooldownFile(cooldownFile);
   });
 
   it("should generate suggestions from classified orphans", async () => {
@@ -99,7 +107,7 @@ describe("Remediation Workflow", () => {
     expect(suggestions.length).toBe(1);
 
     const suggestionId = suggestions[0].id;
-    engine.declineCleanup(suggestionId);
+    await engine.declineCleanup(suggestionId);
 
     // Generate suggestions again - should not include declined resource
     suggestions = await engine.generateSuggestions(orphans);
@@ -162,7 +170,7 @@ describe("Remediation Workflow", () => {
     expect(suggestions.length).toBe(1);
 
     // Decline the suggestion
-    engine.declineCleanup(suggestions[0].id);
+    await engine.declineCleanup(suggestions[0].id);
 
     // Try to generate suggestions again
     suggestions = await engine.generateSuggestions(orphans);
