@@ -91,6 +91,13 @@ describe("Integration Tests (T015)", () => {
       expect(matches.length).toBeGreaterThan(0);
     });
 
+    it("Windows .env path triggers warning", () => {
+      const detector = new ProtectedPathDetector();
+      const matches = detector.check("type C:\\repo\\.env");
+      expect(matches.length).toBeGreaterThan(0);
+      expect(matches[0].matchedPath).toBe("C:\\repo\\.env");
+    });
+
     it("cat README.md does NOT trigger warning", () => {
       const detector = new ProtectedPathDetector();
       const matches = detector.check("cat README.md");
@@ -107,6 +114,12 @@ describe("Integration Tests (T015)", () => {
     it("AWS credentials access triggers warning", () => {
       const detector = new ProtectedPathDetector();
       const matches = detector.check("cat ~/.aws/credentials");
+      expect(matches.length).toBeGreaterThan(0);
+    });
+
+    it("Windows AWS credentials path triggers warning", () => {
+      const detector = new ProtectedPathDetector();
+      const matches = detector.check("Get-Content C:\\Users\\alice\\.aws\\credentials");
       expect(matches.length).toBeGreaterThan(0);
     });
 
