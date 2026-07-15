@@ -6,7 +6,7 @@ import { TerminalRegistry } from "../../../src/sessions/terminal_registry";
 
 describe("TerminalRegistry", () => {
   test("stores and queries terminal context", () => {
-    const _registry = new TerminalRegistry();
+    const registry = new TerminalRegistry();
     const terminal = registry.spawn({
       terminal_id: "t-1",
       workspace_id: "ws-1",
@@ -21,7 +21,7 @@ describe("TerminalRegistry", () => {
   });
 
   test("enforces ownership boundaries for workspace lane session", () => {
-    const _registry = new TerminalRegistry();
+    const registry = new TerminalRegistry();
     registry.spawn({
       terminal_id: "t-2",
       workspace_id: "ws-1",
@@ -46,7 +46,7 @@ describe("TerminalRegistry", () => {
   });
 
   test("cleans up session scoped terminals", () => {
-    const _registry = new TerminalRegistry();
+    const registry = new TerminalRegistry();
     registry.spawn({
       terminal_id: "t-3",
       workspace_id: "ws-1",
@@ -68,7 +68,7 @@ describe("TerminalRegistry", () => {
   });
 
   test("re-indexes terminal ownership when terminal_id is reused", () => {
-    const _registry = new TerminalRegistry();
+    const registry = new TerminalRegistry();
     registry.spawn({
       terminal_id: "t-5",
       workspace_id: "ws-1",
