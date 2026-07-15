@@ -82,7 +82,7 @@ export class ShareWorker {
       }, 5000);
 
       return { pid, link };
-    } catch {
+    } catch (error) {
       throw new Error(`Failed to spawn share worker: ${String(error)}`);
     }
   }
@@ -140,12 +140,18 @@ class DefaultPolicyGate implements PolicyGate {
 export class ShareSessionManager {
   private sessions = new Map<string, ShareSession>();
   private sessionsByTerminal = new Map<string, Set<string>>();
+  private nextSessionSequence = 0;
   private bus: LocalBus | null = null;
   private policyGate: PolicyGate;
 
   constructor(bus?: LocalBus, policyGate?: PolicyGate) {
     this.bus = bus || null;
     this.policyGate = policyGate || new DefaultPolicyGate();
+  }
+
+  private createSessionId(): string {
+    this.nextSessionSequence += 1;
+    return `share-${Date.now()}-${this.nextSessionSequence}`;
   }
 
   /**
@@ -176,7 +182,7 @@ export class ShareSessionManager {
 
     if (!policyDecision.allowed) {
       const session: ShareSession = {
-        id: `share-${Date.now()}`,
+        id: this.createSessionId(),
         terminalId,
         backend,
         shareLink: null,
@@ -199,7 +205,7 @@ export class ShareSessionManager {
 
     // Create session in pending state
     const session: ShareSession = {
-      id: `share-${Date.now()}`,
+      id: this.createSessionId(),
       terminalId,
       backend,
       shareLink: null,
@@ -245,7 +251,7 @@ export class ShareSessionManager {
       });
 
       return session;
-    } catch {
+    } catch (error) {
       session.state = "failed";
       session.message = String(error);
 
@@ -291,7 +297,7 @@ export class ShareSessionManager {
       if (terminalSessions) {
         terminalSessions.delete(sessionId);
       }
-    } catch {
+    } catch (error) {
       throw new Error(`Failed to terminate session: ${String(error)}`);
     }
   }
@@ -338,7 +344,7 @@ export class ShareSessionManager {
         topic,
         payload,
       });
-    } catch {
+    } catch (error) {
       console.warn(`Failed to publish share event ${topic}:`, error);
     }
   }
