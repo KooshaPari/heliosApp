@@ -12,6 +12,7 @@ import { RioSurface } from "../rio/surface.js";
 import { RioCapabilities } from "../rio/capabilities.js";
 import { RioMetrics } from "../rio/metrics.js";
 import { RioInputRelay } from "../rio/input.js";
+import { isRioEnabled } from "../rio/index.js";
 import type { RendererConfig, RenderSurface } from "../adapter.js";
 
 // ---------------------------------------------------------------------------

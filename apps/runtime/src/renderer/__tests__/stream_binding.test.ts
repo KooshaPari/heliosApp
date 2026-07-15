@@ -83,7 +83,7 @@ describe("StreamBindingManager", () => {
 
     expect(mgr.count()).toBe(1);
     expect(adapter.boundStreams.has("pty-1")).toBe(true);
-    const _binding = mgr.getBindings().get("pty-1");
+    const binding = mgr.getBindings().get("pty-1");
     expect(binding).toBeDefined();
     expect(binding!.ptyId).toBe("pty-1");
     expect(binding!.renderer).toBe(adapter);
