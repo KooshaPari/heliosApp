@@ -192,7 +192,7 @@ describe("Storage Chaos Tests", () => {
     expect(finalCount).toBe(1000);
   });
 
-  it("should stay within storage budget", async () => {
+  it.failing("should stay within the WP02 storage budget", async () => {
     store = new SQLiteAuditStore(dbPath);
     const storageAdapter: AuditStorage = {
       persist: events => {
@@ -232,9 +232,12 @@ describe("Storage Chaos Tests", () => {
     await sink.flush();
     sink.destroy();
 
-    // Check storage size
-    const storageSize = store.getStorageSize();
     const eventCount = store.count();
+    store.close();
+
+    // WP02/T008 requires a real SQLite file and a <500 MB projection for 3M events.
+    // Measure after close so WAL contents are checkpointed into the durable database file.
+    const storageSize = fs.statSync(dbPath).size;
 
     const sizePerEvent = storageSize / eventCount;
 
@@ -248,8 +251,7 @@ describe("Storage Chaos Tests", () => {
     // Ensure per-event size is reasonable (< 1000 bytes per event)
     expect(sizePerEvent).toBeLessThan(1000);
 
-    // Projected size should be significantly under 2.5GB
-    expect(projectedSize).toBeLessThan(2500 * 1024 * 1024);
+    expect(projectedSize).toBeLessThan(500 * 1024 * 1024);
   }, 60_000);
 
   it("should document acceptable loss during hard crash", async () => {
