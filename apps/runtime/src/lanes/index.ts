@@ -190,7 +190,7 @@ export class LaneManager {
         );
         await this.emitEvent("lane.state.changed", laneId, lane.workspaceId, fromState, toState);
         return this.registry.get(laneId)!;
-      } catch {
+      } catch (err) {
         // T010: Partial provisioning failure - clean up and close lane
         const fromState = lane.state;
         const toState = transition(fromState, "provision_failed", laneId);
@@ -356,19 +356,15 @@ export class LaneManager {
 
     if (ptys.length === 0) return;
 
-    let _forceKilled = 0;
     const terminationPromises = ptys.map(async pty => {
       try {
         const timeout = new Promise<"timeout">(resolve =>
           setTimeout(() => resolve("timeout"), this.ptyTerminationTimeoutMs)
         );
         const termination = this.ptyManager!.terminate(pty.ptyId).then(() => "done" as const);
-        const result = await Promise.race([termination, timeout]);
-        if (result === "timeout") {
-          forceKilled++;
-        }
+        await Promise.race([termination, timeout]);
       } catch {
-        forceKilled++;
+        // Best-effort termination; cleanup continues for the remaining PTYs.
       }
     });
 
@@ -384,7 +380,7 @@ export class LaneManager {
     options?: { timeoutMs?: number }
   ): Promise<FullReconciliationResult> {
     const timeoutMs = options?.timeoutMs ?? 30_000;
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     const result: FullReconciliationResult = {
       orphanedWorktrees: 0,

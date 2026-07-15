@@ -6,9 +6,13 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { afterEach, beforeEach, describe, expect, setDefaultTimeout, test } from "bun:test";
 import { _resetIdCounter, LaneManager } from "../../../src/lanes/index.js";
+import { computeBranchName } from "../../../src/lanes/worktree.js";
 
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
+
+setDefaultTimeout(30000);
 
 async function runGit(args: string[], cwd: string): Promise<string> {
   const proc = Bun.spawn(["git", ...args], {
@@ -16,10 +20,12 @@ async function runGit(args: string[], cwd: string): Promise<string> {
     stdout: "pipe",
     stderr: "pipe",
   });
-  const stdout = await new Response(proc.stdout).text();
-  const exitCode = await proc.exited;
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ]);
   if (exitCode !== 0) {
-    const stderr = await new Response(proc.stderr).text();
     throw new Error(`git ${args.join(" ")} failed: ${stderr}`);
   }
   return stdout.trim();
@@ -32,11 +38,12 @@ async function createTempRepo(): Promise<string> {
   );
   fs.mkdirSync(tmpDir, { recursive: true });
   await runGit(["init", "-b", "main"], tmpDir);
-  await runGit(["config", "user.email", "test@test.com"], tmpDir);
-  await runGit(["config", "user.name", "Test"], tmpDir);
   fs.writeFileSync(path.join(tmpDir, "README.md"), "# Test Repo\n");
   await runGit(["add", "."], tmpDir);
-  await runGit(["commit", "-m", "initial commit"], tmpDir);
+  await runGit(
+    ["-c", "user.email=test@test.com", "-c", "user.name=Test", "commit", "-m", "initial commit"],
+    tmpDir
+  );
   return tmpDir;
 }
 
@@ -56,7 +63,7 @@ describe("Lane Lifecycle Integration (FR-008-001, FR-008-002)", () => {
     repoDir = await createTempRepo();
     bus = new InMemoryLocalBus();
     mgr = new LaneManager({ bus, capacityLimit: 50 });
-  });
+  }, 30000);
 
   afterEach(() => {
     cleanupDir(repoDir);
