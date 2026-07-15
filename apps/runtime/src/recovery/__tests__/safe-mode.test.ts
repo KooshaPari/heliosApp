@@ -1,8 +1,9 @@
-import { SafeMode, CrashLoopDetector, type SafeModeConfig } from "../safe-mode.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
+import { CrashLoopDetector, SafeMode, type SafeModeConfig } from "../safe-mode.js";
 
 // Traces to: FR-CRH-009 (crash loop detection and safe mode)
 describe("CrashLoopDetector", () => {
@@ -11,8 +12,7 @@ describe("CrashLoopDetector", () => {
 
   beforeEach(async () => {
     vi.useFakeTimers();
-    tempDir = path.join(os.tmpdir(), `crash-loop-test-${Date.now()}`);
-    await fs.mkdir(tempDir, { recursive: true });
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "crash-loop-test-"));
     detector = new CrashLoopDetector(tempDir, 3, 60000);
     await detector.initialize();
   });
@@ -20,7 +20,9 @@ describe("CrashLoopDetector", () => {
   afterEach(async () => {
     vi.restoreAllMocks();
     vi.useRealTimers();
-    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {
+      // Best-effort cleanup keeps a failed assertion from hiding the original test result.
+    });
   });
 
   it("should not detect loop with fewer than threshold crashes", async () => {
@@ -73,6 +75,18 @@ describe("CrashLoopDetector", () => {
 
     const now = Date.now();
     await detector2.recordCrash(now);
+    expect(detector2.isLooping()).toBe(false);
+  });
+
+  it("should reject numeric-string timestamps from persisted history", async () => {
+    const now = Date.now();
+    const historyPath = path.join(tempDir, "recovery", "crash-history.json");
+    await fs.mkdir(path.dirname(historyPath), { recursive: true });
+    await fs.writeFile(historyPath, JSON.stringify([`${now}`, `${now + 1000}`, `${now + 2000}`]));
+
+    const detector2 = new CrashLoopDetector(tempDir, 3, 60000);
+    await detector2.initialize();
+
     expect(detector2.isLooping()).toBe(false);
   });
 });
