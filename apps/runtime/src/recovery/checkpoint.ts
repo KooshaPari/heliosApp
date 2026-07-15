@@ -1,6 +1,6 @@
-import { promises as fs } from "fs";
-import path from "path";
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 
 export const CHECKPOINT_VERSION = 1;
 export const MAX_SCROLLBACK_SIZE = 10240; // 10 KB per session
@@ -35,6 +35,20 @@ export interface ValidationError {
 export interface ValidationResult {
   valid: boolean;
   errors: ValidationError[];
+}
+
+interface CheckpointCandidate {
+  checksum?: unknown;
+  sessions?: unknown;
+  timestamp?: unknown;
+  version?: unknown;
+}
+
+interface SessionCandidate {
+  [key: string]: unknown;
+  environmentVariables?: unknown;
+  scrollbackSnapshot?: unknown;
+  sessionId?: unknown;
 }
 
 export class CheckpointWriter {
@@ -122,11 +136,11 @@ export class CheckpointReader {
 
     try {
       const data = await fs.readFile(checkpointPath, "utf-8");
-      const checkpoint = JSON.parse(data) as Checkpoint;
+      const checkpoint: unknown = JSON.parse(data);
 
       // Validate checksum
-      if (!this.verifyChecksum(checkpoint)) {
-        console.warn("Checkpoint checksum mismatch - trying backup");
+      if (!this.isValidCheckpoint(checkpoint)) {
+        console.warn("Checkpoint integrity or schema validation failed - trying backup");
         return await this.readBackup();
       }
 
@@ -141,10 +155,10 @@ export class CheckpointReader {
     const backupPath = `${this.getCheckpointPath()}.backup`;
     try {
       const data = await fs.readFile(backupPath, "utf-8");
-      const checkpoint = JSON.parse(data) as Checkpoint;
+      const checkpoint: unknown = JSON.parse(data);
 
-      if (!this.verifyChecksum(checkpoint)) {
-        console.warn("Backup checkpoint checksum mismatch - total loss");
+      if (!this.isValidCheckpoint(checkpoint)) {
+        console.warn("Backup checkpoint integrity or schema validation failed - total loss");
         return null;
       }
 
@@ -155,7 +169,15 @@ export class CheckpointReader {
     }
   }
 
-  private verifyChecksum(checkpoint: Checkpoint): boolean {
+  private isValidCheckpoint(checkpoint: unknown): checkpoint is Checkpoint {
+    return this.verifyChecksum(checkpoint) && validateCheckpoint(checkpoint).valid;
+  }
+
+  private verifyChecksum(checkpoint: unknown): checkpoint is Checkpoint {
+    if (!isCheckpointCandidate(checkpoint) || typeof checkpoint.checksum !== "string") {
+      return false;
+    }
+
     const serialized = JSON.stringify(checkpoint.sessions);
     const calculated = createHash("sha256").update(serialized).digest("hex");
     return calculated === checkpoint.checksum;
@@ -166,37 +188,65 @@ export class CheckpointReader {
   }
 }
 
-export function validateCheckpoint(checkpoint: Checkpoint): ValidationResult {
+export function validateCheckpoint(checkpoint: unknown): ValidationResult {
   const errors: ValidationError[] = [];
 
+  if (!isCheckpointCandidate(checkpoint)) {
+    return {
+      valid: false,
+      errors: [{ field: "checkpoint", reason: "Expected an object" }],
+    };
+  }
+
   // Verify version
-  if (checkpoint.version > CHECKPOINT_VERSION) {
+  const version = checkpoint.version;
+  if (!Number.isInteger(version) || (version as number) < 1) {
     errors.push({
       field: "version",
-      reason: `Unsupported schema version: ${checkpoint.version}. Supported: ${CHECKPOINT_VERSION}`,
+      reason: "Expected a positive integer schema version",
+    });
+  } else if ((version as number) > CHECKPOINT_VERSION) {
+    errors.push({
+      field: "version",
+      reason: `Unsupported schema version: ${version}. Supported: ${CHECKPOINT_VERSION}`,
     });
   }
 
   // Verify timestamp
   const now = Date.now();
-  if (checkpoint.timestamp > now + CLOCK_SKEW_TOLERANCE_MS) {
+  const timestamp = checkpoint.timestamp;
+  if (typeof timestamp !== "number" || !Number.isFinite(timestamp)) {
     errors.push({
       field: "timestamp",
-      reason: `Timestamp in future (${new Date(checkpoint.timestamp).toISOString()})`,
+      reason: "Expected a finite numeric timestamp",
+    });
+  } else if (timestamp > now + CLOCK_SKEW_TOLERANCE_MS) {
+    errors.push({
+      field: "timestamp",
+      reason: `Timestamp in future (${new Date(timestamp).toISOString()})`,
     });
   }
 
-  if (now - checkpoint.timestamp > MAX_CHECKPOINT_AGE_MS) {
+  if (
+    typeof timestamp === "number" &&
+    Number.isFinite(timestamp) &&
+    now - timestamp > MAX_CHECKPOINT_AGE_MS
+  ) {
     errors.push({
       field: "timestamp",
-      reason: `Checkpoint too old (${new Date(checkpoint.timestamp).toISOString()})`,
+      reason: `Checkpoint too old (${new Date(timestamp).toISOString()})`,
     });
   }
 
   // Validate sessions
-  for (const session of checkpoint.sessions) {
-    const sessionErrors = validateSession(session);
-    errors.push(...sessionErrors);
+  const sessions = checkpoint.sessions;
+  if (!Array.isArray(sessions)) {
+    errors.push({ field: "sessions", reason: "Expected an array" });
+  } else {
+    for (const session of sessions) {
+      const sessionErrors = validateSession(session);
+      errors.push(...sessionErrors);
+    }
   }
 
   return {
@@ -205,42 +255,71 @@ export function validateCheckpoint(checkpoint: Checkpoint): ValidationResult {
   };
 }
 
-function validateSession(session: CheckpointSession): ValidationError[] {
+function validateSession(session: unknown): ValidationError[] {
   const errors: ValidationError[] = [];
 
-  if (!session.sessionId) {
-    errors.push({
-      sessionId: session.sessionId,
-      field: "sessionId",
-      reason: "Required field missing",
-    });
+  if (!isSessionCandidate(session)) {
+    return [{ field: "session", reason: "Expected an object" }];
   }
 
-  if (!session.terminalId) {
-    errors.push({
-      sessionId: session.sessionId,
-      field: "terminalId",
-      reason: "Required field missing",
-    });
+  const sessionId = typeof session.sessionId === "string" ? session.sessionId : undefined;
+
+  if (!sessionId) {
+    errors.push(validationError(sessionId, "sessionId", "Expected a non-empty string"));
   }
 
-  if (!session.laneId) {
-    errors.push({
-      sessionId: session.sessionId,
-      field: "laneId",
-      reason: "Required field missing",
-    });
+  for (const field of [
+    "terminalId",
+    "laneId",
+    "workingDirectory",
+    "zelijjSessionName",
+    "shellCommand",
+  ] as const) {
+    if (typeof session[field] !== "string" || session[field].length === 0) {
+      errors.push(validationError(sessionId, field, "Expected a non-empty string"));
+    }
   }
 
-  if (!session.workingDirectory) {
-    errors.push({
-      sessionId: session.sessionId,
-      field: "workingDirectory",
-      reason: "Required field missing",
-    });
+  const scrollbackSnapshot = session.scrollbackSnapshot;
+  if (typeof scrollbackSnapshot !== "string") {
+    errors.push(validationError(sessionId, "scrollbackSnapshot", "Expected a string"));
+  } else if (Buffer.byteLength(scrollbackSnapshot, "utf8") > MAX_SCROLLBACK_SIZE) {
+    errors.push(
+      validationError(sessionId, "scrollbackSnapshot", `Exceeds ${MAX_SCROLLBACK_SIZE} byte limit`)
+    );
+  }
+
+  const environmentVariables = session.environmentVariables;
+  if (
+    !isRecord(environmentVariables) ||
+    Object.values(environmentVariables).some(value => typeof value !== "string")
+  ) {
+    errors.push(
+      validationError(sessionId, "environmentVariables", "Expected a string-valued object")
+    );
   }
 
   return errors;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isCheckpointCandidate(value: unknown): value is CheckpointCandidate {
+  return isRecord(value);
+}
+
+function isSessionCandidate(value: unknown): value is SessionCandidate {
+  return isRecord(value);
+}
+
+function validationError(
+  sessionId: string | undefined,
+  field: string,
+  reason: string
+): ValidationError {
+  return sessionId === undefined ? { field, reason } : { sessionId, field, reason };
 }
 
 export function estimateCheckpointSize(sessionCount: number): number {

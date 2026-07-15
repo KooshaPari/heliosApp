@@ -1,9 +1,9 @@
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import {
-  validateCheckpoint,
   CHECKPOINT_VERSION,
   type Checkpoint,
   type CheckpointSession,
+  validateCheckpoint,
 } from "../checkpoint.js";
 
 describe("Checkpoint Validation", () => {
@@ -96,6 +96,43 @@ describe("Checkpoint Validation", () => {
   });
 
   describe("session validation", () => {
+    it("should reject non-array sessions without throwing", () => {
+      const checkpoint = {
+        ...createValidCheckpoint(),
+        sessions: { coerced: "not-an-array" },
+      };
+
+      const result = validateCheckpoint(checkpoint);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.field === "sessions")).toBe(true);
+    });
+
+    it("should reject malformed nested session values", () => {
+      const checkpoint = {
+        ...createValidCheckpoint(),
+        sessions: [
+          {
+            sessionId: 42,
+            terminalId: "term-1",
+            laneId: "lane-1",
+            workingDirectory: "/home/user",
+            environmentVariables: { PATH: 42 },
+            scrollbackSnapshot: null,
+            zelijjSessionName: "main",
+            shellCommand: "bash",
+          },
+        ],
+      };
+
+      const result = validateCheckpoint(checkpoint);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors.map(error => error.field)).toContain("sessionId");
+      expect(result.errors.map(error => error.field)).toContain("environmentVariables");
+      expect(result.errors.map(error => error.field)).toContain("scrollbackSnapshot");
+    });
+
     it("should reject session missing sessionId", () => {
       const checkpoint = createValidCheckpoint({
         sessions: [

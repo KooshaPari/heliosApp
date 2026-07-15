@@ -1,13 +1,15 @@
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { createHash } from "node:crypto";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import {
-  CheckpointWriter,
-  CheckpointReader,
   type Checkpoint,
+  CheckpointReader,
   type CheckpointSession,
+  CheckpointWriter,
   estimateCheckpointSize,
 } from "../checkpoint.js";
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
 
 // Traces to: FR-CRH-003 (zmx checkpoint for restoration), FR-CRH-004 (checkpoint integrity validation)
 describe("CheckpointWriter and CheckpointReader", () => {
@@ -16,14 +18,15 @@ describe("CheckpointWriter and CheckpointReader", () => {
   let tempDir: string;
 
   beforeEach(async () => {
-    tempDir = path.join(os.tmpdir(), `checkpoint-test-${Date.now()}`);
-    await fs.mkdir(tempDir, { recursive: true });
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "checkpoint-test-"));
     writer = new CheckpointWriter(tempDir);
     reader = new CheckpointReader(tempDir);
   });
 
   afterEach(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {
+      // Best-effort cleanup keeps a failed assertion from hiding the original test result.
+    });
   });
 
   describe("atomic write", () => {
@@ -175,6 +178,23 @@ describe("CheckpointWriter and CheckpointReader", () => {
       expect(read).toBeNull();
     });
 
+    it("should reject a checksum-valid checkpoint with malformed sessions", async () => {
+      const sessions = { coerced: "not-an-array" };
+      const checkpointPath = writer.getCheckpointPath();
+      await fs.mkdir(path.dirname(checkpointPath), { recursive: true });
+      await fs.writeFile(
+        checkpointPath,
+        JSON.stringify({
+          version: 1,
+          timestamp: Date.now(),
+          checksum: createHash("sha256").update(JSON.stringify(sessions)).digest("hex"),
+          sessions,
+        })
+      );
+
+      expect(await reader.read()).toBeNull();
+    });
+
     it("should return null on corrupted checksum", async () => {
       const session: CheckpointSession = {
         sessionId: "sess-1",
@@ -198,8 +218,8 @@ describe("CheckpointWriter and CheckpointReader", () => {
 
       // Corrupt the file
       const checkpointPath = writer.getCheckpointPath();
-      let content = await fs.readFile(checkpointPath, "utf-8");
-      let parsed = JSON.parse(content) as Checkpoint;
+      const content = await fs.readFile(checkpointPath, "utf-8");
+      const parsed = JSON.parse(content) as Checkpoint;
       parsed.checksum = "invalid-checksum";
       await fs.writeFile(checkpointPath, JSON.stringify(parsed));
 
@@ -238,8 +258,8 @@ describe("CheckpointWriter and CheckpointReader", () => {
 
       // Corrupt primary
       const checkpointPath = writer.getCheckpointPath();
-      let content = await fs.readFile(checkpointPath, "utf-8");
-      let parsed = JSON.parse(content) as Checkpoint;
+      const content = await fs.readFile(checkpointPath, "utf-8");
+      const parsed = JSON.parse(content) as Checkpoint;
       parsed.checksum = "invalid";
       await fs.writeFile(checkpointPath, JSON.stringify(parsed));
 
