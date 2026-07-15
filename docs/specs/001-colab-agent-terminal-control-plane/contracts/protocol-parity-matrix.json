@@ -223,6 +223,42 @@
 			],
 			"runtime_refs": ["apps/runtime/src/protocol/methods.ts"],
 			"task_ids": ["T006", "T022", "T043"]
+		},
+		{
+			"name": "boundary.local.dispatch",
+			"status": "implemented",
+			"contract_refs": [
+				"orchestration-envelope.schema.json#/properties/method/enum"
+			],
+			"runtime_refs": [
+				"apps/runtime/src/protocol/boundary_adapter.ts",
+				"apps/runtime/tests/unit/protocol/boundary_adapter.test.ts"
+			],
+			"task_ids": ["T031", "T032", "T033"]
+		},
+		{
+			"name": "boundary.tool.dispatch",
+			"status": "implemented",
+			"contract_refs": [
+				"orchestration-envelope.schema.json#/properties/method/enum"
+			],
+			"runtime_refs": [
+				"apps/runtime/src/protocol/boundary_adapter.ts",
+				"apps/runtime/tests/integration/protocol/boundary_dispatch.test.ts"
+			],
+			"task_ids": ["T031", "T032", "T033"]
+		},
+		{
+			"name": "boundary.a2a.dispatch",
+			"status": "implemented",
+			"contract_refs": [
+				"orchestration-envelope.schema.json#/properties/method/enum"
+			],
+			"runtime_refs": [
+				"apps/runtime/src/protocol/boundary_adapter.ts",
+				"apps/runtime/tests/integration/protocol/boundary_dispatch.test.ts"
+			],
+			"task_ids": ["T031", "T032", "T033"]
 		}
 	],
 	"topics": [
@@ -495,6 +531,54 @@
 			],
 			"runtime_refs": ["apps/runtime/src/protocol/topics.ts"],
 			"task_ids": ["T006", "T022", "T045"]
+		},
+		{
+			"name": "lane.attach.started",
+			"status": "implemented",
+			"contract_refs": [
+				"orchestration-envelope.schema.json#/allOf"
+			],
+			"runtime_refs": [
+				"apps/runtime/src/protocol/bus/request-handlers.ts",
+				"apps/runtime/tests/unit/protocol/protocol_bus.test.ts"
+			],
+			"task_ids": ["T016", "T045"]
+		},
+		{
+			"name": "lane.attach.failed",
+			"status": "implemented",
+			"contract_refs": [
+				"orchestration-envelope.schema.json#/allOf"
+			],
+			"runtime_refs": [
+				"apps/runtime/src/protocol/bus/lifecycle.ts",
+				"apps/runtime/tests/unit/protocol/protocol_bus.test.ts"
+			],
+			"task_ids": ["T016", "T024", "T045"]
+		},
+		{
+			"name": "lane.cleanup.started",
+			"status": "implemented",
+			"contract_refs": [
+				"orchestration-envelope.schema.json#/allOf"
+			],
+			"runtime_refs": [
+				"apps/runtime/src/protocol/bus/lifecycle.ts",
+				"apps/runtime/tests/unit/protocol/protocol_bus.test.ts"
+			],
+			"task_ids": ["T022", "T045"]
+		},
+		{
+			"name": "lane.cleanup.failed",
+			"status": "implemented",
+			"contract_refs": [
+				"orchestration-envelope.schema.json#/allOf"
+			],
+			"runtime_refs": [
+				"apps/runtime/src/protocol/bus/lifecycle.ts",
+				"apps/runtime/tests/unit/protocol/protocol_bus.test.ts"
+			],
+			"task_ids": ["T022", "T024", "T045"]
 		},
 		{
 			"name": "harness.status.changed",

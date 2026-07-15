@@ -31,4 +31,19 @@ describe("protocol parity gate", () => {
     expect(result.ok).toBeFalse();
     expect(result.output).toContain("Formal topic 'diagnostics.metric' missing from parity matrix");
   });
+
+  test("keeps boundary result topics as explicit canonical proper reds", () => {
+    const result = runGate(".");
+    expect(result.ok).toBeFalse();
+    for (const topic of [
+      "boundary.local.dispatched",
+      "boundary.tool.dispatched",
+      "boundary.a2a.delegated",
+      "boundary.dispatch.failed",
+    ]) {
+      expect(result.output).toContain(`Formal topic '${topic}' missing from parity matrix`);
+    }
+    expect(result.output).not.toContain("Formal method '");
+    expect(result.output).not.toContain("Formal topic 'lane.");
+  });
 });
