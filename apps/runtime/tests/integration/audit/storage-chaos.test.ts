@@ -1,69 +1,31 @@
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { DefaultAuditSink } from "../../../src/audit/sink";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 import type { AuditStorage } from "../../../src/audit/sink";
-import fs from "fs";
-import path from "path";
-
-const TMP_DIR = "/tmp/audit-test-" + Math.random().toString(36).substring(7);
 
 describe("Storage Chaos Tests", () => {
+  let tmpDir: string;
   let dbPath: string;
-  let store: SQLiteAuditStore;
+  let store!: SQLiteAuditStore;
+  let sink: DefaultAuditSink | undefined;
 
   beforeEach(() => {
-    // Create temp directory
-    if (!fs.existsSync(TMP_DIR)) {
-      fs.mkdirSync(TMP_DIR, { recursive: true });
-    }
-
-    dbPath = path.join(TMP_DIR, "audit.db");
-
-    // Ensure clean previous state
-    if (fs.existsSync(dbPath)) {
-      fs.unlinkSync(dbPath);
-    }
-    const walPath = `${dbPath}-wal`;
-    if (fs.existsSync(walPath)) {
-      fs.unlinkSync(walPath);
-    }
-    const shmPath = `${dbPath}-shm`;
-    if (fs.existsSync(shmPath)) {
-      fs.unlinkSync(shmPath);
-    }
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "helios-audit-test-"));
+    dbPath = path.join(tmpDir, "audit.db");
+    sink = undefined;
   });
 
   afterEach(() => {
-    // Cleanup
-    try {
-      if (store) {
-        store.close();
-      }
-
-      if (fs.existsSync(dbPath)) {
-        fs.unlinkSync(dbPath);
-      }
-
-      const walPath = path.join(path.dirname(dbPath), `${path.basename(dbPath)}-wal`);
-      if (fs.existsSync(walPath)) {
-        fs.unlinkSync(walPath);
-      }
-
-      const shmPath = path.join(path.dirname(dbPath), `${path.basename(dbPath)}-shm`);
-      if (fs.existsSync(shmPath)) {
-        fs.unlinkSync(shmPath);
-      }
-
-      if (fs.existsSync(TMP_DIR)) {
-        fs.rmdirSync(TMP_DIR);
-      }
-    // eslint-disable-next-line no-unused-vars
-    } catch (_err) {
-      // Ignore cleanup errors
-    }
+    sink?.destroy();
+    store?.close();
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
   });
 
-  it("should recover all persisted events after restart", { timeout: 60000 }, async () => {
+  it("should recover all persisted events after restart", async () => {
     // NOTE: timeout increased from default to handle SQLite persistence in CI
     store = new SQLiteAuditStore(dbPath);
     const storageAdapter: AuditStorage = {
@@ -72,7 +34,7 @@ describe("Storage Chaos Tests", () => {
       },
     };
 
-    const sink = new DefaultAuditSink(storageAdapter, 1000);
+    sink = new DefaultAuditSink(storageAdapter, 1000);
 
     let writtenCount = 0;
     for (let i = 0; i < 10_000; i++) {
@@ -100,11 +62,12 @@ describe("Storage Chaos Tests", () => {
     sink.destroy();
 
     // Phase 2: Restart and verify all events are recoverable
+    store.close();
     store = new SQLiteAuditStore(dbPath);
 
     const count = store.count();
     expect(count).toBeGreaterThanOrEqual(10_000 - 1_000); // May lose some in-memory buffered events
-  });
+  }, 60_000);
 
   it("should lose zero events during normal ring buffer overflow", async () => {
     store = new SQLiteAuditStore(dbPath);
@@ -114,7 +77,7 @@ describe("Storage Chaos Tests", () => {
       },
     };
 
-    const sink = new DefaultAuditSink(storageAdapter, 100); // Small buffer to force overflow
+    sink = new DefaultAuditSink(storageAdapter, 100); // Small buffer to force overflow
 
     const eventCount = 500;
 
@@ -159,7 +122,7 @@ describe("Storage Chaos Tests", () => {
     };
 
     store = new SQLiteAuditStore(dbPath);
-    const sink = new DefaultAuditSink(failingStorage, 100);
+    sink = new DefaultAuditSink(failingStorage, 100);
 
     const event = createAuditEvent({
       eventType: AUDIT_EVENT_TYPES.POLICY_EVALUATION,
@@ -188,7 +151,7 @@ describe("Storage Chaos Tests", () => {
       },
     };
 
-    const sink = new DefaultAuditSink(storageAdapter, 1000);
+    sink = new DefaultAuditSink(storageAdapter, 1000);
 
     // Simulate concurrent writes and reads
     let writeCount = 0;
@@ -229,7 +192,7 @@ describe("Storage Chaos Tests", () => {
     expect(finalCount).toBe(1000);
   });
 
-  it("should stay within storage budget", { timeout: 60_000 }, async () => {
+  it("should stay within storage budget", async () => {
     store = new SQLiteAuditStore(dbPath);
     const storageAdapter: AuditStorage = {
       persist: events => {
@@ -237,7 +200,7 @@ describe("Storage Chaos Tests", () => {
       },
     };
 
-    const sink = new DefaultAuditSink(storageAdapter, 5000);
+    sink = new DefaultAuditSink(storageAdapter, 5000);
 
     // Simulate 30 days at 100k events/day = 3M events
     // This test writes a smaller sample to verify storage efficiency in CI
@@ -287,7 +250,7 @@ describe("Storage Chaos Tests", () => {
 
     // Projected size should be significantly under 2.5GB
     expect(projectedSize).toBeLessThan(2500 * 1024 * 1024);
-  });
+  }, 60_000);
 
   it("should document acceptable loss during hard crash", async () => {
     store = new SQLiteAuditStore(dbPath);
@@ -297,7 +260,7 @@ describe("Storage Chaos Tests", () => {
       },
     };
 
-    const sink = new DefaultAuditSink(storageAdapter, 100);
+    sink = new DefaultAuditSink(storageAdapter, 100);
 
     // Write 1000 events
     for (let i = 0; i < 1000; i++) {

@@ -52,26 +52,30 @@ export class SQLiteAuditStore {
       ON CONFLICT(id) DO NOTHING
     `);
 
-    const transaction = this.db.transaction((eventBatch: AuditEvent[]) => {
-      for (const event of eventBatch) {
-        stmt.run(
-          event.id,
-          event.eventType,
-          event.actor,
-          event.action,
-          event.target,
-          event.result,
-          event.timestamp,
-          event.workspaceId,
-          event.laneId || null,
-          event.sessionId || null,
-          event.correlationId,
-          JSON.stringify(event.metadata)
-        );
-      }
-    });
+    try {
+      const transaction = this.db.transaction((eventBatch: AuditEvent[]) => {
+        for (const event of eventBatch) {
+          stmt.run(
+            event.id,
+            event.eventType,
+            event.actor,
+            event.action,
+            event.target,
+            event.result,
+            event.timestamp,
+            event.workspaceId,
+            event.laneId || null,
+            event.sessionId || null,
+            event.correlationId,
+            JSON.stringify(event.metadata)
+          );
+        }
+      });
 
-    transaction(events);
+      transaction(events);
+    } finally {
+      stmt.finalize();
+    }
   }
 
   /**
@@ -126,9 +130,12 @@ export class SQLiteAuditStore {
     params.push(limit, offset);
 
     const stmt = this.db.prepare(query);
-    const rows = stmt.all(...params) as any[];
-
-    return rows.map(row => this.rowToEvent(row));
+    try {
+      const rows = stmt.all(...params) as any[];
+      return rows.map(row => this.rowToEvent(row));
+    } finally {
+      stmt.finalize();
+    }
   }
 
   /**
@@ -141,9 +148,12 @@ export class SQLiteAuditStore {
     const stmt = this.db.prepare(
       "SELECT * FROM audit_events WHERE correlation_id = ? ORDER BY timestamp ASC, id ASC"
     );
-    const rows = stmt.all(correlationId) as any[];
-
-    return rows.map(row => this.rowToEvent(row));
+    try {
+      const rows = stmt.all(correlationId) as any[];
+      return rows.map(row => this.rowToEvent(row));
+    } finally {
+      stmt.finalize();
+    }
   }
 
   /**
@@ -194,9 +204,12 @@ export class SQLiteAuditStore {
     }
 
     const stmt = this.db.prepare(query);
-    const result = stmt.get(...params) as any;
-
-    return result?.count || 0;
+    try {
+      const result = stmt.get(...params) as any;
+      return result?.count || 0;
+    } finally {
+      stmt.finalize();
+    }
   }
 
   /**
@@ -212,7 +225,7 @@ export class SQLiteAuditStore {
 
       const stats = fs.statSync(this.dbPath);
       return stats.size;
-    } catch {
+    } catch (err) {
       console.error("[SQLiteAuditStore] Error getting storage size:", err);
       return 0;
     }
@@ -222,7 +235,7 @@ export class SQLiteAuditStore {
    * Close the database connection.
    */
   close(): void {
-    this.db.close();
+    this.db.close(true);
   }
 
   /**
@@ -272,9 +285,15 @@ export class SQLiteAuditStore {
 
     try {
       // Check if table exists
-      const tableExists = this.db
-        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='audit_events'")
-        .get();
+      const statement = this.db.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='audit_events'"
+      );
+      let tableExists: unknown;
+      try {
+        tableExists = statement.get();
+      } finally {
+        statement.finalize();
+      }
 
       if (!tableExists) {
         // Create table
@@ -308,7 +327,7 @@ export class SQLiteAuditStore {
           CREATE INDEX idx_workspace_timestamp ON audit_events(workspace_id, timestamp);
         `);
       }
-    } catch {
+    } catch (err) {
       handleSchemaFailure(err);
     }
   }
