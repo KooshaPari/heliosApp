@@ -23,10 +23,10 @@ export class CrashLoopDetector {
     await this.loadCrashHistory();
   }
 
-  recordCrash(timestamp: number): void {
+  async recordCrash(timestamp: number): Promise<void> {
     this.crashHistory.push(timestamp);
     this.cleanOldCrashes();
-    this.persistCrashHistory();
+    await this.persistCrashHistory();
   }
 
   isLooping(): boolean {
@@ -54,21 +54,19 @@ export class CrashLoopDetector {
     }
   }
 
-  private persistCrashHistory(): void {
+  private async persistCrashHistory(): Promise<void> {
     try {
       const historyPath = path.join(this.crashDataDir, "recovery", "crash-history.json");
       const tempPath = `${historyPath}.tmp`;
 
       // Atomic write
-      fs.writeFile(tempPath, JSON.stringify(this.crashHistory), {
+      await fs.mkdir(path.dirname(historyPath), { recursive: true });
+      await fs.writeFile(tempPath, JSON.stringify(this.crashHistory), {
         encoding: "utf-8",
-      })
-        .then(() => fs.rename(tempPath, historyPath))
-        .catch(err => {
-          // Silently fail - don't let history persistence block operations
-          console.error("Failed to persist crash history:", err);
-        });
-    } catch {
+      });
+      await fs.rename(tempPath, historyPath);
+    } catch (err) {
+      // Silently fail - don't let history persistence block operations
       console.error("Failed to persist crash history:", err);
     }
   }

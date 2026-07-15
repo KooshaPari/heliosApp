@@ -91,7 +91,7 @@ describe("Chaos Tests - Crash Recovery Resilience", () => {
       const crashes = [now, now + 1000, now + 2000];
 
       for (const crashTime of crashes) {
-        detector.recordCrash(crashTime);
+        await detector.recordCrash(crashTime);
         if (detector.isLooping()) {
           await safeMode.enter();
           break;

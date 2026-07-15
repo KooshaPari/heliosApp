@@ -23,44 +23,43 @@ describe("CrashLoopDetector", () => {
     await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
   });
 
-  it("should not detect loop with fewer than threshold crashes", () => {
+  it("should not detect loop with fewer than threshold crashes", async () => {
     const now = Date.now();
-    detector.recordCrash(now);
-    detector.recordCrash(now + 1000);
+    await detector.recordCrash(now);
+    await detector.recordCrash(now + 1000);
 
     expect(detector.isLooping()).toBe(false);
   });
 
-  it("should detect loop with 3 crashes in 60s window", () => {
+  it("should detect loop with 3 crashes in 60s window", async () => {
     const now = Date.now();
-    detector.recordCrash(now);
-    detector.recordCrash(now + 1000);
-    detector.recordCrash(now + 2000);
+    await detector.recordCrash(now);
+    await detector.recordCrash(now + 1000);
+    await detector.recordCrash(now + 2000);
 
     expect(detector.isLooping()).toBe(true);
   });
 
-  it("should not detect loop with crashes outside window", () => {
+  it("should not detect loop with crashes outside window", async () => {
     const now = Date.now();
-    detector.recordCrash(now);
-    detector.recordCrash(now + 1000);
+    await detector.recordCrash(now);
+    await detector.recordCrash(now + 1000);
     vi.advanceTimersByTime(61000); // Advance past window
-    detector.recordCrash(now + 62000);
+    await detector.recordCrash(now + 62000);
 
     expect(detector.isLooping()).toBe(false);
   });
 
   it("should persist and restore crash history", async () => {
     const now = Date.now();
-    detector.recordCrash(now);
-    detector.recordCrash(now + 1000);
+    await detector.recordCrash(now);
+    await detector.recordCrash(now + 1000);
 
     // Create new detector instance and load history
-    await new Promise(resolve => setTimeout(resolve, 50));
     const detector2 = new CrashLoopDetector(tempDir, 3, 60000);
     await detector2.initialize();
 
-    detector2.recordCrash(now + 2000);
+    await detector2.recordCrash(now + 2000);
     expect(detector2.isLooping()).toBe(true);
   });
 
@@ -73,7 +72,7 @@ describe("CrashLoopDetector", () => {
     await detector2.initialize();
 
     const now = Date.now();
-    detector2.recordCrash(now);
+    await detector2.recordCrash(now);
     expect(detector2.isLooping()).toBe(false);
   });
 });
@@ -117,11 +116,11 @@ describe("SafeMode", () => {
 
   it("should publish exit event to bus", async () => {
     await safeMode.enter();
-    bus.getEvents().length = 0; // Clear events
+    const countBeforeExit = bus.getEvents().length;
     await safeMode.exit();
     const events = bus.getEvents();
-    expect(events.length).toBe(1);
-    expect(events[0].topic).toBe("recovery.safemode.exited");
+    expect(events.length).toBe(countBeforeExit + 1);
+    expect(events.at(-1)?.topic).toBe("recovery.safemode.exited");
   });
 
   it("should notify state change listeners", async () => {
