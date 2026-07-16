@@ -158,4 +158,22 @@ describe("ProtectedPathConfig audit lifecycle", () => {
     );
     expect(config.listPatterns()).toEqual(before);
   });
+
+  it("rejects a stale disable after a concurrent removal", async () => {
+    const bus = new InMemoryLocalBus();
+    const config = new ProtectedPathConfig({ bus });
+    const pattern = await config.addPattern("*.concurrent", "concurrent removal");
+    const publish = bus.publish.bind(bus);
+    bus.publish = async envelope => {
+      if (envelope.payload?.action === "disable") {
+        await config.removePattern(pattern.id);
+      }
+      await publish(envelope);
+    };
+
+    await expect(config.disablePattern(pattern.id)).rejects.toThrow(
+      "Pattern changed before disable"
+    );
+    expect(config.listPatterns()).not.toContainEqual(pattern);
+  });
 });
