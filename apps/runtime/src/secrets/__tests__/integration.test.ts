@@ -418,6 +418,18 @@ describe("Integration Tests (T015)", () => {
       expect(JSON.stringify(bus.getEvents())).not.toContain(secret);
     });
 
+    it("redacts namespaced secret assignments from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const secret = "deployment-secret-value-123456";
+
+      await detector.check(`cat .env DEPLOY_SECRET=${secret}`, {
+        correlationId: "corr-namespaced-secret",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(secret);
+    });
+
     it("redacts namespaced signing keys from direct access audit events", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });

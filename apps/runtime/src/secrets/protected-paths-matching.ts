@@ -249,7 +249,7 @@ export function redactCommandForAudit(command: string): string {
       "[REDACTED:TOKEN]"
     )
     .replace(
-      /\bsecret\s*[=:]\s*(?:"[^"]{16,}"|'[^']{16,}'|[^\s"']{16,})/gi,
+      /\b(?:[a-z][a-z0-9]*_)*secret\s*[=:]\s*(?:"[^"]{16,}"|'[^']{16,}'|[^\s"']{16,})/gi,
       "[REDACTED:SECRET]"
     )
     .replace(
