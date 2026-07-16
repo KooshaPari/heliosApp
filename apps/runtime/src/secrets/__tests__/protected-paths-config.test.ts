@@ -1,6 +1,8 @@
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { ProtectedPathConfig } from "../protected-paths-config.js";
 
 describe("ProtectedPathConfig persistence boundaries", () => {
@@ -65,12 +67,46 @@ describe("ProtectedPathConfig persistence boundaries", () => {
   it("exports through a complete JSON replacement with no temporary residue", async () => {
     const path = join(tempDir, "nested", "patterns.json");
     const config = new ProtectedPathConfig();
-    config.addPattern("*.secret", "secret files");
+    await config.addPattern("*.secret", "secret files");
 
     await config.exportPatterns(path);
 
     expect(JSON.parse(readFileSync(path, "utf8"))).toEqual(config.listPatterns());
     const entries = new Bun.Glob("patterns.json.tmp-*").scanSync({ cwd: join(tempDir, "nested") });
     expect(Array.from(entries)).toEqual([]);
+  });
+});
+
+describe("ProtectedPathConfig audit lifecycle", () => {
+  it("owns audit publication before committing a pattern change", async () => {
+    const bus = new InMemoryLocalBus();
+    let releasePublish: (() => void) | undefined;
+    bus.publish = () =>
+      new Promise<void>(resolve => {
+        releasePublish = resolve;
+      });
+    const config = new ProtectedPathConfig({ bus });
+    const before = config.listPatterns();
+
+    const operation = config.addPattern("*.pending", "pending audit");
+    const committedBeforeAudit = config.listPatterns();
+    releasePublish?.();
+
+    expect(operation).toBeInstanceOf(Promise);
+    expect(committedBeforeAudit).toEqual(before);
+    const pattern = await operation;
+    expect(config.listPatterns()).toContainEqual(pattern);
+  });
+
+  it("preserves pattern state when audit publication fails", async () => {
+    const bus = new InMemoryLocalBus();
+    bus.publish = () => Promise.reject(new Error("audit unavailable"));
+    const config = new ProtectedPathConfig({ bus });
+    const before = config.listPatterns();
+
+    await expect(config.addPattern("*.failed", "failed audit")).rejects.toThrow(
+      "audit unavailable"
+    );
+    expect(config.listPatterns()).toEqual(before);
   });
 });

@@ -9,6 +9,7 @@
  *   SC-028-005: Redaction audit trail present for every persisted artifact
  */
 
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mkdtempSync, rmSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -174,9 +175,9 @@ describe("Integration Tests (T015)", () => {
   });
 
   describe("Configurable protected paths [FR-028-008]", () => {
-    it("custom pattern addition triggers on matching commands", () => {
+    it("custom pattern addition triggers on matching commands", async () => {
       const config = new ProtectedPathConfig();
-      const pattern = config.addPattern("*.pem", "PEM certificate files");
+      const pattern = await config.addPattern("*.pem", "PEM certificate files");
       const detector = new ProtectedPathDetector({ config });
 
       const matches = detector.check("cat server.pem");
@@ -184,9 +185,9 @@ describe("Integration Tests (T015)", () => {
       expect(matches[0].patternId).toBe(pattern.id);
     });
 
-    it("disabled default pattern does not trigger", () => {
+    it("disabled default pattern does not trigger", async () => {
       const config = new ProtectedPathConfig();
-      config.disablePattern("dotenv");
+      await config.disablePattern("dotenv");
       const detector = new ProtectedPathDetector({ config });
 
       const matches = detector.check("cat .env");
@@ -196,7 +197,7 @@ describe("Integration Tests (T015)", () => {
     it("patterns persist to disk and reload", async () => {
       const configPath = join(tmpDir, "config", "protected-paths.json");
       const config = new ProtectedPathConfig({ configPath });
-      config.addPattern("*.secret", "Secret files");
+      await config.addPattern("*.secret", "Secret files");
       await config.saveToDisk();
 
       const config2 = new ProtectedPathConfig({ configPath });
@@ -206,19 +207,19 @@ describe("Integration Tests (T015)", () => {
       expect(customPattern).toBeDefined();
     });
 
-    it("rejects empty pattern", () => {
+    it("rejects empty pattern", async () => {
       const config = new ProtectedPathConfig();
-      expect(() => config.addPattern("", "empty")).toThrow();
+      await expect(config.addPattern("", "empty")).rejects.toThrow();
     });
 
-    it("rejects overly broad pattern **/*", () => {
+    it("rejects overly broad pattern **/*", async () => {
       const config = new ProtectedPathConfig();
-      expect(() => config.addPattern("**/*", "all files")).toThrow();
+      await expect(config.addPattern("**/*", "all files")).rejects.toThrow();
     });
 
-    it("rejects overly broad pattern *", () => {
+    it("rejects overly broad pattern *", async () => {
       const config = new ProtectedPathConfig();
-      expect(() => config.addPattern("*", "all")).toThrow();
+      await expect(config.addPattern("*", "all")).rejects.toThrow();
     });
   });
 

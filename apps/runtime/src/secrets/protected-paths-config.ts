@@ -67,7 +67,7 @@ export class ProtectedPathConfig {
     }
   }
 
-  addPattern(pattern: string, description: string): ProtectedPathPattern {
+  async addPattern(pattern: string, description: string): Promise<ProtectedPathPattern> {
     assertSafePattern(pattern);
     const id = `custom-${randomBytes(4).toString("hex")}`;
     const entry: ProtectedPathPattern = {
@@ -77,35 +77,44 @@ export class ProtectedPathConfig {
       enabled: true,
       isDefault: false,
     };
-    this.patterns.set(id, entry);
-    void this._emit("secrets.protected_paths.config.changed", {
+    await this._emit("secrets.protected_paths.config.changed", {
       action: "add",
       patternId: id,
       pattern,
     });
+    this.patterns.set(id, entry);
     return entry;
   }
 
-  removePattern(id: string): void {
+  async removePattern(id: string): Promise<void> {
     if (!this.patterns.has(id)) {
       throw new Error(`Pattern '${id}' not found`);
     }
+    await this._emit("secrets.protected_paths.config.changed", {
+      action: "remove",
+      patternId: id,
+    });
     this.patterns.delete(id);
-    void this._emit("secrets.protected_paths.config.changed", { action: "remove", patternId: id });
   }
 
-  disablePattern(id: string): void {
+  async disablePattern(id: string): Promise<void> {
     const p = this.patterns.get(id);
     if (!p) throw new Error(`Pattern '${id}' not found`);
+    await this._emit("secrets.protected_paths.config.changed", {
+      action: "disable",
+      patternId: id,
+    });
     p.enabled = false;
-    void this._emit("secrets.protected_paths.config.changed", { action: "disable", patternId: id });
   }
 
-  enablePattern(id: string): void {
+  async enablePattern(id: string): Promise<void> {
     const p = this.patterns.get(id);
     if (!p) throw new Error(`Pattern '${id}' not found`);
+    await this._emit("secrets.protected_paths.config.changed", {
+      action: "enable",
+      patternId: id,
+    });
     p.enabled = true;
-    void this._emit("secrets.protected_paths.config.changed", { action: "enable", patternId: id });
   }
 
   listPatterns(): ProtectedPathPattern[] {
@@ -119,13 +128,13 @@ export class ProtectedPathConfig {
       throw new Error("Invalid protected path config: expected an array");
     }
     const validated = parsed.map(parsePattern);
-    for (const pattern of validated) {
-      this.patterns.set(pattern.id, pattern);
-    }
-    void this._emit("secrets.protected_paths.config.changed", {
+    await this._emit("secrets.protected_paths.config.changed", {
       action: "import",
       count: parsed.length,
     });
+    for (const pattern of validated) {
+      this.patterns.set(pattern.id, pattern);
+    }
   }
 
   async exportPatterns(path: string): Promise<void> {
