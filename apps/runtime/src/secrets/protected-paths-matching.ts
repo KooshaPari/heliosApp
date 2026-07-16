@@ -266,7 +266,7 @@ export function redactCommandForAudit(command: string): string {
       "[REDACTED:SENSITIVE_KEY]"
     )
     .replace(
-      /\b(?:[a-z][a-z0-9]*_)*password\s*[=:]\s*(?:"[^"]{8,}"|'[^']{8,}'|[^\s"']{8,})/gi,
+      /\b(?:[a-z][a-z0-9]*_)*(?:password|passwd)\s*[=:]\s*(?:"[^"]{8,}"|'[^']{8,}'|[^\s"']{8,})/gi,
       "[REDACTED:PASSWORD]"
     )
     .replace(
