@@ -242,6 +242,18 @@ describe("Integration Tests (T015)", () => {
 
       expect(JSON.stringify(bus.getEvents())).not.toContain(secret);
     });
+
+    it("redacts private key headers from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const privateKeyHeader = "-----BEGIN RSA PRIVATE KEY-----";
+
+      await detector.check(`cat .env ${privateKeyHeader}`, {
+        correlationId: "corr-private-key",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(privateKeyHeader);
+    });
   });
 
   describe("Configurable protected paths [FR-028-008]", () => {

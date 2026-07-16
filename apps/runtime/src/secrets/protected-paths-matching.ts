@@ -248,6 +248,7 @@ export function redactCommandForAudit(command: string): string {
       /(?:postgres|postgresql|mysql|mongodb|redis):\/\/[^:\s]+:[^@\s]+@[^\s"']+/gi,
       "[REDACTED:CONNECTION_STRING]"
     )
+    .replace(/-----BEGIN (?:RSA |EC |DSA )?PRIVATE KEY-----/g, "[REDACTED:PRIVATE_KEY]")
     .replace(
       /(?:(?:api_key|apikey|API_KEY)\s*[=:]\s*["']?)([A-Za-z0-9\-_]{16,})["']?/gi,
       () => "[REDACTED:API_KEY]"
