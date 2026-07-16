@@ -294,13 +294,18 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
     validateId("name", name);
 
-    await this.delete(providerId, workspaceId, name);
+    const path = this.credentialPath(providerId, workspaceId, name);
+    if (!existsSync(path)) {
+      throw new CredentialNotFoundError(name);
+    }
+
     await this.emit("secrets.credential.revoked", {
       providerId,
       workspaceId,
       name,
       correlationId,
     });
+    await this.delete(providerId, workspaceId, name);
   }
 
   /**

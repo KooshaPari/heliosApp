@@ -147,6 +147,33 @@ describe("CredentialStore: lifecycle operations", () => {
     expect(raw).not.toContain("my-secret-data");
   });
 
+  it("preserves the credential when revoke audit publication fails", async () => {
+    await store.create("providerA", "ws1", "myKey", "original", "corr-create");
+    bus.publish = () => Promise.reject(new Error("audit unavailable"));
+
+    await expect(store.revoke("providerA", "ws1", "myKey", "corr-revoke")).rejects.toThrow(
+      "audit unavailable"
+    );
+    expect(await store.retrieve("providerA", "ws1", "myKey")).toBe("original");
+  });
+
+  it("publishes revoke audit before deleting the credential", async () => {
+    await store.create("providerA", "ws1", "myKey", "original", "corr-create");
+    let releasePublish: (() => void) | undefined;
+    bus.publish = () =>
+      new Promise<void>(resolve => {
+        releasePublish = resolve;
+      });
+
+    const operation = store.revoke("providerA", "ws1", "myKey", "corr-revoke");
+    expect(await store.retrieve("providerA", "ws1", "myKey")).toBe("original");
+    releasePublish?.();
+    await operation;
+    await expect(store.retrieve("providerA", "ws1", "myKey")).rejects.toBeInstanceOf(
+      CredentialNotFoundError
+    );
+  });
+
   it("revoke throws on non-existent credential", async () => {
     await expect(store.revoke("providerA", "ws1", "noSuchKey", "corr-001")).rejects.toBeInstanceOf(
       CredentialNotFoundError
