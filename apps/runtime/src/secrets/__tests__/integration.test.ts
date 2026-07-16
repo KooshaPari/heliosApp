@@ -204,6 +204,20 @@ describe("Integration Tests (T015)", () => {
       await expect(detector.check("cat .env")).rejects.toThrow("audit unavailable");
       expect(warnings).toEqual([]);
     });
+
+    it("redacts database credentials from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const connectionString = "postgres://alice:supersecret@db.internal/prod";
+
+      await detector.check(`cat .env ${connectionString}`, {
+        correlationId: "corr-database-secret",
+      });
+
+      const events = JSON.stringify(bus.getEvents());
+      expect(events).not.toContain(connectionString);
+      expect(events).not.toContain("supersecret");
+    });
   });
 
   describe("Configurable protected paths [FR-028-008]", () => {
