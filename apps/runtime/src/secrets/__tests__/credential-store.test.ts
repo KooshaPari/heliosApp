@@ -158,6 +158,21 @@ describe("CredentialStore: store and retrieve", () => {
     await expect(store.store("providerA", ".", "key", "val")).rejects.toThrow("path segment");
   });
 
+  it("rejects platform-aliased and control-character path segments", async () => {
+    for (const providerId of [
+      "provider.",
+      "provider ",
+      "CON",
+      "lpt1",
+      "provider:name",
+      "provider\nname",
+    ]) {
+      await expect(store.store(providerId, "ws1", "key", "val")).rejects.toThrow(
+        "unsafe path segment"
+      );
+    }
+  });
+
   it("rejects non-string identifiers without coercion", async () => {
     await expect(store.store(null as unknown as string, "ws1", "key", "val")).rejects.toThrow(
       "must be a string"

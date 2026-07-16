@@ -55,6 +55,15 @@ export class CredentialNotFoundError extends Error {
 // ---------------------------------------------------------------------------
 
 const FORBIDDEN_PATTERNS = ["..", "/", "\\", "\0"];
+const WINDOWS_DEVICE_NAME = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\..*)?$/i;
+const UNSAFE_PATH_CHARACTERS = /[<>:"|?*]/;
+
+function containsControlCharacter(value: string): boolean {
+  return [...value].some(character => {
+    const codePoint = character.codePointAt(0);
+    return codePoint !== undefined && (codePoint <= 0x1f || codePoint === 0x7f);
+  });
+}
 
 function validateId(label: string, value: unknown): asserts value is string {
   if (typeof value !== "string") {
@@ -62,6 +71,14 @@ function validateId(label: string, value: unknown): asserts value is string {
   }
   if (value === ".") {
     throw new Error(`Invalid ${label}: must not be a collapsed path segment`);
+  }
+  if (
+    /[. ]$/.test(value) ||
+    WINDOWS_DEVICE_NAME.test(value) ||
+    UNSAFE_PATH_CHARACTERS.test(value) ||
+    containsControlCharacter(value)
+  ) {
+    throw new Error(`Invalid ${label}: contains an unsafe path segment`);
   }
   for (const pat of FORBIDDEN_PATTERNS) {
     if (value.includes(pat)) {
