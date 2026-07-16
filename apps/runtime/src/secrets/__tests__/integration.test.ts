@@ -321,6 +321,18 @@ describe("Integration Tests (T015)", () => {
 
       expect(JSON.stringify(bus.getEvents())).not.toContain(token);
     });
+
+    it("redacts generic secret assignments from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const secret = "service-secret-value-123456";
+
+      await detector.check(`cat .env secret=${secret}`, {
+        correlationId: "corr-secret-assignment",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(secret);
+    });
   });
 
   describe("Configurable protected paths [FR-028-008]", () => {

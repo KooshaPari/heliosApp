@@ -249,6 +249,10 @@ export function redactCommandForAudit(command: string): string {
       "[REDACTED:TOKEN]"
     )
     .replace(
+      /\bsecret\s*[=:]\s*(?:"[^"]{16,}"|'[^']{16,}'|[^\s"']{16,})/gi,
+      "[REDACTED:SECRET]"
+    )
+    .replace(
       /(?:postgres|postgresql|mysql|mongodb|redis):\/\/[^:\s]+:[^@\s]+@[^\s"']+/gi,
       "[REDACTED:CONNECTION_STRING]"
     )
