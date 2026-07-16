@@ -234,6 +234,21 @@ describe("Integration Tests (T015)", () => {
       expect(events).not.toContain(password);
     });
 
+    it("redacts Redis TLS credentials from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const password = "redis-password-value-123456";
+      const connectionString = `rediss://cache:${password}@redis.internal/0`;
+
+      await detector.check(`cat .env ${connectionString}`, {
+        correlationId: "corr-rediss-secret",
+      });
+
+      const events = JSON.stringify(bus.getEvents());
+      expect(events).not.toContain(connectionString);
+      expect(events).not.toContain(password);
+    });
+
     it("redacts fine-grained GitHub tokens from direct access audit events", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });
