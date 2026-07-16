@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import {
   chmodSync,
   existsSync,
@@ -10,10 +11,9 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join, resolve, sep } from "node:path";
-import { randomBytes } from "node:crypto";
-import { EncryptionService } from "./encryption.js";
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
+import { EncryptionService } from "./encryption.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -109,10 +109,14 @@ export class CredentialStore {
     const finalPath = this.credentialPath(providerId, workspaceId, name);
     const tmpPath = `${finalPath}.tmp.${randomBytes(4).toString("hex")}`;
 
-    writeFileSync(tmpPath, data, { encoding: "utf8", mode: 0o600 });
-    renameSync(tmpPath, finalPath);
-    // Ensure permissions even after rename (some platforms reset on rename)
-    chmodSync(finalPath, 0o600);
+    try {
+      writeFileSync(tmpPath, data, { encoding: "utf8", mode: 0o600 });
+      renameSync(tmpPath, finalPath);
+      // Ensure permissions even after rename (some platforms reset on rename)
+      chmodSync(finalPath, 0o600);
+    } finally {
+      rmSync(tmpPath, { force: true });
+    }
   }
 
   /**

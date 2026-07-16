@@ -1,12 +1,19 @@
-import { mkdtempSync, rmSync, existsSync, statSync, readFileSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { randomBytes } from "node:crypto";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { CredentialNotFoundError, CredentialStore } from "../credential-store.js";
 import { EncryptionService } from "../encryption.js";
-import {
-  CredentialStore,
-  CredentialNotFoundError,
-} from "../credential-store.js";
 
 function makeStore(dataDir: string): CredentialStore {
   const fixedKey = randomBytes(32);
@@ -72,6 +79,35 @@ describe("CredentialStore: store and retrieve", () => {
   it("throws CredentialNotFoundError on missing retrieve", async () => {
     await expect(store.retrieve("providerA", "ws1", "missing")).rejects.toBeInstanceOf(
       CredentialNotFoundError
+    );
+  });
+
+  it("rejects malformed persisted encrypted payloads without coercion", async () => {
+    const credentialDir = join(tmpDir, "secrets", "providerA", "ws1");
+    const filePath = join(credentialDir, "malformed.enc");
+    mkdirSync(credentialDir, { recursive: true });
+
+    for (const payload of [
+      null,
+      [],
+      { ciphertext: "00", iv: 12, authTag: "00".repeat(16), version: 1 },
+      { ciphertext: "not-hex", iv: "00".repeat(12), authTag: "00".repeat(16), version: 1 },
+    ]) {
+      writeFileSync(filePath, JSON.stringify(payload));
+      await expect(store.retrieve("providerA", "ws1", "malformed")).rejects.toThrow(
+        "Invalid encrypted payload"
+      );
+    }
+  });
+
+  it("removes temporary ciphertext when atomic replacement fails", async () => {
+    const credentialDir = join(tmpDir, "secrets", "providerA", "ws1");
+    mkdirSync(join(credentialDir, "blocked.enc"), { recursive: true });
+
+    await expect(store.store("providerA", "ws1", "blocked", "secret")).rejects.toThrow();
+
+    expect(readdirSync(credentialDir).filter(name => name.startsWith("blocked.enc.tmp."))).toEqual(
+      []
     );
   });
 

@@ -41,6 +41,28 @@ function parseMasterKeyHex(value: string, source: string): Buffer {
   return validateMasterKey(Buffer.from(value, "hex"), source);
 }
 
+function validateEncryptedPayload(value: unknown): EncryptedPayload {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new Error("Invalid encrypted payload: expected an object");
+  }
+
+  const payload = value as Record<string, unknown>;
+  if (
+    typeof payload.version !== "number" ||
+    !Number.isInteger(payload.version) ||
+    typeof payload.ciphertext !== "string" ||
+    !/^(?:[0-9a-fA-F]{2})*$/.test(payload.ciphertext) ||
+    typeof payload.iv !== "string" ||
+    !/^[0-9a-fA-F]{24}$/.test(payload.iv) ||
+    typeof payload.authTag !== "string" ||
+    !/^[0-9a-fA-F]{32}$/.test(payload.authTag)
+  ) {
+    throw new Error("Invalid encrypted payload: fields do not match the persisted schema");
+  }
+
+  return payload as unknown as EncryptedPayload;
+}
+
 export class EncryptionService {
   private masterKeyCache: Buffer | null = null;
   private keyPath: string;
@@ -80,16 +102,17 @@ export class EncryptionService {
    * Decrypts an EncryptedPayload. Throws if authentication fails.
    */
   async decrypt(payload: EncryptedPayload, providerSalt?: string): Promise<string> {
-    if (payload.version !== KEY_VERSION) {
-      throw new Error(`Unsupported key version: ${payload.version}`);
+    const validatedPayload = validateEncryptedPayload(payload);
+    if (validatedPayload.version !== KEY_VERSION) {
+      throw new Error(`Unsupported key version: ${validatedPayload.version}`);
     }
 
     const masterKey = await this.getMasterKey();
     const encKey = this.deriveKey(masterKey, providerSalt ?? "default");
 
-    const iv = Buffer.from(payload.iv, "hex");
-    const ciphertext = Buffer.from(payload.ciphertext, "hex");
-    const authTag = Buffer.from(payload.authTag, "hex");
+    const iv = Buffer.from(validatedPayload.iv, "hex");
+    const ciphertext = Buffer.from(validatedPayload.ciphertext, "hex");
+    const authTag = Buffer.from(validatedPayload.authTag, "hex");
 
     const decipher = createDecipheriv(ALGORITHM, encKey, iv);
     decipher.setAuthTag(authTag);
