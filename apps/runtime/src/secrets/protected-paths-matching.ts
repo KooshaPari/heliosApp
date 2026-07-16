@@ -235,6 +235,10 @@ function looksLikeFilePath(tok: string): boolean {
 export function redactCommandForAudit(command: string): string {
   return command
     .replace(/(?:AKIA[0-9A-Z]{16})/g, "[REDACTED:AWS_ACCESS_KEY]")
+    .replace(
+      /(?:aws_secret(?:_access_key)?)\s*[=:]\s*["']?[A-Za-z0-9+/]{40}["']?/gi,
+      "[REDACTED:AWS_SECRET_KEY]"
+    )
     .replace(/(?:AIza[0-9A-Za-z\-_]{35})/g, "[REDACTED:GCP_API_KEY]")
     .replace(/(?:sk-[A-Za-z0-9]{48,})/g, "[REDACTED:OPENAI_KEY]")
     .replace(/(?:gh[ps]_[A-Za-z0-9_]{36,})/g, "[REDACTED:GITHUB_TOKEN]")

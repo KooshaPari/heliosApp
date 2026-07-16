@@ -230,6 +230,18 @@ describe("Integration Tests (T015)", () => {
 
       expect(JSON.stringify(bus.getEvents())).not.toContain(token);
     });
+
+    it("redacts AWS secret keys from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const secret = "a".repeat(40);
+
+      await detector.check(`cat .env aws_secret_access_key=${secret}`, {
+        correlationId: "corr-aws-secret",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(secret);
+    });
   });
 
   describe("Configurable protected paths [FR-028-008]", () => {
