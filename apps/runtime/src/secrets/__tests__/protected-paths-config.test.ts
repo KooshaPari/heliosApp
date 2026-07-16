@@ -124,6 +124,40 @@ describe("ProtectedPathConfig persistence boundaries", () => {
     const entries = new Bun.Glob("patterns.json.tmp-*").scanSync({ cwd: join(tempDir, "nested") });
     expect(Array.from(entries)).toEqual([]);
   });
+
+  it("does not overwrite a concurrently imported pattern during add audit", async () => {
+    const path = join(tempDir, "concurrent-pattern.json");
+    const bus = new InMemoryLocalBus();
+    const config = new ProtectedPathConfig({ bus });
+    const publish = bus.publish.bind(bus);
+    let patternId: string | undefined;
+    bus.publish = async envelope => {
+      if (envelope.payload?.action === "add") {
+        patternId = envelope.payload.patternId as string;
+        writeFileSync(
+          path,
+          JSON.stringify([
+            {
+              id: patternId,
+              pattern: "*.imported",
+              description: "concurrent import",
+              enabled: true,
+              isDefault: false,
+            },
+          ])
+        );
+        await config.importPatterns(path);
+      }
+      await publish(envelope);
+    };
+
+    await expect(config.addPattern("*.added", "stale add")).rejects.toThrow(
+      "Pattern changed before add"
+    );
+    expect(config.listPatterns().find(pattern => pattern.id === patternId)?.pattern).toBe(
+      "*.imported"
+    );
+  });
 });
 
 describe("ProtectedPathConfig audit lifecycle", () => {

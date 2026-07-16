@@ -100,6 +100,9 @@ export class ProtectedPathConfig {
       patternId: id,
       pattern,
     });
+    if (this.patterns.has(id)) {
+      throw new Error("Pattern changed before add");
+    }
     this.patterns.set(id, entry);
     return entry;
   }
