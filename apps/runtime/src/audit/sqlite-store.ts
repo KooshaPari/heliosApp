@@ -1,8 +1,7 @@
 import { Database } from "bun:sqlite";
+import fs from "fs";
 import type { AuditEvent } from "./event";
 import type { AuditFilter } from "./ring-buffer";
-import fs from "fs";
-
 
 /**
  * SQLite-backed persistent storage for audit events.
@@ -53,8 +52,9 @@ export class SQLiteAuditStore {
     `);
 
     try {
-      const transaction = this.db.transaction((eventBatch: AuditEvent[]) => {
-        for (const event of eventBatch) {
+      this.db.exec("BEGIN TRANSACTION");
+      try {
+        for (const event of events) {
           stmt.run(
             event.id,
             event.eventType,
@@ -70,9 +70,18 @@ export class SQLiteAuditStore {
             JSON.stringify(event.metadata)
           );
         }
-      });
-
-      transaction(events);
+        this.db.exec("COMMIT");
+      } catch (error) {
+        try {
+          this.db.exec("ROLLBACK");
+        } catch (rollbackError) {
+          throw new AggregateError(
+            [error, rollbackError],
+            "Audit event transaction rollback failed"
+          );
+        }
+        throw error;
+      }
     } finally {
       stmt.finalize();
     }
