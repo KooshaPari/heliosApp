@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node
 import { dirname } from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
-import type { RedactionRule } from "./redaction-engine.js";
+import { assertRedactionPatternConsumesInput, type RedactionRule } from "./redaction-engine.js";
 
 export type { RedactionRule };
 
@@ -19,9 +19,10 @@ function validateRule(rule: unknown): RedactionRule {
   if (typeof candidate.category !== "string" || candidate.category.trim() === "") {
     throw new Error(`Invalid redaction rule '${candidate.id}': category must be non-empty`);
   }
-  if (!(candidate.pattern instanceof RegExp) || candidate.pattern.source === "(?:)") {
+  if (!(candidate.pattern instanceof RegExp)) {
     throw new Error(`Invalid redaction rule '${candidate.id}': pattern must be non-empty`);
   }
+  assertRedactionPatternConsumesInput(candidate.pattern);
   if (typeof candidate.description !== "string") {
     throw new Error(`Invalid redaction rule '${candidate.id}': description must be a string`);
   }

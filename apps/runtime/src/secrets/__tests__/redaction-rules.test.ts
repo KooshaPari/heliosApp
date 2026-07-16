@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -128,6 +129,20 @@ describe("RedactionRuleManager: custom rules", () => {
         enabled: true,
       })
     ).toThrow();
+  });
+
+  it("rejects rules that can match empty input", () => {
+    const manager = new RedactionRuleManager({ initialRules: [] });
+
+    expect(() =>
+      manager.addRule({
+        id: "zero-width",
+        category: "BAD",
+        pattern: /a*/,
+        description: "would not advance the scanner",
+        enabled: true,
+      })
+    ).toThrow("must consume input");
   });
 });
 

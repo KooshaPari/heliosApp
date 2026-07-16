@@ -126,6 +126,26 @@ describe("RedactionEngine: multiple secrets", () => {
   });
 });
 
+describe("RedactionEngine: scanner progress", () => {
+  it("ignores contextual zero-width matches without stalling", () => {
+    const engine = new RedactionEngine();
+    engine.loadRules([
+      {
+        id: "lookahead",
+        category: "ZERO_WIDTH",
+        pattern: /(?=secret)/,
+        description: "zero-width only when context is present",
+        enabled: true,
+      },
+    ]);
+
+    const result = engine.redact("secret secret", ctx);
+
+    expect(result.redacted).toBe("secret secret");
+    expect(result.matches).toEqual([]);
+  });
+});
+
 describe("RedactionEngine: no false positives on normal text", () => {
   let engine: RedactionEngine;
   beforeEach(() => {
