@@ -9,9 +9,9 @@ reachable and attributable in HeliosLab.
 - [x] Merge the complete heliosApp Git history into the HeliosLab consolidation branch.
 - [x] Preserve heliosApp application, package, test, specification, and documentation paths.
 - [x] Replace placeholder quality checks with blocking TypeScript, Rust, security, coverage,
-  and requirement-traceability gates in HeliosLab.
+      and requirement-traceability gates in HeliosLab.
 - [ ] Merge the HeliosLab consolidation PR after its recorded gates are green or explicitly
-  documented as blocking proper reds.
+      documented as blocking proper reds.
 - [ ] Publish a final heliosApp migration release pointing to HeliosLab.
 - [ ] Transfer open actionable issues or close them with a HeliosLab replacement link.
 - [ ] Archive heliosApp only after the migration release and issue transfer are complete.
