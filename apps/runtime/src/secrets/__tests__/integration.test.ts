@@ -663,6 +663,29 @@ describe("Integration Tests (T015)", () => {
   // -------------------------------------------------------------------------
 
   describe("Audit completeness [SC-028-005]", () => {
+    it("does not expose mutable references to persisted audit records", async () => {
+      const sink = new AuditSink();
+      const ingested = await sink.ingest({
+        id: "credential-created",
+        type: "event",
+        ts: new Date().toISOString(),
+        topic: "secrets.credential.created",
+        payload: {
+          correlationId: "corr-audit-ownership",
+          name: "original",
+        },
+      });
+      if (!ingested) throw new Error("Expected an audit record");
+
+      ingested.payload.name = "mutated-ingest-result";
+      const queried = sink.query({ topic: "secrets.credential.created" });
+      expect(queried[0]?.payload.name).toBe("original");
+
+      if (!queried[0]) throw new Error("Expected a queried audit record");
+      queried[0].payload.name = "mutated-query-result";
+      expect(sink.query({ topic: "secrets.credential.created" })[0]?.payload.name).toBe("original");
+    });
+
     it("full lifecycle: create/access/rotate/revoke all have audit records", async () => {
       const bus = new InMemoryLocalBus();
       const engine = makeEngine();

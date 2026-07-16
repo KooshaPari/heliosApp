@@ -22,6 +22,13 @@ export interface AuditExportBundle {
 
 export type RedactFn = (content: string) => string;
 
+function cloneAuditRecord(record: AuditRecord): AuditRecord {
+  return {
+    ...record,
+    payload: structuredClone(record.payload),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // AuditSink - lightweight spec 024 integration point
 // ---------------------------------------------------------------------------
@@ -103,7 +110,7 @@ export class AuditSink {
     };
 
     await this._persistRecord(record);
-    return record;
+    return cloneAuditRecord(record);
   }
 
   /**
@@ -161,7 +168,7 @@ export class AuditSink {
       results = results.filter(r => new Date(r.timestamp) >= since);
     }
 
-    return results;
+    return results.map(cloneAuditRecord);
   }
 
   /**
