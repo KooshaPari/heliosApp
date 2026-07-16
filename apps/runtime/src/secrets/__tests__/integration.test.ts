@@ -218,6 +218,18 @@ describe("Integration Tests (T015)", () => {
       expect(events).not.toContain(connectionString);
       expect(events).not.toContain("supersecret");
     });
+
+    it("redacts fine-grained GitHub tokens from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const token = `github_pat_${"A".repeat(82)}`;
+
+      await detector.check(`cat .env ${token}`, {
+        correlationId: "corr-github-token",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(token);
+    });
   });
 
   describe("Configurable protected paths [FR-028-008]", () => {
