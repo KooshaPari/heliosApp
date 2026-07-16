@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import {
   chmodSync,
   existsSync,
+  linkSync,
   mkdirSync,
   readdirSync,
   readFileSync,
@@ -106,6 +107,16 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
     validateId("name", name);
 
+    await this.persistCredential(providerId, workspaceId, name, value, false);
+  }
+
+  private async persistCredential(
+    providerId: string,
+    workspaceId: string,
+    name: string,
+    value: string,
+    createOnly: boolean
+  ): Promise<void> {
     const dir = this.credentialDir(providerId, workspaceId);
     mkdirSync(dir, { recursive: true });
 
@@ -115,11 +126,23 @@ export class CredentialStore {
     const finalPath = this.credentialPath(providerId, workspaceId, name);
     const tmpPath = `${finalPath}.tmp.${randomBytes(4).toString("hex")}`;
 
+    let created = false;
     try {
       writeFileSync(tmpPath, data, { encoding: "utf8", mode: 0o600 });
-      renameSync(tmpPath, finalPath);
-      // Ensure permissions even after rename (some platforms reset on rename)
+      if (createOnly) {
+        linkSync(tmpPath, finalPath);
+        created = true;
+      } else {
+        renameSync(tmpPath, finalPath);
+      }
+      // Ensure the published file retains the restrictive temporary-file mode.
       chmodSync(finalPath, 0o600);
+    } catch (error) {
+      if (created) rmSync(finalPath, { force: true });
+      if (createOnly && (error as NodeJS.ErrnoException).code === "EEXIST") {
+        throw new CredentialAlreadyExistsError(name);
+      }
+      throw error;
     } finally {
       rmSync(tmpPath, { force: true });
     }
@@ -204,12 +227,7 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
     validateId("name", name);
 
-    const path = this.credentialPath(providerId, workspaceId, name);
-    if (existsSync(path)) {
-      throw new CredentialAlreadyExistsError(name);
-    }
-
-    await this.store(providerId, workspaceId, name, value);
+    await this.persistCredential(providerId, workspaceId, name, value, true);
     await this.emit("secrets.credential.created", {
       providerId,
       workspaceId,

@@ -1,14 +1,15 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { randomBytes } from "node:crypto";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { EncryptionService } from "../encryption.js";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 import {
-  CredentialStore,
   CredentialAlreadyExistsError,
   CredentialNotFoundError,
+  CredentialStore,
 } from "../credential-store.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { EncryptionService } from "../encryption.js";
 
 function makeStore(dataDir: string, bus: InMemoryLocalBus): CredentialStore {
   const fixedKey = randomBytes(32);
@@ -57,6 +58,21 @@ describe("CredentialStore: lifecycle operations", () => {
     await expect(
       store.create("providerA", "ws1", "myKey", "v2", "corr-002")
     ).rejects.toBeInstanceOf(CredentialAlreadyExistsError);
+  });
+
+  it("allows exactly one winner for concurrent creates", async () => {
+    const attempts = await Promise.allSettled([
+      store.create("providerA", "ws1", "racedKey", "first", "corr-001"),
+      store.create("providerA", "ws1", "racedKey", "second", "corr-002"),
+    ]);
+
+    expect(attempts.filter(result => result.status === "fulfilled")).toHaveLength(1);
+    const rejected = attempts.filter(result => result.status === "rejected");
+    expect(rejected).toHaveLength(1);
+    expect((rejected[0] as PromiseRejectedResult).reason).toBeInstanceOf(
+      CredentialAlreadyExistsError
+    );
+    expect(["first", "second"]).toContain(await store.retrieve("providerA", "ws1", "racedKey"));
   });
 
   it("create allows same name in different provider", async () => {
