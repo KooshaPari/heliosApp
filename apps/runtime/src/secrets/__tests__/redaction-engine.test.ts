@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules } from "../redaction-rules.js";
 
@@ -99,10 +99,15 @@ describe("RedactionEngine: latency under 5ms", () => {
     expect(result.latencyMs).toBeLessThan(5);
   });
 
-  it("redacts a longer string in under 5ms", () => {
+  it("keeps p95 latency for a longer string under 5ms", () => {
     const longText = "normal text ".repeat(500);
-    const result = engine.redact(longText, ctx);
-    expect(result.latencyMs).toBeLessThan(5);
+    const latencies = Array.from(
+      { length: 100 },
+      () => engine.redact(longText, ctx).latencyMs
+    ).sort((left, right) => left - right);
+    const p95 = latencies[Math.ceil(latencies.length * 0.95) - 1] ?? Number.POSITIVE_INFINITY;
+
+    expect(p95).toBeLessThan(5);
   });
 });
 
