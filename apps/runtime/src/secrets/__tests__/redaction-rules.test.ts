@@ -104,9 +104,9 @@ describe("Default rules: negative examples", () => {
 });
 
 describe("RedactionRuleManager: custom rules", () => {
-  it("adds a custom rule and it takes effect", () => {
+  it("adds a custom rule and it takes effect", async () => {
     const manager = new RedactionRuleManager({ initialRules: [] });
-    manager.addRule({
+    await manager.addRule({
       id: "custom-secret",
       category: "CUSTOM",
       pattern: /MYSECRET[A-Z]{4}/,
@@ -118,9 +118,9 @@ describe("RedactionRuleManager: custom rules", () => {
     expect(r.matches.some(m => m.category === "CUSTOM")).toBe(true);
   });
 
-  it("rejects empty rule id", () => {
+  it("rejects empty rule id", async () => {
     const manager = new RedactionRuleManager({ initialRules: [] });
-    expect(() =>
+    await expect(
       manager.addRule({
         id: "",
         category: "BAD",
@@ -128,13 +128,13 @@ describe("RedactionRuleManager: custom rules", () => {
         description: "bad",
         enabled: true,
       })
-    ).toThrow();
+    ).rejects.toThrow();
   });
 
-  it("rejects rules that can match empty input", () => {
+  it("rejects rules that can match empty input", async () => {
     const manager = new RedactionRuleManager({ initialRules: [] });
 
-    expect(() =>
+    await expect(
       manager.addRule({
         id: "zero-width",
         category: "BAD",
@@ -142,37 +142,37 @@ describe("RedactionRuleManager: custom rules", () => {
         description: "would not advance the scanner",
         enabled: true,
       })
-    ).toThrow("must consume input");
+    ).rejects.toThrow("must consume input");
   });
 });
 
 describe("RedactionRuleManager: enable/disable", () => {
-  it("disabled rule does not match", () => {
+  it("disabled rule does not match", async () => {
     const manager = new RedactionRuleManager({
       initialRules: getDefaultRules(),
     });
-    manager.disableRule("aws-access-key");
+    await manager.disableRule("aws-access-key");
     const engine = makeEngine(manager);
     const r = engine.redact("AKIAIOSFODNN7EXAMPLE", ctx);
     expect(r.matches.filter(m => m.category === "AWS_ACCESS_KEY").length).toBe(0);
   });
 
-  it("re-enabled rule matches again", () => {
+  it("re-enabled rule matches again", async () => {
     const manager = new RedactionRuleManager({
       initialRules: getDefaultRules(),
     });
-    manager.disableRule("aws-access-key");
-    manager.enableRule("aws-access-key");
+    await manager.disableRule("aws-access-key");
+    await manager.enableRule("aws-access-key");
     const engine = makeEngine(manager);
     const r = engine.redact("AKIAIOSFODNN7EXAMPLE", ctx);
     expect(r.matches.filter(m => m.category === "AWS_ACCESS_KEY").length).toBeGreaterThan(0);
   });
 
-  it("removeRule removes the rule", () => {
+  it("removeRule removes the rule", async () => {
     const manager = new RedactionRuleManager({
       initialRules: getDefaultRules(),
     });
-    manager.removeRule("aws-access-key");
+    await manager.removeRule("aws-access-key");
     expect(manager.listRules().some(r => r.id === "aws-access-key")).toBe(false);
   });
 });
@@ -186,7 +186,7 @@ describe("RedactionRuleManager: persistence", () => {
     rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it("exports and imports rules", () => {
+  it("exports and imports rules", async () => {
     const manager = new RedactionRuleManager({
       initialRules: getDefaultRules(),
     });
@@ -194,11 +194,11 @@ describe("RedactionRuleManager: persistence", () => {
     manager.exportRules(path);
 
     const manager2 = new RedactionRuleManager({ initialRules: [] });
-    manager2.importRules(path);
+    await manager2.importRules(path);
     expect(manager2.listRules().length).toBe(manager.listRules().length);
   });
 
-  it("rejects coerced persisted values", () => {
+  it("rejects coerced persisted values", async () => {
     const path = join(tmpDir, "rules.json");
     writeFileSync(
       path,
@@ -214,11 +214,11 @@ describe("RedactionRuleManager: persistence", () => {
     );
 
     const manager = new RedactionRuleManager({ initialRules: [] });
-    expect(() => manager.importRules(path)).toThrow("enabled");
+    await expect(manager.importRules(path)).rejects.toThrow("enabled");
     expect(manager.listRules()).toEqual([]);
   });
 
-  it("does not partially install rules when a later entry is malformed", () => {
+  it("does not partially install rules when a later entry is malformed", async () => {
     const path = join(tmpDir, "rules.json");
     writeFileSync(
       path,
@@ -242,7 +242,7 @@ describe("RedactionRuleManager: persistence", () => {
     );
 
     const manager = new RedactionRuleManager({ initialRules: [] });
-    expect(() => manager.importRules(path)).toThrow();
+    await expect(manager.importRules(path)).rejects.toThrow();
     expect(manager.listRules()).toEqual([]);
   });
 
@@ -259,19 +259,59 @@ describe("RedactionRuleManager: persistence", () => {
 });
 
 describe("RedactionRuleManager: bus events", () => {
+  it("owns audit publication before committing a rule change", async () => {
+    const bus = new InMemoryLocalBus();
+    let releasePublish: (() => void) | undefined;
+    bus.publish = () =>
+      new Promise<void>(resolve => {
+        releasePublish = resolve;
+      });
+    const manager = new RedactionRuleManager({ bus, initialRules: [] });
+
+    const operation = manager.addRule({
+      id: "pending-audit",
+      category: "TEST",
+      pattern: /PENDING_SECRET/,
+      description: "test",
+      enabled: true,
+    });
+    const committedBeforeAudit = manager.listRules().length;
+    releasePublish?.();
+
+    expect(operation).toBeInstanceOf(Promise);
+    expect(committedBeforeAudit).toBe(0);
+    await operation;
+    expect(manager.listRules()).toHaveLength(1);
+  });
+
   it("emits event on rule change", async () => {
     const bus = new InMemoryLocalBus();
     const manager = new RedactionRuleManager({ bus, initialRules: [] });
-    manager.addRule({
+    await manager.addRule({
       id: "test-rule",
       category: "TEST",
       pattern: /TEST_SECRET/,
       description: "test",
       enabled: true,
     });
-    // give async emit a tick
-    await new Promise(r => setTimeout(r, 10));
     const events = bus.getEvents();
     expect(events.some(e => e.topic === "secrets.redaction.rules.changed")).toBe(true);
+  });
+
+  it("preserves rule state when audit publication fails", async () => {
+    const bus = new InMemoryLocalBus();
+    bus.publish = () => Promise.reject(new Error("audit unavailable"));
+    const manager = new RedactionRuleManager({ bus, initialRules: [] });
+
+    await expect(
+      manager.addRule({
+        id: "failed-audit",
+        category: "TEST",
+        pattern: /FAILED_SECRET/,
+        description: "test",
+        enabled: true,
+      })
+    ).rejects.toThrow("audit unavailable");
+    expect(manager.listRules()).toEqual([]);
   });
 });

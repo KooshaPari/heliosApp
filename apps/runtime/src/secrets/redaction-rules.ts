@@ -179,42 +179,42 @@ export class RedactionRuleManager {
     }
   }
 
-  addRule(rule: RedactionRule): void {
+  async addRule(rule: RedactionRule): Promise<void> {
     const validated = validateRule(rule);
-    this.rules.set(validated.id, { ...validated, matchCount: 0 });
-    void this._emit("secrets.redaction.rules.changed", {
+    await this._emit("secrets.redaction.rules.changed", {
       action: "add",
       ruleId: rule.id,
     });
+    this.rules.set(validated.id, { ...validated, matchCount: 0 });
   }
 
-  removeRule(id: string): void {
+  async removeRule(id: string): Promise<void> {
     if (!this.rules.has(id)) {
       throw new Error(`Rule '${id}' not found`);
     }
-    this.rules.delete(id);
-    void this._emit("secrets.redaction.rules.changed", {
+    await this._emit("secrets.redaction.rules.changed", {
       action: "remove",
       ruleId: id,
     });
+    this.rules.delete(id);
   }
 
-  enableRule(id: string): void {
+  async enableRule(id: string): Promise<void> {
     const rule = this._getRule(id);
-    rule.enabled = true;
-    void this._emit("secrets.redaction.rules.changed", {
+    await this._emit("secrets.redaction.rules.changed", {
       action: "enable",
       ruleId: id,
     });
+    rule.enabled = true;
   }
 
-  disableRule(id: string): void {
+  async disableRule(id: string): Promise<void> {
     const rule = this._getRule(id);
-    rule.enabled = false;
-    void this._emit("secrets.redaction.rules.changed", {
+    await this._emit("secrets.redaction.rules.changed", {
       action: "disable",
       ruleId: id,
     });
+    rule.enabled = false;
   }
 
   listRules(): RedactionRule[] {
@@ -230,7 +230,7 @@ export class RedactionRuleManager {
     return this.rules.get(id)?.matchCount ?? 0;
   }
 
-  importRules(filePath: string): void {
+  async importRules(filePath: string): Promise<void> {
     const raw = readFileSync(filePath, "utf8");
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) {
@@ -244,13 +244,13 @@ export class RedactionRuleManager {
       }
       ids.add(rule.id);
     }
-    for (const rule of validated) {
-      this.rules.set(rule.id, { ...rule, matchCount: 0 });
-    }
-    void this._emit("secrets.redaction.rules.changed", {
+    await this._emit("secrets.redaction.rules.changed", {
       action: "import",
       count: parsed.length,
     });
+    for (const rule of validated) {
+      this.rules.set(rule.id, { ...rule, matchCount: 0 });
+    }
   }
 
   exportRules(filePath: string): void {
