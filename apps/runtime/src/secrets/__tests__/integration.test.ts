@@ -310,6 +310,18 @@ describe("Integration Tests (T015)", () => {
       expect(JSON.stringify(bus.getEvents())).not.toContain(password);
     });
 
+    it("redacts namespaced password assignments from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const password = "namespaced-password-value-123456";
+
+      await detector.check(`cat .env DATABASE_PASSWORD=${password}`, {
+        correlationId: "corr-namespaced-password",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(password);
+    });
+
     it("redacts generic token assignments from direct access audit events", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });
