@@ -153,6 +153,17 @@ describe("CredentialStore: store and retrieve", () => {
     await expect(store.store("providerA", "../../etc", "key", "val")).rejects.toThrow();
   });
 
+  it("rejects path segments that collapse credential scopes", async () => {
+    await expect(store.store(".", "providerA", "key", "val")).rejects.toThrow("path segment");
+    await expect(store.store("providerA", ".", "key", "val")).rejects.toThrow("path segment");
+  });
+
+  it("rejects non-string identifiers without coercion", async () => {
+    await expect(store.store(null as unknown as string, "ws1", "key", "val")).rejects.toThrow(
+      "must be a string"
+    );
+  });
+
   it("rejects null bytes in name", async () => {
     await expect(store.store("providerA", "ws1", "key\0evil", "val")).rejects.toThrow();
   });
@@ -187,5 +198,28 @@ describe("CredentialStore: rotate preserves file permissions", () => {
     expect(existsSync(filePath)).toBe(true);
     const mode = statSync(filePath).mode & 0o777;
     expect(mode).toBe(0o600);
+  });
+
+  it("preserves the previous credential when replacement encryption fails", async () => {
+    const masterKey = randomBytes(32);
+    const encryption = new EncryptionService({
+      masterKeyOverride: async () => masterKey,
+    });
+    const encrypt = encryption.encrypt.bind(encryption);
+    let failEncryption = false;
+    encryption.encrypt = (plaintext, providerSalt) => {
+      if (failEncryption) return Promise.reject(new Error("injected encryption failure"));
+      return encrypt(plaintext, providerSalt);
+    };
+    const transactionalStore = new CredentialStore({ dataDir: tmpDir, encryption });
+    await transactionalStore.store("providerA", "ws1", "rotKey", "original");
+
+    failEncryption = true;
+    await expect(
+      transactionalStore.rotate("providerA", "ws1", "rotKey", "replacement", "corr-2")
+    ).rejects.toThrow("injected encryption failure");
+    failEncryption = false;
+
+    expect(await transactionalStore.retrieve("providerA", "ws1", "rotKey")).toBe("original");
   });
 });

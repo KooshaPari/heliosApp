@@ -55,7 +55,13 @@ export class CredentialNotFoundError extends Error {
 
 const FORBIDDEN_PATTERNS = ["..", "/", "\\", "\0"];
 
-function validateId(label: string, value: string): void {
+function validateId(label: string, value: unknown): asserts value is string {
+  if (typeof value !== "string") {
+    throw new Error(`Invalid ${label}: must be a string`);
+  }
+  if (value === ".") {
+    throw new Error(`Invalid ${label}: must not be a collapsed path segment`);
+  }
   for (const pat of FORBIDDEN_PATTERNS) {
     if (value.includes(pat)) {
       throw new Error(`Invalid ${label}: contains forbidden character sequence '${pat}'`);
@@ -212,9 +218,7 @@ export class CredentialStore {
     });
   }
 
-  /**
-   * Rotates a credential by overwriting irrecoverably (secure delete + rewrite).
-   */
+  /** Rotates a credential through an atomic encrypted replacement. */
   async rotate(
     providerId: string,
     workspaceId: string,
@@ -231,18 +235,8 @@ export class CredentialStore {
       throw new CredentialNotFoundError(name);
     }
 
-    /**
-     * Best-effort overwrite with random bytes before writing the new value.
-     * Note: on modern SSDs, APFS, and other copy-on-write filesystems this
-     * app-level overwrite is NOT guaranteed to erase the underlying sectors.
-     * AES-256-GCM encryption is the primary data-protection mechanism; the
-     * overwrite here is a defence-in-depth measure only.
-     */
-    const size = statSync(path).size;
-    const noise = randomBytes(Math.max(size, 64));
-    writeFileSync(path, noise, { mode: 0o600 });
-
-    // Now write the new value
+    // Build the encrypted replacement before atomically swapping it into place.
+    // The previous credential stays readable if encryption or persistence fails.
     await this.store(providerId, workspaceId, name, newValue);
     await this.emit("secrets.credential.rotated", {
       providerId,
