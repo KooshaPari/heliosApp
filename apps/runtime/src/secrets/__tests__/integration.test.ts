@@ -264,6 +264,21 @@ describe("Integration Tests (T015)", () => {
       expect(events).not.toContain(password);
     });
 
+    it("redacts SQL Server credentials from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const password = "sqlserver-password-value-123456";
+      const connectionString = `mssql://admin:${password}@sql.internal/prod`;
+
+      await detector.check(`cat .env ${connectionString}`, {
+        correlationId: "corr-mssql-secret",
+      });
+
+      const events = JSON.stringify(bus.getEvents());
+      expect(events).not.toContain(connectionString);
+      expect(events).not.toContain(password);
+    });
+
     it("redacts fine-grained GitHub tokens from direct access audit events", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });

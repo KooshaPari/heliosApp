@@ -253,7 +253,7 @@ export function redactCommandForAudit(command: string): string {
       "[REDACTED:SECRET]"
     )
     .replace(
-      /(?:postgres|postgresql|mysql|mongodb(?:\+srv)?|rediss?|amqps?):\/\/[^:\s]+:[^@\s]+@[^\s"']+/gi,
+      /(?:postgres|postgresql|mysql|mssql|mongodb(?:\+srv)?|rediss?|amqps?):\/\/[^:\s]+:[^@\s]+@[^\s"']+/gi,
       "[REDACTED:CONNECTION_STRING]"
     )
     .replace(
