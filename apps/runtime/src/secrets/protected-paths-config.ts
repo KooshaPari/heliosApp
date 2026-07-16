@@ -108,13 +108,17 @@ export class ProtectedPathConfig {
   }
 
   async removePattern(id: string): Promise<void> {
-    if (!this.patterns.has(id)) {
+    const pattern = this.patterns.get(id);
+    if (!pattern) {
       throw new Error(`Pattern '${id}' not found`);
     }
     await this._emit("secrets.protected_paths.config.changed", {
       action: "remove",
       patternId: id,
     });
+    if (this.patterns.get(id) !== pattern) {
+      throw new Error("Pattern changed before remove");
+    }
     this.patterns.delete(id);
   }
 

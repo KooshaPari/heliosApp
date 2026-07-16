@@ -158,6 +158,37 @@ describe("ProtectedPathConfig persistence boundaries", () => {
       "*.imported"
     );
   });
+
+  it("does not delete a concurrently imported replacement during remove audit", async () => {
+    const path = join(tempDir, "replacement-pattern.json");
+    const bus = new InMemoryLocalBus();
+    const config = new ProtectedPathConfig({ bus });
+    const pattern = await config.addPattern("*.original", "original pattern");
+    const publish = bus.publish.bind(bus);
+    bus.publish = async envelope => {
+      if (envelope.payload?.action === "remove") {
+        writeFileSync(
+          path,
+          JSON.stringify([
+            {
+              id: pattern.id,
+              pattern: "*.replacement",
+              description: "concurrent replacement",
+              enabled: true,
+              isDefault: false,
+            },
+          ])
+        );
+        await config.importPatterns(path);
+      }
+      await publish(envelope);
+    };
+
+    await expect(config.removePattern(pattern.id)).rejects.toThrow("Pattern changed before remove");
+    expect(config.listPatterns().find(candidate => candidate.id === pattern.id)?.pattern).toBe(
+      "*.replacement"
+    );
+  });
 });
 
 describe("ProtectedPathConfig audit lifecycle", () => {
