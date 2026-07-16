@@ -249,6 +249,7 @@ export function redactCommandForAudit(command: string): string {
       "[REDACTED:CONNECTION_STRING]"
     )
     .replace(/-----BEGIN (?:RSA |EC |DSA )?PRIVATE KEY-----/g, "[REDACTED:PRIVATE_KEY]")
+    .replace(/\bpassword\s*[=:]\s*(?:"[^"]{8,}"|'[^']{8,}'|[^\s"']{8,})/gi, "[REDACTED:PASSWORD]")
     .replace(
       /(?:client_secret\s*[=:]\s*["']?)[A-Za-z0-9\-_]{16,}["']?/gi,
       "[REDACTED:CLIENT_SECRET]"
