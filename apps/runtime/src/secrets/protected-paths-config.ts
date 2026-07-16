@@ -7,6 +7,7 @@ import { DEFAULT_PATTERNS } from "./protected-paths-matching.js";
 import type { ProtectedPathPattern } from "./protected-paths-types.js";
 
 const BROAD_PATTERNS = new Set(["*", "**", "**/*", "*.*"]);
+const DEFAULT_PATTERNS_BY_ID = new Map(DEFAULT_PATTERNS.map(pattern => [pattern.id, pattern]));
 
 function assertSafePattern(pattern: string): void {
   if (pattern.trim() === "") {
@@ -51,6 +52,23 @@ function parsePattern(value: unknown, index: number): ProtectedPathPattern {
     enabled: candidate.enabled,
     isDefault: candidate.isDefault,
   };
+}
+
+function assertCanonicalDefaultIdentity(pattern: ProtectedPathPattern): void {
+  const defaultPattern = DEFAULT_PATTERNS_BY_ID.get(pattern.id);
+  if (defaultPattern === undefined) {
+    if (pattern.isDefault) {
+      throw new Error(`Invalid protected path config: unknown default '${pattern.id}'`);
+    }
+    return;
+  }
+  if (
+    !pattern.isDefault ||
+    pattern.pattern !== defaultPattern.pattern ||
+    pattern.description !== defaultPattern.description
+  ) {
+    throw new Error(`Invalid protected path config: cannot redefine default '${pattern.id}'`);
+  }
 }
 
 export class ProtectedPathConfig {
@@ -130,6 +148,7 @@ export class ProtectedPathConfig {
     const validated = parsed.map(parsePattern);
     const ids = new Set<string>();
     for (const pattern of validated) {
+      assertCanonicalDefaultIdentity(pattern);
       if (ids.has(pattern.id)) {
         throw new Error(`Invalid protected path config: duplicate id '${pattern.id}'`);
       }

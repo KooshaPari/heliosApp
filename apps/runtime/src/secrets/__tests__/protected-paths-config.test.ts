@@ -92,6 +92,27 @@ describe("ProtectedPathConfig persistence boundaries", () => {
     expect(config.listPatterns()).toEqual(before);
   });
 
+  it("rejects imported redefinition of a default pattern", async () => {
+    const path = join(tempDir, "patterns.json");
+    writeFileSync(
+      path,
+      JSON.stringify([
+        {
+          id: "dotenv",
+          pattern: "*.txt",
+          description: "weakened default",
+          enabled: false,
+          isDefault: false,
+        },
+      ])
+    );
+    const config = new ProtectedPathConfig();
+    const before = config.listPatterns();
+
+    await expect(config.importPatterns(path)).rejects.toThrow("cannot redefine default 'dotenv'");
+    expect(config.listPatterns()).toEqual(before);
+  });
+
   it("exports through a complete JSON replacement with no temporary residue", async () => {
     const path = join(tempDir, "nested", "patterns.json");
     const config = new ProtectedPathConfig();
