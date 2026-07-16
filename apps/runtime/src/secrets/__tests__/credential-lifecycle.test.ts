@@ -235,6 +235,22 @@ describe("CredentialStore: lifecycle operations", () => {
     );
   });
 
+  it("does not delete a concurrent rotation after revoke audit publication", async () => {
+    await store.create("providerA", "ws1", "myKey", "original", "corr-create");
+    const publish = bus.publish.bind(bus);
+    bus.publish = async envelope => {
+      if (envelope.topic === "secrets.credential.revoked") {
+        await store.rotate("providerA", "ws1", "myKey", "rotated", "corr-rotate");
+      }
+      await publish(envelope);
+    };
+
+    await expect(store.revoke("providerA", "ws1", "myKey", "corr-revoke")).rejects.toThrow(
+      "Credential changed before revoke"
+    );
+    expect(await store.retrieve("providerA", "ws1", "myKey")).toBe("rotated");
+  });
+
   it("revoke throws on non-existent credential", async () => {
     await expect(store.revoke("providerA", "ws1", "noSuchKey", "corr-001")).rejects.toBeInstanceOf(
       CredentialNotFoundError

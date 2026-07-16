@@ -315,6 +315,7 @@ export class CredentialStore {
     if (!existsSync(path)) {
       throw new CredentialNotFoundError(name);
     }
+    const expectedData = readFileSync(path, "utf8");
 
     await this.emit("secrets.credential.revoked", {
       providerId,
@@ -322,6 +323,9 @@ export class CredentialStore {
       name,
       correlationId,
     });
+    if (!existsSync(path) || readFileSync(path, "utf8") !== expectedData) {
+      throw new Error("Credential changed before revoke");
+    }
     await this.delete(providerId, workspaceId, name);
   }
 
