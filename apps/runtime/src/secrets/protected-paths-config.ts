@@ -135,6 +135,9 @@ export class ProtectedPathConfig {
       action: "enable",
       patternId: id,
     });
+    if (this.patterns.get(id) !== p) {
+      throw new Error("Pattern changed before enable");
+    }
     p.enabled = true;
   }
 
