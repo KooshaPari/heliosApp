@@ -1,5 +1,8 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { randomBytes } from "node:crypto";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { EncryptionService } from "../encryption.js";
 
 function makeFixedKeyService(): EncryptionService {
@@ -36,7 +39,7 @@ describe("EncryptionService", () => {
     expect(p1.ciphertext).not.toBe(p2.ciphertext);
   });
 
-  it("uses different derived keys for different providers", async () => {
+  it("uses different derived keys for different providers", () => {
     const masterKey = randomBytes(32);
     const k1 = svc.deriveKey(masterKey, "provider-a");
     const k2 = svc.deriveKey(masterKey, "provider-b");
@@ -100,5 +103,48 @@ describe("EncryptionService", () => {
   it("authTag is 16 bytes (32 hex chars)", async () => {
     const payload = await svc.encrypt("x", "provider-a");
     expect(payload.authTag.length).toBe(32);
+  });
+});
+
+describe("EncryptionService master-key persistence", () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), "helios-master-key-"));
+  });
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  it.each([
+    "not-hex",
+    "ab".repeat(31),
+    `${"ab".repeat(32)}00`,
+  ])("rejects malformed persisted key %s", async persisted => {
+    const keyPath = join(tempDir, "master.key");
+    writeFileSync(keyPath, persisted);
+    const service = new EncryptionService({ keyPath });
+
+    await expect(service.getMasterKey()).rejects.toThrow("64 hexadecimal characters");
+  });
+
+  it("rejects a malformed injected master key", async () => {
+    const service = new EncryptionService({
+      masterKeyOverride: async () => Buffer.alloc(31),
+    });
+
+    await expect(service.getMasterKey()).rejects.toThrow("32 bytes");
+  });
+
+  it("persists a generated key without temporary residue", async () => {
+    const directory = join(tempDir, "nested");
+    const keyPath = join(directory, "master.key");
+    const service = new EncryptionService({ keyPath });
+
+    const key = await service.getMasterKey();
+
+    expect(readFileSync(keyPath, "utf8")).toBe(key.toString("hex"));
+    expect(readdirSync(directory).filter(entry => entry.startsWith("master.key.tmp-"))).toEqual([]);
   });
 });

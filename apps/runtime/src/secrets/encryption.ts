@@ -1,8 +1,16 @@
-import { createCipheriv, createDecipheriv, randomBytes, hkdfSync } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from "node:fs";
+import { createCipheriv, createDecipheriv, hkdfSync, randomBytes } from "node:crypto";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 export interface EncryptedPayload {
   ciphertext: string; // hex
@@ -19,12 +27,28 @@ const KEY_BYTES = 32;
 const KEYCHAIN_SERVICE = "helios.master.key";
 const KEYCHAIN_ACCOUNT = "helios";
 
+function validateMasterKey(value: unknown, source: string): Buffer {
+  if (!Buffer.isBuffer(value) || value.length !== KEY_BYTES) {
+    throw new Error(`Invalid ${source}: master key must be exactly ${KEY_BYTES} bytes`);
+  }
+  return value;
+}
+
+function parseMasterKeyHex(value: string, source: string): Buffer {
+  if (!/^[0-9a-fA-F]{64}$/.test(value)) {
+    throw new Error(`Invalid ${source}: master key must contain exactly 64 hexadecimal characters`);
+  }
+  return validateMasterKey(Buffer.from(value, "hex"), source);
+}
+
 export class EncryptionService {
   private masterKeyCache: Buffer | null = null;
+  private keyPath: string;
   // For testing: allow injection of a master key getter
   private masterKeyOverride: (() => Promise<Buffer>) | null = null;
 
-  constructor(opts?: { masterKeyOverride?: () => Promise<Buffer> }) {
+  constructor(opts?: { masterKeyOverride?: () => Promise<Buffer>; keyPath?: string }) {
+    this.keyPath = opts?.keyPath ?? join(homedir(), ".helios", "master.key");
     if (opts?.masterKeyOverride) {
       this.masterKeyOverride = opts.masterKeyOverride;
     }
@@ -81,7 +105,7 @@ export class EncryptionService {
    */
   async getMasterKey(): Promise<Buffer> {
     if (this.masterKeyOverride !== null) {
-      return this.masterKeyOverride();
+      return validateMasterKey(await this.masterKeyOverride(), "injected master key");
     }
 
     if (this.masterKeyCache !== null) {
@@ -96,10 +120,10 @@ export class EncryptionService {
     }
 
     // Fallback: file-based key
-    const keyPath = join(homedir(), ".helios", "master.key");
+    const keyPath = this.keyPath;
     if (existsSync(keyPath)) {
       const hex = readFileSync(keyPath, "utf8").trim();
-      this.masterKeyCache = Buffer.from(hex, "hex");
+      this.masterKeyCache = parseMasterKeyHex(hex, "persisted master key");
       return this.masterKeyCache;
     }
 
@@ -110,13 +134,19 @@ export class EncryptionService {
     const stored = this.writeToKeychain(newKey);
     if (!stored) {
       // Fall back to file
-      const dir = join(homedir(), ".helios");
+      const dir = dirname(keyPath);
       mkdirSync(dir, { recursive: true });
-      writeFileSync(keyPath, newKey.toString("hex"), {
-        encoding: "utf8",
-        mode: 0o600,
-      });
-      chmodSync(keyPath, 0o600);
+      const tempPath = `${keyPath}.tmp-${process.pid}-${randomBytes(6).toString("hex")}`;
+      try {
+        writeFileSync(tempPath, newKey.toString("hex"), {
+          encoding: "utf8",
+          mode: 0o600,
+        });
+        renameSync(tempPath, keyPath);
+        chmodSync(keyPath, 0o600);
+      } finally {
+        rmSync(tempPath, { force: true });
+      }
     }
 
     this.masterKeyCache = newKey;
@@ -129,6 +159,7 @@ export class EncryptionService {
    * ID to ensure domain separation between providers.
    */
   deriveKey(masterKey: Buffer, providerId: string): Buffer {
+    validateMasterKey(masterKey, "master key");
     const info = Buffer.from(`helios-v1:${providerId}`, "utf8");
     const derived = hkdfSync("sha256", masterKey, Buffer.alloc(32), info, 32);
     return Buffer.from(derived);
@@ -144,21 +175,19 @@ export class EncryptionService {
 
   private readFromKeychain(): Buffer | null {
     if (process.platform !== "darwin") return null;
+    let hex: string;
     try {
-      const hex = execFileSync(
+      hex = execFileSync(
         "security",
         ["find-generic-password", "-s", KEYCHAIN_SERVICE, "-a", KEYCHAIN_ACCOUNT, "-w"],
         { stdio: ["pipe", "pipe", "pipe"] }
       )
         .toString()
         .trim();
-      if (hex.length === KEY_BYTES * 2) {
-        return Buffer.from(hex, "hex");
-      }
-      return null;
     } catch {
       return null;
     }
+    return parseMasterKeyHex(hex, "keychain master key");
   }
 
   private writeToKeychain(key: Buffer): boolean {
