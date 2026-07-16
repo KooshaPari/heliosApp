@@ -175,6 +175,58 @@ describe("Storage Chaos Tests", () => {
     expect(sink.getBufferedCount()).toBe(0);
   }, 10_000);
 
+  it("should preserve exactly-once delivery when the ring evicts an in-flight batch", async () => {
+    const persistedIds: string[] = [];
+    let releaseFirstPersist!: () => void;
+    let markFirstPersistStarted!: () => void;
+    const firstPersistStarted = new Promise<void>(resolve => {
+      markFirstPersistStarted = resolve;
+    });
+    const firstPersistReleased = new Promise<void>(resolve => {
+      releaseFirstPersist = resolve;
+    });
+    let persistCalls = 0;
+    const deferredStorage: AuditStorage = {
+      persist: async events => {
+        persistCalls++;
+        if (persistCalls === 1) {
+          markFirstPersistStarted();
+          await firstPersistReleased;
+        }
+        persistedIds.push(...events.map(event => event.id));
+      },
+    };
+
+    sink = new DefaultAuditSink(deferredStorage, 2);
+    const events = Array.from({ length: 4 }, (_, index) =>
+      createAuditEvent({
+        eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+        actor: "test-agent",
+        action: "execute",
+        target: `cmd-in-flight-${index}`,
+        result: AUDIT_EVENT_RESULTS.SUCCESS,
+        workspaceId: "test-workspace",
+        correlationId: `corr-in-flight-${index}`,
+        metadata: { index },
+      })
+    );
+
+    await sink.write(events[0]!);
+    await sink.write(events[1]!);
+    const firstFlush = sink.flush();
+    await firstPersistStarted;
+
+    await sink.write(events[2]!);
+    await sink.write(events[3]!);
+    releaseFirstPersist();
+
+    await firstFlush;
+    await sink.flush();
+
+    expect(persistedIds.sort()).toEqual(events.map(event => event.id).sort());
+    expect(sink.getBufferedCount()).toBe(0);
+  });
+
   it("should handle concurrent reads during writes", async () => {
     store = new SQLiteAuditStore(dbPath);
     const storageAdapter: AuditStorage = {

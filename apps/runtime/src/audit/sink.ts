@@ -201,8 +201,12 @@ export class DefaultAuditSink implements AuditSink {
       while (retries < this.MAX_RETRIES) {
         try {
           await this.storage.persist(eventsToPersist);
-          // Only clear buffer after successful commit
-          this.buffer = this.buffer.slice(eventsToPersist.length);
+          // A concurrent ring eviction can move in-flight events to overflow and remove them
+          // from the live buffer. Acknowledge the committed batch by identity so newer events
+          // remain buffered and committed events are not persisted again via overflow.
+          const persistedIds = new Set(eventsToPersist.map(event => event.id));
+          this.buffer = this.buffer.filter(event => !persistedIds.has(event.id));
+          this.overflowQueue = this.overflowQueue.filter(event => !persistedIds.has(event.id));
           return;
         } catch (err) {
           this.metrics.persistenceFailures++;
