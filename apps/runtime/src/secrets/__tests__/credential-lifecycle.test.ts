@@ -173,6 +173,24 @@ describe("CredentialStore: lifecycle operations", () => {
     expect(await store.retrieve("providerA", "ws1", "myKey")).toBe("replacement");
   });
 
+  it("does not recreate a concurrent revocation after rotate audit publication", async () => {
+    await store.create("providerA", "ws1", "myKey", "original", "corr-create");
+    const publish = bus.publish.bind(bus);
+    bus.publish = async envelope => {
+      if (envelope.topic === "secrets.credential.rotated") {
+        await store.revoke("providerA", "ws1", "myKey", "corr-revoke");
+      }
+      await publish(envelope);
+    };
+
+    await expect(
+      store.rotate("providerA", "ws1", "myKey", "replacement", "corr-rotate")
+    ).rejects.toThrow("Credential changed before rotate");
+    await expect(store.retrieve("providerA", "ws1", "myKey")).rejects.toBeInstanceOf(
+      CredentialNotFoundError
+    );
+  });
+
   it("rotate throws on non-existent credential", async () => {
     await expect(
       store.rotate("providerA", "ws1", "noSuchKey", "new", "corr-001")

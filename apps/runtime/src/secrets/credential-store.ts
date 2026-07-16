@@ -132,7 +132,8 @@ export class CredentialStore {
     workspaceId: string,
     name: string,
     value: string,
-    createOnly: boolean
+    createOnly: boolean,
+    expectedData?: string
   ): Promise<string> {
     const dir = this.credentialDir(providerId, workspaceId);
     mkdirSync(dir, { recursive: true });
@@ -150,6 +151,12 @@ export class CredentialStore {
         linkSync(tmpPath, finalPath);
         created = true;
       } else {
+        if (
+          expectedData !== undefined &&
+          (!existsSync(finalPath) || readFileSync(finalPath, "utf8") !== expectedData)
+        ) {
+          throw new Error("Credential changed before rotate");
+        }
         renameSync(tmpPath, finalPath);
       }
       // Ensure the published file retains the restrictive temporary-file mode.
@@ -286,6 +293,7 @@ export class CredentialStore {
     if (!existsSync(path)) {
       throw new CredentialNotFoundError(name);
     }
+    const expectedData = readFileSync(path, "utf8");
 
     await this.emit("secrets.credential.rotated", {
       providerId,
@@ -295,7 +303,7 @@ export class CredentialStore {
     });
     // Build the encrypted replacement before atomically swapping it into place.
     // The previous credential stays readable if encryption or persistence fails.
-    await this.store(providerId, workspaceId, name, newValue);
+    await this.persistCredential(providerId, workspaceId, name, newValue, false, expectedData);
   }
 
   /**
