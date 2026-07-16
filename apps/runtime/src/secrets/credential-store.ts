@@ -270,15 +270,15 @@ export class CredentialStore {
       throw new CredentialNotFoundError(name);
     }
 
-    // Build the encrypted replacement before atomically swapping it into place.
-    // The previous credential stays readable if encryption or persistence fails.
-    await this.store(providerId, workspaceId, name, newValue);
     await this.emit("secrets.credential.rotated", {
       providerId,
       workspaceId,
       name,
       correlationId,
     });
+    // Build the encrypted replacement before atomically swapping it into place.
+    // The previous credential stays readable if encryption or persistence fails.
+    await this.store(providerId, workspaceId, name, newValue);
   }
 
   /**

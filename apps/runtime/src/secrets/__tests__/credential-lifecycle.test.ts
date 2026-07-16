@@ -112,6 +112,31 @@ describe("CredentialStore: lifecycle operations", () => {
     expect(raw).not.toContain("original");
   });
 
+  it("preserves the credential when rotate audit publication fails", async () => {
+    await store.create("providerA", "ws1", "myKey", "original", "corr-create");
+    bus.publish = () => Promise.reject(new Error("audit unavailable"));
+
+    await expect(
+      store.rotate("providerA", "ws1", "myKey", "replacement", "corr-rotate")
+    ).rejects.toThrow("audit unavailable");
+    expect(await store.retrieve("providerA", "ws1", "myKey")).toBe("original");
+  });
+
+  it("publishes rotate audit before replacing the credential", async () => {
+    await store.create("providerA", "ws1", "myKey", "original", "corr-create");
+    let releasePublish: (() => void) | undefined;
+    bus.publish = () =>
+      new Promise<void>(resolve => {
+        releasePublish = resolve;
+      });
+
+    const operation = store.rotate("providerA", "ws1", "myKey", "replacement", "corr-rotate");
+    expect(await store.retrieve("providerA", "ws1", "myKey")).toBe("original");
+    releasePublish?.();
+    await operation;
+    expect(await store.retrieve("providerA", "ws1", "myKey")).toBe("replacement");
+  });
+
   it("rotate throws on non-existent credential", async () => {
     await expect(
       store.rotate("providerA", "ws1", "noSuchKey", "new", "corr-001")
