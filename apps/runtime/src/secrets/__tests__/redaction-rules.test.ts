@@ -1,9 +1,9 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { InMemoryLocalBus } from "../../protocol/bus.js";
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules, RedactionRuleManager } from "../redaction-rules.js";
-import { InMemoryLocalBus } from "../../protocol/bus.js";
 
 const ctx = {
   artifactId: "art-1",
@@ -181,6 +181,65 @@ describe("RedactionRuleManager: persistence", () => {
     const manager2 = new RedactionRuleManager({ initialRules: [] });
     manager2.importRules(path);
     expect(manager2.listRules().length).toBe(manager.listRules().length);
+  });
+
+  it("rejects coerced persisted values", () => {
+    const path = join(tmpDir, "rules.json");
+    writeFileSync(
+      path,
+      JSON.stringify([
+        {
+          id: "coerced-enabled",
+          category: "CUSTOM",
+          pattern: "secret",
+          description: "custom secret",
+          enabled: "false",
+        },
+      ])
+    );
+
+    const manager = new RedactionRuleManager({ initialRules: [] });
+    expect(() => manager.importRules(path)).toThrow("enabled");
+    expect(manager.listRules()).toEqual([]);
+  });
+
+  it("does not partially install rules when a later entry is malformed", () => {
+    const path = join(tmpDir, "rules.json");
+    writeFileSync(
+      path,
+      JSON.stringify([
+        {
+          id: "valid-rule",
+          category: "CUSTOM",
+          pattern: "valid-secret",
+          description: "valid rule",
+          enabled: true,
+        },
+        {
+          id: "invalid-flags",
+          category: "CUSTOM",
+          pattern: "invalid-secret",
+          flags: "not-a-flag",
+          description: "invalid rule",
+          enabled: true,
+        },
+      ])
+    );
+
+    const manager = new RedactionRuleManager({ initialRules: [] });
+    expect(() => manager.importRules(path)).toThrow();
+    expect(manager.listRules()).toEqual([]);
+  });
+
+  it("atomically exports to a nested directory without temporary residue", () => {
+    const manager = new RedactionRuleManager({ initialRules: getDefaultRules() });
+    const directory = join(tmpDir, "nested");
+    const path = join(directory, "rules.json");
+
+    manager.exportRules(path);
+
+    expect(JSON.parse(readFileSync(path, "utf8"))).toHaveLength(getDefaultRules().length);
+    expect(readdirSync(directory).filter(entry => entry.startsWith("rules.json.tmp-"))).toEqual([]);
   });
 });
 
