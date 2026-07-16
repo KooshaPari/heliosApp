@@ -334,6 +334,18 @@ describe("Integration Tests (T015)", () => {
       expect(JSON.stringify(bus.getEvents())).not.toContain(token);
     });
 
+    it("redacts namespaced token assignments from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const token = "namespaced-token-value-123456";
+
+      await detector.check(`cat .env DEPLOY_ACCESS_TOKEN=${token}`, {
+        correlationId: "corr-namespaced-token",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(token);
+    });
+
     it("redacts generic secret assignments from direct access audit events", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });
