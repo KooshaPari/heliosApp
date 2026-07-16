@@ -24,6 +24,10 @@ export interface AuditFilter {
   since?: Date;
 }
 
+function cloneAuditRecord(record: RedactionAuditRecord): RedactionAuditRecord {
+  return structuredClone(record);
+}
+
 // ---------------------------------------------------------------------------
 // RedactionAuditTrail
 // ---------------------------------------------------------------------------
@@ -71,7 +75,7 @@ export class RedactionAuditTrail {
     });
     this.records.set(artifactId, auditRecord);
 
-    return auditRecord;
+    return cloneAuditRecord(auditRecord);
   }
 
   verify(artifactId: string): boolean {
@@ -90,7 +94,7 @@ export class RedactionAuditTrail {
       records = records.filter(r => new Date(r.timestamp) >= since);
     }
 
-    return records;
+    return records.map(cloneAuditRecord);
   }
 
   private async _emit(topic: string, payload: Record<string, unknown>): Promise<void> {

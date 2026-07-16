@@ -43,6 +43,20 @@ describe("RedactionAuditTrail: record creation", () => {
     expect(record.timestamp).toBeTruthy();
     expect(record.latencyMs).toBeGreaterThanOrEqual(0);
   });
+
+  it("does not expose mutable references to verification records", async () => {
+    const trail = new RedactionAuditTrail();
+    const result = makeEngine().redact("AKIAIOSFODNN7EXAMPLE", ctx);
+    const recorded = await trail.record("art-1", result, ctx);
+
+    recorded.artifactType = "mutated-record-result";
+    const listed = trail.listRecords();
+    expect(listed[0]?.artifactType).toBe("log");
+
+    if (!listed[0]) throw new Error("Expected a verification record");
+    listed[0].artifactType = "mutated-list-result";
+    expect(trail.listRecords()[0]?.artifactType).toBe("log");
+  });
 });
 
 describe("RedactionAuditTrail: no secrets in records", () => {
