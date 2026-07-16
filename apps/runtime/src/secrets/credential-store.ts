@@ -313,7 +313,7 @@ export class CredentialStore {
     workspaceId: string,
     name: string
   ): Promise<string> {
-    this.checkAccess(ctx, targetProviderId, workspaceId);
+    await this.checkAccess(ctx, targetProviderId, workspaceId);
 
     const value = await this.retrieve(targetProviderId, workspaceId, name);
     await this.emit("secrets.credential.accessed", {
@@ -330,11 +330,11 @@ export class CredentialStore {
   // Cross-provider isolation (T004)
   // -------------------------------------------------------------------------
 
-  private checkAccess(
+  private async checkAccess(
     ctx: CredentialAccessContext,
     targetProviderId: string,
     targetWorkspaceId: string
-  ): void {
+  ): Promise<void> {
     validateId("requestingProviderId", ctx.requestingProviderId);
     validateId("requestingWorkspaceId", ctx.requestingWorkspaceId);
     validateId("targetProviderId", targetProviderId);
@@ -344,8 +344,7 @@ export class CredentialStore {
       ctx.requestingProviderId !== targetProviderId ||
       ctx.requestingWorkspaceId !== targetWorkspaceId
     ) {
-      // Fire-and-forget the denied event; we throw synchronously
-      void this.emit("secrets.credential.access.denied", {
+      await this.emit("secrets.credential.access.denied", {
         requestingProviderId: ctx.requestingProviderId,
         requestingWorkspaceId: ctx.requestingWorkspaceId,
         targetProviderId,
