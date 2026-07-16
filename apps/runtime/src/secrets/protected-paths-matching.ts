@@ -245,6 +245,10 @@ export function redactCommandForAudit(command: string): string {
     .replace(/(?:github_pat_[A-Za-z0-9_]{82,})/g, "[REDACTED:GITHUB_TOKEN]")
     .replace(/(?:Bearer [A-Za-z0-9\-._~+/]+=*)/g, "Bearer [REDACTED:TOKEN]")
     .replace(
+      /\btoken\s*[=:]\s*(?:"[^"]{16,}"|'[^']{16,}'|[^\s"']{16,})/gi,
+      "[REDACTED:TOKEN]"
+    )
+    .replace(
       /(?:postgres|postgresql|mysql|mongodb|redis):\/\/[^:\s]+:[^@\s]+@[^\s"']+/gi,
       "[REDACTED:CONNECTION_STRING]"
     )

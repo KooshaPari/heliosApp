@@ -290,6 +290,18 @@ describe("Integration Tests (T015)", () => {
 
       expect(JSON.stringify(bus.getEvents())).not.toContain(password);
     });
+
+    it("redacts generic token assignments from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const token = "deployment-token-value-123456";
+
+      await detector.check(`cat .env token=${token}`, {
+        correlationId: "corr-token-assignment",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(token);
+    });
   });
 
   describe("Configurable protected paths [FR-028-008]", () => {
