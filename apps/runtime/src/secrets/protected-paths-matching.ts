@@ -250,6 +250,10 @@ export function redactCommandForAudit(command: string): string {
     )
     .replace(/-----BEGIN (?:RSA |EC |DSA )?PRIVATE KEY-----/g, "[REDACTED:PRIVATE_KEY]")
     .replace(
+      /(?:client_secret\s*[=:]\s*["']?)[A-Za-z0-9\-_]{16,}["']?/gi,
+      "[REDACTED:CLIENT_SECRET]"
+    )
+    .replace(
       /(?:(?:api_key|apikey|api_token)\s*[=:]\s*["']?)([A-Za-z0-9\-_]{16,})["']?/gi,
       () => "[REDACTED:API_KEY]"
     );

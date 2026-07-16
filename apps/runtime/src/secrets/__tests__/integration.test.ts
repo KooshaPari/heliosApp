@@ -266,6 +266,18 @@ describe("Integration Tests (T015)", () => {
 
       expect(JSON.stringify(bus.getEvents())).not.toContain(token);
     });
+
+    it("redacts OAuth client secrets from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const clientSecret = "oauth-client-secret-value-123456";
+
+      await detector.check(`cat .env client_secret=${clientSecret}`, {
+        correlationId: "corr-client-secret",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(clientSecret);
+    });
   });
 
   describe("Configurable protected paths [FR-028-008]", () => {
