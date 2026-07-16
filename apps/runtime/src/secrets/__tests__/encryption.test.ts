@@ -137,6 +137,27 @@ describe("EncryptionService master-key persistence", () => {
     await expect(service.getMasterKey()).rejects.toThrow("32 bytes");
   });
 
+  it("does not expose mutable master-key storage", async () => {
+    const injectedKey = randomBytes(32);
+    const expectedInjectedKey = Buffer.from(injectedKey);
+    const injectedService = new EncryptionService({
+      masterKeyOverride: async () => injectedKey,
+    });
+    const injectedResult = await injectedService.getMasterKey();
+    injectedResult.fill(0);
+
+    expect(injectedKey).toEqual(expectedInjectedKey);
+    expect(await injectedService.getMasterKey()).toEqual(expectedInjectedKey);
+
+    const keyPath = join(tempDir, "cached.key");
+    const cachedService = new EncryptionService({ keyPath });
+    const cachedResult = await cachedService.getMasterKey();
+    const expectedCachedKey = Buffer.from(cachedResult);
+    cachedResult.fill(0);
+
+    expect(await cachedService.getMasterKey()).toEqual(expectedCachedKey);
+  });
+
   it("persists a generated key without temporary residue", async () => {
     const directory = join(tempDir, "nested");
     const keyPath = join(directory, "master.key");

@@ -128,18 +128,18 @@ export class EncryptionService {
    */
   async getMasterKey(): Promise<Buffer> {
     if (this.masterKeyOverride !== null) {
-      return validateMasterKey(await this.masterKeyOverride(), "injected master key");
+      return Buffer.from(validateMasterKey(await this.masterKeyOverride(), "injected master key"));
     }
 
     if (this.masterKeyCache !== null) {
-      return this.masterKeyCache;
+      return Buffer.from(this.masterKeyCache);
     }
 
     // Try macOS keychain first
     const fromKeychain = this.readFromKeychain();
     if (fromKeychain !== null) {
       this.masterKeyCache = fromKeychain;
-      return this.masterKeyCache;
+      return Buffer.from(this.masterKeyCache);
     }
 
     // Fallback: file-based key
@@ -147,7 +147,7 @@ export class EncryptionService {
     if (existsSync(keyPath)) {
       const hex = readFileSync(keyPath, "utf8").trim();
       this.masterKeyCache = parseMasterKeyHex(hex, "persisted master key");
-      return this.masterKeyCache;
+      return Buffer.from(this.masterKeyCache);
     }
 
     // Generate a new key and persist it
@@ -173,7 +173,7 @@ export class EncryptionService {
     }
 
     this.masterKeyCache = newKey;
-    return this.masterKeyCache;
+    return Buffer.from(this.masterKeyCache);
   }
 
   /**
