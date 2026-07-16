@@ -143,6 +143,38 @@ describe("Storage Chaos Tests", () => {
     expect(metrics.retryCount).toBeGreaterThan(0);
   });
 
+  it("should not duplicate buffered events after an exhausted persistence attempt", async () => {
+    const persistedIds: string[] = [];
+    let attempts = 0;
+    const recoveringStorage: AuditStorage = {
+      persist: async events => {
+        attempts++;
+        if (attempts <= 5) {
+          throw new Error("Simulated storage outage");
+        }
+        persistedIds.push(...events.map(event => event.id));
+      },
+    };
+
+    sink = new DefaultAuditSink(recoveringStorage, 100);
+    const event = createAuditEvent({
+      eventType: AUDIT_EVENT_TYPES.POLICY_EVALUATION,
+      actor: "system",
+      action: "evaluate",
+      target: "policy-recovery",
+      result: AUDIT_EVENT_RESULTS.SUCCESS,
+      workspaceId: "test-workspace",
+      correlationId: "corr-recovery",
+      metadata: {},
+    });
+
+    await sink.write(event);
+    await sink.flush();
+
+    expect(persistedIds).toEqual([event.id]);
+    expect(sink.getBufferedCount()).toBe(0);
+  }, 10_000);
+
   it("should handle concurrent reads during writes", async () => {
     store = new SQLiteAuditStore(dbPath);
     const storageAdapter: AuditStorage = {

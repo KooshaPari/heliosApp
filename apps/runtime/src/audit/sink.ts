@@ -213,8 +213,7 @@ export class DefaultAuditSink implements AuditSink {
               setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1))
             );
           } else {
-            // Put persisted events back into buffer to avoid data loss; preserve new events that may have been added.
-            this.buffer = [...eventsToPersist, ...this.buffer];
+            // The snapshot was never removed from the buffer, so it is already retained for retry.
             throw err;
           }
         }
