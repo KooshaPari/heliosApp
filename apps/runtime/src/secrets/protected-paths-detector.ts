@@ -1,13 +1,13 @@
 import { randomBytes } from "node:crypto";
 import type { LocalBus } from "../protocol/bus.js";
-import type { ProtectedPathAcknowledgment, ProtectedPathMatch } from "./protected-paths-types.js";
+import type { LocalBusEnvelope } from "../protocol/types.js";
 import { ProtectedPathConfig } from "./protected-paths-config.js";
 import {
   extractFilePaths,
   matchesPattern,
   redactCommandForAudit,
 } from "./protected-paths-matching.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
+import type { ProtectedPathAcknowledgment, ProtectedPathMatch } from "./protected-paths-types.js";
 
 const DEBOUNCE_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -85,19 +85,19 @@ export class ProtectedPathDetector {
     this.warningCallbacks.push(callback);
   }
 
-  acknowledge(patternId: string, matchedPath: string, correlationId?: string): void {
+  async acknowledge(patternId: string, matchedPath: string, correlationId?: string): Promise<void> {
     const key = `${patternId}:${matchedPath}`;
-    this.acknowledgments.set(key, {
-      patternId,
-      matchedPath,
-      acknowledgedAt: Date.now(),
-    });
-
-    void this._emit("secrets.protected_path.acknowledged", {
+    const acknowledgedAt = Date.now();
+    await this._emit("secrets.protected_path.acknowledged", {
       patternId,
       matchedPath,
       correlationId: correlationId ?? null,
-      acknowledgedAt: new Date().toISOString(),
+      acknowledgedAt: new Date(acknowledgedAt).toISOString(),
+    });
+    this.acknowledgments.set(key, {
+      patternId,
+      matchedPath,
+      acknowledgedAt,
     });
   }
 

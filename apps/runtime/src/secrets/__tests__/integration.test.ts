@@ -224,13 +224,36 @@ describe("Integration Tests (T015)", () => {
   });
 
   describe("Acknowledgment debounce [FR-028-007]", () => {
-    it("acknowledgment prevents re-trigger within debounce window", () => {
+    it("owns acknowledgment audit before enabling debounce", async () => {
+      const bus = new InMemoryLocalBus();
+      let releasePublish: (() => void) | undefined;
+      bus.publish = envelope => {
+        if (envelope.topic !== "secrets.protected_path.acknowledged") {
+          return Promise.resolve();
+        }
+        return new Promise<void>(resolve => {
+          releasePublish = resolve;
+        });
+      };
+      const detector = new ProtectedPathDetector({ bus });
+
+      const operation = detector.acknowledge("dotenv", ".env", "corr-owned-ack");
+      const matchesBeforeAudit = detector.check("cat .env");
+      releasePublish?.();
+
+      expect(operation).toBeInstanceOf(Promise);
+      expect(matchesBeforeAudit.length).toBeGreaterThan(0);
+      await operation;
+      expect(detector.check("cat .env")).toEqual([]);
+    });
+
+    it("acknowledgment prevents re-trigger within debounce window", async () => {
       const detector = new ProtectedPathDetector();
       const matches1 = detector.check("cat .env");
       expect(matches1.length).toBeGreaterThan(0);
 
       // Acknowledge
-      detector.acknowledge(matches1[0].patternId, ".env", "corr-1");
+      await detector.acknowledge(matches1[0].patternId, ".env", "corr-1");
 
       // Second check should be debounced
       const matches2 = detector.check("cat .env");
@@ -241,14 +264,28 @@ describe("Integration Tests (T015)", () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });
       detector.check("cat .env");
-      detector.acknowledge("dotenv", ".env", "corr-ack");
-
-      await new Promise(r => setTimeout(r, 0));
+      await detector.acknowledge("dotenv", ".env", "corr-ack");
 
       const events = bus.getEvents();
       const ackEvent = events.find(e => e.topic === "secrets.protected_path.acknowledged");
       expect(ackEvent).toBeDefined();
       expect(ackEvent?.payload?.matchedPath).toBe(".env");
+    });
+
+    it("does not debounce when acknowledgment audit fails", async () => {
+      const bus = new InMemoryLocalBus();
+      bus.publish = envelope => {
+        if (envelope.topic === "secrets.protected_path.acknowledged") {
+          return Promise.reject(new Error("audit unavailable"));
+        }
+        return Promise.resolve();
+      };
+      const detector = new ProtectedPathDetector({ bus });
+
+      await expect(detector.acknowledge("dotenv", ".env", "corr-failed-ack")).rejects.toThrow(
+        "audit unavailable"
+      );
+      expect(detector.check("cat .env").length).toBeGreaterThan(0);
     });
   });
 
