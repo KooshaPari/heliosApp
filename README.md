@@ -1,5 +1,12 @@
 <!-- work-state: active | [========8/10] Block B consolidation in progress -->
 
+> [!IMPORTANT]
+> **Repository migration pending.** The complete heliosApp history, source, tests, and
+> documentation have been consolidated into
+> [KooshaPari/HeliosLab](https://github.com/KooshaPari/HeliosLab). New feature work should
+> target HeliosLab after its consolidation PR is accepted. This repository remains active
+> until that acceptance, then will receive a final migration release and become read-only.
+
 <!-- AI-DD-META:START -->
 <!-- This repository is planned, maintained, and managed by AI Agents only. -->
 <!-- Slop issues are expected and intentionally present as part of an HITL-less -->
