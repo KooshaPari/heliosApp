@@ -245,12 +245,24 @@ export class CredentialStore {
     validateId("name", name);
 
     await this.persistCredential(providerId, workspaceId, name, value, true);
-    await this.emit("secrets.credential.created", {
-      providerId,
-      workspaceId,
-      name,
-      correlationId,
-    });
+    try {
+      await this.emit("secrets.credential.created", {
+        providerId,
+        workspaceId,
+        name,
+        correlationId,
+      });
+    } catch (auditError) {
+      try {
+        await this.delete(providerId, workspaceId, name);
+      } catch (rollbackError) {
+        throw new AggregateError(
+          [auditError, rollbackError],
+          "Credential creation audit failed and rollback could not remove the credential"
+        );
+      }
+      throw auditError;
+    }
   }
 
   /** Rotates a credential through an atomic encrypted replacement. */

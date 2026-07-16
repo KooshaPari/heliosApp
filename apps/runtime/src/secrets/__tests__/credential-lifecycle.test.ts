@@ -53,6 +53,17 @@ describe("CredentialStore: lifecycle operations", () => {
     expect(raw).not.toContain("top-secret");
   });
 
+  it("rolls back the credential when create audit publication fails", async () => {
+    bus.publish = () => Promise.reject(new Error("audit unavailable"));
+
+    await expect(
+      store.create("providerA", "ws1", "myKey", "secret", "corr-create")
+    ).rejects.toThrow("audit unavailable");
+    await expect(store.retrieve("providerA", "ws1", "myKey")).rejects.toBeInstanceOf(
+      CredentialNotFoundError
+    );
+  });
+
   it("create rejects duplicate credential", async () => {
     await store.create("providerA", "ws1", "myKey", "v1", "corr-001");
     await expect(
