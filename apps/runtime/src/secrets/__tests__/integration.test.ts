@@ -357,6 +357,18 @@ describe("Integration Tests (T015)", () => {
 
       expect(JSON.stringify(bus.getEvents())).not.toContain(secret);
     });
+
+    it("redacts namespaced signing keys from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const signingKey = "opaque-signing-key-material-123456";
+
+      await detector.check(`cat .env SERVICE_SIGNING_KEY=${signingKey}`, {
+        correlationId: "corr-namespaced-signing-key",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(signingKey);
+    });
   });
 
   describe("Configurable protected paths [FR-028-008]", () => {
