@@ -219,6 +219,21 @@ describe("Integration Tests (T015)", () => {
       expect(events).not.toContain("supersecret");
     });
 
+    it("redacts MongoDB SRV credentials from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const password = "cluster-password-value-123456";
+      const connectionString = `mongodb+srv://alice:${password}@cluster.internal/prod`;
+
+      await detector.check(`cat .env ${connectionString}`, {
+        correlationId: "corr-mongodb-srv-secret",
+      });
+
+      const events = JSON.stringify(bus.getEvents());
+      expect(events).not.toContain(connectionString);
+      expect(events).not.toContain(password);
+    });
+
     it("redacts fine-grained GitHub tokens from direct access audit events", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });
