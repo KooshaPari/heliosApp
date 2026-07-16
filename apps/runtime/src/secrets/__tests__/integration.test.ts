@@ -255,6 +255,25 @@ describe("Integration Tests (T015)", () => {
       expect(JSON.stringify(bus.getEvents())).not.toContain(privateKeyHeader);
     });
 
+    it("redacts complete private keys from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const privateKeyBody = "MIIEprivatekeymaterial1234567890";
+      const privateKey = [
+        "-----BEGIN PRIVATE KEY-----",
+        privateKeyBody,
+        "-----END PRIVATE KEY-----",
+      ].join("\n");
+
+      await detector.check(`cat .env PRIVATE_KEY="${privateKey}"`, {
+        correlationId: "corr-complete-private-key",
+      });
+
+      const events = JSON.stringify(bus.getEvents());
+      expect(events).not.toContain(privateKey);
+      expect(events).not.toContain(privateKeyBody);
+    });
+
     it("redacts generic API tokens from direct access audit events", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });

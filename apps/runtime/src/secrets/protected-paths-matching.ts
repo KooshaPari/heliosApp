@@ -252,7 +252,11 @@ export function redactCommandForAudit(command: string): string {
       /(?:postgres|postgresql|mysql|mongodb|redis):\/\/[^:\s]+:[^@\s]+@[^\s"']+/gi,
       "[REDACTED:CONNECTION_STRING]"
     )
-    .replace(/-----BEGIN (?:RSA |EC |DSA )?PRIVATE KEY-----/g, "[REDACTED:PRIVATE_KEY]")
+    .replace(
+      /-----BEGIN ((?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY)-----[\s\S]*?-----END \1-----/g,
+      "[REDACTED:PRIVATE_KEY]"
+    )
+    .replace(/-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----/g, "[REDACTED:PRIVATE_KEY]")
     .replace(/\bpassword\s*[=:]\s*(?:"[^"]{8,}"|'[^']{8,}'|[^\s"']{8,})/gi, "[REDACTED:PASSWORD]")
     .replace(
       /(?:client_secret\s*[=:]\s*["']?)[A-Za-z0-9\-_]{16,}["']?/gi,
