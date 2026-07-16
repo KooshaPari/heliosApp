@@ -391,7 +391,7 @@ describe("Integration Tests (T015)", () => {
           artifactType: "terminal_output",
           correlationId: "corr-completeness",
         });
-        trail.record(id, result, {
+        await trail.record(id, result, {
           artifactId: id,
           artifactType: "terminal_output",
           correlationId: "corr-completeness",
@@ -430,7 +430,7 @@ describe("Integration Tests (T015)", () => {
         correlationId: "e2e-test",
       });
 
-      trail.record("terminal:session-1", redactResult, {
+      await trail.record("terminal:session-1", redactResult, {
         artifactId: "terminal:session-1",
         artifactType: "terminal_output",
         correlationId: "e2e-test",
@@ -458,7 +458,7 @@ describe("Integration Tests (T015)", () => {
         artifactType: "terminal_output",
         correlationId: "e2e-safe",
       });
-      trail.record("terminal:safe-1", result, {
+      await trail.record("terminal:safe-1", result, {
         artifactId: "terminal:safe-1",
         artifactType: "terminal_output",
         correlationId: "e2e-safe",

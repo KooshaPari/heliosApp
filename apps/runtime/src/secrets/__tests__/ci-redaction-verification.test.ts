@@ -175,7 +175,7 @@ describe("CI Redaction Verification (T014) [FR-028-011]", () => {
           matches: [],
           latencyMs: 0,
         };
-        trailWithSink.record(`artifact:${secret.slice(0, 8)}`, fakeResult, {
+        await trailWithSink.record(`artifact:${secret.slice(0, 8)}`, fakeResult, {
           artifactId: `artifact:${secret.slice(0, 8)}`,
           artifactType: "terminal_output",
           correlationId: "ci-test",
@@ -199,7 +199,7 @@ describe("CI Redaction Verification (T014) [FR-028-011]", () => {
       const trail = new RedactionAuditTrail({ bus: wrappedBus2 });
 
       const normalOutput = "Deployment completed successfully in 1.2s";
-      trail.record(
+      await trail.record(
         "artifact:normal",
         {
           redacted: normalOutput,
