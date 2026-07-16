@@ -133,7 +133,7 @@ export class CredentialStore {
     name: string,
     value: string,
     createOnly: boolean
-  ): Promise<void> {
+  ): Promise<string> {
     const dir = this.credentialDir(providerId, workspaceId);
     mkdirSync(dir, { recursive: true });
 
@@ -163,6 +163,7 @@ export class CredentialStore {
     } finally {
       rmSync(tmpPath, { force: true });
     }
+    return data;
   }
 
   /**
@@ -244,7 +245,7 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
     validateId("name", name);
 
-    await this.persistCredential(providerId, workspaceId, name, value, true);
+    const createdData = await this.persistCredential(providerId, workspaceId, name, value, true);
     try {
       await this.emit("secrets.credential.created", {
         providerId,
@@ -254,6 +255,10 @@ export class CredentialStore {
       });
     } catch (auditError) {
       try {
+        const path = this.credentialPath(providerId, workspaceId, name);
+        if (readFileSync(path, "utf8") !== createdData) {
+          throw new Error("Credential changed before create audit rollback");
+        }
         await this.delete(providerId, workspaceId, name);
       } catch (rollbackError) {
         throw new AggregateError(

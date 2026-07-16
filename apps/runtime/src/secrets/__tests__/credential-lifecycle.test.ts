@@ -64,6 +64,31 @@ describe("CredentialStore: lifecycle operations", () => {
     );
   });
 
+  it("does not delete a concurrent rotation when create audit publication fails", async () => {
+    const publish = bus.publish.bind(bus);
+    bus.publish = async envelope => {
+      if (envelope.topic === "secrets.credential.created") {
+        await store.rotate("providerA", "ws1", "myKey", "rotated", "corr-rotate");
+        throw new Error("audit unavailable");
+      }
+      await publish(envelope);
+    };
+
+    let failure: unknown;
+    try {
+      await store.create("providerA", "ws1", "myKey", "created", "corr-create");
+    } catch (error) {
+      failure = error;
+    }
+
+    expect(failure).toBeInstanceOf(AggregateError);
+    expect((failure as AggregateError).errors[0]).toEqual(new Error("audit unavailable"));
+    expect((failure as AggregateError).errors[1]).toEqual(
+      new Error("Credential changed before create audit rollback")
+    );
+    expect(await store.retrieve("providerA", "ws1", "myKey")).toBe("rotated");
+  });
+
   it("create rejects duplicate credential", async () => {
     await store.create("providerA", "ws1", "myKey", "v1", "corr-001");
     await expect(
