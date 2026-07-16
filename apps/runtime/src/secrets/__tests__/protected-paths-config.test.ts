@@ -64,6 +64,34 @@ describe("ProtectedPathConfig persistence boundaries", () => {
     expect(config.listPatterns()).toEqual(before);
   });
 
+  it("rejects duplicate imported pattern IDs without changing state", async () => {
+    const path = join(tempDir, "patterns.json");
+    writeFileSync(
+      path,
+      JSON.stringify([
+        {
+          id: "duplicate-custom",
+          pattern: "*.first",
+          description: "first",
+          enabled: true,
+          isDefault: false,
+        },
+        {
+          id: "duplicate-custom",
+          pattern: "*.second",
+          description: "second",
+          enabled: true,
+          isDefault: false,
+        },
+      ])
+    );
+    const config = new ProtectedPathConfig();
+    const before = config.listPatterns();
+
+    await expect(config.importPatterns(path)).rejects.toThrow("duplicate id 'duplicate-custom'");
+    expect(config.listPatterns()).toEqual(before);
+  });
+
   it("exports through a complete JSON replacement with no temporary residue", async () => {
     const path = join(tempDir, "nested", "patterns.json");
     const config = new ProtectedPathConfig();

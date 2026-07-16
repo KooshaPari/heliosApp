@@ -128,6 +128,13 @@ export class ProtectedPathConfig {
       throw new Error("Invalid protected path config: expected an array");
     }
     const validated = parsed.map(parsePattern);
+    const ids = new Set<string>();
+    for (const pattern of validated) {
+      if (ids.has(pattern.id)) {
+        throw new Error(`Invalid protected path config: duplicate id '${pattern.id}'`);
+      }
+      ids.add(pattern.id);
+    }
     await this._emit("secrets.protected_paths.config.changed", {
       action: "import",
       count: parsed.length,
