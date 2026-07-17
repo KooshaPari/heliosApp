@@ -1,5 +1,6 @@
 import { RendererPreferencesManager } from "../../../src/settings/renderer_preferences";
 
+import { unlinkSync, writeFileSync } from "fs";
 import { resolve } from "path";
 
 describe("RendererPreferencesManager", () => {
@@ -8,6 +9,11 @@ describe("RendererPreferencesManager", () => {
 
   beforeEach(() => {
     tempPath = resolve("/tmp/test-renderer-prefs.json");
+    try {
+      unlinkSync(tempPath);
+    } catch {
+      // File might not exist
+    }
     manager = new RendererPreferencesManager(tempPath);
   });
 

@@ -32,7 +32,7 @@ export class RendererPreferencesManager {
   }
 
   load(): RendererPreferences {
-    const _startTime = performance.now();
+    const startTime = performance.now();
 
     try {
       if (this.doesFileExist()) {
@@ -50,7 +50,7 @@ export class RendererPreferencesManager {
           return { ...DEFAULT_PREFERENCES };
         }
       }
-    } catch {
+    } catch (error) {
       console.warn("Failed to load renderer preferences, using defaults", error);
     }
 
