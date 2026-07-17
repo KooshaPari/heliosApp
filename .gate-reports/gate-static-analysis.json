@@ -1,0 +1,12 @@
+{
+  "gateName": "static-analysis",
+  "status": "pass",
+  "findings": [],
+  "duration": 182,
+  "timestamp": "2026-03-03T01:14:19.343Z",
+  "summary": {
+    "errors": 0,
+    "warnings": 0,
+    "infos": 0
+  }
+}

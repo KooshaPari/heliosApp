@@ -1,0 +1,7 @@
+# workflow_file|job_name|check_id
+quality-gates.yml|Quality Gates Pipeline|quality-gates
+compliance-check.yml|Constitution Compliance Validation|compliance-check
+external|CodeRabbit|coderabbit-review
+required-check-names-guard.yml|verify-required-check-names|verify-required-check-names
+policy-gate.yml|policy-gate|policy-gate
+agent-dir-guard.yml|enforce-agent-directory-policy|enforce-agent-directory-policy
