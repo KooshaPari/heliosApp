@@ -19,7 +19,7 @@ export interface ContextValidationResult {
   error?: string;
 }
 
-type ContextChangeListener = (event: ContextChangeEvent) => void;
+type ContextChangeListener = (event: ContextChangeEvent) => void | Promise<void>;
 
 /**
  * ActiveContextStore provides a single source of truth for the current
@@ -70,51 +70,52 @@ export class ActiveContextStore {
     this.pendingContext = context;
 
     // Debounce: wait 50ms for any additional changes before committing
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       this.debounceTimer = setTimeout(async () => {
         this.debounceTimer = null;
 
-        const contextToSet = this.pendingContext;
-        this.pendingContext = null;
+        try {
+          const contextToSet = this.pendingContext;
+          this.pendingContext = null;
 
-        // Validate context if validator is set
-        if (contextToSet !== null && this.validator) {
-          const isValid = await this.validator(contextToSet);
-          if (!isValid) {
+          // Validate context if validator is set
+          if (contextToSet !== null && this.validator) {
+            const isValid = await this.validator(contextToSet);
+            if (!isValid) {
             // Emit validation failure event
-            if (this.bus) {
-              await this.bus.publish({
+              if (this.bus) {
+                await this.bus.publish({
                 id: `validation-${Date.now()}`,
                 type: "event",
                 ts: new Date().toISOString(),
                 topic: "context.validation.failed",
                 payload: { context: contextToSet },
-              });
+                });
+              }
+              resolve();
+              return;
             }
-            resolve();
-            return;
           }
-        }
 
         // Store previous context for comparison
-        const previousContext = this.currentContext;
+          const previousContext = this.currentContext;
 
         // Update context
-        this.currentContext = contextToSet;
+          this.currentContext = contextToSet;
 
         // Emit change event to listeners
-        const changeEvent: ContextChangeEvent = {
-          previous: previousContext,
-          current: this.currentContext,
-        };
+          const changeEvent: ContextChangeEvent = {
+            previous: previousContext,
+            current: this.currentContext,
+          };
 
-        for (const listener of this.listeners) {
-          listener(changeEvent);
-        }
+          for (const listener of this.listeners) {
+            await listener(changeEvent);
+          }
 
         // Publish to bus
-        if (this.bus) {
-          await this.bus.publish({
+          if (this.bus) {
+            await this.bus.publish({
             id: `context-change-${Date.now()}`,
             type: "event",
             ts: new Date().toISOString(),
@@ -123,10 +124,13 @@ export class ActiveContextStore {
             lane_id: contextToSet?.laneId,
             session_id: contextToSet?.sessionId,
             payload: changeEvent,
-          });
-        }
+            });
+          }
 
-        resolve();
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
       }, 50);
     });
   }

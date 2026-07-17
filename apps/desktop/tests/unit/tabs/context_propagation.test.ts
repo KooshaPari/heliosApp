@@ -141,15 +141,24 @@ describe("ContextPropagator", () => {
       };
 
       // Start first propagation
-      const _promise1 = propagator.propagateContext(context1);
+      const promise1 = propagator.propagateContext(context1);
 
       // Immediately start second propagation (should cancel first)
       await new Promise(resolve => setTimeout(resolve, 50));
       const promise2 = propagator.propagateContext(context2);
 
-      // Second propagation should complete
-      const result = await promise2;
-      expect(result.successful.length).toBeGreaterThan(0);
+      // Both propagations must settle: the first is explicitly cancelled and
+      // the replacement completes successfully.
+      const [first, second] = await Promise.allSettled([promise1, promise2]);
+      expect(first.status).toBe("rejected");
+      if (first.status === "rejected") {
+        expect(first.reason).toBeInstanceOf(Error);
+        expect(first.reason.name).toBe("AbortError");
+      }
+      expect(second.status).toBe("fulfilled");
+      if (second.status === "fulfilled") {
+        expect(second.value.successful.length).toBeGreaterThan(0);
+      }
     });
   });
 
