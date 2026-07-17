@@ -5,6 +5,7 @@
  * FR-ORF-008 (emit detection events), FR-ORF-009 (configurable interval)
  */
 import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test";
+import fs from "fs/promises";
 import os from "os";
 import path from "path";
 
@@ -37,19 +38,22 @@ describe("OrphanWatchdog", () => {
   let watchdog: InstanceType<typeof OrphanWatchdog>;
   let laneRegistry: InstanceType<typeof LaneRegistry>;
   let bus: InstanceType<typeof InMemoryLocalBus>;
+  let checkpointBaseDir: string;
 
   beforeEach(() => {
     laneRegistry = new LaneRegistry();
     bus = new InMemoryLocalBus();
+    checkpointBaseDir = path.join(os.tmpdir(), `helios-test-watchdog-${Date.now()}`);
   });
 
   afterEach(async () => {
-    watchdog.stop();
+    await watchdog.stop();
+    await fs.rm(checkpointBaseDir, { recursive: true, force: true });
   });
 
   it("should start and stop cleanly", async () => {
     watchdog = new OrphanWatchdog({
-      checkpointBaseDir: path.join(os.tmpdir(), "helios-test-watchdog-" + Date.now()),
+      checkpointBaseDir,
       detectionInterval: 100,
       worktreeBaseDir: "/tmp/test-worktrees",
       sessionRegistry: createMockSessionRegistry(),
@@ -61,7 +65,7 @@ describe("OrphanWatchdog", () => {
     await watchdog.start();
     expect(watchdog).toBeDefined();
 
-    watchdog.stop();
+    await watchdog.stop();
     // Give time for any pending callbacks
     await new Promise(r => setTimeout(r, 150));
 
@@ -71,7 +75,7 @@ describe("OrphanWatchdog", () => {
 
   it("should run detection cycles on interval", async () => {
     watchdog = new OrphanWatchdog({
-      checkpointBaseDir: path.join(os.tmpdir(), "helios-test-watchdog-" + Date.now()),
+      checkpointBaseDir,
       detectionInterval: 50,
       worktreeBaseDir: "/tmp/test-worktrees",
       sessionRegistry: createMockSessionRegistry(),
@@ -95,12 +99,12 @@ describe("OrphanWatchdog", () => {
     expect(events.length).toBeGreaterThan(0);
     expect(events[0].topic).toBe("orphan.detection.cycle_completed");
 
-    watchdog.stop();
+    await watchdog.stop();
   }, 15000);
 
   it("should emit detection cycle event with correct structure", async () => {
     watchdog = new OrphanWatchdog({
-      checkpointBaseDir: path.join(os.tmpdir(), "helios-test-watchdog-" + Date.now()),
+      checkpointBaseDir,
       detectionInterval: 50,
       worktreeBaseDir: "/tmp/test-worktrees",
       sessionRegistry: createMockSessionRegistry(),
@@ -131,12 +135,12 @@ describe("OrphanWatchdog", () => {
     expect(summary?.zellijSessions).toBe(0);
     expect(summary?.ptyProcesses).toBe(0);
 
-    watchdog.stop();
+    await watchdog.stop();
   }, 15000);
 
   it("should not allow double start", async () => {
     watchdog = new OrphanWatchdog({
-      checkpointBaseDir: path.join(os.tmpdir(), "helios-test-watchdog-" + Date.now()),
+      checkpointBaseDir,
       detectionInterval: 100,
       worktreeBaseDir: "/tmp/test-worktrees",
       sessionRegistry: createMockSessionRegistry(),
@@ -151,12 +155,12 @@ describe("OrphanWatchdog", () => {
     // Second start should warn but not fail
     await watchdog.start();
 
-    watchdog.stop();
+    await watchdog.stop();
   }, 15000);
 
   it("should track detection duration", async () => {
     watchdog = new OrphanWatchdog({
-      checkpointBaseDir: path.join(os.tmpdir(), "helios-test-watchdog-" + Date.now()),
+      checkpointBaseDir,
       detectionInterval: 50,
       worktreeBaseDir: "/tmp/test-worktrees",
       sessionRegistry: createMockSessionRegistry(),
@@ -177,6 +181,6 @@ describe("OrphanWatchdog", () => {
     expect(duration).toBeGreaterThanOrEqual(0);
     expect(duration).toBeLessThan(5000); // Generous limit for slow CI
 
-    watchdog.stop();
+    await watchdog.stop();
   }, 15000);
 });

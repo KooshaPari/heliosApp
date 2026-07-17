@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import { HotSwapToggle } from "../../../src/settings/hotswap_toggle";
 
 describe("HotSwapToggle", () => {
@@ -17,7 +18,7 @@ describe("HotSwapToggle", () => {
   });
 
   it("should render toggle in enabled state", () => {
-    const onToggle = vi.fn();
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: true,
       onToggle,
@@ -30,7 +31,7 @@ describe("HotSwapToggle", () => {
   });
 
   it("should render toggle in disabled state", () => {
-    const onToggle = vi.fn();
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: false,
       onToggle,
@@ -43,7 +44,7 @@ describe("HotSwapToggle", () => {
   });
 
   it("should toggle when clicked", () => {
-    const onToggle = vi.fn();
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: true,
       onToggle,
@@ -58,7 +59,7 @@ describe("HotSwapToggle", () => {
   });
 
   it("should show correct tooltip for enabled state", () => {
-    const onToggle = vi.fn();
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: true,
       onToggle,
@@ -71,7 +72,7 @@ describe("HotSwapToggle", () => {
   });
 
   it("should show correct tooltip for disabled state", () => {
-    const onToggle = vi.fn();
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: false,
       onToggle,
@@ -84,7 +85,7 @@ describe("HotSwapToggle", () => {
   });
 
   it("should update when update() is called", () => {
-    const onToggle = vi.fn();
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: true,
       onToggle,
@@ -102,7 +103,7 @@ describe("HotSwapToggle", () => {
   });
 
   it("should handle keyboard activation", () => {
-    const onToggle = vi.fn();
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: true,
       onToggle,
@@ -118,7 +119,7 @@ describe("HotSwapToggle", () => {
   });
 
   it("should have proper accessibility attributes", () => {
-    const onToggle = vi.fn();
+    const onToggle = mock();
     toggle = new HotSwapToggle({
       isEnabled: true,
       onToggle,

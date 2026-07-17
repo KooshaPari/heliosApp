@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
+import type { AuditSink } from "../audit/audit-sink.js"; // Used for type annotation
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
-import type { RedactionResult, RedactionContext } from "./redaction-engine.js";
-import type { AuditSink } from "../audit/audit-sink.js"; // Used for type annotation
+import type { RedactionContext, RedactionResult } from "./redaction-engine.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -24,6 +24,10 @@ export interface AuditFilter {
   since?: Date;
 }
 
+function cloneAuditRecord(record: RedactionAuditRecord): RedactionAuditRecord {
+  return structuredClone(record);
+}
+
 // ---------------------------------------------------------------------------
 // RedactionAuditTrail
 // ---------------------------------------------------------------------------
@@ -38,11 +42,11 @@ export class RedactionAuditTrail {
     this.auditSink = opts?.auditSink ?? null;
   }
 
-  record(
+  async record(
     artifactId: string,
     result: RedactionResult,
     context: RedactionContext
-  ): RedactionAuditRecord {
+  ): Promise<RedactionAuditRecord> {
     const rulesApplied = [...new Set(result.matches.map(m => m.ruleId))];
     const matchesByCategory: Record<string, number> = {};
     for (const match of result.matches) {
@@ -60,8 +64,7 @@ export class RedactionAuditTrail {
       correlationId: context.correlationId,
     };
 
-    this.records.set(artifactId, auditRecord);
-    void this._emit("secrets.redaction.applied", {
+    await this._emit("secrets.redaction.applied", {
       artifactId,
       artifactType: context.artifactType,
       matchCount: result.matches.length,
@@ -70,8 +73,9 @@ export class RedactionAuditTrail {
       latencyMs: result.latencyMs,
       correlationId: context.correlationId,
     });
+    this.records.set(artifactId, auditRecord);
 
-    return auditRecord;
+    return cloneAuditRecord(auditRecord);
   }
 
   verify(artifactId: string): boolean {
@@ -90,7 +94,7 @@ export class RedactionAuditTrail {
       records = records.filter(r => new Date(r.timestamp) >= since);
     }
 
-    return records;
+    return records.map(cloneAuditRecord);
   }
 
   private async _emit(topic: string, payload: Record<string, unknown>): Promise<void> {

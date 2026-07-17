@@ -24,6 +24,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "oxlint apps/",
     "format": "biome format --write apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
+    "format:check": "biome format apps docs/.vitepress playwright.config.ts tsconfig.json package.json",
     "test": "bun test apps/runtime/tests/unit scripts/tests/",
     "test:desktop": "bun test apps/desktop/tests/unit",
     "test:integration": "bun test --timeout 60000 apps/runtime/tests/integration",
@@ -49,6 +50,7 @@
     "solid-js": "^1.9.12"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
     "@biomejs/biome": "2.4.13",
     "@playwright/test": "1.59.1",
     "@types/node": "25.6.0",

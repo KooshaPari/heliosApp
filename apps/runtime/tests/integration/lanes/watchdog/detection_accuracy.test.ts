@@ -2,24 +2,30 @@
  * FR-HELIOS-085: Orphan Detection Accuracy Integration Tests
  * Verifies: FR-ORF-001 (Orphan detection), FR-ORF-006 (Resource classification)
  */
-import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
+import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { createTestCooldownFile, removeTestCooldownFile } from "./cooldown_test_utils.js";
 
 describe("Detection Accuracy", () => {
   let engine: RemediationEngine;
   let bus: InMemoryLocalBus;
   let laneRegistry: LaneRegistry;
+  let cooldownFile: string;
 
   beforeEach(() => {
     bus = new InMemoryLocalBus();
     laneRegistry = new LaneRegistry();
-    engine = new RemediationEngine(laneRegistry, bus);
+    cooldownFile = createTestCooldownFile();
+    engine = new RemediationEngine(laneRegistry, bus, { cooldownFile });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     engine.stop();
+    await removeTestCooldownFile(cooldownFile);
   });
 
   it("should detect all orphans in mixed environment", async () => {

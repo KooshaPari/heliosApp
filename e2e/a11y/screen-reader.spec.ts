@@ -48,3 +48,19 @@ test("colab: terminal has role=application and screen-reader mode enabled", asyn
   const accessibleTree = await page.locator(".xterm-accessibility").count();
   expect(accessibleTree).toBeGreaterThanOrEqual(0); // 0 in headless, >0 in real browser
 });
+
+test("colab: terminal tabs use a tablist with separate close controls", async ({ page }) => {
+  await page.goto(`http://localhost:${PORTS.colab}/`);
+
+  const tablist = page.getByRole("tablist", { name: "Terminal sessions" });
+  const tabs = tablist.getByRole("tab");
+  const closeControls = page.getByRole("button", { name: /^Close / });
+  const close = closeControls.first();
+
+  await expect(tablist).toBeVisible();
+  await expect(tabs.first()).toBeVisible();
+  await expect(close).toBeVisible();
+  expect(await closeControls.count()).toBe(await tabs.count());
+  expect(await close.evaluate(element => element.closest('[role="tablist"]') !== null)).toBe(false);
+  expect(await close.evaluate(element => element.closest('[role="tab"]') !== null)).toBe(false);
+});

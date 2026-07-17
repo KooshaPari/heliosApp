@@ -7,7 +7,6 @@ import { BusAuditSubscriber } from "../../../src/audit/bus-subscriber";
 import type { BusEvent } from "../../../src/audit/bus-subscriber";
 import { DefaultAuditSink, NoOpAuditStorage } from "../../../src/audit/sink";
 
-
 describe("BusAuditSubscriber", () => {
   let subscriber: BusAuditSubscriber;
   let sink: DefaultAuditSink;
@@ -38,6 +37,34 @@ describe("BusAuditSubscriber", () => {
   describe("subscribe", () => {
     it("should subscribe to bus events", () => {
       expect(() => subscriber.subscribe(mockBus, sink)).not.toThrow();
+    });
+
+    it("should log sink errors without rejecting bus dispatch", async () => {
+      const sinkError = new Error("sink unavailable");
+      sink.write = async () => {
+        throw sinkError;
+      };
+      const originalConsoleError = console.error;
+      const loggedErrors: unknown[][] = [];
+      console.error = (...args: unknown[]) => {
+        loggedErrors.push(args);
+      };
+
+      subscriber.subscribe(mockBus, sink);
+
+      try {
+        await expect(
+          mockBus.emit({
+            topic: "lane.created",
+            payload: {},
+            workspaceId: "workspace-1",
+          })
+        ).resolves.toBeUndefined();
+      } finally {
+        console.error = originalConsoleError;
+      }
+
+      expect(loggedErrors).toEqual([["[BusAuditSubscriber] Error handling bus event:", sinkError]]);
     });
   });
 

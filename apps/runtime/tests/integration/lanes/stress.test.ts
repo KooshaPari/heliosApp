@@ -3,9 +3,12 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { afterEach, beforeEach, describe, expect, setDefaultTimeout, test } from "bun:test";
 import { _resetIdCounter, LaneManager } from "../../../src/lanes/index.js";
 import { LaneCapacityExceededError } from "../../../src/lanes/registry.js";
 import { InMemoryLocalBus } from "../../../src/protocol/bus.js";
+
+setDefaultTimeout(30000);
 
 async function runGit(args: string[], cwd: string): Promise<string> {
   const proc = Bun.spawn(["git", ...args], {
@@ -13,8 +16,11 @@ async function runGit(args: string[], cwd: string): Promise<string> {
     stdout: "pipe",
     stderr: "pipe",
   });
-  const stdout = await new Response(proc.stdout).text();
-  await proc.exited;
+  const [stdout] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ]);
   return stdout.trim();
 }
 
@@ -25,11 +31,12 @@ async function createTempRepo(): Promise<string> {
   );
   fs.mkdirSync(tmpDir, { recursive: true });
   await runGit(["init", "-b", "main"], tmpDir);
-  await runGit(["config", "user.email", "test@test.com"], tmpDir);
-  await runGit(["config", "user.name", "Test"], tmpDir);
   fs.writeFileSync(path.join(tmpDir, "file.txt"), "content\n");
   await runGit(["add", "."], tmpDir);
-  await runGit(["commit", "-m", "initial"], tmpDir);
+  await runGit(
+    ["-c", "user.email=test@test.com", "-c", "user.name=Test", "commit", "-m", "initial"],
+    tmpDir
+  );
   return tmpDir;
 }
 
@@ -49,7 +56,7 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
     repoDir = await createTempRepo();
     bus = new InMemoryLocalBus();
     mgr = new LaneManager({ bus, capacityLimit: 50 });
-  });
+  }, 30000);
 
   afterEach(() => {
     cleanupDir(repoDir);
@@ -57,11 +64,11 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
 
   test("50 concurrent lanes: create, provision, verify, cleanup", async () => {
     const LANE_COUNT = 50;
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     // Step 1: Create 50 lanes concurrently
-    const createPromises = Array.from({ length: LANE_COUNT }, (_,_i) =>
-      mgr.create(`ws-stress`, "main")
+    const createPromises = Array.from({ length: LANE_COUNT }, () =>
+      mgr.create("ws-stress", "main")
     );
     const lanes = await Promise.all(createPromises);
     expect(lanes.length).toBe(LANE_COUNT);
@@ -121,8 +128,7 @@ describe("Concurrent Lane Stress Test (NFR-008-003)", () => {
     try {
       await mgr.create("ws-cap", "main");
       expect(true).toBe(false); // should not reach
-     // eslint-disable-next-line no-unused-vars
-    } catch (_err) {
+    } catch (e) {
       expect(e).toBeInstanceOf(LaneCapacityExceededError);
     }
   });

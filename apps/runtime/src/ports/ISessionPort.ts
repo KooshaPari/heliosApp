@@ -17,7 +17,7 @@ export interface SessionCreateOptions {
 
 export interface SessionCheckpoint {
   readonly sessionId: string;
-  readonly checkpointAt: string;   // ISO-8601
+  readonly checkpointAt: string; // ISO-8601
   readonly metadata: Record<string, unknown>;
 }
 

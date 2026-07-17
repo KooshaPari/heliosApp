@@ -1,12 +1,13 @@
 // T007-T009 - Remediation engine with confirmation gates and recovery suppression
 
-import { promises as fs } from "fs";
+import { randomUUID } from "node:crypto";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { execCommand } from "../../integrations/exec.js";
-import path from "path";
-import os from "os";
-import { type ClassifiedOrphan, type ResourceType } from "./resource_classifier.js";
 import type { LocalBus } from "../../protocol/bus.js";
 import type { LaneRegistry } from "../registry.js";
+import type { ClassifiedOrphan, ResourceType } from "./resource_classifier.js";
 
 export interface RemediationSuggestion {
   id: string;
@@ -28,29 +29,67 @@ interface CooldownEntry {
   expiresAt: number; // milliseconds since epoch
 }
 
+export interface RemediationEngineOptions {
+  cooldownFile?: string;
+  snapshotDirectory?: string;
+}
+
+function isCooldownEntry(value: unknown): value is CooldownEntry {
+  if (typeof value !== "object" || value === null) return false;
+
+  const entry = value as Partial<CooldownEntry>;
+  return (
+    typeof entry.resourceKey === "string" &&
+    entry.resourceKey.length > 0 &&
+    typeof entry.expiresAt === "number" &&
+    Number.isInteger(entry.expiresAt) &&
+    entry.expiresAt > 0
+  );
+}
+
+function parseCooldownEntries(value: unknown): CooldownEntry[] | null {
+  if (!Array.isArray(value) || !value.every(isCooldownEntry)) return null;
+
+  const resourceKeys = new Set(value.map(entry => entry.resourceKey));
+  return resourceKeys.size === value.length ? value : null;
+}
+
+function sanitizeSnapshotOwner(owner: string): string {
+  const sanitized = owner
+    .normalize("NFKC")
+    .replace(/[^A-Za-z0-9._-]/g, "_")
+    .replace(/^\.+/, "_")
+    .slice(0, 80);
+  return sanitized || "unknown";
+}
+
 export class RemediationEngine {
   private suggestions = new Map<string, RemediationSuggestion>();
   private cooldownMap = new Map<string, CooldownEntry>();
   private readonly cooldownDurationMs = 24 * 60 * 60 * 1000; // 24 hours
-  private readonly cooldownPath = path.join(
-    os.homedir(),
-    ".helios",
-    "data",
-    "remediation_cooldown.json"
-  );
+  private readonly cooldownPath: string;
+  private readonly cooldownReady: Promise<void>;
+  private readonly snapshotDirectory: string;
 
   constructor(
     private readonly laneRegistry: LaneRegistry,
-    private readonly bus: LocalBus
+    private readonly bus: LocalBus,
+    options: RemediationEngineOptions = {}
   ) {
-    this.loadCooldownMap();
+    this.cooldownPath =
+      options.cooldownFile ??
+      path.join(os.homedir(), ".helios", "data", "remediation_cooldown.json");
+    this.snapshotDirectory =
+      options.snapshotDirectory ?? path.join(os.homedir(), ".helios", "data", "worktree_snapshots");
+    this.cooldownReady = this.loadCooldownMap();
   }
 
   async generateSuggestions(orphans: ClassifiedOrphan[]): Promise<RemediationSuggestion[]> {
+    await this.cooldownReady;
     const suggestions: RemediationSuggestion[] = [];
 
     // Expire old cooldown entries
-    this.expireCooldownEntries();
+    await this.expireCooldownEntries();
 
     for (const orphan of orphans) {
       // Check if resource is in cooldown
@@ -155,6 +194,7 @@ export class RemediationEngine {
   }
 
   async declineCleanup(suggestionId: string): Promise<void> {
+    await this.cooldownReady;
     const suggestion = this.suggestions.get(suggestionId);
     if (!suggestion) {
       return;
@@ -168,7 +208,7 @@ export class RemediationEngine {
     });
 
     // Persist cooldown
-    this.saveCooldownMap();
+    await this.saveCooldownMap();
 
     // Remove suggestion
     this.suggestions.delete(suggestionId);
@@ -204,7 +244,7 @@ export class RemediationEngine {
             resourceType: orphan.type,
           };
       }
-    } catch {
+    } catch (error) {
       return {
         resourceId: orphan.path || String(orphan.pid),
         success: false,
@@ -246,7 +286,7 @@ export class RemediationEngine {
           resourceType: "worktree",
         };
       }
-    } catch {
+    } catch (error) {
       return {
         resourceId: orphan.path,
         success: false,
@@ -259,11 +299,11 @@ export class RemediationEngine {
   private async snapshotWorktree(orphan: ClassifiedOrphan): Promise<void> {
     if (!orphan.path) return;
 
-    const snapshotDir = path.join(os.homedir(), ".helios", "data", "worktree_snapshots");
-    await fs.mkdir(snapshotDir, { recursive: true });
+    await fs.mkdir(this.snapshotDirectory, { recursive: true });
 
-    const snapshotName = `${Date.now()}-${orphan.estimatedOwner}.json`;
-    const snapshotPath = path.join(snapshotDir, snapshotName);
+    const snapshotName = `${Date.now()}-${randomUUID()}-${sanitizeSnapshotOwner(orphan.estimatedOwner)}.json`;
+    const snapshotPath = path.join(this.snapshotDirectory, snapshotName);
+    const tempPath = path.join(this.snapshotDirectory, `.${snapshotName}.tmp`);
 
     const snapshot = {
       timestamp: new Date().toISOString(),
@@ -273,7 +313,14 @@ export class RemediationEngine {
       age: orphan.age,
     };
 
-    await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2));
+    try {
+      await fs.writeFile(tempPath, JSON.stringify(snapshot, null, 2));
+      await fs.rename(tempPath, snapshotPath);
+    } finally {
+      await fs.unlink(tempPath).catch(() => {
+        // The rename consumed the temp file, or cleanup is best-effort after failure.
+      });
+    }
   }
 
   private async cleanupZellijSession(orphan: ClassifiedOrphan): Promise<CleanupResult> {
@@ -304,7 +351,7 @@ export class RemediationEngine {
           resourceType: "zellij_session",
         };
       }
-    } catch {
+    } catch (error) {
       return {
         resourceId: orphan.path,
         success: false,
@@ -371,7 +418,7 @@ export class RemediationEngine {
           resourceType: "pty_process",
         };
       }
-    } catch {
+    } catch (error) {
       return {
         resourceId: String(orphan.pid),
         success: false,
@@ -404,7 +451,7 @@ export class RemediationEngine {
     }
   }
 
-  private expireCooldownEntries(): void {
+  private async expireCooldownEntries(): Promise<void> {
     const now = Date.now();
     const expiredKeys: string[] = [];
 
@@ -419,19 +466,21 @@ export class RemediationEngine {
     }
 
     if (expiredKeys.length > 0) {
-      this.saveCooldownMap();
+      await this.saveCooldownMap();
     }
   }
 
   private async loadCooldownMap(): Promise<void> {
     try {
       const content = await fs.readFile(this.cooldownPath, "utf-8");
-      const entries = JSON.parse(content) as CooldownEntry[];
+      const entries = parseCooldownEntries(JSON.parse(content));
+      if (!entries) return;
+
       for (const entry of entries) {
         this.cooldownMap.set(entry.resourceKey, entry);
       }
       // Expire old entries
-      this.expireCooldownEntries();
+      await this.expireCooldownEntries();
     } catch {
       // File doesn't exist or is corrupt - start fresh
     }
@@ -443,15 +492,21 @@ export class RemediationEngine {
     this.suggestions.clear();
   }
 
-  private saveCooldownMap(): void {
+  private async saveCooldownMap(): Promise<void> {
+    const tempPath = `${this.cooldownPath}.tmp-${process.pid}-${randomUUID()}`;
     try {
       const dir = path.dirname(this.cooldownPath);
-      fs.mkdir(dir, { recursive: true }).then(() => {
-        const entries = Array.from(this.cooldownMap.values());
-        fs.writeFile(this.cooldownPath, JSON.stringify(entries, null, 2));
-      });
-    } catch {
+      await fs.mkdir(dir, { recursive: true });
+      const entries = Array.from(this.cooldownMap.values());
+      await fs.writeFile(tempPath, JSON.stringify(entries, null, 2));
+      await fs.rename(tempPath, this.cooldownPath);
+    } catch (error) {
       console.error("Failed to save cooldown map:", error);
+      throw error;
+    } finally {
+      await fs.unlink(tempPath).catch(() => {
+        // The rename already consumed the temp file, or cleanup is best-effort after failure.
+      });
     }
   }
 

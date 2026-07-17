@@ -10,10 +10,35 @@ export type BindingTripleValidationOptions = {
   skipReferenceChecks?: boolean;
 };
 
-function isValidIdFormat(id: string): boolean {
+const BINDING_STATES = new Set<string>(Object.values(BindingState));
+
+export function isValidIdFormat(id: unknown): id is string {
   if (!id || typeof id !== "string") return false;
   if (id.length < 1 || id.length > 36) return false;
   return /^[a-z0-9-]+$/.test(id);
+}
+
+export function isTerminalBinding(value: unknown): value is TerminalBinding {
+  if (typeof value !== "object" || value === null) return false;
+
+  const candidate = value as Partial<TerminalBinding>;
+  const triple = candidate.binding;
+  return (
+    isValidIdFormat(candidate.terminalId) &&
+    typeof triple === "object" &&
+    triple !== null &&
+    isValidIdFormat(triple.workspaceId) &&
+    isValidIdFormat(triple.laneId) &&
+    isValidIdFormat(triple.sessionId) &&
+    typeof candidate.state === "string" &&
+    BINDING_STATES.has(candidate.state) &&
+    typeof candidate.createdAt === "number" &&
+    Number.isFinite(candidate.createdAt) &&
+    candidate.createdAt >= 0 &&
+    typeof candidate.updatedAt === "number" &&
+    Number.isFinite(candidate.updatedAt) &&
+    candidate.updatedAt >= candidate.createdAt
+  );
 }
 
 export function validateBindingTriple(

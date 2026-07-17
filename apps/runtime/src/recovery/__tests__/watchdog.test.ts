@@ -19,6 +19,8 @@ describe("Watchdog", () => {
   });
 
   afterEach(async () => {
+    await watchdog.waitForIdle();
+    watchdog.dispose();
     vi.restoreAllMocks();
     vi.useRealTimers();
     // Cleanup temp dir
@@ -31,6 +33,7 @@ describe("Watchdog", () => {
 
     watchdog.registerProcess("test-proc", 1234, 2000);
     vi.advanceTimersByTime(4100); // 2 * 2000 + 100ms
+    await watchdog.waitForIdle();
 
     expect(crashEvents.length).toBe(1);
     expect(crashEvents[0].reason).toBe(CrashReason.HEARTBEAT_TIMEOUT);
@@ -67,6 +70,7 @@ describe("Watchdog", () => {
 
     watchdog.registerProcess("test-proc", 1234, 1000);
     vi.advanceTimersByTime(2100);
+    await watchdog.waitForIdle();
 
     expect(crashEvents.length).toBe(1);
     expect(crashEvents[0].reason).toBeDefined();
@@ -75,6 +79,7 @@ describe("Watchdog", () => {
   it("should publish crash event to bus", async () => {
     watchdog.registerProcess("test-proc", 1234, 1000);
     vi.advanceTimersByTime(2100);
+    await watchdog.waitForIdle();
 
     const events = bus.getEvents();
     expect(events.length).toBeGreaterThan(0);
@@ -85,10 +90,7 @@ describe("Watchdog", () => {
   it("should write crash record to filesystem", async () => {
     watchdog.registerProcess("test-proc", 1234, 1000);
     vi.advanceTimersByTime(2100);
-    vi.runAllTimers();
-
-    // Give async operations time to complete
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await watchdog.waitForIdle();
 
     const recordPath = path.join(tempDir, "recovery", "last-crash.json");
     const exists = await fs
@@ -149,6 +151,7 @@ describe("Watchdog", () => {
     watchdog.registerProcess("proc2", 1002, 2000);
 
     vi.advanceTimersByTime(4100);
+    await watchdog.waitForIdle();
 
     expect(crashEvents.length).toBe(2);
     expect(crashEvents.map(e => e.name)).toContain("proc1");

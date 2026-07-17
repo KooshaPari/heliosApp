@@ -13,7 +13,7 @@ export class VllmInferenceEngine implements InferenceEngine {
   constructor(endpoint = "http://localhost:8000", apiKey = "") {
     this.endpoint = endpoint;
     this.client = ky.create({
-      prefixUrl: endpoint,
+      prefix: endpoint,
       retry: { limit: 3, methods: ["get", "post"], statusCodes: [429, 500, 502, 503, 504] },
       headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
     });

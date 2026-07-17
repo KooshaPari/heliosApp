@@ -5,9 +5,7 @@
  * FR-ZMX-005 (relay mux events), FR-ZMX-006 (session reattach after restart), FR-ZMX-008 (reconcile bindings)
  */
 import { describe, expect, it, mock, beforeEach } from "bun:test";
-import {
-  ZellijSessionManager,
-} from "../../../../src/integrations/zellij/session.js";
+import { ZellijSessionManager } from "../../../../src/integrations/zellij/session.js";
 import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
 import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
 import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";
@@ -179,7 +177,7 @@ describe("Integration: full lifecycle", () => {
 describe("Integration: reattach", () => {
   it("creates session, simulates restart, reattaches, verifies topology", async () => {
     const cli = new FakeCli();
-    const _registry = new MuxRegistry(cli as unknown as ZellijCli);
+    const registry = new MuxRegistry(cli as unknown as ZellijCli);
     const topology = new TopologyTracker(cli as unknown as ZellijCli);
     const bus = makeEventBus();
     const emitter = new MuxEventEmitter(bus);
@@ -218,7 +216,7 @@ describe("Integration: reattach", () => {
 describe("Integration: reconciliation", () => {
   it("creates orphans, runs reconciliation, verifies cleanup", async () => {
     const cli = new FakeCli();
-    const _registry = new MuxRegistry(cli as unknown as ZellijCli);
+    const registry = new MuxRegistry(cli as unknown as ZellijCli);
 
     // Create an orphan session (live but not in registry)
     cli.sessions.set("helios-lane-orphan", {

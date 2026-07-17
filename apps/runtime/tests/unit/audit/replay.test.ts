@@ -14,7 +14,7 @@ describe("ReplayEngine", () => {
     engine = new ReplayEngine();
 
     // Create mock replay stream
-    const _startTime = new Date("2026-03-01T10:00:00Z");
+    const startTime = new Date("2026-03-01T10:00:00Z");
     const endTime = new Date("2026-03-01T11:00:00Z");
 
     const snapshot: SessionSnapshot = {
@@ -49,6 +49,21 @@ describe("ReplayEngine", () => {
       endTime,
       duration: endTime.getTime() - startTime.getTime(),
     };
+  });
+
+  describe("loadSession", () => {
+    it("returns a bounded empty replay stream", async () => {
+      const beforeLoad = Date.now();
+      const stream = await engine.loadSession("session-1", {});
+      const afterLoad = Date.now();
+
+      expect(stream.sessionId).toBe("session-1");
+      expect(stream.snapshots).toEqual([]);
+      expect(stream.events).toEqual([]);
+      expect(stream.startTime.getTime()).toBeGreaterThanOrEqual(beforeLoad);
+      expect(stream.endTime.getTime()).toBeLessThanOrEqual(afterLoad);
+      expect(stream.duration).toBe(stream.endTime.getTime() - stream.startTime.getTime());
+    });
   });
 
   describe("getStateAtTime", () => {

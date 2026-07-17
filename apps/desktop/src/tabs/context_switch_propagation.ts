@@ -20,7 +20,6 @@ export interface PropagationResult {
  */
 export class ContextPropagator {
   private registeredTabs: Map<string, TabSurface> = new Map();
-  private currentPropagation: Promise<PropagationResult> | null = null;
   private propagationAbortController: AbortController | null = null;
   private readonly PROPAGATION_TIMEOUT = 500; // ms
 
@@ -44,13 +43,12 @@ export class ContextPropagator {
    */
   async propagateContext(context: ActiveContext | null): Promise<PropagationResult> {
     // Cancel previous propagation if still in progress
-    if (this.propagationAbortController) {
-      this.propagationAbortController.abort();
-    }
+    this.propagationAbortController?.abort();
 
-    this.propagationAbortController = new AbortController();
+    const controller = new AbortController();
+    this.propagationAbortController = controller;
 
-    const _startTime = Date.now();
+    const startTime = Date.now();
     const result: PropagationResult = {
       successful: [],
       failed: [],
@@ -61,23 +59,19 @@ export class ContextPropagator {
     const propagationPromises: Promise<void>[] = [];
 
     for (const [tabId, tab] of this.registeredTabs) {
-      const tabPromise = this.propagateTabWithTimeout(
-        tab,
-        context,
-        this.propagationAbortController.signal
-      )
+      const tabPromise = this.propagateTabWithTimeout(tab, context, controller.signal)
         .then(success => {
           if (success) {
             result.successful.push(tabId);
           }
         })
         .catch(error => {
-          if (error.name === "AbortError") {
+          if (error instanceof Error && error.name === "AbortError") {
             // Propagation was cancelled
             return;
           }
 
-          if (error.message === "TIMEOUT") {
+          if (error instanceof Error && error.message === "TIMEOUT") {
             result.timed_out.push(tabId);
           } else {
             result.failed.push(tabId);
@@ -88,17 +82,20 @@ export class ContextPropagator {
       propagationPromises.push(tabPromise);
     }
 
-    // Wait for all propagations to complete
-    await Promise.all(propagationPromises);
+    try {
+      await Promise.all(propagationPromises);
+      result.duration_ms = Date.now() - startTime;
 
-    result.duration_ms = Date.now() - startTime;
+      if (controller.signal.aborted) {
+        throw this.createAbortError();
+      }
 
-    // If propagation was cancelled, throw error
-    if (this.propagationAbortController.signal.aborted) {
-      throw new Error("Propagation cancelled");
+      return result;
+    } finally {
+      if (this.propagationAbortController === controller) {
+        this.propagationAbortController = null;
+      }
     }
-
-    return result;
   }
 
   /**
@@ -109,19 +106,48 @@ export class ContextPropagator {
     context: ActiveContext | null,
     signal: AbortSignal
   ): Promise<boolean> {
-    return Promise.race([
-      tab.onContextChange(context).then(() => true),
-      new Promise<boolean>((_, reject) => {
-        const timeoutId = setTimeout(() => {
-          reject(new Error("TIMEOUT"));
-        }, this.PROPAGATION_TIMEOUT);
+    return new Promise<boolean>((resolve, reject) => {
+      let settled = false;
 
-        signal.addEventListener("abort", () => {
-          clearTimeout(timeoutId);
-          reject(new Error("Propagation cancelled"));
-        });
-      }),
-    ]);
+      const cleanup = (): void => {
+        clearTimeout(timeoutId);
+        signal.removeEventListener("abort", onAbort);
+      };
+
+      const settle = (callback: () => void): void => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        callback();
+      };
+
+      const onAbort = (): void => {
+        settle(() => reject(this.createAbortError()));
+      };
+
+      const timeoutId = setTimeout(() => {
+        settle(() => reject(new Error("TIMEOUT")));
+      }, this.PROPAGATION_TIMEOUT);
+
+      signal.addEventListener("abort", onAbort, { once: true });
+      if (signal.aborted) {
+        onAbort();
+        return;
+      }
+
+      Promise.resolve()
+        .then(() => tab.onContextChange(context))
+        .then(
+          () => settle(() => resolve(true)),
+          error => settle(() => reject(error))
+        );
+    });
+  }
+
+  private createAbortError(): Error {
+    const error = new Error("Propagation cancelled");
+    error.name = "AbortError";
+    return error;
   }
 
   /**

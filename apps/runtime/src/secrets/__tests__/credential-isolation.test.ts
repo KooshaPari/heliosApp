@@ -1,10 +1,11 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { randomBytes } from "node:crypto";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { EncryptionService } from "../encryption.js";
-import { CredentialStore, CredentialAccessDeniedError } from "../credential-store.js";
 import { InMemoryLocalBus } from "../../protocol/bus.js";
+import { CredentialAccessDeniedError, CredentialStore } from "../credential-store.js";
+import { EncryptionService } from "../encryption.js";
 
 function makeStore(dataDir: string, bus: InMemoryLocalBus): CredentialStore {
   const fixedKey = randomBytes(32);
@@ -76,13 +77,46 @@ describe("CredentialStore: cross-provider isolation", () => {
     } catch {
       // expected
     }
-    // Give the fire-and-forget a tick to settle
-    await new Promise(r => setTimeout(r, 10));
     const events = bus.getEvents();
     const denied = events.find(e => e.topic === "secrets.credential.access.denied");
     expect(denied).toBeDefined();
     expect(denied?.payload?.requestingProviderId).toBe("evil-provider");
     expect(denied?.payload?.targetProviderId).toBe("providerA");
+  });
+
+  it("owns denied audit publication before rejecting access", async () => {
+    let releasePublish: (() => void) | undefined;
+    bus.publish = () =>
+      new Promise<void>(resolve => {
+        releasePublish = resolve;
+      });
+
+    const operation = store.retrieveWithContext(
+      {
+        requestingProviderId: "providerB",
+        requestingWorkspaceId: "ws1",
+        correlationId: "corr-owned-denial",
+      },
+      "providerA",
+      "ws1",
+      "myKey"
+    );
+    let settled = false;
+    const observed = operation.then(
+      () => {
+        settled = true;
+      },
+      () => {
+        settled = true;
+      }
+    );
+    await Promise.resolve();
+    const settledBeforeAudit = settled;
+    releasePublish?.();
+
+    expect(settledBeforeAudit).toBe(false);
+    await expect(operation).rejects.toBeInstanceOf(CredentialAccessDeniedError);
+    await observed;
   });
 
   it("denied event does NOT include credential values", async () => {
@@ -101,10 +135,27 @@ describe("CredentialStore: cross-provider isolation", () => {
     } catch {
       // expected
     }
-    await new Promise(r => setTimeout(r, 10));
     const events = bus.getEvents();
     const raw = JSON.stringify(events);
     expect(raw).not.toContain("secret-value");
+  });
+
+  it("propagates denied audit publication failure", async () => {
+    await store.create("providerA", "ws1", "myKey", "secret-value", "corr-create");
+    bus.publish = () => Promise.reject(new Error("audit unavailable"));
+
+    await expect(
+      store.retrieveWithContext(
+        {
+          requestingProviderId: "providerB",
+          requestingWorkspaceId: "ws1",
+          correlationId: "corr-failed-denial",
+        },
+        "providerA",
+        "ws1",
+        "myKey"
+      )
+    ).rejects.toThrow("audit unavailable");
   });
 
   it("denies cross-workspace access even with same provider", async () => {
@@ -178,7 +229,7 @@ describe("CredentialStore: cross-provider isolation", () => {
         "myKey"
       );
       expect(true).toBe(false); // should not reach here
-    } catch {
+    } catch (err) {
       expect(err).toBeInstanceOf(CredentialAccessDeniedError);
       expect((err as CredentialAccessDeniedError).code).toBe("CREDENTIAL_ACCESS_DENIED");
     }

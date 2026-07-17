@@ -5,7 +5,6 @@
 import { test, expect, describe } from "bun:test";
 import { PolicyEngine } from "../../../src/policy/engine";
 
-
 describe("PolicyEngine", () => {
   test("evaluates command classification correctly", async () => {
     const engine = new PolicyEngine();

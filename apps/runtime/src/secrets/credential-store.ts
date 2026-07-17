@@ -1,6 +1,8 @@
+import { randomBytes } from "node:crypto";
 import {
   chmodSync,
   existsSync,
+  linkSync,
   mkdirSync,
   readdirSync,
   readFileSync,
@@ -10,10 +12,9 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join, resolve, sep } from "node:path";
-import { randomBytes } from "node:crypto";
-import { EncryptionService } from "./encryption.js";
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
+import { EncryptionService } from "./encryption.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -54,8 +55,31 @@ export class CredentialNotFoundError extends Error {
 // ---------------------------------------------------------------------------
 
 const FORBIDDEN_PATTERNS = ["..", "/", "\\", "\0"];
+const WINDOWS_DEVICE_NAME = /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\..*)?$/i;
+const UNSAFE_PATH_CHARACTERS = /[<>:"|?*]/;
 
-function validateId(label: string, value: string): void {
+function containsControlCharacter(value: string): boolean {
+  return [...value].some(character => {
+    const codePoint = character.codePointAt(0);
+    return codePoint !== undefined && (codePoint <= 0x1f || codePoint === 0x7f);
+  });
+}
+
+function validateId(label: string, value: unknown): asserts value is string {
+  if (typeof value !== "string") {
+    throw new Error(`Invalid ${label}: must be a string`);
+  }
+  if (value === ".") {
+    throw new Error(`Invalid ${label}: must not be a collapsed path segment`);
+  }
+  if (
+    /[. ]$/.test(value) ||
+    WINDOWS_DEVICE_NAME.test(value) ||
+    UNSAFE_PATH_CHARACTERS.test(value) ||
+    containsControlCharacter(value)
+  ) {
+    throw new Error(`Invalid ${label}: contains an unsafe path segment`);
+  }
   for (const pat of FORBIDDEN_PATTERNS) {
     if (value.includes(pat)) {
       throw new Error(`Invalid ${label}: contains forbidden character sequence '${pat}'`);
@@ -100,6 +124,17 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
     validateId("name", name);
 
+    await this.persistCredential(providerId, workspaceId, name, value, false);
+  }
+
+  private async persistCredential(
+    providerId: string,
+    workspaceId: string,
+    name: string,
+    value: string,
+    createOnly: boolean,
+    expectedData?: string
+  ): Promise<string> {
     const dir = this.credentialDir(providerId, workspaceId);
     mkdirSync(dir, { recursive: true });
 
@@ -109,10 +144,33 @@ export class CredentialStore {
     const finalPath = this.credentialPath(providerId, workspaceId, name);
     const tmpPath = `${finalPath}.tmp.${randomBytes(4).toString("hex")}`;
 
-    writeFileSync(tmpPath, data, { encoding: "utf8", mode: 0o600 });
-    renameSync(tmpPath, finalPath);
-    // Ensure permissions even after rename (some platforms reset on rename)
-    chmodSync(finalPath, 0o600);
+    let created = false;
+    try {
+      writeFileSync(tmpPath, data, { encoding: "utf8", mode: 0o600 });
+      if (createOnly) {
+        linkSync(tmpPath, finalPath);
+        created = true;
+      } else {
+        if (
+          expectedData !== undefined &&
+          (!existsSync(finalPath) || readFileSync(finalPath, "utf8") !== expectedData)
+        ) {
+          throw new Error("Credential changed before rotate");
+        }
+        renameSync(tmpPath, finalPath);
+      }
+      // Ensure the published file retains the restrictive temporary-file mode.
+      chmodSync(finalPath, 0o600);
+    } catch (error) {
+      if (created) rmSync(finalPath, { force: true });
+      if (createOnly && (error as NodeJS.ErrnoException).code === "EEXIST") {
+        throw new CredentialAlreadyExistsError(name);
+      }
+      throw error;
+    } finally {
+      rmSync(tmpPath, { force: true });
+    }
+    return data;
   }
 
   /**
@@ -194,23 +252,32 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
     validateId("name", name);
 
-    const path = this.credentialPath(providerId, workspaceId, name);
-    if (existsSync(path)) {
-      throw new CredentialAlreadyExistsError(name);
+    const createdData = await this.persistCredential(providerId, workspaceId, name, value, true);
+    try {
+      await this.emit("secrets.credential.created", {
+        providerId,
+        workspaceId,
+        name,
+        correlationId,
+      });
+    } catch (auditError) {
+      try {
+        const path = this.credentialPath(providerId, workspaceId, name);
+        if (readFileSync(path, "utf8") !== createdData) {
+          throw new Error("Credential changed before create audit rollback");
+        }
+        await this.delete(providerId, workspaceId, name);
+      } catch (rollbackError) {
+        throw new AggregateError(
+          [auditError, rollbackError],
+          "Credential creation audit failed and rollback could not remove the credential"
+        );
+      }
+      throw auditError;
     }
-
-    await this.store(providerId, workspaceId, name, value);
-    await this.emit("secrets.credential.created", {
-      providerId,
-      workspaceId,
-      name,
-      correlationId,
-    });
   }
 
-  /**
-   * Rotates a credential by overwriting irrecoverably (secure delete + rewrite).
-   */
+  /** Rotates a credential through an atomic encrypted replacement. */
   async rotate(
     providerId: string,
     workspaceId: string,
@@ -226,26 +293,17 @@ export class CredentialStore {
     if (!existsSync(path)) {
       throw new CredentialNotFoundError(name);
     }
+    const expectedData = readFileSync(path, "utf8");
 
-    /**
-     * Best-effort overwrite with random bytes before writing the new value.
-     * Note: on modern SSDs, APFS, and other copy-on-write filesystems this
-     * app-level overwrite is NOT guaranteed to erase the underlying sectors.
-     * AES-256-GCM encryption is the primary data-protection mechanism; the
-     * overwrite here is a defence-in-depth measure only.
-     */
-    const size = statSync(path).size;
-    const noise = randomBytes(Math.max(size, 64));
-    writeFileSync(path, noise, { mode: 0o600 });
-
-    // Now write the new value
-    await this.store(providerId, workspaceId, name, newValue);
     await this.emit("secrets.credential.rotated", {
       providerId,
       workspaceId,
       name,
       correlationId,
     });
+    // Build the encrypted replacement before atomically swapping it into place.
+    // The previous credential stays readable if encryption or persistence fails.
+    await this.persistCredential(providerId, workspaceId, name, newValue, false, expectedData);
   }
 
   /**
@@ -261,13 +319,22 @@ export class CredentialStore {
     validateId("workspaceId", workspaceId);
     validateId("name", name);
 
-    await this.delete(providerId, workspaceId, name);
+    const path = this.credentialPath(providerId, workspaceId, name);
+    if (!existsSync(path)) {
+      throw new CredentialNotFoundError(name);
+    }
+    const expectedData = readFileSync(path, "utf8");
+
     await this.emit("secrets.credential.revoked", {
       providerId,
       workspaceId,
       name,
       correlationId,
     });
+    if (!existsSync(path) || readFileSync(path, "utf8") !== expectedData) {
+      throw new Error("Credential changed before revoke");
+    }
+    await this.delete(providerId, workspaceId, name);
   }
 
   /**
@@ -280,7 +347,7 @@ export class CredentialStore {
     workspaceId: string,
     name: string
   ): Promise<string> {
-    this.checkAccess(ctx, targetProviderId, workspaceId);
+    await this.checkAccess(ctx, targetProviderId, workspaceId);
 
     const value = await this.retrieve(targetProviderId, workspaceId, name);
     await this.emit("secrets.credential.accessed", {
@@ -297,11 +364,11 @@ export class CredentialStore {
   // Cross-provider isolation (T004)
   // -------------------------------------------------------------------------
 
-  private checkAccess(
+  private async checkAccess(
     ctx: CredentialAccessContext,
     targetProviderId: string,
     targetWorkspaceId: string
-  ): void {
+  ): Promise<void> {
     validateId("requestingProviderId", ctx.requestingProviderId);
     validateId("requestingWorkspaceId", ctx.requestingWorkspaceId);
     validateId("targetProviderId", targetProviderId);
@@ -311,8 +378,7 @@ export class CredentialStore {
       ctx.requestingProviderId !== targetProviderId ||
       ctx.requestingWorkspaceId !== targetWorkspaceId
     ) {
-      // Fire-and-forget the denied event; we throw synchronously
-      void this.emit("secrets.credential.access.denied", {
+      await this.emit("secrets.credential.access.denied", {
         requestingProviderId: ctx.requestingProviderId,
         requestingWorkspaceId: ctx.requestingWorkspaceId,
         targetProviderId,

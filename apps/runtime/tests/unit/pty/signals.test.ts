@@ -34,7 +34,8 @@ function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
 }
 
 function spawnShellProcess(): number {
-  const proc = Bun.spawn(["/bin/sh"], {
+  const shell = process.platform === "win32" ? (process.env["ComSpec"] ?? "cmd.exe") : "/bin/sh";
+  const proc = Bun.spawn([shell], {
     stdout: "pipe",
     stderr: "pipe",
   }) as { pid?: number };
@@ -121,35 +122,35 @@ describe("resize", () => {
   });
 
   it("rejects zero cols", () => {
-    const _registry = new PtyRegistry();
-    const _record = makeRecord();
+    const registry = new PtyRegistry();
+    const record = makeRecord();
     registry.register(record);
-    expect(() => resize(_record, 0, 24, _registry, new Map(), new InMemoryBusPublisher())).toThrow(
+    expect(() => resize(record, 0, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
       InvalidDimensionsError
     );
   });
 
   it("rejects zero rows", () => {
-    const _registry = new PtyRegistry();
-    const _record = makeRecord();
+    const registry = new PtyRegistry();
+    const record = makeRecord();
     registry.register(record);
-    expect(() => resize(_record, 80, 0, _registry, new Map(), new InMemoryBusPublisher())).toThrow(
+    expect(() => resize(record, 80, 0, registry, new Map(), new InMemoryBusPublisher())).toThrow(
       InvalidDimensionsError
     );
   });
 
   it("rejects cols > 10000", () => {
-    const _registry = new PtyRegistry();
-    const _record = makeRecord();
+    const registry = new PtyRegistry();
+    const record = makeRecord();
     registry.register(record);
     expect(() =>
-      resize(_record, 10001, 24, _registry, new Map(), new InMemoryBusPublisher())
+      resize(record, 10001, 24, registry, new Map(), new InMemoryBusPublisher())
     ).toThrow(InvalidDimensionsError);
   });
 
   it("rejects non-integer dimensions", () => {
-    const _registry = new PtyRegistry();
-    const _record = makeRecord();
+    const registry = new PtyRegistry();
+    const record = makeRecord();
     registry.register(record);
     expect(() => resize(record, 80.5, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
       InvalidDimensionsError
@@ -157,8 +158,8 @@ describe("resize", () => {
   });
 
   it("rejects resize on errored PTY", () => {
-    const _registry = new PtyRegistry();
-    const _record = makeRecord({ state: "errored" });
+    const registry = new PtyRegistry();
+    const record = makeRecord({ state: "errored" });
     registry.register(record);
     expect(() => resize(record, 80, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
       "Cannot resize"
@@ -166,8 +167,8 @@ describe("resize", () => {
   });
 
   it("rejects resize on stopped PTY", () => {
-    const _registry = new PtyRegistry();
-    const _record = makeRecord({ state: "stopped" });
+    const registry = new PtyRegistry();
+    const record = makeRecord({ state: "stopped" });
     registry.register(record);
     expect(() => resize(record, 80, 24, registry, new Map(), new InMemoryBusPublisher())).toThrow(
       "Cannot resize"
@@ -180,9 +181,9 @@ describe("terminate", () => {
     const pid = spawnShellProcess() as number;
     pidsToCleanup.push(pid);
 
-    const _registry = new PtyRegistry();
-    const _record = makeRecord({ pid });
-    _registry.register(_record);
+    const registry = new PtyRegistry();
+    const record = makeRecord({ pid });
+    registry.register(record);
     const lifecycle = new PtyLifecycle(record.ptyId, "active");
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
@@ -207,7 +208,7 @@ describe("terminate", () => {
   });
 
   it("is idempotent on stopped PTY", async () => {
-    const _record = makeRecord({ state: "stopped" });
+    const record = makeRecord({ state: "stopped" });
     const lifecycle = new PtyLifecycle(record.ptyId, "stopped");
     const bus = new InMemoryBusPublisher();
     await terminate(record, lifecycle, new PtyRegistry(), new Map(), bus);
@@ -215,8 +216,8 @@ describe("terminate", () => {
   });
 
   it("escalates to SIGKILL after grace period", async () => {
-    const _registry = new PtyRegistry();
-    const _record = makeRecord({ pid: 99999 });
+    const registry = new PtyRegistry();
+    const record = makeRecord({ pid: 99999 });
     registry.register(record);
     const lifecycle = new PtyLifecycle(record.ptyId, "active");
     const bus = new InMemoryBusPublisher();
@@ -245,22 +246,25 @@ describe("terminate", () => {
 });
 
 describe("sendSighup", () => {
-  it("records successful delivery", () => {
+  it("records the platform signal delivery result", () => {
     // Spawn a real child so SIGHUP has a valid target (not the test runner).
     const pid = spawnShellProcess();
     pidsToCleanup.push(pid);
 
-    const _record = makeRecord({ pid });
+    const record = makeRecord({ pid });
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
     const envelope = sendSighup(record, historyMap, bus);
-    expect(envelope.outcome).toBe("delivered");
+    expect(envelope.outcome).toBe(process.platform === "win32" ? "failed" : "delivered");
+    if (process.platform === "win32") {
+      expect(envelope.error).toBeDefined();
+    }
     expect(envelope.signal).toBe("SIGHUP");
     expect(historyMap.get(record.ptyId)?.length).toBe(1);
   });
 
   it("records failed delivery for dead process", () => {
-    const _record = makeRecord({ pid: 999999 });
+    const record = makeRecord({ pid: 999999 });
     const historyMap: SignalHistoryMap = new Map();
     const bus = new InMemoryBusPublisher();
     const envelope = sendSighup(record, historyMap, bus);

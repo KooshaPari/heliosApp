@@ -29,7 +29,10 @@ export async function handleRuntimeFetch(
       payload: normalizePayload(body.payload),
     };
 
-    const dispatcher = createBoundaryDispatcher({ dispatchLocal: request });
+    const dispatcher = createBoundaryDispatcher({
+      dispatchLocal: request,
+      publishBoundaryEvent: event => context.bus.publish(event),
+    });
     const result = await dispatcher(command);
     if (result.type !== "response") {
       return Response.json({ error: "invalid_boundary_response" }, { status: 500 });

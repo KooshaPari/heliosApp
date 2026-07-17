@@ -2,9 +2,12 @@
  * FR-HELIOS-046: SQLite Audit Store Tests
  * Verifies: FR-AUD-004 (SQLite persistence for durable retention)
  */
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { AUDIT_EVENT_RESULTS, AUDIT_EVENT_TYPES, createAuditEvent } from "../../../src/audit/event";
 import { SQLiteAuditStore } from "../../../src/audit/sqlite-store";
-import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 
 describe("SQLiteAuditStore", () => {
   let store: SQLiteAuditStore;
@@ -53,7 +56,7 @@ describe("SQLiteAuditStore", () => {
         events.push(event);
       }
 
-      const _startTime = Date.now();
+      const startTime = Date.now();
       store.persist(events);
       const endTime = Date.now();
 
@@ -61,6 +64,32 @@ describe("SQLiteAuditStore", () => {
 
       // Should complete in < 1 second for 1000 events
       expect(endTime - startTime).toBeLessThan(1000);
+    });
+
+    it("should roll back the entire batch when an event cannot be serialized", () => {
+      const validEvent = createAuditEvent({
+        eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+        actor: "agent-1",
+        action: "execute",
+        target: "cmd-1",
+        result: AUDIT_EVENT_RESULTS.SUCCESS,
+        workspaceId: "ws-1",
+        correlationId: "corr-valid",
+        metadata: {},
+      });
+      const invalidEvent = createAuditEvent({
+        eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+        actor: "agent-1",
+        action: "execute",
+        target: "cmd-2",
+        result: AUDIT_EVENT_RESULTS.SUCCESS,
+        workspaceId: "ws-1",
+        correlationId: "corr-invalid",
+        metadata: { unsupported: 1n },
+      });
+
+      expect(() => store.persist([validEvent, invalidEvent])).toThrow();
+      expect(store.count()).toBe(0);
     });
   });
 
@@ -91,13 +120,13 @@ describe("SQLiteAuditStore", () => {
     });
 
     it("should query with workspace filter", () => {
-      const _results = store.query({ workspaceId: "ws-1" });
+      const results = store.query({ workspaceId: "ws-1" });
       expect(results.length).toBeLessThanOrEqual(100);
       expect(results.every(e => e.workspaceId === "ws-1")).toBe(true);
     });
 
     it("should query with event type filter", () => {
-      const _results = store.query({
+      const results = store.query({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
       });
       expect(results.length).toBeGreaterThan(0);
@@ -185,6 +214,47 @@ describe("SQLiteAuditStore", () => {
       const size = store.getStorageSize();
       expect(size).toBe(0);
     });
+
+    it("should durably close and release a file-backed database", () => {
+      const tempDirectory = mkdtempSync(join(tmpdir(), "helios-sqlite-close-"));
+      const databasePath = join(tempDirectory, "audit.db");
+      let fileStore: SQLiteAuditStore | undefined;
+      let reopenedStore: SQLiteAuditStore | undefined;
+
+      try {
+        const event = createAuditEvent({
+          eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+          actor: "agent-1",
+          action: "execute",
+          target: "cmd",
+          result: AUDIT_EVENT_RESULTS.SUCCESS,
+          workspaceId: "ws-1",
+          correlationId: "corr-durable-close",
+          metadata: { exitCode: 0 },
+        });
+
+        fileStore = new SQLiteAuditStore(databasePath);
+        fileStore.persist([event]);
+        fileStore.close();
+        fileStore.close();
+        fileStore = undefined;
+
+        reopenedStore = new SQLiteAuditStore(databasePath);
+        expect(reopenedStore.count()).toBe(1);
+        reopenedStore.close();
+        reopenedStore.close();
+        reopenedStore = undefined;
+
+        rmSync(tempDirectory, { recursive: true, force: true });
+        expect(existsSync(tempDirectory)).toBe(false);
+      } finally {
+        fileStore?.close();
+        reopenedStore?.close();
+        if (existsSync(tempDirectory)) {
+          rmSync(tempDirectory, { recursive: true, force: true });
+        }
+      }
+    });
   });
 
   describe("WAL mode", () => {
@@ -209,7 +279,7 @@ describe("SQLiteAuditStore", () => {
 
       // Persist while querying (simulates concurrent access)
       store.persist(events.slice(0, 50));
-      const _results = store.query({ workspaceId: "ws-1" });
+      const results = store.query({ workspaceId: "ws-1" });
 
       store.persist(events.slice(50, 100));
       const finalResults = store.query({ workspaceId: "ws-1" });

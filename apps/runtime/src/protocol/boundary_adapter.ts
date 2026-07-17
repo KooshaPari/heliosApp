@@ -9,11 +9,19 @@ export type BoundaryDispatchDecision = {
 };
 
 type CommandDispatch = (command: LocalBusEnvelope) => Promise<LocalBusEnvelope>;
+type BoundaryEventPublisher = (event: LocalBusEnvelope) => void | Promise<void>;
 
 type BoundaryDispatcherInput = {
   dispatchLocal: CommandDispatch;
   dispatchTool?: CommandDispatch;
   dispatchA2A?: CommandDispatch;
+  publishBoundaryEvent?: BoundaryEventPublisher;
+};
+
+const SUCCESS_TOPICS: Record<BoundaryAdapterName, string> = {
+  local_bus: "boundary.local.dispatched",
+  tool_bridge: "boundary.tool.dispatched",
+  a2a_bridge: "boundary.a2a.delegated",
 };
 
 const LOCAL_METHODS = new Set([
@@ -74,6 +82,36 @@ function normalizedBoundaryError(
   };
 }
 
+async function publishBoundaryResult(
+  input: BoundaryDispatcherInput,
+  command: LocalBusEnvelope,
+  decision: BoundaryDispatchDecision,
+  response: LocalBusEnvelope
+): Promise<void> {
+  if (!input.publishBoundaryEvent) return;
+
+  const succeeded = response.type === "response" && response.status === "ok";
+  const topic = succeeded ? SUCCESS_TOPICS[decision.adapter] : "boundary.dispatch.failed";
+  await input.publishBoundaryEvent({
+    id: `evt-${command.id}-${topic}`,
+    type: "event",
+    ts: new Date().toISOString(),
+    workspace_id: command.workspace_id,
+    lane_id: command.lane_id,
+    session_id: command.session_id,
+    terminal_id: command.terminal_id,
+    correlation_id: command.correlation_id,
+    topic,
+    payload: {
+      method: command.method ?? null,
+      boundary: decision.boundary,
+      adapter: decision.adapter,
+      outcome: succeeded ? "ok" : "error",
+      error_code: response.error?.code ?? null,
+    },
+  });
+}
+
 export function getBoundaryDispatchDecision(method: string): BoundaryDispatchDecision {
   if (LOCAL_METHODS.has(method)) {
     return { boundary: "local_control", adapter: "local_bus" };
@@ -116,8 +154,9 @@ export function createBoundaryDispatcher(input: BoundaryDispatcherInput): Comman
       ));
 
   return async (command: LocalBusEnvelope): Promise<LocalBusEnvelope> => {
+    const decision = getBoundaryDispatchDecision(command.method ?? "");
     if (command.type !== "command") {
-      return normalizedBoundaryError(
+      const response = normalizedBoundaryError(
         command,
         "INVALID_ENVELOPE_TYPE",
         "command envelope required",
@@ -125,21 +164,37 @@ export function createBoundaryDispatcher(input: BoundaryDispatcherInput): Comman
           type: command.type,
         }
       );
-    }
-
-    const decision = getBoundaryDispatchDecision(command.method ?? "");
-    const response =
-      decision.adapter === "local_bus"
-        ? await input.dispatchLocal(command)
-        : decision.adapter === "tool_bridge"
-          ? await dispatchTool(command)
-          : await dispatchA2A(command);
-
-    if (response.type === "response") {
+      await publishBoundaryResult(input, command, decision, response);
       return response;
     }
 
-    return normalizedBoundaryError(
+    let response: LocalBusEnvelope;
+    try {
+      response =
+        decision.adapter === "local_bus"
+          ? await input.dispatchLocal(command)
+          : decision.adapter === "tool_bridge"
+            ? await dispatchTool(command)
+            : await dispatchA2A(command);
+    } catch {
+      response = normalizedBoundaryError(
+        command,
+        "BOUNDARY_DISPATCH_FAILED",
+        "boundary adapter dispatch failed",
+        {
+          boundary: decision.boundary,
+          adapter: decision.adapter,
+          method: command.method ?? null,
+        }
+      );
+    }
+
+    if (response.type === "response") {
+      await publishBoundaryResult(input, command, decision, response);
+      return response;
+    }
+
+    const invalidResponse = normalizedBoundaryError(
       command,
       "INVALID_BOUNDARY_RESPONSE",
       "boundary adapter must return response",
@@ -148,5 +203,7 @@ export function createBoundaryDispatcher(input: BoundaryDispatcherInput): Comman
         adapter: decision.adapter,
       }
     );
+    await publishBoundaryResult(input, command, decision, invalidResponse);
+    return invalidResponse;
   };
 }

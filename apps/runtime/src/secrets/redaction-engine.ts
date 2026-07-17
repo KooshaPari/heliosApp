@@ -36,12 +36,53 @@ export interface RedactionRule {
   falsePositiveRate?: number;
 }
 
+export function assertRedactionPatternConsumesInput(pattern: RegExp): void {
+  const probe = new RegExp(pattern.source, pattern.flags.replace(/[gy]/g, ""));
+  const emptyMatch = probe.exec("");
+  if (emptyMatch?.[0].length === 0) {
+    throw new Error("Invalid redaction rule: pattern must consume input");
+  }
+}
+
+interface CollectedRedactionMatch {
+  start: number;
+  end: number;
+  category: string;
+  ruleId: string;
+}
+
+function collectRuleMatches(
+  content: string,
+  rule: RedactionRule,
+  regex: RegExp
+): CollectedRedactionMatch[] {
+  const matches: CollectedRedactionMatch[] = [];
+  regex.lastIndex = 0;
+  let match = regex.exec(content);
+  while (match !== null) {
+    const matchedText = match[0];
+    if (matchedText === undefined || matchedText.length === 0) {
+      const codePoint = content.codePointAt(match.index);
+      regex.lastIndex =
+        match.index + (regex.unicode && codePoint !== undefined && codePoint > 0xffff ? 2 : 1);
+    } else {
+      matches.push({
+        start: match.index,
+        end: match.index + matchedText.length,
+        category: rule.category,
+        ruleId: rule.id,
+      });
+    }
+    match = regex.exec(content);
+  }
+  return matches;
+}
+
 // ---------------------------------------------------------------------------
 // RedactionEngine
 // ---------------------------------------------------------------------------
 
 export class RedactionEngine {
-  private rules: RedactionRule[] = [];
   private compiledRules: Array<{ rule: RedactionRule; regex: RegExp }> = [];
 
   private totalScans = 0;
@@ -49,7 +90,7 @@ export class RedactionEngine {
   private totalLatencyMs = 0;
 
   loadRules(rules: RedactionRule[]): void {
-    this.rules = rules;
+    for (const rule of rules) assertRedactionPatternConsumesInput(rule.pattern);
     this.compiledRules = rules
       .filter(r => r.enabled)
       .map(r => ({
@@ -57,7 +98,7 @@ export class RedactionEngine {
         // Ensure global flag for exec-loop scanning
         regex: new RegExp(
           r.pattern.source,
-          r.pattern.flags.includes("g") ? r.pattern.flags : r.pattern.flags + "g"
+          r.pattern.flags.includes("g") ? r.pattern.flags : `${r.pattern.flags}g`
         ),
       }));
   }
@@ -76,24 +117,10 @@ export class RedactionEngine {
     }
 
     // Collect all matches first (on original string), then apply replacements
-    const allMatches: Array<{
-      start: number;
-      end: number;
-      category: string;
-      ruleId: string;
-    }> = [];
+    const allMatches: CollectedRedactionMatch[] = [];
 
     for (const { rule, regex } of this.compiledRules) {
-      regex.lastIndex = 0;
-      let m: RegExpExecArray | null;
-      while ((m = regex.exec(content)) !== null) {
-        allMatches.push({
-          start: m.index,
-          end: m.index + m[0].length,
-          category: rule.category,
-          ruleId: rule.id,
-        });
-      }
+      allMatches.push(...collectRuleMatches(content, rule, regex));
     }
 
     // Sort by start position

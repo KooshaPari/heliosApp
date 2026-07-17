@@ -9,6 +9,7 @@
  *   SC-028-005: Redaction audit trail present for every persisted artifact
  */
 
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mkdtempSync, rmSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -74,69 +75,84 @@ describe("Integration Tests (T015)", () => {
   // -------------------------------------------------------------------------
 
   describe("Protected path detection [FR-028-007]", () => {
-    it("cat .env triggers warning", () => {
+    it("cat .env triggers warning", async () => {
       const detector = new ProtectedPathDetector();
       const warnings: string[] = [];
       detector.onWarning(m => warnings.push(m.matchedPath));
 
-      const matches = detector.check("cat .env");
+      const matches = await detector.check("cat .env");
       expect(matches.length).toBeGreaterThan(0);
       expect(matches[0].matchedPath).toBe(".env");
       expect(warnings).toContain(".env");
     });
 
-    it("cat .env.local triggers warning", () => {
+    it("cat .env.local triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cat .env.local");
+      const matches = await detector.check("cat .env.local");
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it("cat README.md does NOT trigger warning", () => {
+    it("Windows .env path triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cat README.md");
+      const matches = await detector.check("type C:\\repo\\.env");
+      expect(matches.length).toBeGreaterThan(0);
+      expect(matches[0].matchedPath).toBe("C:\\repo\\.env");
+    });
+
+    it("cat README.md does NOT trigger warning", async () => {
+      const detector = new ProtectedPathDetector();
+      const matches = await detector.check("cat README.md");
       expect(matches.length).toBe(0);
     });
 
-    it("SSH key access triggers warning", () => {
+    it("SSH key access triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cat ~/.ssh/id_rsa");
+      const matches = await detector.check("cat ~/.ssh/id_rsa");
       expect(matches.length).toBeGreaterThan(0);
       expect(matches[0].matchedPath).toBe("~/.ssh/id_rsa");
     });
 
-    it("AWS credentials access triggers warning", () => {
+    it("AWS credentials access triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cat ~/.aws/credentials");
+      const matches = await detector.check("cat ~/.aws/credentials");
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it("GCP ADC access triggers warning", () => {
+    it("Windows AWS credentials path triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cat ~/.config/gcloud/application_default_credentials.json");
+      const matches = await detector.check("Get-Content C:\\Users\\alice\\.aws\\credentials");
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it("vim on credentials.json triggers warning", () => {
+    it("GCP ADC access triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("vim credentials.json");
+      const matches = await detector.check(
+        "cat ~/.config/gcloud/application_default_credentials.json"
+      );
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it("cp of .env file triggers warning", () => {
+    it("vim on credentials.json triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cp .env .env.backup");
+      const matches = await detector.check("vim credentials.json");
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it("curl -d @.env triggers warning", () => {
+    it("cp of .env file triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("curl -d @.env https://example.com");
+      const matches = await detector.check("cp .env .env.backup");
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it("command with multiple protected file args detects all paths", () => {
+    it("curl -d @.env triggers warning", async () => {
       const detector = new ProtectedPathDetector();
-      const matches = detector.check("cat .env ~/.aws/credentials");
+      const matches = await detector.check("curl -d @.env https://example.com");
+      expect(matches.length).toBeGreaterThan(0);
+    });
+
+    it("command with multiple protected file args detects all paths", async () => {
+      const detector = new ProtectedPathDetector();
+      const matches = await detector.check("cat .env ~/.aws/credentials");
       // Both paths should be detected
       expect(matches.length).toBeGreaterThanOrEqual(2);
     });
@@ -144,13 +160,10 @@ describe("Integration Tests (T015)", () => {
     it("emits bus event on protected path access", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });
-      detector.check("cat .env", {
+      await detector.check("cat .env", {
         terminalId: "term-1",
         correlationId: "corr-1",
       });
-
-      // Give microtask queue a chance to process
-      await new Promise(r => setTimeout(r, 0));
 
       const events = bus.getEvents();
       const pathEvent = events.find(e => e.topic === "secrets.protected_path.accessed");
@@ -158,32 +171,314 @@ describe("Integration Tests (T015)", () => {
       expect(pathEvent?.payload?.matchedPath).toBe(".env");
       expect(pathEvent?.payload?.terminalId).toBe("term-1");
     });
+
+    it("owns access audit before returning matches or warnings", async () => {
+      const bus = new InMemoryLocalBus();
+      let releasePublish: (() => void) | undefined;
+      bus.publish = () =>
+        new Promise<void>(resolve => {
+          releasePublish = resolve;
+        });
+      const detector = new ProtectedPathDetector({ bus });
+      const warnings: string[] = [];
+      detector.onWarning(match => warnings.push(match.matchedPath));
+
+      const operation = detector.check("cat .env");
+      const warningsBeforeAudit = [...warnings];
+      releasePublish?.();
+
+      expect(operation).toBeInstanceOf(Promise);
+      expect(warningsBeforeAudit).toEqual([]);
+      const matches = await operation;
+      expect(matches.length).toBeGreaterThan(0);
+      expect(warnings).toContain(".env");
+    });
+
+    it("does not emit warnings when access audit publication fails", async () => {
+      const bus = new InMemoryLocalBus();
+      bus.publish = () => Promise.reject(new Error("audit unavailable"));
+      const detector = new ProtectedPathDetector({ bus });
+      const warnings: string[] = [];
+      detector.onWarning(match => warnings.push(match.matchedPath));
+
+      await expect(detector.check("cat .env")).rejects.toThrow("audit unavailable");
+      expect(warnings).toEqual([]);
+    });
+
+    it("redacts database credentials from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const connectionString = "postgres://alice:supersecret@db.internal/prod";
+
+      await detector.check(`cat .env ${connectionString}`, {
+        correlationId: "corr-database-secret",
+      });
+
+      const events = JSON.stringify(bus.getEvents());
+      expect(events).not.toContain(connectionString);
+      expect(events).not.toContain("supersecret");
+    });
+
+    it("redacts MongoDB SRV credentials from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const password = "cluster-password-value-123456";
+      const connectionString = `mongodb+srv://alice:${password}@cluster.internal/prod`;
+
+      await detector.check(`cat .env ${connectionString}`, {
+        correlationId: "corr-mongodb-srv-secret",
+      });
+
+      const events = JSON.stringify(bus.getEvents());
+      expect(events).not.toContain(connectionString);
+      expect(events).not.toContain(password);
+    });
+
+    it("redacts Redis TLS credentials from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const password = "redis-password-value-123456";
+      const connectionString = `rediss://cache:${password}@redis.internal/0`;
+
+      await detector.check(`cat .env ${connectionString}`, {
+        correlationId: "corr-rediss-secret",
+      });
+
+      const events = JSON.stringify(bus.getEvents());
+      expect(events).not.toContain(connectionString);
+      expect(events).not.toContain(password);
+    });
+
+    it("redacts AMQPS credentials from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const password = "broker-password-value-123456";
+      const connectionString = `amqps://worker:${password}@broker.internal/prod`;
+
+      await detector.check(`cat .env ${connectionString}`, {
+        correlationId: "corr-amqps-secret",
+      });
+
+      const events = JSON.stringify(bus.getEvents());
+      expect(events).not.toContain(connectionString);
+      expect(events).not.toContain(password);
+    });
+
+    it("redacts SQL Server credentials from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const password = "sqlserver-password-value-123456";
+      const connectionString = `mssql://admin:${password}@sql.internal/prod`;
+
+      await detector.check(`cat .env ${connectionString}`, {
+        correlationId: "corr-mssql-secret",
+      });
+
+      const events = JSON.stringify(bus.getEvents());
+      expect(events).not.toContain(connectionString);
+      expect(events).not.toContain(password);
+    });
+
+    it("redacts fine-grained GitHub tokens from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const token = `github_pat_${"A".repeat(82)}`;
+
+      await detector.check(`cat .env ${token}`, {
+        correlationId: "corr-github-token",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(token);
+    });
+
+    it("redacts AWS secret keys from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const secret = "a".repeat(40);
+
+      await detector.check(`cat .env aws_secret_access_key=${secret}`, {
+        correlationId: "corr-aws-secret",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(secret);
+    });
+
+    it("redacts private key headers from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const privateKeyHeader = "-----BEGIN RSA PRIVATE KEY-----";
+
+      await detector.check(`cat .env ${privateKeyHeader}`, {
+        correlationId: "corr-private-key",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(privateKeyHeader);
+    });
+
+    it("redacts complete private keys from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const privateKeyBody = "MIIEprivatekeymaterial1234567890";
+      const privateKey = [
+        "-----BEGIN PRIVATE KEY-----",
+        privateKeyBody,
+        "-----END PRIVATE KEY-----",
+      ].join("\n");
+
+      await detector.check(`cat .env PRIVATE_KEY="${privateKey}"`, {
+        correlationId: "corr-complete-private-key",
+      });
+
+      const events = JSON.stringify(bus.getEvents());
+      expect(events).not.toContain(privateKey);
+      expect(events).not.toContain(privateKeyBody);
+    });
+
+    it("redacts generic API tokens from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const token = "generic-token-value-123456";
+
+      await detector.check(`cat .env api_token=${token}`, {
+        correlationId: "corr-generic-token",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(token);
+    });
+
+    it("redacts OAuth client secrets from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const clientSecret = "oauth-client-secret-value-123456";
+
+      await detector.check(`cat .env client_secret=${clientSecret}`, {
+        correlationId: "corr-client-secret",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(clientSecret);
+    });
+
+    it("redacts password assignments from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const password = "database-password-value-123456";
+
+      await detector.check(`cat .env password=${password}`, {
+        correlationId: "corr-password",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(password);
+    });
+
+    it("redacts namespaced password assignments from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const password = "namespaced-password-value-123456";
+
+      await detector.check(`cat .env DATABASE_PASSWORD=${password}`, {
+        correlationId: "corr-namespaced-password",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(password);
+    });
+
+    it("redacts namespaced passwd assignments from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const password = "passwd-alias-value-123456";
+
+      await detector.check(`cat .env DATABASE_PASSWD=${password}`, {
+        correlationId: "corr-namespaced-passwd",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(password);
+    });
+
+    it("redacts generic token assignments from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const token = "deployment-token-value-123456";
+
+      await detector.check(`cat .env token=${token}`, {
+        correlationId: "corr-token-assignment",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(token);
+    });
+
+    it("redacts namespaced token assignments from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const token = "namespaced-token-value-123456";
+
+      await detector.check(`cat .env DEPLOY_ACCESS_TOKEN=${token}`, {
+        correlationId: "corr-namespaced-token",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(token);
+    });
+
+    it("redacts generic secret assignments from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const secret = "service-secret-value-123456";
+
+      await detector.check(`cat .env secret=${secret}`, {
+        correlationId: "corr-secret-assignment",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(secret);
+    });
+
+    it("redacts namespaced secret assignments from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const secret = "deployment-secret-value-123456";
+
+      await detector.check(`cat .env DEPLOY_SECRET=${secret}`, {
+        correlationId: "corr-namespaced-secret",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(secret);
+    });
+
+    it("redacts namespaced signing keys from direct access audit events", async () => {
+      const bus = new InMemoryLocalBus();
+      const detector = new ProtectedPathDetector({ bus });
+      const signingKey = "opaque-signing-key-material-123456";
+
+      await detector.check(`cat .env SERVICE_SIGNING_KEY=${signingKey}`, {
+        correlationId: "corr-namespaced-signing-key",
+      });
+
+      expect(JSON.stringify(bus.getEvents())).not.toContain(signingKey);
+    });
   });
 
   describe("Configurable protected paths [FR-028-008]", () => {
-    it("custom pattern addition triggers on matching commands", () => {
+    it("custom pattern addition triggers on matching commands", async () => {
       const config = new ProtectedPathConfig();
-      const pattern = config.addPattern("*.pem", "PEM certificate files");
+      const pattern = await config.addPattern("*.pem", "PEM certificate files");
       const detector = new ProtectedPathDetector({ config });
 
-      const matches = detector.check("cat server.pem");
+      const matches = await detector.check("cat server.pem");
       expect(matches.length).toBeGreaterThan(0);
       expect(matches[0].patternId).toBe(pattern.id);
     });
 
-    it("disabled default pattern does not trigger", () => {
+    it("disabled default pattern does not trigger", async () => {
       const config = new ProtectedPathConfig();
-      config.disablePattern("dotenv");
+      await config.disablePattern("dotenv");
       const detector = new ProtectedPathDetector({ config });
 
-      const matches = detector.check("cat .env");
+      const matches = await detector.check("cat .env");
       expect(matches.length).toBe(0);
     });
 
     it("patterns persist to disk and reload", async () => {
       const configPath = join(tmpDir, "config", "protected-paths.json");
       const config = new ProtectedPathConfig({ configPath });
-      config.addPattern("*.secret", "Secret files");
+      await config.addPattern("*.secret", "Secret files");
       await config.saveToDisk();
 
       const config2 = new ProtectedPathConfig({ configPath });
@@ -193,48 +488,85 @@ describe("Integration Tests (T015)", () => {
       expect(customPattern).toBeDefined();
     });
 
-    it("rejects empty pattern", () => {
+    it("rejects empty pattern", async () => {
       const config = new ProtectedPathConfig();
-      expect(() => config.addPattern("", "empty")).toThrow();
+      await expect(config.addPattern("", "empty")).rejects.toThrow();
     });
 
-    it("rejects overly broad pattern **/*", () => {
+    it("rejects overly broad pattern **/*", async () => {
       const config = new ProtectedPathConfig();
-      expect(() => config.addPattern("**/*", "all files")).toThrow();
+      await expect(config.addPattern("**/*", "all files")).rejects.toThrow();
     });
 
-    it("rejects overly broad pattern *", () => {
+    it("rejects overly broad pattern *", async () => {
       const config = new ProtectedPathConfig();
-      expect(() => config.addPattern("*", "all")).toThrow();
+      await expect(config.addPattern("*", "all")).rejects.toThrow();
     });
   });
 
   describe("Acknowledgment debounce [FR-028-007]", () => {
-    it("acknowledgment prevents re-trigger within debounce window", () => {
+    it("owns acknowledgment audit before enabling debounce", async () => {
+      const bus = new InMemoryLocalBus();
+      let releasePublish: (() => void) | undefined;
+      bus.publish = envelope => {
+        if (envelope.topic !== "secrets.protected_path.acknowledged") {
+          return Promise.resolve();
+        }
+        return new Promise<void>(resolve => {
+          releasePublish = resolve;
+        });
+      };
+      const detector = new ProtectedPathDetector({ bus });
+
+      const operation = detector.acknowledge("dotenv", ".env", "corr-owned-ack");
+      const matchesBeforeAudit = await detector.check("cat .env");
+      releasePublish?.();
+
+      expect(operation).toBeInstanceOf(Promise);
+      expect(matchesBeforeAudit.length).toBeGreaterThan(0);
+      await operation;
+      expect(await detector.check("cat .env")).toEqual([]);
+    });
+
+    it("acknowledgment prevents re-trigger within debounce window", async () => {
       const detector = new ProtectedPathDetector();
-      const matches1 = detector.check("cat .env");
+      const matches1 = await detector.check("cat .env");
       expect(matches1.length).toBeGreaterThan(0);
 
       // Acknowledge
-      detector.acknowledge(matches1[0].patternId, ".env", "corr-1");
+      await detector.acknowledge(matches1[0].patternId, ".env", "corr-1");
 
       // Second check should be debounced
-      const matches2 = detector.check("cat .env");
+      const matches2 = await detector.check("cat .env");
       expect(matches2.length).toBe(0);
     });
 
     it("acknowledgment emits audit event", async () => {
       const bus = new InMemoryLocalBus();
       const detector = new ProtectedPathDetector({ bus });
-      detector.check("cat .env");
-      detector.acknowledge("dotenv", ".env", "corr-ack");
-
-      await new Promise(r => setTimeout(r, 0));
+      await detector.check("cat .env");
+      await detector.acknowledge("dotenv", ".env", "corr-ack");
 
       const events = bus.getEvents();
       const ackEvent = events.find(e => e.topic === "secrets.protected_path.acknowledged");
       expect(ackEvent).toBeDefined();
       expect(ackEvent?.payload?.matchedPath).toBe(".env");
+    });
+
+    it("does not debounce when acknowledgment audit fails", async () => {
+      const bus = new InMemoryLocalBus();
+      bus.publish = envelope => {
+        if (envelope.topic === "secrets.protected_path.acknowledged") {
+          return Promise.reject(new Error("audit unavailable"));
+        }
+        return Promise.resolve();
+      };
+      const detector = new ProtectedPathDetector({ bus });
+
+      await expect(detector.acknowledge("dotenv", ".env", "corr-failed-ack")).rejects.toThrow(
+        "audit unavailable"
+      );
+      expect((await detector.check("cat .env")).length).toBeGreaterThan(0);
     });
   });
 
@@ -266,7 +598,7 @@ describe("Integration Tests (T015)", () => {
             "apiKey"
           );
           // Should never reach here
-        } catch {
+        } catch (err) {
           if (err instanceof CredentialAccessDeniedError) {
             denialCount++;
           }
@@ -293,7 +625,7 @@ describe("Integration Tests (T015)", () => {
           "ws1",
           "key"
         );
-      // eslint-disable-next-line no-unused-vars
+        // eslint-disable-next-line no-unused-vars
       } catch (_) {
         /* expected */
       }
@@ -331,6 +663,29 @@ describe("Integration Tests (T015)", () => {
   // -------------------------------------------------------------------------
 
   describe("Audit completeness [SC-028-005]", () => {
+    it("does not expose mutable references to persisted audit records", async () => {
+      const sink = new AuditSink();
+      const ingested = await sink.ingest({
+        id: "credential-created",
+        type: "event",
+        ts: new Date().toISOString(),
+        topic: "secrets.credential.created",
+        payload: {
+          correlationId: "corr-audit-ownership",
+          name: "original",
+        },
+      });
+      if (!ingested) throw new Error("Expected an audit record");
+
+      ingested.payload.name = "mutated-ingest-result";
+      const queried = sink.query({ topic: "secrets.credential.created" });
+      expect(queried[0]?.payload.name).toBe("original");
+
+      if (!queried[0]) throw new Error("Expected a queried audit record");
+      queried[0].payload.name = "mutated-query-result";
+      expect(sink.query({ topic: "secrets.credential.created" })[0]?.payload.name).toBe("original");
+    });
+
     it("full lifecycle: create/access/rotate/revoke all have audit records", async () => {
       const bus = new InMemoryLocalBus();
       const engine = makeEngine();
@@ -377,7 +732,7 @@ describe("Integration Tests (T015)", () => {
           artifactType: "terminal_output",
           correlationId: "corr-completeness",
         });
-        trail.record(id, result, {
+        await trail.record(id, result, {
           artifactId: id,
           artifactType: "terminal_output",
           correlationId: "corr-completeness",
@@ -416,7 +771,7 @@ describe("Integration Tests (T015)", () => {
         correlationId: "e2e-test",
       });
 
-      trail.record("terminal:session-1", redactResult, {
+      await trail.record("terminal:session-1", redactResult, {
         artifactId: "terminal:session-1",
         artifactType: "terminal_output",
         correlationId: "e2e-test",
@@ -444,7 +799,7 @@ describe("Integration Tests (T015)", () => {
         artifactType: "terminal_output",
         correlationId: "e2e-safe",
       });
-      trail.record("terminal:safe-1", result, {
+      await trail.record("terminal:safe-1", result, {
         artifactId: "terminal:safe-1",
         artifactType: "terminal_output",
         correlationId: "e2e-safe",
@@ -558,7 +913,7 @@ describe("Integration Tests (T015)", () => {
       const wrappedBus = sink.wrapBus(bus);
 
       const detector = new ProtectedPathDetector({ bus: wrappedBus });
-      detector.check("cat .env", {
+      await detector.check("cat .env", {
         terminalId: "term-1",
         correlationId: "corr-path",
       });
@@ -579,7 +934,7 @@ describe("Integration Tests (T015)", () => {
 
       const detector = new ProtectedPathDetector({ bus: wrappedBus });
       // Command that includes an AWS key inline (should be stripped in redactedCommand)
-      detector.check("cat .env AKIAIOSFODNN7EXAMPLE", {
+      await detector.check("cat .env AKIAIOSFODNN7EXAMPLE", {
         terminalId: "term-1",
         correlationId: "corr-sensitive",
       });

@@ -5,9 +5,7 @@
 
 import type { Component } from "solid-js";
 
-export const SkipLink: Component<{ href?: string; label?: string }> = (
-  props,
-) => {
+export const SkipLink: Component<{ href?: string; label?: string }> = props => {
   const href = () => props.href ?? "#main";
   const label = () => props.label ?? "Skip to main content";
   return (

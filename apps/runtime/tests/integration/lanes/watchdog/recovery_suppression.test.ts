@@ -2,21 +2,29 @@
  * FR-HELIOS-086: Recovery Suppression Tests
  * Verifies: FR-ORF-007 (Suppress cleanup suggestions during recovery)
  */
-import { describe, it, expect, beforeEach } from "bun:test";
-import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
-import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { LaneRegistry } from "../../../../src/lanes/registry.js";
+import { RemediationEngine } from "../../../../src/lanes/watchdog/remediation.js";
 import type { ClassifiedOrphan } from "../../../../src/lanes/watchdog/resource_classifier.js";
+import { InMemoryLocalBus } from "../../../../src/protocol/bus.js";
+import { createTestCooldownFile, removeTestCooldownFile } from "./cooldown_test_utils.js";
 
 describe("Recovery Suppression", () => {
   let engine: RemediationEngine;
   let bus: InMemoryLocalBus;
   let laneRegistry: LaneRegistry;
+  let cooldownFile: string;
 
   beforeEach(() => {
     bus = new InMemoryLocalBus();
     laneRegistry = new LaneRegistry();
-    engine = new RemediationEngine(laneRegistry, bus);
+    cooldownFile = createTestCooldownFile();
+    engine = new RemediationEngine(laneRegistry, bus, { cooldownFile });
+  });
+
+  afterEach(async () => {
+    engine.stop();
+    await removeTestCooldownFile(cooldownFile);
   });
 
   it("should suppress suggestions for recovering lanes", async () => {

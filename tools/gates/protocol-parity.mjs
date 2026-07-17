@@ -1,10 +1,10 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 function parseLiteralArray(tsPath, constName) {
 	const source = readFileSync(tsPath, "utf8");
 	const regex = new RegExp(
-		`export const ${constName} = \\[(?<body>[\\s\\S]*?)\\] as const;`,
+		`export const ${constName}(?:\\s*:[^=]+)?\\s*=\\s*\\[(?<body>[\\s\\S]*?)\\]\\s*as const;`,
 	);
 	const match = source.match(regex);
 	if (!match?.groups?.body) {
@@ -95,6 +95,13 @@ const fixtureRootArgIndex = args.indexOf("--fixture-root");
 const fixtureRoot =
 	fixtureRootArgIndex >= 0 ? args[fixtureRootArgIndex + 1] : ".";
 const root = resolve(fixtureRoot ?? ".");
+const canonicalContractRoot =
+	"docs/specs/001-colab-agent-terminal-control-plane/contracts";
+const fixtureContractRoot =
+	"kitty-specs/001-colab-agent-terminal-control-plane/contracts";
+const contractRoot = existsSync(resolve(root, canonicalContractRoot))
+	? canonicalContractRoot
+	: fixtureContractRoot;
 
 const runtimeTopics = parseLiteralArray(
 	resolve(root, "apps/runtime/src/protocol/topics.ts"),
@@ -111,18 +118,10 @@ const formalMethods = readJson(
 	resolve(root, "specs/protocol/v1/methods.json"),
 ).methods;
 const matrix = readJson(
-	resolve(
-		root,
-		"kitty-specs/001-colab-agent-terminal-control-plane/contracts/protocol-parity-matrix.json",
-	),
+	resolve(root, contractRoot, "protocol-parity-matrix.json"),
 );
 const contract = readJson(
-	resolve(
-		root,
-		"kitty-specs/001-colab-agent-terminal-control-plane/contracts/orchestration-envelope.schema.json",
-	),
-
-
+	resolve(root, contractRoot, "orchestration-envelope.schema.json"),
 );
 
 const contractMethods = (contract.properties?.method?.enum ?? []).filter(

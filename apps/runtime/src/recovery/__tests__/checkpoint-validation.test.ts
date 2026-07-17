@@ -1,9 +1,9 @@
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import {
-  validateCheckpoint,
   CHECKPOINT_VERSION,
   type Checkpoint,
   type CheckpointSession,
+  validateCheckpoint,
 } from "../checkpoint.js";
 
 describe("Checkpoint Validation", () => {
@@ -30,7 +30,7 @@ describe("Checkpoint Validation", () => {
 
   describe("valid checkpoint", () => {
     it("should pass validation for valid checkpoint", () => {
-      const _checkpoint = createValidCheckpoint();
+      const checkpoint = createValidCheckpoint();
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(true);
@@ -40,7 +40,7 @@ describe("Checkpoint Validation", () => {
 
   describe("version validation", () => {
     it("should reject future schema version", () => {
-      const _checkpoint = createValidCheckpoint({
+      const checkpoint = createValidCheckpoint({
         version: CHECKPOINT_VERSION + 1,
       });
       const result = validateCheckpoint(checkpoint);
@@ -50,7 +50,7 @@ describe("Checkpoint Validation", () => {
     });
 
     it("should accept current schema version", () => {
-      const _checkpoint = createValidCheckpoint({ version: CHECKPOINT_VERSION });
+      const checkpoint = createValidCheckpoint({ version: CHECKPOINT_VERSION });
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(true);
@@ -60,7 +60,7 @@ describe("Checkpoint Validation", () => {
   describe("timestamp validation", () => {
     it("should reject timestamp in future (beyond tolerance)", () => {
       const futureTimestamp = Date.now() + 10 * 60 * 1000; // 10 minutes in future
-      const _checkpoint = createValidCheckpoint({ timestamp: futureTimestamp });
+      const checkpoint = createValidCheckpoint({ timestamp: futureTimestamp });
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(false);
@@ -69,7 +69,7 @@ describe("Checkpoint Validation", () => {
 
     it("should accept timestamp within future tolerance", () => {
       const nearFutureTimestamp = Date.now() + 2 * 60 * 1000; // 2 minutes in future
-      const _checkpoint = createValidCheckpoint({
+      const checkpoint = createValidCheckpoint({
         timestamp: nearFutureTimestamp,
       });
       const result = validateCheckpoint(checkpoint);
@@ -79,7 +79,7 @@ describe("Checkpoint Validation", () => {
 
     it("should reject timestamp older than max age", () => {
       const oldTimestamp = Date.now() - 25 * 60 * 60 * 1000; // 25 hours old
-      const _checkpoint = createValidCheckpoint({ timestamp: oldTimestamp });
+      const checkpoint = createValidCheckpoint({ timestamp: oldTimestamp });
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(false);
@@ -88,7 +88,7 @@ describe("Checkpoint Validation", () => {
 
     it("should accept recent timestamp", () => {
       const recentTimestamp = Date.now() - 1 * 60 * 60 * 1000; // 1 hour old
-      const _checkpoint = createValidCheckpoint({ timestamp: recentTimestamp });
+      const checkpoint = createValidCheckpoint({ timestamp: recentTimestamp });
       const result = validateCheckpoint(checkpoint);
 
       expect(result.valid).toBe(true);
@@ -96,8 +96,45 @@ describe("Checkpoint Validation", () => {
   });
 
   describe("session validation", () => {
+    it("should reject non-array sessions without throwing", () => {
+      const checkpoint = {
+        ...createValidCheckpoint(),
+        sessions: { coerced: "not-an-array" },
+      };
+
+      const result = validateCheckpoint(checkpoint);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.field === "sessions")).toBe(true);
+    });
+
+    it("should reject malformed nested session values", () => {
+      const checkpoint = {
+        ...createValidCheckpoint(),
+        sessions: [
+          {
+            sessionId: 42,
+            terminalId: "term-1",
+            laneId: "lane-1",
+            workingDirectory: "/home/user",
+            environmentVariables: { PATH: 42 },
+            scrollbackSnapshot: null,
+            zelijjSessionName: "main",
+            shellCommand: "bash",
+          },
+        ],
+      };
+
+      const result = validateCheckpoint(checkpoint);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors.map(error => error.field)).toContain("sessionId");
+      expect(result.errors.map(error => error.field)).toContain("environmentVariables");
+      expect(result.errors.map(error => error.field)).toContain("scrollbackSnapshot");
+    });
+
     it("should reject session missing sessionId", () => {
-      const _checkpoint = createValidCheckpoint({
+      const checkpoint = createValidCheckpoint({
         sessions: [
           {
             sessionId: "",
@@ -118,7 +155,7 @@ describe("Checkpoint Validation", () => {
     });
 
     it("should reject session missing terminalId", () => {
-      const _checkpoint = createValidCheckpoint({
+      const checkpoint = createValidCheckpoint({
         sessions: [
           {
             sessionId: "sess-1",
@@ -139,7 +176,7 @@ describe("Checkpoint Validation", () => {
     });
 
     it("should reject session missing laneId", () => {
-      const _checkpoint = createValidCheckpoint({
+      const checkpoint = createValidCheckpoint({
         sessions: [
           {
             sessionId: "sess-1",
@@ -160,7 +197,7 @@ describe("Checkpoint Validation", () => {
     });
 
     it("should reject session missing workingDirectory", () => {
-      const _checkpoint = createValidCheckpoint({
+      const checkpoint = createValidCheckpoint({
         sessions: [
           {
             sessionId: "sess-1",
@@ -205,7 +242,7 @@ describe("Checkpoint Validation", () => {
         shellCommand: "bash",
       };
 
-      const _checkpoint = createValidCheckpoint({
+      const checkpoint = createValidCheckpoint({
         sessions: [validSession, invalidSession],
       });
 
@@ -216,7 +253,7 @@ describe("Checkpoint Validation", () => {
     });
 
     it("should allow partial validity", () => {
-      const _checkpoint = createValidCheckpoint({
+      const checkpoint = createValidCheckpoint({
         sessions: [
           {
             sessionId: "sess-1",

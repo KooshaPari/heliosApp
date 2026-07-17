@@ -14,9 +14,7 @@
 import type { CommandEnvelope, ResponseEnvelope, EventEnvelope } from "../protocol/types.js";
 
 /** Handler registered for a method name on the bus. */
-export type CommandHandler = (
-  command: CommandEnvelope,
-) => Promise<ResponseEnvelope>;
+export type CommandHandler = (command: CommandEnvelope) => Promise<ResponseEnvelope>;
 
 /** Subscriber notified of bus-wide events. */
 export type EventSubscriber = (event: EventEnvelope) => void | Promise<void>;

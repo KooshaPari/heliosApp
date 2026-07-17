@@ -31,4 +31,10 @@ describe("protocol parity gate", () => {
     expect(result.ok).toBeFalse();
     expect(result.output).toContain("Formal topic 'diagnostics.metric' missing from parity matrix");
   });
+
+  test("passes against the complete canonical protocol surface", () => {
+    const result = runGate(".");
+    expect(result.ok).toBeTrue();
+    expect(result.output).toContain("Protocol parity gate passed.");
+  });
 });

@@ -199,11 +199,9 @@ export type A2AAdapter = ProviderAdapter<A2AConfig, A2AExecuteInput, A2AExecuteO
  * Providers can extend this class to share implementation
  * of common patterns (health check scheduling, error handling, etc.).
  */
-export abstract class BaseProviderAdapter<
-  TConfig,
-  TExecuteInput,
-  TExecuteOutput,
-> implements ProviderAdapter<TConfig, TExecuteInput, TExecuteOutput> {
+export abstract class BaseProviderAdapter<TConfig, TExecuteInput, TExecuteOutput>
+  implements ProviderAdapter<TConfig, TExecuteInput, TExecuteOutput>
+{
   protected config: TConfig | null = null;
   protected healthStatus: ProviderHealthStatus = {
     state: "unavailable",

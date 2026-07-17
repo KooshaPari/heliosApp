@@ -1,12 +1,19 @@
-import { mkdtempSync, rmSync, existsSync, statSync, readFileSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { randomBytes } from "node:crypto";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { CredentialNotFoundError, CredentialStore } from "../credential-store.js";
 import { EncryptionService } from "../encryption.js";
-import {
-  CredentialStore,
-  CredentialNotFoundError,
-} from "../credential-store.js";
 
 function makeStore(dataDir: string): CredentialStore {
   const fixedKey = randomBytes(32);
@@ -75,6 +82,35 @@ describe("CredentialStore: store and retrieve", () => {
     );
   });
 
+  it("rejects malformed persisted encrypted payloads without coercion", async () => {
+    const credentialDir = join(tmpDir, "secrets", "providerA", "ws1");
+    const filePath = join(credentialDir, "malformed.enc");
+    mkdirSync(credentialDir, { recursive: true });
+
+    for (const payload of [
+      null,
+      [],
+      { ciphertext: "00", iv: 12, authTag: "00".repeat(16), version: 1 },
+      { ciphertext: "not-hex", iv: "00".repeat(12), authTag: "00".repeat(16), version: 1 },
+    ]) {
+      writeFileSync(filePath, JSON.stringify(payload));
+      await expect(store.retrieve("providerA", "ws1", "malformed")).rejects.toThrow(
+        "Invalid encrypted payload"
+      );
+    }
+  });
+
+  it("removes temporary ciphertext when atomic replacement fails", async () => {
+    const credentialDir = join(tmpDir, "secrets", "providerA", "ws1");
+    mkdirSync(join(credentialDir, "blocked.enc"), { recursive: true });
+
+    await expect(store.store("providerA", "ws1", "blocked", "secret")).rejects.toThrow();
+
+    expect(readdirSync(credentialDir).filter(name => name.startsWith("blocked.enc.tmp."))).toEqual(
+      []
+    );
+  });
+
   it("deletes a credential", async () => {
     await store.store("providerA", "ws1", "myKey", "secret");
     await store.delete("providerA", "ws1", "myKey");
@@ -117,6 +153,32 @@ describe("CredentialStore: store and retrieve", () => {
     await expect(store.store("providerA", "../../etc", "key", "val")).rejects.toThrow();
   });
 
+  it("rejects path segments that collapse credential scopes", async () => {
+    await expect(store.store(".", "providerA", "key", "val")).rejects.toThrow("path segment");
+    await expect(store.store("providerA", ".", "key", "val")).rejects.toThrow("path segment");
+  });
+
+  it("rejects platform-aliased and control-character path segments", async () => {
+    for (const providerId of [
+      "provider.",
+      "provider ",
+      "CON",
+      "lpt1",
+      "provider:name",
+      "provider\nname",
+    ]) {
+      await expect(store.store(providerId, "ws1", "key", "val")).rejects.toThrow(
+        "unsafe path segment"
+      );
+    }
+  });
+
+  it("rejects non-string identifiers without coercion", async () => {
+    await expect(store.store(null as unknown as string, "ws1", "key", "val")).rejects.toThrow(
+      "must be a string"
+    );
+  });
+
   it("rejects null bytes in name", async () => {
     await expect(store.store("providerA", "ws1", "key\0evil", "val")).rejects.toThrow();
   });
@@ -151,5 +213,28 @@ describe("CredentialStore: rotate preserves file permissions", () => {
     expect(existsSync(filePath)).toBe(true);
     const mode = statSync(filePath).mode & 0o777;
     expect(mode).toBe(0o600);
+  });
+
+  it("preserves the previous credential when replacement encryption fails", async () => {
+    const masterKey = randomBytes(32);
+    const encryption = new EncryptionService({
+      masterKeyOverride: async () => masterKey,
+    });
+    const encrypt = encryption.encrypt.bind(encryption);
+    let failEncryption = false;
+    encryption.encrypt = (plaintext, providerSalt) => {
+      if (failEncryption) return Promise.reject(new Error("injected encryption failure"));
+      return encrypt(plaintext, providerSalt);
+    };
+    const transactionalStore = new CredentialStore({ dataDir: tmpDir, encryption });
+    await transactionalStore.store("providerA", "ws1", "rotKey", "original");
+
+    failEncryption = true;
+    await expect(
+      transactionalStore.rotate("providerA", "ws1", "rotKey", "replacement", "corr-2")
+    ).rejects.toThrow("injected encryption failure");
+    failEncryption = false;
+
+    expect(await transactionalStore.retrieve("providerA", "ws1", "rotKey")).toBe("original");
   });
 });

@@ -8,7 +8,12 @@
 import { describe, it, expect } from "bun:test";
 
 import { BaseProviderAdapter } from "../adapter.js";
-import type { ACPConfig, ACPExecuteInput, ACPExecuteOutput } from "../adapter.js";
+import type {
+  ACPConfig,
+  ACPExecuteInput,
+  ACPExecuteOutput,
+  ProviderHealthStatus,
+} from "../adapter.js";
 
 /**
  * Mock provider implementation for testing.

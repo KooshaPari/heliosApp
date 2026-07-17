@@ -162,7 +162,7 @@ export class DefaultAuditSink implements AuditSink {
           await this.persistWithRetry();
         }
         break;
-      } catch {
+      } catch (err) {
         retries++;
         if (retries >= this.MAX_RETRIES) {
           throw new Error(`[AuditSink] Failed to flush after ${this.MAX_RETRIES} retries: ${err}`);
@@ -201,10 +201,14 @@ export class DefaultAuditSink implements AuditSink {
       while (retries < this.MAX_RETRIES) {
         try {
           await this.storage.persist(eventsToPersist);
-          // Only clear buffer after successful commit
-          this.buffer = this.buffer.slice(eventsToPersist.length);
+          // A concurrent ring eviction can move in-flight events to overflow and remove them
+          // from the live buffer. Acknowledge the committed batch by identity so newer events
+          // remain buffered and committed events are not persisted again via overflow.
+          const persistedIds = new Set(eventsToPersist.map(event => event.id));
+          this.buffer = this.buffer.filter(event => !persistedIds.has(event.id));
+          this.overflowQueue = this.overflowQueue.filter(event => !persistedIds.has(event.id));
           return;
-        } catch {
+        } catch (err) {
           this.metrics.persistenceFailures++;
           this.metrics.retryCount++;
           retries++;
@@ -213,8 +217,7 @@ export class DefaultAuditSink implements AuditSink {
               setTimeout(resolve, this.RETRY_BACKOFF_MS * Math.pow(2, retries - 1))
             );
           } else {
-            // Put persisted events back into buffer to avoid data loss; preserve new events that may have been added.
-            this.buffer = [...eventsToPersist, ...this.buffer];
+            // The snapshot was never removed from the buffer, so it is already retained for retry.
             throw err;
           }
         }
@@ -238,7 +241,7 @@ export class DefaultAuditSink implements AuditSink {
           this.overflowQueue.splice(0, eventsToPersist.length);
 
           retries = 0;
-        } catch {
+        } catch (err) {
           this.metrics.sqliteWriteFailures!++;
           this.metrics.sqliteRetryCount!++;
           retries++;

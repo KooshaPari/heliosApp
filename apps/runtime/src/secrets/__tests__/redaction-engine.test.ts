@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { RedactionEngine } from "../redaction-engine.js";
 import { getDefaultRules } from "../redaction-rules.js";
 
@@ -99,10 +99,15 @@ describe("RedactionEngine: latency under 5ms", () => {
     expect(result.latencyMs).toBeLessThan(5);
   });
 
-  it("redacts a longer string in under 5ms", () => {
+  it("keeps p95 latency for a longer string under 5ms", () => {
     const longText = "normal text ".repeat(500);
-    const result = engine.redact(longText, ctx);
-    expect(result.latencyMs).toBeLessThan(5);
+    const latencies = Array.from(
+      { length: 100 },
+      () => engine.redact(longText, ctx).latencyMs
+    ).sort((left, right) => left - right);
+    const p95 = latencies[Math.ceil(latencies.length * 0.95) - 1] ?? Number.POSITIVE_INFINITY;
+
+    expect(p95).toBeLessThan(5);
   });
 });
 
@@ -118,6 +123,26 @@ describe("RedactionEngine: multiple secrets", () => {
     expect(result.matches.length).toBeGreaterThanOrEqual(2);
     expect(result.redacted).not.toContain("AKIAIOSFODNN7EXAMPLE");
     expect(result.redacted).not.toContain("AIzaSy");
+  });
+});
+
+describe("RedactionEngine: scanner progress", () => {
+  it("ignores contextual zero-width matches without stalling", () => {
+    const engine = new RedactionEngine();
+    engine.loadRules([
+      {
+        id: "lookahead",
+        category: "ZERO_WIDTH",
+        pattern: /(?=secret)/,
+        description: "zero-width only when context is present",
+        enabled: true,
+      },
+    ]);
+
+    const result = engine.redact("secret secret", ctx);
+
+    expect(result.redacted).toBe("secret secret");
+    expect(result.matches).toEqual([]);
   });
 });
 

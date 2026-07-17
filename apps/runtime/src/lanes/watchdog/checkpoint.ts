@@ -15,6 +15,28 @@ export interface WatchdogCheckpoint {
   };
 }
 
+export function isWatchdogCheckpoint(value: unknown): value is WatchdogCheckpoint {
+  if (typeof value !== "object" || value === null) return false;
+
+  const checkpoint = value as Partial<WatchdogCheckpoint>;
+  const summary = checkpoint.detectionSummary;
+  return (
+    typeof checkpoint.cycleNumber === "number" &&
+    Number.isInteger(checkpoint.cycleNumber) &&
+    checkpoint.cycleNumber >= 0 &&
+    typeof checkpoint.lastCycleTimestamp === "string" &&
+    !Number.isNaN(Date.parse(checkpoint.lastCycleTimestamp)) &&
+    typeof checkpoint.orphanCount === "number" &&
+    Number.isInteger(checkpoint.orphanCount) &&
+    checkpoint.orphanCount >= 0 &&
+    typeof summary === "object" &&
+    summary !== null &&
+    [summary.worktrees, summary.zellijSessions, summary.ptyProcesses].every(
+      count => typeof count === "number" && Number.isInteger(count) && count >= 0
+    )
+  );
+}
+
 export class CheckpointManager {
   private readonly checkpointPath: string;
 
@@ -24,11 +46,18 @@ export class CheckpointManager {
   }
 
   async save(checkpoint: WatchdogCheckpoint): Promise<void> {
+    if (!isWatchdogCheckpoint(checkpoint)) {
+      throw new Error("Invalid watchdog checkpoint");
+    }
+
+    const tempPath = `${this.checkpointPath}.tmp`;
     try {
       const dir = path.dirname(this.checkpointPath);
       await fs.mkdir(dir, { recursive: true });
-      await fs.writeFile(this.checkpointPath, JSON.stringify(checkpoint, null, 2));
-    } catch {
+      await fs.writeFile(tempPath, JSON.stringify(checkpoint, null, 2));
+      await fs.rename(tempPath, this.checkpointPath);
+    } catch (error) {
+      await fs.unlink(tempPath).catch(() => {});
       console.error("Failed to save checkpoint:", error);
       throw error;
     }
@@ -37,8 +66,8 @@ export class CheckpointManager {
   async load(): Promise<WatchdogCheckpoint | null> {
     try {
       const content = await fs.readFile(this.checkpointPath, "utf-8");
-      const _checkpoint = JSON.parse(content) as WatchdogCheckpoint;
-      return checkpoint;
+      const checkpoint: unknown = JSON.parse(content);
+      return isWatchdogCheckpoint(checkpoint) ? checkpoint : null;
     } catch {
       // File doesn't exist or is corrupt - return null for fresh start
       return null;

@@ -2,7 +2,7 @@
  * FR-HELIOS-063: Audit Sink Tests
  * Verifies: FR-AUD-002 (Append-only log), FR-SEC-005 (Redaction at sink boundary)
  */
-import { describe, it, expect, beforeEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { DefaultAuditSink, NoOpAuditStorage } from "../../../src/audit/sink";
 import { createAuditEvent, AUDIT_EVENT_TYPES, AUDIT_EVENT_RESULTS } from "../../../src/audit/event";
 
@@ -13,6 +13,10 @@ describe("AuditSink", () => {
   beforeEach(() => {
     storage = new NoOpAuditStorage();
     sink = new DefaultAuditSink(storage);
+  });
+
+  afterEach(() => {
+    sink.destroy();
   });
 
   describe("write", () => {
@@ -28,7 +32,7 @@ describe("AuditSink", () => {
         metadata: {},
       });
 
-      const _startTime = Date.now();
+      const startTime = Date.now();
       await sink.write(event);
       const endTime = Date.now();
 

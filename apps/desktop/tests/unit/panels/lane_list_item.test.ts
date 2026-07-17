@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import { LaneListItem } from "../../../src/panels/lane_list_item";
 
 describe("LaneListItem", () => {
@@ -8,8 +9,8 @@ describe("LaneListItem", () => {
     laneId: "lane-1",
     laneName: "Test Lane",
     state: "running",
-    onSelect: vi.fn(),
-    onContextMenu: vi.fn(),
+    onSelect: mock(),
+    onContextMenu: mock(),
   };
 
   beforeEach(() => {
@@ -105,7 +106,7 @@ describe("LaneListItem", () => {
   });
 
   it("should call onSelect when clicked", () => {
-    const onSelect = vi.fn();
+    const onSelect = mock();
     item = new LaneListItem({ ...mockProps, onSelect });
     item.mount(container);
 
@@ -116,7 +117,7 @@ describe("LaneListItem", () => {
   });
 
   it("should call onContextMenu when right-clicked", () => {
-    const onContextMenu = vi.fn();
+    const onContextMenu = mock();
     item = new LaneListItem({ ...mockProps, onContextMenu });
     item.mount(container);
 
@@ -129,7 +130,7 @@ describe("LaneListItem", () => {
   });
 
   it("should call onSelect when Enter is pressed", () => {
-    const onSelect = vi.fn();
+    const onSelect = mock();
     item = new LaneListItem({ ...mockProps, onSelect });
     item.mount(container);
 

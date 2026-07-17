@@ -22,7 +22,7 @@ describe("CheckpointManager", () => {
     // Clean up any existing test files
     try {
       await fs.rm(testDir, { recursive: true, force: true });
-    // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line no-unused-vars
     } catch (_err) {
       // Ignore cleanup errors
     }
@@ -32,7 +32,7 @@ describe("CheckpointManager", () => {
     // Clean up test files
     try {
       await fs.rm(testDir, { recursive: true, force: true });
-    // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line no-unused-vars
     } catch (_err) {
       // Ignore cleanup errors
     }
@@ -43,7 +43,7 @@ describe("CheckpointManager", () => {
   });
 
   it("should return null for non-existent checkpoint", async () => {
-    const _checkpoint = await manager.load();
+    const checkpoint = await manager.load();
     expect(checkpoint).toBeNull();
   });
 
@@ -108,10 +108,27 @@ describe("CheckpointManager", () => {
 
       const loaded = await manager.load();
       expect(loaded).toBeNull();
-    // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line no-unused-vars
     } catch (_err) {
       // Expected for test isolation
     }
+  });
+
+  it("should reject structurally invalid checkpoint JSON", async () => {
+    const checkpointPath = path.join(testDir, "watchdog_checkpoint.json");
+    await fs.mkdir(testDir, { recursive: true });
+    await fs.writeFile(
+      checkpointPath,
+      JSON.stringify({
+        cycleNumber: "7",
+        lastCycleTimestamp: "not-a-date",
+        orphanCount: -1,
+        detectionSummary: {},
+      }),
+      "utf-8"
+    );
+
+    expect(await manager.load()).toBeNull();
   });
 
   it("should delete checkpoint", async () => {

@@ -22,6 +22,13 @@ export interface AuditExportBundle {
 
 export type RedactFn = (content: string) => string;
 
+function cloneAuditRecord(record: AuditRecord): AuditRecord {
+  return {
+    ...record,
+    payload: structuredClone(record.payload),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // AuditSink - lightweight spec 024 integration point
 // ---------------------------------------------------------------------------
@@ -78,7 +85,7 @@ export class AuditSink {
    * re-parsed before storage to ensure no secrets persist in memory.
    */
   async ingest(envelope: LocalBusEnvelope): Promise<AuditRecord | null> {
-    const _topic = envelope.topic ?? "";
+    const topic = envelope.topic ?? "";
     if (!this.watchedTopics.has(topic)) return null;
 
     const correlationId: string =
@@ -103,7 +110,7 @@ export class AuditSink {
     };
 
     await this._persistRecord(record);
-    return record;
+    return cloneAuditRecord(record);
   }
 
   /**
@@ -129,7 +136,7 @@ export class AuditSink {
    */
   wrapBus(bus: LocalBus): LocalBus {
     return {
-      async publish(event: LocalBusEnvelope): Promise<void> {
+      publish: async (event: LocalBusEnvelope): Promise<void> => {
         await this.ingest(event);
         await bus.publish(event);
       },
@@ -161,7 +168,7 @@ export class AuditSink {
       results = results.filter(r => new Date(r.timestamp) >= since);
     }
 
-    return results;
+    return results.map(cloneAuditRecord);
   }
 
   /**

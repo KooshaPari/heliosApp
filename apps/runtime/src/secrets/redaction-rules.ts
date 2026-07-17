@@ -1,10 +1,76 @@
-import { readFileSync, writeFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
+import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
 import type { LocalBusEnvelope } from "../protocol/types.js";
-import type { RedactionRule } from "./redaction-engine.js";
+import { assertRedactionPatternConsumesInput, type RedactionRule } from "./redaction-engine.js";
 
 export type { RedactionRule };
+
+function validateRule(rule: unknown): RedactionRule {
+  if (typeof rule !== "object" || rule === null || Array.isArray(rule)) {
+    throw new Error("Invalid redaction rule: expected an object");
+  }
+
+  const candidate = rule as Record<string, unknown>;
+  if (typeof candidate.id !== "string" || candidate.id.trim() === "") {
+    throw new Error("Invalid redaction rule: id must be non-empty");
+  }
+  if (typeof candidate.category !== "string" || candidate.category.trim() === "") {
+    throw new Error(`Invalid redaction rule '${candidate.id}': category must be non-empty`);
+  }
+  if (!(candidate.pattern instanceof RegExp)) {
+    throw new Error(`Invalid redaction rule '${candidate.id}': pattern must be non-empty`);
+  }
+  assertRedactionPatternConsumesInput(candidate.pattern);
+  if (typeof candidate.description !== "string") {
+    throw new Error(`Invalid redaction rule '${candidate.id}': description must be a string`);
+  }
+  if (typeof candidate.enabled !== "boolean") {
+    throw new Error(`Invalid redaction rule '${candidate.id}': enabled must be a boolean`);
+  }
+  if (
+    candidate.falsePositiveRate !== undefined &&
+    (typeof candidate.falsePositiveRate !== "number" ||
+      !Number.isFinite(candidate.falsePositiveRate) ||
+      candidate.falsePositiveRate < 0 ||
+      candidate.falsePositiveRate > 1)
+  ) {
+    throw new Error(
+      `Invalid redaction rule '${candidate.id}': falsePositiveRate must be between 0 and 1`
+    );
+  }
+
+  return {
+    id: candidate.id,
+    category: candidate.category,
+    pattern: new RegExp(candidate.pattern.source, candidate.pattern.flags),
+    description: candidate.description,
+    enabled: candidate.enabled,
+    falsePositiveRate: candidate.falsePositiveRate as number | undefined,
+  };
+}
+
+function parsePersistedRule(value: unknown): RedactionRule {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new Error("Invalid persisted redaction rule: expected an object");
+  }
+  const candidate = value as Record<string, unknown>;
+  if (typeof candidate.pattern !== "string") {
+    throw new Error("Invalid persisted redaction rule: pattern must be a string");
+  }
+  if (candidate.flags !== undefined && typeof candidate.flags !== "string") {
+    throw new Error("Invalid persisted redaction rule: flags must be a string");
+  }
+
+  let pattern: RegExp;
+  try {
+    pattern = new RegExp(candidate.pattern, candidate.flags ?? "");
+  } catch (error) {
+    throw new Error(`Invalid persisted redaction rule regex: ${(error as Error).message}`);
+  }
+  return validateRule({ ...candidate, pattern });
+}
 
 // ---------------------------------------------------------------------------
 // Default rules
@@ -113,53 +179,42 @@ export class RedactionRuleManager {
     }
   }
 
-  addRule(rule: RedactionRule): void {
-    if (!rule.id || rule.id.trim() === "") {
-      throw new Error("Rule id must not be empty");
-    }
-    if (!rule.pattern || rule.pattern.source === "(?:)") {
-      throw new Error("Rule pattern must not be empty");
-    }
-    // Validate regex by attempting construction
-    try {
-      new RegExp(rule.pattern.source, rule.pattern.flags);
-    } catch (e) {
-      throw new Error(`Invalid regex pattern: ${(e as Error).message}`);
-    }
-    this.rules.set(rule.id, { ...rule, matchCount: 0 });
-    void this._emit("secrets.redaction.rules.changed", {
+  async addRule(rule: RedactionRule): Promise<void> {
+    const validated = validateRule(rule);
+    await this._emit("secrets.redaction.rules.changed", {
       action: "add",
       ruleId: rule.id,
     });
+    this.rules.set(validated.id, { ...validated, matchCount: 0 });
   }
 
-  removeRule(id: string): void {
+  async removeRule(id: string): Promise<void> {
     if (!this.rules.has(id)) {
       throw new Error(`Rule '${id}' not found`);
     }
-    this.rules.delete(id);
-    void this._emit("secrets.redaction.rules.changed", {
+    await this._emit("secrets.redaction.rules.changed", {
       action: "remove",
       ruleId: id,
     });
+    this.rules.delete(id);
   }
 
-  enableRule(id: string): void {
+  async enableRule(id: string): Promise<void> {
     const rule = this._getRule(id);
-    rule.enabled = true;
-    void this._emit("secrets.redaction.rules.changed", {
+    await this._emit("secrets.redaction.rules.changed", {
       action: "enable",
       ruleId: id,
     });
+    rule.enabled = true;
   }
 
-  disableRule(id: string): void {
+  async disableRule(id: string): Promise<void> {
     const rule = this._getRule(id);
-    rule.enabled = false;
-    void this._emit("secrets.redaction.rules.changed", {
+    await this._emit("secrets.redaction.rules.changed", {
       action: "disable",
       ruleId: id,
     });
+    rule.enabled = false;
   }
 
   listRules(): RedactionRule[] {
@@ -175,36 +230,27 @@ export class RedactionRuleManager {
     return this.rules.get(id)?.matchCount ?? 0;
   }
 
-  importRules(filePath: string): void {
+  async importRules(filePath: string): Promise<void> {
     const raw = readFileSync(filePath, "utf8");
-    const parsed = JSON.parse(raw) as Array<{
-      id: string;
-      category: string;
-      pattern: string;
-      flags?: string;
-      description: string;
-      enabled: boolean;
-      falsePositiveRate?: number;
-    }>;
-
-    for (const entry of parsed) {
-      if (!entry.id || !entry.pattern) {
-        throw new Error(`Invalid rule entry: missing id or pattern`);
-      }
-      const rule: RedactionRule = {
-        id: entry.id,
-        category: entry.category,
-        pattern: new RegExp(entry.pattern, entry.flags ?? ""),
-        description: entry.description,
-        enabled: entry.enabled,
-        falsePositiveRate: entry.falsePositiveRate,
-      };
-      this.rules.set(rule.id, { ...rule, matchCount: 0 });
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      throw new Error("Invalid redaction rules config: expected an array");
     }
-    void this._emit("secrets.redaction.rules.changed", {
+    const validated = parsed.map(parsePersistedRule);
+    const ids = new Set<string>();
+    for (const rule of validated) {
+      if (ids.has(rule.id)) {
+        throw new Error(`Invalid redaction rules config: duplicate id '${rule.id}'`);
+      }
+      ids.add(rule.id);
+    }
+    await this._emit("secrets.redaction.rules.changed", {
       action: "import",
       count: parsed.length,
     });
+    for (const rule of validated) {
+      this.rules.set(rule.id, { ...rule, matchCount: 0 });
+    }
   }
 
   exportRules(filePath: string): void {
@@ -213,9 +259,17 @@ export class RedactionRuleManager {
       pattern: pattern.source,
       flags: pattern.flags,
     }));
-    writeFileSync(filePath, JSON.stringify(data, null, 2), {
-      encoding: "utf8",
-    });
+    mkdirSync(dirname(filePath), { recursive: true });
+    const tempPath = `${filePath}.tmp-${process.pid}-${randomBytes(6).toString("hex")}`;
+    try {
+      writeFileSync(tempPath, JSON.stringify(data, null, 2), {
+        encoding: "utf8",
+        mode: 0o600,
+      });
+      renameSync(tempPath, filePath);
+    } finally {
+      rmSync(tempPath, { force: true });
+    }
   }
 
   private _getRule(id: string): RedactionRule & { matchCount: number } {

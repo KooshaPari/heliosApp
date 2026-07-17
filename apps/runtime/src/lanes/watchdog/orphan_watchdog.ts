@@ -43,6 +43,7 @@ export class OrphanWatchdog {
   private cycleNumber = 0;
   private isRunning = false;
   private detectionTimer: ReturnType<typeof setTimeout> | null = null;
+  private activeCycle: Promise<void> | null = null;
   private lastDetectionDuration = 0;
   private lastClassifiedOrphans: ClassifiedOrphan[] = [];
 
@@ -65,7 +66,7 @@ export class OrphanWatchdog {
     this.isRunning = true;
 
     // Load checkpoint for crash recovery
-    const _checkpoint = await this.checkpointManager.load();
+    const checkpoint = await this.checkpointManager.load();
     if (checkpoint) {
       this.cycleNumber = checkpoint.cycleNumber;
       console.log(
@@ -81,18 +82,19 @@ export class OrphanWatchdog {
     this.scheduleNextCycle();
   }
 
-  stop(): void {
-    if (!this.isRunning) {
-      return;
-    }
-
+  async stop(): Promise<void> {
+    const wasRunning = this.isRunning;
     this.isRunning = false;
     if (this.detectionTimer) {
       clearTimeout(this.detectionTimer);
       this.detectionTimer = null;
     }
 
-    console.log("[Watchdog] Stopped");
+    if (wasRunning) {
+      console.log("[Watchdog] Stopped");
+    }
+
+    await this.activeCycle;
   }
 
   getLastDetectionDuration(): number {
@@ -105,7 +107,12 @@ export class OrphanWatchdog {
 
   private scheduleNextCycle(): void {
     this.detectionTimer = setTimeout(async () => {
-      await this.processOrphans();
+      const cycle = this.processOrphans();
+      this.activeCycle = cycle;
+      await cycle;
+      if (this.activeCycle === cycle) {
+        this.activeCycle = null;
+      }
       if (this.isRunning) {
         this.scheduleNextCycle();
       }
@@ -115,11 +122,11 @@ export class OrphanWatchdog {
   private async processOrphans(): Promise<void> {
     if (!this.isRunning) return;
 
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
       // Run all three detectors in parallel (allSettled tolerates individual failures)
-      const _results = await Promise.allSettled([
+      const results = await Promise.allSettled([
         this.worktreeDetector.detect(),
         this.zellijDetector.detect(),
         this.ptyDetector.detect(),
@@ -220,7 +227,7 @@ export class OrphanWatchdog {
       console.log(
         `[Watchdog] Cycle ${this.cycleNumber} completed: ${this.lastDetectionDuration}ms, ${this.lastClassifiedOrphans.length} orphans found`
       );
-    } catch {
+    } catch (error) {
       // biome-ignore lint/suspicious/noConsole: Checkpoint save failures are intentionally emitted for operational visibility.
       console.error("Orphan watchdog detection cycle failed", error);
     }

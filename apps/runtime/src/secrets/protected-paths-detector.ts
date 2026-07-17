@@ -1,13 +1,13 @@
 import { randomBytes } from "node:crypto";
 import type { LocalBus } from "../protocol/bus.js";
-import type { ProtectedPathAcknowledgment, ProtectedPathMatch } from "./protected-paths-types.js";
+import type { LocalBusEnvelope } from "../protocol/types.js";
 import { ProtectedPathConfig } from "./protected-paths-config.js";
 import {
   extractFilePaths,
   matchesPattern,
   redactCommandForAudit,
 } from "./protected-paths-matching.js";
-import type { LocalBusEnvelope } from "../protocol/types.js";
+import type { ProtectedPathAcknowledgment, ProtectedPathMatch } from "./protected-paths-types.js";
 
 const DEBOUNCE_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -26,58 +26,62 @@ export class ProtectedPathDetector {
     return this.config;
   }
 
-  check(
+  async check(
     command: string,
     opts?: { terminalId?: string; correlationId?: string }
-  ): ProtectedPathMatch[] {
+  ): Promise<ProtectedPathMatch[]> {
     const filePaths = extractFilePaths(command);
     if (filePaths.length === 0) return [];
 
-    const enabledPatterns = this.config.getEnabledPatterns();
-    const matches: ProtectedPathMatch[] = [];
-    const seen = new Set<string>();
+    const matches = this._findMatches(command, filePaths);
+    for (const match of matches) {
+      await this._emit("secrets.protected_path.accessed", {
+        patternId: match.patternId,
+        pattern: match.pattern,
+        matchedPath: match.matchedPath,
+        command: match.command,
+        terminalId: opts?.terminalId ?? null,
+        correlationId: opts?.correlationId ?? randomBytes(8).toString("hex"),
+      });
+    }
 
-    for (const filePath of filePaths) {
-      for (const pattern of enabledPatterns) {
-        if (matchesPattern(filePath, pattern.pattern)) {
-          const dedupeKey = `${pattern.id}:${filePath}`;
-          if (seen.has(dedupeKey)) continue;
-          seen.add(dedupeKey);
-
-          if (this._isDebounced(pattern.id, filePath)) continue;
-
-          const redactedCommand = redactCommandForAudit(command);
-
-          const match: ProtectedPathMatch = {
-            patternId: pattern.id,
-            pattern: pattern.pattern,
-            matchedPath: filePath,
-            warningMessage:
-              "Command accesses protected path '" +
-              `${filePath}` +
-              "' matching pattern '" +
-              `${pattern.description}` +
-              "'",
-            command: redactedCommand,
-          };
-          matches.push(match);
-
-          void this._emit("secrets.protected_path.accessed", {
-            patternId: pattern.id,
-            pattern: pattern.pattern,
-            matchedPath: filePath,
-            command: redactedCommand,
-            terminalId: opts?.terminalId ?? null,
-            correlationId: opts?.correlationId ?? randomBytes(8).toString("hex"),
-          });
-
-          for (const cb of this.warningCallbacks) {
-            cb(match);
-          }
-        }
+    for (const match of matches) {
+      for (const callback of this.warningCallbacks) {
+        callback(match);
       }
     }
 
+    return matches;
+  }
+
+  private _findMatches(command: string, filePaths: string[]): ProtectedPathMatch[] {
+    const patterns = this.config.getEnabledPatterns();
+    const seen = new Set<string>();
+    return filePaths.flatMap(filePath => this._matchFilePath(command, filePath, patterns, seen));
+  }
+
+  private _matchFilePath(
+    command: string,
+    filePath: string,
+    patterns: ReturnType<ProtectedPathConfig["getEnabledPatterns"]>,
+    seen: Set<string>
+  ): ProtectedPathMatch[] {
+    const matches: ProtectedPathMatch[] = [];
+    for (const pattern of patterns) {
+      if (!matchesPattern(filePath, pattern.pattern)) continue;
+      const dedupeKey = `${pattern.id}:${filePath}`;
+      if (seen.has(dedupeKey)) continue;
+      seen.add(dedupeKey);
+      if (this._isDebounced(pattern.id, filePath)) continue;
+
+      matches.push({
+        patternId: pattern.id,
+        pattern: pattern.pattern,
+        matchedPath: filePath,
+        warningMessage: `Command accesses protected path '${filePath}' matching pattern '${pattern.description}'`,
+        command: redactCommandForAudit(command),
+      });
+    }
     return matches;
   }
 
@@ -85,19 +89,19 @@ export class ProtectedPathDetector {
     this.warningCallbacks.push(callback);
   }
 
-  acknowledge(patternId: string, matchedPath: string, correlationId?: string): void {
+  async acknowledge(patternId: string, matchedPath: string, correlationId?: string): Promise<void> {
     const key = `${patternId}:${matchedPath}`;
-    this.acknowledgments.set(key, {
-      patternId,
-      matchedPath,
-      acknowledgedAt: Date.now(),
-    });
-
-    void this._emit("secrets.protected_path.acknowledged", {
+    const acknowledgedAt = Date.now();
+    await this._emit("secrets.protected_path.acknowledged", {
       patternId,
       matchedPath,
       correlationId: correlationId ?? null,
-      acknowledgedAt: new Date().toISOString(),
+      acknowledgedAt: new Date(acknowledgedAt).toISOString(),
+    });
+    this.acknowledgments.set(key, {
+      patternId,
+      matchedPath,
+      acknowledgedAt,
     });
   }
 

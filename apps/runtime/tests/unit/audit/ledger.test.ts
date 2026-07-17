@@ -57,30 +57,30 @@ describe("AuditLedger", () => {
     });
 
     it("should filter by workspace ID", () => {
-      const _results = ledger.search({ workspaceId: "ws-1" });
+      const results = ledger.search({ workspaceId: "ws-1" });
       expect(results.every(e => e.workspaceId === "ws-1")).toBe(true);
     });
 
     it("should filter by actor", () => {
-      const _results = ledger.search({ actor: "agent-0" });
+      const results = ledger.search({ actor: "agent-0" });
       expect(results.every(e => e.actor === "agent-0")).toBe(true);
     });
 
     it("should filter by event type", () => {
-      const _results = ledger.search({
+      const results = ledger.search({
         eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
       });
       expect(results.every(e => e.eventType === AUDIT_EVENT_TYPES.COMMAND_EXECUTED)).toBe(true);
     });
 
     it("should merge results from ring buffer and store", () => {
-      const _results = ledger.search({ workspaceId: "ws-1", limit: 100 });
+      const results = ledger.search({ workspaceId: "ws-1", limit: 100 });
       expect(results.length).toBeGreaterThan(0);
       expect(results.length).toBeLessThanOrEqual(100);
     });
 
     it("should maintain chronological order", () => {
-      const _results = ledger.search({ workspaceId: "ws-1", limit: 100 });
+      const results = ledger.search({ workspaceId: "ws-1", limit: 100 });
 
       for (let i = 1; i < results.length; i++) {
         const prevTime = new Date(results[i - 1].timestamp).getTime();
@@ -233,6 +233,41 @@ describe("AuditLedger", () => {
         unsubscribe();
         done();
       }, 150);
+    });
+
+    it("should isolate subscriber callback errors", async () => {
+      const subscriberError = new Error("subscriber failed");
+      const originalConsoleError = console.error;
+      const loggedErrors: unknown[][] = [];
+      console.error = (...args: unknown[]) => {
+        loggedErrors.push(args);
+      };
+
+      ledger.subscribe({}, () => {
+        throw subscriberError;
+      });
+
+      const event = createAuditEvent({
+        eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+        actor: "agent-1",
+        action: "execute",
+        target: "cmd",
+        result: AUDIT_EVENT_RESULTS.SUCCESS,
+        workspaceId: "ws-1",
+        correlationId: "corr-error",
+        metadata: {},
+      });
+
+      try {
+        ledger.notifyEvent(event);
+        await new Promise(resolve => setTimeout(resolve, 300));
+      } finally {
+        console.error = originalConsoleError;
+      }
+
+      expect(loggedErrors).toEqual([
+        ["[AuditLedger] Subscription callback error:", subscriberError],
+      ]);
     });
 
     it("should allow unsubscribe", () => {

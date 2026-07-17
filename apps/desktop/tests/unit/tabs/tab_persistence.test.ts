@@ -82,7 +82,7 @@ describe("TabPersistence", () => {
       const filePath = path.join(tempDir, "tab_state.json");
       await fs.writeFile(filePath, JSON.stringify(testState), "utf-8");
 
-      const _startTime = Date.now();
+      const startTime = Date.now();
       await persistence.load();
       const _duration = Date.now() - startTime;
 

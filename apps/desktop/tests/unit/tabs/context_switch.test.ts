@@ -59,7 +59,7 @@ describe("ActiveContextStore", () => {
 
       let emittedEvent: any = null;
 
-      store.onContextChange(_event => {
+      store.onContextChange(event => {
         emittedEvent = event;
       });
 
@@ -87,7 +87,7 @@ describe("ActiveContextStore", () => {
 
       await store.setContext(context1);
 
-      store.onContextChange(_event => {
+      store.onContextChange(event => {
         emittedEvent = event;
       });
 
@@ -165,7 +165,7 @@ describe("ActiveContextStore", () => {
 
       let emittedContexts: ActiveContext[] = [];
 
-      store.onContextChange(_event => {
+      store.onContextChange(event => {
         if (event.current) {
           emittedContexts.push(event.current);
         }
@@ -193,7 +193,7 @@ describe("ActiveContextStore", () => {
 
       let finalContext: ActiveContext | null = null;
 
-      store.onContextChange(_event => {
+      store.onContextChange(event => {
         finalContext = event.current;
       });
 
@@ -306,6 +306,20 @@ describe("ActiveContextStore", () => {
   });
 
   describe("Listener Management", () => {
+    it("should reject instead of leaving setContext pending when a listener throws", async () => {
+      const context: ActiveContext = {
+        workspaceId: "ws1",
+        laneId: "lane1",
+        sessionId: "session1",
+      };
+
+      store.onContextChange(() => {
+        throw new Error("listener failed");
+      });
+
+      await expect(store.setContext(context)).rejects.toThrow("listener failed");
+    });
+
     it("should track listener count", () => {
       expect(store.getListenerCount()).toBe(0);
 

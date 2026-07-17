@@ -6,11 +6,7 @@
  */
 
 import type { AvailabilityResult, CliResult, ZellijSession } from "./types.js";
-import {
-  ZellijNotFoundError,
-  ZellijVersionError,
-  ZellijTimeoutError,
-} from "./errors.js";
+import { ZellijNotFoundError, ZellijVersionError, ZellijTimeoutError } from "./errors.js";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const MINIMUM_VERSION = "0.40.0";
@@ -54,7 +50,7 @@ export class ZellijCli {
         stdout: "pipe",
         stderr: "pipe",
       });
-    } catch {
+    } catch (error) {
       const caught = error as { code?: string; message?: string };
       if (caught?.code === "ENOENT" || caught?.message?.includes("spawn ENOENT")) {
         throw new ZellijNotFoundError();
@@ -106,7 +102,7 @@ export class ZellijCli {
     let result: CliResult;
     try {
       result = await this.run(["--version"], { timeout: 5_000 });
-    } catch {
+    } catch (err) {
       if (err instanceof ZellijNotFoundError) {
         return { available: false };
       }

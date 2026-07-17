@@ -5,8 +5,9 @@
 import { mkdtemp, rm, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { createHash } from "node:crypto";
 
-
+import { createJsonStore } from "../../../src/workspace/store.js";
 import type { Workspace } from "../../../src/workspace/types.js";
 
 function makeWorkspace(overrides: Partial<Workspace> = {}): Workspace {
@@ -161,6 +162,25 @@ describe("Corruption recovery", () => {
     expect(loaded?.name).toBe("Checksum");
   });
 
+  test("checksum-valid malformed primary recovers from snapshot", async () => {
+    const store = await createJsonStore(dataDir);
+    const ws = makeWorkspace({ name: "Schema Recovery" });
+    await store.save(ws);
+
+    const workspaces = [{ id: "malformed" }];
+    const checksum = createHash("sha256")
+      .update(JSON.stringify({ version: 1, workspaces }))
+      .digest("hex");
+    await writeFile(
+      join(dataDir, "workspaces.json"),
+      JSON.stringify({ version: 1, workspaces, _checksum: checksum })
+    );
+
+    const recovered = await createJsonStore(dataDir);
+    expect(await recovered.getById(ws.id)).toEqual(ws);
+    expect(await recovered.getById("malformed")).toBeUndefined();
+  });
+
   test("both files missing (fresh install after wipe) starts empty", async () => {
     await rm(dataDir, { recursive: true, force: true });
     const store = await createJsonStore(dataDir);
@@ -204,25 +224,29 @@ describe("Concurrent operations", () => {
 });
 
 describe("Storage size", () => {
-  test("50 workspaces with 10 projects each under 1 MB", { timeout: 30000 }, async () => {
-    const store = await createJsonStore(dataDir);
-    for (let i = 0; i < 50; i++) {
-      const ws = makeWorkspace({
-        name: `Workspace-${i}`,
-        rootPath: `/home/user/projects/workspace-${i}`,
-        projects: Array.from({ length: 10 }, (_, j) => ({
-          id: `proj_${i}_${j}`,
-          workspaceId: `ws_${i}`,
-          rootPath: `/home/user/projects/workspace-${i}/project-${j}`,
-          gitUrl: `https://github.com/user/project-${j}.git`,
-          status: "active" as const,
-          boundAt: Date.now(),
-        })),
-      });
-      await store.save(ws);
-    }
+  test(
+    "50 workspaces with 10 projects each under 1 MB",
+    async () => {
+      const store = await createJsonStore(dataDir);
+      for (let i = 0; i < 50; i++) {
+        const ws = makeWorkspace({
+          name: `Workspace-${i}`,
+          rootPath: `/home/user/projects/workspace-${i}`,
+          projects: Array.from({ length: 10 }, (_, j) => ({
+            id: `proj_${i}_${j}`,
+            workspaceId: `ws_${i}`,
+            rootPath: `/home/user/projects/workspace-${i}/project-${j}`,
+            gitUrl: `https://github.com/user/project-${j}.git`,
+            status: "active" as const,
+            boundAt: Date.now(),
+          })),
+        });
+        await store.save(ws);
+      }
 
-    const raw = await readFile(join(dataDir, "workspaces.json"), "utf-8");
-    expect(raw.length).toBeLessThan(1_000_000); // < 1 MB
-  });
+      const raw = await readFile(join(dataDir, "workspaces.json"), "utf-8");
+      expect(raw.length).toBeLessThan(1_000_000); // < 1 MB
+    },
+    { timeout: 30000 }
+  );
 });

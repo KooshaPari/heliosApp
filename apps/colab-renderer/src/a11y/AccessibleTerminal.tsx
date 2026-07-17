@@ -16,9 +16,7 @@ interface AccessibleTerminalProps {
   onData?: (data: string) => void;
 }
 
-export const AccessibleTerminal: Component<AccessibleTerminalProps> = (
-  props,
-) => {
+export const AccessibleTerminal: Component<AccessibleTerminalProps> = props => {
   let host: HTMLDivElement | undefined;
   let term: Terminal | undefined;
 
@@ -40,7 +38,7 @@ export const AccessibleTerminal: Component<AccessibleTerminalProps> = (
     term.open(host);
     fit.fit();
     if (props.onData) {
-      term.onData((d) => props.onData?.(d));
+      term.onData(d => props.onData?.(d));
     }
   });
 
@@ -50,7 +48,9 @@ export const AccessibleTerminal: Component<AccessibleTerminalProps> = (
 
   return (
     <div
-      ref={host}
+      ref={element => {
+        host = element;
+      }}
       id={props.id}
       role="application"
       aria-label={props.ariaLabel}

@@ -93,26 +93,29 @@ const FILE_ARG_COMMANDS = [
 ];
 
 export function matchesPattern(filePath: string, pattern: string): boolean {
-  const expandedPattern = pattern.replace(/^~\//, "");
-  const expandedPath = filePath.replace(/^~\//, "").replace(/^\/home\/[^/]+\//, "");
+  const normalizedPattern = pattern.replace(/\\/g, "/");
+  const normalizedPath = filePath.replace(/\\/g, "/");
+  const expandedPattern = normalizedPattern.replace(/^~\//, "");
+  const expandedPath = normalizedPath.replace(/^~\//, "").replace(/^\/home\/[^/]+\//, "");
 
-  if (pattern === ".env") {
-    const base = filePath.split("/").pop() ?? filePath;
+  if (normalizedPattern === ".env") {
+    const base = normalizedPath.split("/").pop() ?? normalizedPath;
     return base === ".env" || base.startsWith(".env.");
   }
 
-  if (!pattern.includes("*") && !pattern.includes("?")) {
-    const base = filePath.split("/").pop() ?? filePath;
-    const patBase = pattern.split("/").pop() ?? pattern;
+  if (!normalizedPattern.includes("*") && !normalizedPattern.includes("?")) {
+    const base = normalizedPath.split("/").pop() ?? normalizedPath;
+    const patBase = normalizedPattern.split("/").pop() ?? normalizedPattern;
     if (base === patBase) return true;
-    if (filePath.endsWith(pattern) || filePath === pattern) return true;
+    if (normalizedPath.endsWith(normalizedPattern) || normalizedPath === normalizedPattern)
+      return true;
     if (expandedPath.endsWith(expandedPattern) || expandedPath === expandedPattern) return true;
     return false;
   }
 
-  const regexSource = globToRegex(pattern);
+  const regexSource = globToRegex(normalizedPattern);
   const regex = new RegExp(regexSource, "i");
-  return regex.test(filePath) || regex.test(expandedPath);
+  return regex.test(normalizedPath) || regex.test(expandedPath);
 }
 
 function globToRegex(glob: string): string {
@@ -232,12 +235,46 @@ function looksLikeFilePath(tok: string): boolean {
 export function redactCommandForAudit(command: string): string {
   return command
     .replace(/(?:AKIA[0-9A-Z]{16})/g, "[REDACTED:AWS_ACCESS_KEY]")
+    .replace(
+      /(?:aws_secret(?:_access_key)?)\s*[=:]\s*["']?[A-Za-z0-9+/]{40}["']?/gi,
+      "[REDACTED:AWS_SECRET_KEY]"
+    )
     .replace(/(?:AIza[0-9A-Za-z\-_]{35})/g, "[REDACTED:GCP_API_KEY]")
     .replace(/(?:sk-[A-Za-z0-9]{48,})/g, "[REDACTED:OPENAI_KEY]")
     .replace(/(?:gh[ps]_[A-Za-z0-9_]{36,})/g, "[REDACTED:GITHUB_TOKEN]")
+    .replace(/(?:github_pat_[A-Za-z0-9_]{82,})/g, "[REDACTED:GITHUB_TOKEN]")
     .replace(/(?:Bearer [A-Za-z0-9\-._~+/]+=*)/g, "Bearer [REDACTED:TOKEN]")
     .replace(
-      /(?:(?:api_key|apikey|API_KEY)\s*[=:]\s*["']?)([A-Za-z0-9\-_]{16,})["']?/gi,
+      /\b(?:[a-z][a-z0-9]*_)*token\s*[=:]\s*(?:"[^"]{16,}"|'[^']{16,}'|[^\s"']{16,})/gi,
+      "[REDACTED:TOKEN]"
+    )
+    .replace(
+      /\b(?:[a-z][a-z0-9]*_)*secret\s*[=:]\s*(?:"[^"]{16,}"|'[^']{16,}'|[^\s"']{16,})/gi,
+      "[REDACTED:SECRET]"
+    )
+    .replace(
+      /(?:postgres|postgresql|mysql|mssql|mongodb(?:\+srv)?|rediss?|amqps?):\/\/[^:\s]+:[^@\s]+@[^\s"']+/gi,
+      "[REDACTED:CONNECTION_STRING]"
+    )
+    .replace(
+      /-----BEGIN ((?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY)-----[\s\S]*?-----END \1-----/g,
+      "[REDACTED:PRIVATE_KEY]"
+    )
+    .replace(/-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----/g, "[REDACTED:PRIVATE_KEY]")
+    .replace(
+      /\b(?:[a-z][a-z0-9]*_)*(?:private|secret|signing|encryption|master)_key\s*[=:]\s*(?:"[^"]{16,}"|'[^']{16,}'|[^\s"']{16,})/gi,
+      "[REDACTED:SENSITIVE_KEY]"
+    )
+    .replace(
+      /\b(?:[a-z][a-z0-9]*_)*(?:password|passwd)\s*[=:]\s*(?:"[^"]{8,}"|'[^']{8,}'|[^\s"']{8,})/gi,
+      "[REDACTED:PASSWORD]"
+    )
+    .replace(
+      /(?:client_secret\s*[=:]\s*["']?)[A-Za-z0-9\-_]{16,}["']?/gi,
+      "[REDACTED:CLIENT_SECRET]"
+    )
+    .replace(
+      /(?:(?:api_key|apikey|api_token)\s*[=:]\s*["']?)([A-Za-z0-9\-_]{16,})["']?/gi,
       () => "[REDACTED:API_KEY]"
     );
 }

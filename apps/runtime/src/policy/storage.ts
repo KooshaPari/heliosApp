@@ -7,6 +7,8 @@ import { promises as fs } from "fs";
 import * as path from "path";
 
 import { PolicyRuleSet } from "./rules";
+import type { PolicyRule } from "./types";
+import { validatePolicyRules, validatePolicyWorkspaceId } from "./validation.js";
 
 export type RulesChangedCallback = (workspaceId: string, rules: PolicyRule[]) => void;
 
@@ -28,6 +30,7 @@ export class PolicyStorage {
    * Load or get cached rule set for a workspace.
    */
   async getRuleSet(workspaceId: string): Promise<PolicyRuleSet> {
+    validatePolicyWorkspaceId(workspaceId);
     // Return cached rule set if available
     if (this.cache.has(workspaceId)) {
       return this.cache.get(workspaceId)!;
@@ -54,17 +57,17 @@ export class PolicyStorage {
    * Returns empty array if file doesn't exist.
    */
   async loadRules(workspaceId: string): Promise<PolicyRule[]> {
-    const filePath = path.join(this.policyDir, `${workspaceId}.json`);
+    const filePath = this.getPolicyPath(workspaceId);
 
     try {
       const content = await fs.readFile(filePath, "utf-8");
-      const rules = JSON.parse(content) as PolicyRule[];
+      const rules: unknown = JSON.parse(content);
 
       // Validate rules
-      this.validateRules(rules);
+      validatePolicyRules(workspaceId, rules);
 
       return rules;
-    } catch {
+    } catch (error) {
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         // File doesn't exist: return empty (deny-by-default)
         return [];
@@ -79,12 +82,12 @@ export class PolicyStorage {
    */
   async saveRules(workspaceId: string, rules: PolicyRule[]): Promise<void> {
     // Validate before saving
-    this.validateRules(rules);
+    validatePolicyRules(workspaceId, rules);
 
     // Ensure directory exists
     await fs.mkdir(this.policyDir, { recursive: true });
 
-    const filePath = path.join(this.policyDir, `${workspaceId}.json`);
+    const filePath = this.getPolicyPath(workspaceId);
     const tempPath = `${filePath}.tmp`;
 
     try {
@@ -104,7 +107,7 @@ export class PolicyStorage {
 
       // Notify callbacks (debounced)
       this.notifyChangedDebounced(workspaceId, rules);
-    } catch {
+    } catch (error) {
       // Clean up temp file
       try {
         await fs.unlink(tempPath);
@@ -123,7 +126,7 @@ export class PolicyStorage {
       return; // Already watching
     }
 
-    const filePath = path.join(this.policyDir, `${workspaceId}.json`);
+    const filePath = this.getPolicyPath(workspaceId);
 
     // Simple file watching using setInterval (cross-platform, no native watch needed)
     let lastMtime = 0;
@@ -143,7 +146,7 @@ export class PolicyStorage {
             }
             this.cache.set(workspaceId, ruleSet);
             this.notifyChangedDebounced(workspaceId, rules);
-          } catch {
+          } catch (error) {
             console.error(`Failed to reload policy rules for ${workspaceId}:`, error);
             // Keep previous rules on error
           }
@@ -190,34 +193,9 @@ export class PolicyStorage {
     this.changeCallbacks.push(callback);
   }
 
-  /**
-   * Validate rules conform to schema.
-   */
-  private validateRules(rules: PolicyRule[]): void {
-    if (!Array.isArray(rules)) {
-      throw new Error("Rules must be an array");
-    }
-
-    for (const rule of rules) {
-      if (!rule.id || typeof rule.id !== "string") {
-        throw new Error("Rule must have an id field");
-      }
-      if (!rule.pattern || typeof rule.pattern !== "string") {
-        throw new Error(`Rule ${rule.id} must have a pattern field`);
-      }
-      if (!rule.patternType || !["glob", "regex"].includes(rule.patternType)) {
-        throw new Error(`Rule ${rule.id} has invalid patternType`);
-      }
-      if (
-        !rule.classification ||
-        !["safe", "needs-approval", "blocked"].includes(rule.classification)
-      ) {
-        throw new Error(`Rule ${rule.id} has invalid classification`);
-      }
-      if (typeof rule.priority !== "number") {
-        throw new Error(`Rule ${rule.id} must have a numeric priority`);
-      }
-    }
+  private getPolicyPath(workspaceId: string): string {
+    validatePolicyWorkspaceId(workspaceId);
+    return path.join(this.policyDir, `${workspaceId}.json`);
   }
 
   /**

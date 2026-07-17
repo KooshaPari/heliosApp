@@ -27,6 +27,8 @@ export const TerminalTabs: Component<TerminalTabsProps> = props => {
 
   return (
     <div
+      role="toolbar"
+      aria-label="Terminal controls"
       style={{
         display: "flex",
         "flex-direction": "row",
@@ -37,50 +39,56 @@ export const TerminalTabs: Component<TerminalTabsProps> = props => {
         "min-height": "32px",
       }}
     >
-      <For each={getTerminals()}>
-        {(term: TerminalInfo) => {
-          const isActive = () => getActiveTerminalId() === term.id;
-          return (
-            <div
-              role="tab"
-              aria-selected={isActive()}
-              onClick={() => switchTerminal(term.id)}
-              style={{
-                display: "flex",
-                "align-items": "center",
-                gap: "6px",
-                padding: "4px 12px",
-                cursor: "pointer",
-                "background-color": isActive() ? "#1e1e2e" : "transparent",
-                color: isActive() ? "#cdd6f4" : "#6c7086",
-                "border-right": "1px solid #313244",
-                "font-family": '"JetBrains Mono", "Fira Code", monospace',
-                "font-size": "12px",
-                "white-space": "nowrap",
-                "user-select": "none",
-              }}
-            >
-              <span>{term.name}</span>
+      <div role="tablist" aria-label="Terminal sessions" style={{ display: "flex" }}>
+        <For each={getTerminals()}>
+          {(term: TerminalInfo) => {
+            const isActive = () => getActiveTerminalId() === term.id;
+            return (
               <button
                 type="button"
-                onClick={(e: MouseEvent) => handleClose(e, term.id)}
+                role="tab"
+                aria-selected={isActive()}
+                onClick={() => switchTerminal(term.id)}
                 style={{
                   background: "none",
                   border: "none",
-                  color: "inherit",
+                  color: isActive() ? "#cdd6f4" : "#6c7086",
                   cursor: "pointer",
-                  padding: "0 2px",
+                  padding: "4px 6px 4px 12px",
+                  "font-family": '"JetBrains Mono", "Fira Code", monospace',
                   "font-size": "12px",
-                  "line-height": "1",
-                  opacity: "0.7",
+                  "white-space": "nowrap",
+                  "user-select": "none",
+                  "background-color": isActive() ? "#1e1e2e" : "transparent",
+                  "border-right": "1px solid #313244",
                 }}
-                aria-label={`Close ${term.name}`}
               >
-                X
+                {term.name}
               </button>
-            </div>
-          );
-        }}
+            );
+          }}
+        </For>
+      </div>
+      <For each={getTerminals()}>
+        {(term: TerminalInfo) => (
+          <button
+            type="button"
+            onClick={(e: MouseEvent) => handleClose(e, term.id)}
+            style={{
+              background: "none",
+              border: "none",
+              color: "inherit",
+              cursor: "pointer",
+              padding: "0 2px",
+              "font-size": "12px",
+              "line-height": "1",
+              opacity: "0.7",
+            }}
+            aria-label={`Close ${term.name}`}
+          >
+            X
+          </button>
+        )}
       </For>
       <button
         type="button"

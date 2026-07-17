@@ -11,6 +11,7 @@ import { createHash } from "crypto";
 import { homedir } from "os";
 import { dirname, join } from "path";
 import type { TerminalBinding } from "./binding_triple.js";
+import { isTerminalBinding } from "./binding_triple.js";
 
 export interface PersistenceStore {
   save(bindings: TerminalBinding[]): Promise<void>;
@@ -71,7 +72,7 @@ export class JsonFilePersistence implements PersistenceStore {
         await this.doWrite(bindings);
         this.writeTimeoutId = null;
         this.pendingBindings = null;
-      } catch {
+      } catch (error) {
         console.error("Failed to persist bindings:", error);
       }
     }, this.writeDebounceMs);
@@ -86,13 +87,14 @@ export class JsonFilePersistence implements PersistenceStore {
   async load(): Promise<TerminalBinding[]> {
     try {
       const content = await fs.readFile(this.storePath, "utf-8");
-      const data: PersistenceData = JSON.parse(content);
+      const parsed: unknown = JSON.parse(content);
 
       // Verify structure
-      if (!data.bindings || !Array.isArray(data.bindings)) {
-        console.warn("Invalid persistence format: missing or invalid bindings array");
+      if (!this.isPersistenceData(parsed)) {
+        console.warn("Invalid persistence format or binding schema");
         return [];
       }
+      const data = parsed;
 
       // Verify checksum
       const expectedChecksum = this.computeChecksum(data.bindings, data.timestamp);
@@ -102,7 +104,7 @@ export class JsonFilePersistence implements PersistenceStore {
       }
 
       return data.bindings;
-    } catch {
+    } catch (error) {
       if ((error as any).code === "ENOENT") {
         // File doesn't exist; expected on first run
         return [];
@@ -135,7 +137,7 @@ export class JsonFilePersistence implements PersistenceStore {
   async clear(): Promise<void> {
     try {
       await fs.unlink(this.storePath);
-    } catch {
+    } catch (error) {
       if ((error as any).code !== "ENOENT") {
         console.error("Failed to clear persistence:", error);
       }
@@ -164,7 +166,7 @@ export class JsonFilePersistence implements PersistenceStore {
     try {
       await fs.writeFile(tempPath, JSON.stringify(data, null, 2), "utf-8");
       await fs.rename(tempPath, this.storePath);
-    } catch {
+    } catch (error) {
       // Clean up temp file on error
       try {
         await fs.unlink(tempPath);
@@ -179,6 +181,20 @@ export class JsonFilePersistence implements PersistenceStore {
   private computeChecksum(bindings: TerminalBinding[], timestamp: string): string {
     const data = JSON.stringify({ bindings, timestamp });
     return createHash("sha256").update(data).digest("hex");
+  }
+
+  private isPersistenceData(value: unknown): value is PersistenceData {
+    if (typeof value !== "object" || value === null) return false;
+
+    const data = value as Partial<PersistenceData>;
+    return (
+      data.version === this.version &&
+      typeof data.timestamp === "string" &&
+      !Number.isNaN(Date.parse(data.timestamp)) &&
+      typeof data.checksum === "string" &&
+      Array.isArray(data.bindings) &&
+      data.bindings.every(isTerminalBinding)
+    );
   }
 }
 

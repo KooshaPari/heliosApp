@@ -1,10 +1,19 @@
+import { randomUUID } from "node:crypto";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import type { LocalBus } from "../protocol/bus.js";
-import { promises as fs } from "fs";
-import path from "path";
-import { randomUUID } from "crypto";
 
 export interface CrashRecord {
   timestamp: number;
+}
+
+function isValidCrashTimestamp(value: unknown, now: number, windowMs: number): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isSafeInteger(value) &&
+    value >= 0 &&
+    value <= now + windowMs
+  );
 }
 
 export class CrashLoopDetector {
@@ -23,10 +32,12 @@ export class CrashLoopDetector {
     await this.loadCrashHistory();
   }
 
-  recordCrash(timestamp: number): void {
+  async recordCrash(timestamp: number): Promise<void> {
+    if (!isValidCrashTimestamp(timestamp, Date.now(), this.windowMs)) return;
+
     this.crashHistory.push(timestamp);
     this.cleanOldCrashes();
-    this.persistCrashHistory();
+    await this.persistCrashHistory();
   }
 
   isLooping(): boolean {
@@ -43,10 +54,15 @@ export class CrashLoopDetector {
     try {
       const historyPath = path.join(this.crashDataDir, "recovery", "crash-history.json");
       const data = await fs.readFile(historyPath, "utf-8");
-      const parsed = JSON.parse(data) as number[];
-      if (Array.isArray(parsed)) {
+      const parsed: unknown = JSON.parse(data);
+      if (
+        Array.isArray(parsed) &&
+        parsed.every(timestamp => isValidCrashTimestamp(timestamp, Date.now(), this.windowMs))
+      ) {
         this.crashHistory = parsed;
         this.cleanOldCrashes();
+      } else {
+        this.crashHistory = [];
       }
     } catch {
       // History file doesn't exist or is corrupted - start with empty history
@@ -54,22 +70,23 @@ export class CrashLoopDetector {
     }
   }
 
-  private persistCrashHistory(): void {
+  private async persistCrashHistory(): Promise<void> {
+    const historyPath = path.join(this.crashDataDir, "recovery", "crash-history.json");
+    const tempPath = `${historyPath}.${randomUUID()}.tmp`;
     try {
-      const historyPath = path.join(this.crashDataDir, "recovery", "crash-history.json");
-      const tempPath = `${historyPath}.tmp`;
-
       // Atomic write
-      fs.writeFile(tempPath, JSON.stringify(this.crashHistory), {
+      await fs.mkdir(path.dirname(historyPath), { recursive: true });
+      await fs.writeFile(tempPath, JSON.stringify(this.crashHistory), {
         encoding: "utf-8",
-      })
-        .then(() => fs.rename(tempPath, historyPath))
-        .catch(err => {
-          // Silently fail - don't let history persistence block operations
-          console.error("Failed to persist crash history:", err);
-        });
-    } catch {
+      });
+      await fs.rename(tempPath, historyPath);
+    } catch (err) {
+      // Silently fail - don't let history persistence block operations
       console.error("Failed to persist crash history:", err);
+    } finally {
+      await fs.unlink(tempPath).catch(() => {
+        // The rename consumed the temp file, or cleanup is best-effort after failure.
+      });
     }
   }
 }

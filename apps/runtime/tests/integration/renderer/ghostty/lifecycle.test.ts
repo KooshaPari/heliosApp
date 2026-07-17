@@ -42,7 +42,7 @@ describe("Ghostty integration - lifecycle (T013)", () => {
     if (backend !== undefined) {
       try {
         await backend.stop();
-    // eslint-disable-next-line no-unused-vars
+        // eslint-disable-next-line no-unused-vars
       } catch (_err) {
         // Ignore cleanup errors
       }
@@ -93,7 +93,7 @@ describe("Ghostty integration - lifecycle (T013)", () => {
   });
 
   test("register ghostty with renderer registry", () => {
-    const _registry = new RendererRegistry();
+    const registry = new RendererRegistry();
     backend = new GhosttyBackend("0.0.0-test");
     registry.register(backend);
     expect(registry.get("ghostty")).toBe(backend);

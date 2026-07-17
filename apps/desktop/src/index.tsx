@@ -20,18 +20,12 @@ export const App: Component = () => {
       <header role="banner" aria-label="App header">
         {/* Header chrome — file tree toggle, search, settings */}
       </header>
-      <nav aria-label="Primary">
-        {/* Primary navigation */}
-      </nav>
+      <nav aria-label="Primary">{/* Primary navigation */}</nav>
       <main id="main" tabindex="-1" role="main">
         {/* Route content */}
       </main>
-      <aside aria-label="Secondary">
-        {/* File tree, secondary panels */}
-      </aside>
-      <footer role="contentinfo">
-        {/* Status bar */}
-      </footer>
+      <aside aria-label="Secondary">{/* File tree, secondary panels */}</aside>
+      <footer role="contentinfo">{/* Status bar */}</footer>
     </DirProvider>
   );
 };

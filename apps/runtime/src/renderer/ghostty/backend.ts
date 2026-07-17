@@ -13,7 +13,7 @@ import { detectCapabilities, getCachedCapabilities } from "./capabilities.js";
 import { GhosttyMetrics } from "./metrics.js";
 import type { MetricsSnapshot, MetricsPublisher } from "./metrics.js";
 import { GhosttyInputRelay } from "./input.js";
-
+import type { PtyWriter } from "./input.js";
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -190,7 +190,7 @@ export class GhosttyBackend implements RendererAdapter {
 
       // Start render loop monitoring (T006)
       this._startRenderLoopMonitoring();
-    } catch {
+    } catch (error) {
       this._state = "errored";
       throw error;
     }

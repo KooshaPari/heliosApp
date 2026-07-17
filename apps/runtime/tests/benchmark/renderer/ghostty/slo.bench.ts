@@ -18,7 +18,6 @@ import { GhosttyMetrics } from "../../../../src/renderer/ghostty/metrics.js";
 import { isGhosttyAvailable } from "../../../../src/renderer/ghostty/index.js";
 import type { RendererConfig } from "../../../../src/renderer/adapter.js";
 
-
 // ---------------------------------------------------------------------------
 // SLO targets
 // ---------------------------------------------------------------------------
