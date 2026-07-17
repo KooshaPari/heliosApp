@@ -1,5 +1,6 @@
 import { RendererPreferencesManager } from "../../../src/settings/renderer_preferences";
 
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 import { unlinkSync, writeFileSync } from "fs";
 import { resolve } from "path";
 
@@ -43,6 +44,29 @@ describe("RendererPreferencesManager", () => {
 
     expect(prefs.activeRenderer).toBe("rio");
     expect(prefs.hotSwapEnabled).toBe(false);
+  });
+
+  it("should handle a preferences directory creation failure", () => {
+    const blockingPath = resolve("/tmp/test-renderer-prefs-blocker");
+    const originalConsoleError = console.error;
+    const errorLog = mock((_message?: unknown, _error?: unknown) => {});
+    writeFileSync(blockingPath, "not a directory");
+    console.error = errorLog;
+
+    try {
+      const blockedManager = new RendererPreferencesManager(resolve(blockingPath, "prefs.json"));
+
+      expect(() => blockedManager.save({ activeRenderer: "rio" })).not.toThrow();
+      expect(errorLog).toHaveBeenCalledTimes(2);
+      expect(errorLog.mock.calls[0]?.[0]).toBe("Failed to create preferences directory");
+      expect(errorLog.mock.calls[0]?.[1]).toHaveProperty("code", "EEXIST");
+      expect(errorLog.mock.calls[1]?.[0]).toBe("Failed to save renderer preferences");
+      expect(errorLog.mock.calls[1]?.[1]).toHaveProperty("code");
+      expect(errorLog.mock.calls[1]?.[1]).not.toBeInstanceOf(ReferenceError);
+    } finally {
+      console.error = originalConsoleError;
+      unlinkSync(blockingPath);
+    }
   });
 
   it("should handle corrupted JSON file", () => {

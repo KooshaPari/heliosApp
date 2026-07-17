@@ -68,7 +68,7 @@ export class RendererPreferencesManager {
 
       this.isDirty = false;
       console.log("Renderer preferences saved");
-    } catch {
+    } catch (error) {
       console.error("Failed to save renderer preferences", error);
     }
   }
@@ -120,7 +120,7 @@ export class RendererPreferencesManager {
     const dir = dirname(this.preferencesPath);
     try {
       mkdirSync(dir, { recursive: true });
-    } catch {
+    } catch (error) {
       console.error("Failed to create preferences directory", error);
     }
   }
