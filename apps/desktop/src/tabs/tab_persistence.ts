@@ -42,7 +42,7 @@ export class TabPersistence {
    * Must complete within 100ms.
    */
   async load(): Promise<TabPersistedState | null> {
-    const _startTime = Date.now();
+    const startTime = Date.now();
 
     try {
       const data = await fs.readFile(this.storagePath, "utf-8");
@@ -61,7 +61,7 @@ export class TabPersistence {
       }
 
       return state;
-    } catch {
+    } catch (error) {
       if (error instanceof Error && "code" in error) {
         const nodeError = error as NodeJS.ErrnoException;
         if (nodeError.code === "ENOENT") {
@@ -215,7 +215,7 @@ export class TabPersistence {
   async delete(): Promise<void> {
     try {
       await fs.unlink(this.storagePath);
-    } catch {
+    } catch (error) {
       if (error instanceof Error && "code" in error) {
         const nodeError = error as NodeJS.ErrnoException;
         if (nodeError.code !== "ENOENT") {
