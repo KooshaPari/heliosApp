@@ -6,7 +6,6 @@ import { describe, expect, test } from "bun:test";
 
 import { createRuntime } from "../../../src/index.js";
 
-
 describe("terminal lifecycle and streaming data plane", () => {
   test("rejects lifecycle commands without correlation_id", async () => {
     const runtime = createRuntime();

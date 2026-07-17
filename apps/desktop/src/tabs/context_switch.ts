@@ -82,14 +82,14 @@ export class ActiveContextStore {
           if (contextToSet !== null && this.validator) {
             const isValid = await this.validator(contextToSet);
             if (!isValid) {
-            // Emit validation failure event
+              // Emit validation failure event
               if (this.bus) {
                 await this.bus.publish({
-                id: `validation-${Date.now()}`,
-                type: "event",
-                ts: new Date().toISOString(),
-                topic: "context.validation.failed",
-                payload: { context: contextToSet },
+                  id: `validation-${Date.now()}`,
+                  type: "event",
+                  ts: new Date().toISOString(),
+                  topic: "context.validation.failed",
+                  payload: { context: contextToSet },
                 });
               }
               resolve();
@@ -97,13 +97,13 @@ export class ActiveContextStore {
             }
           }
 
-        // Store previous context for comparison
+          // Store previous context for comparison
           const previousContext = this.currentContext;
 
-        // Update context
+          // Update context
           this.currentContext = contextToSet;
 
-        // Emit change event to listeners
+          // Emit change event to listeners
           const changeEvent: ContextChangeEvent = {
             previous: previousContext,
             current: this.currentContext,
@@ -113,17 +113,17 @@ export class ActiveContextStore {
             await listener(changeEvent);
           }
 
-        // Publish to bus
+          // Publish to bus
           if (this.bus) {
             await this.bus.publish({
-            id: `context-change-${Date.now()}`,
-            type: "event",
-            ts: new Date().toISOString(),
-            topic: "context.active.changed",
-            workspace_id: contextToSet?.workspaceId,
-            lane_id: contextToSet?.laneId,
-            session_id: contextToSet?.sessionId,
-            payload: changeEvent,
+              id: `context-change-${Date.now()}`,
+              type: "event",
+              ts: new Date().toISOString(),
+              topic: "context.active.changed",
+              workspace_id: contextToSet?.workspaceId,
+              lane_id: contextToSet?.laneId,
+              session_id: contextToSet?.sessionId,
+              payload: changeEvent,
             });
           }
 

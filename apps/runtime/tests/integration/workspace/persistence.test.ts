@@ -224,25 +224,29 @@ describe("Concurrent operations", () => {
 });
 
 describe("Storage size", () => {
-  test("50 workspaces with 10 projects each under 1 MB", async () => {
-    const store = await createJsonStore(dataDir);
-    for (let i = 0; i < 50; i++) {
-      const ws = makeWorkspace({
-        name: `Workspace-${i}`,
-        rootPath: `/home/user/projects/workspace-${i}`,
-        projects: Array.from({ length: 10 }, (_, j) => ({
-          id: `proj_${i}_${j}`,
-          workspaceId: `ws_${i}`,
-          rootPath: `/home/user/projects/workspace-${i}/project-${j}`,
-          gitUrl: `https://github.com/user/project-${j}.git`,
-          status: "active" as const,
-          boundAt: Date.now(),
-        })),
-      });
-      await store.save(ws);
-    }
+  test(
+    "50 workspaces with 10 projects each under 1 MB",
+    async () => {
+      const store = await createJsonStore(dataDir);
+      for (let i = 0; i < 50; i++) {
+        const ws = makeWorkspace({
+          name: `Workspace-${i}`,
+          rootPath: `/home/user/projects/workspace-${i}`,
+          projects: Array.from({ length: 10 }, (_, j) => ({
+            id: `proj_${i}_${j}`,
+            workspaceId: `ws_${i}`,
+            rootPath: `/home/user/projects/workspace-${i}/project-${j}`,
+            gitUrl: `https://github.com/user/project-${j}.git`,
+            status: "active" as const,
+            boundAt: Date.now(),
+          })),
+        });
+        await store.save(ws);
+      }
 
-    const raw = await readFile(join(dataDir, "workspaces.json"), "utf-8");
-    expect(raw.length).toBeLessThan(1_000_000); // < 1 MB
-  }, { timeout: 30000 });
+      const raw = await readFile(join(dataDir, "workspaces.json"), "utf-8");
+      expect(raw.length).toBeLessThan(1_000_000); // < 1 MB
+    },
+    { timeout: 30000 }
+  );
 });

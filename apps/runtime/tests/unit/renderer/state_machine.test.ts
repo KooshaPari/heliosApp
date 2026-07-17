@@ -11,7 +11,6 @@ import {
 } from "../../../src/renderer/state_machine.js";
 import type { RendererEvent } from "../../../src/renderer/state_machine.js";
 
-
 describe("RendererStateMachine", () => {
   it("starts in uninitialized state", () => {
     const sm = new RendererStateMachine();

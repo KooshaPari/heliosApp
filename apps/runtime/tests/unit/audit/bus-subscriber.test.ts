@@ -7,7 +7,6 @@ import { BusAuditSubscriber } from "../../../src/audit/bus-subscriber";
 import type { BusEvent } from "../../../src/audit/bus-subscriber";
 import { DefaultAuditSink, NoOpAuditStorage } from "../../../src/audit/sink";
 
-
 describe("BusAuditSubscriber", () => {
   let subscriber: BusAuditSubscriber;
   let sink: DefaultAuditSink;

@@ -59,11 +59,7 @@ export class ContextPropagator {
     const propagationPromises: Promise<void>[] = [];
 
     for (const [tabId, tab] of this.registeredTabs) {
-      const tabPromise = this.propagateTabWithTimeout(
-        tab,
-        context,
-        controller.signal
-      )
+      const tabPromise = this.propagateTabWithTimeout(tab, context, controller.signal)
         .then(success => {
           if (success) {
             result.successful.push(tabId);

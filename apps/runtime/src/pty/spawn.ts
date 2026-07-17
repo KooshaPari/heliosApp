@@ -58,7 +58,9 @@ export async function spawnPty(options: SpawnOptions, registry: PtyRegistry): Pr
   const ptyId = generatePtyId();
   const lifecycle = new PtyLifecycle(ptyId);
 
-  const shell = options.shell ?? (process.platform === "win32" ? process.env["ComSpec"] ?? "cmd.exe" : "/bin/bash");
+  const shell =
+    options.shell ??
+    (process.platform === "win32" ? (process.env["ComSpec"] ?? "cmd.exe") : "/bin/bash");
   const cwd = options.cwd ?? process.cwd();
   const env = options.env ?? {};
   const cols = options.cols ?? 80;

@@ -625,7 +625,7 @@ describe("Integration Tests (T015)", () => {
           "ws1",
           "key"
         );
-      // eslint-disable-next-line no-unused-vars
+        // eslint-disable-next-line no-unused-vars
       } catch (_) {
         /* expected */
       }

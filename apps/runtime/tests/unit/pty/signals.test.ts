@@ -34,7 +34,7 @@ function makeRecord(overrides?: Partial<PtyRecord>): PtyRecord {
 }
 
 function spawnShellProcess(): number {
-  const shell = process.platform === "win32" ? process.env["ComSpec"] ?? "cmd.exe" : "/bin/sh";
+  const shell = process.platform === "win32" ? (process.env["ComSpec"] ?? "cmd.exe") : "/bin/sh";
   const proc = Bun.spawn([shell], {
     stdout: "pipe",
     stderr: "pipe",

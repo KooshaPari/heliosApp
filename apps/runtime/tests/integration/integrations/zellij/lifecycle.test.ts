@@ -5,9 +5,7 @@
  * FR-ZMX-005 (relay mux events), FR-ZMX-006 (session reattach after restart), FR-ZMX-008 (reconcile bindings)
  */
 import { describe, expect, it, mock, beforeEach } from "bun:test";
-import {
-  ZellijSessionManager,
-} from "../../../../src/integrations/zellij/session.js";
+import { ZellijSessionManager } from "../../../../src/integrations/zellij/session.js";
 import { MuxRegistry } from "../../../../src/integrations/zellij/registry.js";
 import { TopologyTracker } from "../../../../src/integrations/zellij/topology.js";
 import { ZellijPaneManager } from "../../../../src/integrations/zellij/panes.js";

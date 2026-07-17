@@ -1,6 +1,5 @@
 // T005 - Lane sharing (multi-agent concurrent access)
 
-
 import type { LaneRegistry } from "./registry.js";
 import { transition, withLaneLock, recordTransition, type LaneState } from "./state_machine.js";
 

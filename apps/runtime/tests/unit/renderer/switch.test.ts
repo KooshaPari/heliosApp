@@ -4,11 +4,7 @@
  * Traces to: FR-RND-004 (renderer switch as transaction), FR-TXN-007 (reject concurrent switches)
  */
 import { describe, expect, it } from "bun:test";
-import {
-  switchRenderer,
-  SwitchSameRendererError,
-  
-} from "../../../src/renderer/switch.js";
+import { switchRenderer, SwitchSameRendererError } from "../../../src/renderer/switch.js";
 import { RendererRegistry } from "../../../src/renderer/registry.js";
 import { RendererStateMachine } from "../../../src/renderer/state_machine.js";
 import type { RendererEventBus, RendererLifecycleEvent } from "../../../src/renderer/index.js";

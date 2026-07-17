@@ -15,7 +15,7 @@ export interface AuditQuery {
   readonly type?: RuntimeAuditRecord["type"];
   readonly method?: string;
   readonly topic?: string;
-  readonly since?: string;  // ISO-8601 lower bound
+  readonly since?: string; // ISO-8601 lower bound
   readonly limit?: number;
 }
 

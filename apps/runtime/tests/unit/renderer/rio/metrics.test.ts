@@ -3,9 +3,7 @@
  * Verifies: FR-RIO-005 (Frame metrics using same schema as ghostty), FR-PRF-005 (Memory sampling)
  */
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import {
-  RioMetrics,
-} from "../../../../src/renderer/rio/metrics.js";
+import { RioMetrics } from "../../../../src/renderer/rio/metrics.js";
 
 describe("RioMetrics — schema identity with ghostty", () => {
   let metrics: RioMetrics;

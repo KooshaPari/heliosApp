@@ -1,5 +1,3 @@
-
-
 // In-memory persistence for renderer side
 // Will be wired to main process via RPC when ElectroBun is integrated
 const STORAGE_KEY = "helios_conversations";

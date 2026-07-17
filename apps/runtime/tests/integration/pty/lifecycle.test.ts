@@ -9,13 +9,13 @@ import { PtyManager } from "../../../src/pty/index.js";
 import { InMemoryBusPublisher } from "../../../src/pty/events.js";
 
 const pidsToCleanup: number[] = [];
-const shell = process.platform === "win32" ? process.env["ComSpec"] ?? "cmd.exe" : "/bin/sh";
+const shell = process.platform === "win32" ? (process.env["ComSpec"] ?? "cmd.exe") : "/bin/sh";
 
 afterEach(() => {
   for (const pid of pidsToCleanup) {
     try {
       process.kill(pid, "SIGKILL");
-    // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line no-unused-vars
     } catch (_err) {
       /* already exited */
     }
@@ -145,7 +145,7 @@ describe("PTY lifecycle integration", () => {
     // Kill the process externally.
     try {
       process.kill(record.pid, "SIGKILL");
-    // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line no-unused-vars
     } catch (_err) {
       // may already be dead
     }

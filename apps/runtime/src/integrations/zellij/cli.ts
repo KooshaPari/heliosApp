@@ -6,11 +6,7 @@
  */
 
 import type { AvailabilityResult, CliResult, ZellijSession } from "./types.js";
-import {
-  ZellijNotFoundError,
-  ZellijVersionError,
-  ZellijTimeoutError,
-} from "./errors.js";
+import { ZellijNotFoundError, ZellijVersionError, ZellijTimeoutError } from "./errors.js";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const MINIMUM_VERSION = "0.40.0";
