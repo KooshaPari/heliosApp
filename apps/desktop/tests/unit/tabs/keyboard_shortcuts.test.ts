@@ -151,6 +151,27 @@ describe("KeyboardShortcuts", () => {
       expect(newShortcuts.getShortcut("select-terminal")).toBe("Cmd+1");
     });
 
+    it("should report save errors without rejecting", async () => {
+      const invalidConfigDir = path.join(tempDir, "not-a-directory");
+      await fs.writeFile(invalidConfigDir, "file", "utf-8");
+      const newShortcuts = new KeyboardShortcuts(invalidConfigDir);
+      const originalConsoleError = console.error;
+      const loggedErrors: unknown[][] = [];
+      console.error = (...args: unknown[]) => {
+        loggedErrors.push(args);
+      };
+
+      try {
+        await newShortcuts.save();
+      } finally {
+        console.error = originalConsoleError;
+      }
+
+      expect(loggedErrors).toHaveLength(1);
+      expect(loggedErrors[0]?.[0]).toBe("Failed to save keyboard shortcuts:");
+      expect(loggedErrors[0]?.[1]).toBeInstanceOf(Error);
+    });
+
     it("should handle invalid JSON gracefully", async () => {
       const configPath = path.join(tempDir, "keyboard_shortcuts.json");
       await fs.writeFile(configPath, "invalid json {", "utf-8");
