@@ -48,7 +48,9 @@ export const AccessibleTerminal: Component<AccessibleTerminalProps> = props => {
 
   return (
     <div
-      ref={host}
+      ref={element => {
+        host = element;
+      }}
       id={props.id}
       role="application"
       aria-label={props.ariaLabel}
