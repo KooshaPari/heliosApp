@@ -51,6 +51,21 @@ describe("ReplayEngine", () => {
     };
   });
 
+  describe("loadSession", () => {
+    it("returns a bounded empty replay stream", async () => {
+      const beforeLoad = Date.now();
+      const stream = await engine.loadSession("session-1", {});
+      const afterLoad = Date.now();
+
+      expect(stream.sessionId).toBe("session-1");
+      expect(stream.snapshots).toEqual([]);
+      expect(stream.events).toEqual([]);
+      expect(stream.startTime.getTime()).toBeGreaterThanOrEqual(beforeLoad);
+      expect(stream.endTime.getTime()).toBeLessThanOrEqual(afterLoad);
+      expect(stream.duration).toBe(stream.endTime.getTime() - stream.startTime.getTime());
+    });
+  });
+
   describe("getStateAtTime", () => {
     it("should return state at given timestamp", () => {
       const targetTime = mockStream.startTime;
