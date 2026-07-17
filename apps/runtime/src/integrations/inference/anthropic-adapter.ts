@@ -15,7 +15,7 @@ export class AnthropicInferenceEngine implements InferenceEngine {
     this.apiKey = apiKey ?? process.env.HELIOS_ACP_API_KEY ?? process.env.ANTHROPIC_API_KEY ?? "";
     this.endpoint = endpoint;
     this.client = ky.create({
-      prefixUrl: endpoint,
+      prefix: endpoint,
       retry: { limit: 3, methods: ["post"], statusCodes: [429, 500, 502, 503, 504] },
       headers: {
         "anthropic-version": "2023-06-01",
