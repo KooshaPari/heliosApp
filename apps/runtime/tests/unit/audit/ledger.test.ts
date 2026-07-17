@@ -235,6 +235,41 @@ describe("AuditLedger", () => {
       }, 150);
     });
 
+    it("should isolate subscriber callback errors", async () => {
+      const subscriberError = new Error("subscriber failed");
+      const originalConsoleError = console.error;
+      const loggedErrors: unknown[][] = [];
+      console.error = (...args: unknown[]) => {
+        loggedErrors.push(args);
+      };
+
+      ledger.subscribe({}, () => {
+        throw subscriberError;
+      });
+
+      const event = createAuditEvent({
+        eventType: AUDIT_EVENT_TYPES.COMMAND_EXECUTED,
+        actor: "agent-1",
+        action: "execute",
+        target: "cmd",
+        result: AUDIT_EVENT_RESULTS.SUCCESS,
+        workspaceId: "ws-1",
+        correlationId: "corr-error",
+        metadata: {},
+      });
+
+      try {
+        ledger.notifyEvent(event);
+        await new Promise(resolve => setTimeout(resolve, 300));
+      } finally {
+        console.error = originalConsoleError;
+      }
+
+      expect(loggedErrors).toEqual([
+        ["[AuditLedger] Subscription callback error:", subscriberError],
+      ]);
+    });
+
     it("should allow unsubscribe", () => {
       const unsubscribe = ledger.subscribe({ workspaceId: "ws-1" }, () => {});
       unsubscribe();
