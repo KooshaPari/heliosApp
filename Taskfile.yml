@@ -1,0 +1,149 @@
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task --list
+    silent: true
+
+  preflight:
+    desc: Fail fast if required tooling is missing
+    cmds:
+      - |
+        set -euo pipefail
+        command -v bun >/dev/null 2>&1 || { echo "[FAIL] bun is required"; exit 1; }
+        command -v task >/dev/null 2>&1 || { echo "[FAIL] task is required"; exit 1; }
+        command -v git >/dev/null 2>&1 || { echo "[FAIL] git is required"; exit 1; }
+        test -f package.json || { echo "[FAIL] package.json missing"; exit 1; }
+        echo "[OK] preflight checks passed"
+
+  deps:
+    desc: Install dependencies with lockfile guarantees
+    deps: [preflight]
+    cmds:
+      - bun install --frozen-lockfile
+
+  typecheck:
+    desc: Run TypeScript type checks
+    cmds:
+      - bun run typecheck
+
+  lint:
+    desc: Run static lint checks
+    cmds:
+      - bun run lint
+
+  test:
+    desc: Run unit test suites
+    cmds:
+      - bun run test
+
+  test:e2e:build:
+    desc: Build runtime and desktop artifacts for E2E execution
+    cmds:
+      - bun run --cwd apps/runtime build
+      - bun run --cwd apps/desktop build
+
+  test:e2e:playwright:
+    desc: Run E2E tests with existing report + gate handling
+    cmds:
+      - |
+        set -euo pipefail
+        set +e
+        bun run test:e2e:gate | tee /tmp/e2e.log
+        E2E_EXIT=${PIPESTATUS[0]}
+        bun run scripts/gate-e2e.ts
+        GATE_EXIT=$?
+        set -e
+        if [ "$E2E_EXIT" -ne 0 ] || [ "$GATE_EXIT" -ne 0 ]; then
+          exit 1
+        fi
+
+  coverage:
+    desc: Run unit tests with coverage
+    cmds:
+      - bun run test:coverage
+
+  test:e2e:
+    desc: Canonical E2E lane with build + install + gate
+    cmds:
+      - bunx playwright install --with-deps chromium
+      - task test:e2e:build
+      - task test:e2e:playwright
+
+  docs:index:
+    desc: Generate markdown document index pages
+    cmds:
+      - bun run docs:index
+
+  docs:build:
+    desc: Build VitePress docs
+    cmds:
+      - bun run docs:build
+
+  quality:quick:
+    desc: Fast quality lane for inner-loop development
+    deps: [preflight, deps]
+    cmds:
+      - task typecheck
+      - task lint
+      - task test
+
+  quality:strict:
+    desc: Strict quality lane including coverage and docs build
+    deps: [quality:quick]
+    cmds:
+      - task coverage
+      - task docs:build
+
+  check:
+    desc: Canonical full-project check
+    deps: [quality:strict]
+
+  ci:
+    desc: CI lane (strict quality + docs index refresh)
+    deps: [check]
+    cmds:
+      - task docs:index
+
+  devops:status:
+    desc: Show Git status, remotes, and branch state
+    cmds:
+      - git status --short --branch
+      - git remote -v
+      - git log --oneline -n 5
+
+  devops:check:
+    desc: Run shared DevOps checks for this repo (no CI pipeline)
+    cmds:
+      - bash scripts/devops-checker.sh
+
+  devops:check:ci:
+    desc: Run shared DevOps checks including CI lane
+    cmds:
+      - bash scripts/devops-checker.sh --check-ci
+
+  devops:check:ci-summary:
+    desc: Run shared DevOps checks including CI lane and emit JSON summary
+    cmds:
+      - bash scripts/devops-checker.sh --check-ci --emit-summary
+
+  devops:push:
+    desc: Push branch with shared helper and fallback remote behavior
+    cmds:
+      - bash scripts/push-heliosapp-with-fallback.sh {{.CLI_ARGS}}
+
+  devops:push:origin:
+    desc: Push using fallback remote only (skip primary)
+    cmds:
+      - bash scripts/push-heliosapp-with-fallback.sh --skip-primary {{.CLI_ARGS}}
+
+  devops:push:queue:
+    desc: Enqueue a push request for later execution
+    cmds:
+      - bash scripts/push-heliosapp-with-fallback.sh --queue-only {{.CLI_ARGS}}
+
+  devops:push:drain-queue:
+    desc: Drain queued push requests
+    cmds:
+      - bash scripts/push-heliosapp-with-fallback.sh --drain-queue {{.CLI_ARGS}}

@@ -1,0 +1,38 @@
+# Added by Spec Kitty CLI (auto-managed)
+.opencode/
+.windsurf/
+.qwen/
+.augment/
+.roo/
+.amazonq/
+.github/copilot/
+.kittify/.dashboard
+!.kittify/memory/
+!.kittify/memory/constitution.md
+!.gemini/
+!.gemini/config.yaml
+!.gemini/commands/
+!.gemini/commands/**
+*.tsbuildinfo
+node_modules/
+dist/
+# tsc --build emit artifacts in test dirs
+apps/*/tests/**/*.js
+apps/*/tests/**/*.js.map
+apps/*/tests/**/*.d.ts
+apps/*/tests/**/*.d.ts.map
+.gate-reports/
+# Excluded via sparse-checkout
+kitty-specs/
+
+# AI tool artifacts
+.claude/
+.codex/
+.cursor/
+.gemini/
+.kittify/
+.kilocode/
+.github/prompts/
+.github/copilot-instructions.md
+.claudeignore
+.llmignore
