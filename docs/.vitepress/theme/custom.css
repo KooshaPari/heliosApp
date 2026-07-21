@@ -1,0 +1,8 @@
+@import '@phenotype/design/css/vitepress-theme.css';
+
+/* heliosApp docs — phenodocs-specific overrides only */
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3 {
+  scroll-margin-top: 64px;
+}
