@@ -1,4 +1,6 @@
 import DefaultTheme from "vitepress/theme";
+import "./custom.css";
 
-// @phenodocs-theme is not yet available; using VitePress default theme
-export default DefaultTheme;
+export default {
+  extends: DefaultTheme,
+};
